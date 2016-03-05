@@ -1,0 +1,390 @@
+\NeedsTeXFormat{LaTeX2e}[1994/06/01]
+\ProvidesPackage{mod}[2015/05/01 The MedØlDatschgerl Package]
+
+\RequirePackage{grffile}
+\RequirePackage{verbatim}
+\RequirePackage[dvipsnames]{xcolor}
+\RequirePackage{tikz}
+\usetikzlibrary{shapes,positioning,arrows,fit,calc,matrix,shadows,decorations.pathmorphing}
+
+
+\newcommand{\modName}{Med\O lDatschgerl}
+\newcommand{\modAbbr}{M\O D}
+
+%------------------------------------------------------------------------------
+% Settings
+%------------------------------------------------------------------------------
+\def\mod@figOutputName{\jobname-mod.py}
+\def\mod@figIncludeName{\jobname-mod.tex}
+\def\mod@figFolder{modFigs}
+
+
+%------------------------------------------------------------------------------
+% Fig file stuff
+%------------------------------------------------------------------------------
+\newwrite\mod@figOutput
+\newif\ifmod@firstWrite
+\mod@firstWritetrue
+\def\mod@writeLineReal#1{%
+	\immediate\write\mod@figOutput{#1}%
+}
+\def\mod@writeLine{%
+	\ifmod@firstWrite%
+		\global\mod@firstWritefalse%
+		\immediate\openout\mod@figOutput=\mod@figOutputName%
+		\mod@writeLineReal{import mod}%
+		\mod@writeLineReal{import mod.latex}%
+		\mod@writeLineReal{mod.latex.setTexFile('\mod@figIncludeName')}%
+		\mod@writeLineReal{mod.latex.setFigFolder('\mod@figFolder')}%
+	\fi%
+	\mod@writeLineReal%
+}
+
+\AtBeginDocument{%
+	\IfFileExists{\mod@figIncludeName}{%
+		\input{\mod@figIncludeName}%
+	}{}%
+}
+
+\newcounter{mod@figCounter}
+
+\def\mod@graphPrinter{p}
+
+\newcommand{\modset}[1]{%
+	\pgfqkeys{/mod}{#1}%
+}
+
+\pgfqkeys{/mod}{
+	graph base/.style={},
+	graph/.style={},
+	graphGML/.style={},
+	smiles/.style={},
+	graphDFS/.style={},
+	rule/.style={},
+	ruleGML/.style={}
+}
+
+\def\mod@graphPrinter@installOption#1#2{%
+	\pgfqkeys{/mod/#1}{%
+		.default=true,
+		.is choice,
+		true/.code={\mod@writeLine{\mod@graphPrinter.#2=True}},
+		false/.code={\mod@writeLine{\mod@graphPrinter.#2=False}}
+	}
+}
+\mod@graphPrinter@installOption{edges as bonds}{edgesAsBonds}
+\mod@graphPrinter@installOption{collapse hydrogens}{collapseHydrogens}
+\mod@graphPrinter@installOption{raise charges}{raiseCharges}
+\mod@graphPrinter@installOption{simple carbons}{simpleCarbons}
+\mod@graphPrinter@installOption{thick}{thick}
+\mod@graphPrinter@installOption{with colour}{withColour}
+\mod@graphPrinter@installOption{with index}{withIndex}
+\mod@graphPrinter@installOption{with texttt}{withTexttt}
+\def\mod@graphPrinter@installCall#1#2{%
+	\pgfqkeys{/mod/#1}{
+		.value forbidden,
+		.code={\mod@writeLine{\mod@graphPrinter.#2()}}%
+	}%
+}
+\mod@graphPrinter@installCall{molecule}{setMolDefault}
+\mod@graphPrinter@installCall{reaction}{setReactionDefault}
+\mod@graphPrinter@installCall{all}{enableAll}
+\mod@graphPrinter@installCall{none}{disableAll}
+
+\def\mod@figGraphBegin#1{%
+	\mod@writeLine{\mod@graphPrinter = GraphPrinter()}%
+	\pgfqkeys{\expandafter/mod}{molecule, graph base, graph, #1}%
+}
+\def\mod@figGraphEnd{%
+	\stepcounter{mod@figCounter}%
+}
+
+\def\mod@figRuleBegin#1{%
+	\mod@writeLine{\mod@graphPrinter = GraphPrinter()}%
+	\pgfqkeys{\expandafter/mod}{reaction, graph base, rule, #1}%
+}
+\def\mod@figRuleEnd{%
+	\stepcounter{mod@figCounter}%
+}
+
+\def\mod@deftonil#1#2\@nil{\def#1{#2}}
+
+% rst: \graphGML[<options>][<includegraphics options>]{<filename>}
+\def\graphGML{\@testopt\mod@graphGML@i{}}
+\def\mod@graphGML@i[#1]{\@testopt{\mod@graphGML@ii[#1]}{}}
+\def\mod@graphGML@ii[#1][#2]#3{%
+	\mod@figGraphBegin{graphGML, #1}%
+	\xdef\mod@graph@id{\arabic{mod@figCounter}}%
+	\edef\mod@f{#3}%
+	\ifcsname mod@figDef-graph-\mod@graph@id\endcsname%
+		\expandafter\includegraphics\expandafter[#2]{\csname mod@figDef-graph-\mod@graph@id\endcsname}%
+	\else%
+		\fbox{%
+			 Missing PDF for smiles (id \mod@graph@id)%
+		}%
+	\fi%
+	\mod@figGraphEnd%
+	\mod@writeLine{mod.latex.graphGML(id=\mod@graph@id, data='\mod@f', printer=\mod@graphPrinter)}%
+}
+% rst: \smiles[<options>][<includegraphics options>]{<smiles string>}
+\def\smiles{\@testopt\mod@smiles@i{}}
+\def\mod@smiles@i[#1]{\@testopt{\mod@smiles@ii[#1]}{}}
+\def\mod@smiles@ii[#1][#2]{%
+	\mod@figGraphBegin{smiles, #1}%
+	\xdef\mod@graph@id{\arabic{mod@figCounter}}%
+	\ifcsname mod@figDef-graph-\mod@graph@id\endcsname%
+		\expandafter\includegraphics\expandafter[#2]{\csname mod@figDef-graph-\mod@graph@id\endcsname}%
+	\else%
+		\fbox{%
+			 Missing PDF for smiles (id \mod@graph@id)%
+		}%
+	\fi%
+	\mod@figGraphEnd%
+	\begingroup%
+		\everyeof{\@nil}%
+		\endlinechar\m@ne%
+		\catcode`\#=12%
+		\mod@smiles@final%
+}
+\def\mod@smiles@final#1{%
+		\expandafter\mod@deftonil\expandafter\mod@smiles@data\scantokens{#1}%
+		\mod@writeLine{mod.latex.smiles(id=\mod@graph@id, data='\mod@smiles@data', printer=\mod@graphPrinter)}%
+	\endgroup%
+}
+% rst: \graphDFS[<options>][<includegraphics options>]{<graphDFS string>}
+\def\graphDFS{\@testopt\mod@graphDFS@i{}}
+\def\mod@graphDFS@i[#1]{\@testopt{\mod@graphDFS@ii[#1]}{}}
+\def\mod@graphDFS@ii[#1][#2]{%
+	\mod@figGraphBegin{graphDFS, #1}%
+	\xdef\mod@graph@id{\arabic{mod@figCounter}}%
+	\ifcsname mod@figDef-graph-\mod@graph@id\endcsname%
+		\expandafter\includegraphics\expandafter[#2]{\csname mod@figDef-graph-\mod@graph@id\endcsname}%
+	\else%
+		\fbox{%
+			 Missing PDF for graphDFS (id \mod@graph@id)%
+		}%
+	\fi%
+	\mod@figGraphEnd%
+	\begingroup%
+		\everyeof{\@nil}%
+		\endlinechar\m@ne%
+		\catcode`\#=12%
+		\mod@graphDFS@final%
+}
+\def\mod@graphDFS@final#1{%
+		\expandafter\mod@deftonil\expandafter\mod@graphDFS@data\scantokens{#1}%
+		\mod@writeLine{mod.latex.graphDFS(id=\mod@graph@id, data='\mod@graphDFS@data', printer=\mod@graphPrinter)}%
+	\endgroup%
+}
+
+% rst: \ruleGML[<options>]{<filename>}{<continuation>}
+\def\ruleGML{\@testopt\mod@ruleGML@i{}}
+\def\mod@ruleGML@i[#1]#2#3{%
+	\mod@figRuleBegin{ruleGML, #1}%
+	\xdef\mod@rule@id{\arabic{mod@figCounter}}%
+	\edef\mod@f{#2}%
+	\ifcsname mod@figDef-rule-\mod@rule@id\endcsname%
+		\def\continuation{#3}%
+		\edef\args{\csname mod@figDef-rule-\mod@rule@id\endcsname}%
+		\expandafter\continuation\args%
+	\else%
+		\def\b{\fbox{Missing PDF for ruleGML (id \mod@rule@id)}}%
+		\b\b\b%
+	\fi%
+	\mod@figRuleEnd%
+	\mod@writeLine{mod.latex.ruleGML(id=\mod@rule@id, data='\mod@f', printer=\mod@graphPrinter)}%
+}
+
+
+
+
+
+\newcommand{\modInputPrefix}{.}
+
+\newlength\mod@testWidth
+\newcommand{\modFitpic}[1]{%
+	\settowidth{\mod@testWidth}{\includegraphics{#1}}%
+	\ifthenelse{\lengthtest{\mod@testWidth>\textwidth}}{%
+	\noindent\includegraphics[width=\textwidth]{#1}}{%
+	\includegraphics{#1}}%
+}
+
+%me the ChemFig package has been used for inspiration for some of this code
+
+%------------------------------------------------------------------------------
+% Graph (and molecule)
+%------------------------------------------------------------------------------
+\newcommand{\modGraphScale}{1.2}
+\newcommand{\modBondSep}{0.25em}
+\newcommand{\modEdgeShortening}{0.2em}
+\newcommand{\modHashLength}{1pt}
+\newcommand{\modHashSep}{2pt}
+
+\tikzset{modStyleGraphVertex/.style={inner sep=0, outer sep=0, text height=1.6ex, text depth=.05ex}}
+\tikzset{modStyleCarbon/.style={inner sep=0, outer sep=0, minimum size=0, text height=0, text depth=0}}
+\tikzset{modStyleCarbonIndex/.style={inner sep=0, outer sep=0, minimum size=0, text height=1ex, text depth=0}}
+\tikzset{modStyleGraphEdgeNoDraw/.style={}}
+\tikzset{modStyleGraphEdge/.style={modStyleGraphEdgeNoDraw, draw}}
+\tikzset{modStyleGraphWedgeNoDraw/.style={}}
+\tikzset{modStyleGraphWedge/.style={modStyleGraphWedgeNoDraw, fill, draw}}
+\tikzset{modStyleGraphHashNoDraw/.style={line width=3*\modBondSep, dash pattern=on \modHashLength off \modHashSep}}
+\tikzset{modStyleGraphHash/.style={modStyleGraphHashNoDraw, draw}}
+
+% node1 node2
+\newcommand{\modGetAngle}[2]{
+	\pgfmathanglebetweenpoints{\pgfpointanchor{#1}{center}}{\pgfpointanchor{#2}{center}}
+	\let\modRes\pgfmathresult
+}
+
+% idFrom idTo fromOffset toOffset
+%	-> creates v-idFrom-idTo and v-idTo-idFrom
+\newcommand{\modCreateEdgeEnds}[4]{%
+	\modGetAngle{v-#1}{v-#2}
+	\path[modStyleGraphEdgeNoDraw] (v-#1) to
+		node [shape=coordinate, pos=0, shift=($(\modRes:#3*\modEdgeShortening)$)] (v-#1-#2) {}
+		node [shape=coordinate, pos=1, shift=($(\modRes+180:#4*\modEdgeShortening)$)] (v-#2-#1) {}
+		(v-#2);
+}
+
+% idFrom idTo fromOffset toOffset label options
+\newcommand{\modDrawGraphEdge}[6]{%
+	\modCreateEdgeEnds{#1}{#2}{#3}{#4}
+	\path[modStyleGraphEdge, #6] (v-#1-#2) to node[auto] {#5} (v-#2-#1);
+}
+
+% idFrom idTo fromOffset toOffset options
+\newcommand{\modDrawSingleBond}[5]{%
+	\modCreateEdgeEnds{#1}{#2}{#3}{#4}
+	\path[modStyleGraphEdge, #5] (v-#1-#2) to (v-#2-#1);
+}
+% idFrom idTo fromOffset toOffset options
+\newcommand{\modDrawAromaticBond}[5]{%
+	\modCreateEdgeEnds{#1}{#2}{#3}{#4}
+	\modGetAngle{v-#1}{v-#2}
+	\path[modStyleGraphEdge, #5]
+		($(v-#1-#2) + (\modRes+90:\modBondSep/2)$) to
+		($(v-#2-#1) + (\modRes+90:\modBondSep/2)$);
+	\path[modStyleGraphEdge, dashed, #5]
+		($(v-#1-#2) + (\modRes-90:\modBondSep/2)$) to
+		($(v-#2-#1) + (\modRes-90:\modBondSep/2)$);
+}
+% idFrom idTo fromOffset toOffset options
+\newcommand{\modDrawDoubleBond}[5]{%
+	\modCreateEdgeEnds{#1}{#2}{#3}{#4}
+	\modGetAngle{v-#1}{v-#2}
+	\path[modStyleGraphEdge, #5]
+		($(v-#1-#2) + (\modRes+90:\modBondSep/2)$) to
+		($(v-#2-#1) + (\modRes+90:\modBondSep/2)$);
+	\path[modStyleGraphEdge, #5]
+		($(v-#1-#2) + (\modRes-90:\modBondSep/2)$) to
+		($(v-#2-#1) + (\modRes-90:\modBondSep/2)$);
+}
+% idFrom idTo fromOffset toOffset options
+\newcommand{\modDrawTripleBond}[5]{%
+	\modDrawSingleBond{#1}{#2}{#3}{#4}{#5}
+	\modCreateEdgeEnds{#1}{#2}{#3}{#4} % hmm, shouldn't they be created by the \modDrawSingleBond call? or is it a subscope?
+	\modGetAngle{v-#1}{v-#2}
+	\path[modStyleGraphEdge, #5]
+		($(v-#1-#2) + (\modRes+90:\modBondSep)$) to
+		($(v-#2-#1) + (\modRes+90:\modBondSep)$);
+	\path[modStyleGraphEdge, #5]
+		($(v-#1-#2) + (\modRes-90:\modBondSep)$) to
+		($(v-#2-#1) + (\modRes-90:\modBondSep)$);
+}
+
+% RC Match
+%------------------------------------------------------------------------------
+\tikzset{modRCMatchEdge/.style={draw, dashed, red}}
+\tikzset{modRCMatchEdgeTo/.style={bend right=15}}
+
+%------------------------------------------------------------------------------
+% DGHyper
+%------------------------------------------------------------------------------
+\tikzset{modStyleDGHyperVertex/.style={draw, ellipse, align=center,
+	minimum height=12, minimum width=17, inner sep=1}}
+\tikzset{modStyleDGHyperVertexHidden/.style={ellipse, align=center,
+	minimum height=12, minimum width=17, inner sep=1}}
+\tikzset{modStyleDGHyperVertexHiddenLarge/.style={modStyleDGHyperVertexHidden,
+	minimum height=48, minimum width=68, inner sep=1}}
+\tikzset{modStyleDGHyperEdge/.style={draw, align=center, rectangle,
+	minimum height=12, minimum width=17, inner sep=1}}
+\tikzset{modStyleDGHyperConnector/.style={draw, ->, >=stealth', thick}}
+\tikzset{modStyleDGHyperHasReverseShortcut/.style={bend right=10, max distance=5, looseness=0.5}}
+\tikzset{modStyleDGTransitVertex/.style={draw, fill, circle, minimum size=2, inner sep=0}}
+
+\newcommand{\modDGHyperConnectorBend}{8}
+\newcommand{\modDGHyperScale}{3}
+\newcommand{\modDGHyperImageScale}{0.75}
+
+
+%------------------------------------------------------------------------------
+% DPO Diagram
+%------------------------------------------------------------------------------
+
+% Category theory
+\tikzset{eMorphism/.style={->, >=stealth}}
+\tikzset{eIsomorphism/.style={double, double equal sign distance}}
+
+\tikzset{vDot/.style={fill,minimum size=0, inner sep=1pt, circle, outer sep=0}}
+\tikzset{eDot/.style={}}
+\tikzset{eDotMorphism/.style={->, >=stealth, dashed, red}}
+\tikzset{gDot/.style={node distance=1em and 1em}}
+\tikzset{gCat/.style={node distance=2em and 2em}}
+\tikzset{vCat/.style={draw, minimum size=2.5em}}
+% MØD support
+\newcommand\dpoRuleRaw[3]{%
+    \begin{tikzpicture}[gCat, baseline={([yshift=-0.5ex]K.center)}]
+        \node[vCat, label=above:$L$] (L) {#1};
+        \node[vCat, label=above:$K$, right=of L] (K) {#2};
+        \node[vCat, label=above:$R$, right=of K] (R) {#3};
+        \draw[eMorphism] (K) to (L); 
+        \draw[eMorphism] (K) to (R); 
+    \end{tikzpicture}%
+}
+% [includegraphics options] fileL fileK fileR
+\newcommand\dpoRule[4][]{%
+    \dpoRuleRaw{\includegraphics[#1]{#2}}{\includegraphics[#1]{#3}}{\includegraphics[#1]{#4}}
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+\endinput

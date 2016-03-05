@@ -1,0 +1,187 @@
+#------------------------------------------------------------------
+# Meta stuff
+#------------------------------------------------------------------
+ 
+function printStatus {
+	echo "	echo -n '$1 '" >> $makefileImpl
+}
+
+# target to add
+function addTarget {
+	echo -n " $1" >> $makefileAllTarget
+}
+
+#------------------------------------------------------------------
+# OpenBabel related post processing
+#------------------------------------------------------------------
+
+# svgFile
+function obabelPostProcess {
+	# hax to remove the artificial bagground obabel made
+	echo "	sed -i 's/<rect x=\"0%\" y=\"0%\" width=\"100%\" height=\"100%\" stroke-width=\"0\" fill=\"rgb(255,255,255)\"  \/>//' $1" >> $makefileImpl
+}
+
+# svgFile
+function obabelRulePostProcess {
+	# remove radicals and implicit hydrogens
+	echo "	sed -i \\" >> $makefileImpl
+	echo "		-e \"s/.*>\.<\/text>//\" \\" >> $makefileImpl
+	echo "		-e \"s/.*>\.\.<\/text>//\" \\" >> $makefileImpl
+	echo "		-e \"s/>\(..*\)H<\/text>/>\1<\/text>/\" \\" >> $makefileImpl
+	echo "		-e \"s/>H\([A-Z].*\)<\/text>/ dx=\\\"16\\\">\1<\/text>/\" \\" >> $makefileImpl
+	echo "		$1" >> $makefileImpl
+	# the magic 16 is fontSize
+}
+
+# svgFile mapFile
+function graphDFSSvgMapping {
+	local outFile=$1
+	local map=$2
+	echo "	cat $map | while read relation; do \\" >> $makefileImpl
+	echo "		key=\$\$(echo \$\$relation | sed \"s/^\([A-Z][a-z]*\).*/\1/\"); \\" >> $makefileImpl
+	echo "		value=\$\$(echo \$\$relation | sed \"s/^[A-Z][a-z]*.\(.*\)/\1/\"); \\" >> $makefileImpl
+	echo "		keyLen=\$\$(echo \$\$key | wc -m); \\" >> $makefileImpl
+	echo "		let keyLen=keyLen-1; \\" >> $makefileImpl		# wc -m counts the eoi char too
+	echo "		offset=\$\$(echo \"16*0.75*\$\$keyLen/2\" | bc -q); \\" >> $makefileImpl # fontSize * 0.75 * numChars / 2
+	# TODO: should probably do some escaping of $value
+	echo "		sed -i \\" >> $makefileImpl
+	echo "			-e \"s/ fill=\\\"rgb([0-9]*,[0-9]*,[0-9]*)\\\"\(.*>\$\$key<\/text>\)/ fill=\\\"black\\\"\1/\" \\" >> $makefileImpl
+	echo "			-e \"s/ stroke=\\\"rgb([0-9]*,[0-9]*,[0-9]*)\\\"\(.*>\$\$key<\/text>\)/ stroke=\\\"black\\\"\1/\" \\" >> $makefileImpl
+	echo "			-e \"s/>\$\$key<\/text>/ dx=\\\"\$\$offset\\\" style=\\\"text-anchor: middle;\\\">\$\$value<\/text>/\" \\" >> $makefileImpl
+	echo "			$outFile; \\" >> $makefileImpl
+	echo "	done;" >> $makefileImpl
+}
+
+#------------------------------------------------------------------
+# Smiles and GraphDFS stuff
+#------------------------------------------------------------------
+
+# fileNoExt
+function phonyGraphDFSToSvg {
+	local dotFile=$1.svg
+	local outFile=$1.graphDFS.svg
+	echo "$outFile: $dotFile" >> $makefileImpl
+	echo "	cp $dotFile $outFile" >> $makefileImpl
+}
+
+# graphDFS fileNoExt fileGraphDFSmap
+function graphDFSToSvg {
+	local graphDFS=$1
+	local outFile=$2.graphDFS.svg
+	local log=$2.graphDFS.log
+	local map=$3
+	echo "$outFile $log: $2.svg $map" >> $makefileImpl
+	echo "	obabel -:\"$graphDFS\" -o svg -O $outFile.temp &> $log" >> $makefileImpl
+	echo "	grep \"1 molecule converted\" $log &> /dev/null || \\" >> $makefileImpl
+	echo "		cp $2.svg $outFile.temp" >> $makefileImpl
+	obabelPostProcess $outFile.temp
+	graphDFSSvgMapping $outFile.temp $map
+	echo "	mv $outFile.temp $outFile" >> $makefileImpl
+}
+
+# fileNoExt fileGraphDFSmap
+function graphDFSRuleSide {
+	local f=$1.graphDFS.svg.orig
+	local out=$1.graphDFS.svg
+	local map=$2
+	echo "$out: $f" >> $makefileImpl
+	obabelPostProcess $f
+	obabelRulePostProcess $f
+	graphDFSSvgMapping $f $map
+	echo "	cp $f $out" >> $makefileImpl
+}
+
+# smilesString fileNoExt
+function smilesToSvg {
+	local smiles=$1
+	local file=$2.smiles.svg
+	local log=$2.smiles.log
+	echo "$file $log:" >> $makefileImpl
+	echo "	obabel -:\"$smiles\" -o svg -O $file.temp &> $log" >> $makefileImpl
+	echo "	grep \"1 molecule converted\" $log &> /dev/null || (cat $log && false)" >> $makefileImpl
+	obabelPostProcess $file.temp $1
+	echo "	mv $file.temp $file" >> $makefileImpl
+}
+
+# fileNoExt
+function phonySmilesToSvg {
+	local inFile=$1.graphDFS.svg
+	local outFile=$1.smiles.svg
+	echo "$outFile: $inFile" >> $makefileImpl
+	echo "	cp $inFile $outFile" >> $makefileImpl
+}
+
+# fileNoExt
+function phonyRuleSideGraphDFSToSvg {
+	local inFile=$1.svg
+	local outFile=$1.graphDFS.svg
+	echo "$outFile: $inFile" >> $makefileImpl
+	echo "	cp $inFile $outFile" >> $makefileImpl
+}
+
+#------------------------------------------------------------------
+# Graphviz
+#------------------------------------------------------------------
+
+gvArgs_base="-Gbgcolor=transparent -Gpad=0.01 -Gmargin=0"
+
+gvArgs_graph="$gvArgs_base -Kneato -Nfontsize=28 -Epenwidth=3"
+gvArgs_ruleSide="$gvArgs_base -Kneato -Nfontsize=28 -Epenwidth=3"
+gvArgs_ruleCombined="$gvArgs_base -Kneato"
+gvArgs_dgNonHyper="$gvArgs_base -Kneato -Goverlap=false -Elen=1.1"
+gvArgs_dgHyper="$gvArgs_base -Kneato -Goverlap=false -Elen=1.1"
+gvArgs_rc="$gvArgs_base -Kdot";
+
+
+gvArgs_svgToPdf="$gvArgs_base"
+gvArgs_putLabelSvg="$gvArgs_base"
+
+# dotFile
+function extractGVImageDeps {
+	grep image $1 | sed "s/.* image=\"\([^\"]*\)\".*/\1/" | while read f; do
+		echo -n " $f"
+	done;
+}
+
+# texFile
+function extractTexImageDeps {
+	grep insertNodeGraph $1 | sed "s/.*\\insertNodeGraph{\([^}]*\)}.*/\1/" | while read f; do
+		echo -n " $f"
+	done;
+}
+
+# graphType fileNoExt outType extraArgs
+function gv {
+	local gvType=$1
+	local argsVar="gvArgs_$gvType"
+	local outType=$3
+	local args="-T$outType ${!argsVar} $4"
+	local inFile=$2.dot
+	local outFile=$2.$outType
+	echo -n "$outFile: $inFile" >> $makefileImpl
+	extractGVImageDeps $inFile >> $makefileImpl
+	echo "" >> $makefileImpl
+	printStatus "$FUNCNAME($1)"
+	echo "	dot $args -o $outFile $inFile" >> $makefileImpl
+}
+
+# fileNoExt
+function svgToPdf {
+	local file=$1.svg
+	local outFile=$1.pdf
+	echo "$outFile: $file" >> $makefileImpl
+	printStatus $FUNCNAME
+	echo "	echo 'graph { a [ shape=plaintext label=\"\" image=\"$file\" ] }' | \\" >> $makefileImpl
+	echo "		neato -Tpdf $gvArgs_svgToPdf -o $outFile" >> $makefileImpl
+}
+
+# label inFile outFile
+function putLabelSvg {
+	local label=$1
+	local inFile=$2.svg
+	local outFile=$3.svg
+	echo "$outFile: $inFile" >> $makefileImpl
+	printStatus $FUNCNAME
+	echo "	echo \"graph { label=\\\"$label\\\"; a [ shape=plaintext label=\\\"\\\" image=\\\"$inFile\\\" ] }\" | \\" >> $makefileImpl
+	echo "		neato -Tsvg $gvArgs_putLabelSvg -o $outFile" >> $makefileImpl
+}

@@ -1,0 +1,312 @@
+\input{\modPrefix/share/mod/commonPreamble.tex}
+\usepackage{\modPrefix/share/mod/mod}
+
+\usepackage[cm]{fullpage}
+\usepackage{fancyhdr}
+\usepackage{lastpage}
+\usepackage{listings}
+\usepackage{float}
+\usepackage{longtable}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+
+\tikzset{hnodeNormal/.style={draw,ellipse,minimum height=12, minimum width=17,inner sep=1}}
+\tikzset{tnode/.style={draw,circle,fill=black,inner sep=0,minimum size=3}}
+\tikzset{hedge/.style={draw,rectangle,minimum height=12, minimum width=17,inner sep=1}}
+\tikzset{edge/.style={->,>=stealth',thick}}
+\tikzset{tedge/.style={->,>=stealth'}}
+% from, to, numEdges; assumes the style 'edge' is defined
+\newcommand{\multiedge}[4][20]{
+\pgfmathsetmacro{\num}{#4-1}
+\foreach \i in {0, ..., \num}{
+	\pgfmathsetmacro{\angleSep}{#1}
+	\pgfmathsetmacro{\angle}{\angleSep*(\i-#4/2+.5)}
+	\draw[edge] (#2) to [bend right=\angle] (#3);
+}
+}
+\newcommand{\multiexplodeedge}[4][40]{\multiedge[#1]{#2}{#3}{#4}}
+% end of stuff
+
+\newcommand\bendAngle{5}
+
+\newcommand{\insertNodeGraph}[1]{%
+	\includegraphics[scale=0.2]{#1}%
+}
+
+\newcommand{\graphName}[1]{
+	\\
+	#1
+}
+
+
+\title{Summary}
+\date{\today}
+
+\pagestyle{fancy}
+\fancyhead[OL]{}
+\fancyhead[OC]{}
+\fancyhead[OR]{}
+\fancyfoot[OL]{}
+\fancyfoot[OC]{}
+\fancyfoot[OR]{Page \thepage\ af \pageref{LastPage}}
+\renewcommand{\headrulewidth}{0pt}
+\renewcommand{\footrulewidth}{0pt}
+\renewcommand{\footruleskip}{.3\normalbaselineskip}
+
+\newlength{\testwd}
+\newcommand{\fitpic}[1]{
+	\settowidth{\testwd}{\includegraphics{#1}}
+	\message{#1 width=\the\testwd, page=\the\textwidth}
+	\ifthenelse{\lengthtest{\testwd>\textwidth}}{
+	\noindent\includegraphics[width=\textwidth]{#1}}{
+	\includegraphics{#1}}
+}
+
+
+\newcommand{\summaryChapter}[1]{
+	\chapter{#1}
+}
+
+\newcommand{\summarySection}[1]{
+	\section{#1}
+}
+
+\newcommand{\summarySubsection}[1]{
+	\subsection{#1}
+}
+
+\newcommand{\summarySubsubsection}[1]{
+	\subsubsection{#1}
+}
+
+% name file fileEsc fileMol fileMolEsc
+\newcommand{\summaryGraph}[5]{
+	\subsection{#1}
+	\begin{center}
+		\fbox{
+		\includegraphics{#2}
+		}\\
+		File: #3\\
+		\fbox{
+		\includegraphics{#4}
+		}\\
+		File: #5
+	\end{center}
+}
+
+
+% file
+\newcommand{\summaryRuleSide}[1]{
+	\begin{minipage}{0.28\textwidth}
+		\begin{center}
+			\fitpic{#1}
+		\end{center}
+	\end{minipage}
+}
+
+% file fileEsc
+\newcommand{\summaryRuleSpan}[2]{
+	\begin{center}
+	\begin{tikzpicture}[thick,
+		node distance=20pt,
+		vertex/.style={draw},
+		normal/.style={->,>=triangle 45} 
+	]
+	\node[vertex,label=above:$L$](L)				{\summaryRuleSide{#1.L}};
+	\node[vertex,label=above:$K$](K)[right=of L]	{\summaryRuleSide{#1.K}};
+	\node[vertex,label=above:$R$](R)[right=of K]	{\summaryRuleSide{#1.R}};
+	\draw[normal](K) to (L);
+	\draw[normal](K) to (R);
+	\end{tikzpicture}\\
+	Files: #2.\{L, K, R\}
+	\end{center}
+}
+
+% name
+%   file fileEsc
+%   fileMol fileMolEsc
+%   fileCombined fileCombinedEsc
+%	fileConstraints
+\newcommand{\summaryRule}[8]{%
+	\subsection{#1}
+	\summaryRuleSpan{#2}{#3}
+	\summaryRuleSpan{#4}{#5}
+	\begin{center}
+		\fitpic{#6}\\
+		File: #7
+	\end{center}
+	\verbatiminput{#8}
+}
+
+
+
+% name 
+%	fileLeft	fileLeftEsc
+%	fileContext	fileContextEsc
+%	fileRight	fileRightEsc
+\newcommand{\summaryRuleGV}[7]{
+	\subsection{#1}
+	\begin{center}
+	\begin{tikzpicture}[thick,
+		node distance=20pt,
+		vertex/.style={draw},
+		normal/.style={->,>=triangle 45} 
+	]
+	\node[vertex,label=above:$L$](L)	{\summaryRuleSide{#2}};
+	\node[vertex,label=above:$K$](K)[right=of L]	{\summaryRuleSide{#4}};
+	\node[vertex,label=above:$R$](R)[right=of K]	{\summaryRuleSide{#6}};
+	\draw[normal](K) to (L);
+	\draw[normal](K) to (R);
+	\end{tikzpicture}
+	\end{center}
+	Files: #3, #5, #7
+}
+
+% name 
+%	fileLeft	fileLeftEsc
+%	fileContext	fileContextEsc
+%	fileRight	fileRightEsc
+\newcommand{\summaryRuleBoth}[7]{
+	\summaryRuleGV{#1}{#2}{#3}{#4}{#5}{#6}{#7}
+	\begin{center}
+	\begin{tikzpicture}[thick,
+		node distance=20pt,
+		vertex/.style={draw},
+		normal/.style={->,>=triangle 45} 
+	]
+	\node[vertex,label=above:$L$](L)	{\summaryRuleSide{#2.graphDFS}};
+	\node[vertex,label=above:$R$](R)[right=of L]	{\summaryRuleSide{#6.graphDFS}};
+	\draw[normal](L) to (R);
+	\end{tikzpicture}
+	\end{center}
+	Files: #3.graphDFS, #7.graphDFS\\
+	Important note: the OpenBabel depiction uses 1-indexing, instead of 0-indexing.\\
+	Important note: all radicals have been removed from the depiction.\\
+	Important note: the OpenBabel depiciton shows molecule fragments, NOT molecules, which means that all hydrogens are explicit seperate atoms.
+		If any implicit hydrogens are shown, it is probably a bug.
+}
+	
+%	fileComb	fileCombEsc
+%	fileConstraints
+\newcommand{\summaryRuleRest}[3]{
+	\begin{center}
+		\fitpic{#1}\\
+		File: #2
+	\end{center}
+	\verbatiminput{#3}
+}
+
+% fileNoExt1 fileNoExtEsc1 fileNoExt2 fileNoExtEsc2
+\newcommand{\summaryDerivation}[4]{
+	\subsection{Match}
+	\begin{center}
+	\begin{tikzpicture}[thick,
+		node distance=20pt,
+		vertex/.style={draw},
+		normal/.style={->,>=triangle 45} 
+	]
+	\node[vertex,label=above:$L$](L)            	{\summaryRuleSide{#1.derL}};
+	\node[vertex,label=above:$K$](K)[right=of L]	{\summaryRuleSide{#1.derK}};
+	\node[vertex,label=above:$R$](R)[right=of K]	{\summaryRuleSide{#1.derR}};
+	\draw[normal](K) to (L);
+	\draw[normal](K) to (R);
+	\node[vertex,label=below:$G$](G)[below=of L]	{\summaryRuleSide{#3.derG}};
+	\node[vertex,label=below:$D$](D)[right=of G]	{\summaryRuleSide{#3.derD}};
+	\node[vertex,label=below:$H$](H)[right=of D]	{\summaryRuleSide{#3.derH}};
+	\draw[normal](D) to (G);
+	\draw[normal](D) to (H);
+	\draw[normal](L) to (G);
+	\draw[normal](K) to (D);
+	\draw[normal](R) to (H);
+	\end{tikzpicture}\\
+	Files: #2.\{derL,derK,derR\}\\
+	Files: #4.\{derG,derD,derH\}
+	\end{center}
+}
+
+% name file fileEsc
+\newcommand{\summaryDGNonHyper}[3]{
+	\subsection{DG NonHyper, #1}
+	\begin{center}
+		\fitpic{#2}\\
+		File: #3
+	\end{center}
+}
+
+% name file fileEsc
+\newcommand{\summaryDGHyperOld}[3]{
+	\subsection{DG Hyper, #1, old style}
+	\begin{center}
+		\fitpic{#2}\\
+		File: #3
+	\end{center}
+}
+
+% name file fileEsc
+\newcommand{\summaryDGHyper}[3]{
+	\subsection{DG Hyper, #1}
+	\begin{center}
+		\fitpic{#2}\\
+		File: #3
+	\end{center}
+}
+
+% file fileEsc
+\newcommand{\summaryRC}[2]{
+	\subsection{RC}
+	\begin{center}
+		\fitpic{#1}\\
+		File: #2
+	\end{center}
+}
+
+%--------------------------------------------------------------------------
+% New/old delimiter
+%--------------------------------------------------------------------------
+
+\newcommand{\includeGraph}[2]{
+	\begin{figure}[H]
+		\centering
+		\fitpic{#1}
+		\caption{#2}
+	\end{figure}
+}
+
+\newcommand{\includeSmilesGraph}[2]{
+	\begin{figure}[H]
+		\centering
+		\fitpic{#1}
+		\caption{#2}
+	\end{figure}
+}
+
+
+\newcommand{\ruleSide}[1]{
+	\fbox{\begin{minipage}{0.45\textwidth}
+		\centering
+		\fitpic{#1}
+	\end{minipage}}
+}
+
+\newcommand{\includeRule}[3]{
+	\begin{figure}[H]
+		\centering
+		\ruleSide{#1}
+		\hfill
+		\ruleSide{#2}
+		\caption{#3}
+	\end{figure}
+}
+
+\lstdefinelanguage{pseudo}{morekeywords={function,return,for,if,while,end,each,in,add,to,else,do,length}}
+\lstset{basicstyle=\small,tabsize=2,breaklines=true,numbers=left}
+%\lstinputlisting{fil}
+%\begin{lstlisting}
+%\end{lstlisting}
+
+\begin{document}
+\maketitle
+\tableofcontents
+\newpage
+\input{\modInputFile}
+\end{document}

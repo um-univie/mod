@@ -1,0 +1,295 @@
+#!/bin/bash
+
+echo "MØD Wrapper --------------------------------------------------------"
+
+function printHelp {
+	echo "MØD Wrapper usage:"
+	echo "$0 [wrapper options] [shared options] [vm options]"
+	echo "Wrapper Options:"
+	echo "	--help, -h      Show this and return."
+	echo "	--version       Print version and exit."
+	echo "	--get-latex     Copy mod.sty and mod.mk to the current folder."
+	echo "	--nopost        Do not generate the summary."
+	echo "	--profile       Use callgrind to profile the execution."
+	echo "	--memcheck      Use valgrind to do memory check."
+	echo "	--vgArgs <arg>  Options for valgrind."
+	echo "	--debug         Start gdb with the program."
+	echo "	clean           Delete out/ and summary/. Any other args are ignored."
+	echo "	-j <N>          Set number of available threads for post processing."
+}
+
+# Args
+post="true"
+profile="false"
+memcheck="false"
+debug="false"
+clean="false"
+vgArgs=""
+pymod="true"
+interceptedArgs=""
+summaryArgs=""
+
+# File names
+modvm="modvm"
+pythonvm="python3"
+summaryMaker="mod_post"
+obabelSupp="obabel.supp"
+libsbmlSupp="libSBML.supp"
+pythonSupp="python.supp"
+
+# Find prefix
+self="mod"
+if [ -z "$MOD_PREFIX" ]; then
+	MOD_PREFIX="$(cd -P "$(dirname "${BASH_SOURCE[0]}")" && pwd )/.."
+	stat $MOD_PREFIX/bin/$self &> /dev/null
+	if [ $? -ne 0 ]; then
+		echo "Could not find our own location. Please set PATH, MOD_PREFIX or use the correct path."
+		echo "PATH is $PATH"
+		echo "Guessed path is $MOD_PREFIX/bin/$self"
+		exit 1
+	fi
+else
+	stat $MOD_PREFIX/bin/$self &> /dev/null
+	if [ $? -ne 0 ]; then
+		echo "Invalid path in MOD_PREFIX. \"$MOD_PREFIX/bin/$self\" does not exist."
+		exit 1
+	fi
+fi
+
+export MOD_PREFIX
+echo "Prefix: $MOD_PREFIX"
+echo -n "MedØlDatschgerl version "
+cat $MOD_PREFIX/share/mod/VERSION
+echo ""
+
+# Check summary maker
+stat $MOD_PREFIX/bin/$summaryMaker &> /dev/null
+if [ $? -ne 0 ]; then
+	echo "Summary maker, \"$MOD_PREFIX/bin/$summaryMaker\", not found."
+	echo "Post processing disabled"
+	post="false"
+fi
+
+args=()
+summaryArgs=()
+
+# Parse options
+while test "$1" != ""; do
+	case $1 in
+		"--help"|"-h" )
+			printHelp $0
+			exit 0
+			;;
+		"--version" )
+			exit 0
+			;;
+		"--get-latex" )
+			echo "cp $MOD_PREFIX/share/mod/mod.{sty,mk} ./"
+			cp $MOD_PREFIX/share/mod/mod.{sty,mk} ./
+			exit $?
+			;;
+		"--nopost" )
+			post="false"
+			shift
+			;;
+		"--profile" )
+			profile="true"
+			shift
+			;;
+		"--memcheck" )
+			memcheck="true"
+			shift
+			;;
+		"--vgArgs" )
+			vgArgs="$2"
+			shift
+			shift
+			;;
+		"--debug" )
+			debug="true"
+			post="false"
+			shift
+			;;
+		"clean" )
+			clean="true"
+			post="false"
+			shift
+			;;
+		"-j" )
+			summaryArgs+=(-j "$2")
+			shift
+			shift
+			;;
+		* )
+			args+=("$1")
+			shift
+			;;
+	esac
+done
+
+# Create precommand (gdb/valgrind/...)
+precommand=""
+if [ $profile = "true" -o $memcheck = "true" ]; then
+	precommand="valgrind"
+fi
+if [ $profile = "true" ]; then
+	precommand="$precommand --tool=callgrind $vgArgs"
+elif [ $memcheck = "true" ]; then
+	function checkSuppFile {
+		stat $MOD_PREFIX/share/mod/$1 &> /dev/null
+		if [ $? -ne 0 ]; then
+			echo "Could not find valgrind suppressions file, \"$MOD_PREFIX/share/$1\""
+			exit 1
+		fi
+	}
+	checkSuppFile $obabelSupp
+	checkSuppFile $libsbmlSupp
+	if [ $pymod = "true" ]; then
+		checkSuppFile $pythonSupp
+	fi
+	if [ $debug = "true" ]; then
+		precommand="$precommand --vgdb=yes --vgdb-error=0"
+	fi
+	precommand="$precommand --leak-check=full --track-origins=yes --num-callers=50 --gen-suppressions=all $vgArgs"
+	precommand="$precommand --suppressions=$MOD_PREFIX/share/mod/$obabelSupp --suppressions=$MOD_PREFIX/share/mod/$libsbmlSupp"
+	if [ $pymod = "true" ]; then
+		precommand="$precommand --suppressions=$MOD_PREFIX/share/mod/$pythonSupp"
+	fi
+elif [ $debug = "true" ]; then
+	precommand="gdb --args"
+fi
+
+# Prepare output folder
+if [ -e out ]; then
+	if [ -d out ]; then
+		# there could be a lot of files in out/
+		cd out
+		ls | xargs rm -rf
+		cd ..
+	else
+		rm -f out
+		mkdir out
+	fi
+else
+	mkdir out
+fi
+
+function executeVM {
+	echo "Running VM ---------------------------------------------------------"
+	time "$@"
+}
+
+function executeVMPython {
+	local pyFile="out/input"
+	touch $pyFile
+	function preamble {
+		cat << "EOF"
+import ctypes
+import os
+import sys
+sys.setdlopenflags(sys.getdlopenflags() | ctypes.RTLD_GLOBAL)
+import mod
+from mod import *
+
+mod.includedFiles = set()
+
+def include(fName, checkDup=True, putDup=True, skipDup=True):
+	t = fName.rpartition("/")
+	if(fName != prefixFilename(fName)):
+		print("Executing code from '", fName, "' ('", prefixFilename(fName), "')", sep="")
+	else:
+		print("Executing code from '", fName, "'", sep="")
+	fPrefixed = prefixFilename(fName)
+	skip = False
+	ino = os.stat(fPrefixed).st_ino
+	if checkDup:
+		if ino in mod.includedFiles:
+			if skipDup:
+				skip = True
+			else:
+				print("Include error (checkDup=", checkDup, ", putDup=", putDup, ", skipDup=", skipDup, "): file '", fPrefixed, "' already included once.", sep="")
+				sys.exit(1)
+	if putDup:
+		mod.includedFiles.add(ino)	
+	if t[1] != "":
+		pushFilePrefix(t[0] + t[1])
+	if skip:
+		print("Skipping inclusion (already included)")
+	else:
+		with open(fPrefixed) as f:
+			code = compile(f.read(), fName, 'exec')
+		exec(code, globals())
+	if t[1] != "":
+		popFilePrefix()
+	if(fName != prefixFilename(fName)):
+		print("End of code from '", fName, "' ('", prefixFilename(fName), "')", sep="")
+	else:
+		print("End of code from '", fName, "'", sep="")
+mod.include = include
+EOF
+	}
+	echo '# Preamble' >> $pyFile
+	preamble >> $pyFile
+
+	echo '# From command line arguments' >> $pyFile
+	while [ $1 ]; do
+		case $1 in
+			"-f" )
+				shift
+				echo "include(\"$1\")" >> $pyFile
+				shift
+				;;
+			"-e" )
+				shift
+				echo "$1" >> $pyFile
+				shift
+				;;
+			"-j" )
+				shift
+				echo "config.common.numThreads = $1" >> $pyFile
+				shift
+				;;
+			* )
+				echo "Unknown argument '$1'"
+				exit 1
+				;;
+		esac
+	done
+	export PYTHONPATH="$PYTHONPATH:$MOD_PREFIX/lib:$(pwd)"
+	echo "Input --------------------------------------------------------------"
+	echo "(see $pyFile)"
+	echo "Command ------------------------------------------------------------"
+	echo "$precommand $pythonvm $pyFile"
+	executeVM $precommand $pythonvm $pyFile
+}
+
+function executeVMClean {
+	rm -rf out/ summary/
+}
+
+if [ $clean = "true" ]; then
+	executeVMClean
+	exit $?
+elif [ "$pymod" = "true" ]; then
+	executeVMPython "${args[@]}" 2>&1 | tee out/log.txt
+	ret=${PIPESTATUS[0]}
+else
+	echo "Neither 'clean' or 'pymod'? What is going on?"
+	exit 1
+fi
+
+if [ $ret -ne 0 ]; then
+	echo "Program failed! Exit code: $ret"
+	exit $ret
+fi
+
+# Post processing
+if [ $post = "true" ]; then
+	export MOD_PREFIX
+	$MOD_PREFIX/bin/$summaryMaker "${summaryArgs[@]}"
+	res=$?
+else
+	res=0
+fi
+
+exit $res

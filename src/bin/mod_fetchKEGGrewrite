@@ -1,0 +1,28 @@
+#!/bin/bash
+
+function fetch {
+	temp=$(mktemp)
+	keggid=$1
+	server="http://rna.tbi.univie.ac.at/cgi-bin/mapreaction.cgi?"
+	server="${server}valence=true&keggid="
+	wget -O $temp $server$keggid 	2> /dev/null
+	res=$?
+
+	if [ $res -ne 0 ]; then
+		echo "Could not fetch: $keggid" 
+		echo "Error code: $res"
+		echo "URL: $server$keggid"
+		rm -f $temp
+		return 1
+	fi
+
+	line=$(grep -n "<pre>rule \[" $temp | head -n 1 | sed "s/:.*$//")
+	tail -n +$line $temp | sed "s/<[^<]*>//g" | head -n -4 > $keggid.gml
+	echo -e "Done:\t$keggid"
+	rm -f $temp
+}
+
+
+for arg in $@; do
+	fetch $arg
+done
