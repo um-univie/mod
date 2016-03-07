@@ -1,0 +1,175 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>3.1. API Reference &mdash; MØD v0.5.0 documentation</title>
+    
+    <link rel="stylesheet" href="../_static/classic.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     'v0.5.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="top" title="MØD v0.5.0 documentation" href="../index.html" />
+    <link rel="up" title="3. PyMØD" href="pymod.html" />
+    <link rel="next" title="3.1.1. Chem" href="Chem.html" />
+    <link rel="prev" title="3. PyMØD" href="pymod.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="Chem.html" title="3.1.1. Chem"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="pymod.html" title="3. PyMØD"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">MØD v0.5.0 documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="pymod.html" accesskey="U">3. PyMØD</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <span class="target" id="module-mod"></span><div class="section" id="api-reference">
+<h1>3.1. API Reference<a class="headerlink" href="#api-reference" title="Permalink to this headline">¶</a></h1>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="Chem.html">3.1.1. Chem</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="Chem.html#class-atomid">3.1.1.1. Class <code class="docutils literal"><span class="pre">AtomId</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="Chem.html#class-charge">3.1.1.2. Class <code class="docutils literal"><span class="pre">Charge</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="Chem.html#class-atomdata">3.1.1.3. Class <code class="docutils literal"><span class="pre">AtomData</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="Chem.html#class-bondtype">3.1.1.4. Class <code class="docutils literal"><span class="pre">BondType</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="Chem.html#class-atomids">3.1.1.5. Class <code class="docutils literal"><span class="pre">AtomIds</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="Config.html">3.1.2. Config</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="Config.html#class-config">3.1.2.1. Class <code class="docutils literal"><span class="pre">Config</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="Derivation.html">3.1.3. Derivation</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="Derivation.html#class-derivation">3.1.3.1. Class <code class="docutils literal"><span class="pre">Derivation</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="DG.html">3.1.4. DG</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="DG.html#class-dg">3.1.4.1. Class <code class="docutils literal"><span class="pre">DG</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="DG.html#class-dgvertex">3.1.4.2. Class <code class="docutils literal"><span class="pre">DGVertex</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="DG.html#class-dghyperedge">3.1.4.3. Class <code class="docutils literal"><span class="pre">DGHyperEdge</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="DG.html#class-derivationref">3.1.4.4. Class <code class="docutils literal"><span class="pre">DerivationRef</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="DG.html#class-dgprintdata">3.1.4.5. Class <code class="docutils literal"><span class="pre">DGPrintData</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="DG.html#class-dgprinter">3.1.4.6. Class <code class="docutils literal"><span class="pre">DGPrinter</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="DGStrat.html">3.1.5. DGStrat</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="DGStrat.html#the-embedded-strategy-language">3.1.5.1. The Embedded Strategy Language</a></li>
+<li class="toctree-l2"><a class="reference internal" href="DGStrat.html#the-basic-api">3.1.5.2. The Basic API</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="Error.html">3.1.6. Error</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Graph.html">3.1.7. Graph</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="Graph.html#class-graph">3.1.7.1. Class <code class="docutils literal"><span class="pre">Graph</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="Graph.html#class-graphvertex">3.1.7.2. Class <code class="docutils literal"><span class="pre">GraphVertex</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="Graph.html#class-graphedge">3.1.7.3. Class <code class="docutils literal"><span class="pre">GraphEdge</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="Graph.html#class-graphprinter">3.1.7.4. Class <code class="docutils literal"><span class="pre">GraphPrinter</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="Misc.html">3.1.8. Misc</a></li>
+<li class="toctree-l1"><a class="reference internal" href="RC.html">3.1.9. RC</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="RC.html#the-embedded-rule-composition-expression-language">3.1.9.1. The Embedded Rule Composition Expression Language</a></li>
+<li class="toctree-l2"><a class="reference internal" href="RC.html#expression-evaluator">3.1.9.2. Expression Evaluator</a></li>
+<li class="toctree-l2"><a class="reference internal" href="RC.html#rule-composition-expressions">3.1.9.3. Rule Composition Expressions</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="Rule.html">3.1.10. Rule</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="Rule.html#class-rule">3.1.10.1. Class <code class="docutils literal"><span class="pre">Rule</span></code></a></li>
+</ul>
+</li>
+</ul>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="pymod.html"
+                        title="previous chapter">3. PyMØD</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="Chem.html"
+                        title="next chapter">3.1.1. Chem</a></p>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../_sources/pymod/api.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="Chem.html" title="3.1.1. Chem"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="pymod.html" title="3. PyMØD"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">MØD v0.5.0 documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="pymod.html" >3. PyMØD</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &copy; Copyright 2013-2015, Jakob Lykke Andersen.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.4a0+.
+    </div>
+  </body>
+</html>

@@ -1,0 +1,583 @@
+.. _cpp-Graph:
+
+**********************************************************
+Graph.h
+**********************************************************
+.. default-domain:: cpp
+
+.. py:currentmodule:: mod
+.. cpp:namespace:: mod
+
+
+Class ``Graph``
+--------------------------------------------------------------------------------------------------------------------------------
+
+.. class:: Graph
+    
+
+    This class models an undirected graph with labels on vertices and edges,
+    without loops and without parallel edges.
+    Certain labels are regarded as models of chemical atoms and bonds.
+    See :ref:`mol-enc` for more information on this.
+
+
+Synopsis
+^^^^^^^^
+
+.. code-block:: c++
+    
+    struct Graph {
+        class Edge;
+        class VertexIterator;
+        class VertexRange;
+        class EdgeIterator;
+        class IncidentEdgeIterator;
+        class IncidentEdgeRange;
+        class Vertex {
+            friend class Edge;
+            friend class VertexIterator;
+            friend class VertexRange;
+            Vertex(std::shared_ptr<Graph> g, std::size_t vId);
+        public:
+            Vertex();
+            friend std::ostream &operator<<(std::ostream &s, const Vertex &v);
+            friend bool operator==(const Vertex &v1, const Vertex &v2);
+            friend bool operator!=(const Vertex &v1, const Vertex &v2);
+            std::size_t getId() const;
+            std::shared_ptr<Graph> getGraph() const;
+            std::size_t getDegree() const;
+            IncidentEdgeRange incidentEdges() const;
+            const std::string &getStringLabel() const;
+            AtomId getAtomId() const;
+            Charge getCharge() const;
+        private:
+            std::shared_ptr<Graph> g;
+            std::size_t vId;
+        };
+        class Edge {
+            friend class EdgeIterator;
+            friend class IncidentEdgeIterator;
+            Edge(std::shared_ptr<Graph> g, std::size_t vId, std::size_t eId);
+        public:
+            Edge();
+            friend std::ostream &operator<<(std::ostream &s, const Edge &e);
+            friend bool operator==(const Edge &e1, const Edge &e2);
+            friend bool operator!=(const Edge &e1, const Edge &e2);
+            std::shared_ptr<Graph> getGraph() const;
+            Vertex source() const;
+            Vertex target() const;
+            const std::string &getStringLabel() const;
+            BondType getBondType() const;
+        private:
+            std::shared_ptr<Graph> g;
+            std::size_t vId, eId;
+        };
+    public: // VertexList
+        class VertexIterator : public boost::iterator_facade<VertexIterator, Vertex, std::forward_iterator_tag, Vertex> {
+            friend class Graph;
+            VertexIterator(std::shared_ptr<Graph> g);
+        public:
+            VertexIterator();
+        private:
+            friend class boost::iterator_core_access;
+            Vertex dereference() const;
+            bool equal(const VertexIterator &iter) const;
+            void increment();
+        private:
+            std::shared_ptr<Graph> g;
+            std::size_t vId;
+        };
+        // rst-nested-begin:
+        struct VertexRange {
+            using iterator = VertexIterator;
+            using const_iterator = iterator;
+        private:
+            friend class Graph;
+            VertexRange(std::shared_ptr<Graph> g);
+        public:
+            VertexIterator begin() const;
+            VertexIterator end() const;
+            Vertex operator[](std::size_t i) const;
+        private:
+            std::shared_ptr<Graph> g;
+        };
+    public: // EdgeList
+        class EdgeIterator : public boost::iterator_facade<EdgeIterator, Edge, std::forward_iterator_tag, Edge> {
+            friend class Graph;
+            EdgeIterator(std::shared_ptr<Graph> g);
+        public:
+            EdgeIterator();
+        private:
+            friend class boost::iterator_core_access;
+            Edge dereference() const;
+            bool equal(const EdgeIterator &iter) const;
+            void increment();
+            void advanceToValid();
+        private:
+            std::shared_ptr<Graph> g;
+            std::size_t vId, eId;
+        };
+        // rst-nested-begin:
+        struct EdgeRange {
+            using iterator = EdgeIterator;
+            using const_iterator = iterator;
+        private:
+            friend class Graph;
+            EdgeRange(std::shared_ptr<Graph> g);
+        public:
+            EdgeIterator begin() const;
+            EdgeIterator end() const;
+        private:
+            std::shared_ptr<Graph> g;
+        };
+    public: // Incidence
+        class IncidentEdgeIterator : public boost::iterator_facade<IncidentEdgeIterator, Edge, std::forward_iterator_tag, Edge> {
+            friend class Graph;
+            IncidentEdgeIterator(std::shared_ptr<Graph> g, std::size_t vId);
+        public:
+            IncidentEdgeIterator();
+        private:
+            friend class boost::iterator_core_access;
+            Edge dereference() const;
+            bool equal(const IncidentEdgeIterator &iter) const;
+            void increment();
+        private:
+            std::shared_ptr<Graph> g;
+            std::size_t vId, eId;
+        };
+        // rst-nested-begin:
+        struct IncidentEdgeRange {
+            using iterator = IncidentEdgeIterator;
+            using const_iterator = iterator;
+        private:
+            friend class Vertex;
+            IncidentEdgeRange(std::shared_ptr<Graph> g, std::size_t vId);
+        public:
+            IncidentEdgeIterator begin() const;
+            IncidentEdgeIterator end() const;
+        private:
+            std::shared_ptr<Graph> g;
+            std::size_t vId;
+        };
+    private: // The actual class interface
+        Graph(std::unique_ptr<lib::Graph::Single> g);
+        Graph(const Graph&) = delete;
+        Graph &operator=(const Graph&) = delete;
+    public:
+        ~Graph();
+        std::size_t getId() const;
+        friend std::ostream &operator<<(std::ostream &s, const mod::Graph &g);
+        lib::Graph::Single &getGraph() const;
+    public: // graph interface
+        std::size_t numVertices() const;
+        VertexRange vertices() const;
+        std::size_t numEdges() const;
+        EdgeRange edges() const;
+    public:
+        std::pair<std::string, std::string> print() const;
+        std::pair<std::string, std::string> print(const GraphPrinter &first, const GraphPrinter &second) const;
+        std::string getGMLString(bool withCoords = false) const;
+        std::string printGML(bool withCoords = false) const;
+        const std::string &getName() const;
+        void setName(std::string name) const;
+        const std::string &getSmiles() const;
+        const std::string &getGraphDFS() const;
+        const std::string &getLinearEncoding() const;
+        bool getIsMolecule() const;
+        double getEnergy() const;
+        void cacheEnergy(double value) const;
+        double getMolarMass() const;
+        unsigned int vLabelCount(const std::string &label) const;
+        unsigned int eLabelCount(const std::string &label) const;
+        std::size_t isomorphism(std::shared_ptr<Graph> g, std::size_t maxNumMatches) const;
+        std::size_t monomorphism(std::shared_ptr<Graph> g, std::size_t maxNumMatches) const;
+        std::shared_ptr<Graph> makePermutation() const;
+        void setImage(std::shared_ptr<Function<std::string()> > image);
+        std::shared_ptr<Function<std::string()> > getImage() const;
+        void setImageCommand(std::string cmd);
+        std::string getImageCommand() const;
+    private:
+        struct Pimpl;
+        std::unique_ptr<Pimpl> p;
+    public:
+        static std::shared_ptr<Graph> graphGMLString(const std::string &data);
+        static std::shared_ptr<Graph> graphGML(const std::string &file);
+        static std::shared_ptr<Graph> graphDFS(const std::string &graphDFS);
+        static std::shared_ptr<Graph> smiles(const std::string &smiles);
+        static std::shared_ptr<Graph> makeGraph(std::unique_ptr<lib::Graph::Single> g);
+    };
+
+Details
+^^^^^^^
+
+.. cpp:namespace:: mod
+
+.. cpp:namespace-push:: Graph
+
+.. function:: unsigned int getId() const
+
+    :returns: the unique instance id among :class:`Graph` objects.
+.. function:: std::size_t numVertices() const
+
+    :returns: the number of vertices in the graph.
+.. function:: VertexRange vertices() const
+
+    :returns: a range of all vertices in the graph.
+.. function:: std::size_t numEdges() const
+
+    :returns: the number of edges in the graph.
+.. function:: EdgeRange edges() const
+
+    :returns: a range of all edges in the graph.
+.. function:: std::pair<std::string, std::string> print() const
+              std::pair<std::string, std::string> print(const GraphPrinter &first, const GraphPrinter &second) const
+
+    Print the graph, using either the default options or the options in ``first`` and ``second``.
+
+    :returns: a pair of names for the PDF-files that will be compiled in post-processing.
+.. function:: std::string getGMLString(bool withCoords = false) const
+
+    :returns: the :ref:`GML <graph-gml>` representation of the graph,
+              optionally with generated 2D coordinates.
+    :throws: :any:`LogicError` when coordinates are requested, but
+             none can be generated.
+.. function:: std::string printGML(bool withCoords = false) const
+
+    Print the :ref:`GML <graph-gml>` representation of the graph,
+    optionally with generated 2D coordinates.
+
+    :returns: the filename of the printed GML file.
+    :throws: :any:`LogicError` when coordinates are requested, but
+             none can be generated.
+.. function:: const std::string &getName() const
+              void setName(std::string name) const
+
+    Access the name of the graph.
+.. function:: const std::string &getSmiles() const
+
+    :returns: the canonical :ref:`SMILES string <graph-smiles>` of the graph, if it's a molecule.
+.. function:: const std::string &getGraphDFS() const
+
+    :returns: the :ref:`GraphDFS <graph-graphDFS>` string of the graph.
+.. function:: const std::string &getLinearEncoding() const
+
+    :returns: the :ref:`SMILES <graph-smiles>` string if the graph is a molecule, otherwise the :ref:`GraphDFS <graph-graphDFS>` string.
+.. function:: bool getIsMolecule() const
+
+    :returns: whether or not the graph models a molecule. See :ref:`mol-enc`.
+.. function:: double getEnergy() const
+
+    :returns: some energy value if the graph is a molecule.
+        The energy is calculated using Open Babel, unless already calculated or cached by :cpp:func:`Graph::cacheEnergy`.
+.. function:: void cacheEnergy(double value) const
+
+    If the graph models a molecule, sets the energy to a given value.
+
+    :throws: :class:`LogicError` if the graph is not a molecule.
+.. function:: double getMolarMass() const
+
+    :returns: the molar mass of the graph, if it is a molecule.
+        The molar mass is calculated by Open Babel.
+.. function:: unsigned int vLabelCount(const std::string &label) const
+
+    :returns: the number of vertices in the graph with the given label.
+.. function:: unsigned int eLabelCount(const std::string &label) const
+
+    :returns: the number of edges in the graph with the given label.
+.. function:: std::size_t isomorphism(std::shared_ptr<Graph> g, std::size_t maxNumMatches) const
+
+    :returns: the number of isomorphisms found from this graph to ``g``, but at most ``maxNumMatches``.
+.. function:: std::size_t monomorphism(std::shared_ptr<Graph> g, std::size_t maxNumMatches) const
+
+    :returns: the number of monomorphisms from this graph to ``g``, though at most ``maxNumMatches``.
+.. function:: std::shared_ptr<Graph> makePermutation() const
+
+    :returns: a graph isomorphic to this, but with the vertex indices randomly permuted.
+.. function:: void setImage(std::shared_ptr<Function<std::string()> > image)
+
+    Set a custom depiction for the graph. The depiction file used will be the string
+    returned by the given function, with ``.pdf`` appended.
+    The function will only be called once.
+    Give ``nullptr`` to use auto-generated depiction.
+.. function:: std::shared_ptr<Function<std::string()> > getImage() const
+
+    :returns: the current custom depiction file function.
+.. function:: void setImageCommand(std::string cmd)
+
+    Set a command to be run in post-processing if a custom depiction is set.
+    The command is only run once.
+.. function:: std::string getImageCommand() const
+
+    :returns: the current post-processing command.
+.. function:: static std::shared_ptr<Graph> graphGMLString(const std::string &data)
+
+    :returns: a graph created from the given :ref:`GML <graph-gml>` data.
+    :throws: :class:`InputError` on bad input.
+.. function:: static std::shared_ptr<Graph> graphGML(const std::string &file)
+
+    :returns: a graph loaded from the given :ref:`GML <graph-gml>` file.
+    :throws: :class:`InputError` on bad input.
+.. function:: static std::shared_ptr<Graph> graphDFS(const std::string &graphDFS)
+
+    :returns: a graph loaded from the given :ref:`GraphDFS <graph-graphDFS>` string.
+    :throws: :class:`InputError` on bad input.
+.. function:: static std::shared_ptr<Graph> smiles(const std::string &smiles)
+
+    :returns: a graph representing a molecule, loaded from the given :ref:`SMILES <graph-smiles>` string.
+    :throws: :class:`InputError` on bad input.
+.. function:: static std::shared_ptr<Graph> makeGraph(std::unique_ptr<lib::Graph::Single> g)
+
+    :returns: a graph wrapping the given internal graph object.
+
+.. cpp:namespace:: mod
+
+
+Class ``Graph::Vertex``
+---------------------------------------------------------------
+
+.. class:: Graph::Vertex
+
+
+    A descriptor of either a vertex in a graph, or a null vertex.
+
+    .. function:: Vertex()
+
+        Constructs a null descriptor.
+    .. function:: std::size_t getId() const
+
+        :returns: the index of the vertex. It will be in the range :math:`[0, numVertices[`.
+        :throws: :cpp:class:`LogicError` if it is a null descriptor.
+    .. function:: std::shared_ptr<Graph> getGraph() const
+
+        :returns: the graph the vertex belongs to.
+        :throws: :cpp:class:`LogicError` if it is a null descriptor.
+    .. function:: std::size_t getDegree() const
+
+        :returns: the degree of the vertex.
+        :throws: :cpp:class:`LogicError` if it is a null descriptor.
+    .. function:: IncidentEdgeRange incidentEdges() const
+
+        :returns: a range of incident edges to this vertex.
+        :throws: :cpp:class:`LogicError` if it is a null descriptor.
+    .. function:: const std::string &getStringLabel() const
+
+        :returns: the string label of the vertex.
+        :throws: :cpp:class:`LogicError` if it is a null descriptor.
+    .. function:: AtomId getAtomId() const
+
+        :returns: the atom id of the vertex.
+        :throws: :cpp:class:`LogicError` if it is a null descriptor.
+    .. function:: Charge getCharge() const
+
+        :returns: the charge of the vertex.
+        :throws: :cpp:class:`LogicError` if it is a null descriptor.
+
+
+Class ``Graph::Edge``
+---------------------------------------------------------------
+
+.. class:: Graph::Edge
+
+
+    A descriptor of either an edge in a graph, or a null edge.
+
+    .. function:: Edge()
+
+        Constructs a null descriptor.
+    .. function:: std::shared_ptr<Graph> getGraph() const
+
+        :returns: the graph the edge belongs to.
+        :throws: :cpp:class:`LogicError` if it is a null descriptor.
+    .. function:: Vertex source() const
+
+        :returns: the source vertex of the edge.
+        :throws: :cpp:class:`LogicError` if it is a null descriptor.
+    .. function:: Vertex target() const
+
+        :returns: the target vertex of the edge.
+        :throws: :cpp:class:`LogicError` if it is a null descriptor.
+    .. function:: const std::string &getStringLabel() const
+
+        :returns: the string label of the edge.
+        :throws: :cpp:class:`LogicError` if it is a null descriptor.
+    .. function:: BondType getBondType() const
+
+        :returns: the bond type of the edge.
+        :throws: :cpp:class:`LogicError` if it is a null descriptor.
+
+
+Class ``Graph::VertexIterator``
+---------------------------------------------------------------
+
+.. class:: Graph::VertexIterator
+
+
+    An iterator for traversing all vertices in a graph.
+    It models a forward iterator.
+
+    .. function:: VertexIterator()
+
+        Construct a past-the-end iterator.
+
+
+Class ``Graph::VertexRange``
+---------------------------------------------------------------
+
+.. class:: Graph::VertexRange
+
+
+    A range of all vertices in a graph.
+
+
+Class ``Graph::EdgeIterator``
+---------------------------------------------------------------
+
+.. class:: Graph::EdgeIterator
+
+
+    An iterator for traversing all edges in a graph.
+    It models a forward iterator.
+
+    .. function:: EdgeIterator()
+
+        Construct a past-the-end iterator.
+
+
+Class ``Graph::EdgeRange``
+---------------------------------------------------------------
+
+.. class:: Graph::EdgeRange
+
+
+    A range of all edges in a graph.
+
+
+Class ``Graph::IncidnetEdgeIterator``
+---------------------------------------------------------------
+
+.. class:: Graph::IncidnetEdgeIterator
+
+
+    An iterator for traversing all edges in a graph.
+    It models a forward iterator.
+
+    .. function:: IncidentEdgeIterator()
+
+        Construct a past-the-end iterator.
+
+
+Class ``Graph::IncidentEdgeRange``
+---------------------------------------------------------------
+
+.. class:: Graph::IncidentEdgeRange
+
+
+    A range of all incident edges to a vertex in a graph.
+
+
+
+Class ``GraphPrinter``
+--------------------------------------------------------------------------------------------------------------------------------
+
+.. class:: GraphPrinter
+    
+
+    This class is used to configure how graphs are visualised.
+
+    .. warning:: Some of these options greatly alter how graphs are depicted
+        and the result may not accurately represent the underlying graph,
+        and may make non-molecules look like molecules.
+
+
+Synopsis
+^^^^^^^^
+
+.. code-block:: c++
+    
+    struct GraphPrinter {
+        GraphPrinter();
+        GraphPrinter(const GraphPrinter&) = delete;
+        GraphPrinter &operator=(const GraphPrinter&) = delete;
+        ~GraphPrinter();
+        const lib::IO::Graph::Write::Options &getOptions() const;
+        void setMolDefault();
+        void setReactionDefault();
+        void disableAll();
+        void enableAll();
+        void setEdgesAsBonds(bool value);
+        bool getEdgesAsBonds() const;
+        void setCollapseHydrogens(bool value);
+        bool getCollapseHydrogens() const;
+        void setRaiseCharges(bool value);
+        bool getRaiseCharges() const;
+        void setSimpleCarbons(bool value);
+        bool getSimpleCarbons() const;
+        void setThick(bool value);
+        bool getThick() const;
+        void setWithColour(bool value);
+        bool getWithColour() const;
+        void setWithIndex(bool value);
+        bool getWithIndex() const;
+        void setWithTexttt(bool value);
+        bool getWithTexttt() const;
+    private:
+        std::unique_ptr<lib::IO::Graph::Write::Options> options;
+    };
+
+Details
+^^^^^^^
+
+.. cpp:namespace:: mod
+
+.. cpp:namespace-push:: GraphPrinter
+
+.. function GraphPrinter()
+
+    The default constructor enables edges as bonds and raised charges.
+.. function:: void setMolDefault()
+
+    Shortcut for enabling all but thickening and index printing.
+.. function:: void setReactionDefault()
+
+    Shortcut for enabling all but thickening, index printing and simplification of carbon atoms.
+.. function:: void disableAll()
+
+    Disable all special printing features.
+.. function:: void enableAll()
+
+    Enable all special printing features, except typewriter font.
+.. function:: void setEdgesAsBonds(bool value)
+              bool getEdgesAsBonds() const
+
+    Control whether edges with special labels are drawn as chemical bonds.
+.. function:: void setCollapseHydrogens(bool value)
+              bool getCollapseHydrogens() const
+
+    Control whether vertices representing hydrogen atoms are collapsed into their neighbours labels.
+.. function:: void setRaiseCharges(bool value)
+              bool getRaiseCharges() const
+
+    Control whether a vertex label suffix encoding a charge is written as a superscript to the rest of the label.
+.. function:: void setSimpleCarbons(bool value)
+              bool getSimpleCarbons() const
+
+    Control whether some vertices encoding carbon atoms are depicted without any label.
+.. function:: void setThick(bool value)
+              bool getThick() const
+
+    Control whether all edges are drawn thicker than normal and all labels are written in bold.
+.. function:: void setWithColour(bool value)
+              bool getWithColour() const
+
+    Control whether colour is applied to certain elements of the graph which are molecule-like.
+.. function:: void setWithIndex(bool value)
+              bool getWithIndex() const
+
+    Control whether the underlying indices of the vertices are printed.
+.. function:: void setWithTexttt(bool value)
+              bool getWithTexttt() const
+
+    Control whether the vertex and edge labels are written with typewriter font.
+
+.. cpp:namespace:: mod
+

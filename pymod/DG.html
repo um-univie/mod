@@ -1,0 +1,1214 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>3.1.4. DG &mdash; MØD v0.5.0 documentation</title>
+    
+    <link rel="stylesheet" href="../_static/classic.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     'v0.5.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="top" title="MØD v0.5.0 documentation" href="../index.html" />
+    <link rel="up" title="3.1. API Reference" href="api.html" />
+    <link rel="next" title="3.1.5. DGStrat" href="DGStrat.html" />
+    <link rel="prev" title="3.1.3. Derivation" href="Derivation.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="DGStrat.html" title="3.1.5. DGStrat"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="Derivation.html" title="3.1.3. Derivation"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">MØD v0.5.0 documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="pymod.html" >3. PyMØD</a> &raquo;</li>
+          <li class="nav-item nav-item-2"><a href="api.html" accesskey="U">3.1. API Reference</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="dg">
+<span id="py-dg"></span><h1>3.1.4. DG<a class="headerlink" href="#dg" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="class-dg">
+<h2>3.1.4.1. Class <code class="docutils literal"><span class="pre">DG</span></code><a class="headerlink" href="#class-dg" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="mod.DG">
+<em class="property">class </em><code class="descclassname">mod.</code><code class="descname">DG</code><a class="headerlink" href="#mod.DG" title="Permalink to this definition">¶</a></dt>
+<dd><p>The main derivation graph class. A derivation graph is a directed hypergraph <span class="math">\(H = (V, E)\)</span>.
+Each vertex is annotated with a graph, and each hyperedge is annotated with a transformation rule.
+A derivation graph can either be calculated from a strategy or loaded from external data.</p>
+<dl class="attribute">
+<dt id="mod.DG.id">
+<code class="descname">id</code><a class="headerlink" href="#mod.DG.id" title="Permalink to this definition">¶</a></dt>
+<dd><p>The unique instance id among all <a class="reference internal" href="#mod.DG" title="mod.DG"><code class="xref py py-class docutils literal"><span class="pre">DG</span></code></a> objects.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Type:</th><td class="field-body">unsigned int</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="mod.DG.numVertices">
+<code class="descname">numVertices</code><a class="headerlink" href="#mod.DG.numVertices" title="Permalink to this definition">¶</a></dt>
+<dd><p>(Read-only) The number of vertices in the derivation graph.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Type:</th><td class="field-body">int</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="mod.DG.vertices">
+<code class="descname">vertices</code><a class="headerlink" href="#mod.DG.vertices" title="Permalink to this definition">¶</a></dt>
+<dd><p>(Read-only) An iterable of all vertices in the derivation graph.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Type:</th><td class="field-body"><code class="xref py py-class docutils literal"><span class="pre">DGVertexRange</span></code></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="mod.DG.numEdges">
+<code class="descname">numEdges</code><a class="headerlink" href="#mod.DG.numEdges" title="Permalink to this definition">¶</a></dt>
+<dd><p>(Read-only) The number of hyperedges in the derivation graph.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Type:</th><td class="field-body">int</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="mod.DG.edges">
+<code class="descname">edges</code><a class="headerlink" href="#mod.DG.edges" title="Permalink to this definition">¶</a></dt>
+<dd><p>(Read-only) An iterable of all hyperedges in the derivation graph.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Type:</th><td class="field-body"><code class="xref py py-class docutils literal"><span class="pre">DGEdgeRange</span></code></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="mod.DG.calc">
+<code class="descname">calc</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#mod.DG.calc" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create the actual derivation graph.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="mod.DG.graphDatabase">
+<code class="descname">graphDatabase</code><a class="headerlink" href="#mod.DG.graphDatabase" title="Permalink to this definition">¶</a></dt>
+<dd><p>All graphs known to the derivation graph.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Type:</th><td class="field-body">list of <a class="reference internal" href="Graph.html#mod.Graph" title="mod.Graph"><code class="xref py py-class docutils literal"><span class="pre">Graph</span></code></a></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="mod.DG.vertexGraphs">
+<code class="descname">vertexGraphs</code><a class="headerlink" href="#mod.DG.vertexGraphs" title="Permalink to this definition">¶</a></dt>
+<dd><p>A subset of the graph database corresponding to the vertices of the actual derivation graph.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Type:</th><td class="field-body">list of <a class="reference internal" href="Graph.html#mod.Graph" title="mod.Graph"><code class="xref py py-class docutils literal"><span class="pre">Graph</span></code></a></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="mod.DG.products">
+<code class="descname">products</code><a class="headerlink" href="#mod.DG.products" title="Permalink to this definition">¶</a></dt>
+<dd><p>The subset of the vertex graphs which were discovered by the calculation.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Type:</th><td class="field-body">list of <a class="reference internal" href="Graph.html#mod.Graph" title="mod.Graph"><code class="xref py py-class docutils literal"><span class="pre">Graph</span></code></a></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="mod.DG.print">
+<code class="descname">print</code><span class="sig-paren">(</span><em>printer=DGPrinter()</em>, <em>data=None</em><span class="sig-paren">)</span><a class="headerlink" href="#mod.DG.print" title="Permalink to this definition">¶</a></dt>
+<dd><p>Print the derivation graph in style of a hypergraph. The appearance and structure
+of the visualisation can optionally be configured by giving a DG printer and/or data object.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>printer</strong> (<a class="reference internal" href="#mod.DGPrinter" title="mod.DGPrinter"><code class="xref py py-class docutils literal"><span class="pre">DGPrinter</span></code></a>) &#8211; the printer to use governing the appearance.</li>
+<li><strong>data</strong> (<a class="reference internal" href="#mod.DGPrintData" title="mod.DGPrintData"><code class="xref py py-class docutils literal"><span class="pre">DGPrintData</span></code></a>) &#8211; the extra data to use encoding the structure of the graph.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="mod.DG.dump">
+<code class="descname">dump</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#mod.DG.dump" title="Permalink to this definition">¶</a></dt>
+<dd><p>Export the derivation graph to an external file. The vertex graphs are exported as well.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">the filename of the exported derivation graph.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">string</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="mod.DG.getDerivationRef">
+<code class="descname">getDerivationRef</code><span class="sig-paren">(</span><em>educts</em>, <em>products</em><span class="sig-paren">)</span><a class="headerlink" href="#mod.DG.getDerivationRef" title="Permalink to this definition">¶</a></dt>
+<dd><p>Query the derivation graph for a specific derivation.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>educts</strong> (list of <a class="reference internal" href="Graph.html#mod.Graph" title="mod.Graph"><code class="xref py py-class docutils literal"><span class="pre">Graph</span></code></a>) &#8211; the educts of the derivation to find.</li>
+<li><strong>products</strong> (list of <a class="reference internal" href="Graph.html#mod.Graph" title="mod.Graph"><code class="xref py py-class docutils literal"><span class="pre">Graph</span></code></a>) &#8211; the products of the derivation to find.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">a reference to a derivation. If no matching derivation is found, the returned reference will not be valid.</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last"><a class="reference internal" href="#mod.DerivationRef" title="mod.DerivationRef"><code class="xref py py-class docutils literal"><span class="pre">DerivationRef</span></code></a></p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="mod.DG.derivations">
+<code class="descname">derivations</code><a class="headerlink" href="#mod.DG.derivations" title="Permalink to this definition">¶</a></dt>
+<dd><p>(Read-only) An iterable of references to all derivations in the DG.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Type:</th><td class="field-body"><code class="xref py py-class docutils literal"><span class="pre">DerivationRefRange</span></code></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="mod.DG.inDerivations">
+<code class="descname">inDerivations</code><span class="sig-paren">(</span><em>g</em><span class="sig-paren">)</span><a class="headerlink" href="#mod.DG.inDerivations" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>g</strong> (<a class="reference internal" href="Graph.html#mod.Graph" title="mod.Graph"><code class="xref py py-class docutils literal"><span class="pre">Graph</span></code></a>) &#8211; the graph corresponding to the vertex to return in-derivations for.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">an iterable of references to all derivations going in to the vertex corresponding to the graph <code class="docutils literal"><span class="pre">g</span></code>.
+A derivation reference is in the range as many times as the vertex is a member of the head-multiset of that derivation.</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><code class="xref py py-class docutils literal"><span class="pre">DerivationRefRange</span></code></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="mod.DG.outDerivations">
+<code class="descname">outDerivations</code><span class="sig-paren">(</span><em>g</em><span class="sig-paren">)</span><a class="headerlink" href="#mod.DG.outDerivations" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>g</strong> (<a class="reference internal" href="Graph.html#mod.Graph" title="mod.Graph"><code class="xref py py-class docutils literal"><span class="pre">Graph</span></code></a>) &#8211; the graph corresponding to the vertex to return out-derivations for.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">an iterable of references to all derivations going out of the vertex corresponding to the graph <code class="docutils literal"><span class="pre">g</span></code>.
+A derivation reference is in the range as many times as the vertex is a member of the tail-multiset of that derivation.</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><code class="xref py py-class docutils literal"><span class="pre">DerivationRefRange</span></code></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="mod.DG.list">
+<code class="descname">list</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#mod.DG.list" title="Permalink to this definition">¶</a></dt>
+<dd><p>List information about the calculation.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="mod.DG.listStats">
+<code class="descname">listStats</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#mod.DG.listStats" title="Permalink to this definition">¶</a></dt>
+<dd><p>Lists various statistics for the derivation graph.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="mod.DG.listIncidence">
+<code class="descname">listIncidence</code><span class="sig-paren">(</span><em>g</em><span class="sig-paren">)</span><a class="headerlink" href="#mod.DG.listIncidence" title="Permalink to this definition">¶</a></dt>
+<dd><p>List the incident derivations of the vertex represented by the given graph.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>g</strong> (<a class="reference internal" href="Graph.html#mod.Graph" title="mod.Graph"><code class="xref py py-class docutils literal"><span class="pre">Graph</span></code></a>) &#8211; the graph for which the corresponding derivation graph vertex should have its incident derivations listed.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="method">
+<dt id="mod.dgDerivations">
+<code class="descclassname">mod.</code><code class="descname">dgDerivations</code><span class="sig-paren">(</span><em>ders</em><span class="sig-paren">)</span><a class="headerlink" href="#mod.dgDerivations" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>ders</strong> (list of <a class="reference internal" href="Derivation.html#mod.Derivation" title="mod.Derivation"><code class="xref py py-class docutils literal"><span class="pre">Derivation</span></code></a>) &#8211; the list of derivations to include in the derivation graph.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">a derivation graph from a list of <a class="reference internal" href="Derivation.html#mod.Derivation" title="mod.Derivation"><code class="xref py py-class docutils literal"><span class="pre">Derivation</span></code></a>.</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><a class="reference internal" href="#mod.DG" title="mod.DG"><code class="xref py py-class docutils literal"><span class="pre">DG</span></code></a></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="mod.dgAbstract">
+<code class="descclassname">mod.</code><code class="descname">dgAbstract</code><span class="sig-paren">(</span><em>s</em><span class="sig-paren">)</span><a class="headerlink" href="#mod.dgAbstract" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>s</strong> (<em>string</em>) &#8211; the abstract specification of a derivation graph.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">Construct a derivation graph from an abstract set of derivations. See <a class="reference internal" href="../libmod/DG.html#_CPPv2N3mod2DG8abstractERKNSt6stringE" title="mod::DG::abstract"><code class="xref cpp cpp-func docutils literal"><span class="pre">DG::abstract()</span></code></a> for the specification format.</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><a class="reference internal" href="#mod.DG" title="mod.DG"><code class="xref py py-class docutils literal"><span class="pre">DG</span></code></a></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="mod.dgSBML">
+<code class="descclassname">mod.</code><code class="descname">dgSBML</code><span class="sig-paren">(</span><em>s</em><span class="sig-paren">)</span><a class="headerlink" href="#mod.dgSBML" title="Permalink to this definition">¶</a></dt>
+<dd><p>Load a derivation graph from an SBML file.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>s</strong> (<em>string</em>) &#8211; the name of the SBML file.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">the loaded derivation graph.</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><a class="reference internal" href="#mod.DG" title="mod.DG"><code class="xref py py-class docutils literal"><span class="pre">DG</span></code></a></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="mod.dgRuleComp">
+<code class="descclassname">mod.</code><code class="descname">dgRuleComp</code><span class="sig-paren">(</span><em>graphs</em>, <em>strat</em><span class="sig-paren">)</span><a class="headerlink" href="#mod.dgRuleComp" title="Permalink to this definition">¶</a></dt>
+<dd><p>Initialize a derivation graph defined by a strategy.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>graphs</strong> (list of <a class="reference internal" href="Graph.html#mod.Graph" title="mod.Graph"><code class="xref py py-class docutils literal"><span class="pre">Graph</span></code></a>) &#8211; an initial graph database. Any derived graph isomorphic to one of these graphs will be replaced by the given graph.</li>
+<li><strong>strat</strong> (<a class="reference internal" href="DGStrat.html#mod.DGStrat" title="mod.DGStrat"><code class="xref py py-class docutils literal"><span class="pre">DGStrat</span></code></a>) &#8211; the strategy which will be used for calculating the actual derivation graph.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">the derivation graph object. The calculation method must be called to create the actual derivation graph.</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last"><a class="reference internal" href="#mod.DG" title="mod.DG"><code class="xref py py-class docutils literal"><span class="pre">DG</span></code></a></p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="mod.dgDump">
+<code class="descclassname">mod.</code><code class="descname">dgDump</code><span class="sig-paren">(</span><em>graphs</em>, <em>rules</em>, <em>file</em><span class="sig-paren">)</span><a class="headerlink" href="#mod.dgDump" title="Permalink to this definition">¶</a></dt>
+<dd><p>Load a derivation graph dump.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>graphs</strong> (list of <a class="reference internal" href="Graph.html#mod.Graph" title="mod.Graph"><code class="xref py py-class docutils literal"><span class="pre">Graph</span></code></a>) &#8211; Any graph in the dump which is isomorphic one of these graphs is replaced by the given graph.</li>
+<li><strong>rules</strong> (list of <a class="reference internal" href="Rule.html#mod.Rule" title="mod.Rule"><code class="xref py py-class docutils literal"><span class="pre">Rule</span></code></a>) &#8211; As for the graphs the same procedure is done for the rules, however only using the name of the rule for comparison.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">the loaded derivation graph.</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last"><a class="reference internal" href="#mod.DG" title="mod.DG"><code class="xref py py-class docutils literal"><span class="pre">DG</span></code></a></p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="mod.diffDGs">
+<code class="descclassname">mod.</code><code class="descname">diffDGs</code><span class="sig-paren">(</span><em>dg1</em>, <em>dg2</em><span class="sig-paren">)</span><a class="headerlink" href="#mod.diffDGs" title="Permalink to this definition">¶</a></dt>
+<dd><p>Compare two derivation graphs and lists the difference.
+This is not a general isomorphism check; two vertices are equal if they have
+the same graph attached. Edges are equal if the head and tail sets are equal
+and if the attached rule is the same.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>dg1</strong> (<a class="reference internal" href="#mod.DG" title="mod.DG"><code class="xref py py-class docutils literal"><span class="pre">DG</span></code></a>) &#8211; the first derivation graph.</li>
+<li><strong>dg2</strong> (<a class="reference internal" href="#mod.DG" title="mod.DG"><code class="xref py py-class docutils literal"><span class="pre">DG</span></code></a>) &#8211; the second derivation graph.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="class-dgvertex">
+<h2>3.1.4.2. Class <code class="docutils literal"><span class="pre">DGVertex</span></code><a class="headerlink" href="#class-dgvertex" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="mod.DGVertex">
+<em class="property">class </em><code class="descclassname">mod.</code><code class="descname">DGVertex</code><a class="headerlink" href="#mod.DGVertex" title="Permalink to this definition">¶</a></dt>
+<dd><p>A descriptor of either a vertex in a derivation graph, or a null vertex.</p>
+<dl class="function">
+<dt id="mod.DGVertex.__init__">
+<code class="descname">__init__</code><span class="sig-paren">(</span><em>self</em><span class="sig-paren">)</span><a class="headerlink" href="#mod.DGVertex.__init__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Constructs a null descriptor.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="mod.DGVertex.id">
+<code class="descname">id</code><a class="headerlink" href="#mod.DGVertex.id" title="Permalink to this definition">¶</a></dt>
+<dd><p>(Read-only) The index of the vertex. It will be in the range <span class="math">\([0, numVertices + numEdges[\)</span>.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Type:</th><td class="field-body">int</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Raises:</th><td class="field-body"><a class="reference internal" href="Error.html#mod.LogicError" title="mod.LogicError"><code class="xref py py-class docutils literal"><span class="pre">LogicError</span></code></a> if it is a null descriptor.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="mod.DGVertex.dg">
+<code class="descname">dg</code><a class="headerlink" href="#mod.DGVertex.dg" title="Permalink to this definition">¶</a></dt>
+<dd><p>(Read-only) The derivation graph the vertex belongs to.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Type:</th><td class="field-body"><a class="reference internal" href="#mod.DG" title="mod.DG"><code class="xref py py-class docutils literal"><span class="pre">DG</span></code></a></td>
+</tr>
+<tr class="field-even field"><th class="field-name">Raises:</th><td class="field-body"><a class="reference internal" href="Error.html#mod.LogicError" title="mod.LogicError"><code class="xref py py-class docutils literal"><span class="pre">LogicError</span></code></a> if it is a null descriptor.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="mod.DGVertex.inEdges">
+<code class="descname">inEdges</code><a class="headerlink" href="#mod.DGVertex.inEdges" title="Permalink to this definition">¶</a></dt>
+<dd><p>(Read-only) A range of in-hyperedges for this vertex.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Type:</th><td class="field-body"><code class="xref py py-class docutils literal"><span class="pre">InEdgeRange</span></code></td>
+</tr>
+<tr class="field-even field"><th class="field-name">Raises:</th><td class="field-body"><a class="reference internal" href="Error.html#mod.LogicError" title="mod.LogicError"><code class="xref py py-class docutils literal"><span class="pre">LogicError</span></code></a> if it is a null descriptor.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="mod.DGVertex.outEdges">
+<code class="descname">outEdges</code><a class="headerlink" href="#mod.DGVertex.outEdges" title="Permalink to this definition">¶</a></dt>
+<dd><p>(Read-only) A range of out-hyperedges for this vertex.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Type:</th><td class="field-body"><code class="xref py py-class docutils literal"><span class="pre">OutEdgeRange</span></code></td>
+</tr>
+<tr class="field-even field"><th class="field-name">Raises:</th><td class="field-body"><a class="reference internal" href="Error.html#mod.LogicError" title="mod.LogicError"><code class="xref py py-class docutils literal"><span class="pre">LogicError</span></code></a> if it is a null descriptor.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="mod.DGVertex.graph">
+<code class="descname">graph</code><a class="headerlink" href="#mod.DGVertex.graph" title="Permalink to this definition">¶</a></dt>
+<dd><p>(Read-only) The graph label of the vertex.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Type:</th><td class="field-body"><a class="reference internal" href="Graph.html#mod.Graph" title="mod.Graph"><code class="xref py py-class docutils literal"><span class="pre">Graph</span></code></a></td>
+</tr>
+<tr class="field-even field"><th class="field-name">Raises:</th><td class="field-body"><a class="reference internal" href="Error.html#mod.LogicError" title="mod.LogicError"><code class="xref py py-class docutils literal"><span class="pre">LogicError</span></code></a> if it is a null descriptor.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="class-dghyperedge">
+<h2>3.1.4.3. Class <code class="docutils literal"><span class="pre">DGHyperEdge</span></code><a class="headerlink" href="#class-dghyperedge" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="mod.DGHyperEdge">
+<em class="property">class </em><code class="descclassname">mod.</code><code class="descname">DGHyperEdge</code><a class="headerlink" href="#mod.DGHyperEdge" title="Permalink to this definition">¶</a></dt>
+<dd><p>A descriptor of either a hyperedge in a derivation graph, or a null edge.</p>
+<dl class="function">
+<dt id="mod.DGHyperEdge.__init__">
+<code class="descname">__init__</code><span class="sig-paren">(</span><em>self</em><span class="sig-paren">)</span><a class="headerlink" href="#mod.DGHyperEdge.__init__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Constructs a null descriptor.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="mod.DGHyperEdge.id">
+<code class="descname">id</code><a class="headerlink" href="#mod.DGHyperEdge.id" title="Permalink to this definition">¶</a></dt>
+<dd><p>(Read-only) The index of the hyperedge. It will be in the range <span class="math">\([0, numVertices + numEdges[\)</span>.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Type:</th><td class="field-body">int</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Raises:</th><td class="field-body"><a class="reference internal" href="Error.html#mod.LogicError" title="mod.LogicError"><code class="xref py py-class docutils literal"><span class="pre">LogicError</span></code></a> if it is a null descriptor.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="mod.DGHyperEdge.dg">
+<code class="descname">dg</code><a class="headerlink" href="#mod.DGHyperEdge.dg" title="Permalink to this definition">¶</a></dt>
+<dd><p>(Read-only) The derivation graph the edge belongs to.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Type:</th><td class="field-body"><a class="reference internal" href="#mod.DG" title="mod.DG"><code class="xref py py-class docutils literal"><span class="pre">DG</span></code></a></td>
+</tr>
+<tr class="field-even field"><th class="field-name">Raises:</th><td class="field-body"><a class="reference internal" href="Error.html#mod.LogicError" title="mod.LogicError"><code class="xref py py-class docutils literal"><span class="pre">LogicError</span></code></a> if it is a null descriptor.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="mod.DGHyperEdge.numSources">
+<code class="descname">numSources</code><a class="headerlink" href="#mod.DGHyperEdge.numSources" title="Permalink to this definition">¶</a></dt>
+<dd><p>(Read-only) The number of sources of the hyperedge.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Type:</th><td class="field-body">int</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="mod.DGHyperEdge.sources">
+<code class="descname">sources</code><a class="headerlink" href="#mod.DGHyperEdge.sources" title="Permalink to this definition">¶</a></dt>
+<dd><p>(Read-only) The sources of the hyperedge.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Type:</th><td class="field-body"><code class="xref py py-class docutils literal"><span class="pre">DGSourceRange</span></code></td>
+</tr>
+<tr class="field-even field"><th class="field-name">Raises:</th><td class="field-body"><a class="reference internal" href="Error.html#mod.LogicError" title="mod.LogicError"><code class="xref py py-class docutils literal"><span class="pre">LogicError</span></code></a> if it is a null descriptor.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="mod.DGHyperEdge.numTargets">
+<code class="descname">numTargets</code><a class="headerlink" href="#mod.DGHyperEdge.numTargets" title="Permalink to this definition">¶</a></dt>
+<dd><p>(Read-only) The number of targerts of the hyperedge.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Type:</th><td class="field-body">int</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="mod.DGHyperEdge.targets">
+<code class="descname">targets</code><a class="headerlink" href="#mod.DGHyperEdge.targets" title="Permalink to this definition">¶</a></dt>
+<dd><p>(Read-only) The targets of the hyperedge.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Type:</th><td class="field-body"><code class="xref py py-class docutils literal"><span class="pre">DGTargetRange</span></code></td>
+</tr>
+<tr class="field-even field"><th class="field-name">Raises:</th><td class="field-body"><a class="reference internal" href="Error.html#mod.LogicError" title="mod.LogicError"><code class="xref py py-class docutils literal"><span class="pre">LogicError</span></code></a> if it is a null descriptor.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="mod.DGHyperEdge.rules">
+<code class="descname">rules</code><a class="headerlink" href="#mod.DGHyperEdge.rules" title="Permalink to this definition">¶</a></dt>
+<dd><p>(Read-only) The rules associated with the hyperedge.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Type:</th><td class="field-body"><code class="xref py py-class docutils literal"><span class="pre">DGRuleRange</span></code></td>
+</tr>
+<tr class="field-even field"><th class="field-name">Raises:</th><td class="field-body"><a class="reference internal" href="Error.html#mod.LogicError" title="mod.LogicError"><code class="xref py py-class docutils literal"><span class="pre">LogicError</span></code></a> if it is a null descriptor.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="class-derivationref">
+<h2>3.1.4.4. Class <code class="docutils literal"><span class="pre">DerivationRef</span></code><a class="headerlink" href="#class-derivationref" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="mod.DerivationRef">
+<em class="property">class </em><code class="descclassname">mod.</code><code class="descname">DerivationRef</code><a class="headerlink" href="#mod.DerivationRef" title="Permalink to this definition">¶</a></dt>
+<dd><p>A reference to a derivation in a specific derivation graph, or an invalid reference.</p>
+<dl class="attribute">
+<dt id="mod.DerivationRef.id">
+<code class="descname">id</code><a class="headerlink" href="#mod.DerivationRef.id" title="Permalink to this definition">¶</a></dt>
+<dd><p>(Read-only) If the reference is valid, this is the id of the pointed to derivation.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Type:</th><td class="field-body">unsigned int</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="mod.DerivationRef.dg">
+<code class="descname">dg</code><a class="headerlink" href="#mod.DerivationRef.dg" title="Permalink to this definition">¶</a></dt>
+<dd><p>(Read-only) If the reference is valid, this is the derivation graph the reference points into.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Type:</th><td class="field-body"><a class="reference internal" href="#mod.DG" title="mod.DG"><code class="xref py py-class docutils literal"><span class="pre">DG</span></code></a></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="mod.DerivationRef.isValid">
+<code class="descname">isValid</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#mod.DerivationRef.isValid" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">whether or not the reference is valid.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">bool</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="mod.DerivationRef.derivation">
+<code class="descname">derivation</code><a class="headerlink" href="#mod.DerivationRef.derivation" title="Permalink to this definition">¶</a></dt>
+<dd><p>(Read-only) If the reference is valid, this is the pointed to derivation.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Type:</th><td class="field-body"><a class="reference internal" href="Derivation.html#mod.Derivation" title="mod.Derivation"><code class="xref py py-class docutils literal"><span class="pre">Derivation</span></code></a></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="mod.DerivationRef.print">
+<code class="descname">print</code><span class="sig-paren">(</span><em>printer=GraphPrinter()</em>, <em>matchColour=&quot;ForestGreen&quot;</em><span class="sig-paren">)</span><a class="headerlink" href="#mod.DerivationRef.print" title="Permalink to this definition">¶</a></dt>
+<dd><p>Print the derivation pointed to by the derivation reference.
+All possible Double-Pushout diagrams for the derivation are printed.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>printer</strong> (<a class="reference internal" href="Graph.html#mod.GraphPrinter" title="mod.GraphPrinter"><code class="xref py py-class docutils literal"><span class="pre">GraphPrinter</span></code></a>) &#8211; the printer to use for the figures.</li>
+<li><strong>matchColour</strong> (<em>string</em>) &#8211; the TikZ colour to use for the rule and its image in the bottom span.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="class-dgprintdata">
+<h2>3.1.4.5. Class <code class="docutils literal"><span class="pre">DGPrintData</span></code><a class="headerlink" href="#class-dgprintdata" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="mod.DGPrintData">
+<em class="property">class </em><code class="descclassname">mod.</code><code class="descname">DGPrintData</code><a class="headerlink" href="#mod.DGPrintData" title="Permalink to this definition">¶</a></dt>
+<dd><p>This class is used to hold extra data about how a specific derivation graph
+is visualised.</p>
+<dl class="method">
+<dt id="mod.DGPrintData.__init__">
+<code class="descname">__init__</code><span class="sig-paren">(</span><em>self</em>, <em>dg</em><span class="sig-paren">)</span><a class="headerlink" href="#mod.DGPrintData.__init__" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>dg</strong> (<a class="reference internal" href="#mod.DG" title="mod.DG"><code class="xref py py-class docutils literal"><span class="pre">DG</span></code></a>) &#8211; the derivation graph to hold data for.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="mod.DGPrintData.dg">
+<code class="descname">dg</code><a class="headerlink" href="#mod.DGPrintData.dg" title="Permalink to this definition">¶</a></dt>
+<dd><p>(Read-only) The derivation graph the object holds data for.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="mod.DGPrintData.makeDuplicate">
+<code class="descname">makeDuplicate</code><span class="sig-paren">(</span><em>dRef</em>, <em>eDup</em><span class="sig-paren">)</span><a class="headerlink" href="#mod.DGPrintData.makeDuplicate" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create another version of the given derivation and give it the given duplicate number.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>dRef</strong> (<a class="reference internal" href="#mod.DerivationRef" title="mod.DerivationRef"><code class="xref py py-class docutils literal"><span class="pre">DerivationRef</span></code></a>) &#8211; a reference to the derivation to duplicate.</li>
+<li><strong>eDup</strong> (<em>unsigned int</em>) &#8211; the duplicate number for the new version of the derivation.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="mod.DGPrintData.removeDuplicate">
+<code class="descname">removeDuplicate</code><span class="sig-paren">(</span><em>dRef</em>, <em>eDup</em><span class="sig-paren">)</span><a class="headerlink" href="#mod.DGPrintData.removeDuplicate" title="Permalink to this definition">¶</a></dt>
+<dd><p>Remove the version of the given derivation with the given duplicate number.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>dRef</strong> (<a class="reference internal" href="#mod.DerivationRef" title="mod.DerivationRef"><code class="xref py py-class docutils literal"><span class="pre">DerivationRef</span></code></a>) &#8211; a reference to the derivation to duplicate.</li>
+<li><strong>eDup</strong> (<em>unsigned int</em>) &#8211; the duplicate number for the version of the derivation to remove.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="mod.DGPrintData.reconnectTail">
+<code class="descname">reconnectTail</code><span class="sig-paren">(</span><em>dRef</em>, <em>eDup</em>, <em>g</em>, <em>vDupTar</em><span class="sig-paren">)</span><a class="headerlink" href="#mod.DGPrintData.reconnectTail" title="Permalink to this definition">¶</a></dt>
+<dd><p>Reconnect an arbitrary version of the tail specified by the given graph in the derivation duplicate given.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>dRef</strong> (<a class="reference internal" href="#mod.DerivationRef" title="mod.DerivationRef"><code class="xref py py-class docutils literal"><span class="pre">DerivationRef</span></code></a>) &#8211; a reference to the derivation to reconnect.</li>
+<li><strong>eDup</strong> (<em>unsigned int</em>) &#8211; the duplicate number of the derivation to reconnect.</li>
+<li><strong>g</strong> (<a class="reference internal" href="Graph.html#mod.Graph" title="mod.Graph"><code class="xref py py-class docutils literal"><span class="pre">Graph</span></code></a>) &#8211; a graph representing the tail vertex to reconnect.</li>
+<li><strong>vDupTar</strong> (<em>unsigned int</em>) &#8211; the new duplicate number for the tail vertex.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="mod.DGPrintData.reconnectHead">
+<code class="descname">reconnectHead</code><span class="sig-paren">(</span><em>dRef</em>, <em>eDup</em>, <em>g</em>, <em>vDupTar</em><span class="sig-paren">)</span><a class="headerlink" href="#mod.DGPrintData.reconnectHead" title="Permalink to this definition">¶</a></dt>
+<dd><p>Reconnect an arbitrary version of the head specified by the given graph in the derivation duplicate given.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>dRef</strong> (<a class="reference internal" href="#mod.DerivationRef" title="mod.DerivationRef"><code class="xref py py-class docutils literal"><span class="pre">DerivationRef</span></code></a>) &#8211; a reference to the derivation to reconnect.</li>
+<li><strong>eDup</strong> (<em>unsigned int</em>) &#8211; the duplicate number of the derivation to reconnect.</li>
+<li><strong>g</strong> (<a class="reference internal" href="Graph.html#mod.Graph" title="mod.Graph"><code class="xref py py-class docutils literal"><span class="pre">Graph</span></code></a>) &#8211; a graph representing the head vertex to reconnect.</li>
+<li><strong>vDupTar</strong> (<em>unsigned int</em>) &#8211; the new duplicate number for the tail vertex.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="class-dgprinter">
+<h2>3.1.4.6. Class <code class="docutils literal"><span class="pre">DGPrinter</span></code><a class="headerlink" href="#class-dgprinter" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="mod.DGPrinter">
+<em class="property">class </em><code class="descclassname">mod.</code><code class="descname">DGPrinter</code><a class="headerlink" href="#mod.DGPrinter" title="Permalink to this definition">¶</a></dt>
+<dd><p>This class is used to configure how derivation graphs are visualised,
+how much is visualised and which extra properties are printed.</p>
+<dl class="attribute">
+<dt id="mod.DGPrinter.graphPrinter">
+<code class="descname">graphPrinter</code><a class="headerlink" href="#mod.DGPrinter.graphPrinter" title="Permalink to this definition">¶</a></dt>
+<dd><p>(Read-only) Retrieve the <a class="reference internal" href="Graph.html#mod.GraphPrinter" title="mod.GraphPrinter"><code class="xref py py-class docutils literal"><span class="pre">GraphPrinter</span></code></a> used when printing images of graphs.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Type:</th><td class="field-body"><a class="reference internal" href="Graph.html#mod.GraphPrinter" title="mod.GraphPrinter"><code class="xref py py-class docutils literal"><span class="pre">GraphPrinter</span></code></a></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="mod.DGPrinter.withShortcutEdges">
+<code class="descname">withShortcutEdges</code><a class="headerlink" href="#mod.DGPrinter.withShortcutEdges" title="Permalink to this definition">¶</a></dt>
+<dd><p>Control whether or not hyperedges <span class="math">\((T, H)\)</span> with <span class="math">\(|T| = |H| = 1\)</span>
+are printed as a simple arrow without the usual rectangle.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Type:</th><td class="field-body">bool</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="mod.DGPrinter.withGraphImages">
+<code class="descname">withGraphImages</code><a class="headerlink" href="#mod.DGPrinter.withGraphImages" title="Permalink to this definition">¶</a></dt>
+<dd><p>Control whether or not each vertex is printed with a image of its graph in it.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Type:</th><td class="field-body">bool</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="mod.DGPrinter.labelsAsLatexMath">
+<code class="descname">labelsAsLatexMath</code><a class="headerlink" href="#mod.DGPrinter.labelsAsLatexMath" title="Permalink to this definition">¶</a></dt>
+<dd><p>Control whether or not labels on vertices and hyperedges are put inline <span class="math">\(\LaTeX\)</span> math.
+Specifically, a label <code class="docutils literal"><span class="pre">label</span></code> is written as <code class="docutils literal"><span class="pre">$\mathrm{label'}$</span></code>, with <code class="docutils literal"><span class="pre">label'</span></code> being
+<code class="docutils literal"><span class="pre">label</span></code> with all space characters escaped.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Type:</th><td class="field-body">bool</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="mod.DGPrinter.pushVertexVisible">
+<code class="descname">pushVertexVisible</code><span class="sig-paren">(</span><em>f</em><span class="sig-paren">)</span><a class="headerlink" href="#mod.DGPrinter.pushVertexVisible" title="Permalink to this definition">¶</a></dt>
+<dd><p>Add another function controlling the visibility of vertices.
+All visibility functions must return <code class="docutils literal"><span class="pre">true</span></code> for a vertex to be visible.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>f</strong> (bool(<a class="reference internal" href="Graph.html#mod.Graph" title="mod.Graph"><code class="xref py py-class docutils literal"><span class="pre">Graph</span></code></a>, <a class="reference internal" href="#mod.DG" title="mod.DG"><code class="xref py py-class docutils literal"><span class="pre">DG</span></code></a>)) &#8211; the function to push for specifying vertex visibility.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="mod.DGPrinter.popVertexVisible">
+<code class="descname">popVertexVisible</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#mod.DGPrinter.popVertexVisible" title="Permalink to this definition">¶</a></dt>
+<dd><p>Remove the last pushed vertex visibility function.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="mod.DGPrinter.pushEdgeVisible">
+<code class="descname">pushEdgeVisible</code><span class="sig-paren">(</span><em>f</em><span class="sig-paren">)</span><a class="headerlink" href="#mod.DGPrinter.pushEdgeVisible" title="Permalink to this definition">¶</a></dt>
+<dd><p>Add another function controlling the visibility of hyperedges.
+All visibility functions must return <code class="docutils literal"><span class="pre">true</span></code> for a hyperedge to be visible.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>f</strong> (bool(<a class="reference internal" href="#mod.DerivationRef" title="mod.DerivationRef"><code class="xref py py-class docutils literal"><span class="pre">DerivationRef</span></code></a>)) &#8211; the function to push for specifying hyperedge visibility.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="mod.DGPrinter.popEdgeVisible">
+<code class="descname">popEdgeVisible</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#mod.DGPrinter.popEdgeVisible" title="Permalink to this definition">¶</a></dt>
+<dd><p>Remove the last pushed hyperedge visibility function.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="mod.DGPrinter.withShortcutEdgesAfterVisibility">
+<code class="descname">withShortcutEdgesAfterVisibility</code><a class="headerlink" href="#mod.DGPrinter.withShortcutEdgesAfterVisibility" title="Permalink to this definition">¶</a></dt>
+<dd><p>Control whether or not hyperedges are depicted as simple arrows when all but 1 head and tail are hidden.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Type:</th><td class="field-body">bool</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="mod.DGPrinter.vertexLabelSep">
+<code class="descname">vertexLabelSep</code><a class="headerlink" href="#mod.DGPrinter.vertexLabelSep" title="Permalink to this definition">¶</a></dt>
+<dd><p>The string used as separator between each part of each vertex label.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Type:</th><td class="field-body">string</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="mod.DGPrinter.edgeLabelSep">
+<code class="descname">edgeLabelSep</code><a class="headerlink" href="#mod.DGPrinter.edgeLabelSep" title="Permalink to this definition">¶</a></dt>
+<dd><p>The string used as separator between each part of each edge label.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Type:</th><td class="field-body">string</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="mod.DGPrinter.pushVertexLabel">
+<code class="descname">pushVertexLabel</code><span class="sig-paren">(</span><em>f</em><span class="sig-paren">)</span><a class="headerlink" href="#mod.DGPrinter.pushVertexLabel" title="Permalink to this definition">¶</a></dt>
+<dd><p>Add another function for vertex labelling. The result of this function is added to the end of each label.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>f</strong> (string(<a class="reference internal" href="Graph.html#mod.Graph" title="mod.Graph"><code class="xref py py-class docutils literal"><span class="pre">Graph</span></code></a>, <a class="reference internal" href="#mod.DG" title="mod.DG"><code class="xref py py-class docutils literal"><span class="pre">DG</span></code></a>)) &#8211; the function to push for labelling vertices.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="mod.DGPrinter.popVertexLabel">
+<code class="descname">popVertexLabel</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#mod.DGPrinter.popVertexLabel" title="Permalink to this definition">¶</a></dt>
+<dd><p>Remove the last pushed vertex labelling function.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="mod.DGPrinter.pushEdgeLabel">
+<code class="descname">pushEdgeLabel</code><span class="sig-paren">(</span><em>f</em><span class="sig-paren">)</span><a class="headerlink" href="#mod.DGPrinter.pushEdgeLabel" title="Permalink to this definition">¶</a></dt>
+<dd><p>Add another function for edge labelling. The result of this function is appended to each label.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>f</strong> (string(<a class="reference internal" href="#mod.DerivationRef" title="mod.DerivationRef"><code class="xref py py-class docutils literal"><span class="pre">DerivationRef</span></code></a>)) &#8211; the function to push for labelling edges.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="mod.DGPrinter.popEdgeLabel">
+<code class="descname">popEdgeLabel</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#mod.DGPrinter.popEdgeLabel" title="Permalink to this definition">¶</a></dt>
+<dd><p>Remove the last pushed edge labelling function.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="mod.DGPrinter.withGraphName">
+<code class="descname">withGraphName</code><a class="headerlink" href="#mod.DGPrinter.withGraphName" title="Permalink to this definition">¶</a></dt>
+<dd><p>Control whether or not graph names are appended to the vertex labels (see also <a class="reference internal" href="#mod.DGPrinter.pushVertexLabel" title="mod.DGPrinter.pushVertexLabel"><code class="xref py py-meth docutils literal"><span class="pre">DGPrinter.pushVertexLabel()</span></code></a>).</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Type:</th><td class="field-body">bool</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="mod.DGPrinter.withRuleName">
+<code class="descname">withRuleName</code><a class="headerlink" href="#mod.DGPrinter.withRuleName" title="Permalink to this definition">¶</a></dt>
+<dd><p>Control whether or not rule names are appended to the edge labels (see also <a class="reference internal" href="#mod.DGPrinter.pushEdgeLabel" title="mod.DGPrinter.pushEdgeLabel"><code class="xref py py-meth docutils literal"><span class="pre">DGPrinter.pushEdgeLabel()</span></code></a>).</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Type:</th><td class="field-body">bool</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="mod.DGPrinter.withRuleId">
+<code class="descname">withRuleId</code><a class="headerlink" href="#mod.DGPrinter.withRuleId" title="Permalink to this definition">¶</a></dt>
+<dd><p>Control whether or not rule IDs are appended to the edge labels (see also <a class="reference internal" href="#mod.DGPrinter.pushEdgeLabel" title="mod.DGPrinter.pushEdgeLabel"><code class="xref py py-meth docutils literal"><span class="pre">DGPrinter.pushEdgeLabel()</span></code></a>).</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Type:</th><td class="field-body">bool</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="mod.DGPrinter.pushVertexColour">
+<code class="descname">pushVertexColour</code><span class="sig-paren">(</span><em>f</em>, <em>extendToEdges=True</em><span class="sig-paren">)</span><a class="headerlink" href="#mod.DGPrinter.pushVertexColour" title="Permalink to this definition">¶</a></dt>
+<dd><p>Add another function for colouring vertices. The final colour of a vertex is the result of the first colour function returning a non-empty string.
+The functions are evaluated in the order they are pushed and the resulting string is used directly as a colour in Tikz.
+A hyperedge is also coloured if at least one head and one tail <em>can</em> be coloured with a colour for which <code class="docutils literal"><span class="pre">extendToEdges</span></code> is <code class="docutils literal"><span class="pre">True</span></code>.
+In this case, the hyperedge (and a subset of the head and tail connectors) is coloured with the first applicable colour.
+The edge extension of vertex colour takes lower precedence than explicitly added hyperedge colouring functions.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>f</strong> (string(<a class="reference internal" href="Graph.html#mod.Graph" title="mod.Graph"><code class="xref py py-class docutils literal"><span class="pre">Graph</span></code></a>, <a class="reference internal" href="#mod.DG" title="mod.DG"><code class="xref py py-class docutils literal"><span class="pre">DG</span></code></a>)) &#8211; the function to push for colouring vertices.</li>
+<li><strong>extendToEdges</strong> (<em>bool</em>) &#8211; whether or not some hyperedges are coloured as well (see above).</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="mod.DGPrinter.popVertexColour">
+<code class="descname">popVertexColour</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#mod.DGPrinter.popVertexColour" title="Permalink to this definition">¶</a></dt>
+<dd><p>Remove the last pushed vertex colouring function.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="mod.DGPrinter.pushEdgeColour">
+<code class="descname">pushEdgeColour</code><span class="sig-paren">(</span><em>f</em><span class="sig-paren">)</span><a class="headerlink" href="#mod.DGPrinter.pushEdgeColour" title="Permalink to this definition">¶</a></dt>
+<dd><p>Add another function for colouring hyperedges. The final colour of a hyperedge (and all of its head and tail connectors) is the result of the
+first colour function returning a non-empty string.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>f</strong> (string(<a class="reference internal" href="#mod.DerivationRef" title="mod.DerivationRef"><code class="xref py py-class docutils literal"><span class="pre">DerivationRef</span></code></a>)) &#8211; the function to push for colouring hyperedges.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="mod.DGPrinter.popEdgeColour">
+<code class="descname">popEdgeColour</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#mod.DGPrinter.popEdgeColour" title="Permalink to this definition">¶</a></dt>
+<dd><p>Remove the last pushed hyperedge colouring function.</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="../index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">3.1.4. DG</a><ul>
+<li><a class="reference internal" href="#class-dg">3.1.4.1. Class <code class="docutils literal"><span class="pre">DG</span></code></a></li>
+<li><a class="reference internal" href="#class-dgvertex">3.1.4.2. Class <code class="docutils literal"><span class="pre">DGVertex</span></code></a></li>
+<li><a class="reference internal" href="#class-dghyperedge">3.1.4.3. Class <code class="docutils literal"><span class="pre">DGHyperEdge</span></code></a></li>
+<li><a class="reference internal" href="#class-derivationref">3.1.4.4. Class <code class="docutils literal"><span class="pre">DerivationRef</span></code></a></li>
+<li><a class="reference internal" href="#class-dgprintdata">3.1.4.5. Class <code class="docutils literal"><span class="pre">DGPrintData</span></code></a></li>
+<li><a class="reference internal" href="#class-dgprinter">3.1.4.6. Class <code class="docutils literal"><span class="pre">DGPrinter</span></code></a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="Derivation.html"
+                        title="previous chapter">3.1.3. Derivation</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="DGStrat.html"
+                        title="next chapter">3.1.5. DGStrat</a></p>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../_sources/pymod/DG.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="DGStrat.html" title="3.1.5. DGStrat"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="Derivation.html" title="3.1.3. Derivation"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">MØD v0.5.0 documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="pymod.html" >3. PyMØD</a> &raquo;</li>
+          <li class="nav-item nav-item-2"><a href="api.html" >3.1. API Reference</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &copy; Copyright 2013-2015, Jakob Lykke Andersen.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.4a0+.
+    </div>
+  </body>
+</html>

@@ -1,0 +1,108 @@
+.. _py-Rule:
+
+**********************************************************
+Rule
+**********************************************************
+.. default-domain:: py
+
+.. py:currentmodule:: mod
+.. cpp:namespace:: mod
+
+
+Class ``Rule``
+--------------------------------------------------------------------------------------------------------------------------------
+
+.. py:class:: Rule
+
+    Model of a transformation rule in the Double Pushout formalism.
+
+    .. py:attribute:: id
+
+        (Read-only) The unique instance id among all :class:`Rule` instances.
+
+        :type: unsigned int
+    .. py:method:: print()
+                   print(first, second=None)
+
+        Print the rule, using either the default options or the options in ``first`` and ``second``.
+
+        :param first: the printing options used for the first depiction.
+        :type first: :class:`GraphPrinter`
+        :param second: the printing options used for the second depiction.
+            If it is ``None`` then it is set to``first``.F
+        :type second: :class:`GraphPrinter`
+
+        :returns: a pair of filename prefixes for the PDF-files that will be compiled in post-processing.
+            The actual names can be obtained by appending ``.L.pdf``, ``.K.pdf``, and ``.R.pdf`` for
+            respectively the left side, context, and right side graphs.
+        :rtype: (string, string)
+    .. py:method:: getGMLString(withCoords=False)
+
+        :returns: the :ref:`GML <rule-gml>` representation of the rule,
+                  optionally with generated 2D coordinates.
+        :rtype: string
+        :raises: :py:class:`LogicError` when coordinates are requested, but
+                 none can be generated.
+    .. py:method:: printGML(withCoords=False)
+
+        Print the rule in :ref:`GML <rule-gml>` format,
+        optionally with generated 2D coordinates.
+
+        :returns: the filename of the printed GML file.
+        :rtype: string
+        :raises: :py:class:`LogicError` when coordinates are requested, but
+                 none can be generated.
+    .. py:attribute:: name
+
+        The name of the rule. The default name includes the unique instance id.
+
+        :type: string
+    .. py:attribute:: numLeftComponents
+
+        (Read-only) The number of connected components of the left graph.
+
+        :type: :cpp:type:`std::size_t`
+    .. py:attribute:: numRightComponents
+
+        (Read-only) The number of connected components of the right graph.
+
+        :type: :cpp:type:`std::size_t`
+    .. py:method:: isomorphism(other, maxNumMatches=1)
+    
+        :param other: the other :class:`Rule` for comparison.
+        :type other: :class:`Rule`
+        :param maxNumMatches: the maximum number of isomorphisms to search for.
+        :type maxNumMatches: :cpp:any:`std::size_t`
+        :returns: the number of isomorphisms found between ``other`` and this rule, but at most ``maxNumMatches``.
+        :rtype: :cpp:any:`std::size_t`
+    .. py:method:: monomorphism(host, maxNumMatches=1)
+    
+        :param host: the host :class:`Rule` to check for subgraphs.
+        :type host: :class:`Rule`
+        :param maxNumMatches: the maximum number of morphisms to search for.
+        :type maxNumMatches: :cpp:any:`std::size_t`
+        :returns: the number of monomorphisms from this rule to subgraphs of ``host``, though at most ``maxNumMatches``.
+        :rtype: :cpp:any:`std::size_t`
+.. py:method:: ruleGMLString(s, invert=False)
+
+    Load a rule from a :ref:`GML <rule-gml>` string, and store either that rule or its inverse.
+    The name of the rule is the one specified in the GML string, though when ``invert=True``
+    the string ", inverse" is appended to the name.
+
+    .. note::
+
+        If the GML string specifies matching constraints it is not possible to invert the rule.
+        There is however a configuration option to ignore matching constraints when inverting rules.
+
+    :param string s: the GML string to load a rule from.
+    :param bool invert: whether or not to invert the loaded rule.
+    :returns: the rule in the GML string, possibly inverted.
+    :rtype: :class:`Rule`
+.. py:method:: ruleGML(s, invert=False)
+    
+    Read ``file`` and pass the contents to :py:func:`ruleGMLString`.
+
+    :param string s: name of the GML file to be loaded.
+    :param bool invert: whether or not to invert the loaded rule.
+    :returns: the rule in the GML file, possibly inverted.
+    :rtype: :class:`Rule`

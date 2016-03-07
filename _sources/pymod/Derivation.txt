@@ -1,0 +1,33 @@
+.. _py-Derivation:
+
+**********************************************************
+Derivation
+**********************************************************
+.. default-domain:: py
+
+.. py:currentmodule:: mod
+.. cpp:namespace:: mod
+
+
+Class ``Derivation``
+--------------------------------------------------------------------------------------------------------------------------------
+
+.. py:class:: Derivation
+
+    This class represents a derivation :math:`G\Rightarrow^p H`, with :math:`G` and :math:`H` being multisets of graphs.
+
+    .. py:attribute:: left
+
+        Represents the multi-set of left graphs :math:`G` in a derivation :math:`G\Rightarrow^p H`.
+
+        :type: list of :class:`Graph`
+    .. py:attribute:: rule
+
+        Represents the transformation rule :math:`p` in a derivation :math:`G\Rightarrow^p H`.
+
+        :type: :class:`Rule`
+    .. py:attribute:: right
+
+        Represents the multi-set of right graphs :math:`G` in a derivation :math:`G\Rightarrow^p H`.
+
+        :type: list of :class:`Graph`

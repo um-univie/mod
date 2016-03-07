@@ -1,0 +1,528 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>2.2.10. RC.h &mdash; MØD v0.5.0 documentation</title>
+    
+    <link rel="stylesheet" href="../_static/classic.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     'v0.5.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="top" title="MØD v0.5.0 documentation" href="../index.html" />
+    <link rel="up" title="2.2. API Reference" href="api.html" />
+    <link rel="next" title="2.2.11. Rule.h" href="Rule.html" />
+    <link rel="prev" title="2.2.9. Misc.h" href="Misc.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="Rule.html" title="2.2.11. Rule.h"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="Misc.html" title="2.2.9. Misc.h"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">MØD v0.5.0 documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="libmod.html" >2. libMØD</a> &raquo;</li>
+          <li class="nav-item nav-item-2"><a href="api.html" accesskey="U">2.2. API Reference</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="rc-h">
+<span id="cpp-rc"></span><h1>2.2.10. RC.h<a class="headerlink" href="#rc-h" title="Permalink to this headline">¶</a></h1>
+<p>This file contains the core functionality for composing rules and creating rules from graphs.</p>
+<div class="section" id="class-rcevaluator">
+<h2>2.2.10.1. Class <code class="docutils literal"><span class="pre">RCEvaluator</span></code><a class="headerlink" href="#class-rcevaluator" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="_CPPv2N3mod11RCEvaluatorE">
+<span id="mod::RCEvaluator"></span><em class="property">class </em><code class="descclassname"></code><code class="descname">RCEvaluator</code><a class="headerlink" href="#_CPPv2N3mod11RCEvaluatorE" title="Permalink to this definition">¶</a></dt>
+<dd><p>This class can evaluate rule composition expressions. During evaluation an expression graph is recorded.</p>
+<p>The expression graph is a directed hypergraph <span class="math">\((V, E)\)</span>, with each vertex representing a rule.
+Each edge represent all compositions calculated for a unique input. That is every edge <span class="math">\(e\in E\)</span> is on the form
+<span class="math">\(((u, v), R_e)\)</span> with <span class="math">\((u, v)\in V\times V\)</span> as an <em>ordered</em> pair of rules and <span class="math">\(R_e\subseteq V\)</span> is the set
+of all resulting rules found.</p>
+<p>The graph is visualised as a bipartite graph with point-shaped vertices representing the hyperedges. The in-edges to these
+hyperedge vertices are labelled with 1 and 2.</p>
+</dd></dl>
+
+<div class="section" id="synopsis">
+<h3>2.2.10.1.1. Synopsis<a class="headerlink" href="#synopsis" title="Permalink to this headline">¶</a></h3>
+<div class="highlight-c++"><div class="highlight"><pre><span class="k">class</span> <span class="nc">RCEvaluator</span> <span class="p">{</span>
+    <span class="n">RCEvaluator</span><span class="p">(</span><span class="k">const</span> <span class="n">std</span><span class="o">::</span><span class="n">unordered_set</span><span class="o">&lt;</span><span class="n">std</span><span class="o">::</span><span class="n">shared_ptr</span><span class="o">&lt;</span><span class="n">Rule</span><span class="o">&gt;</span> <span class="o">&gt;</span> <span class="o">&amp;</span><span class="n">database</span><span class="p">);</span>
+    <span class="n">RCEvaluator</span><span class="p">(</span><span class="k">const</span> <span class="n">RCEvaluator</span><span class="o">&amp;</span><span class="p">)</span> <span class="o">=</span> <span class="k">delete</span><span class="p">;</span>
+    <span class="n">RCEvaluator</span> <span class="o">&amp;</span><span class="k">operator</span><span class="o">=</span><span class="p">(</span><span class="k">const</span> <span class="n">RCEvaluator</span><span class="o">&amp;</span><span class="p">)</span> <span class="o">=</span> <span class="k">delete</span><span class="p">;</span>
+    <span class="n">RCEvaluator</span><span class="p">(</span><span class="n">RCEvaluator</span><span class="o">&amp;&amp;</span><span class="p">)</span> <span class="o">=</span> <span class="k">delete</span><span class="p">;</span>
+    <span class="n">RCEvaluator</span> <span class="o">&amp;</span><span class="k">operator</span><span class="o">=</span><span class="p">(</span><span class="n">RCEvaluator</span><span class="o">&amp;&amp;</span><span class="p">)</span> <span class="o">=</span> <span class="k">delete</span><span class="p">;</span>
+<span class="k">public</span><span class="o">:</span>
+    <span class="o">~</span><span class="n">RCEvaluator</span><span class="p">();</span>
+    <span class="k">const</span> <span class="n">std</span><span class="o">::</span><span class="n">unordered_set</span><span class="o">&lt;</span><span class="n">std</span><span class="o">::</span><span class="n">shared_ptr</span><span class="o">&lt;</span><span class="n">Rule</span><span class="o">&gt;</span> <span class="o">&gt;</span> <span class="o">&amp;</span><span class="n">getRuleDatabase</span><span class="p">()</span> <span class="k">const</span><span class="p">;</span>
+    <span class="k">const</span> <span class="n">std</span><span class="o">::</span><span class="n">unordered_set</span><span class="o">&lt;</span><span class="n">std</span><span class="o">::</span><span class="n">shared_ptr</span><span class="o">&lt;</span><span class="n">Rule</span><span class="o">&gt;</span> <span class="o">&gt;</span> <span class="o">&amp;</span><span class="n">getProducts</span><span class="p">()</span> <span class="k">const</span><span class="p">;</span>
+    <span class="n">std</span><span class="o">::</span><span class="n">unordered_set</span><span class="o">&lt;</span><span class="n">std</span><span class="o">::</span><span class="n">shared_ptr</span><span class="o">&lt;</span><span class="n">Rule</span><span class="o">&gt;</span> <span class="o">&gt;</span> <span class="n">eval</span><span class="p">(</span><span class="k">const</span> <span class="n">RCExp</span><span class="o">::</span><span class="n">Expression</span> <span class="o">&amp;</span><span class="n">exp</span><span class="p">);</span>
+    <span class="kt">void</span> <span class="n">print</span><span class="p">()</span> <span class="k">const</span><span class="p">;</span>
+<span class="k">private</span><span class="o">:</span>
+    <span class="k">struct</span> <span class="n">Pimpl</span><span class="p">;</span>
+    <span class="n">std</span><span class="o">::</span><span class="n">unique_ptr</span><span class="o">&lt;</span><span class="n">Pimpl</span><span class="o">&gt;</span> <span class="n">p</span><span class="p">;</span>
+<span class="k">public</span><span class="o">:</span>
+    <span class="k">static</span> <span class="n">std</span><span class="o">::</span><span class="n">shared_ptr</span><span class="o">&lt;</span><span class="n">RCEvaluator</span><span class="o">&gt;</span> <span class="n">create</span><span class="p">(</span><span class="k">const</span> <span class="n">std</span><span class="o">::</span><span class="n">unordered_set</span><span class="o">&lt;</span><span class="n">std</span><span class="o">::</span><span class="n">shared_ptr</span><span class="o">&lt;</span><span class="n">Rule</span><span class="o">&gt;</span> <span class="o">&gt;</span> <span class="o">&amp;</span><span class="n">database</span><span class="p">);</span>
+<span class="p">};</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="details">
+<h3>2.2.10.1.2. Details<a class="headerlink" href="#details" title="Permalink to this headline">¶</a></h3>
+<dl class="function">
+<dt id="_CPPv2NK3mod11RCEvaluator15getRuleDatabaseEv">
+<span id="mod::RCEvaluator::getRuleDatabaseC"></span><em class="property">const</em> std::unordered_set&lt;std::shared_ptr&lt;<a class="reference internal" href="Rule.html#_CPPv2N3mod4RuleE" title="mod::Rule">Rule</a>&gt;&gt; &amp;<code class="descclassname"></code><code class="descname">getRuleDatabase</code><span class="sig-paren">(</span><span class="sig-paren">)</span> <em class="property">const</em><a class="headerlink" href="#_CPPv2NK3mod11RCEvaluator15getRuleDatabaseEv" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">the set of unique rules known by the evaluator.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="_CPPv2NK3mod11RCEvaluator11getProductsEv">
+<span id="mod::RCEvaluator::getProductsC"></span><em class="property">const</em> std::unordered_set&lt;std::shared_ptr&lt;<a class="reference internal" href="Rule.html#_CPPv2N3mod4RuleE" title="mod::Rule">Rule</a>&gt;&gt; &amp;<code class="descclassname"></code><code class="descname">getProducts</code><span class="sig-paren">(</span><span class="sig-paren">)</span> <em class="property">const</em><a class="headerlink" href="#_CPPv2NK3mod11RCEvaluator11getProductsEv" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">the set of unique rules this evaluator has constructed.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="_CPPv2N3mod11RCEvaluator4evalERKN5RCExp10ExpressionE">
+<span id="mod::RCEvaluator::eval__RCExp::ExpressionCR"></span>std::unordered_set&lt;std::shared_ptr&lt;<a class="reference internal" href="Rule.html#_CPPv2N3mod4RuleE" title="mod::Rule">Rule</a>&gt;&gt; <code class="descclassname"></code><code class="descname">eval</code><span class="sig-paren">(</span><em class="property">const</em> RCExp::<a class="reference internal" href="#_CPPv2N3mod5RCExp10ExpressionE" title="mod::RCExp::Expression">Expression</a> &amp;<em>exp</em><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv2N3mod11RCEvaluator4evalERKN5RCExp10ExpressionE" title="Permalink to this definition">¶</a></dt>
+<dd><p>Evaluates a rule composition expression. Any created rule is replaced by a rule in the database if they are isomorphic.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">the result of the expression.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="_CPPv2NK3mod11RCEvaluator5printEv">
+<span id="mod::RCEvaluator::printC"></span>void <code class="descclassname"></code><code class="descname">print</code><span class="sig-paren">(</span><span class="sig-paren">)</span> <em class="property">const</em><a class="headerlink" href="#_CPPv2NK3mod11RCEvaluator5printEv" title="Permalink to this definition">¶</a></dt>
+<dd><p>Print the graph representing all expressions evaluated so far.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="_CPPv2N3mod11RCEvaluator6createERKNSt13unordered_setINSt10shared_ptrI4RuleEEEE">
+<span id="mod::RCEvaluator::create__std::unordered_set:std::shared_ptr:Rule::CR"></span><em class="property">static</em> std::shared_ptr&lt;<a class="reference internal" href="#_CPPv2N3mod11RCEvaluatorE" title="mod::RCEvaluator">RCEvaluator</a>&gt; <code class="descclassname"></code><code class="descname">create</code><span class="sig-paren">(</span><em class="property">const</em> std::unordered_set&lt;std::shared_ptr&lt;<a class="reference internal" href="Rule.html#_CPPv2N3mod4RuleE" title="mod::Rule">Rule</a>&gt;&gt; &amp;<em>database</em><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv2N3mod11RCEvaluator6createERKNSt13unordered_setINSt10shared_ptrI4RuleEEEE" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">a new instance of an evaluator with its database initialised with the given rules.</td>
+</tr>
+</tbody>
+</table>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">The caller is responsible for ensuring the given rules are unique.</p>
+</div>
+</dd></dl>
+
+</div>
+</div>
+<div class="section" id="rcexp">
+<h2>2.2.10.2. RCExp<a class="headerlink" href="#rcexp" title="Permalink to this headline">¶</a></h2>
+<p>In this namespace the data structures and operators for representing rule composition expressions are defined.
+An expression, <code class="docutils literal"><span class="pre">RCExp</span></code>, can be evaluated through the method <code class="docutils literal"><span class="pre">RCEvaluator::eval</span></code>. The result of an expression
+is a set of rules.</p>
+</div>
+<div class="section" id="class-rcexp-union">
+<h2>2.2.10.3. Class <code class="docutils literal"><span class="pre">RCExp::Union</span></code><a class="headerlink" href="#class-rcexp-union" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="_CPPv2N3mod5RCExp5UnionE">
+<span id="mod::RCExp::Union"></span><em class="property">class </em><code class="descclassname">RCExp::</code><code class="descname">Union</code><a class="headerlink" href="#_CPPv2N3mod5RCExp5UnionE" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the union of the subexpressions. I.e., flatten the subresult lists into a single list.</p>
+</dd></dl>
+
+<div class="section" id="id1">
+<h3>2.2.10.3.1. Synopsis<a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h3>
+<div class="highlight-c++"><div class="highlight"><pre><span class="k">struct</span> <span class="n">Union</span> <span class="p">{</span>
+    <span class="n">Union</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;</span><span class="n">Expression</span><span class="o">&gt;</span> <span class="n">exps</span><span class="p">);</span>
+    <span class="k">friend</span> <span class="n">std</span><span class="o">::</span><span class="n">ostream</span> <span class="o">&amp;</span><span class="k">operator</span><span class="o">&lt;&lt;</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">ostream</span> <span class="o">&amp;</span><span class="n">s</span><span class="p">,</span> <span class="k">const</span> <span class="n">Union</span> <span class="o">&amp;</span><span class="n">par</span><span class="p">);</span>
+    <span class="k">const</span> <span class="n">std</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;</span><span class="n">Expression</span><span class="o">&gt;</span> <span class="o">&amp;</span><span class="n">getExpressions</span><span class="p">()</span> <span class="k">const</span><span class="p">;</span>
+<span class="k">private</span><span class="o">:</span>
+    <span class="n">std</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;</span><span class="n">Expression</span><span class="o">&gt;</span> <span class="n">exps</span><span class="p">;</span>
+<span class="p">};</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="section" id="class-rcexp-bind">
+<h2>2.2.10.4. Class <code class="docutils literal"><span class="pre">RCExp::Bind</span></code><a class="headerlink" href="#class-rcexp-bind" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="_CPPv2N3mod5RCExp4BindE">
+<span id="mod::RCExp::Bind"></span><em class="property">class </em><code class="descclassname">RCExp::</code><code class="descname">Bind</code><a class="headerlink" href="#_CPPv2N3mod5RCExp4BindE" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the singleton list with the rule <span class="math">\((\emptyset, \emptyset, G)\)</span> for the given graph <span class="math">\(G\)</span>.</p>
+</dd></dl>
+
+<div class="section" id="id2">
+<h3>2.2.10.4.1. Synopsis<a class="headerlink" href="#id2" title="Permalink to this headline">¶</a></h3>
+<div class="highlight-c++"><div class="highlight"><pre><span class="k">struct</span> <span class="n">Bind</span> <span class="p">{</span>
+    <span class="n">Bind</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">shared_ptr</span><span class="o">&lt;</span><span class="n">Graph</span><span class="o">&gt;</span> <span class="n">g</span><span class="p">);</span>
+    <span class="k">friend</span> <span class="n">std</span><span class="o">::</span><span class="n">ostream</span> <span class="o">&amp;</span><span class="k">operator</span><span class="o">&lt;&lt;</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">ostream</span> <span class="o">&amp;</span><span class="n">s</span><span class="p">,</span> <span class="k">const</span> <span class="n">Bind</span> <span class="o">&amp;</span><span class="n">b</span><span class="p">);</span>
+    <span class="n">std</span><span class="o">::</span><span class="n">shared_ptr</span><span class="o">&lt;</span><span class="n">Graph</span><span class="o">&gt;</span> <span class="n">getGraph</span><span class="p">()</span> <span class="k">const</span><span class="p">;</span>
+<span class="k">private</span><span class="o">:</span>
+    <span class="n">std</span><span class="o">::</span><span class="n">shared_ptr</span><span class="o">&lt;</span><span class="n">Graph</span><span class="o">&gt;</span> <span class="n">g</span><span class="p">;</span>
+<span class="p">};</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="section" id="class-rcexp-id">
+<h2>2.2.10.5. Class <code class="docutils literal"><span class="pre">RCExp::Id</span></code><a class="headerlink" href="#class-rcexp-id" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="_CPPv2N3mod5RCExp2IdE">
+<span id="mod::RCExp::Id"></span><em class="property">class </em><code class="descclassname">RCExp::</code><code class="descname">Id</code><a class="headerlink" href="#_CPPv2N3mod5RCExp2IdE" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the singleton list with the rule <span class="math">\((G, G, G)\)</span> for the given graph <span class="math">\(G\)</span>.</p>
+</dd></dl>
+
+<div class="section" id="id3">
+<h3>2.2.10.5.1. Synopsis<a class="headerlink" href="#id3" title="Permalink to this headline">¶</a></h3>
+<div class="highlight-c++"><div class="highlight"><pre><span class="k">struct</span> <span class="n">Id</span> <span class="p">{</span>
+    <span class="n">Id</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">shared_ptr</span><span class="o">&lt;</span><span class="n">Graph</span><span class="o">&gt;</span> <span class="n">g</span><span class="p">);</span>
+    <span class="k">friend</span> <span class="n">std</span><span class="o">::</span><span class="n">ostream</span> <span class="o">&amp;</span><span class="k">operator</span><span class="o">&lt;&lt;</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">ostream</span> <span class="o">&amp;</span><span class="n">s</span><span class="p">,</span> <span class="k">const</span> <span class="n">Id</span> <span class="o">&amp;</span><span class="n">i</span><span class="p">);</span>
+    <span class="n">std</span><span class="o">::</span><span class="n">shared_ptr</span><span class="o">&lt;</span><span class="n">Graph</span><span class="o">&gt;</span> <span class="n">getGraph</span><span class="p">()</span> <span class="k">const</span><span class="p">;</span>
+<span class="k">private</span><span class="o">:</span>
+    <span class="n">std</span><span class="o">::</span><span class="n">shared_ptr</span><span class="o">&lt;</span><span class="n">Graph</span><span class="o">&gt;</span> <span class="n">g</span><span class="p">;</span>
+<span class="p">};</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="section" id="class-rcexp-unbind">
+<h2>2.2.10.6. Class <code class="docutils literal"><span class="pre">RCExp::Unbind</span></code><a class="headerlink" href="#class-rcexp-unbind" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="_CPPv2N3mod5RCExp6UnbindE">
+<span id="mod::RCExp::Unbind"></span><em class="property">class </em><code class="descclassname">RCExp::</code><code class="descname">Unbind</code><a class="headerlink" href="#_CPPv2N3mod5RCExp6UnbindE" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the singleton list with the rule <span class="math">\((G, \emptyset, \emptyset)\)</span> for the given graph <span class="math">\(G\)</span>.</p>
+</dd></dl>
+
+<div class="section" id="id4">
+<h3>2.2.10.6.1. Synopsis<a class="headerlink" href="#id4" title="Permalink to this headline">¶</a></h3>
+<div class="highlight-c++"><div class="highlight"><pre><span class="k">struct</span> <span class="n">Unbind</span> <span class="p">{</span>
+    <span class="n">Unbind</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">shared_ptr</span><span class="o">&lt;</span><span class="n">Graph</span><span class="o">&gt;</span> <span class="n">g</span><span class="p">);</span>
+    <span class="k">friend</span> <span class="n">std</span><span class="o">::</span><span class="n">ostream</span> <span class="o">&amp;</span><span class="k">operator</span><span class="o">&lt;&lt;</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">ostream</span> <span class="o">&amp;</span><span class="n">s</span><span class="p">,</span> <span class="k">const</span> <span class="n">Unbind</span> <span class="o">&amp;</span><span class="n">u</span><span class="p">);</span>
+    <span class="n">std</span><span class="o">::</span><span class="n">shared_ptr</span><span class="o">&lt;</span><span class="n">Graph</span><span class="o">&gt;</span> <span class="n">getGraph</span><span class="p">()</span> <span class="k">const</span><span class="p">;</span>
+<span class="k">private</span><span class="o">:</span>
+    <span class="n">std</span><span class="o">::</span><span class="n">shared_ptr</span><span class="o">&lt;</span><span class="n">Graph</span><span class="o">&gt;</span> <span class="n">g</span><span class="p">;</span>
+<span class="p">};</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="section" id="class-rcexp-expression">
+<h2>2.2.10.7. Class <code class="docutils literal"><span class="pre">RCExp::Expression</span></code><a class="headerlink" href="#class-rcexp-expression" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="_CPPv2N3mod5RCExp10ExpressionE">
+<span id="mod::RCExp::Expression"></span><em class="property">class </em><code class="descclassname">RCExp::</code><code class="descname">Expression</code><a class="headerlink" href="#_CPPv2N3mod5RCExp10ExpressionE" title="Permalink to this definition">¶</a></dt>
+<dd><p>A generic rule composition expression.</p>
+</dd></dl>
+
+<div class="section" id="id5">
+<h3>2.2.10.7.1. Synopsis<a class="headerlink" href="#id5" title="Permalink to this headline">¶</a></h3>
+<div class="highlight-c++"><div class="highlight"><pre><span class="k">struct</span> <span class="n">Expression</span> <span class="p">{</span>
+    <span class="n">Expression</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">shared_ptr</span><span class="o">&lt;</span><span class="n">Rule</span><span class="o">&gt;</span> <span class="n">r</span><span class="p">);</span>
+    <span class="n">Expression</span><span class="p">(</span><span class="n">Union</span> <span class="n">u</span><span class="p">);</span>
+    <span class="n">Expression</span><span class="p">(</span><span class="n">Bind</span> <span class="n">bind</span><span class="p">);</span>
+    <span class="n">Expression</span><span class="p">(</span><span class="n">Id</span> <span class="n">id</span><span class="p">);</span>
+    <span class="n">Expression</span><span class="p">(</span><span class="n">Unbind</span> <span class="n">unbind</span><span class="p">);</span>
+    <span class="n">Expression</span><span class="p">(</span><span class="n">ComposeCommon</span> <span class="n">compose</span><span class="p">);</span>
+    <span class="n">Expression</span><span class="p">(</span><span class="n">ComposeParallel</span> <span class="n">compose</span><span class="p">);</span>
+    <span class="n">Expression</span><span class="p">(</span><span class="n">ComposeSub</span> <span class="n">compose</span><span class="p">);</span>
+    <span class="n">Expression</span><span class="p">(</span><span class="n">ComposeSuper</span> <span class="n">compose</span><span class="p">);</span>
+    <span class="k">template</span><span class="o">&lt;</span><span class="k">typename</span> <span class="n">Visitor</span><span class="o">&gt;</span>
+    <span class="k">typename</span> <span class="n">Visitor</span><span class="o">::</span><span class="n">result_type</span> <span class="n">applyVisitor</span><span class="p">(</span><span class="n">Visitor</span> <span class="n">visitor</span><span class="p">)</span> <span class="k">const</span> <span class="p">{</span>
+        <span class="k">return</span> <span class="n">boost</span><span class="o">::</span><span class="n">apply_visitor</span><span class="p">(</span><span class="n">visitor</span><span class="p">,</span> <span class="n">data</span><span class="p">);</span>
+    <span class="p">}</span>
+    <span class="k">friend</span> <span class="n">std</span><span class="o">::</span><span class="n">ostream</span> <span class="o">&amp;</span><span class="k">operator</span><span class="o">&lt;&lt;</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">ostream</span> <span class="o">&amp;</span><span class="n">s</span><span class="p">,</span> <span class="k">const</span> <span class="n">Expression</span> <span class="o">&amp;</span><span class="n">exp</span><span class="p">);</span>
+<span class="k">private</span><span class="o">:</span>
+    <span class="n">boost</span><span class="o">::</span><span class="n">variant</span><span class="o">&lt;</span><span class="n">std</span><span class="o">::</span><span class="n">shared_ptr</span><span class="o">&lt;</span><span class="n">Rule</span><span class="o">&gt;</span><span class="p">,</span> <span class="n">Union</span><span class="p">,</span> <span class="n">Bind</span><span class="p">,</span> <span class="n">Id</span><span class="p">,</span> <span class="n">Unbind</span><span class="p">,</span>
+    <span class="n">boost</span><span class="o">::</span><span class="n">recursive_wrapper</span><span class="o">&lt;</span><span class="n">ComposeCommon</span><span class="o">&gt;</span><span class="p">,</span>
+    <span class="n">boost</span><span class="o">::</span><span class="n">recursive_wrapper</span><span class="o">&lt;</span><span class="n">ComposeParallel</span><span class="o">&gt;</span><span class="p">,</span>
+    <span class="n">boost</span><span class="o">::</span><span class="n">recursive_wrapper</span><span class="o">&lt;</span><span class="n">ComposeSub</span><span class="o">&gt;</span><span class="p">,</span>
+    <span class="n">boost</span><span class="o">::</span><span class="n">recursive_wrapper</span><span class="o">&lt;</span><span class="n">ComposeSuper</span><span class="o">&gt;</span>
+    <span class="o">&gt;</span> <span class="n">data</span><span class="p">;</span>
+<span class="p">};</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="section" id="class-rcexp-composebase">
+<h2>2.2.10.8. Class <code class="docutils literal"><span class="pre">RCExp::ComposeBase</span></code><a class="headerlink" href="#class-rcexp-composebase" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="_CPPv2N3mod5RCExp11ComposeBaseE">
+<span id="mod::RCExp::ComposeBase"></span><em class="property">class </em><code class="descclassname">RCExp::</code><code class="descname">ComposeBase</code><a class="headerlink" href="#_CPPv2N3mod5RCExp11ComposeBaseE" title="Permalink to this definition">¶</a></dt>
+<dd><p>The base class for the composition of two rule <span class="math">\((L_1, K_1, R_1)\)</span> and <span class="math">\((L_2, K_2, R_2)\)</span>.</p>
+</dd></dl>
+
+<div class="section" id="id6">
+<h3>2.2.10.8.1. Synopsis<a class="headerlink" href="#id6" title="Permalink to this headline">¶</a></h3>
+<div class="highlight-c++"><div class="highlight"><pre><span class="k">class</span> <span class="nc">ComposeBase</span> <span class="p">{</span>
+<span class="k">protected</span><span class="o">:</span>
+    <span class="n">ComposeBase</span><span class="p">(</span><span class="n">Expression</span> <span class="n">first</span><span class="p">,</span> <span class="n">Expression</span> <span class="n">second</span><span class="p">,</span> <span class="kt">bool</span> <span class="n">discardNonchemical</span><span class="p">);</span>
+<span class="k">public</span><span class="o">:</span>
+    <span class="k">virtual</span> <span class="o">~</span><span class="n">ComposeBase</span><span class="p">();</span>
+    <span class="k">friend</span> <span class="n">std</span><span class="o">::</span><span class="n">ostream</span> <span class="o">&amp;</span><span class="k">operator</span><span class="o">&lt;&lt;</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">ostream</span> <span class="o">&amp;</span><span class="n">s</span><span class="p">,</span> <span class="k">const</span> <span class="n">ComposeBase</span> <span class="o">&amp;</span><span class="n">compose</span><span class="p">);</span>
+    <span class="k">const</span> <span class="n">Expression</span> <span class="o">&amp;</span><span class="n">getFirst</span><span class="p">()</span> <span class="k">const</span><span class="p">;</span>
+    <span class="k">const</span> <span class="n">Expression</span> <span class="o">&amp;</span><span class="n">getSecond</span><span class="p">()</span> <span class="k">const</span><span class="p">;</span>
+    <span class="kt">bool</span> <span class="n">getDiscardNonchemical</span><span class="p">()</span> <span class="k">const</span><span class="p">;</span>
+<span class="k">private</span><span class="o">:</span>
+    <span class="k">virtual</span> <span class="n">std</span><span class="o">::</span><span class="n">ostream</span> <span class="o">&amp;</span><span class="n">print</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">ostream</span> <span class="o">&amp;</span><span class="n">s</span><span class="p">)</span> <span class="k">const</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+<span class="k">private</span><span class="o">:</span>
+    <span class="n">Expression</span> <span class="n">first</span><span class="p">,</span> <span class="n">second</span><span class="p">;</span>
+    <span class="kt">bool</span> <span class="n">discardNonchemical</span><span class="p">;</span>
+<span class="p">};</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="section" id="class-rcexp-composecommon">
+<h2>2.2.10.9. Class <code class="docutils literal"><span class="pre">RCExp::ComposeCommon</span></code><a class="headerlink" href="#class-rcexp-composecommon" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="_CPPv2N3mod5RCExp13ComposeCommonE">
+<span id="mod::RCExp::ComposeCommon"></span><em class="property">class </em><code class="descclassname">RCExp::</code><code class="descname">ComposeCommon</code><a class="headerlink" href="#_CPPv2N3mod5RCExp13ComposeCommonE" title="Permalink to this definition">¶</a></dt>
+<dd><p>Compose the rules by all common subgraphs of <span class="math">\(R_1\)</span> and <span class="math">\(L_2\)</span>,
+possibly limited to connected subgraphs or to the subgraphs of maximum size.</p>
+</dd></dl>
+
+<div class="section" id="id7">
+<h3>2.2.10.9.1. Synopsis<a class="headerlink" href="#id7" title="Permalink to this headline">¶</a></h3>
+<div class="highlight-c++"><div class="highlight"><pre><span class="k">struct</span> <span class="nl">ComposeCommon</span> <span class="p">:</span> <span class="k">public</span> <span class="n">ComposeBase</span> <span class="p">{</span>
+    <span class="n">ComposeCommon</span><span class="p">(</span><span class="n">Expression</span> <span class="n">first</span><span class="p">,</span> <span class="n">Expression</span> <span class="n">second</span><span class="p">,</span> <span class="kt">bool</span> <span class="n">discardNonchemical</span><span class="p">,</span> <span class="kt">bool</span> <span class="n">maximum</span><span class="p">,</span> <span class="kt">bool</span> <span class="n">connected</span><span class="p">);</span>
+    <span class="kt">bool</span> <span class="n">getMaxmimum</span><span class="p">()</span> <span class="k">const</span><span class="p">;</span>
+    <span class="kt">bool</span> <span class="n">getConnected</span><span class="p">()</span> <span class="k">const</span><span class="p">;</span>
+<span class="k">private</span><span class="o">:</span>
+    <span class="n">std</span><span class="o">::</span><span class="n">ostream</span> <span class="o">&amp;</span><span class="n">print</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">ostream</span> <span class="o">&amp;</span><span class="n">s</span><span class="p">)</span> <span class="k">const</span><span class="p">;</span>
+<span class="k">private</span><span class="o">:</span>
+    <span class="kt">bool</span> <span class="n">maximum</span><span class="p">,</span> <span class="n">connected</span><span class="p">;</span>
+<span class="p">};</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="section" id="class-rcexp-composeparallel">
+<h2>2.2.10.10. Class <code class="docutils literal"><span class="pre">RCExp::ComposeParallel</span></code><a class="headerlink" href="#class-rcexp-composeparallel" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="_CPPv2N3mod5RCExp15ComposeParallelE">
+<span id="mod::RCExp::ComposeParallel"></span><em class="property">class </em><code class="descclassname">RCExp::</code><code class="descname">ComposeParallel</code><a class="headerlink" href="#_CPPv2N3mod5RCExp15ComposeParallelE" title="Permalink to this definition">¶</a></dt>
+<dd><p>Compose the rules by the empty graph, i.e., create a rule representing the parallel application of two input rules.</p>
+</dd></dl>
+
+<div class="section" id="id8">
+<h3>2.2.10.10.1. Synopsis<a class="headerlink" href="#id8" title="Permalink to this headline">¶</a></h3>
+<div class="highlight-c++"><div class="highlight"><pre><span class="k">struct</span> <span class="nl">ComposeParallel</span> <span class="p">:</span> <span class="k">public</span> <span class="n">ComposeBase</span> <span class="p">{</span>
+    <span class="n">ComposeParallel</span><span class="p">(</span><span class="n">Expression</span> <span class="n">first</span><span class="p">,</span> <span class="n">Expression</span> <span class="n">second</span><span class="p">,</span> <span class="kt">bool</span> <span class="n">discardNonchemical</span><span class="p">);</span>
+<span class="k">private</span><span class="o">:</span>
+    <span class="n">std</span><span class="o">::</span><span class="n">ostream</span> <span class="o">&amp;</span><span class="n">print</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">ostream</span> <span class="o">&amp;</span><span class="n">s</span><span class="p">)</span> <span class="k">const</span><span class="p">;</span>
+<span class="p">};</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="section" id="class-rcexp-composesub">
+<h2>2.2.10.11. Class <code class="docutils literal"><span class="pre">RCExp::ComposeSub</span></code><a class="headerlink" href="#class-rcexp-composesub" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="_CPPv2N3mod5RCExp10ComposeSubE">
+<span id="mod::RCExp::ComposeSub"></span><em class="property">class </em><code class="descclassname">RCExp::</code><code class="descname">ComposeSub</code><a class="headerlink" href="#_CPPv2N3mod5RCExp10ComposeSubE" title="Permalink to this definition">¶</a></dt>
+<dd><p>Compose the rules such that overlapping connected components of <span class="math">\(R_1\)</span> and <span class="math">\(L_2\)</span> have the <span class="math">\(L_2\)</span> component as a subgraph of <span class="math">\(R_1\)</span>.
+The overlap is <cite>partial</cite> if not every connected component of <span class="math">\(L_2\)</span> is participating in the common subgraph.</p>
+</dd></dl>
+
+<div class="section" id="id9">
+<h3>2.2.10.11.1. Synopsis<a class="headerlink" href="#id9" title="Permalink to this headline">¶</a></h3>
+<div class="highlight-c++"><div class="highlight"><pre><span class="k">struct</span> <span class="nl">ComposeSub</span> <span class="p">:</span> <span class="k">public</span> <span class="n">ComposeBase</span> <span class="p">{</span>
+    <span class="n">ComposeSub</span><span class="p">(</span><span class="n">Expression</span> <span class="n">first</span><span class="p">,</span> <span class="n">Expression</span> <span class="n">second</span><span class="p">,</span> <span class="kt">bool</span> <span class="n">discardNonchemical</span><span class="p">,</span> <span class="kt">bool</span> <span class="n">allowPartial</span><span class="p">);</span>
+    <span class="kt">bool</span> <span class="n">getAllowPartial</span><span class="p">()</span> <span class="k">const</span><span class="p">;</span>
+<span class="k">private</span><span class="o">:</span>
+    <span class="n">std</span><span class="o">::</span><span class="n">ostream</span> <span class="o">&amp;</span><span class="n">print</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">ostream</span> <span class="o">&amp;</span><span class="n">s</span><span class="p">)</span> <span class="k">const</span><span class="p">;</span>
+<span class="k">private</span><span class="o">:</span>
+    <span class="kt">bool</span> <span class="n">allowPartial</span><span class="p">;</span>
+<span class="p">};</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="section" id="class-rcexp-composesuper">
+<h2>2.2.10.12. Class <code class="docutils literal"><span class="pre">RCExp::ComposeSuper</span></code><a class="headerlink" href="#class-rcexp-composesuper" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="_CPPv2N3mod5RCExp12ComposeSuperE">
+<span id="mod::RCExp::ComposeSuper"></span><em class="property">class </em><code class="descclassname">RCExp::</code><code class="descname">ComposeSuper</code><a class="headerlink" href="#_CPPv2N3mod5RCExp12ComposeSuperE" title="Permalink to this definition">¶</a></dt>
+<dd><p>Compose the rules such that overlapping connected components of <span class="math">\(R_1\)</span> and <span class="math">\(L_2\)</span> have the <span class="math">\(R_1\)</span> component as a subgraph of <span class="math">\(L_2\)</span>.
+The overlap is <cite>partial</cite> if not every connected component of <span class="math">\(R_1\)</span> is participating in the common subgraph.</p>
+</dd></dl>
+
+<div class="section" id="id10">
+<h3>2.2.10.12.1. Synopsis<a class="headerlink" href="#id10" title="Permalink to this headline">¶</a></h3>
+<div class="highlight-c++"><div class="highlight"><pre><span class="k">struct</span> <span class="nl">ComposeSuper</span> <span class="p">:</span> <span class="k">public</span> <span class="n">ComposeBase</span> <span class="p">{</span>
+    <span class="n">ComposeSuper</span><span class="p">(</span><span class="n">Expression</span> <span class="n">first</span><span class="p">,</span> <span class="n">Expression</span> <span class="n">second</span><span class="p">,</span> <span class="kt">bool</span> <span class="n">discardNonchemical</span><span class="p">,</span> <span class="kt">bool</span> <span class="n">allowPartial</span><span class="p">,</span> <span class="kt">bool</span> <span class="n">enforceConstraints</span><span class="p">);</span>
+    <span class="kt">bool</span> <span class="n">getAllowPartial</span><span class="p">()</span> <span class="k">const</span><span class="p">;</span>
+    <span class="kt">bool</span> <span class="n">getEnforceConstraints</span><span class="p">()</span> <span class="k">const</span><span class="p">;</span>
+<span class="k">private</span><span class="o">:</span>
+    <span class="n">std</span><span class="o">::</span><span class="n">ostream</span> <span class="o">&amp;</span><span class="n">print</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">ostream</span> <span class="o">&amp;</span><span class="n">s</span><span class="p">)</span> <span class="k">const</span><span class="p">;</span>
+<span class="k">private</span><span class="o">:</span>
+    <span class="kt">bool</span> <span class="n">allowPartial</span><span class="p">,</span> <span class="n">enforceConstraints</span><span class="p">;</span>
+<span class="p">};</span>
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="../index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">2.2.10. RC.h</a><ul>
+<li><a class="reference internal" href="#class-rcevaluator">2.2.10.1. Class <code class="docutils literal"><span class="pre">RCEvaluator</span></code></a><ul>
+<li><a class="reference internal" href="#synopsis">2.2.10.1.1. Synopsis</a></li>
+<li><a class="reference internal" href="#details">2.2.10.1.2. Details</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#rcexp">2.2.10.2. RCExp</a></li>
+<li><a class="reference internal" href="#class-rcexp-union">2.2.10.3. Class <code class="docutils literal"><span class="pre">RCExp::Union</span></code></a><ul>
+<li><a class="reference internal" href="#id1">2.2.10.3.1. Synopsis</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#class-rcexp-bind">2.2.10.4. Class <code class="docutils literal"><span class="pre">RCExp::Bind</span></code></a><ul>
+<li><a class="reference internal" href="#id2">2.2.10.4.1. Synopsis</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#class-rcexp-id">2.2.10.5. Class <code class="docutils literal"><span class="pre">RCExp::Id</span></code></a><ul>
+<li><a class="reference internal" href="#id3">2.2.10.5.1. Synopsis</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#class-rcexp-unbind">2.2.10.6. Class <code class="docutils literal"><span class="pre">RCExp::Unbind</span></code></a><ul>
+<li><a class="reference internal" href="#id4">2.2.10.6.1. Synopsis</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#class-rcexp-expression">2.2.10.7. Class <code class="docutils literal"><span class="pre">RCExp::Expression</span></code></a><ul>
+<li><a class="reference internal" href="#id5">2.2.10.7.1. Synopsis</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#class-rcexp-composebase">2.2.10.8. Class <code class="docutils literal"><span class="pre">RCExp::ComposeBase</span></code></a><ul>
+<li><a class="reference internal" href="#id6">2.2.10.8.1. Synopsis</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#class-rcexp-composecommon">2.2.10.9. Class <code class="docutils literal"><span class="pre">RCExp::ComposeCommon</span></code></a><ul>
+<li><a class="reference internal" href="#id7">2.2.10.9.1. Synopsis</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#class-rcexp-composeparallel">2.2.10.10. Class <code class="docutils literal"><span class="pre">RCExp::ComposeParallel</span></code></a><ul>
+<li><a class="reference internal" href="#id8">2.2.10.10.1. Synopsis</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#class-rcexp-composesub">2.2.10.11. Class <code class="docutils literal"><span class="pre">RCExp::ComposeSub</span></code></a><ul>
+<li><a class="reference internal" href="#id9">2.2.10.11.1. Synopsis</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#class-rcexp-composesuper">2.2.10.12. Class <code class="docutils literal"><span class="pre">RCExp::ComposeSuper</span></code></a><ul>
+<li><a class="reference internal" href="#id10">2.2.10.12.1. Synopsis</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="Misc.html"
+                        title="previous chapter">2.2.9. Misc.h</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="Rule.html"
+                        title="next chapter">2.2.11. Rule.h</a></p>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../_sources/libmod/RC.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="Rule.html" title="2.2.11. Rule.h"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="Misc.html" title="2.2.9. Misc.h"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">MØD v0.5.0 documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="libmod.html" >2. libMØD</a> &raquo;</li>
+          <li class="nav-item nav-item-2"><a href="api.html" >2.2. API Reference</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &copy; Copyright 2013-2015, Jakob Lykke Andersen.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.4a0+.
+    </div>
+  </body>
+</html>

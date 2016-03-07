@@ -1,0 +1,253 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>3.2. Creating a Python Extension &mdash; MØD v0.5.0 documentation</title>
+    
+    <link rel="stylesheet" href="../_static/classic.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     'v0.5.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="top" title="MØD v0.5.0 documentation" href="../index.html" />
+    <link rel="up" title="3. PyMØD" href="pymod.html" />
+    <link rel="next" title="4. PostMØD (mod_post)" href="../postmod/postmod.html" />
+    <link rel="prev" title="3.1.10. Rule" href="Rule.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="../postmod/postmod.html" title="4. PostMØD (mod_post)"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="Rule.html" title="3.1.10. Rule"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">MØD v0.5.0 documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="pymod.html" accesskey="U">3. PyMØD</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="creating-a-python-extension">
+<span id="creatingpymodext"></span><h1>3.2. Creating a Python Extension<a class="headerlink" href="#creating-a-python-extension" title="Permalink to this headline">¶</a></h1>
+<p>PyMØD is primarily Python bindings for libMØD made using
+<a class="reference external" href="http://www.boost.org/libs/python/">Boost.Python</a>.
+The following shows a template for creating a Python extension with C++
+functions (e.g., to extend libMØD).</p>
+<div class="section" id="library-source-and-headers">
+<h2>3.2.1. Library Source and Headers<a class="headerlink" href="#library-source-and-headers" title="Permalink to this headline">¶</a></h2>
+<p>For this examples the following C++ source with header should be exposed
+in the Python module. Header (<a class="reference download internal" href="../_downloads/stuff.h"><code class="xref download docutils literal"><span class="pre">download</span></code></a>):</p>
+<div class="highlight-cpp"><div class="highlight"><pre><span class="cp">#ifndef AWESOMELIB_H</span>
+<span class="cp">#define AWESOMELIB_H</span>
+
+<span class="cp">#include &lt;mod/Graph.h&gt;</span>
+
+<span class="k">namespace</span> <span class="n">awesome</span> <span class="p">{</span>
+
+<span class="n">std</span><span class="o">::</span><span class="n">shared_ptr</span><span class="o">&lt;</span><span class="n">mod</span><span class="o">::</span><span class="n">Graph</span><span class="o">&gt;</span> <span class="n">doStuff</span><span class="p">();</span>
+
+<span class="p">}</span> <span class="c1">// namespace awesome</span>
+
+<span class="cp">#endif </span><span class="c1">// AWESOMELIB_H</span>
+</pre></div>
+</div>
+<p>Source (<a class="reference download internal" href="../_downloads/stuff.cpp"><code class="xref download docutils literal"><span class="pre">download</span></code></a>):</p>
+<div class="highlight-cpp"><div class="highlight"><pre><span class="cp">#include &quot;stuff.h&quot;</span>
+
+<span class="k">namespace</span> <span class="n">awesome</span> <span class="p">{</span>
+
+<span class="n">std</span><span class="o">::</span><span class="n">shared_ptr</span><span class="o">&lt;</span><span class="n">mod</span><span class="o">::</span><span class="n">Graph</span><span class="o">&gt;</span> <span class="n">doStuff</span><span class="p">()</span> <span class="p">{</span>
+	<span class="k">auto</span> <span class="n">g</span> <span class="o">=</span> <span class="n">mod</span><span class="o">::</span><span class="n">Graph</span><span class="o">::</span><span class="n">smiles</span><span class="p">(</span><span class="s">&quot;CCO&quot;</span><span class="p">);</span>
+	<span class="n">g</span><span class="o">-&gt;</span><span class="n">setName</span><span class="p">(</span><span class="s">&quot;Ethanol&quot;</span><span class="p">);</span>
+	<span class="k">return</span> <span class="n">g</span><span class="p">;</span>
+<span class="p">}</span>
+
+<span class="p">}</span> <span class="c1">// namespace awesome</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="exposing-the-interface">
+<h2>3.2.2. Exposing the Interface<a class="headerlink" href="#exposing-the-interface" title="Permalink to this headline">¶</a></h2>
+<p>See the Boost.Python documentation for instructions how to expose C++ code.
+Below is the code for creating our simple Python extension
+(<a class="reference download internal" href="../_downloads/pyModule.cpp"><code class="xref download docutils literal"><span class="pre">download</span></code></a>).</p>
+<div class="highlight-cpp"><div class="highlight"><pre><span class="cp">#include &lt;boost/python.hpp&gt;</span>
+
+<span class="cp">#include &quot;stuff.h&quot;</span>
+
+<span class="cp">#include &lt;mod/Config.h&gt;</span>
+
+<span class="k">namespace</span> <span class="n">py</span> <span class="o">=</span> <span class="n">boost</span><span class="o">::</span><span class="n">python</span><span class="p">;</span>
+
+<span class="k">namespace</span> <span class="p">{</span>
+	<span class="c1">// this can be used to make sure the extension and mod is using the same shared library</span>
+	<span class="kt">uintptr_t</span> <span class="n">magicLibraryValue</span><span class="p">()</span> <span class="p">{</span>
+		<span class="k">return</span> <span class="p">(</span><span class="kt">uintptr_t</span><span class="p">)</span><span class="o">&amp;</span><span class="n">mod</span><span class="o">::</span><span class="n">getConfig</span><span class="p">();</span>
+	<span class="p">}</span>
+<span class="p">}</span>
+
+<span class="n">BOOST_PYTHON_MODULE</span><span class="p">(</span><span class="n">awesome</span><span class="p">)</span> <span class="p">{</span>
+	<span class="n">py</span><span class="o">::</span><span class="n">def</span><span class="p">(</span><span class="s">&quot;magicLibraryValue&quot;</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">magicLibraryValue</span><span class="p">);</span>
+
+	<span class="n">py</span><span class="o">::</span><span class="n">def</span><span class="p">(</span><span class="s">&quot;doStuff&quot;</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">awesome</span><span class="o">::</span><span class="n">doStuff</span><span class="p">);</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p>The example exposes a bit of extra functionality for a sanity check.
+Python will <code class="docutils literal"><span class="pre">dlopen</span></code> libMØD twice As both the PyMØD module and our extension
+requires it. The library uses static variables and strange things might happen
+if multiple instances of these exist. The MØD wrapper script changes the dlopen
+flags (setting <code class="docutils literal"><span class="pre">RTLD_GLOBAL</span></code> and <code class="docutils literal"><span class="pre">RTLD_NOW</span></code>) which should prevent multiple
+instances of the library. The function <code class="docutils literal"><span class="pre">magicLibraryValue</span></code> can be used to check
+that this is true (see the test script below).</p>
+</div>
+<div class="section" id="makefile">
+<h2>3.2.3. Makefile<a class="headerlink" href="#makefile" title="Permalink to this headline">¶</a></h2>
+<p>A Makefile fragment to build the example (<a class="reference download internal" href="../_downloads/Makefile1"><code class="xref download docutils literal"><span class="pre">download</span></code></a>):</p>
+<div class="highlight-make"><div class="highlight"><pre><span class="k">export </span><span class="nv">PKG_CONFIG_PATH</span> <span class="o">:=</span> <span class="si">${</span><span class="nv">PKG_CONFIG_PATH</span><span class="si">}</span>:&lt;mod installation path&gt;/lib/pkgconfig
+<span class="nv">CPPFLAGS</span>                <span class="o">=</span> <span class="nv">$$</span><span class="o">(</span>pkg-config --cflags mod<span class="o">)</span>
+<span class="nv">CPPFLAGS</span>               <span class="o">+=</span> -I&lt;Boost installation path&gt;/include
+<span class="nv">CPPFLAGS</span>               <span class="o">+=</span> <span class="nv">$$</span><span class="o">(</span>python3-config --includes<span class="o">)</span>
+<span class="nv">CXXFLAGS</span>                <span class="o">=</span> -std<span class="o">=</span>c++11 -fpic
+<span class="nv">LDFLAGS</span>                 <span class="o">=</span> -Wl,--no-undefined -L&lt;Boost installation path&gt;/lib
+<span class="nv">LDLIBS</span>                  <span class="o">=</span> <span class="nv">$$</span><span class="o">(</span>pkg-config --libs mod<span class="o">)</span> -lboost_python3
+<span class="nv">LDLIBS</span>                 <span class="o">+=</span> <span class="nv">$$</span><span class="o">(</span>python3-config --libs<span class="o">)</span>
+
+<span class="nv">OBJECTS</span>                 <span class="o">=</span> pyModule.o stuff.o
+
+<span class="nf">awesome.so</span><span class="o">:</span> <span class="k">$(</span><span class="nv">OBJECTS</span><span class="k">)</span>
+	<span class="k">$(</span>CXX<span class="k">)</span> -shared <span class="k">$(</span>LDFLAGS<span class="k">)</span> -o awesome.so <span class="k">$(</span>OBJECTS<span class="k">)</span> <span class="k">$(</span>LDLIBS<span class="k">)</span>
+
+<span class="nf">clean</span><span class="o">:</span>
+	rm -f awesome.so <span class="k">$(</span>OBJECTS<span class="k">)</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="testing-the-extension">
+<h2>3.2.4. Testing the Extension<a class="headerlink" href="#testing-the-extension" title="Permalink to this headline">¶</a></h2>
+<p>Using the Makefile above creates the shared library <code class="docutils literal"><span class="pre">awesome.so</span></code> which contains
+the extension. Executing the following script using the wrapper script in the same folder
+as the shared libray should now work (<a class="reference download internal" href="../_downloads/test.py"><code class="xref download docutils literal"><span class="pre">download</span></code></a>):</p>
+<div class="highlight-py"><div class="highlight"><pre><span class="kn">import</span> <span class="nn">awesome</span>
+
+<span class="c"># sanity check for multiple copies of libMØD</span>
+<span class="n">modValue</span> <span class="o">=</span> <span class="n">mod</span><span class="o">.</span><span class="n">magicLibraryValue</span><span class="p">()</span>
+<span class="n">ourValue</span> <span class="o">=</span> <span class="n">awesome</span><span class="o">.</span><span class="n">magicLibraryValue</span><span class="p">()</span>
+<span class="k">if</span> <span class="n">modValue</span> <span class="o">!=</span> <span class="n">ourValue</span><span class="p">:</span>
+	<span class="k">print</span><span class="p">(</span><span class="s">&quot;mod =&quot;</span><span class="p">,</span> <span class="n">modValue</span><span class="p">)</span>
+	<span class="k">print</span><span class="p">(</span><span class="s">&quot;our =&quot;</span><span class="p">,</span> <span class="n">ourValue</span><span class="p">)</span>
+	<span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s">&quot;Magic values differ! I.e., more than one instance of libMØD has been loaded.&quot;</span><span class="p">)</span>
+<span class="c"># end if check</span>
+
+<span class="n">g</span> <span class="o">=</span> <span class="n">awesome</span><span class="o">.</span><span class="n">doStuff</span><span class="p">()</span>
+<span class="k">print</span><span class="p">(</span><span class="s">&quot;Got a graph:&quot;</span><span class="p">,</span> <span class="n">g</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+<span class="n">g</span><span class="o">.</span><span class="k">print</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>Command to execute:</p>
+<div class="highlight-sh"><div class="highlight"><pre>mod -f test.py
+</pre></div>
+</div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="../index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">3.2. Creating a Python Extension</a><ul>
+<li><a class="reference internal" href="#library-source-and-headers">3.2.1. Library Source and Headers</a></li>
+<li><a class="reference internal" href="#exposing-the-interface">3.2.2. Exposing the Interface</a></li>
+<li><a class="reference internal" href="#makefile">3.2.3. Makefile</a></li>
+<li><a class="reference internal" href="#testing-the-extension">3.2.4. Testing the Extension</a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="Rule.html"
+                        title="previous chapter">3.1.10. Rule</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="../postmod/postmod.html"
+                        title="next chapter">4. PostMØD (<code class="docutils literal"><span class="pre">mod_post</span></code>)</a></p>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../_sources/pymod/extensions.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="../postmod/postmod.html" title="4. PostMØD (mod_post)"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="Rule.html" title="3.1.10. Rule"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">MØD v0.5.0 documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="pymod.html" >3. PyMØD</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &copy; Copyright 2013-2015, Jakob Lykke Andersen.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.4a0+.
+    </div>
+  </body>
+</html>

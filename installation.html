@@ -1,0 +1,267 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>1. Installation &mdash; MØD v0.5.0 documentation</title>
+    
+    <link rel="stylesheet" href="_static/classic.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     'v0.5.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="top" title="MØD v0.5.0 documentation" href="index.html" />
+    <link rel="next" title="2. libMØD" href="libmod/libmod.html" />
+    <link rel="prev" title="MedØlDatschgerl" href="index.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="libmod/libmod.html" title="2. libMØD"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="index.html" title="MedØlDatschgerl"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">MØD v0.5.0 documentation</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="installation">
+<h1>1. Installation<a class="headerlink" href="#installation" title="Permalink to this headline">¶</a></h1>
+<p>The package is built and installed as a normal autotools project (i.e., use <code class="docutils literal"><span class="pre">configure</span></code> then <code class="docutils literal"><span class="pre">make</span></code> amd <code class="docutils literal"><span class="pre">make</span> <span class="pre">install</span></code>).
+The following is a list of dependencies, where relevant arguments for <code class="docutils literal"><span class="pre">configure</span></code> is shown in parenthesis.
+Futher below are specific instructions on how to install these dependencies.</p>
+<ul class="simple">
+<li>This documentation requires <a class="reference external" href="http://sphinx-doc.org">Sphinx</a>, preferably in the newest development version (<code class="docutils literal"><span class="pre">--enable-doc-checks</span></code>, <code class="docutils literal"><span class="pre">--disable-doc-checks</span></code>).</li>
+<li>libMØD:<ul>
+<li>A C++ compiler with reasonable C++11 support is needed. GCC 4.7 or later should work.</li>
+<li><a class="reference external" href="http://boost.org">Boost</a> dev, &gt;= 1.56 (<code class="docutils literal"><span class="pre">--with-boost=&lt;path&gt;</span></code>).</li>
+<li>(optional) <a class="reference external" href="http://openbabel.org">Open Babel</a> dev, &gt;= 2.3.2 (<code class="docutils literal"><span class="pre">--with-OpenBabel=yes|no|&lt;path&gt;</span></code>).</li>
+<li>(optional, default off) <a class="reference external" href="http://sbml.org/Software/libSBML">libSBML</a> (<code class="docutils literal"><span class="pre">--with-SBML=yes|no|&lt;path&gt;</span></code>).</li>
+</ul>
+</li>
+<li>PyMØD (<code class="docutils literal"><span class="pre">--enable-pymod</span></code>, <code class="docutils literal"><span class="pre">--disable-pymod</span></code>):<ul>
+<li>Python 3 dev</li>
+<li>Boost.Python built with Python 3</li>
+</ul>
+</li>
+<li>PostMØD (<code class="docutils literal"><span class="pre">--enable-postmod</span></code>, <code class="docutils literal"><span class="pre">--disable-postmod</span></code>):<ul>
+<li><code class="docutils literal"><span class="pre">pdflatex</span></code> available in the <code class="docutils literal"><span class="pre">PATH</span></code>, with not too old packages (Tex Live 2012 or newer should work).</li>
+<li><code class="docutils literal"><span class="pre">pdf2svg</span></code> available in the <code class="docutils literal"><span class="pre">PATH</span></code></li>
+<li><code class="docutils literal"><span class="pre">dot</span></code> and <code class="docutils literal"><span class="pre">neato</span></code> from Graphviz available in the <code class="docutils literal"><span class="pre">PATH</span></code>.
+They must additionally be able to load SVG files and output as both SVG and PDF files (all via cairo).
+That is, in the output of <code class="docutils literal"><span class="pre">dot</span> <span class="pre">-P</span></code> the following edges must exist:<ul>
+<li><code class="docutils literal"><span class="pre">cairo_device_svg</span> <span class="pre">-&gt;</span> <span class="pre">output_svg</span></code></li>
+<li><code class="docutils literal"><span class="pre">cairo_device_pdf</span> <span class="pre">-&gt;</span> <span class="pre">output_pdf</span></code></li>
+<li><code class="docutils literal"><span class="pre">rsvg_loadimage_svg</span> <span class="pre">-&gt;</span> <span class="pre">render_cairo</span></code></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<div class="section" id="ubuntu">
+<h2>1.1. Ubuntu<a class="headerlink" href="#ubuntu" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li>(&gt;= Ubuntu 15.10) Boost: <code class="docutils literal"><span class="pre">libboost-regex-dev</span> <span class="pre">libboost-system-dev</span></code>.</li>
+<li>(&gt;= Ubuntu 15.10) Boost.Python: <code class="docutils literal"><span class="pre">python3-dev</span> <span class="pre">libboost-python-dev</span></code>.</li>
+<li>(&lt; Ubuntu 15.10) Boost, Boost.Python: <code class="docutils literal"><span class="pre">python3-dev</span></code>, and see <a class="reference internal" href="#install-boost-python"><span class="std std-ref">Boost and Boost.Python with Python 3</span></a>.</li>
+<li>(&gt;= Ubuntu 14.04) Open Babel: <code class="docutils literal"><span class="pre">libopenbabel-dev</span></code>.</li>
+<li>(&lt; Ubuntu 14.04) Open Babel: install from source.</li>
+<li><code class="docutils literal"><span class="pre">pdflatex</span></code>: <code class="docutils literal"><span class="pre">texlive-full</span></code> (less can do it, will be refined in the future).</li>
+<li><code class="docutils literal"><span class="pre">pdf2svg</span></code>: <code class="docutils literal"><span class="pre">pdf2svg</span></code>.</li>
+<li>Graphviz: The Ubuntu package unfortunately does not include the plugin for converting SVG to PDF via rsvg and cairo.
+<code class="docutils literal"><span class="pre">librsvg2-dev</span> <span class="pre">libpango1.0-dev</span></code>, and see <a class="reference internal" href="#install-graphviz"><span class="std std-ref">Graphviz</span></a>.</li>
+</ul>
+</div>
+<div class="section" id="fedora">
+<h2>1.2. Fedora<a class="headerlink" href="#fedora" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li>Boost: <code class="docutils literal"><span class="pre">boost-devel</span> <span class="pre">boost-regex</span> <span class="pre">boost-system</span></code>.</li>
+<li>Boost.Python: <code class="docutils literal"><span class="pre">python3-devel</span> <span class="pre">boost-python3-devel</span></code>.</li>
+<li>Boost, Boost.Python: <code class="docutils literal"><span class="pre">python3-devel</span></code>, and see <a class="reference internal" href="#install-boost-python"><span class="std std-ref">Boost and Boost.Python with Python 3</span></a>.</li>
+<li>Open Babel: <code class="docutils literal"><span class="pre">openbabel-devel</span></code>.</li>
+<li><code class="docutils literal"><span class="pre">pdflatex</span></code>: <code class="docutils literal"><span class="pre">texlive-scheme-full</span></code> (less can do it, will be refined in the future).</li>
+<li><code class="docutils literal"><span class="pre">pdf2svg</span></code>: <code class="docutils literal"><span class="pre">pdf2svg</span></code>.</li>
+<li>Graphviz: <code class="docutils literal"><span class="pre">graphviz</span></code>.</li>
+</ul>
+</div>
+<div class="section" id="common">
+<h2>1.3. Common<a class="headerlink" href="#common" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li>libSBML: install from source, see <a class="reference internal" href="#install-libsbml"><span class="std std-ref">libSBML</span></a>.</li>
+</ul>
+</div>
+<div class="section" id="boost-and-boost-python-with-python-3">
+<span id="install-boost-python"></span><h2>1.4. Boost and Boost.Python with Python 3<a class="headerlink" href="#boost-and-boost-python-with-python-3" title="Permalink to this headline">¶</a></h2>
+<p>A package with the sources of Boost can be downloaded from <cite>http://boost.org</cite>.</p>
+<div class="section" id="basic-installation">
+<h3>1.4.1. Basic Installation<a class="headerlink" href="#basic-installation" title="Permalink to this headline">¶</a></h3>
+<p>Boost uses a custom build system which may be difficult to use.
+The general procedure for compiling and installing Bosot is the following.</p>
+<ol class="arabic simple">
+<li><code class="docutils literal"><span class="pre">./bootstrap.sh</span></code> (optionally give <code class="docutils literal"><span class="pre">--prefix=some/path</span></code> to specify a non-standard installation path.</li>
+<li><code class="docutils literal"><span class="pre">./b2</span></code> (optionally give <code class="docutils literal"><span class="pre">-j</span> <span class="pre">N</span></code> (similar to GNU Make) to compile with multiple threads)</li>
+<li><code class="docutils literal"><span class="pre">./b2</span> <span class="pre">install</span></code> (optionally give <code class="docutils literal"><span class="pre">--prefix=some/path</span></code> to specify a non-standard installation path (if not done earlier).</li>
+</ol>
+<p>After <code class="docutils literal"><span class="pre">bootstrap.sh</span></code> has been run, the file <code class="docutils literal"><span class="pre">project-config.jam</span></code>
+has been created, which can be edited to customise installation path and a lot of other
+things. All edits should be done before running <code class="docutils literal"><span class="pre">b2</span></code>.</p>
+</div>
+<div class="section" id="custom-python-version-e-g-python-3-for-boost-python">
+<h3>1.4.2. Custom Python Version (e.g., Python 3 for Boost.Python)<a class="headerlink" href="#custom-python-version-e-g-python-3-for-boost-python" title="Permalink to this headline">¶</a></h3>
+<p>This can be achieved in multiple ways. If the custom version (here assumed to be 3.3) is
+installed in the normal system location, then passing <code class="docutils literal"><span class="pre">--with-python=python3</span></code> to
+<code class="docutils literal"><span class="pre">bootstrap.sh</span></code> should work. This adds a line similar to
+&#8220;<code class="docutils literal"><span class="pre">using</span> <span class="pre">python</span> <span class="pre">:</span> <span class="pre">3.3</span> <span class="pre">;</span></code>&#8221; to <code class="docutils literal"><span class="pre">project-config.jam</span></code>. After compilation
+(running <code class="docutils literal"><span class="pre">b2</span></code>) the file <code class="docutils literal"><span class="pre">stage/lib/libboost_python3.so</span></code> should exist.
+If not, it did not detect Python 3 properly.</p>
+<p>If Python is installed in a non-standard location, add the a line similar to
+&#8220;<code class="docutils literal"><span class="pre">using</span> <span class="pre">python</span> <span class="pre">:</span> <span class="pre">3.3</span> <span class="pre">:</span> <span class="pre">python3</span> <span class="pre">:</span> <span class="pre">/path/to/python/3/installtion/include</span> <span class="pre">;</span></code>&#8221; to
+<code class="docutils literal"><span class="pre">project-config.jam</span></code>, where the last path is the path to the
+<code class="docutils literal"><span class="pre">include</span></code>-folder of the Python-installation.</p>
+</div>
+<div class="section" id="custom-gcc-version">
+<h3>1.4.3. Custom GCC Version<a class="headerlink" href="#custom-gcc-version" title="Permalink to this headline">¶</a></h3>
+<p>Before running <code class="docutils literal"><span class="pre">b2</span></code> create the file <code class="docutils literal"><span class="pre">user-config.jam</span></code> in the root of the home dir (see
+<a class="reference external" href="http://www.boost.org/boost-build2/doc/html/bbv2/overview/configuration.html">here</a>
+for the full documentation). Put a line similar to
+&#8220;<code class="docutils literal"><span class="pre">using</span> <span class="pre">gcc</span> <span class="pre">:</span> <span class="pre">:</span> <span class="pre">/path/to/g++-4.8</span></code>&#8221; in the file.</p>
+</div>
+</div>
+<div class="section" id="install-graphviz">
+<span id="id1"></span><h2>1.5. Graphviz<a class="headerlink" href="#install-graphviz" title="Permalink to this headline">¶</a></h2>
+<p>A package with the sources of Graphviz can be downloaded from <cite>http://graphviz.org</cite>.
+Make sure that the status output in the end of <code class="docutils literal"><span class="pre">configure</span></code> includes <code class="docutils literal"><span class="pre">pangocairo:</span>&nbsp;&nbsp;&nbsp; <span class="pre">Yes</span></code> and <code class="docutils literal"><span class="pre">rsvg:</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <span class="pre">Yes</span></code>.</p>
+</div>
+<div class="section" id="install-libsbml">
+<span id="id2"></span><h2>1.6. libSBML<a class="headerlink" href="#install-libsbml" title="Permalink to this headline">¶</a></h2>
+<p>Note that at version 5.8 (and probably other versions too) the library is
+transitioning from using Autotools to CMake and both build systems coexist.
+The following assumes CMake is used.</p>
+<p>The option <code class="docutils literal"><span class="pre">-DWITH_CPP_NAMESPACE=yes</span></code> <strong>must</strong> be used for configuration.
+This will wrap the complete library in the C++ namespace <code class="docutils literal"><span class="pre">libsbml</span></code>, which is
+currently not the default behaviour.</p>
+<p>(The following should not be needed, but if libMØD compilation fails with
+libSBML related errors, then try it)
+In version 5.8 (and maybe other versions), the build system does not
+install the correct header files when namespace wrapping is enabled.
+After installation, open the file</p>
+<div class="highlight-bash"><div class="highlight"><pre>&lt;installation prefix&gt;/include/sbml/common/libsbml-namespace.h
+</pre></div>
+</div>
+<p>Change line 42 from</p>
+<div class="highlight-c++"><div class="highlight"><pre><span class="cm">/* #undef LIBSBML_USE_CPP_NAMESPACE \*/</span>
+</pre></div>
+</div>
+<p>to</p>
+<div class="highlight-c++"><div class="highlight"><pre><span class="cp">#define LIBSBML_USE_CPP_NAMESPACE</span>
+</pre></div>
+</div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">1. Installation</a><ul>
+<li><a class="reference internal" href="#ubuntu">1.1. Ubuntu</a></li>
+<li><a class="reference internal" href="#fedora">1.2. Fedora</a></li>
+<li><a class="reference internal" href="#common">1.3. Common</a></li>
+<li><a class="reference internal" href="#boost-and-boost-python-with-python-3">1.4. Boost and Boost.Python with Python 3</a><ul>
+<li><a class="reference internal" href="#basic-installation">1.4.1. Basic Installation</a></li>
+<li><a class="reference internal" href="#custom-python-version-e-g-python-3-for-boost-python">1.4.2. Custom Python Version (e.g., Python 3 for Boost.Python)</a></li>
+<li><a class="reference internal" href="#custom-gcc-version">1.4.3. Custom GCC Version</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#install-graphviz">1.5. Graphviz</a></li>
+<li><a class="reference internal" href="#install-libsbml">1.6. libSBML</a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="index.html"
+                        title="previous chapter">MedØlDatschgerl</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="libmod/libmod.html"
+                        title="next chapter">2. libMØD</a></p>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/installation.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="libmod/libmod.html" title="2. libMØD"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="index.html" title="MedØlDatschgerl"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">MØD v0.5.0 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &copy; Copyright 2013-2015, Jakob Lykke Andersen.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.4a0+.
+    </div>
+  </body>
+</html>

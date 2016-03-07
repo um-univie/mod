@@ -1,0 +1,138 @@
+.. _cpp-Rule:
+
+**********************************************************
+Rule.h
+**********************************************************
+.. default-domain:: cpp
+
+.. py:currentmodule:: mod
+.. cpp:namespace:: mod
+
+
+Class ``Rule``
+--------------------------------------------------------------------------------------------------------------------------------
+
+.. class:: Rule
+    
+
+    Model of a transformation rule in the Double Pushout formalism.
+
+
+Synopsis
+^^^^^^^^
+
+.. code-block:: c++
+    
+    class Rule {
+        Rule(const Rule&) = delete;
+        Rule &operator=(const Rule&) = delete;
+        Rule(Rule&&) = delete;
+        Rule &operator=(Rule&&) = delete;
+    private:
+        Rule(std::unique_ptr<lib::Rule::Real> r);
+        Rule(std::unique_ptr<lib::Rule::Shallow> r);
+    public:
+        ~Rule();
+        unsigned int getId() const;
+        friend std::ostream &operator<<(std::ostream &s, const Rule &r);
+        const lib::Rule::Base &getBase() const;
+        const lib::Rule::Real *getReal() const;
+        const lib::Rule::Shallow *getShallow() const;
+        std::pair<std::string, std::string> print() const;
+        std::pair<std::string, std::string> print(const GraphPrinter &first, const GraphPrinter &second) const;
+        std::string getGMLString(bool withCoords = false) const;
+        std::string printGML(bool withCoords = false) const;
+        const std::string &getName() const;
+        void setName(std::string name);
+        std::size_t getNumLeftComponents() const;
+        std::size_t getNumRightComponents() const;
+        std::size_t isomorphism(std::shared_ptr<Rule> r, std::size_t maxNumMatches) const;
+        std::size_t monomorphism(std::shared_ptr<Rule> r, std::size_t maxNumMatches) const;
+    public:
+        static std::shared_ptr<Rule> ruleGMLString(const std::string &data, bool invert);
+        static std::shared_ptr<Rule> ruleGML(const std::string &file, bool invert);
+        static std::shared_ptr<Rule> makeRule(std::unique_ptr<lib::Rule::Real> r);
+        static std::shared_ptr<Rule> makeRule(std::unique_ptr<lib::Rule::Shallow> r);
+    private:
+        struct Pimpl;
+        std::unique_ptr<Pimpl> p;
+    };
+
+Details
+^^^^^^^
+
+.. cpp:namespace:: mod
+
+.. cpp:namespace-push:: Rule
+
+.. function:: unsigned int getId() const
+
+    :returns: the unique instance id among all :class:`Rule` instances.
+.. function:: void print() const
+              void print(const GraphPrinter &first, const GraphPrinter &second) const
+
+    Print the rule, using either the default options or the options in ``first`` and ``second``.
+
+    :returns: a pair of filename prefixes for the PDF-files that will be compiled in post-processing.
+        The actual names can be obtained by appending ``.L.pdf``, ``.K.pdf``, and ``.R.pdf`` for
+        respectively the left side, context, and right side graphs.
+.. function:: std::string getGMLString(bool withCoords = false) const
+
+    :returns: the :ref:`GML <rule-gml>` representation of the rule,
+              optionally with generated 2D coordinates.
+    :throws: :any:`LogicError` when coordinates are requested, but
+             none can be generated.
+.. function:: std::string printGML(bool withCoords = false) const
+
+    Print the rule in :ref:`GML <rule-gml>` format,
+    optionally with generated 2D coordinates.
+
+    :returns: the filename of the printed GML file.
+    :throws: :any:`LogicError` when coordinates are requested, but
+             none can be generated.
+.. function:: const std::string &getName() const
+              void setName(std::string name)
+
+    Access the name of the rule.
+.. function:: std::size_t getNumLeftComponents() const
+
+    :returns: the number of connected components in the left graph.
+    :throws: :class:`LogicError` if this rule is a fake rule.
+.. function:: std::size_t getNumRightComponents() const
+
+    :returns: the number of connected components in the right graph.
+    :throws: :class:`LogicError` if this rule is a fake rule.
+.. function:: std::size_t isomorphism(std::shared_ptr<Rule> r, std::size_t maxNumMatches) const
+
+    :returns: the number of isomorphisms found between ``r`` and this graph, but at most ``maxNumMatches``.
+    :throws: :class:`LogicError` if either this rule or ``r`` is a fake rule.
+.. function:: std::size_t monomorphism(std::shared_ptr<Rule> r, std::size_t maxNumMatches) const
+
+    :returns: the number of monomorphism from this rule to subgraphs of ``r``, though at most ``maxNumMatches``.
+    :throws: :class:`LogicError` if either this rule or ``r`` is a fake rule.
+.. function:: static std::shared_ptr<Rule> ruleGMLString(const std::string &data, bool invert)
+
+    Load a rule from a :ref:`GML <rule-gml>` string, and store either that rule or its inverse.
+    The name of the rule is the one specified in the GML string, though when ``invert=True``
+    the string ", inverse" is appended to the name.
+
+    .. note::
+
+        If the GML string specifies matching constraints it is not possible to invert the rule.
+        There is however a configuration option to ignore matching constraints when inverting rules.
+
+    :returns: the loaded (possibly inverted) rule.
+    :throws: :class:`InputError` on bad data and when inversion fails due to constraints.
+.. function:: static std::shared_ptr<Rule> ruleGML(const std::string &file, bool invert)
+    
+    Read ``file`` and pass the contents to :cpp:func:`ruleGMLString`.
+
+    :returns: the loaded (possibly inverted) rule.
+    :throws: :class:`InputError` on bad data and when inversion fails due to constraints.
+.. function:: static std::shared_ptr<Rule> makeRule(std::unique_ptr<lib::Rule::Real> r)
+              static std::shared_ptr<Rule> makeRule(std::unique_ptr<lib::Rule::Shallow> r)
+
+    :returns: a rule wrapping the given internal rule object.
+
+.. cpp:namespace:: mod
+

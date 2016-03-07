@@ -1,0 +1,412 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>MedØlDatschgerl &mdash; MØD v0.5.0 documentation</title>
+    
+    <link rel="stylesheet" href="_static/classic.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     'v0.5.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="top" title="MØD v0.5.0 documentation" href="#" />
+    <link rel="next" title="1. Installation" href="installation.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="installation.html" title="1. Installation"
+             accesskey="N">next</a> |</li>
+        <li class="nav-item nav-item-0"><a href="#">MØD v0.5.0 documentation</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="medoldatschgerl">
+<h1>MedØlDatschgerl<a class="headerlink" href="#medoldatschgerl" title="Permalink to this headline">¶</a></h1>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="installation.html">1. Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="libmod/libmod.html">2. libMØD</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pymod/pymod.html">3. PyMØD</a></li>
+<li class="toctree-l1"><a class="reference internal" href="postmod/postmod.html">4. PostMØD (<code class="docutils literal"><span class="pre">mod_post</span></code>)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="modWrapper/modWrapper.html">5. The Wrapper Script (<code class="docutils literal"><span class="pre">mod</span></code>)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="dataDesc/dataDesc.html">6. Data Formats</a></li>
+<li class="toctree-l1"><a class="reference internal" href="dgStrat/dgStrat.html">7. Derivation Graph Strategies</a></li>
+<li class="toctree-l1"><a class="reference internal" href="references.html">8. References</a></li>
+</ul>
+</div>
+<div class="section" id="overview">
+<span id="id1"></span><h2>Overview<a class="headerlink" href="#overview" title="Permalink to this headline">¶</a></h2>
+<p>This is the documentation for the MedØlDatschgerl (MØD) software package.
+For additional information see the webpage: <a class="reference external" href="http://mod.imada.sdu.dk">http://mod.imada.sdu.dk</a>.</p>
+<p>The package contains the following components.</p>
+<ul>
+<li><dl class="first docutils">
+<dt>libMØD, shared library (<code class="docutils literal"><span class="pre">mod</span></code>)</dt>
+<dd><p class="first last">The main library.</p>
+</dd>
+</dl>
+</li>
+<li><dl class="first docutils">
+<dt>PyMØD, Python 3 module (<code class="docutils literal"><span class="pre">mod</span></code>)</dt>
+<dd><p class="first last">Python bindings for the library and extra functionality for easier usage of
+many features.</p>
+</dd>
+</dl>
+</li>
+<li><dl class="first docutils">
+<dt>PostMØD, Bash Script (<code class="docutils literal"><span class="pre">mod_post</span></code>)</dt>
+<dd><p class="first last">The post processor for compiling figures and summaries.</p>
+</dd>
+</dl>
+</li>
+<li><dl class="first docutils">
+<dt>The wrapper script, Bash Script (<code class="docutils literal"><span class="pre">mod</span></code>)</dt>
+<dd><p class="first last">A convenience wrapper for invoking a virtual machine (e.g., <code class="docutils literal"><span class="pre">python3</span></code>)
+with user-supplied code.
+The wrapper handles output and invokes the post processor.
+Additionally, it can run the chosen virtual machine through <code class="docutils literal"><span class="pre">gdb</span></code>
+and/or <code class="docutils literal"><span class="pre">valgrind</span></code> (either normal memcheck or callgrind).</p>
+</dd>
+</dl>
+</li>
+</ul>
+</div>
+<div class="section" id="indices-and-tables">
+<h2>Indices and Tables<a class="headerlink" href="#indices-and-tables" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li><a class="reference internal" href="genindex.html"><span class="std std-ref">Index</span></a></li>
+</ul>
+</div>
+<div class="section" id="table-of-contents">
+<h2>Table of Contents<a class="headerlink" href="#table-of-contents" title="Permalink to this headline">¶</a></h2>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="installation.html">1. Installation</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="installation.html#ubuntu">1.1. Ubuntu</a></li>
+<li class="toctree-l2"><a class="reference internal" href="installation.html#fedora">1.2. Fedora</a></li>
+<li class="toctree-l2"><a class="reference internal" href="installation.html#common">1.3. Common</a></li>
+<li class="toctree-l2"><a class="reference internal" href="installation.html#boost-and-boost-python-with-python-3">1.4. Boost and Boost.Python with Python 3</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="installation.html#basic-installation">1.4.1. Basic Installation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="installation.html#custom-python-version-e-g-python-3-for-boost-python">1.4.2. Custom Python Version (e.g., Python 3 for Boost.Python)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="installation.html#custom-gcc-version">1.4.3. Custom GCC Version</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="installation.html#install-graphviz">1.5. Graphviz</a></li>
+<li class="toctree-l2"><a class="reference internal" href="installation.html#install-libsbml">1.6. libSBML</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="libmod/libmod.html">2. libMØD</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="libmod/usage.html">2.1. Compiling and Linking Client Code</a></li>
+<li class="toctree-l2"><a class="reference internal" href="libmod/api.html">2.2. API Reference</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="libmod/Chem.html">2.2.1. Chem.h</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="libmod/Chem.html#class-atomid">2.2.1.1. Class <code class="docutils literal"><span class="pre">AtomId</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="libmod/Chem.html#class-charge">2.2.1.2. Class <code class="docutils literal"><span class="pre">Charge</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="libmod/Chem.html#class-atomdata">2.2.1.3. Class <code class="docutils literal"><span class="pre">AtomData</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="libmod/Chem.html#enum-bondtype">2.2.1.4. Enum <code class="docutils literal"><span class="pre">BondType</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="libmod/Chem.html#namespace-atomids">2.2.1.5. Namespace <code class="docutils literal"><span class="pre">AtomIds</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="libmod/Config.html">2.2.2. Config.h</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="libmod/Config.html#class-template-typename-t-configsetting">2.2.2.1. Class <code class="docutils literal"><span class="pre">template&lt;typename</span> <span class="pre">T&gt;</span> <span class="pre">ConfigSetting</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="libmod/Config.html#class-config">2.2.2.2. Class <code class="docutils literal"><span class="pre">Config</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="libmod/Derivation.html">2.2.3. Derivation.h</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="libmod/Derivation.html#class-derivation">2.2.3.1. Class <code class="docutils literal"><span class="pre">Derivation</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="libmod/DG.html">2.2.4. DG.h</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="libmod/DG.html#class-derivationref">2.2.4.1. Class <code class="docutils literal"><span class="pre">DerivationRef</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="libmod/DG.html#class-dg">2.2.4.2. Class <code class="docutils literal"><span class="pre">DG</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="libmod/DG.html#class-dg-vertex">2.2.4.3. Class <code class="docutils literal"><span class="pre">DG::Vertex</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="libmod/DG.html#class-dg-hyperedge">2.2.4.4. Class <code class="docutils literal"><span class="pre">DG::HyperEdge</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="libmod/DG.html#class-dg-vertexiterator">2.2.4.5. Class <code class="docutils literal"><span class="pre">DG::VertexIterator</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="libmod/DG.html#class-dg-vertexrange">2.2.4.6. Class <code class="docutils literal"><span class="pre">DG::VertexRange</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="libmod/DG.html#class-dg-edgeiterator">2.2.4.7. Class <code class="docutils literal"><span class="pre">DG::EdgeIterator</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="libmod/DG.html#class-dg-edgerange">2.2.4.8. Class <code class="docutils literal"><span class="pre">DG::EdgeRange</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="libmod/DG.html#class-dg-inedgeiterator">2.2.4.9. Class <code class="docutils literal"><span class="pre">DG::InEdgeIterator</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="libmod/DG.html#class-dg-inedgerange">2.2.4.10. Class <code class="docutils literal"><span class="pre">DG::InEdgeRange</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="libmod/DG.html#class-dg-outedgeiterator">2.2.4.11. Class <code class="docutils literal"><span class="pre">DG::OutEdgeIterator</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="libmod/DG.html#class-dg-outedgerange">2.2.4.12. Class <code class="docutils literal"><span class="pre">DG::OutEdgeRange</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="libmod/DG.html#class-dg-sourceiterator">2.2.4.13. Class <code class="docutils literal"><span class="pre">DG::SourceIterator</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="libmod/DG.html#class-dg-sourcerange">2.2.4.14. Class <code class="docutils literal"><span class="pre">DG::SourceRange</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="libmod/DG.html#class-dg-targetiterator">2.2.4.15. Class <code class="docutils literal"><span class="pre">DG::TargetIterator</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="libmod/DG.html#class-dg-targetrange">2.2.4.16. Class <code class="docutils literal"><span class="pre">DG::TargetRange</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="libmod/DG.html#class-dg-ruleiterator">2.2.4.17. Class <code class="docutils literal"><span class="pre">DG::RuleIterator</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="libmod/DG.html#class-dg-rulerange">2.2.4.18. Class <code class="docutils literal"><span class="pre">DG::RuleRange</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="libmod/DG.html#class-dg-derivationrefrange">2.2.4.19. Class <code class="docutils literal"><span class="pre">DG::DerivationRefRange</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="libmod/DG.html#class-dgprintdata">2.2.4.20. Class <code class="docutils literal"><span class="pre">DGPrintData</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="libmod/DG.html#class-dgprinter">2.2.4.21. Class <code class="docutils literal"><span class="pre">DGPrinter</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="libmod/DGStrat.html">2.2.5. DGStrat.h</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="libmod/DGStrat.html#class-dgstrat">2.2.5.1. Class <code class="docutils literal"><span class="pre">DGStrat</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="libmod/DGStrat.html#class-dgstrat-graphstate">2.2.5.2. Class <code class="docutils literal"><span class="pre">DGStrat::GraphState</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="libmod/Error.html">2.2.6. Error.h</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="libmod/Error.html#class-stacktrace">2.2.6.1. Class <code class="docutils literal"><span class="pre">Stacktrace</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="libmod/Error.html#class-exception">2.2.6.2. Class <code class="docutils literal"><span class="pre">Exception</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="libmod/Error.html#class-fatalerror">2.2.6.3. Class <code class="docutils literal"><span class="pre">FatalError</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="libmod/Error.html#class-inputerror">2.2.6.4. Class <code class="docutils literal"><span class="pre">InputError</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="libmod/Error.html#class-logicerror">2.2.6.5. Class <code class="docutils literal"><span class="pre">LogicError</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="libmod/Function.html">2.2.7. Function.h</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="libmod/Function.html#class-template-typename-r-typename-args-function-r-args">2.2.7.1. Class <code class="docutils literal"><span class="pre">template&lt;typename</span> <span class="pre">R,</span> <span class="pre">typename</span> <span class="pre">...Args&gt;</span> <span class="pre">Function&lt;R(Args...)&gt;</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="libmod/Graph.html">2.2.8. Graph.h</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="libmod/Graph.html#class-graph">2.2.8.1. Class <code class="docutils literal"><span class="pre">Graph</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="libmod/Graph.html#class-graph-vertex">2.2.8.2. Class <code class="docutils literal"><span class="pre">Graph::Vertex</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="libmod/Graph.html#class-graph-edge">2.2.8.3. Class <code class="docutils literal"><span class="pre">Graph::Edge</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="libmod/Graph.html#class-graph-vertexiterator">2.2.8.4. Class <code class="docutils literal"><span class="pre">Graph::VertexIterator</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="libmod/Graph.html#class-graph-vertexrange">2.2.8.5. Class <code class="docutils literal"><span class="pre">Graph::VertexRange</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="libmod/Graph.html#class-graph-edgeiterator">2.2.8.6. Class <code class="docutils literal"><span class="pre">Graph::EdgeIterator</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="libmod/Graph.html#class-graph-edgerange">2.2.8.7. Class <code class="docutils literal"><span class="pre">Graph::EdgeRange</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="libmod/Graph.html#class-graph-incidnetedgeiterator">2.2.8.8. Class <code class="docutils literal"><span class="pre">Graph::IncidnetEdgeIterator</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="libmod/Graph.html#class-graph-incidentedgerange">2.2.8.9. Class <code class="docutils literal"><span class="pre">Graph::IncidentEdgeRange</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="libmod/Graph.html#class-graphprinter">2.2.8.10. Class <code class="docutils literal"><span class="pre">GraphPrinter</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="libmod/Misc.html">2.2.9. Misc.h</a></li>
+<li class="toctree-l3"><a class="reference internal" href="libmod/RC.html">2.2.10. RC.h</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="libmod/RC.html#class-rcevaluator">2.2.10.1. Class <code class="docutils literal"><span class="pre">RCEvaluator</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="libmod/RC.html#rcexp">2.2.10.2. RCExp</a></li>
+<li class="toctree-l4"><a class="reference internal" href="libmod/RC.html#class-rcexp-union">2.2.10.3. Class <code class="docutils literal"><span class="pre">RCExp::Union</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="libmod/RC.html#class-rcexp-bind">2.2.10.4. Class <code class="docutils literal"><span class="pre">RCExp::Bind</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="libmod/RC.html#class-rcexp-id">2.2.10.5. Class <code class="docutils literal"><span class="pre">RCExp::Id</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="libmod/RC.html#class-rcexp-unbind">2.2.10.6. Class <code class="docutils literal"><span class="pre">RCExp::Unbind</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="libmod/RC.html#class-rcexp-expression">2.2.10.7. Class <code class="docutils literal"><span class="pre">RCExp::Expression</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="libmod/RC.html#class-rcexp-composebase">2.2.10.8. Class <code class="docutils literal"><span class="pre">RCExp::ComposeBase</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="libmod/RC.html#class-rcexp-composecommon">2.2.10.9. Class <code class="docutils literal"><span class="pre">RCExp::ComposeCommon</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="libmod/RC.html#class-rcexp-composeparallel">2.2.10.10. Class <code class="docutils literal"><span class="pre">RCExp::ComposeParallel</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="libmod/RC.html#class-rcexp-composesub">2.2.10.11. Class <code class="docutils literal"><span class="pre">RCExp::ComposeSub</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="libmod/RC.html#class-rcexp-composesuper">2.2.10.12. Class <code class="docutils literal"><span class="pre">RCExp::ComposeSuper</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="libmod/Rule.html">2.2.11. Rule.h</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="libmod/Rule.html#class-rule">2.2.11.1. Class <code class="docutils literal"><span class="pre">Rule</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="pymod/pymod.html">3. PyMØD</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="pymod/api.html">3.1. API Reference</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="pymod/Chem.html">3.1.1. Chem</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="pymod/Chem.html#class-atomid">3.1.1.1. Class <code class="docutils literal"><span class="pre">AtomId</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="pymod/Chem.html#class-charge">3.1.1.2. Class <code class="docutils literal"><span class="pre">Charge</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="pymod/Chem.html#class-atomdata">3.1.1.3. Class <code class="docutils literal"><span class="pre">AtomData</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="pymod/Chem.html#class-bondtype">3.1.1.4. Class <code class="docutils literal"><span class="pre">BondType</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="pymod/Chem.html#class-atomids">3.1.1.5. Class <code class="docutils literal"><span class="pre">AtomIds</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="pymod/Config.html">3.1.2. Config</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="pymod/Config.html#class-config">3.1.2.1. Class <code class="docutils literal"><span class="pre">Config</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="pymod/Derivation.html">3.1.3. Derivation</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="pymod/Derivation.html#class-derivation">3.1.3.1. Class <code class="docutils literal"><span class="pre">Derivation</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="pymod/DG.html">3.1.4. DG</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="pymod/DG.html#class-dg">3.1.4.1. Class <code class="docutils literal"><span class="pre">DG</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="pymod/DG.html#class-dgvertex">3.1.4.2. Class <code class="docutils literal"><span class="pre">DGVertex</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="pymod/DG.html#class-dghyperedge">3.1.4.3. Class <code class="docutils literal"><span class="pre">DGHyperEdge</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="pymod/DG.html#class-derivationref">3.1.4.4. Class <code class="docutils literal"><span class="pre">DerivationRef</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="pymod/DG.html#class-dgprintdata">3.1.4.5. Class <code class="docutils literal"><span class="pre">DGPrintData</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="pymod/DG.html#class-dgprinter">3.1.4.6. Class <code class="docutils literal"><span class="pre">DGPrinter</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="pymod/DGStrat.html">3.1.5. DGStrat</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="pymod/DGStrat.html#the-embedded-strategy-language">3.1.5.1. The Embedded Strategy Language</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pymod/DGStrat.html#the-basic-api">3.1.5.2. The Basic API</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="pymod/Error.html">3.1.6. Error</a></li>
+<li class="toctree-l3"><a class="reference internal" href="pymod/Graph.html">3.1.7. Graph</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="pymod/Graph.html#class-graph">3.1.7.1. Class <code class="docutils literal"><span class="pre">Graph</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="pymod/Graph.html#class-graphvertex">3.1.7.2. Class <code class="docutils literal"><span class="pre">GraphVertex</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="pymod/Graph.html#class-graphedge">3.1.7.3. Class <code class="docutils literal"><span class="pre">GraphEdge</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="pymod/Graph.html#class-graphprinter">3.1.7.4. Class <code class="docutils literal"><span class="pre">GraphPrinter</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="pymod/Misc.html">3.1.8. Misc</a></li>
+<li class="toctree-l3"><a class="reference internal" href="pymod/RC.html">3.1.9. RC</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="pymod/RC.html#the-embedded-rule-composition-expression-language">3.1.9.1. The Embedded Rule Composition Expression Language</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pymod/RC.html#expression-evaluator">3.1.9.2. Expression Evaluator</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pymod/RC.html#rule-composition-expressions">3.1.9.3. Rule Composition Expressions</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="pymod/Rule.html">3.1.10. Rule</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="pymod/Rule.html#class-rule">3.1.10.1. Class <code class="docutils literal"><span class="pre">Rule</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="pymod/extensions.html">3.2. Creating a Python Extension</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="pymod/extensions.html#library-source-and-headers">3.2.1. Library Source and Headers</a></li>
+<li class="toctree-l3"><a class="reference internal" href="pymod/extensions.html#exposing-the-interface">3.2.2. Exposing the Interface</a></li>
+<li class="toctree-l3"><a class="reference internal" href="pymod/extensions.html#makefile">3.2.3. Makefile</a></li>
+<li class="toctree-l3"><a class="reference internal" href="pymod/extensions.html#testing-the-extension">3.2.4. Testing the Extension</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="postmod/postmod.html">4. PostMØD (<code class="docutils literal"><span class="pre">mod_post</span></code>)</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="postmod/postmod.html#usage">4.1. Usage</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="postmod/postmod.html#options">4.1.1. Options</a></li>
+<li class="toctree-l3"><a class="reference internal" href="postmod/postmod.html#environtment-variables">4.1.2. Environtment Variables</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="postmod/postmod.html#useful-api-references">4.2. Useful API References</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="modWrapper/modWrapper.html">5. The Wrapper Script (<code class="docutils literal"><span class="pre">mod</span></code>)</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="modWrapper/modWrapper.html#usage">5.1. Usage</a></li>
+<li class="toctree-l2"><a class="reference internal" href="modWrapper/modWrapper.html#pymod-preamble">5.2. PyMØD Preamble</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="dataDesc/dataDesc.html">6. Data Formats</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="dataDesc/dataDesc.html#tikz-rule">6.1. Tikz (Rule)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="dataDesc/dataDesc.html#dot-rule">6.2. DOT (Rule)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="dataDesc/dataDesc.html#gml-rule">6.3. GML (Rule)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="dataDesc/dataDesc.html#tikz-graph">6.4. Tikz (Graph)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="dataDesc/dataDesc.html#dot-graph">6.5. DOT (Graph)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="dataDesc/dataDesc.html#gml-graph">6.6. GML (Graph)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="dataDesc/dataDesc.html#smiles">6.7. SMILES</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="dataDesc/dataDesc.html#implicit-hydrogen-atoms">6.7.1. Implicit Hydrogen Atoms</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="dataDesc/dataDesc.html#graphdfs">6.8. GraphDFS</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="dataDesc/dataDesc.html#grammar">6.8.1. Grammar</a></li>
+<li class="toctree-l3"><a class="reference internal" href="dataDesc/dataDesc.html#semantics">6.8.2. Semantics</a></li>
+<li class="toctree-l3"><a class="reference internal" href="dataDesc/dataDesc.html#abstracted-molecules">6.8.3. Abstracted Molecules</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="dataDesc/dataDesc.html#molecule-encoding">6.9. Molecule Encoding</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="dataDesc/dataDesc.html#edges-bonds">6.9.1. Edges / Bonds</a></li>
+<li class="toctree-l3"><a class="reference internal" href="dataDesc/dataDesc.html#vertices-atoms">6.9.2. Vertices / Atoms</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="dgStrat/dgStrat.html">7. Derivation Graph Strategies</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="dgStrat/dgStrat.html#virtual-machine">7.1. Virtual Machine</a></li>
+<li class="toctree-l2"><a class="reference internal" href="dgStrat/dgStrat.html#strategies">7.2. Strategies</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="dgStrat/dgStrat.html#add-universe">7.2.1. Add Universe</a></li>
+<li class="toctree-l3"><a class="reference internal" href="dgStrat/dgStrat.html#add-subset">7.2.2. Add Subset</a></li>
+<li class="toctree-l3"><a class="reference internal" href="dgStrat/dgStrat.html#execute">7.2.3. Execute</a></li>
+<li class="toctree-l3"><a class="reference internal" href="dgStrat/dgStrat.html#filter-universe">7.2.4. Filter Universe</a></li>
+<li class="toctree-l3"><a class="reference internal" href="dgStrat/dgStrat.html#filter-subset">7.2.5. Filter Subset</a></li>
+<li class="toctree-l3"><a class="reference internal" href="dgStrat/dgStrat.html#rule">7.2.6. Rule</a></li>
+<li class="toctree-l3"><a class="reference internal" href="dgStrat/dgStrat.html#derivation-predicates">7.2.7. Derivation Predicates</a></li>
+<li class="toctree-l3"><a class="reference internal" href="dgStrat/dgStrat.html#parallel">7.2.8. Parallel</a></li>
+<li class="toctree-l3"><a class="reference internal" href="dgStrat/dgStrat.html#sequence">7.2.9. Sequence</a></li>
+<li class="toctree-l3"><a class="reference internal" href="dgStrat/dgStrat.html#repeat">7.2.10. Repeat</a></li>
+<li class="toctree-l3"><a class="reference internal" href="dgStrat/dgStrat.html#revive">7.2.11. Revive</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="references.html">8. References</a></li>
+</ul>
+</div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="#">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">MedØlDatschgerl</a><ul>
+<li><a class="reference internal" href="#overview">Overview</a></li>
+<li><a class="reference internal" href="#indices-and-tables">Indices and Tables</a></li>
+<li><a class="reference internal" href="#table-of-contents">Table of Contents</a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Next topic</h4>
+  <p class="topless"><a href="installation.html"
+                        title="next chapter">1. Installation</a></p>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/index.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="installation.html" title="1. Installation"
+             >next</a> |</li>
+        <li class="nav-item nav-item-0"><a href="#">MØD v0.5.0 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &copy; Copyright 2013-2015, Jakob Lykke Andersen.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.4a0+.
+    </div>
+  </body>
+</html>

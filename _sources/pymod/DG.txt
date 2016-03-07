@@ -1,0 +1,490 @@
+.. _py-DG:
+
+**********************************************************
+DG
+**********************************************************
+.. default-domain:: py
+
+.. py:currentmodule:: mod
+.. cpp:namespace:: mod
+
+
+Class ``DG``
+--------------------------------------------------------------------------------------------------------------------------------
+
+.. py:class:: DG
+
+    The main derivation graph class. A derivation graph is a directed hypergraph :math:`H = (V, E)`.
+    Each vertex is annotated with a graph, and each hyperedge is annotated with a transformation rule.
+    A derivation graph can either be calculated from a strategy or loaded from external data.
+
+    .. py:attribute:: id
+
+        The unique instance id among all :class:`DG` objects.
+
+        :type: unsigned int
+    .. py:attribute:: numVertices
+
+        (Read-only) The number of vertices in the derivation graph.
+
+        :type: int
+    .. py:attribute:: vertices
+
+        (Read-only) An iterable of all vertices in the derivation graph.
+
+        :type: :py:class:`DGVertexRange`
+    .. py:attribute:: numEdges
+
+        (Read-only) The number of hyperedges in the derivation graph.
+
+        :type: int
+    .. py:attribute:: edges
+
+        (Read-only) An iterable of all hyperedges in the derivation graph.
+
+        :type: :py:class:`DGEdgeRange`
+    .. py:method:: calc()
+
+        Create the actual derivation graph.
+    .. py:attribute:: graphDatabase
+
+        All graphs known to the derivation graph.
+
+        :type: list of :class:`Graph`
+    .. py:attribute:: vertexGraphs
+
+        A subset of the graph database corresponding to the vertices of the actual derivation graph.
+
+        :type: list of :class:`Graph`
+    .. py:attribute:: products
+
+        The subset of the vertex graphs which were discovered by the calculation.
+
+        :type: list of :class:`Graph`
+    .. py:method:: print(printer=DGPrinter(), data=None)
+
+        Print the derivation graph in style of a hypergraph. The appearance and structure
+        of the visualisation can optionally be configured by giving a DG printer and/or data object.
+
+        :param printer: the printer to use governing the appearance.
+        :type printer: :class:`DGPrinter`
+        :param data: the extra data to use encoding the structure of the graph.
+        :type data: :class:`DGPrintData`
+    .. py:method:: dump()
+
+        Export the derivation graph to an external file. The vertex graphs are exported as well.
+
+        :returns: the filename of the exported derivation graph.
+        :rtype: string
+    .. py:method:: getDerivationRef(educts, products)
+
+        Query the derivation graph for a specific derivation.
+
+        :param educts: the educts of the derivation to find.
+        :type educts: list of :class:`Graph`
+        :param products: the products of the derivation to find.
+        :type products: list of :class:`Graph`
+        :returns: a reference to a derivation. If no matching derivation is found, the returned reference will not be valid.
+        :rtype: :class:`DerivationRef`
+    .. py:attribute:: derivations
+
+        (Read-only) An iterable of references to all derivations in the DG.
+
+        :type: :class:`DerivationRefRange`
+    .. py:method:: inDerivations(g)
+
+        :param g: the graph corresponding to the vertex to return in-derivations for.
+        :type g: :class:`Graph`
+        :returns: an iterable of references to all derivations going in to the vertex corresponding to the graph ``g``.
+            A derivation reference is in the range as many times as the vertex is a member of the head-multiset of that derivation.
+        :rtype: :class:`DerivationRefRange`
+    .. py:method:: outDerivations(g)
+
+        :param g: the graph corresponding to the vertex to return out-derivations for.
+        :type g: :class:`Graph`
+        :returns: an iterable of references to all derivations going out of the vertex corresponding to the graph ``g``.
+            A derivation reference is in the range as many times as the vertex is a member of the tail-multiset of that derivation.
+        :rtype: :class:`DerivationRefRange`
+    .. py:method:: list()
+
+        List information about the calculation.
+    .. py:method:: listStats()
+
+        Lists various statistics for the derivation graph.
+    .. py:method:: listIncidence(g)
+
+        List the incident derivations of the vertex represented by the given graph.
+
+        :param g: the graph for which the corresponding derivation graph vertex should have its incident derivations listed.
+        :type g: :class:`Graph`
+.. py:method:: dgDerivations(ders)
+
+    :param ders: the list of derivations to include in the derivation graph.
+    :type ders: list of :class:`Derivation`
+    :returns: a derivation graph from a list of :class:`Derivation`.
+    :rtype: :class:`DG`
+.. py:method:: dgAbstract(s)
+
+    :param s: the abstract specification of a derivation graph.
+    :type s: string
+    :returns: Construct a derivation graph from an abstract set of derivations. See :cpp:func:`DG::abstract` for the specification format.
+    :rtype: :class:`DG`
+.. py:method:: dgSBML(s)
+
+    Load a derivation graph from an SBML file.
+    
+    :param s: the name of the SBML file.
+    :type s: string
+    :returns: the loaded derivation graph.
+    :rtype: :class:`DG`
+.. py:method:: dgRuleComp(graphs, strat)
+
+    Initialize a derivation graph defined by a strategy.
+
+    :param graphs: an initial graph database. Any derived graph isomorphic to one of these graphs will be replaced by the given graph.
+    :type graphs: list of :class:`Graph`
+    :param strat: the strategy which will be used for calculating the actual derivation graph.
+    :type strat: :class:`DGStrat`
+    :returns: the derivation graph object. The calculation method must be called to create the actual derivation graph.
+    :rtype: :class:`DG`
+.. py:method:: dgDump(graphs, rules, file)
+
+    Load a derivation graph dump.
+
+    :param graphs: Any graph in the dump which is isomorphic one of these graphs is replaced by the given graph.
+    :type graphs: list of :class:`Graph`
+    :param rules: As for the graphs the same procedure is done for the rules, however only using the name of the rule for comparison.
+    :type rules: list of :class:`Rule`
+    :returns: the loaded derivation graph.
+    :rtype: :class:`DG`
+.. py:method:: diffDGs(dg1, dg2)
+
+    Compare two derivation graphs and lists the difference.
+    This is not a general isomorphism check; two vertices are equal if they have
+    the same graph attached. Edges are equal if the head and tail sets are equal
+    and if the attached rule is the same.
+
+    :param dg1: the first derivation graph.
+    :type dg1: :class:`DG`
+    :param dg2: the second derivation graph.
+    :type dg2: :class:`DG`
+
+Class ``DGVertex``
+--------------------------------------------------------------------------------------------------------------------------------
+
+.. py:class:: DGVertex
+
+    A descriptor of either a vertex in a derivation graph, or a null vertex.
+
+    .. py:function:: __init__(self)
+
+        Constructs a null descriptor.
+    .. py:attribute:: id
+
+        (Read-only) The index of the vertex. It will be in the range :math:`[0, numVertices + numEdges[`.
+
+        :type: int
+        :raises: :py:class:`LogicError` if it is a null descriptor.
+    .. py:attribute:: dg
+
+        (Read-only) The derivation graph the vertex belongs to.
+
+        :type: :py:class:`DG`
+        :raises: :py:class:`LogicError` if it is a null descriptor.
+    .. py:attribute: inDegree
+
+        (Read-only) The in-degree of the vertex, including multiplicity of target multisets.
+
+        :type: int
+        :raises: :py:class:`LogicError` if it is a null descriptor.
+    .. py:attribute:: inEdges
+
+        (Read-only) A range of in-hyperedges for this vertex.
+
+        :type: :py:class:`InEdgeRange`
+        :raises: :py:class:`LogicError` if it is a null descriptor.
+    .. py:attribute: outDegree
+
+        (Read-only) The out-degree of the vertex, including multiplicity of source multisets.
+
+        :type: int
+        :raises: :py:class:`LogicError` if it is a null descriptor.
+    .. py:attribute:: outEdges
+
+        (Read-only) A range of out-hyperedges for this vertex.
+
+        :type: :py:class:`OutEdgeRange`
+        :raises: :py:class:`LogicError` if it is a null descriptor.
+    .. py:attribute:: graph
+
+        (Read-only) The graph label of the vertex.
+
+        :type: :py:class:`Graph`
+        :raises: :py:class:`LogicError` if it is a null descriptor.
+
+Class ``DGHyperEdge``
+--------------------------------------------------------------------------------------------------------------------------------
+
+.. py:class:: DGHyperEdge
+
+    A descriptor of either a hyperedge in a derivation graph, or a null edge.
+
+    .. py:function:: __init__(self)
+
+        Constructs a null descriptor.
+    .. py:attribute:: id
+
+        (Read-only) The index of the hyperedge. It will be in the range :math:`[0, numVertices + numEdges[`.
+
+        :type: int
+        :raises: :py:class:`LogicError` if it is a null descriptor.
+    .. py:attribute:: dg
+
+        (Read-only) The derivation graph the edge belongs to.
+
+        :type: :py:class:`DG`
+        :raises: :py:class:`LogicError` if it is a null descriptor.
+    .. py:attribute:: numSources
+
+        (Read-only) The number of sources of the hyperedge.
+
+        :type: int
+    .. py:attribute:: sources
+
+        (Read-only) The sources of the hyperedge.
+
+        :type: :py:class:`DGSourceRange`
+        :raises: :py:class:`LogicError` if it is a null descriptor.
+    .. py:attribute:: numTargets
+
+        (Read-only) The number of targerts of the hyperedge.
+
+        :type: int
+    .. attribute:: targets
+
+        (Read-only) The targets of the hyperedge.
+
+        :type: :py:class:`DGTargetRange`
+        :raises: :py:class:`LogicError` if it is a null descriptor.
+    .. py:attribute:: rules
+
+        (Read-only) The rules associated with the hyperedge.
+
+        :type: :py:class:`DGRuleRange`
+        :raises: :py:class:`LogicError` if it is a null descriptor.
+
+Class ``DerivationRef``
+--------------------------------------------------------------------------------------------------------------------------------
+
+.. py:class:: DerivationRef
+
+    A reference to a derivation in a specific derivation graph, or an invalid reference.
+    
+    .. py:attribute:: id
+
+        (Read-only) If the reference is valid, this is the id of the pointed to derivation.
+
+        :type: unsigned int
+    .. py:attribute:: dg
+
+        (Read-only) If the reference is valid, this is the derivation graph the reference points into.
+
+        :type: :class:`DG`
+    .. py:method:: isValid()
+
+        :returns: whether or not the reference is valid.
+        :rtype: bool
+    .. py:attribute:: derivation
+
+        (Read-only) If the reference is valid, this is the pointed to derivation.
+
+        :type: :class:`Derivation`
+    .. py:method:: print(printer=GraphPrinter(), matchColour="ForestGreen")
+
+        Print the derivation pointed to by the derivation reference.
+        All possible Double-Pushout diagrams for the derivation are printed.
+
+        :param printer: the printer to use for the figures.
+        :type printer: :class:`GraphPrinter`
+        :param matchColour: the TikZ colour to use for the rule and its image in the bottom span.
+        :type matchColour: string
+
+Class ``DGPrintData``
+--------------------------------------------------------------------------------------------------------------------------------
+
+.. py:class:: DGPrintData
+
+    This class is used to hold extra data about how a specific derivation graph
+    is visualised.
+
+    .. py:method:: __init__(self, dg)
+
+        :param dg: the derivation graph to hold data for.
+        :type dg: :class:`DG`
+    .. py:attribute:: dg
+
+        (Read-only) The derivation graph the object holds data for.
+    .. py:method:: makeDuplicate(dRef, eDup)
+
+        Create another version of the given derivation and give it the given duplicate number.
+
+        :param dRef: a reference to the derivation to duplicate.
+        :type dRef: :class:`DerivationRef`
+        :param eDup: the duplicate number for the new version of the derivation.
+        :type eDup: unsigned int
+    .. py:method:: removeDuplicate(dRef, eDup)
+
+        Remove the version of the given derivation with the given duplicate number.
+
+        :param dRef: a reference to the derivation to duplicate.
+        :type dRef: :class:`DerivationRef`
+        :param eDup: the duplicate number for the version of the derivation to remove.
+        :type eDup: unsigned int
+    .. py:method:: reconnectTail(dRef, eDup, g, vDupTar)
+
+        Reconnect an arbitrary version of the tail specified by the given graph in the derivation duplicate given.
+
+        :param dRef: a reference to the derivation to reconnect.
+        :type dRef: :class:`DerivationRef`
+        :param eDup: the duplicate number of the derivation to reconnect.
+        :type eDup: unsigned int
+        :param g: a graph representing the tail vertex to reconnect.
+        :type g: :class:`Graph`
+        :param vDupTar: the new duplicate number for the tail vertex.
+        :type vDupTar: unsigned int
+    .. py:method:: reconnectHead(dRef, eDup, g, vDupTar)
+
+        Reconnect an arbitrary version of the head specified by the given graph in the derivation duplicate given.
+
+        :param dRef: a reference to the derivation to reconnect.
+        :type dRef: :class:`DerivationRef`
+        :param eDup: the duplicate number of the derivation to reconnect.
+        :type eDup: unsigned int
+        :param g: a graph representing the head vertex to reconnect.
+        :type g: :class:`Graph`
+        :param vDupTar: the new duplicate number for the tail vertex.
+        :type vDupTar: unsigned int
+
+Class ``DGPrinter``
+--------------------------------------------------------------------------------------------------------------------------------
+
+.. py:class:: DGPrinter
+
+    This class is used to configure how derivation graphs are visualised,
+    how much is visualised and which extra properties are printed.
+
+    .. py:attribute:: graphPrinter
+
+        (Read-only) Retrieve the :class:`GraphPrinter` used when printing images of graphs.
+
+        :type: :class:`GraphPrinter`
+    .. py:attribute:: withShortcutEdges
+
+        Control whether or not hyperedges :math:`(T, H)` with :math:`|T| = |H| = 1`
+        are printed as a simple arrow without the usual rectangle.
+
+        :type: bool
+    .. py:attribute:: withGraphImages
+
+        Control whether or not each vertex is printed with a image of its graph in it.
+
+        :type: bool
+    .. py:attribute:: labelsAsLatexMath
+
+        Control whether or not labels on vertices and hyperedges are put inline :math:`\LaTeX` math.
+        Specifically, a label ``label`` is written as ``$\mathrm{label'}$``, with ``label'`` being
+        ``label`` with all space characters escaped.
+
+        :type: bool
+    .. py:method:: pushVertexVisible(f)
+
+        Add another function controlling the visibility of vertices.
+        All visibility functions must return ``true`` for a vertex to be visible.
+
+        :param f: the function to push for specifying vertex visibility.
+        :type f: bool(:class:`Graph`, :class:`DG`)
+    .. py:method:: popVertexVisible()
+
+        Remove the last pushed vertex visibility function.
+    .. py:method:: pushEdgeVisible(f)
+
+        Add another function controlling the visibility of hyperedges.
+        All visibility functions must return ``true`` for a hyperedge to be visible.
+
+        :param f: the function to push for specifying hyperedge visibility.
+        :type f: bool(:class:`DerivationRef`)
+    .. py:method:: popEdgeVisible()
+
+        Remove the last pushed hyperedge visibility function.
+    .. py:attribute:: withShortcutEdgesAfterVisibility
+
+        Control whether or not hyperedges are depicted as simple arrows when all but 1 head and tail are hidden.
+
+        :type: bool
+    .. py:attribute:: vertexLabelSep
+
+        The string used as separator between each part of each vertex label.
+
+        :type: string
+    .. py:attribute:: edgeLabelSep
+
+        The string used as separator between each part of each edge label.
+
+        :type: string
+    .. py:method:: pushVertexLabel(f)
+
+        Add another function for vertex labelling. The result of this function is added to the end of each label.
+
+        :param f: the function to push for labelling vertices.
+        :type f: string(:class:`Graph`, :class:`DG`)
+    .. py:method:: popVertexLabel()
+
+        Remove the last pushed vertex labelling function.
+    .. py:method:: pushEdgeLabel(f)
+
+        Add another function for edge labelling. The result of this function is appended to each label.
+
+        :param f: the function to push for labelling edges.
+        :type f: string(:class:`DerivationRef`)
+    .. py:method:: popEdgeLabel()
+
+        Remove the last pushed edge labelling function.
+    .. py:attribute:: withGraphName
+
+        Control whether or not graph names are appended to the vertex labels (see also :meth:`DGPrinter.pushVertexLabel`).
+
+        :type: bool
+    .. py:attribute:: withRuleName
+
+        Control whether or not rule names are appended to the edge labels (see also :meth:`DGPrinter.pushEdgeLabel`).
+
+        :type: bool
+    .. py:attribute:: withRuleId
+
+        Control whether or not rule IDs are appended to the edge labels (see also :meth:`DGPrinter.pushEdgeLabel`).
+
+        :type: bool
+    .. py:method:: pushVertexColour(f, extendToEdges=True)
+
+        Add another function for colouring vertices. The final colour of a vertex is the result of the first colour function returning a non-empty string.
+        The functions are evaluated in the order they are pushed and the resulting string is used directly as a colour in Tikz.
+        A hyperedge is also coloured if at least one head and one tail *can* be coloured with a colour for which ``extendToEdges`` is ``True``.
+        In this case, the hyperedge (and a subset of the head and tail connectors) is coloured with the first applicable colour.
+        The edge extension of vertex colour takes lower precedence than explicitly added hyperedge colouring functions.
+
+        :param f: the function to push for colouring vertices.
+        :type f: string(:class:`Graph`, :class:`DG`)
+        :param bool extendToEdges: whether or not some hyperedges are coloured as well (see above).
+    .. py:method:: popVertexColour()
+
+        Remove the last pushed vertex colouring function.
+    .. py:method:: pushEdgeColour(f)
+
+        Add another function for colouring hyperedges. The final colour of a hyperedge (and all of its head and tail connectors) is the result of the
+        first colour function returning a non-empty string.
+        
+        :param f: the function to push for colouring hyperedges.
+        :type f: string(:class:`DerivationRef`)
+    .. py:method:: popEdgeColour()
+
+        Remove the last pushed hyperedge colouring function.

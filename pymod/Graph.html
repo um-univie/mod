@@ -1,0 +1,1009 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>3.1.7. Graph &mdash; MØD v0.5.0 documentation</title>
+    
+    <link rel="stylesheet" href="../_static/classic.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     'v0.5.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="top" title="MØD v0.5.0 documentation" href="../index.html" />
+    <link rel="up" title="3.1. API Reference" href="api.html" />
+    <link rel="next" title="3.1.8. Misc" href="Misc.html" />
+    <link rel="prev" title="3.1.6. Error" href="Error.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="Misc.html" title="3.1.8. Misc"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="Error.html" title="3.1.6. Error"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">MØD v0.5.0 documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="pymod.html" >3. PyMØD</a> &raquo;</li>
+          <li class="nav-item nav-item-2"><a href="api.html" accesskey="U">3.1. API Reference</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="graph">
+<span id="py-graph"></span><h1>3.1.7. Graph<a class="headerlink" href="#graph" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="class-graph">
+<h2>3.1.7.1. Class <code class="docutils literal"><span class="pre">Graph</span></code><a class="headerlink" href="#class-graph" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="mod.Graph">
+<em class="property">class </em><code class="descclassname">mod.</code><code class="descname">Graph</code><a class="headerlink" href="#mod.Graph" title="Permalink to this definition">¶</a></dt>
+<dd><p>This class models an undirected graph with labels on vertices and edges,
+without loops and without parallel edges.
+Certain labels are regarded as models of chemical atoms and bonds.
+See <a class="reference internal" href="../dataDesc/dataDesc.html#mol-enc"><span class="std std-ref">Molecule Encoding</span></a> for more information on this.</p>
+<dl class="attribute">
+<dt id="mod.Graph.id">
+<code class="descname">id</code><a class="headerlink" href="#mod.Graph.id" title="Permalink to this definition">¶</a></dt>
+<dd><p>(Read-only) A unique instance id among <a class="reference internal" href="#mod.Graph" title="mod.Graph"><code class="xref py py-class docutils literal"><span class="pre">Graph</span></code></a> objects.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Type:</th><td class="field-body">int</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="mod.Graph.numVertices">
+<code class="descname">numVertices</code><a class="headerlink" href="#mod.Graph.numVertices" title="Permalink to this definition">¶</a></dt>
+<dd><p>(Read-only) The number of vertices in the graph.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Type:</th><td class="field-body">int</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="mod.Graph.vertices">
+<code class="descname">vertices</code><a class="headerlink" href="#mod.Graph.vertices" title="Permalink to this definition">¶</a></dt>
+<dd><p>(Read-only) An iterable of all vertices in the graph.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Type:</th><td class="field-body"><code class="xref py py-class docutils literal"><span class="pre">GraphVertexRange</span></code></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="mod.Graph.numEdges">
+<code class="descname">numEdges</code><a class="headerlink" href="#mod.Graph.numEdges" title="Permalink to this definition">¶</a></dt>
+<dd><p>(Read-only) The number of edges in the graph.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Type:</th><td class="field-body">int</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="mod.Graph.edges">
+<code class="descname">edges</code><a class="headerlink" href="#mod.Graph.edges" title="Permalink to this definition">¶</a></dt>
+<dd><p>(Read-only) An iterable of all edges in the graph.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Type:</th><td class="field-body"><code class="xref py py-class docutils literal"><span class="pre">GraphEdgeRange</span></code></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="mod.Graph.print">
+<code class="descname">print</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#mod.Graph.print" title="Permalink to this definition">¶</a></dt>
+<dt>
+<code class="descname">print</code><span class="sig-paren">(</span><em>first</em>, <em>second=None</em><span class="sig-paren">)</span></dt>
+<dd><p>Print the graph, using either the default options or the options in <code class="docutils literal"><span class="pre">first</span></code> and <code class="docutils literal"><span class="pre">second</span></code>.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>first</strong> (<a class="reference internal" href="#mod.GraphPrinter" title="mod.GraphPrinter"><code class="xref py py-class docutils literal"><span class="pre">GraphPrinter</span></code></a>) &#8211; the printing options used for the first depiction.</li>
+<li><strong>second</strong> (<a class="reference internal" href="#mod.GraphPrinter" title="mod.GraphPrinter"><code class="xref py py-class docutils literal"><span class="pre">GraphPrinter</span></code></a>) &#8211; the printing options used for the second depiction.
+If it is <code class="docutils literal"><span class="pre">None</span></code> then it is set to``first``.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">the names for the PDF-files that will be compiled in post-processing.</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">(string, string)</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="mod.Graph.getGMLString">
+<code class="descname">getGMLString</code><span class="sig-paren">(</span><em>withCoords=False</em><span class="sig-paren">)</span><a class="headerlink" href="#mod.Graph.getGMLString" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">the <a class="reference internal" href="../dataDesc/dataDesc.html#graph-gml"><span class="std std-ref">GML</span></a> representation of the graph,
+optionally with generated 2D coordinates.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">string</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Raises:</th><td class="field-body"><a class="reference internal" href="Error.html#mod.LogicError" title="mod.LogicError"><code class="xref py py-class docutils literal"><span class="pre">LogicError</span></code></a> when coordinates are requested, but
+none can be generated.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="mod.Graph.printGML">
+<code class="descname">printGML</code><span class="sig-paren">(</span><em>withCoords=False</em><span class="sig-paren">)</span><a class="headerlink" href="#mod.Graph.printGML" title="Permalink to this definition">¶</a></dt>
+<dd><p>Print the <a class="reference internal" href="../dataDesc/dataDesc.html#graph-gml"><span class="std std-ref">GML</span></a> representation of the graph,
+optionally with generated 2D coordinates.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">the filename of the printed GML file.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">string</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Raises:</th><td class="field-body"><a class="reference internal" href="Error.html#mod.LogicError" title="mod.LogicError"><code class="xref py py-class docutils literal"><span class="pre">LogicError</span></code></a> when coordinates are requested, but
+none can be generated.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="mod.Graph.name">
+<code class="descname">name</code><a class="headerlink" href="#mod.Graph.name" title="Permalink to this definition">¶</a></dt>
+<dd><p>The name of the graph. The default name includes the unique instance id.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Type:</th><td class="field-body">string</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="mod.Graph.smiles">
+<code class="descname">smiles</code><a class="headerlink" href="#mod.Graph.smiles" title="Permalink to this definition">¶</a></dt>
+<dd><p>(Read-only) If the graph models a molecule, this is the canonical <a class="reference internal" href="../dataDesc/dataDesc.html#graph-smiles"><span class="std std-ref">SMILES string</span></a> for it.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Type:</th><td class="field-body">string</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="mod.Graph.graphDFS">
+<code class="descname">graphDFS</code><a class="headerlink" href="#mod.Graph.graphDFS" title="Permalink to this definition">¶</a></dt>
+<dd><p>(Read-only) This is the <a class="reference internal" href="../dataDesc/dataDesc.html#graph-graphdfs"><span class="std std-ref">GraphDFS</span></a> of the graph.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Type:</th><td class="field-body">string</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="mod.Graph.linearEncoding">
+<code class="descname">linearEncoding</code><a class="headerlink" href="#mod.Graph.linearEncoding" title="Permalink to this definition">¶</a></dt>
+<dd><p>(Read-only) If the graph models a molecule this is the <a class="reference internal" href="../dataDesc/dataDesc.html#graph-smiles"><span class="std std-ref">SMILES string</span></a> string, otherwise it is the <a class="reference internal" href="../dataDesc/dataDesc.html#graph-graphdfs"><span class="std std-ref">GraphDFS</span></a> string.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Type:</th><td class="field-body">string</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="mod.Graph.isMolecule">
+<code class="descname">isMolecule</code><a class="headerlink" href="#mod.Graph.isMolecule" title="Permalink to this definition">¶</a></dt>
+<dd><p>(Read-only) Whether or not the graph models a molecule. See <a class="reference internal" href="../dataDesc/dataDesc.html#mol-enc"><span class="std std-ref">Molecule Encoding</span></a>.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Type:</th><td class="field-body">bool</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="mod.Graph.energy">
+<code class="descname">energy</code><a class="headerlink" href="#mod.Graph.energy" title="Permalink to this definition">¶</a></dt>
+<dd><p>(Read-only) If the graph models a molecule, this is some energy value.
+The energy is calculated using Open Babel, unless already calculated or cached by <a class="reference internal" href="#mod.Graph.cacheEnergy" title="mod.Graph.cacheEnergy"><code class="xref py py-meth docutils literal"><span class="pre">Graph.cacheEnergy()</span></code></a>.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Type:</th><td class="field-body">double</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="mod.Graph.cacheEnergy">
+<code class="descname">cacheEnergy</code><span class="sig-paren">(</span><em>e</em><span class="sig-paren">)</span><a class="headerlink" href="#mod.Graph.cacheEnergy" title="Permalink to this definition">¶</a></dt>
+<dd><p>If the graph models a molecule, sets the energy to a given value.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>e</strong> (<em>double</em>) &#8211; the value for the energy to be set.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="mod.Graph.molarMass">
+<code class="descname">molarMass</code><a class="headerlink" href="#mod.Graph.molarMass" title="Permalink to this definition">¶</a></dt>
+<dd><p>(Read-only) If the graph models a molecule, this is the molar mass of the molecule as calculated by Open Babel.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Type:</th><td class="field-body">double</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="mod.Graph.vLabelCount">
+<code class="descname">vLabelCount</code><span class="sig-paren">(</span><em>label</em><span class="sig-paren">)</span><a class="headerlink" href="#mod.Graph.vLabelCount" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>label</strong> (<em>string</em>) &#8211; some label for querying.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">the number of vertices in the graph with the given label.</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">unsigned int</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="mod.Graph.eLabelCount">
+<code class="descname">eLabelCount</code><span class="sig-paren">(</span><em>label</em><span class="sig-paren">)</span><a class="headerlink" href="#mod.Graph.eLabelCount" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>label</strong> (<em>string</em>) &#8211; some label for querying.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">the number of edges in the graph with the given label.</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">unsigned int</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="mod.Graph.isomorphism">
+<code class="descname">isomorphism</code><span class="sig-paren">(</span><em>other</em>, <em>maxNumMatches=1</em><span class="sig-paren">)</span><a class="headerlink" href="#mod.Graph.isomorphism" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>other</strong> (<a class="reference internal" href="#mod.Graph" title="mod.Graph"><code class="xref py py-class docutils literal"><span class="pre">Graph</span></code></a>) &#8211; the codomain <a class="reference internal" href="#mod.Graph" title="mod.Graph"><code class="xref py py-class docutils literal"><span class="pre">Graph</span></code></a> for finding morphisms.</li>
+<li><strong>maxNumMatches</strong> (<code class="xref cpp cpp-any docutils literal"><span class="pre">std::size_t</span></code>) &#8211; the maximum number of isomorphisms to search for.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">the number of isomorphisms from this graph to <code class="docutils literal"><span class="pre">other</span></code>, but at most <code class="docutils literal"><span class="pre">maxNumMatches</span></code>.</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last"><code class="xref cpp cpp-any docutils literal"><span class="pre">std::size_t</span></code></p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="mod.Graph.monomorphism">
+<code class="descname">monomorphism</code><span class="sig-paren">(</span><em>other</em>, <em>maxNumMatches=1</em><span class="sig-paren">)</span><a class="headerlink" href="#mod.Graph.monomorphism" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>other</strong> &#8211; the codomain <a class="reference internal" href="#mod.Graph" title="mod.Graph"><code class="xref py py-class docutils literal"><span class="pre">Graph</span></code></a> for finding morphisms.</li>
+<li><strong>maxNumMatches</strong> (<code class="xref cpp cpp-any docutils literal"><span class="pre">std::size_t</span></code>) &#8211; the maximum number of monomorphisms to search for.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">the number of monomorphisms from this graph to <code class="docutils literal"><span class="pre">other</span></code>, though at most <code class="docutils literal"><span class="pre">maxNumMatches</span></code>.</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last"><code class="xref cpp cpp-any docutils literal"><span class="pre">std::size_t</span></code></p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="mod.Graph.makePermutation">
+<code class="descname">makePermutation</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#mod.Graph.makePermutation" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">a graph isomorphic to this, but with the vertex indices randomly permuted.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body"><a class="reference internal" href="#mod.Graph" title="mod.Graph"><code class="xref py py-class docutils literal"><span class="pre">Graph</span></code></a></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="mod.Graph.image">
+<code class="descname">image</code><a class="headerlink" href="#mod.Graph.image" title="Permalink to this definition">¶</a></dt>
+<dd><p>(Write-only) A custom depiction for the graph. The depiction file used will be the string
+returned by the given function, with <code class="docutils literal"><span class="pre">.pdf</span></code> appended.
+The function will only be called once.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Type:</th><td class="field-body">string()</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="mod.Graph.imageCommad">
+<code class="descname">imageCommad</code><a class="headerlink" href="#mod.Graph.imageCommad" title="Permalink to this definition">¶</a></dt>
+<dd><p>A command to be run in post-processing if a custom depiction is set.
+The command is only run once.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Type:</th><td class="field-body">string</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="method">
+<dt id="mod.graphGMLString">
+<code class="descclassname">mod.</code><code class="descname">graphGMLString</code><span class="sig-paren">(</span><em>s</em>, <em>name=None</em><span class="sig-paren">)</span><a class="headerlink" href="#mod.graphGMLString" title="Permalink to this definition">¶</a></dt>
+<dd><p>Load a graph in <a class="reference internal" href="../dataDesc/dataDesc.html#graph-gml"><span class="std std-ref">GML</span></a> format from a given string.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>d</strong> (<em>string</em>) &#8211; the string with the <a class="reference internal" href="../dataDesc/dataDesc.html#graph-gml"><span class="std std-ref">GML</span></a> data to load from.</li>
+<li><strong>name</strong> (<em>string</em>) &#8211; the name of the graph. If none is given the default name is used.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">the loaded graph.</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first"><a class="reference internal" href="#mod.Graph" title="mod.Graph"><code class="xref py py-class docutils literal"><span class="pre">Graph</span></code></a></p>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Raises:</th><td class="field-body"><p class="first last"><a class="reference internal" href="Error.html#mod.InputError" title="mod.InputError"><code class="xref py py-class docutils literal"><span class="pre">InputError</span></code></a> on bad input.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="mod.graphGML">
+<code class="descclassname">mod.</code><code class="descname">graphGML</code><span class="sig-paren">(</span><em>f</em>, <em>name=None</em><span class="sig-paren">)</span><a class="headerlink" href="#mod.graphGML" title="Permalink to this definition">¶</a></dt>
+<dd><p>Load a graph in <a class="reference internal" href="../dataDesc/dataDesc.html#graph-gml"><span class="std std-ref">GML</span></a> format from a given file.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>f</strong> (<em>string</em>) &#8211; name of the <a class="reference internal" href="../dataDesc/dataDesc.html#graph-gml"><span class="std std-ref">GML</span></a> file to be loaded.</li>
+<li><strong>name</strong> (<em>string</em>) &#8211; the name of the graph. If none is given the default name is used.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">the loaded graph.</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first"><a class="reference internal" href="#mod.Graph" title="mod.Graph"><code class="xref py py-class docutils literal"><span class="pre">Graph</span></code></a></p>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Raises:</th><td class="field-body"><p class="first last"><a class="reference internal" href="Error.html#mod.InputError" title="mod.InputError"><code class="xref py py-class docutils literal"><span class="pre">InputError</span></code></a> on bad input.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="mod.graphDFS">
+<code class="descclassname">mod.</code><code class="descname">graphDFS</code><span class="sig-paren">(</span><em>s</em>, <em>name=None</em><span class="sig-paren">)</span><a class="headerlink" href="#mod.graphDFS" title="Permalink to this definition">¶</a></dt>
+<dd><p>Load a graph from a <a class="reference internal" href="../dataDesc/dataDesc.html#graph-graphdfs"><span class="std std-ref">GraphDFS</span></a> string.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>s</strong> (<em>string</em>) &#8211; the <a class="reference internal" href="../dataDesc/dataDesc.html#graph-graphdfs"><span class="std std-ref">GraphDFS</span></a> string to parse.</li>
+<li><strong>name</strong> (<em>string</em>) &#8211; the name of the graph. If none is given the default name is used.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">the loaded graph.</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first"><a class="reference internal" href="#mod.Graph" title="mod.Graph"><code class="xref py py-class docutils literal"><span class="pre">Graph</span></code></a></p>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Raises:</th><td class="field-body"><p class="first last"><a class="reference internal" href="Error.html#mod.InputError" title="mod.InputError"><code class="xref py py-class docutils literal"><span class="pre">InputError</span></code></a> on bad input.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="mod.smiles">
+<code class="descclassname">mod.</code><code class="descname">smiles</code><span class="sig-paren">(</span><em>s</em>, <em>name=None</em><span class="sig-paren">)</span><a class="headerlink" href="#mod.smiles" title="Permalink to this definition">¶</a></dt>
+<dd><p>Load a molecule from a <a class="reference internal" href="../dataDesc/dataDesc.html#graph-smiles"><span class="std std-ref">SMILES</span></a> string.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>s</strong> (<em>string</em>) &#8211; the <a class="reference internal" href="../dataDesc/dataDesc.html#graph-smiles"><span class="std std-ref">SMILES</span></a> string to parse.</li>
+<li><strong>name</strong> (<em>string</em>) &#8211; the name of the graph. If none is given the default name is used.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">the loaded molecule.</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first"><a class="reference internal" href="#mod.Graph" title="mod.Graph"><code class="xref py py-class docutils literal"><span class="pre">Graph</span></code></a></p>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Raises:</th><td class="field-body"><p class="first last"><a class="reference internal" href="Error.html#mod.InputError" title="mod.InputError"><code class="xref py py-class docutils literal"><span class="pre">InputError</span></code></a> on bad input.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="class-graphvertex">
+<h2>3.1.7.2. Class <code class="docutils literal"><span class="pre">GraphVertex</span></code><a class="headerlink" href="#class-graphvertex" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="mod.GraphVertex">
+<em class="property">class </em><code class="descclassname">mod.</code><code class="descname">GraphVertex</code><a class="headerlink" href="#mod.GraphVertex" title="Permalink to this definition">¶</a></dt>
+<dd><p>A descriptor of either a vertex in a graph, or a null vertex.</p>
+<dl class="function">
+<dt id="mod.GraphVertex.__init__">
+<code class="descname">__init__</code><span class="sig-paren">(</span><em>self</em><span class="sig-paren">)</span><a class="headerlink" href="#mod.GraphVertex.__init__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Constructs a null descriptor.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="mod.GraphVertex.id">
+<code class="descname">id</code><a class="headerlink" href="#mod.GraphVertex.id" title="Permalink to this definition">¶</a></dt>
+<dd><p>(Read-only) The index of the vertex. It will be in the range <span class="math">\([0, numVertices[\)</span>.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Type:</th><td class="field-body">int</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Raises:</th><td class="field-body"><a class="reference internal" href="Error.html#mod.LogicError" title="mod.LogicError"><code class="xref py py-class docutils literal"><span class="pre">LogicError</span></code></a> if it is a null descriptor.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="mod.GraphVertex.graph">
+<code class="descname">graph</code><a class="headerlink" href="#mod.GraphVertex.graph" title="Permalink to this definition">¶</a></dt>
+<dd><p>(Read-only) The graph the vertex belongs to.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Type:</th><td class="field-body"><a class="reference internal" href="#mod.Graph" title="mod.Graph"><code class="xref py py-class docutils literal"><span class="pre">Graph</span></code></a></td>
+</tr>
+<tr class="field-even field"><th class="field-name">Raises:</th><td class="field-body"><a class="reference internal" href="Error.html#mod.LogicError" title="mod.LogicError"><code class="xref py py-class docutils literal"><span class="pre">LogicError</span></code></a> if it is a null descriptor.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="mod.GraphVertex.degree">
+<code class="descname">degree</code><a class="headerlink" href="#mod.GraphVertex.degree" title="Permalink to this definition">¶</a></dt>
+<dd><p>(Read-only) The degree of the vertex.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Type:</th><td class="field-body">int</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Raises:</th><td class="field-body"><a class="reference internal" href="Error.html#mod.LogicError" title="mod.LogicError"><code class="xref py py-class docutils literal"><span class="pre">LogicError</span></code></a> if it is a null descriptor.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="mod.GraphVertex.incidentEdges">
+<code class="descname">incidentEdges</code><a class="headerlink" href="#mod.GraphVertex.incidentEdges" title="Permalink to this definition">¶</a></dt>
+<dd><p>(Read-only) A range of incident edges to this vertex.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Type:</th><td class="field-body"><code class="xref py py-class docutils literal"><span class="pre">IncidentEdgeRange</span></code></td>
+</tr>
+<tr class="field-even field"><th class="field-name">Raises:</th><td class="field-body"><a class="reference internal" href="Error.html#mod.LogicError" title="mod.LogicError"><code class="xref py py-class docutils literal"><span class="pre">LogicError</span></code></a> if it is a null descriptor.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="mod.GraphVertex.stringLabel">
+<code class="descname">stringLabel</code><a class="headerlink" href="#mod.GraphVertex.stringLabel" title="Permalink to this definition">¶</a></dt>
+<dd><p>(Read-only) The string label of the vertex.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Type:</th><td class="field-body">string</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Raises:</th><td class="field-body"><a class="reference internal" href="Error.html#mod.LogicError" title="mod.LogicError"><code class="xref py py-class docutils literal"><span class="pre">LogicError</span></code></a> if it is a null descriptor.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="mod.GraphVertex.atomId">
+<code class="descname">atomId</code><a class="headerlink" href="#mod.GraphVertex.atomId" title="Permalink to this definition">¶</a></dt>
+<dd><p>(Read-only) The atom id of the vertex.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Type:</th><td class="field-body"><a class="reference internal" href="Chem.html#mod.AtomId" title="mod.AtomId"><code class="xref py py-class docutils literal"><span class="pre">AtomId</span></code></a></td>
+</tr>
+<tr class="field-even field"><th class="field-name">Raises:</th><td class="field-body"><a class="reference internal" href="Error.html#mod.LogicError" title="mod.LogicError"><code class="xref py py-class docutils literal"><span class="pre">LogicError</span></code></a> if it is a null descriptor.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="mod.GraphVertex.charge">
+<code class="descname">charge</code><a class="headerlink" href="#mod.GraphVertex.charge" title="Permalink to this definition">¶</a></dt>
+<dd><p>(Read-only) The charge of the vertex.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Type:</th><td class="field-body"><a class="reference internal" href="Chem.html#mod.Charge" title="mod.Charge"><code class="xref py py-class docutils literal"><span class="pre">Charge</span></code></a></td>
+</tr>
+<tr class="field-even field"><th class="field-name">Raises:</th><td class="field-body"><a class="reference internal" href="Error.html#mod.LogicError" title="mod.LogicError"><code class="xref py py-class docutils literal"><span class="pre">LogicError</span></code></a> if it is a null descriptor.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="class-graphedge">
+<h2>3.1.7.3. Class <code class="docutils literal"><span class="pre">GraphEdge</span></code><a class="headerlink" href="#class-graphedge" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="mod.GraphEdge">
+<em class="property">class </em><code class="descclassname">mod.</code><code class="descname">GraphEdge</code><a class="headerlink" href="#mod.GraphEdge" title="Permalink to this definition">¶</a></dt>
+<dd><p>A descriptor of either an edge in a graph, or a null edge.</p>
+<dl class="function">
+<dt id="mod.GraphEdge.__init__">
+<code class="descname">__init__</code><span class="sig-paren">(</span><em>self</em><span class="sig-paren">)</span><a class="headerlink" href="#mod.GraphEdge.__init__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Constructs a null descriptor.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="mod.GraphEdge.graph">
+<code class="descname">graph</code><a class="headerlink" href="#mod.GraphEdge.graph" title="Permalink to this definition">¶</a></dt>
+<dd><p>(Read-only) The graph the edge belongs to.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Type:</th><td class="field-body"><a class="reference internal" href="#mod.Graph" title="mod.Graph"><code class="xref py py-class docutils literal"><span class="pre">Graph</span></code></a></td>
+</tr>
+<tr class="field-even field"><th class="field-name">Raises:</th><td class="field-body"><a class="reference internal" href="Error.html#mod.LogicError" title="mod.LogicError"><code class="xref py py-class docutils literal"><span class="pre">LogicError</span></code></a> if it is a null descriptor.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="mod.GraphEdge.source">
+<code class="descname">source</code><a class="headerlink" href="#mod.GraphEdge.source" title="Permalink to this definition">¶</a></dt>
+<dd><p>(Read-only) The source vertex of the edge.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Type:</th><td class="field-body"><a class="reference internal" href="#mod.GraphVertex" title="mod.GraphVertex"><code class="xref py py-class docutils literal"><span class="pre">GraphVertex</span></code></a></td>
+</tr>
+<tr class="field-even field"><th class="field-name">Raises:</th><td class="field-body"><a class="reference internal" href="Error.html#mod.LogicError" title="mod.LogicError"><code class="xref py py-class docutils literal"><span class="pre">LogicError</span></code></a> if it is a null descriptor.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="mod.GraphEdge.target">
+<code class="descname">target</code><a class="headerlink" href="#mod.GraphEdge.target" title="Permalink to this definition">¶</a></dt>
+<dd><p>(Read-only) The target vertex of the edge.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Type:</th><td class="field-body"><a class="reference internal" href="#mod.GraphVertex" title="mod.GraphVertex"><code class="xref py py-class docutils literal"><span class="pre">GraphVertex</span></code></a></td>
+</tr>
+<tr class="field-even field"><th class="field-name">Raises:</th><td class="field-body"><a class="reference internal" href="Error.html#mod.LogicError" title="mod.LogicError"><code class="xref py py-class docutils literal"><span class="pre">LogicError</span></code></a> if it is a null descriptor.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="mod.GraphEdge.stringLabel">
+<code class="descname">stringLabel</code><a class="headerlink" href="#mod.GraphEdge.stringLabel" title="Permalink to this definition">¶</a></dt>
+<dd><p>(Read-only) The string label of the edge.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Type:</th><td class="field-body">string</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Raises:</th><td class="field-body"><a class="reference internal" href="Error.html#mod.LogicError" title="mod.LogicError"><code class="xref py py-class docutils literal"><span class="pre">LogicError</span></code></a> if it is a null descriptor.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="mod.GraphEdge.bondType">
+<code class="descname">bondType</code><a class="headerlink" href="#mod.GraphEdge.bondType" title="Permalink to this definition">¶</a></dt>
+<dd><p>(Read-only) The bond type of the edge.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Type:</th><td class="field-body"><a class="reference internal" href="Chem.html#mod.BondType" title="mod.BondType"><code class="xref py py-class docutils literal"><span class="pre">BondType</span></code></a></td>
+</tr>
+<tr class="field-even field"><th class="field-name">Raises:</th><td class="field-body"><a class="reference internal" href="Error.html#mod.LogicError" title="mod.LogicError"><code class="xref py py-class docutils literal"><span class="pre">LogicError</span></code></a> if it is a null descriptor.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="class-graphprinter">
+<h2>3.1.7.4. Class <code class="docutils literal"><span class="pre">GraphPrinter</span></code><a class="headerlink" href="#class-graphprinter" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="mod.GraphPrinter">
+<em class="property">class </em><code class="descclassname">mod.</code><code class="descname">GraphPrinter</code><a class="headerlink" href="#mod.GraphPrinter" title="Permalink to this definition">¶</a></dt>
+<dd><p>This class is used to configure how graphs are visualised.</p>
+<div class="admonition warning">
+<p class="first admonition-title">Warning</p>
+<p class="last">Some of these options greatly alter how graphs are depicted
+and the result may not accurately represent the underlying graph,
+and may make non-molecules look like molecules.</p>
+</div>
+<dl class="method">
+<dt id="mod.GraphPrinter.__init__">
+<code class="descname">__init__</code><span class="sig-paren">(</span><em>self</em><span class="sig-paren">)</span><a class="headerlink" href="#mod.GraphPrinter.__init__" title="Permalink to this definition">¶</a></dt>
+<dd><p>The default constructor enables edges as bonds and raised charges.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="mod.GraphPrinter.setMolDefault">
+<code class="descname">setMolDefault</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#mod.GraphPrinter.setMolDefault" title="Permalink to this definition">¶</a></dt>
+<dd><p>Shortcut for enabling all but thickening and index printing.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="mod.GraphPrinter.setReactionDefault">
+<code class="descname">setReactionDefault</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#mod.GraphPrinter.setReactionDefault" title="Permalink to this definition">¶</a></dt>
+<dd><p>Shortcut for enabling all but thickening, index printing and simplification of carbon atoms.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="mod.GraphPrinter.disableAll">
+<code class="descname">disableAll</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#mod.GraphPrinter.disableAll" title="Permalink to this definition">¶</a></dt>
+<dd><p>Disable all special printing features.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="mod.GraphPrinter.enableAll">
+<code class="descname">enableAll</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#mod.GraphPrinter.enableAll" title="Permalink to this definition">¶</a></dt>
+<dd><p>Enable all special printing features, except typewriter font.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="mod.GraphPrinter.edgesAsBonds">
+<code class="descname">edgesAsBonds</code><a class="headerlink" href="#mod.GraphPrinter.edgesAsBonds" title="Permalink to this definition">¶</a></dt>
+<dd><p>Control whether edges with special labels are drawn as chemical bonds.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Type:</th><td class="field-body">bool</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="mod.GraphPrinter.collapseHydrogens">
+<code class="descname">collapseHydrogens</code><a class="headerlink" href="#mod.GraphPrinter.collapseHydrogens" title="Permalink to this definition">¶</a></dt>
+<dd><p>Control whether vertices representing hydrogen atoms are collapsed into their neighbours labels.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Type:</th><td class="field-body">bool</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="mod.GraphPrinter.raiseCharges">
+<code class="descname">raiseCharges</code><a class="headerlink" href="#mod.GraphPrinter.raiseCharges" title="Permalink to this definition">¶</a></dt>
+<dd><p>Control whether a vertex label suffix encoding a charge is written as a superscript to the rest of the label.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Type:</th><td class="field-body">bool</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="mod.GraphPrinter.simpleCarbons">
+<code class="descname">simpleCarbons</code><a class="headerlink" href="#mod.GraphPrinter.simpleCarbons" title="Permalink to this definition">¶</a></dt>
+<dd><p>Control whether some vertices encoding carbon atoms are depicted without any label.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Type:</th><td class="field-body">bool</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="mod.GraphPrinter.thick">
+<code class="descname">thick</code><a class="headerlink" href="#mod.GraphPrinter.thick" title="Permalink to this definition">¶</a></dt>
+<dd><p>Control whether all edges are drawn thicker than normal and all labels are written in bold.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Type:</th><td class="field-body">bool</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="mod.GraphPrinter.withColour">
+<code class="descname">withColour</code><a class="headerlink" href="#mod.GraphPrinter.withColour" title="Permalink to this definition">¶</a></dt>
+<dd><p>Control whether colour is applied to certain elements of the graph which are molecule-like.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Type:</th><td class="field-body">bool</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="mod.GraphPrinter.withIndex">
+<code class="descname">withIndex</code><a class="headerlink" href="#mod.GraphPrinter.withIndex" title="Permalink to this definition">¶</a></dt>
+<dd><p>Control whether the underlying indices of the vertices are printed.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Type:</th><td class="field-body">bool</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="mod.GraphPrinter.withTexttt">
+<code class="descname">withTexttt</code><a class="headerlink" href="#mod.GraphPrinter.withTexttt" title="Permalink to this definition">¶</a></dt>
+<dd><p>Control whether the vertex and edge labels are written with typewriter font.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Type:</th><td class="field-body">bool</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="../index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">3.1.7. Graph</a><ul>
+<li><a class="reference internal" href="#class-graph">3.1.7.1. Class <code class="docutils literal"><span class="pre">Graph</span></code></a></li>
+<li><a class="reference internal" href="#class-graphvertex">3.1.7.2. Class <code class="docutils literal"><span class="pre">GraphVertex</span></code></a></li>
+<li><a class="reference internal" href="#class-graphedge">3.1.7.3. Class <code class="docutils literal"><span class="pre">GraphEdge</span></code></a></li>
+<li><a class="reference internal" href="#class-graphprinter">3.1.7.4. Class <code class="docutils literal"><span class="pre">GraphPrinter</span></code></a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="Error.html"
+                        title="previous chapter">3.1.6. Error</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="Misc.html"
+                        title="next chapter">3.1.8. Misc</a></p>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../_sources/pymod/Graph.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="Misc.html" title="3.1.8. Misc"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="Error.html" title="3.1.6. Error"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">MØD v0.5.0 documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="pymod.html" >3. PyMØD</a> &raquo;</li>
+          <li class="nav-item nav-item-2"><a href="api.html" >3.1. API Reference</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &copy; Copyright 2013-2015, Jakob Lykke Andersen.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.4a0+.
+    </div>
+  </body>
+</html>
