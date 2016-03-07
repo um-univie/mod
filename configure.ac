@@ -1,0 +1,484 @@
+AC_PREREQ([2.68])
+# http://stackoverflow.com/questions/8559456/read-a-version-number-from-a-file-in-configure-ac
+AC_INIT([mod], m4_esyscmd([tr -d '\n' < VERSION]), [jakob@caput.dk])
+AC_LANG([C++])
+AC_CONFIG_AUX_DIR([auxConfig])
+AC_CONFIG_SRCDIR([src/mod/Config.cpp])
+AM_INIT_AUTOMAKE([1.11 foreign silent-rules subdir-objects -Wall -Werror tar-ustar nostdinc])
+# this AM_PROG_AR call should not be needed, but see http://debbugs.gnu.org/cgi/bugreport.cgi?bug=11401%3E
+AM_PROG_AR
+LT_INIT([shared disable-static])
+#AC_SUBST([LIBTOOL_DEPS])
+
+AC_CONFIG_MACRO_DIR([m4])
+m4_include([m4/ax_prefix_config_h.m4])
+m4_include([m4/ax_boost_base.m4])
+m4_include([m4/ax_cxx_compile_stdcxx_11.m4])
+
+AC_CONFIG_HEADERS([src/mod/BuildConfig.h_])
+AX_PREFIX_CONFIG_H([src/mod/BuildConfig.h], [MOD], [src/mod/BuildConfig.h_])
+
+
+##########################################################################
+# Constants and Variable Information
+##########################################################################
+# search build-generated sources, distributed source, and our Boost files
+AM_CPPFLAGS="-I\$(top_builddir)/src -I\$(top_srcdir)/src"
+AM_CPPFLAGS="$AM_CPPFLAGS -DBOOST_SPIRIT_USE_PHOENIX_V3 -DBOOST_RESULT_OF_USE_DECLTYPE $BOOST_CPPFLAGS -DBOOST_SYSTEM_NO_DEPRECATED"
+AM_CXXFLAGS="-Wno-unused-local-typedefs -Wno-unused-parameter -Wno-comment -Wno-maybe-uninitialized -Wno-deprecated-declarations"
+AM_LDFLAGS="-no-undefined"
+AM_LDLIBS=""
+# so we can restore before each test
+CPPFLAGS=${CPPFLAGS:-""}
+CXXFLAGS=${CXXFLAGS:-""}
+LDFLAGS=${LDFLAGS:-""}
+LDLIBS=${LDLIBS:-""}
+LIBS=${LIBS:-""}
+orig_CPPFLAGS=$CPPFLAGS
+orig_CXXFLAGS=$CXXFLAGS
+orig_LDFLAGS=$LDFLAGS
+orig_LDLIBS=$LDLIBS
+orig_LIBS=$LIBS
+
+
+# Top level options 
+##########################################################################
+# Documentation ----------------------------------------------------------
+default_enable_doc_checks="yes"
+# PostMØD ----------------------------------------------------------------
+default_enable_postmod="yes"
+# PyMØD ------------------------------------------------------------------
+default_enable_pymod="yes"
+# ENABLE_PYMOD
+
+# Individual checks
+##########################################################################
+# C++11 ------------------------------------------------------------------
+# Boost ------------------------------------------------------------------
+boostReqVersion="1.56.0"
+# Graphviz --------------------------------------------------------------
+# if PostMØD checks
+# Open Babel -------------------------------------------------------------
+default_with_OpenBabel="yes"
+obabelReqVersion="2.3.2"
+# HAVE_OPENBABEL
+# pdf2svg ----------------------------------------------------------------
+# if PostMØD checks
+# pdflatex ---------------------------------------------------------------
+# if PostMØD checks
+# Python -----------------------------------------------------------------
+# PYTHON_LDLIBS
+# libSBML ----------------------------------------------------------------
+default_with_SBML="no"
+# HAVE_SBML
+# Sphinx -----------------------------------------------------------------
+default_enable_sphinx="yes"
+# ENABLE_SPHINX
+# Boost Python (depends on Boost and Python) -----------------------------
+# BOOST_PYTHON_LIB_NAME
+
+##########################################################################
+# Top level options 
+##########################################################################
+# PostMØD ----------------------------------------------------------------
+AC_ARG_ENABLE([postmod],
+	[AS_HELP_STRING([--enable-postmod=yes|no],
+		[Enable/disable building of the post-processor.])],
+	[
+if test "$enable_postmod" != "yes" -a "$enable_postmod" != "no"; then
+	AC_MSG_ERROR(["Invalid value '$enable_postmod' for --enable-postmod."])
+fi
+], [enable_postmod=$default_enable_postmod])
+AM_CONDITIONAL([ENABLE_POSTMOD], [test "$enable_postmod" = "yes"])
+
+# PyMØD ------------------------------------------------------------------
+AC_ARG_ENABLE([pymod],
+	[AS_HELP_STRING([--enable-pymod=yes|no],
+		[Enable/disable building of the Python bindings for MØD.])],
+	[
+if test "$enable_pymod" != "yes" -a "$enable_pymod" != "no"; then
+	AC_MSG_ERROR(["Invalid value '$enable_pymod' for --enable-pymod."])
+fi	
+], [enable_pymod=$default_enable_pymod])
+AM_CONDITIONAL([ENABLE_PYMOD], [test "$enable_pymod" = "yes"])
+
+# Check documentation requirements --------------------------------------
+AC_ARG_ENABLE([doc_checks],
+	[AS_HELP_STRING([--enable-doc-checks=yes|no],
+		[Enable/disable configure checks for building the documentation.])],
+	[
+if test "$enable_doc_checks" != "yes" -a "$enable_doc_checks" != "no"; then
+	AC_MSG_ERROR(["Invalid value '$enable_doc_checks' for --enable-doc-checks."])
+fi
+], [enable_doc_checks=$default_enable_doc_checks])
+
+##########################################################################
+# Options for individual dependencies
+##########################################################################
+
+Ipaths=()
+Lpaths=()
+function printPaths {
+	if test ${#Ipaths[@]} > 0; then
+		AC_MSG_NOTICE([Specified I paths are:])
+		for p in ${Ipaths[[@]]}; do
+			AC_MSG_NOTICE([   $p])
+		done
+	fi
+	if test ${#Lpaths[@]} > 0; then
+		AC_MSG_NOTICE([Specified L paths are:])
+		for p in ${Lpaths[[@]]}; do
+			AC_MSG_NOTICE([   $p])
+		done
+	fi
+}
+doPathSort="no"
+function restoreFlags {
+	CPPFLAGS=$orig_CPPFLAGS
+	CXXFLAGS=$orig_CXXFLAGS
+	LDFLAGS=$orig_LDFLAGS
+	LDLIBS=$orig_LDLIBS
+	LIBS=$orig_LIBS
+	if test "$doPathSort" = "yes"; then
+		doPathSort="no"
+		Ipaths=($(for p in ${Ipaths[[@]]}; do echo $p; done | sort | uniq))
+		Lpaths=($(for p in ${Lpaths[[@]]}; do echo $p; done | sort | uniq))
+	fi
+	for p in ${Ipaths[[@]]}; do
+		CPPFLAGS+=" -I$p"
+	done
+	for p in ${Lpaths[[@]]}; do
+		LDFLAGS+=" -L$p -Wl,-rpath -Wl,$p"
+	done
+}
+function addIPath {
+	Ipaths+=("$1")
+	doPathSort="yes"
+}
+function addLPath {
+	Lpaths+=("$1")
+	doPathSort="yes"
+	PKG_CONFIG_PATH+=":$1/pkgconfig"
+	export PKG_CONFIG_PATH
+}
+
+# Boost ------------------------------------------------------------------
+AC_ARG_WITH([boost],
+	[AS_HELP_STRING([--with-boost=arg],
+		[yes: enable Boost, <path>: add specified location for dependency searching, no: not an option, you need Boost.])],
+	[], [with_boost=yes])
+if test "$with_boost" != "yes" -a "$with_boost" != "no"; then
+	addIPath "$with_boost/include"
+	addLPath "$with_boost/lib"
+fi
+
+# Open Babel -------------------------------------------------------------
+AC_ARG_WITH([OpenBabel],
+	[AS_HELP_STRING([--with-OpenBabel=prefix],
+		[yes: enable Open Babel, no: disable Open Babel, <path>: use Open Babel from specified location.])],
+	[], [with_OpenBabel=$default_with_OpenBabel])
+if test "$with_OpenBabel" != no -a "$with_OpenBabel" != "yes"; then
+	addIPath "$with_OpenBabel/include"
+	addLPath "$with_OpenBabel/lib"
+fi
+
+# libSBML ----------------------------------------------------------------
+AC_ARG_WITH([SBML],
+	[AS_HELP_STRING([--with-SBML=arg],
+		[yes: enable libSBML, no: disable libSBML, <prefix>: use libSBML from specified location. Note that libSBML must be compiled with C++ namespace wrapping.])],
+	[], [with_SBML=$default_with_SBML])
+if test "$with_SBML" != "no" -a "$with_SBML" != "yes"; then
+	addIPath "$with_SBML/include"
+	addLPath "$with_SBML/lib"
+fi
+
+if test "$enable_pymod" = "yes"; then
+	AC_PATH_PROG([PYTHON], [python3], [no])
+	if test "$PYTHON" = "no"; then
+		AC_MSG_ERROR([Could not find the python3 interpreter. It must be found via PATH.])
+	fi
+	AC_PATH_PROG([PYTHON_CONFIG], [python3-config], [no])
+	if test "$PYTHON_CONFIG" = "no"; then
+		AC_MSG_ERROR([Could not find python3-config. It must be found via PATH.])
+	fi
+	PYTHON_CPPFLAGS=$(python3-config --includes)
+	for a in $PYTHON_CPPFLAGS; do
+		if test "${a:0:2}" = "-I"; then
+			addIPath "${a:2}"
+		fi
+	done
+	PYTHON_LDFLAGS=$(python3-config --ldflags)
+	for a in $PYTHON_LDFLAGS; do
+		if test "${a:0:2}" = "-L"; then
+			addLPath "${a:2}"
+		fi
+	done
+fi
+
+##########################################################################
+# Check Stuff
+##########################################################################
+
+# Compiler Stuff ---------------------------------------------------------
+AC_PROG_CXXCPP
+AC_PROG_CXX
+CXXFLAGS=""
+AX_CXX_COMPILE_STDCXX_11([noext])
+AM_CXXFLAGS="$AM_CXXFLAGS $CXXFLAGS"
+CXXFLAGS=""
+AC_LANG([C++])
+
+# Boost ------------------------------------------------------------------
+restoreFlags
+if test "$with_boost" = "no"; then
+	AC_MSG_ERROR([You have to want Boost libraries. --with-boost=no is not an option.])
+else
+	AC_CHECK_HEADER([boost/version.hpp],
+		[],
+		[AC_MSG_NOTICE([Boost not found.])
+		 printPaths
+		 if test $with_boost != "yes"; then
+			AC_MSG_ERROR([Is the path "$with_boost" correct?])
+		 else
+			AC_MSG_ERROR([Use --with-boost=<path> to specify where Boost is installed.])
+		 fi
+	])
+
+	AC_MSG_CHECKING(for Boost >= $boostReqVersion)
+	# these checks are based on the ax_boost_base.m4 macros
+	expr "$boostReqVersion" : '[[0-9]]\{1,\}\.[[0-9]]\{1,\}\.[[0-9]]\{1,\}$' &> /dev/null
+	if test $? -ne 0; then
+		AC_MSG_ERROR([Boost version "$boostReqVersion" is invalid. It most be on the form MAJOR.MINOR.PATCH])
+	fi
+	major=$(expr "$boostReqVersion" : '\([[0-9]]\{1,\}\)\.[[0-9]]\{1,\}\.[[0-9]]\{1,\}$')
+	minor=$(expr "$boostReqVersion" : '[[0-9]]\{1,\}\.\([[0-9]]\{1,\}\)\.[[0-9]]\{1,\}$')
+	patch=$(expr "$boostReqVersion" : '[[0-9]]\{1,\}\.[[0-9]]\{1,\}\.\([[0-9]]\{1,\}\)$')
+	reqVersion=$(expr \( $major \* 1000 \+ $minor \) \* 100 + $patch)
+	AC_COMPILE_IFELSE([AC_LANG_SOURCE([[
+		#include <boost/version.hpp>
+		#if BOOST_VERSION >= $reqVersion
+		// yay
+		#else
+		#error Too old
+		#endif
+	]])], [versionOk="yes"], [versionOk="no"])
+	AC_MSG_RESULT($versionOk)
+	if test $versionOk = "no"; then
+		AC_MSG_ERROR([Boost version too old.])
+	fi
+fi
+
+# Graphviz ---------------------------------------------------------------
+restoreFlags
+if test "$enable_postmod" = "yes"; then
+	AC_CHECK_PROGS([DOT], [dot], [no])
+	if test "$DOT" = "no"; then
+		AC_MSG_ERROR([dot (from Graphviz) is essential for PostMØD.
+$postmod_check_fail_msg])
+	fi
+
+	graphviz_format_fail_msg="Please report false positives/negatives on the Graphviz image formats checks."
+
+	AC_MSG_CHECKING([Graphviz image format, cairo svg output])
+	dot -P 2>&1 | grep "cairo_device_svg -> output_svg" &> /dev/null
+	if test $? -ne 0; then
+		AC_MSG_RESULT([not found])
+		AC_MSG_ERROR([svg output of dot is essential for PostMØD.
+$graphviz_format_fail_msg
+$postmod_check_fail_msg])
+	else
+		AC_MSG_RESULT([found])
+	fi
+
+	AC_MSG_CHECKING([Graphviz image format, cairo pdf output])
+	dot -P 2>&1 | grep "cairo_device_pdf -> output_pdf" &> /dev/null
+	if test $? -ne 0; then
+		AC_MSG_RESULT([not found])
+		AC_MSG_ERROR([pdf output of dot is essential for PostMØD.
+$graphviz_format_fail_msg
+$postmod_check_fail_msg])
+	else
+		AC_MSG_RESULT([found])
+	fi
+
+	AC_MSG_CHECKING([Graphviz image format, cairo svg input via rsvg])
+	dot -P 2>&1 | grep "rsvg_loadimage_svg -> render_cairo" &> /dev/null
+	if test $? -ne 0; then
+		AC_MSG_RESULT([not found])
+		AC_MSG_ERROR([svg input of dot is essential for PostMØD.
+$graphviz_format_fail_msg
+$postmod_check_fail_msg])
+	else
+		AC_MSG_RESULT([found])
+	fi
+fi
+
+# Open Babel -------------------------------------------------------------
+restoreFlags
+if test "$with_OpenBabel" != "no"; then
+	AC_DEFINE(HAVE_OPENBABEL, 1, [Define if you have Open Babel available.])
+	PKG_CHECK_MODULES([OpenBabel], [openbabel-2.0 >= $obabelReqVersion], [], [
+		AC_MSG_NOTICE([$OpenBabel_PKG_ERRORS])
+		AC_MSG_NOTICE([PKG_CONFIG_PATH=$PKG_CONFIG_PATH])
+		printPaths
+		AC_MSG_ERROR([Use --with-OpenBabel=prefix, or set PKG_CONFIG_PATH for non-standard install prefix.])])
+	addIPath "$(pkg-config openbabel-2.0 --variable=pkgincludedir)"
+fi
+AM_CONDITIONAL([HAVE_OPENBABEL], [test "$with_OpenBabel" != "no"])
+
+# pdf2svg ----------------------------------------------------------------
+restoreFlags
+if test "$enable_postmod" = "yes"; then
+	AC_CHECK_PROGS([PDF2SVG], [pdf2svg], [no])
+	if test "$PDF2SVG" = "no"; then
+		AC_MSG_ERROR([pdf2svg is essential for PostMØD.
+$postmod_check_fail_msg])
+	fi
+fi
+
+# pdflatex ---------------------------------------------------------------
+restoreFlags
+if test "$enable_postmod" = "yes"; then
+	AC_CHECK_PROGS([PDFLATEX], [pdflatex], [no])
+	if test "$PDFLATEX" = "no"; then
+		AC_MSG_ERROR([pdflatex is essential for PostMØD.
+$postmod_check_fail_msg])
+	fi
+fi
+
+# Python -----------------------------------------------------------------
+restoreFlags
+if test "$enable_pymod" = "yes"; then
+	AC_CHECK_HEADER([Python.h], [], [
+		printPaths
+		AC_MSG_ERROR([Could not find Python headers.])
+	])
+	PYTHON_LDLIBS=$(python3-config --libs)
+	AC_SUBST([PYTHON_LDLIBS])
+	PYTHON_VERSION=$(python3 -c "import sys; print(sys.version_info.minor);")
+fi
+
+# libSBML ----------------------------------------------------------------
+restoreFlags
+if test "$with_SBML" != "no"; then
+	AC_DEFINE(HAVE_SBML, 1, [Define if you have libSBML available.])
+
+	AC_MSG_CHECKING([for libSBML library headers])
+	AC_COMPILE_IFELSE([AC_LANG_SOURCE([
+			#define LIBSBML_USE_CPP_NAMESPACE
+			#include <sbml/SBMLDocument.h>
+		])],
+		[AC_MSG_RESULT([yes])],
+		[
+			AC_MSG_RESULT([no])
+			AC_MSG_NOTICE([libSBML is enabled but not found.])
+			printPaths
+			AC_MSG_ERROR([Use --with-SBML=<prefix> to set path for SBML installation folder.])
+		])
+
+	AC_MSG_CHECKING([for libSBML library])
+	AC_LINK_IFELSE([AC_LANG_SOURCE([
+			#define LIBSBML_USE_CPP_NAMESPACE
+			#include <sbml/SBMLDocument.h>
+			int main() {return 0;}
+		])],
+		[AC_MSG_RESULT([yes])],
+		[
+			AC_MSG_RESULT([no])
+			AC_MSG_NOTICE([libSBML is enabled but not found.])
+			printPaths
+			AC_MSG_ERROR([Use --with-SBML=<prefix> to set path for SBML installation folder.])
+		])
+
+	AC_MSG_CHECKING([for namespace wrapping of libSBML])
+	AC_LINK_IFELSE([AC_LANG_SOURCE([
+			#define LIBSBML_USE_CPP_NAMESPACE
+			#include <sbml/SBMLDocument.h>
+			using namespace libsbml;
+			int main() {return 0;}
+		])],
+		[AC_MSG_RESULT([yes])],
+		[
+			AC_MSG_RESULT([no])
+			AC_MSG_NOTICE([libSBML does not appear to be compiled with C++ namespace wrapping, which is required.])
+			AC_MSG_ERROR([Give '-DWITH_CPP_NAMESPACE=yes' as argument to 'cmake' when configuring libSBML.])
+		])
+fi
+AM_CONDITIONAL([HAVE_SBML], [test "$with_SBML" != "no"])
+
+# Sphinx -----------------------------------------------------------------
+restoreFlags
+AC_CHECK_PROGS([SPHINXBUILD], [sphinx-build sphinx-build3 sphinx-build2], [no])
+if test "$SPHINXBUILD" = "no"; then
+	if test "$enable_doc_checks" = "yes"; then
+		AC_MSG_ERROR([sphinx-build is required for building the documentation.
+This error can be suppressed with '--disable-doc-checks'])
+	else
+		AC_MSG_WARN([sphinx-build is required for building the documentation.
+This warning will be an error without '--disable-doc-checks'])
+	fi
+fi
+AM_CONDITIONAL([ENABLE_SPHINX], [test "$SPHINXBUILD" != "no"])
+
+# Boost Python -----------------------------------------------------------
+if test "$enable_pymod" = "yes"; then
+	AC_CHECK_HEADER([boost/python/module.hpp],
+		[],
+		[AC_MSG_ERROR([Could not find Boost.Python.])])
+	# Find the proper name for the library.
+	# Ubuntu thinks it's great to only have the -py3X names.
+	# PYTHON_VERSION was set when we checked for python3
+	BOOST_PYTHON_LIB_NAME=""
+	for libName in boost_python{3,-py3$PYTHON_VERSION}; do
+		restoreFlags
+		LIBS+=" -l$libName $PYTHON_LDLIBS"
+		AC_MSG_CHECKING([for Boost.Python library, using Python 3 (lib name=$libName)])
+		AC_LINK_IFELSE([
+			AC_LANG_SOURCE([[
+				#include <boost/python/module.hpp>
+				using namespace boost::python;
+				BOOST_PYTHON_MODULE(test) { throw "Boost::Python test."; }
+				int main() {}]])],
+			[
+				AC_MSG_RESULT([yes])
+				BOOST_PYTHON_LIB_NAME="$libName"
+				break
+			],
+			[
+				AC_MSG_RESULT([no])
+			])
+	done
+	if test "x$BOOST_PYTHON_LIB_NAME" = "x"; then
+		AC_MSG_ERROR([Could not link test program using Boost.Python.])
+	fi
+	AC_SUBST([BOOST_PYTHON_LIB_NAME])
+fi
+
+##########################################################################
+# pkg-config file
+##########################################################################
+restoreFlags
+PKG_INCLUDES=""
+for p in ${Ipaths[[@]]}; do
+	PKG_INCLUDES+=" -I$p"
+done
+PKG_LIBS="-pthread"
+
+AC_SUBST([PKG_INCLUDES])
+AC_SUBST([PKG_LIBS])
+
+##########################################################################
+# Finalize
+##########################################################################
+restoreFlags
+AC_SUBST([AM_CPPFLAGS])
+AC_SUBST([AM_CXXFLAGS])
+AC_SUBST([AM_LDFLAGS])
+AC_SUBST([AM_LDLIBS])
+
+AC_CONFIG_FILES([
+	Makefile
+	src/Makefile
+	doc/Makefile
+	src/lib/pkgconfig/mod.pc])
+AC_OUTPUT

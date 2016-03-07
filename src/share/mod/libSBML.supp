@@ -1,0 +1,97 @@
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Leak
+   fun:_Znwm
+   fun:_ZN7libsbml17SBMLRuleConverter4initEv
+   fun:_ZN7libsbml21SBMLConverterRegisterINS_17SBMLRuleConverterEEC1Ev
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Leak
+   fun:_Znwm
+   fun:_ZNK7libsbml17SBMLRuleConverter5cloneEv
+   fun:_ZN7libsbml21SBMLConverterRegistry12addConverterEPKNS_13SBMLConverterE
+   fun:_ZN7libsbml17SBMLRuleConverter4initEv
+   fun:_ZN7libsbml21SBMLConverterRegisterINS_17SBMLRuleConverterEEC1Ev
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Leak
+   fun:_Znwm
+   fun:_ZN7libsbml31SBMLFunctionDefinitionConverter4initEv
+   fun:_ZN7libsbml21SBMLConverterRegisterINS_31SBMLFunctionDefinitionConverterEEC1Ev
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Leak
+   fun:_Znwm
+   fun:_ZNK7libsbml31SBMLFunctionDefinitionConverter5cloneEv
+   fun:_ZN7libsbml21SBMLConverterRegistry12addConverterEPKNS_13SBMLConverterE
+   fun:_ZN7libsbml31SBMLFunctionDefinitionConverter4initEv
+   fun:_ZN7libsbml21SBMLConverterRegisterINS_31SBMLFunctionDefinitionConverterEEC1Ev
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Leak
+   fun:_Znwm
+   fun:_ZN7libsbml30SBMLInitialAssignmentConverter4initEv
+   fun:_ZN7libsbml21SBMLConverterRegisterINS_30SBMLInitialAssignmentConverterEEC1Ev
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Leak
+   fun:_Znwm
+   fun:_ZNK7libsbml30SBMLInitialAssignmentConverter5cloneEv
+   fun:_ZN7libsbml21SBMLConverterRegistry12addConverterEPKNS_13SBMLConverterE
+   fun:_ZN7libsbml30SBMLInitialAssignmentConverter4initEv
+   fun:_ZN7libsbml21SBMLConverterRegisterINS_30SBMLInitialAssignmentConverterEEC1Ev
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Leak
+   fun:_Znwm
+   fun:_ZN7libsbml25SBMLLevelVersionConverter4initEv
+   fun:_ZN7libsbml21SBMLConverterRegisterINS_25SBMLLevelVersionConverterEEC1Ev
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Leak
+   fun:_Znwm
+   fun:_ZNK7libsbml25SBMLLevelVersionConverter5cloneEv
+   fun:_ZN7libsbml21SBMLConverterRegistry12addConverterEPKNS_13SBMLConverterE
+   fun:_ZN7libsbml25SBMLLevelVersionConverter4initEv
+   fun:_ZN7libsbml21SBMLConverterRegisterINS_25SBMLLevelVersionConverterEEC1Ev
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Leak
+   fun:_Znwm
+   fun:_ZN7libsbml25SBMLStripPackageConverter4initEv
+   fun:_ZN7libsbml21SBMLConverterRegisterINS_25SBMLStripPackageConverterEEC1Ev
+   fun:_Z41__static_initialization_and_destruction_0ii
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Leak
+   fun:_Znwm
+   fun:_ZNK7libsbml25SBMLStripPackageConverter5cloneEv
+   fun:_ZN7libsbml21SBMLConverterRegistry12addConverterEPKNS_13SBMLConverterE
+   fun:_ZN7libsbml25SBMLStripPackageConverter4initEv
+   fun:_ZN7libsbml21SBMLConverterRegisterINS_25SBMLStripPackageConverterEEC1Ev
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Leak
+   fun:_Znwm
+   fun:_ZN7libsbml18SBMLUnitsConverter4initEv
+   fun:_ZN7libsbml21SBMLConverterRegisterINS_18SBMLUnitsConverterEEC1Ev
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Leak
+   fun:_Znwm
+   fun:_ZNK7libsbml18SBMLUnitsConverter5cloneEv
+   fun:_ZN7libsbml21SBMLConverterRegistry12addConverterEPKNS_13SBMLConverterE
+   fun:_ZN7libsbml18SBMLUnitsConverter4initEv
+   fun:_ZN7libsbml21SBMLConverterRegisterINS_18SBMLUnitsConverterEEC1Ev
+}
