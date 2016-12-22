@@ -1,0 +1,19 @@
+.. _py-Error:
+
+**********************************************************
+Error
+**********************************************************
+.. default-domain:: py
+
+.. py:currentmodule:: mod
+.. cpp:namespace:: mod
+
+.. py:exception:: FatalError
+
+    See :cpp:class:`FatalError`.
+.. py:exception:: InputError
+
+    See :cpp:class:`InputError`.
+.. py:exception:: LogicError
+
+    See :cpp:class:`LogicError`.

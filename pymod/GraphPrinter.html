@@ -1,0 +1,301 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>3.1.11. GraphPrinter &#8212; MØD 65d3c41 documentation</title>
+    
+    <link rel="stylesheet" href="../_static/classic.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '65d3c41',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="3.1.12. Misc" href="Misc.html" />
+    <link rel="prev" title="3.1.10. GraphGraphInterface" href="GraphGraphInterface.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="Misc.html" title="3.1.12. Misc"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="GraphGraphInterface.html" title="3.1.10. GraphGraphInterface"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">MØD 65d3c41 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="pymod.html" >3. PyMØD</a> &#187;</li>
+          <li class="nav-item nav-item-2"><a href="api.html" accesskey="U">3.1. API Reference</a> &#187;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="graphprinter">
+<span id="py-graphprinter"></span><h1>3.1.11. GraphPrinter<a class="headerlink" href="#graphprinter" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="class-graphprinter">
+<h2>3.1.11.1. Class <code class="docutils literal"><span class="pre">GraphPrinter</span></code><a class="headerlink" href="#class-graphprinter" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="mod.GraphPrinter">
+<em class="property">class </em><code class="descclassname">mod.</code><code class="descname">GraphPrinter</code><a class="headerlink" href="#mod.GraphPrinter" title="Permalink to this definition">¶</a></dt>
+<dd><p>This class is used to configure how graphs are visualised.</p>
+<div class="admonition warning">
+<p class="first admonition-title">Warning</p>
+<p class="last">Some of these options greatly alter how graphs are depicted
+and the result may not accurately represent the underlying graph,
+and may make non-molecules look like molecules.</p>
+</div>
+<dl class="method">
+<dt id="mod.GraphPrinter.__init__">
+<code class="descname">__init__</code><span class="sig-paren">(</span><em>self</em><span class="sig-paren">)</span><a class="headerlink" href="#mod.GraphPrinter.__init__" title="Permalink to this definition">¶</a></dt>
+<dd><p>The default constructor enables edges as bonds and raised charges.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="mod.GraphPrinter.setMolDefault">
+<code class="descname">setMolDefault</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#mod.GraphPrinter.setMolDefault" title="Permalink to this definition">¶</a></dt>
+<dd><p>Shortcut for enabling all but thickening and index printing.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="mod.GraphPrinter.setReactionDefault">
+<code class="descname">setReactionDefault</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#mod.GraphPrinter.setReactionDefault" title="Permalink to this definition">¶</a></dt>
+<dd><p>Shortcut for enabling all but thickening, index printing and simplification of carbon atoms.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="mod.GraphPrinter.disableAll">
+<code class="descname">disableAll</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#mod.GraphPrinter.disableAll" title="Permalink to this definition">¶</a></dt>
+<dd><p>Disable all special printing features.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="mod.GraphPrinter.enableAll">
+<code class="descname">enableAll</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#mod.GraphPrinter.enableAll" title="Permalink to this definition">¶</a></dt>
+<dd><p>Enable all special printing features, except typewriter font.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="mod.GraphPrinter.edgesAsBonds">
+<code class="descname">edgesAsBonds</code><a class="headerlink" href="#mod.GraphPrinter.edgesAsBonds" title="Permalink to this definition">¶</a></dt>
+<dd><p>Control whether edges with special labels are drawn as chemical bonds.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Type:</th><td class="field-body">bool</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="mod.GraphPrinter.collapseHydrogens">
+<code class="descname">collapseHydrogens</code><a class="headerlink" href="#mod.GraphPrinter.collapseHydrogens" title="Permalink to this definition">¶</a></dt>
+<dd><p>Control whether vertices representing hydrogen atoms are collapsed into their neighbours labels.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Type:</th><td class="field-body">bool</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="mod.GraphPrinter.raiseCharges">
+<code class="descname">raiseCharges</code><a class="headerlink" href="#mod.GraphPrinter.raiseCharges" title="Permalink to this definition">¶</a></dt>
+<dd><p>Control whether a vertex label suffix encoding a charge is written as a superscript to the rest of the label.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Type:</th><td class="field-body">bool</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="mod.GraphPrinter.simpleCarbons">
+<code class="descname">simpleCarbons</code><a class="headerlink" href="#mod.GraphPrinter.simpleCarbons" title="Permalink to this definition">¶</a></dt>
+<dd><p>Control whether some vertices encoding carbon atoms are depicted without any label.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Type:</th><td class="field-body">bool</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="mod.GraphPrinter.thick">
+<code class="descname">thick</code><a class="headerlink" href="#mod.GraphPrinter.thick" title="Permalink to this definition">¶</a></dt>
+<dd><p>Control whether all edges are drawn thicker than normal and all labels are written in bold.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Type:</th><td class="field-body">bool</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="mod.GraphPrinter.withColour">
+<code class="descname">withColour</code><a class="headerlink" href="#mod.GraphPrinter.withColour" title="Permalink to this definition">¶</a></dt>
+<dd><p>Control whether colour is applied to certain elements of the graph which are molecule-like.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Type:</th><td class="field-body">bool</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="mod.GraphPrinter.withIndex">
+<code class="descname">withIndex</code><a class="headerlink" href="#mod.GraphPrinter.withIndex" title="Permalink to this definition">¶</a></dt>
+<dd><p>Control whether the underlying indices of the vertices are printed.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Type:</th><td class="field-body">bool</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="mod.GraphPrinter.withTexttt">
+<code class="descname">withTexttt</code><a class="headerlink" href="#mod.GraphPrinter.withTexttt" title="Permalink to this definition">¶</a></dt>
+<dd><p>Control whether the vertex and edge labels are written with typewriter font.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Type:</th><td class="field-body">bool</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="mod.GraphPrinter.rotation">
+<code class="descname">rotation</code><a class="headerlink" href="#mod.GraphPrinter.rotation" title="Permalink to this definition">¶</a></dt>
+<dd><p>Rotation of internally computed coordinates.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Type:</th><td class="field-body">int</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="../index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">3.1.11. GraphPrinter</a><ul>
+<li><a class="reference internal" href="#class-graphprinter">3.1.11.1. Class <code class="docutils literal"><span class="pre">GraphPrinter</span></code></a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="GraphGraphInterface.html"
+                        title="previous chapter">3.1.10. GraphGraphInterface</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="Misc.html"
+                        title="next chapter">3.1.12. Misc</a></p>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../_sources/pymod/GraphPrinter.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="Misc.html" title="3.1.12. Misc"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="GraphGraphInterface.html" title="3.1.10. GraphGraphInterface"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">MØD 65d3c41 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="pymod.html" >3. PyMØD</a> &#187;</li>
+          <li class="nav-item nav-item-2"><a href="api.html" >3.1. API Reference</a> &#187;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2013-2015, Jakob Lykke Andersen.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.5a3.
+    </div>
+  </body>
+</html>

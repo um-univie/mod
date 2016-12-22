@@ -1,0 +1,284 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>2.2.12. GraphPrinter.h &#8212; MØD 65d3c41 documentation</title>
+    
+    <link rel="stylesheet" href="../_static/classic.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '65d3c41',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="2.2.13. Misc.h" href="Misc.html" />
+    <link rel="prev" title="2.2.11. GraphGraphInterface.h" href="GraphGraphInterface.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="Misc.html" title="2.2.13. Misc.h"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="GraphGraphInterface.html" title="2.2.11. GraphGraphInterface.h"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">MØD 65d3c41 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="libmod.html" >2. libMØD</a> &#187;</li>
+          <li class="nav-item nav-item-2"><a href="api.html" accesskey="U">2.2. API Reference</a> &#187;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="graphprinter-h">
+<span id="cpp-graphprinter"></span><h1>2.2.12. GraphPrinter.h<a class="headerlink" href="#graphprinter-h" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="class-graphprinter">
+<h2>2.2.12.1. Class <code class="docutils literal"><span class="pre">GraphPrinter</span></code><a class="headerlink" href="#class-graphprinter" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="_CPPv2N3mod12GraphPrinterE">
+<span id="mod::GraphPrinter"></span><em class="property">class </em><code class="descclassname"></code><code class="descname">GraphPrinter</code><a class="headerlink" href="#_CPPv2N3mod12GraphPrinterE" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>This class is used to configure how graphs are visualised.</p>
+<div class="admonition warning">
+<p class="first admonition-title">Warning</p>
+<p class="last">Some of these options greatly alter how graphs are depicted
+and the result may not accurately represent the underlying graph,
+and may make non-molecules look like molecules.</p>
+</div>
+</dd></dl>
+
+<div class="section" id="synopsis">
+<h3>2.2.12.1.1. Synopsis<a class="headerlink" href="#synopsis" title="Permalink to this headline">¶</a></h3>
+<div class="highlight-c++"><div class="highlight"><pre><span></span><span class="k">struct</span> <span class="n">GraphPrinter</span> <span class="p">{</span>
+    <span class="n">GraphPrinter</span><span class="p">();</span>
+    <span class="n">GraphPrinter</span><span class="p">(</span><span class="k">const</span> <span class="n">GraphPrinter</span><span class="o">&amp;</span><span class="p">)</span> <span class="o">=</span> <span class="k">delete</span><span class="p">;</span>
+    <span class="n">GraphPrinter</span> <span class="o">&amp;</span><span class="k">operator</span><span class="o">=</span><span class="p">(</span><span class="k">const</span> <span class="n">GraphPrinter</span><span class="o">&amp;</span><span class="p">)</span> <span class="o">=</span> <span class="k">delete</span><span class="p">;</span>
+    <span class="o">~</span><span class="n">GraphPrinter</span><span class="p">();</span>
+    <span class="k">const</span> <span class="n">lib</span><span class="o">::</span><span class="n">IO</span><span class="o">::</span><span class="n">Graph</span><span class="o">::</span><span class="n">Write</span><span class="o">::</span><span class="n">Options</span> <span class="o">&amp;</span><span class="n">getOptions</span><span class="p">()</span> <span class="k">const</span><span class="p">;</span>
+    <span class="kt">void</span> <span class="nf">setMolDefault</span><span class="p">();</span>
+    <span class="kt">void</span> <span class="nf">setReactionDefault</span><span class="p">();</span>
+    <span class="kt">void</span> <span class="nf">disableAll</span><span class="p">();</span>
+    <span class="kt">void</span> <span class="nf">enableAll</span><span class="p">();</span>
+    <span class="kt">void</span> <span class="nf">setEdgesAsBonds</span><span class="p">(</span><span class="kt">bool</span> <span class="n">value</span><span class="p">);</span>
+    <span class="kt">bool</span> <span class="nf">getEdgesAsBonds</span><span class="p">()</span> <span class="k">const</span><span class="p">;</span>
+    <span class="kt">void</span> <span class="nf">setCollapseHydrogens</span><span class="p">(</span><span class="kt">bool</span> <span class="n">value</span><span class="p">);</span>
+    <span class="kt">bool</span> <span class="nf">getCollapseHydrogens</span><span class="p">()</span> <span class="k">const</span><span class="p">;</span>
+    <span class="kt">void</span> <span class="nf">setRaiseCharges</span><span class="p">(</span><span class="kt">bool</span> <span class="n">value</span><span class="p">);</span>
+    <span class="kt">bool</span> <span class="nf">getRaiseCharges</span><span class="p">()</span> <span class="k">const</span><span class="p">;</span>
+    <span class="kt">void</span> <span class="nf">setSimpleCarbons</span><span class="p">(</span><span class="kt">bool</span> <span class="n">value</span><span class="p">);</span>
+    <span class="kt">bool</span> <span class="nf">getSimpleCarbons</span><span class="p">()</span> <span class="k">const</span><span class="p">;</span>
+    <span class="kt">void</span> <span class="nf">setThick</span><span class="p">(</span><span class="kt">bool</span> <span class="n">value</span><span class="p">);</span>
+    <span class="kt">bool</span> <span class="nf">getThick</span><span class="p">()</span> <span class="k">const</span><span class="p">;</span>
+    <span class="kt">void</span> <span class="nf">setWithColour</span><span class="p">(</span><span class="kt">bool</span> <span class="n">value</span><span class="p">);</span>
+    <span class="kt">bool</span> <span class="nf">getWithColour</span><span class="p">()</span> <span class="k">const</span><span class="p">;</span>
+    <span class="kt">void</span> <span class="nf">setWithIndex</span><span class="p">(</span><span class="kt">bool</span> <span class="n">value</span><span class="p">);</span>
+    <span class="kt">bool</span> <span class="nf">getWithIndex</span><span class="p">()</span> <span class="k">const</span><span class="p">;</span>
+    <span class="kt">void</span> <span class="nf">setWithTexttt</span><span class="p">(</span><span class="kt">bool</span> <span class="n">value</span><span class="p">);</span>
+    <span class="kt">bool</span> <span class="nf">getWithTexttt</span><span class="p">()</span> <span class="k">const</span><span class="p">;</span>
+    <span class="kt">void</span> <span class="nf">setRotation</span><span class="p">(</span><span class="kt">int</span> <span class="n">degrees</span><span class="p">);</span>
+    <span class="kt">int</span> <span class="nf">getRotation</span><span class="p">()</span> <span class="k">const</span><span class="p">;</span>
+<span class="k">private</span><span class="o">:</span>
+    <span class="n">std</span><span class="o">::</span><span class="n">unique_ptr</span><span class="o">&lt;</span><span class="n">lib</span><span class="o">::</span><span class="n">IO</span><span class="o">::</span><span class="n">Graph</span><span class="o">::</span><span class="n">Write</span><span class="o">::</span><span class="n">Options</span><span class="o">&gt;</span> <span class="n">options</span><span class="p">;</span>
+<span class="p">};</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="details">
+<h3>2.2.12.1.2. Details<a class="headerlink" href="#details" title="Permalink to this headline">¶</a></h3>
+<dl class="function">
+<dt id="_CPPv2N3mod12GraphPrinter13setMolDefaultEv">
+<span id="mod::GraphPrinter::setMolDefault"></span>void <code class="descclassname"></code><code class="descname">setMolDefault</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv2N3mod12GraphPrinter13setMolDefaultEv" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Shortcut for enabling all but thickening and index printing.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="_CPPv2N3mod12GraphPrinter18setReactionDefaultEv">
+<span id="mod::GraphPrinter::setReactionDefault"></span>void <code class="descclassname"></code><code class="descname">setReactionDefault</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv2N3mod12GraphPrinter18setReactionDefaultEv" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Shortcut for enabling all but thickening, index printing and simplification of carbon atoms.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="_CPPv2N3mod12GraphPrinter10disableAllEv">
+<span id="mod::GraphPrinter::disableAll"></span>void <code class="descclassname"></code><code class="descname">disableAll</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv2N3mod12GraphPrinter10disableAllEv" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Disable all special printing features.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="_CPPv2N3mod12GraphPrinter9enableAllEv">
+<span id="mod::GraphPrinter::enableAll"></span>void <code class="descclassname"></code><code class="descname">enableAll</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv2N3mod12GraphPrinter9enableAllEv" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Enable all special printing features, except typewriter font.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="_CPPv2N3mod12GraphPrinter15setEdgesAsBondsEb">
+<span id="mod::GraphPrinter::setEdgesAsBonds__b"></span>void <code class="descclassname"></code><code class="descname">setEdgesAsBonds</code><span class="sig-paren">(</span>bool <em>value</em><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv2N3mod12GraphPrinter15setEdgesAsBondsEb" title="Permalink to this definition">¶</a><br /></dt>
+<dt id="_CPPv2NK3mod12GraphPrinter15getEdgesAsBondsEv">
+<span id="mod::GraphPrinter::getEdgesAsBondsC"></span>bool <code class="descclassname"></code><code class="descname">getEdgesAsBonds</code><span class="sig-paren">(</span><span class="sig-paren">)</span> <em class="property">const</em><a class="headerlink" href="#_CPPv2NK3mod12GraphPrinter15getEdgesAsBondsEv" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Control whether edges with special labels are drawn as chemical bonds.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="_CPPv2N3mod12GraphPrinter20setCollapseHydrogensEb">
+<span id="mod::GraphPrinter::setCollapseHydrogens__b"></span>void <code class="descclassname"></code><code class="descname">setCollapseHydrogens</code><span class="sig-paren">(</span>bool <em>value</em><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv2N3mod12GraphPrinter20setCollapseHydrogensEb" title="Permalink to this definition">¶</a><br /></dt>
+<dt id="_CPPv2NK3mod12GraphPrinter20getCollapseHydrogensEv">
+<span id="mod::GraphPrinter::getCollapseHydrogensC"></span>bool <code class="descclassname"></code><code class="descname">getCollapseHydrogens</code><span class="sig-paren">(</span><span class="sig-paren">)</span> <em class="property">const</em><a class="headerlink" href="#_CPPv2NK3mod12GraphPrinter20getCollapseHydrogensEv" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Control whether vertices representing hydrogen atoms are collapsed into their neighbours labels.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="_CPPv2N3mod12GraphPrinter15setRaiseChargesEb">
+<span id="mod::GraphPrinter::setRaiseCharges__b"></span>void <code class="descclassname"></code><code class="descname">setRaiseCharges</code><span class="sig-paren">(</span>bool <em>value</em><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv2N3mod12GraphPrinter15setRaiseChargesEb" title="Permalink to this definition">¶</a><br /></dt>
+<dt id="_CPPv2NK3mod12GraphPrinter15getRaiseChargesEv">
+<span id="mod::GraphPrinter::getRaiseChargesC"></span>bool <code class="descclassname"></code><code class="descname">getRaiseCharges</code><span class="sig-paren">(</span><span class="sig-paren">)</span> <em class="property">const</em><a class="headerlink" href="#_CPPv2NK3mod12GraphPrinter15getRaiseChargesEv" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Control whether a vertex label suffix encoding a charge is written as a superscript to the rest of the label.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="_CPPv2N3mod12GraphPrinter16setSimpleCarbonsEb">
+<span id="mod::GraphPrinter::setSimpleCarbons__b"></span>void <code class="descclassname"></code><code class="descname">setSimpleCarbons</code><span class="sig-paren">(</span>bool <em>value</em><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv2N3mod12GraphPrinter16setSimpleCarbonsEb" title="Permalink to this definition">¶</a><br /></dt>
+<dt id="_CPPv2NK3mod12GraphPrinter16getSimpleCarbonsEv">
+<span id="mod::GraphPrinter::getSimpleCarbonsC"></span>bool <code class="descclassname"></code><code class="descname">getSimpleCarbons</code><span class="sig-paren">(</span><span class="sig-paren">)</span> <em class="property">const</em><a class="headerlink" href="#_CPPv2NK3mod12GraphPrinter16getSimpleCarbonsEv" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Control whether some vertices encoding carbon atoms are depicted without any label.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="_CPPv2N3mod12GraphPrinter8setThickEb">
+<span id="mod::GraphPrinter::setThick__b"></span>void <code class="descclassname"></code><code class="descname">setThick</code><span class="sig-paren">(</span>bool <em>value</em><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv2N3mod12GraphPrinter8setThickEb" title="Permalink to this definition">¶</a><br /></dt>
+<dt id="_CPPv2NK3mod12GraphPrinter8getThickEv">
+<span id="mod::GraphPrinter::getThickC"></span>bool <code class="descclassname"></code><code class="descname">getThick</code><span class="sig-paren">(</span><span class="sig-paren">)</span> <em class="property">const</em><a class="headerlink" href="#_CPPv2NK3mod12GraphPrinter8getThickEv" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Control whether all edges are drawn thicker than normal and all labels are written in bold.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="_CPPv2N3mod12GraphPrinter13setWithColourEb">
+<span id="mod::GraphPrinter::setWithColour__b"></span>void <code class="descclassname"></code><code class="descname">setWithColour</code><span class="sig-paren">(</span>bool <em>value</em><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv2N3mod12GraphPrinter13setWithColourEb" title="Permalink to this definition">¶</a><br /></dt>
+<dt id="_CPPv2NK3mod12GraphPrinter13getWithColourEv">
+<span id="mod::GraphPrinter::getWithColourC"></span>bool <code class="descclassname"></code><code class="descname">getWithColour</code><span class="sig-paren">(</span><span class="sig-paren">)</span> <em class="property">const</em><a class="headerlink" href="#_CPPv2NK3mod12GraphPrinter13getWithColourEv" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Control whether colour is applied to certain elements of the graph which are molecule-like.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="_CPPv2N3mod12GraphPrinter12setWithIndexEb">
+<span id="mod::GraphPrinter::setWithIndex__b"></span>void <code class="descclassname"></code><code class="descname">setWithIndex</code><span class="sig-paren">(</span>bool <em>value</em><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv2N3mod12GraphPrinter12setWithIndexEb" title="Permalink to this definition">¶</a><br /></dt>
+<dt id="_CPPv2NK3mod12GraphPrinter12getWithIndexEv">
+<span id="mod::GraphPrinter::getWithIndexC"></span>bool <code class="descclassname"></code><code class="descname">getWithIndex</code><span class="sig-paren">(</span><span class="sig-paren">)</span> <em class="property">const</em><a class="headerlink" href="#_CPPv2NK3mod12GraphPrinter12getWithIndexEv" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Control whether the underlying indices of the vertices are printed.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="_CPPv2N3mod12GraphPrinter13setWithTextttEb">
+<span id="mod::GraphPrinter::setWithTexttt__b"></span>void <code class="descclassname"></code><code class="descname">setWithTexttt</code><span class="sig-paren">(</span>bool <em>value</em><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv2N3mod12GraphPrinter13setWithTextttEb" title="Permalink to this definition">¶</a><br /></dt>
+<dt id="_CPPv2NK3mod12GraphPrinter13getWithTextttEv">
+<span id="mod::GraphPrinter::getWithTextttC"></span>bool <code class="descclassname"></code><code class="descname">getWithTexttt</code><span class="sig-paren">(</span><span class="sig-paren">)</span> <em class="property">const</em><a class="headerlink" href="#_CPPv2NK3mod12GraphPrinter13getWithTextttEv" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Control whether the vertex and edge labels are written with typewriter font.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="_CPPv2N3mod12GraphPrinter11setRotationEi">
+<span id="mod::GraphPrinter::setRotation__i"></span>void <code class="descclassname"></code><code class="descname">setRotation</code><span class="sig-paren">(</span>int <em>degrees</em><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv2N3mod12GraphPrinter11setRotationEi" title="Permalink to this definition">¶</a><br /></dt>
+<dt id="_CPPv2NK3mod12GraphPrinter11getRotationEv">
+<span id="mod::GraphPrinter::getRotationC"></span>int <code class="descclassname"></code><code class="descname">getRotation</code><span class="sig-paren">(</span><span class="sig-paren">)</span> <em class="property">const</em><a class="headerlink" href="#_CPPv2NK3mod12GraphPrinter11getRotationEv" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Rotation of internally computed coordinates.</p>
+</dd></dl>
+
+</div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="../index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">2.2.12. GraphPrinter.h</a><ul>
+<li><a class="reference internal" href="#class-graphprinter">2.2.12.1. Class <code class="docutils literal"><span class="pre">GraphPrinter</span></code></a><ul>
+<li><a class="reference internal" href="#synopsis">2.2.12.1.1. Synopsis</a></li>
+<li><a class="reference internal" href="#details">2.2.12.1.2. Details</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="GraphGraphInterface.html"
+                        title="previous chapter">2.2.11. GraphGraphInterface.h</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="Misc.html"
+                        title="next chapter">2.2.13. Misc.h</a></p>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../_sources/libmod/GraphPrinter.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="Misc.html" title="2.2.13. Misc.h"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="GraphGraphInterface.html" title="2.2.11. GraphGraphInterface.h"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">MØD 65d3c41 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="libmod.html" >2. libMØD</a> &#187;</li>
+          <li class="nav-item nav-item-2"><a href="api.html" >2.2. API Reference</a> &#187;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2013-2015, Jakob Lykke Andersen.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.5a3.
+    </div>
+  </body>
+</html>

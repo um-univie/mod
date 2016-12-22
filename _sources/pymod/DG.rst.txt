@@ -1,0 +1,180 @@
+.. _py-DG:
+
+**********************************************************
+DG
+**********************************************************
+.. default-domain:: py
+
+.. py:currentmodule:: mod
+.. cpp:namespace:: mod
+
+
+Class ``DG``
+--------------------------------------------------------------------------------------------------------------------------------
+
+.. py:class:: DG
+
+    The main derivation graph class. A derivation graph is a directed hypergraph :math:`H = (V, E)`.
+    Each vertex is annotated with a graph, and each hyperedge is annotated with a transformation rule.
+    A derivation graph can either be calculated from a strategy or loaded from external data.
+
+    .. py:attribute:: id
+
+        The unique instance id among all :class:`DG` objects.
+
+        :type: int
+    .. py:attribute:: numVertices
+
+        (Read-only) The number of vertices in the derivation graph.
+
+        :type: int
+    .. py:attribute:: vertices
+
+        (Read-only) An iterable of all vertices in the derivation graph.
+
+        :type: :py:class:`DGVertexRange`
+    .. py:attribute:: numEdges
+
+        (Read-only) The number of hyperedges in the derivation graph.
+
+        :type: int
+    .. py:attribute:: edges
+
+        (Read-only) An iterable of all hyperedges in the derivation graph.
+
+        :type: :py:class:`DGEdgeRange`
+    .. py:method:: findVertex(g)
+
+        :param g: the graph to find a vertex which has it associated.
+        :type g: :class:`Graph`
+        :returns: a vertex descriptor for which the given graph is associated,
+            or a null descriptor if no such vertex exists.
+        :rtype: :class:`DGVertex`
+    .. py:method:: findEdge(sources, targets)
+                   findEdge(sourceGraphs, targetGraphs)
+
+        :param sources: the list of source vertices the resulting hyperedge must have.
+        :type sources: list of :class:`Vertex`
+        :param targets: the list of targets vertices the resulting hyperedge must have.
+        :type targets: list of :class:`Vertex`
+        :param sourceGraphs: the list of graphs that must be associated with the source vertices the resulting hyperedge must have.
+        :type sourceGraphs: list of :class:`Graph`
+        :param targetGraphs: the list of graphs that must be associated with the targets vertices the resulting hyperedge must have.
+        :type targetGraphs: list of :class:`Graph`
+        :returns: a hyperedge with the given sources and targets.
+          If no such hyperedge exists in the derivation graph then a null edge is returned.
+          In the second version, the graphs are put through :meth:`findVertex` first.
+        :raises: :class:`LogicError` if a vertex descriptor is null, or does not belong to the derivation graph.
+    .. py:method:: calc()
+
+        Create the actual derivation graph.
+    .. py:attribute:: graphDatabase
+
+        All graphs known to the derivation graph.
+
+        :type: list of :class:`Graph`
+    .. py:attribute:: products
+
+        The subset of the vertex graphs which were discovered by the calculation.
+
+        :type: list of :class:`Graph`
+    .. py:method:: print(printer=DGPrinter(), data=None)
+
+        Print the derivation graph in style of a hypergraph. The appearance and structure
+        of the visualisation can optionally be configured by giving a DG printer and/or data object.
+
+        :param printer: the printer to use governing the appearance.
+        :type printer: :class:`DGPrinter`
+        :param data: the extra data to use encoding the structure of the graph.
+        :type data: :class:`DGPrintData`
+    .. py:method:: dump()
+
+        Export the derivation graph to an external file. The vertex graphs are exported as well.
+
+        :returns: the filename of the exported derivation graph.
+        :rtype: string
+    .. py:method:: list()
+
+        List information about the calculation.
+    .. py:method:: listStats()
+
+        Lists various statistics for the derivation graph.
+.. py:method:: dgDerivations(ders)
+
+    :param ders: the list of derivations to include in the derivation graph.
+    :type ders: list of :class:`Derivation`
+    :returns: a derivation graph from a list of :class:`Derivation`.
+    :rtype: :class:`DG`
+.. py:method:: dgAbstract(s)
+
+    :param s: the abstract specification of a derivation graph.
+    :type s: string
+    :returns: Construct a derivation graph from an abstract set of derivations. See :cpp:func:`DG::abstract` for the specification format.
+    :rtype: :class:`DG`
+.. py:method:: dgRuleComp(graphs, strat)
+
+    Initialize a derivation graph defined by a strategy.
+
+    :param graphs: an initial graph database. Any derived graph isomorphic to one of these graphs will be replaced by the given graph.
+    :type graphs: list of :class:`Graph`
+    :param strat: the strategy which will be used for calculating the actual derivation graph.
+    :type strat: :class:`DGStrat`
+    :returns: the derivation graph object. The calculation method must be called to create the actual derivation graph.
+    :rtype: :class:`DG`
+.. py:method:: dgDump(graphs, rules, file)
+
+    Load a derivation graph dump.
+
+    :param graphs: Any graph in the dump which is isomorphic one of these graphs is replaced by the given graph.
+    :type graphs: list of :class:`Graph`
+    :param rules: As for the graphs the same procedure is done for the rules, however only using the name of the rule for comparison.
+    :type rules: list of :class:`Rule`
+    :returns: the loaded derivation graph.
+    :rtype: :class:`DG`
+.. py:method:: diffDGs(dg1, dg2)
+
+    Compare two derivation graphs and lists the difference.
+    This is not a general isomorphism check; two vertices are equal if they have
+    the same graph attached. Edges are equal if the head and tail sets are equal
+    and if the attached rule is the same.
+
+    :param dg1: the first derivation graph.
+    :type dg1: :class:`DG`
+    :param dg2: the second derivation graph.
+    :type dg2: :class:`DG`
+
+Class ``DerivationRef``
+--------------------------------------------------------------------------------------------------------------------------------
+
+.. py:class:: DerivationRef
+
+    A reference to a derivation in a specific derivation graph, or an invalid reference.
+    
+    .. py:attribute:: id
+
+        (Read-only) If the reference is valid, this is the id of the pointed to derivation.
+
+        :type: unsigned int
+    .. py:attribute:: dg
+
+        (Read-only) If the reference is valid, this is the derivation graph the reference points into.
+
+        :type: :class:`DG`
+    .. py:method:: isValid()
+
+        :returns: whether or not the reference is valid.
+        :rtype: bool
+    .. py:attribute:: derivation
+
+        (Read-only) If the reference is valid, this is the pointed to derivation.
+
+        :type: :class:`Derivation`
+    .. py:method:: print(printer=GraphPrinter(), matchColour="ForestGreen")
+
+        Print the derivation pointed to by the derivation reference.
+        All possible Double-Pushout diagrams for the derivation are printed.
+
+        :param printer: the printer to use for the figures.
+        :type printer: :class:`GraphPrinter`
+        :param matchColour: the TikZ colour to use for the rule and its image in the bottom span.
+        :type matchColour: string

@@ -1,0 +1,260 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>8. Hyperflow Model &#8212; MØD be5c189 documentation</title>
+    
+    <link rel="stylesheet" href="_static/classic.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     'be5c189',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="9. References" href="references.html" />
+    <link rel="prev" title="7. Derivation Graph Strategies" href="dgStrat/dgStrat.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="references.html" title="9. References"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="dgStrat/dgStrat.html" title="7. Derivation Graph Strategies"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">MØD be5c189 documentation</a> &#187;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="hyperflow-model">
+<span id="dgflowcommon"></span><h1>8. Hyperflow Model<a class="headerlink" href="#hyperflow-model" title="Permalink to this headline">¶</a></h1>
+<p>The hyperflow model on derivation graphs accessible through
+<a class="reference internal" href="libmod/DGFlow.html#_CPPv2N3mod6DGFlowE" title="mod::DGFlow"><code class="xref cpp cpp-class docutils literal"><span class="pre">mod::DGFlow</span></code></a> (C++) and <a class="reference internal" href="pymod/DGFlow.html#mod.DGFlow" title="mod.DGFlow"><code class="xref py py-class docutils literal"><span class="pre">mod.DGFlow</span></code></a> (Python)
+consists of many different variables and constraints.
+This page is not meant to fully describe the model but to describe how the variables are available
+in the C++ and Python interface.</p>
+<div class="section" id="variable-specifiers">
+<h2>8.1. Variable Specifiers<a class="headerlink" href="#variable-specifiers" title="Permalink to this headline">¶</a></h2>
+<p>The following information is common for both the C++ and Python interface. Though, in Python the specifiers are defined in module scope, while in C++ they are
+defined in the namespace <code class="docutils literal"><span class="pre">mod::DGFlowVar</span></code>. Thus, it may be useful to use the using-declaration <code class="docutils literal"><span class="pre">using</span> <span class="pre">namespace</span> <span class="pre">mod::DGFlowVar;</span></code> when defining linear expressions/constraints in C++.</p>
+<p>Each defined specifier represents a sum of variables, and calling the specifier as a function
+retrieves a specifier for a single variable (or a sum of a subset of the variables) as indicated by the argument.
+E.g., <code class="docutils literal"><span class="pre">inFlow</span></code> represents the sum <span class="math">\(\sum_{v\in V}x^-_v\)</span> while <code class="docutils literal"><span class="pre">inFlow(g)</span></code> retrieves the specifier for
+<span class="math">\(x^-_v\)</span> for where the graph <code class="docutils literal"><span class="pre">g</span></code> is represented by the vertex <span class="math">\(v\)</span> in the
+underlying derivation graph <span class="math">\(\mathcal{H} = (V, E)\)</span>.</p>
+<table border="1" class="docutils">
+<colgroup>
+<col width="13%" />
+<col width="15%" />
+<col width="13%" />
+<col width="59%" />
+</colgroup>
+<thead valign="bottom">
+<tr class="row-odd"><th class="head">Specifier</th>
+<th class="head">Argument to get detailed</th>
+<th class="head">Extension</th>
+<th class="head">Description</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr class="row-even"><td><code class="docutils literal"><span class="pre">inFlow</span></code></td>
+<td><code class="docutils literal"><span class="pre">Graph</span></code></td>
+<td>Base</td>
+<td>The input flow variables, <span class="math">\(x^-_v\)</span>.</td>
+</tr>
+<tr class="row-odd"><td><code class="docutils literal"><span class="pre">outFlow</span></code></td>
+<td><code class="docutils literal"><span class="pre">Graph</span></code></td>
+<td>Base</td>
+<td>The output flow variables, <span class="math">\(x^+_v\)</span>.</td>
+</tr>
+<tr class="row-even"><td><code class="docutils literal"><span class="pre">isInPositive</span></code></td>
+<td><code class="docutils literal"><span class="pre">Graph</span></code></td>
+<td>Base</td>
+<td>Indicator variables for <span class="math">\(x^-_v &gt; 0\)</span>.</td>
+</tr>
+<tr class="row-odd"><td><code class="docutils literal"><span class="pre">isInLessOut</span></code></td>
+<td><code class="docutils literal"><span class="pre">Graph</span></code></td>
+<td>Base</td>
+<td>Indicator variables for <span class="math">\(x^-_v &lt; x^+_v\)</span>.</td>
+</tr>
+<tr class="row-even"><td><code class="docutils literal"><span class="pre">isInGreaterOut</span></code></td>
+<td><code class="docutils literal"><span class="pre">Graph</span></code></td>
+<td>Base</td>
+<td>Indicator variables for <span class="math">\(x^-_v &gt; x^+_v\)</span>.</td>
+</tr>
+<tr class="row-odd"><td><code class="docutils literal"><span class="pre">isInOutZero</span></code></td>
+<td><code class="docutils literal"><span class="pre">Graph</span></code></td>
+<td>Base</td>
+<td>Indicator variables for <span class="math">\(x^-_v = x^+_v = 0\)</span>.</td>
+</tr>
+<tr class="row-even"><td><code class="docutils literal"><span class="pre">vertex</span></code></td>
+<td><code class="docutils literal"><span class="pre">Graph</span></code></td>
+<td>Base</td>
+<td>Variables for flow through each vertex, <span class="math">\(\sum_{v\in V}\sum_{e\in \delta^-(v)} x_e\)</span>.
+The detailed variable specifier retrieves the inner sum for some <span class="math">\(v\)</span>.</td>
+</tr>
+<tr class="row-odd"><td><code class="docutils literal"><span class="pre">isVertexUsed</span></code></td>
+<td><code class="docutils literal"><span class="pre">Graph</span></code></td>
+<td>Base</td>
+<td>Indicator variables for <span class="math">\(\sum_{e\in \delta^-(v)} x_e\)</span>.</td>
+</tr>
+<tr class="row-even"><td><code class="docutils literal"><span class="pre">isOverallAutocata</span></code></td>
+<td><code class="docutils literal"><span class="pre">Graph</span></code></td>
+<td>Overall autocatalysis</td>
+<td>Indicator variables for overall autocatalysis.</td>
+</tr>
+<tr class="row-odd"><td><code class="docutils literal"><span class="pre">isOverallCata</span></code></td>
+<td><code class="docutils literal"><span class="pre">Graph</span></code></td>
+<td>Overall catalysis</td>
+<td>Indicator variables for overall catalysis.</td>
+</tr>
+<tr class="row-even"><td><code class="docutils literal"><span class="pre">edge</span></code></td>
+<td><code class="docutils literal"><span class="pre">DerivationRef</span></code></td>
+<td>Base</td>
+<td>The edge flow variables, <span class="math">\(x_e\)</span>, without the input/output edges.</td>
+</tr>
+<tr class="row-odd"><td><code class="docutils literal"><span class="pre">isEdgeUsed</span></code></td>
+<td><code class="docutils literal"><span class="pre">DerivationRef</span></code></td>
+<td>Base</td>
+<td>Indicator variables for <span class="math">\(x_e &gt; 0\)</span> for the non-input/output edges.</td>
+</tr>
+<tr class="row-even"><td><code class="docutils literal"><span class="pre">isBothReverseUsed</span></code></td>
+<td><code class="docutils literal"><span class="pre">DerivationRef</span></code></td>
+<td>Base</td>
+<td>For each unique unordered pair of edges (not input/output)
+<span class="math">\(e_a = (S_a, T_a), e_b = (T_a, S_a)\)</span> there is an indicator variable indicating
+<span class="math">\(x_{e_a} &gt; 0 \wedge x_{e_b} &gt; 0\)</span>.
+The detailed specifier can only be retrieved if the given <code class="docutils literal"><span class="pre">DerivationRef</span></code> actually has
+a reverse. Two edges being each others reverse maps to the <em>same</em> detailed indicator variable.</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section" id="objective-function">
+<h2>8.2. Objective Function<a class="headerlink" href="#objective-function" title="Permalink to this headline">¶</a></h2>
+<p>The objective function is always minimised and can be changed to any linear expression.
+The default objective function is determined by the enabled extensions.
+Each extension will add some linear expression to the objective function if it is enabled.</p>
+<table border="1" class="docutils">
+<colgroup>
+<col width="37%" />
+<col width="63%" />
+</colgroup>
+<thead valign="bottom">
+<tr class="row-odd"><th class="head">Extension</th>
+<th class="head">Added Linear Expression</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr class="row-even"><td>Base</td>
+<td><code class="docutils literal"><span class="pre">edge</span></code> <span class="math">\(+\)</span> <code class="docutils literal"><span class="pre">inFlow</span></code></td>
+</tr>
+<tr class="row-odd"><td>Transit</td>
+<td><span class="math">\(0\)</span></td>
+</tr>
+<tr class="row-even"><td>Overall Autocatalysis</td>
+<td><code class="docutils literal"><span class="pre">isOverallAutocata</span></code></td>
+</tr>
+<tr class="row-odd"><td>Overall Catalysis</td>
+<td><code class="docutils literal"><span class="pre">isOverallCata</span></code></td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">8. Hyperflow Model</a><ul>
+<li><a class="reference internal" href="#variable-specifiers">8.1. Variable Specifiers</a></li>
+<li><a class="reference internal" href="#objective-function">8.2. Objective Function</a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="dgStrat/dgStrat.html"
+                        title="previous chapter">7. Derivation Graph Strategies</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="references.html"
+                        title="next chapter">9. References</a></p>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/dgFlowCommon.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="references.html" title="9. References"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="dgStrat/dgStrat.html" title="7. Derivation Graph Strategies"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">MØD be5c189 documentation</a> &#187;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2013-2015, Jakob Lykke Andersen.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.5a3.
+    </div>
+  </body>
+</html>

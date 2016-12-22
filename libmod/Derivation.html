@@ -1,0 +1,184 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>2.2.3. Derivation.h &#8212; MØD 65d3c41 documentation</title>
+    
+    <link rel="stylesheet" href="../_static/classic.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '65d3c41',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="2.2.4. DG.h" href="DG.html" />
+    <link rel="prev" title="2.2.2. Config.h" href="Config.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="DG.html" title="2.2.4. DG.h"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="Config.html" title="2.2.2. Config.h"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">MØD 65d3c41 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="libmod.html" >2. libMØD</a> &#187;</li>
+          <li class="nav-item nav-item-2"><a href="api.html" accesskey="U">2.2. API Reference</a> &#187;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="derivation-h">
+<span id="cpp-derivation"></span><h1>2.2.3. Derivation.h<a class="headerlink" href="#derivation-h" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="class-derivation">
+<h2>2.2.3.1. Class <code class="docutils literal"><span class="pre">Derivation</span></code><a class="headerlink" href="#class-derivation" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="_CPPv2N3mod10DerivationE">
+<span id="mod::Derivation"></span><em class="property">class </em><code class="descclassname"></code><code class="descname">Derivation</code><a class="headerlink" href="#_CPPv2N3mod10DerivationE" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>This class represents a derivation <span class="math">\(G\Rightarrow^p H\)</span>, with <span class="math">\(G\)</span> and <span class="math">\(H\)</span> being multisets of graphs.</p>
+</dd></dl>
+
+<div class="section" id="synopsis">
+<h3>2.2.3.1.1. Synopsis<a class="headerlink" href="#synopsis" title="Permalink to this headline">¶</a></h3>
+<div class="highlight-c++"><div class="highlight"><pre><span></span><span class="k">struct</span> <span class="n">Derivation</span> <span class="p">{</span>
+    <span class="k">using</span> <span class="n">GraphList</span> <span class="o">=</span> <span class="n">std</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;</span><span class="n">std</span><span class="o">::</span><span class="n">shared_ptr</span><span class="o">&lt;</span><span class="n">Graph</span><span class="o">&gt;</span> <span class="o">&gt;</span><span class="p">;</span>
+<span class="k">public</span><span class="o">:</span>
+    <span class="k">friend</span> <span class="n">std</span><span class="o">::</span><span class="n">ostream</span> <span class="o">&amp;</span><span class="k">operator</span><span class="o">&lt;&lt;</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">ostream</span> <span class="o">&amp;</span><span class="n">s</span><span class="p">,</span> <span class="k">const</span> <span class="n">Derivation</span> <span class="o">&amp;</span><span class="n">d</span><span class="p">);</span>
+<span class="k">public</span><span class="o">:</span>
+    <span class="n">GraphList</span> <span class="n">left</span><span class="p">;</span>
+    <span class="n">std</span><span class="o">::</span><span class="n">shared_ptr</span><span class="o">&lt;</span><span class="n">Rule</span><span class="o">&gt;</span> <span class="n">rule</span><span class="p">;</span>
+    <span class="n">GraphList</span> <span class="n">right</span><span class="p">;</span>
+<span class="p">};</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="details">
+<h3>2.2.3.1.2. Details<a class="headerlink" href="#details" title="Permalink to this headline">¶</a></h3>
+<dl class="type">
+<dt id="_CPPv2N3mod10Derivation9GraphListE">
+<span id="mod::Derivation::GraphList"></span><em class="property">typedef </em>std::vector&lt;std::shared_ptr&lt;<a class="reference internal" href="Graph.html#_CPPv2N3mod5GraphE" title="mod::Graph">Graph</a>&gt;&gt; <code class="descclassname"></code><code class="descname">GraphList</code><a class="headerlink" href="#_CPPv2N3mod10Derivation9GraphListE" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Representation of a multiset of graphs.</p>
+</dd></dl>
+
+<dl class="member">
+<dt id="_CPPv2N3mod10Derivation4leftE">
+<span id="mod::Derivation::left__GraphList"></span><a class="reference internal" href="#_CPPv2N3mod10Derivation9GraphListE" title="mod::Derivation::GraphList">GraphList</a> <code class="descclassname"></code><code class="descname">left</code><a class="headerlink" href="#_CPPv2N3mod10Derivation4leftE" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Represents the multi-set of left graphs <span class="math">\(G\)</span> in a derivation <span class="math">\(G\Rightarrow^p H\)</span>.</p>
+</dd></dl>
+
+<dl class="member">
+<dt id="_CPPv2N3mod10Derivation4ruleE">
+<span id="mod::Derivation::rule__std::shared_ptr:Rule:"></span>std::shared_ptr&lt;<a class="reference internal" href="Rule.html#_CPPv2N3mod4RuleE" title="mod::Rule">Rule</a>&gt; <code class="descclassname"></code><code class="descname">rule</code><a class="headerlink" href="#_CPPv2N3mod10Derivation4ruleE" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Represents the transformation rule <span class="math">\(p\)</span> in a derivation <span class="math">\(G\Rightarrow^p H\)</span>.</p>
+</dd></dl>
+
+<dl class="member">
+<dt id="_CPPv2N3mod10Derivation5rightE">
+<span id="mod::Derivation::right__GraphList"></span><a class="reference internal" href="#_CPPv2N3mod10Derivation9GraphListE" title="mod::Derivation::GraphList">GraphList</a> <code class="descclassname"></code><code class="descname">right</code><a class="headerlink" href="#_CPPv2N3mod10Derivation5rightE" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Represents the multi-set of right graphs <span class="math">\(H\)</span> in a derivation <span class="math">\(G\Rightarrow^p H\)</span>.</p>
+</dd></dl>
+
+</div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="../index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">2.2.3. Derivation.h</a><ul>
+<li><a class="reference internal" href="#class-derivation">2.2.3.1. Class <code class="docutils literal"><span class="pre">Derivation</span></code></a><ul>
+<li><a class="reference internal" href="#synopsis">2.2.3.1.1. Synopsis</a></li>
+<li><a class="reference internal" href="#details">2.2.3.1.2. Details</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="Config.html"
+                        title="previous chapter">2.2.2. Config.h</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="DG.html"
+                        title="next chapter">2.2.4. DG.h</a></p>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../_sources/libmod/Derivation.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="DG.html" title="2.2.4. DG.h"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="Config.html" title="2.2.2. Config.h"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">MØD 65d3c41 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="libmod.html" >2. libMØD</a> &#187;</li>
+          <li class="nav-item nav-item-2"><a href="api.html" >2.2. API Reference</a> &#187;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2013-2015, Jakob Lykke Andersen.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.5a3.
+    </div>
+  </body>
+</html>

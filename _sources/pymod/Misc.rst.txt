@@ -1,0 +1,19 @@
+.. _py-Misc:
+
+**********************************************************
+Misc
+**********************************************************
+.. default-domain:: py
+
+.. py:currentmodule:: mod
+.. cpp:namespace:: mod
+
+.. function:: magicLibraryValue()
+
+    :returns: a number unique for each instantiation of libMØD. This can be used to check for the diamond problem for shared libraries.
+
+    :rtype: uintptr_t
+.. function:: version()
+
+    :returns: the version of MØD.
+    :rtype: string

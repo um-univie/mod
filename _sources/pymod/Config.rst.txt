@@ -1,0 +1,24 @@
+.. _py-Config:
+
+**********************************************************
+Config
+**********************************************************
+.. default-domain:: py
+
+.. py:currentmodule:: mod
+.. cpp:namespace:: mod
+
+
+Class ``Config``
+--------------------------------------------------------------------------------------------------------------------------------
+
+.. py:class:: Config
+
+    This class contains a range of inner classes of config settings. See :doc:`the libMØD documentation</libmod/Config>`.
+.. py:data:: config
+
+    This variable is initialised to the return value of :py:func:`getConfig`, i.e., just use this instead of the method.
+
+.. py:method:: getConfig()
+
+    :returns: the singleton :cpp:class:`Config` instance used by the library.

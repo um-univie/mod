@@ -1,0 +1,10 @@
+.. _py-DGTransition:
+
+**********************************************************
+DGTransition
+**********************************************************
+.. default-domain:: py
+
+.. py:currentmodule:: mod
+.. cpp:namespace:: mod
+

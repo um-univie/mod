@@ -1,0 +1,401 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>3.1.5. DGGraphInterface &#8212; MØD 65d3c41 documentation</title>
+    
+    <link rel="stylesheet" href="../_static/classic.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '65d3c41',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="3.1.6. DGPrinter" href="DGPrinter.html" />
+    <link rel="prev" title="3.1.4. DG" href="DG.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="DGPrinter.html" title="3.1.6. DGPrinter"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="DG.html" title="3.1.4. DG"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">MØD 65d3c41 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="pymod.html" >3. PyMØD</a> &#187;</li>
+          <li class="nav-item nav-item-2"><a href="api.html" accesskey="U">3.1. API Reference</a> &#187;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="dggraphinterface">
+<span id="py-dggraphinterface"></span><h1>3.1.5. DGGraphInterface<a class="headerlink" href="#dggraphinterface" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="class-dgvertex">
+<h2>3.1.5.1. Class <code class="docutils literal"><span class="pre">DGVertex</span></code><a class="headerlink" href="#class-dgvertex" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="mod.DGVertex">
+<em class="property">class </em><code class="descclassname">mod.</code><code class="descname">DGVertex</code><a class="headerlink" href="#mod.DGVertex" title="Permalink to this definition">¶</a></dt>
+<dd><p>A descriptor of either a vertex in a derivation graph, or a null vertex.</p>
+<dl class="function">
+<dt id="mod.DGVertex.__init__">
+<code class="descname">__init__</code><span class="sig-paren">(</span><em>self</em><span class="sig-paren">)</span><a class="headerlink" href="#mod.DGVertex.__init__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Constructs a null descriptor.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="mod.DGVertex.isNull">
+<code class="descname">isNull</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#mod.DGVertex.isNull" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">whether this is a null descriptor or not.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">bool</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="mod.DGVertex.id">
+<code class="descname">id</code><a class="headerlink" href="#mod.DGVertex.id" title="Permalink to this definition">¶</a></dt>
+<dd><p>(Read-only) The index of the vertex. It will be in the range <span class="math">\([0, numVertices + numEdges[\)</span>.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Type:</th><td class="field-body">int</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Raises:</th><td class="field-body"><a class="reference internal" href="Error.html#mod.LogicError" title="mod.LogicError"><code class="xref py py-class docutils literal"><span class="pre">LogicError</span></code></a> if it is a null descriptor.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="mod.DGVertex.dg">
+<code class="descname">dg</code><a class="headerlink" href="#mod.DGVertex.dg" title="Permalink to this definition">¶</a></dt>
+<dd><p>(Read-only) The derivation graph the vertex belongs to.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Type:</th><td class="field-body"><a class="reference internal" href="DG.html#mod.DG" title="mod.DG"><code class="xref py py-class docutils literal"><span class="pre">DG</span></code></a></td>
+</tr>
+<tr class="field-even field"><th class="field-name">Raises:</th><td class="field-body"><a class="reference internal" href="Error.html#mod.LogicError" title="mod.LogicError"><code class="xref py py-class docutils literal"><span class="pre">LogicError</span></code></a> if it is a null descriptor.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="mod.DGVertex.inEdges">
+<code class="descname">inEdges</code><a class="headerlink" href="#mod.DGVertex.inEdges" title="Permalink to this definition">¶</a></dt>
+<dd><p>(Read-only) A range of in-hyperedges for this vertex.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Type:</th><td class="field-body"><code class="xref py py-class docutils literal"><span class="pre">InEdgeRange</span></code></td>
+</tr>
+<tr class="field-even field"><th class="field-name">Raises:</th><td class="field-body"><a class="reference internal" href="Error.html#mod.LogicError" title="mod.LogicError"><code class="xref py py-class docutils literal"><span class="pre">LogicError</span></code></a> if it is a null descriptor.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="mod.DGVertex.outEdges">
+<code class="descname">outEdges</code><a class="headerlink" href="#mod.DGVertex.outEdges" title="Permalink to this definition">¶</a></dt>
+<dd><p>(Read-only) A range of out-hyperedges for this vertex.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Type:</th><td class="field-body"><code class="xref py py-class docutils literal"><span class="pre">OutEdgeRange</span></code></td>
+</tr>
+<tr class="field-even field"><th class="field-name">Raises:</th><td class="field-body"><a class="reference internal" href="Error.html#mod.LogicError" title="mod.LogicError"><code class="xref py py-class docutils literal"><span class="pre">LogicError</span></code></a> if it is a null descriptor.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="mod.DGVertex.graph">
+<code class="descname">graph</code><a class="headerlink" href="#mod.DGVertex.graph" title="Permalink to this definition">¶</a></dt>
+<dd><p>(Read-only) The graph label of the vertex.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Type:</th><td class="field-body"><a class="reference internal" href="Graph.html#mod.Graph" title="mod.Graph"><code class="xref py py-class docutils literal"><span class="pre">Graph</span></code></a></td>
+</tr>
+<tr class="field-even field"><th class="field-name">Raises:</th><td class="field-body"><a class="reference internal" href="Error.html#mod.LogicError" title="mod.LogicError"><code class="xref py py-class docutils literal"><span class="pre">LogicError</span></code></a> if it is a null descriptor.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="class-dghyperedge">
+<h2>3.1.5.2. Class <code class="docutils literal"><span class="pre">DGHyperEdge</span></code><a class="headerlink" href="#class-dghyperedge" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="mod.DGHyperEdge">
+<em class="property">class </em><code class="descclassname">mod.</code><code class="descname">DGHyperEdge</code><a class="headerlink" href="#mod.DGHyperEdge" title="Permalink to this definition">¶</a></dt>
+<dd><p>A descriptor of either a hyperedge in a derivation graph, or a null edge.</p>
+<dl class="function">
+<dt id="mod.DGHyperEdge.__init__">
+<code class="descname">__init__</code><span class="sig-paren">(</span><em>self</em><span class="sig-paren">)</span><a class="headerlink" href="#mod.DGHyperEdge.__init__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Constructs a null descriptor.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="mod.DGHyperEdge.isNull">
+<code class="descname">isNull</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#mod.DGHyperEdge.isNull" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">whether this is a null descriptor or not.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">bool</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="mod.DGHyperEdge.id">
+<code class="descname">id</code><a class="headerlink" href="#mod.DGHyperEdge.id" title="Permalink to this definition">¶</a></dt>
+<dd><p>(Read-only) The index of the hyperedge. It will be in the range <span class="math">\([0, numVertices + numEdges[\)</span>.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Type:</th><td class="field-body">int</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Raises:</th><td class="field-body"><a class="reference internal" href="Error.html#mod.LogicError" title="mod.LogicError"><code class="xref py py-class docutils literal"><span class="pre">LogicError</span></code></a> if it is a null descriptor.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="mod.DGHyperEdge.dg">
+<code class="descname">dg</code><a class="headerlink" href="#mod.DGHyperEdge.dg" title="Permalink to this definition">¶</a></dt>
+<dd><p>(Read-only) The derivation graph the edge belongs to.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Type:</th><td class="field-body"><a class="reference internal" href="DG.html#mod.DG" title="mod.DG"><code class="xref py py-class docutils literal"><span class="pre">DG</span></code></a></td>
+</tr>
+<tr class="field-even field"><th class="field-name">Raises:</th><td class="field-body"><a class="reference internal" href="Error.html#mod.LogicError" title="mod.LogicError"><code class="xref py py-class docutils literal"><span class="pre">LogicError</span></code></a> if it is a null descriptor.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="mod.DGHyperEdge.numSources">
+<code class="descname">numSources</code><a class="headerlink" href="#mod.DGHyperEdge.numSources" title="Permalink to this definition">¶</a></dt>
+<dd><p>(Read-only) The number of sources of the hyperedge.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Type:</th><td class="field-body">int</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="mod.DGHyperEdge.sources">
+<code class="descname">sources</code><a class="headerlink" href="#mod.DGHyperEdge.sources" title="Permalink to this definition">¶</a></dt>
+<dd><p>(Read-only) The sources of the hyperedge.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Type:</th><td class="field-body"><code class="xref py py-class docutils literal"><span class="pre">DGSourceRange</span></code></td>
+</tr>
+<tr class="field-even field"><th class="field-name">Raises:</th><td class="field-body"><a class="reference internal" href="Error.html#mod.LogicError" title="mod.LogicError"><code class="xref py py-class docutils literal"><span class="pre">LogicError</span></code></a> if it is a null descriptor.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="mod.DGHyperEdge.numTargets">
+<code class="descname">numTargets</code><a class="headerlink" href="#mod.DGHyperEdge.numTargets" title="Permalink to this definition">¶</a></dt>
+<dd><p>(Read-only) The number of targerts of the hyperedge.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Type:</th><td class="field-body">int</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="mod.DGHyperEdge.targets">
+<code class="descname">targets</code><a class="headerlink" href="#mod.DGHyperEdge.targets" title="Permalink to this definition">¶</a></dt>
+<dd><p>(Read-only) The targets of the hyperedge.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Type:</th><td class="field-body"><code class="xref py py-class docutils literal"><span class="pre">DGTargetRange</span></code></td>
+</tr>
+<tr class="field-even field"><th class="field-name">Raises:</th><td class="field-body"><a class="reference internal" href="Error.html#mod.LogicError" title="mod.LogicError"><code class="xref py py-class docutils literal"><span class="pre">LogicError</span></code></a> if it is a null descriptor.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="mod.DGHyperEdge.rules">
+<code class="descname">rules</code><a class="headerlink" href="#mod.DGHyperEdge.rules" title="Permalink to this definition">¶</a></dt>
+<dd><p>(Read-only) The rules associated with the hyperedge.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Type:</th><td class="field-body"><code class="xref py py-class docutils literal"><span class="pre">DGRuleRange</span></code></td>
+</tr>
+<tr class="field-even field"><th class="field-name">Raises:</th><td class="field-body"><a class="reference internal" href="Error.html#mod.LogicError" title="mod.LogicError"><code class="xref py py-class docutils literal"><span class="pre">LogicError</span></code></a> if it is a null descriptor.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="mod.DGHyperEdge.print">
+<code class="descname">print</code><span class="sig-paren">(</span><em>printer=GraphPrinter()</em>, <em>matchColour=&quot;Melon&quot;</em><span class="sig-paren">)</span><a class="headerlink" href="#mod.DGHyperEdge.print" title="Permalink to this definition">¶</a></dt>
+<dd><p>Print the derivations represented by the hyperedge.
+All possible Double-Pushout diagrams are printed.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>printer</strong> (<a class="reference internal" href="GraphPrinter.html#mod.GraphPrinter" title="mod.GraphPrinter"><code class="xref py py-class docutils literal"><span class="pre">GraphPrinter</span></code></a>) &#8211; the printer to use for the figures.</li>
+<li><strong>matchColour</strong> (<em>string</em>) &#8211; the TikZ colour to use for the rule and its image in the bottom span.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Raises:</th><td class="field-body"><p class="first last"><a class="reference internal" href="Error.html#mod.LogicError" title="mod.LogicError"><code class="xref py py-class docutils literal"><span class="pre">LogicError</span></code></a> if it is a null descriptor.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="../index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">3.1.5. DGGraphInterface</a><ul>
+<li><a class="reference internal" href="#class-dgvertex">3.1.5.1. Class <code class="docutils literal"><span class="pre">DGVertex</span></code></a></li>
+<li><a class="reference internal" href="#class-dghyperedge">3.1.5.2. Class <code class="docutils literal"><span class="pre">DGHyperEdge</span></code></a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="DG.html"
+                        title="previous chapter">3.1.4. DG</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="DGPrinter.html"
+                        title="next chapter">3.1.6. DGPrinter</a></p>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../_sources/pymod/DGGraphInterface.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="DGPrinter.html" title="3.1.6. DGPrinter"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="DG.html" title="3.1.4. DG"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">MØD 65d3c41 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="pymod.html" >3. PyMØD</a> &#187;</li>
+          <li class="nav-item nav-item-2"><a href="api.html" >3.1. API Reference</a> &#187;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2013-2015, Jakob Lykke Andersen.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.5a3.
+    </div>
+  </body>
+</html>

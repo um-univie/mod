@@ -1,0 +1,258 @@
+.. _cpp-DG:
+
+**********************************************************
+DG.h
+**********************************************************
+.. default-domain:: cpp
+
+.. py:currentmodule:: mod
+.. cpp:namespace:: mod
+
+
+Class ``DG``
+--------------------------------------------------------------------------------------------------------------------------------
+
+.. class:: DG
+    
+
+    The main derivation graph class. A derivation graph is a directed hypergraph
+    :math:`\mathcal{H} = (V, E)`.
+    Each vertex is annotated with a graph, and each hyperedge is annotated with a transformation rule.
+    A derivation graph can either be calculated from a strategy or loaded from external data.
+
+
+Synopsis
+^^^^^^^^
+
+.. code-block:: c++
+    
+    struct DG {
+        DG(const DG&) = delete;
+        DG &operator=(const DG&) = delete;
+    public:
+        class Vertex;
+        class HyperEdge;
+        class VertexIterator;
+        class VertexRange;
+        class EdgeIterator;
+        class EdgeRange;
+        class InEdgeIterator;
+        class InEdgeRange;
+        class OutEdgeIterator;
+        class OutEdgeRange;
+        class SourceIterator;
+        class SourceRange;
+        class TargetIterator;
+        class TargetRange;
+        class RuleIterator;
+        class RuleRange;
+    private:
+        DG(std::unique_ptr<lib::DG::NonHyper> dg);
+    public:
+        ~DG();
+        std::size_t getId() const;
+        friend std::ostream &operator<<(std::ostream &s, const DG &dg);
+        const lib::DG::NonHyper &getNonHyper() const;
+        const lib::DG::Hyper &getHyper() const;
+    public: // hypergraph interface
+        std::size_t numVertices() const;
+        VertexRange vertices() const;
+        std::size_t numEdges() const;
+        EdgeRange edges() const;
+    public: // searching for vertices and hyperedges
+        Vertex findVertex(std::shared_ptr<Graph> g) const;
+        HyperEdge findEdge(const std::vector<Vertex> &sources, const std::vector<Vertex> &targets) const;
+        HyperEdge findEdge(const std::vector<std::shared_ptr<Graph> > &sources, const std::vector<std::shared_ptr<Graph> > &targets) const;
+    public:
+        void calc();
+        const std::set<std::shared_ptr<Graph>, GraphLess> &getGraphDatabase() const;
+        const std::vector<std::shared_ptr<Graph> > &getProducts() const;
+        void print(const DGPrintData &data, const DGPrinter &printer) const;
+        std::string dump() const;
+        void list() const;
+        void listStats() const;
+        // :throws: :class:`LogicError` if the DG has not been calculated or if the DG is not created from strategies.
+        std::vector<std::shared_ptr<Graph> > getStratOutputSubset() const;
+    private:
+        struct Pimpl;
+        std::unique_ptr<Pimpl> p;
+    public:
+        static std::shared_ptr<DG> derivations(const std::vector<Derivation> &derivations);
+        static std::shared_ptr<DG> abstract(const std::string &specification);
+        static std::shared_ptr<DG> ruleComp(const std::vector<std::shared_ptr<Graph> > &graphs,
+                std::shared_ptr<DGStrat> strategy);
+        static std::shared_ptr<DG> dumpImport(const std::vector<std::shared_ptr<Graph> > &graphs, const std::vector<std::shared_ptr<Rule> > &rules, const std::string &file);
+        static void diff(std::shared_ptr<DG> dg1, std::shared_ptr<DG> dg2);
+    };
+
+Details
+^^^^^^^
+
+.. cpp:namespace:: mod
+
+.. cpp:namespace-push:: DG
+
+.. function:: std::size_t getId() const
+
+    :returns: the instance identifier for the object.
+.. function:: const lib::DG::NonHyper &getNonHyper() const
+              const lib::DG::Hyper &getHyper() const
+
+    :returns: the internal data structures of the derivation graph.
+.. function:: std::size_t numVertices() const
+
+    :returns: the number of vertices in the derivation graph.
+.. function:: VertexRange vertices() const
+
+    :returns: a range of all vertices in the derivation graph.
+.. function:: std::size_t numEdges() const
+
+    :returns: the number of edges in the derivation graph.
+.. function:: EdgeRange edges() const
+
+    :returns: a range of all edges in the derivation graph.
+.. function:: Vertex findVertex(std::shared_ptr<Graph> g) const
+
+    :returns: a vertex descriptor for which the given graph is associated,
+        or a null descriptor if no such vertex exists.
+.. function:: HyperEdge findEdge(const std::vector<Vertex> &sources, const std::vector<Vertex> &targets) const
+              HyperEdge findEdge(const std::vector<std::shared_ptr<Graph> > &sources, const std::vector<std::shared_ptr<Graph> > &targets) const
+
+    :returns: a hyperedge with the given sources and targets.
+      If no such hyperedge exists in the derivation graph then a null edge is returned.
+      In the second version, the graphs are put through :func:`findVertex` first.
+    :throws: :class:`LogicError` if a vertex descriptor is null, or does not belong to the derivation graph.
+.. function:: void calc()
+
+     Compute the derivation graph.
+
+.. function:: const std::set<std::shared_ptr<Graph>, GraphLess> &getGraphDatabase() const
+
+    :returns: the set of all graphs created by the derivation graph,
+        and all graphs given when constructed.
+.. function:: const std::vector<std::shared_ptr<Graph> > &getProducts() const
+
+    :returns: the list of new graphs discovered by the derivation graph.
+.. function:: void print(const DGPrintData &data, const DGPrinter &printer) const
+
+    Print the derivation graph in style of a hypergraph.
+
+    :throws: :class:`LogicError` if the print data is not for this DG.
+.. function:: std::string dump() const
+
+    Exports the derivation graph to a text file, which can be importetet.
+
+    :returns: the name of the file with the exported data.
+    :throws: :class:`LogicError` if the DG has not been calculated.
+.. function:: void list() const
+
+    Output information on the calculation of the derivation graph.
+    For strategy-based calculations, this outputs the expression tree.
+.. function:: void listStats() const
+
+    Output various stats of the derivation graph.
+
+    :throws: :class:`LogicError` if the DG has not been calculated.
+.. function:: static std::shared_ptr<DG> derivations(const std::vector<Derivation> &derivations)
+
+    Create a derivation graph from a list of :class:`Derivation`.
+.. function:: static std::shared_ptr<DG> abstract(const std::string &specification)
+
+    Create a derivation graph from an abstract description according to the following grammar.
+
+    .. productionlist::
+        description: `derivation` { `derivation` }
+        derivation: `side` ("->" | "<=>") `side`
+         side: `term` { "+" `term` }
+        term: [ `unsignedInt` ] `identifier`
+
+    :throws: :class:`InputError` on bad input.
+.. function:: static std::shared_ptr<DG> ruleComp(const std::vector<std::shared_ptr<Graph> > &graphs, \
+              std::shared_ptr<DGStrat> strategy)
+
+    Initialize a derivation graph with a :cpp:class:`DGStrat` and an initial graph database.
+    Any derived graph isomorphic to a given graph is replaced by the given graph.
+.. function:: static std::shared_ptr<DG> dumpImport(const std::vector<std::shared_ptr<Graph> > &graphs, const std::vector<std::shared_ptr<Rule> > &rules, const std::string &file)
+
+    Load a derivation graph dump. Any graph in the dump which is isomorphic to a given graph is replaced by the given graph.
+    The same procedure is done for the rules, however only using the name of the rule for comparison.
+
+    :throws: :class:`InputError` on bad input.
+.. function:: static void diff(std::shared_ptr<DG> dg1, std::shared_ptr<DG> dg2)
+
+    Compare two derivation graphs and lists the difference.
+    This is not a general isomorphism check; two vertices are equal if they have
+    the same graph attached. Edges are equal if the head and tail sets are equal
+    and if the attached rule is the same.
+
+.. cpp:namespace:: mod
+
+
+Class ``DerivationRef``
+--------------------------------------------------------------------------------------------------------------------------------
+
+.. class:: DerivationRef
+    
+
+    The class represents a reference to a derivation in a derivation graph.
+    A reference may be invalid.
+
+
+Synopsis
+^^^^^^^^
+
+.. code-block:: c++
+    
+    class DerivationRef {
+        friend class lib::DG::Hyper;
+        DerivationRef(unsigned int id, std::shared_ptr<DG> dg);
+    public:
+        DerivationRef();
+        DerivationRef(DG::HyperEdge e);
+        operator DG::HyperEdge() const;
+        friend std::ostream &operator<<(std::ostream &s, const DerivationRef &d);
+        unsigned int getId() const;
+        std::shared_ptr<DG> getDG() const;
+        bool isValid() const;
+        Derivation operator*() const;
+        void print(const GraphPrinter &printer, const std::string &matchColour) const;
+        bool operator<(const DerivationRef &other) const;
+        friend bool operator==(const DerivationRef &a, const DerivationRef &b) {
+            return a.id == b.id && a.dg == b.dg;
+        }
+    private:
+        unsigned int id;
+        std::shared_ptr<DG> dg;
+    };
+
+Details
+^^^^^^^
+
+.. cpp:namespace:: mod
+
+.. cpp:namespace-push:: DerivationRef
+
+.. function:: DerivationRef()
+
+    Constructor for an invalid reference.
+.. function:: unsigned int getId() const
+
+    :returns: the id of the derivation.
+.. function:: std::shared_ptr<DG> getDG() const
+
+    :returns: the derivation graph the reference is pointing into.
+.. function:: bool isValid() const
+
+    :returns: ``true`` iff the reference is valid.
+.. function:: Derivation operator*() const
+
+    :returns: the derivation represented by the reference.
+.. function:: void print(const GraphPrinter &printer, const std::string &matchColour) const
+
+    Print the derivation pointed to by the derivation reference.
+    All possible Double-Pushout diagrams for the derivation are printed.
+    The ``matchColour`` must be a valid colour for TikZ, which is applied to the rule
+    and its image in the bottom span.
+
+.. cpp:namespace:: mod
+

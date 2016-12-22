@@ -1,0 +1,1187 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>DGFlow.h &#8212; MØD 65d3c41 documentation</title>
+    
+    <link rel="stylesheet" href="../_static/classic.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '65d3c41',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">MØD 65d3c41 documentation</a> &#187;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="dgflow-h">
+<span id="cpp-dgflow"></span><h1>DGFlow.h<a class="headerlink" href="#dgflow-h" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="class-dgflow">
+<h2>Class <code class="docutils literal"><span class="pre">DGFlow</span></code><a class="headerlink" href="#class-dgflow" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="_CPPv2N3mod6DGFlowE">
+<span id="mod::DGFlow"></span><em class="property">class </em><code class="descclassname"></code><code class="descname">DGFlow</code><a class="headerlink" href="#_CPPv2N3mod6DGFlowE" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>A <a class="reference internal" href="#_CPPv2N3mod6DGFlowE" title="mod::DGFlow"><code class="xref cpp cpp-class docutils literal"><span class="pre">DGFlow</span></code></a> object represents a flow model on a given derivation graph.
+A model consists of a set of extensions with the Base extension modelling the edge flow and input/output flow.</p>
+</dd></dl>
+
+<div class="section" id="synopsis">
+<h3>Synopsis<a class="headerlink" href="#synopsis" title="Permalink to this headline">¶</a></h3>
+<div class="highlight-c++"><div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">DGFlow</span> <span class="o">:</span> <span class="k">public</span> <span class="n">std</span><span class="o">::</span><span class="n">enable_shared_from_this</span><span class="o">&lt;</span><span class="n">DGFlow</span><span class="o">&gt;</span> <span class="p">{</span>
+    <span class="n">DGFlow</span><span class="p">(</span><span class="k">const</span> <span class="n">DGFlow</span><span class="o">&amp;</span><span class="p">)</span> <span class="o">=</span> <span class="k">delete</span><span class="p">;</span>
+    <span class="n">DGFlow</span> <span class="o">&amp;</span><span class="k">operator</span><span class="o">=</span><span class="p">(</span><span class="k">const</span> <span class="n">DGFlow</span><span class="o">&amp;</span><span class="p">)</span> <span class="o">=</span> <span class="k">delete</span><span class="p">;</span>
+    <span class="n">DGFlow</span><span class="p">(</span><span class="n">DGFlow</span><span class="o">&amp;&amp;</span><span class="p">)</span> <span class="o">=</span> <span class="k">delete</span><span class="p">;</span>
+    <span class="n">DGFlow</span> <span class="o">&amp;</span><span class="k">operator</span><span class="o">=</span><span class="p">(</span><span class="n">DGFlow</span><span class="o">&amp;&amp;</span><span class="p">)</span> <span class="o">=</span> <span class="k">delete</span><span class="p">;</span>
+<span class="k">private</span><span class="o">:</span>
+    <span class="n">DGFlow</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">unique_ptr</span><span class="o">&lt;</span><span class="n">lib</span><span class="o">::</span><span class="n">Flow</span><span class="o">::</span><span class="n">FlowBase</span><span class="o">&gt;</span> <span class="n">base</span><span class="p">);</span>
+<span class="k">public</span><span class="o">:</span>
+    <span class="o">~</span><span class="n">DGFlow</span><span class="p">();</span>
+    <span class="k">friend</span> <span class="n">std</span><span class="o">::</span><span class="n">ostream</span> <span class="o">&amp;</span><span class="k">operator</span><span class="o">&lt;&lt;</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">ostream</span> <span class="o">&amp;</span><span class="n">s</span><span class="p">,</span> <span class="k">const</span> <span class="n">DGFlow</span> <span class="o">&amp;</span><span class="n">dgFlow</span><span class="p">);</span>
+    <span class="kt">unsigned</span> <span class="kt">int</span> <span class="nf">getId</span><span class="p">()</span> <span class="k">const</span><span class="p">;</span>
+    <span class="n">std</span><span class="o">::</span><span class="n">shared_ptr</span><span class="o">&lt;</span><span class="n">DG</span><span class="o">&gt;</span> <span class="n">getDG</span><span class="p">()</span> <span class="k">const</span><span class="p">;</span>
+    <span class="n">lib</span><span class="o">::</span><span class="n">Flow</span><span class="o">::</span><span class="n">FlowBase</span> <span class="o">&amp;</span><span class="n">getBase</span><span class="p">();</span>
+    <span class="k">const</span> <span class="n">lib</span><span class="o">::</span><span class="n">Flow</span><span class="o">::</span><span class="n">FlowBase</span> <span class="o">&amp;</span><span class="n">getBase</span><span class="p">()</span> <span class="k">const</span><span class="p">;</span>
+<span class="k">public</span><span class="o">:</span> <span class="c1">// base extension</span>
+    <span class="kt">void</span> <span class="n">addSource</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">shared_ptr</span><span class="o">&lt;</span><span class="n">Graph</span><span class="o">&gt;</span> <span class="n">g</span><span class="p">);</span>
+    <span class="kt">void</span> <span class="nf">addSink</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">shared_ptr</span><span class="o">&lt;</span><span class="n">Graph</span><span class="o">&gt;</span> <span class="n">g</span><span class="p">);</span>
+    <span class="kt">void</span> <span class="nf">setAllowHyperLoops</span><span class="p">(</span><span class="kt">bool</span> <span class="n">value</span><span class="p">);</span>
+    <span class="kt">bool</span> <span class="nf">getAllowHyperLoops</span><span class="p">()</span> <span class="k">const</span><span class="p">;</span>
+    <span class="kt">void</span> <span class="nf">setAllowReverse</span><span class="p">(</span><span class="kt">bool</span> <span class="n">value</span><span class="p">);</span>
+    <span class="kt">bool</span> <span class="nf">getAllowReverse</span><span class="p">()</span> <span class="k">const</span><span class="p">;</span>
+    <span class="kt">void</span> <span class="nf">setAllowIOReverse</span><span class="p">(</span><span class="kt">bool</span> <span class="n">value</span><span class="p">);</span>
+    <span class="kt">bool</span> <span class="nf">getAllowIOReverse</span><span class="p">()</span> <span class="k">const</span><span class="p">;</span>
+    <span class="kt">void</span> <span class="nf">setRelaxed</span><span class="p">(</span><span class="kt">bool</span> <span class="n">value</span><span class="p">);</span>
+    <span class="kt">bool</span> <span class="nf">getRelaxed</span><span class="p">()</span> <span class="k">const</span><span class="p">;</span>
+<span class="k">public</span><span class="o">:</span> <span class="c1">// transit</span>
+    <span class="k">class</span> <span class="nc">TransitProxy</span> <span class="p">{</span>
+        <span class="n">TransitProxy</span><span class="p">(</span><span class="k">const</span> <span class="n">TransitProxy</span><span class="o">&amp;</span><span class="p">)</span> <span class="o">=</span> <span class="k">delete</span><span class="p">;</span>
+        <span class="n">TransitProxy</span> <span class="o">&amp;</span><span class="k">operator</span><span class="o">=</span><span class="p">(</span><span class="k">const</span> <span class="n">TransitProxy</span><span class="o">&amp;</span><span class="p">)</span> <span class="o">=</span> <span class="k">delete</span><span class="p">;</span>
+        <span class="n">TransitProxy</span><span class="p">(</span><span class="n">TransitProxy</span><span class="o">&amp;&amp;</span><span class="p">)</span> <span class="o">=</span> <span class="k">delete</span><span class="p">;</span>
+        <span class="n">TransitProxy</span> <span class="o">&amp;</span><span class="k">operator</span><span class="o">=</span><span class="p">(</span><span class="n">TransitProxy</span><span class="o">&amp;&amp;</span><span class="p">)</span> <span class="o">=</span> <span class="k">delete</span><span class="p">;</span>
+    <span class="k">private</span><span class="o">:</span>
+        <span class="k">friend</span> <span class="k">class</span> <span class="nc">DGFlow</span><span class="p">;</span>
+        <span class="n">TransitProxy</span><span class="p">(</span><span class="n">DGFlow</span> <span class="o">&amp;</span><span class="n">dgFlow</span><span class="p">);</span>
+    <span class="k">public</span><span class="o">:</span>
+        <span class="kt">void</span> <span class="n">printGraph</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">shared_ptr</span><span class="o">&lt;</span><span class="n">Graph</span><span class="o">&gt;</span> <span class="n">g</span><span class="p">)</span> <span class="k">const</span><span class="p">;</span>
+        <span class="kt">void</span> <span class="nf">printExpanded</span><span class="p">()</span> <span class="k">const</span><span class="p">;</span>
+    <span class="k">private</span><span class="o">:</span>
+        <span class="n">DGFlow</span> <span class="o">&amp;</span><span class="n">dgFlow</span><span class="p">;</span>
+    <span class="p">};</span>
+    <span class="n">TransitProxy</span> <span class="n">transit</span><span class="p">;</span>
+<span class="k">public</span><span class="o">:</span> <span class="c1">// overall autocatalysis</span>
+    <span class="k">class</span> <span class="nc">OverallAutocatalysisProxy</span> <span class="p">{</span>
+        <span class="n">OverallAutocatalysisProxy</span><span class="p">(</span><span class="k">const</span> <span class="n">OverallAutocatalysisProxy</span><span class="o">&amp;</span><span class="p">)</span> <span class="o">=</span> <span class="k">delete</span><span class="p">;</span>
+        <span class="n">OverallAutocatalysisProxy</span> <span class="o">&amp;</span><span class="k">operator</span><span class="o">=</span><span class="p">(</span><span class="k">const</span> <span class="n">OverallAutocatalysisProxy</span><span class="o">&amp;</span><span class="p">)</span> <span class="o">=</span> <span class="k">delete</span><span class="p">;</span>
+        <span class="n">OverallAutocatalysisProxy</span><span class="p">(</span><span class="n">OverallAutocatalysisProxy</span><span class="o">&amp;&amp;</span><span class="p">)</span> <span class="o">=</span> <span class="k">delete</span><span class="p">;</span>
+        <span class="n">OverallAutocatalysisProxy</span> <span class="o">&amp;</span><span class="k">operator</span><span class="o">=</span><span class="p">(</span><span class="n">OverallAutocatalysisProxy</span><span class="o">&amp;&amp;</span><span class="p">)</span> <span class="o">=</span> <span class="k">delete</span><span class="p">;</span>
+    <span class="k">private</span><span class="o">:</span>
+        <span class="k">friend</span> <span class="k">class</span> <span class="nc">DGFlow</span><span class="p">;</span>
+        <span class="n">OverallAutocatalysisProxy</span><span class="p">(</span><span class="n">DGFlow</span> <span class="o">&amp;</span><span class="n">dgFlow</span><span class="p">);</span>
+    <span class="k">public</span><span class="o">:</span>
+        <span class="kt">void</span> <span class="n">enable</span><span class="p">();</span>
+        <span class="kt">void</span> <span class="nf">setForceExistence</span><span class="p">(</span><span class="kt">bool</span> <span class="n">value</span><span class="p">);</span>
+        <span class="kt">bool</span> <span class="nf">getForceExistence</span><span class="p">()</span> <span class="k">const</span><span class="p">;</span>
+        <span class="kt">void</span> <span class="nf">setStrictTransit</span><span class="p">(</span><span class="kt">bool</span> <span class="n">value</span><span class="p">);</span>
+        <span class="kt">bool</span> <span class="nf">getStrictTransit</span><span class="p">()</span> <span class="k">const</span><span class="p">;</span>
+        <span class="kt">void</span> <span class="nf">setBFSExclusive</span><span class="p">(</span><span class="kt">bool</span> <span class="n">value</span><span class="p">);</span>
+        <span class="kt">bool</span> <span class="nf">getBFSExclusive</span><span class="p">()</span> <span class="k">const</span><span class="p">;</span>
+    <span class="k">private</span><span class="o">:</span>
+        <span class="n">DGFlow</span> <span class="o">&amp;</span><span class="n">dgFlow</span><span class="p">;</span>
+    <span class="p">};</span>
+    <span class="n">OverallAutocatalysisProxy</span> <span class="n">overallAutocatalysis</span><span class="p">;</span>
+<span class="k">public</span><span class="o">:</span> <span class="c1">// overall catalysis</span>
+    <span class="k">class</span> <span class="nc">OverallCatalysisProxy</span> <span class="p">{</span>
+        <span class="n">OverallCatalysisProxy</span><span class="p">(</span><span class="k">const</span> <span class="n">OverallCatalysisProxy</span><span class="o">&amp;</span><span class="p">)</span> <span class="o">=</span> <span class="k">delete</span><span class="p">;</span>
+        <span class="n">OverallCatalysisProxy</span> <span class="o">&amp;</span><span class="k">operator</span><span class="o">=</span><span class="p">(</span><span class="k">const</span> <span class="n">OverallCatalysisProxy</span><span class="o">&amp;</span><span class="p">)</span> <span class="o">=</span> <span class="k">delete</span><span class="p">;</span>
+        <span class="n">OverallCatalysisProxy</span><span class="p">(</span><span class="n">OverallCatalysisProxy</span><span class="o">&amp;&amp;</span><span class="p">)</span> <span class="o">=</span> <span class="k">delete</span><span class="p">;</span>
+        <span class="n">OverallCatalysisProxy</span> <span class="o">&amp;</span><span class="k">operator</span><span class="o">=</span><span class="p">(</span><span class="n">OverallCatalysisProxy</span><span class="o">&amp;&amp;</span><span class="p">)</span> <span class="o">=</span> <span class="k">delete</span><span class="p">;</span>
+    <span class="k">private</span><span class="o">:</span>
+        <span class="k">friend</span> <span class="k">class</span> <span class="nc">DGFlow</span><span class="p">;</span>
+        <span class="n">OverallCatalysisProxy</span><span class="p">(</span><span class="n">DGFlow</span> <span class="o">&amp;</span><span class="n">dgFlow</span><span class="p">);</span>
+    <span class="k">public</span><span class="o">:</span>
+        <span class="kt">void</span> <span class="n">enable</span><span class="p">();</span>
+        <span class="kt">void</span> <span class="nf">setForceExistence</span><span class="p">(</span><span class="kt">bool</span> <span class="n">value</span><span class="p">);</span>
+        <span class="kt">bool</span> <span class="nf">getForceExistence</span><span class="p">()</span> <span class="k">const</span><span class="p">;</span>
+        <span class="kt">void</span> <span class="nf">setStrictTransit</span><span class="p">(</span><span class="kt">bool</span> <span class="n">value</span><span class="p">);</span>
+        <span class="kt">bool</span> <span class="nf">getStrictTransit</span><span class="p">()</span> <span class="k">const</span><span class="p">;</span>
+    <span class="k">private</span><span class="o">:</span>
+        <span class="n">DGFlow</span> <span class="o">&amp;</span><span class="n">dgFlow</span><span class="p">;</span>
+    <span class="p">};</span>
+    <span class="n">OverallCatalysisProxy</span> <span class="n">overallCatalysis</span><span class="p">;</span>
+<span class="k">public</span><span class="o">:</span> <span class="c1">// common</span>
+    <span class="kt">void</span> <span class="n">addConstraint</span><span class="p">(</span><span class="k">const</span> <span class="n">DGFlowAux</span><span class="o">::</span><span class="n">LinConstraint</span> <span class="o">&amp;</span><span class="n">constraint</span><span class="p">);</span>
+    <span class="kt">void</span> <span class="nf">setVertexFilter</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">shared_ptr</span><span class="o">&lt;</span><span class="n">Function</span><span class="o">&lt;</span><span class="kt">bool</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">shared_ptr</span><span class="o">&lt;</span><span class="n">Graph</span><span class="o">&gt;</span><span class="p">)</span><span class="o">&gt;</span> <span class="o">&gt;</span> <span class="n">vFilter</span><span class="p">);</span>
+    <span class="kt">void</span> <span class="nf">setObjectiveFunction</span><span class="p">(</span><span class="n">DGFlowAux</span><span class="o">::</span><span class="n">LinExp</span> <span class="n">func</span><span class="p">);</span>
+    <span class="kt">void</span> <span class="nf">listModel</span><span class="p">()</span> <span class="k">const</span><span class="p">;</span>
+<span class="k">public</span><span class="o">:</span>
+    <span class="kt">void</span> <span class="n">setSolver</span><span class="p">(</span><span class="k">const</span> <span class="n">DGFlowAux</span><span class="o">::</span><span class="n">Solver</span> <span class="o">&amp;</span><span class="n">solver</span><span class="p">);</span>
+    <span class="n">std</span><span class="o">::</span><span class="n">string</span> <span class="n">dump</span><span class="p">()</span> <span class="k">const</span><span class="p">;</span>
+    <span class="kt">void</span> <span class="nf">calc</span><span class="p">();</span>
+<span class="k">public</span><span class="o">:</span>
+    <span class="n">DGFlowAux</span><span class="o">::</span><span class="n">SolutionSet</span> <span class="n">getSolutions</span><span class="p">()</span> <span class="k">const</span><span class="p">;</span>
+<span class="k">private</span><span class="o">:</span>
+    <span class="k">struct</span> <span class="n">Pimpl</span><span class="p">;</span>
+    <span class="n">std</span><span class="o">::</span><span class="n">unique_ptr</span><span class="o">&lt;</span><span class="n">Pimpl</span><span class="o">&gt;</span> <span class="n">p</span><span class="p">;</span>
+<span class="k">public</span><span class="o">:</span>
+    <span class="k">static</span> <span class="n">std</span><span class="o">::</span><span class="n">shared_ptr</span><span class="o">&lt;</span><span class="n">DGFlow</span><span class="o">&gt;</span> <span class="n">make</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">shared_ptr</span><span class="o">&lt;</span><span class="n">DG</span><span class="o">&gt;</span> <span class="n">dg</span><span class="p">);</span>
+    <span class="k">static</span> <span class="n">std</span><span class="o">::</span><span class="n">shared_ptr</span><span class="o">&lt;</span><span class="n">DGFlow</span><span class="o">&gt;</span> <span class="n">flowDump</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">shared_ptr</span><span class="o">&lt;</span><span class="n">DG</span><span class="o">&gt;</span> <span class="n">dg</span><span class="p">,</span> <span class="k">const</span> <span class="n">std</span><span class="o">::</span><span class="n">string</span> <span class="o">&amp;</span><span class="n">file</span><span class="p">);</span>
+<span class="p">};</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="details">
+<h3>Details<a class="headerlink" href="#details" title="Permalink to this headline">¶</a></h3>
+<dl class="function">
+<dt id="_CPPv2NK3mod6DGFlow5getIdEv">
+<span id="mod::DGFlow::getIdC"></span>unsigned int <code class="descclassname"></code><code class="descname">getId</code><span class="sig-paren">(</span><span class="sig-paren">)</span> <em class="property">const</em><a class="headerlink" href="#_CPPv2NK3mod6DGFlow5getIdEv" title="Permalink to this definition">¶</a><br /></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">the instance identifier for the object.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="_CPPv2NK3mod6DGFlow5getDGEv">
+<span id="mod::DGFlow::getDGC"></span>std::shared_ptr&lt;<a class="reference internal" href="DG.html#_CPPv2N3mod2DGE" title="mod::DG">DG</a>&gt; <code class="descclassname"></code><code class="descname">getDG</code><span class="sig-paren">(</span><span class="sig-paren">)</span> <em class="property">const</em><a class="headerlink" href="#_CPPv2NK3mod6DGFlow5getDGEv" title="Permalink to this definition">¶</a><br /></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">the underlying derivation graph.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="_CPPv2N3mod6DGFlow7getBaseEv">
+<span id="mod::DGFlow::getBase"></span>lib::Flow::FlowBase &amp;<code class="descclassname"></code><code class="descname">getBase</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv2N3mod6DGFlow7getBaseEv" title="Permalink to this definition">¶</a><br /></dt>
+<dt id="_CPPv2NK3mod6DGFlow7getBaseEv">
+<span id="mod::DGFlow::getBaseC"></span><em class="property">const</em> lib::Flow::FlowBase &amp;<code class="descclassname"></code><code class="descname">getBase</code><span class="sig-paren">(</span><span class="sig-paren">)</span> <em class="property">const</em><a class="headerlink" href="#_CPPv2NK3mod6DGFlow7getBaseEv" title="Permalink to this definition">¶</a><br /></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">the internal data structures of the flow model.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="_CPPv2N3mod6DGFlow9addSourceENSt10shared_ptrI5GraphEE">
+<span id="mod::DGFlow::addSource__std::shared_ptr:Graph:"></span>void <code class="descclassname"></code><code class="descname">addSource</code><span class="sig-paren">(</span>std::shared_ptr&lt;<a class="reference internal" href="Graph.html#_CPPv2N3mod5GraphE" title="mod::Graph">Graph</a>&gt; <em>g</em><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv2N3mod6DGFlow9addSourceENSt10shared_ptrI5GraphEE" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Add the vertex represented by <code class="docutils literal"><span class="pre">g</span></code> as a possible source.
+The graph <code class="docutils literal"><span class="pre">g</span></code> must be part of the underlying derivation graph.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Throws:</th><td class="field-body"><a class="reference internal" href="Error.html#_CPPv2N3mod10LogicErrorE" title="mod::LogicError"><code class="xref cpp cpp-class docutils literal"><span class="pre">LogicError</span></code></a> if the specification is locked or if <code class="docutils literal"><span class="pre">g</span></code> is not part of the underling derivation graph.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="_CPPv2N3mod6DGFlow7addSinkENSt10shared_ptrI5GraphEE">
+<span id="mod::DGFlow::addSink__std::shared_ptr:Graph:"></span>void <code class="descclassname"></code><code class="descname">addSink</code><span class="sig-paren">(</span>std::shared_ptr&lt;<a class="reference internal" href="Graph.html#_CPPv2N3mod5GraphE" title="mod::Graph">Graph</a>&gt; <em>g</em><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv2N3mod6DGFlow7addSinkENSt10shared_ptrI5GraphEE" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Add the vertex represented by <code class="docutils literal"><span class="pre">g</span></code> as a possible sink.
+The graph <code class="docutils literal"><span class="pre">g</span></code> must be part of the underlying derivation graph.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Throws:</th><td class="field-body"><a class="reference internal" href="Error.html#_CPPv2N3mod10LogicErrorE" title="mod::LogicError"><code class="xref cpp cpp-class docutils literal"><span class="pre">LogicError</span></code></a> if the specification is locked or if <code class="docutils literal"><span class="pre">g</span></code> is not part of the underling derivation graph.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="_CPPv2N3mod6DGFlow18setAllowHyperLoopsEb">
+<span id="mod::DGFlow::setAllowHyperLoops__b"></span>void <code class="descclassname"></code><code class="descname">setAllowHyperLoops</code><span class="sig-paren">(</span>bool <em>value</em><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv2N3mod6DGFlow18setAllowHyperLoopsEb" title="Permalink to this definition">¶</a><br /></dt>
+<dt id="_CPPv2NK3mod6DGFlow18getAllowHyperLoopsEv">
+<span id="mod::DGFlow::getAllowHyperLoopsC"></span>bool <code class="descclassname"></code><code class="descname">getAllowHyperLoops</code><span class="sig-paren">(</span><span class="sig-paren">)</span> <em class="property">const</em><a class="headerlink" href="#_CPPv2NK3mod6DGFlow18getAllowHyperLoopsEv" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Control or query whether or not flow is allowed through loop hyper-edges.
+I.e., hyperedges with identical left and right side.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Throws:</th><td class="field-body">(only set) <a class="reference internal" href="Error.html#_CPPv2N3mod10LogicErrorE" title="mod::LogicError"><code class="xref cpp cpp-class docutils literal"><span class="pre">LogicError</span></code></a> if the specification is locked.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Note:</th><td class="field-body">This setting may be changed when certain modules are enabled.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="_CPPv2N3mod6DGFlow15setAllowReverseEb">
+<span id="mod::DGFlow::setAllowReverse__b"></span>void <code class="descclassname"></code><code class="descname">setAllowReverse</code><span class="sig-paren">(</span>bool <em>value</em><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv2N3mod6DGFlow15setAllowReverseEb" title="Permalink to this definition">¶</a><br /></dt>
+<dt id="_CPPv2NK3mod6DGFlow15getAllowReverseEv">
+<span id="mod::DGFlow::getAllowReverseC"></span>bool <code class="descclassname"></code><code class="descname">getAllowReverse</code><span class="sig-paren">(</span><span class="sig-paren">)</span> <em class="property">const</em><a class="headerlink" href="#_CPPv2NK3mod6DGFlow15getAllowReverseEv" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Control or query whether or not flow in solutions may go through
+one derivation and then directly afterwards the reverse derivation.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Throws:</th><td class="field-body">(only set) <a class="reference internal" href="Error.html#_CPPv2N3mod10LogicErrorE" title="mod::LogicError"><code class="xref cpp cpp-class docutils literal"><span class="pre">LogicError</span></code></a> if the model is locked.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Note:</th><td class="field-body">This setting may be modified when certain modules are enabled.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="_CPPv2N3mod6DGFlow17setAllowIOReverseEb">
+<span id="mod::DGFlow::setAllowIOReverse__b"></span>void <code class="descclassname"></code><code class="descname">setAllowIOReverse</code><span class="sig-paren">(</span>bool <em>value</em><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv2N3mod6DGFlow17setAllowIOReverseEb" title="Permalink to this definition">¶</a><br /></dt>
+<dt id="_CPPv2NK3mod6DGFlow17getAllowIOReverseEv">
+<span id="mod::DGFlow::getAllowIOReverseC"></span>bool <code class="descclassname"></code><code class="descname">getAllowIOReverse</code><span class="sig-paren">(</span><span class="sig-paren">)</span> <em class="property">const</em><a class="headerlink" href="#_CPPv2NK3mod6DGFlow17getAllowIOReverseEv" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Control or query whether or not flow in solutions may go through
+an input edge and directly afterwards through the corresponding output edge.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Throws:</th><td class="field-body">(only set) <a class="reference internal" href="Error.html#_CPPv2N3mod10LogicErrorE" title="mod::LogicError"><code class="xref cpp cpp-class docutils literal"><span class="pre">LogicError</span></code></a> if the model is locked.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Note:</th><td class="field-body">This setting may be modified when certain modules are enabled.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="_CPPv2N3mod6DGFlow10setRelaxedEb">
+<span id="mod::DGFlow::setRelaxed__b"></span>void <code class="descclassname"></code><code class="descname">setRelaxed</code><span class="sig-paren">(</span>bool <em>value</em><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv2N3mod6DGFlow10setRelaxedEb" title="Permalink to this definition">¶</a><br /></dt>
+<dt id="_CPPv2NK3mod6DGFlow10getRelaxedEv">
+<span id="mod::DGFlow::getRelaxedC"></span>bool <code class="descclassname"></code><code class="descname">getRelaxed</code><span class="sig-paren">(</span><span class="sig-paren">)</span> <em class="property">const</em><a class="headerlink" href="#_CPPv2NK3mod6DGFlow10getRelaxedEv" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Controls whether the core variables are integer or continuous.
+The default is <code class="docutils literal"><span class="pre">False</span></code>, meaning integer. Using the relaxed model significantly
+changes the meaning of solutions, and many features may break.
+This feature is only here to provide an easy way to emulated flux balance analysis.</p>
+</dd></dl>
+
+<dl class="member">
+<dt id="_CPPv2N3mod6DGFlow7transitE">
+<span id="mod::DGFlow::transit__TransitProxy"></span><a class="reference internal" href="#_CPPv2N3mod6DGFlow12TransitProxyE" title="mod::DGFlow::TransitProxy">TransitProxy</a> <code class="descclassname"></code><code class="descname">transit</code><a class="headerlink" href="#_CPPv2N3mod6DGFlow7transitE" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>The transit extension of the flow model.</p>
+</dd></dl>
+
+<dl class="member">
+<dt id="_CPPv2N3mod6DGFlow20overallAutocatalysisE">
+<span id="mod::DGFlow::overallAutocatalysis__OverallAutocatalysisProxy"></span><a class="reference internal" href="#_CPPv2N3mod6DGFlow25OverallAutocatalysisProxyE" title="mod::DGFlow::OverallAutocatalysisProxy">OverallAutocatalysisProxy</a> <code class="descclassname"></code><code class="descname">overallAutocatalysis</code><a class="headerlink" href="#_CPPv2N3mod6DGFlow20overallAutocatalysisE" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>The overall autocatalysis extension of the flow model.</p>
+</dd></dl>
+
+<dl class="member">
+<dt id="_CPPv2N3mod6DGFlow16overallCatalysisE">
+<span id="mod::DGFlow::overallCatalysis__OverallCatalysisProxy"></span><a class="reference internal" href="#_CPPv2N3mod6DGFlow21OverallCatalysisProxyE" title="mod::DGFlow::OverallCatalysisProxy">OverallCatalysisProxy</a> <code class="descclassname"></code><code class="descname">overallCatalysis</code><a class="headerlink" href="#_CPPv2N3mod6DGFlow16overallCatalysisE" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>The overall catalysis extension of the flow model.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="_CPPv2N3mod6DGFlow13addConstraintERKN9DGFlowAux13LinConstraintE">
+<span id="mod::DGFlow::addConstraint__DGFlowAux::LinConstraintCR"></span>void <code class="descclassname"></code><code class="descname">addConstraint</code><span class="sig-paren">(</span><em class="property">const</em> DGFlowAux::<a class="reference internal" href="#_CPPv2N3mod9DGFlowAux13LinConstraintE" title="mod::DGFlowAux::LinConstraint">LinConstraint</a> &amp;<em>constraint</em><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv2N3mod6DGFlow13addConstraintERKN9DGFlowAux13LinConstraintE" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Add the given linear constraint to the model.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Throws:</th><td class="field-body"><a class="reference internal" href="Error.html#_CPPv2N3mod10LogicErrorE" title="mod::LogicError"><code class="xref cpp cpp-class docutils literal"><span class="pre">LogicError</span></code></a> if the model is locked.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="_CPPv2N3mod6DGFlow15setVertexFilterENSt10shared_ptrI8FunctionIFbNSt10shared_ptrI5GraphEEEEEE">
+void <code class="descclassname"></code><code class="descname">setVertexFilter</code><span class="sig-paren">(</span>std::shared_ptr&lt;Function&lt;bool<span class="sig-paren">(</span>std::shared_ptr&lt;<a class="reference internal" href="Graph.html#_CPPv2N3mod5GraphE" title="mod::Graph">Graph</a>&gt;<span class="sig-paren">)</span>&gt;&gt; <em>vFilter</em><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv2N3mod6DGFlow15setVertexFilterENSt10shared_ptrI8FunctionIFbNSt10shared_ptrI5GraphEEEEEE" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Set a filter indicating the vertices which should be considered part of the model.
+This not only disables flow through the vertices but also removes the vertices from considerations in some algorithms.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Throws:</th><td class="field-body"><a class="reference internal" href="Error.html#_CPPv2N3mod10LogicErrorE" title="mod::LogicError"><code class="xref cpp cpp-class docutils literal"><span class="pre">LogicError</span></code></a> if the model is locked.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="_CPPv2N3mod6DGFlow20setObjectiveFunctionEN9DGFlowAux6LinExpE">
+<span id="mod::DGFlow::setObjectiveFunction__DGFlowAux::LinExp"></span>void <code class="descclassname"></code><code class="descname">setObjectiveFunction</code><span class="sig-paren">(</span>DGFlowAux::<a class="reference internal" href="#_CPPv2N3mod9DGFlowAux6LinExpE" title="mod::DGFlowAux::LinExp">LinExp</a> <em>func</em><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv2N3mod6DGFlow20setObjectiveFunctionEN9DGFlowAux6LinExpE" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Set the objective function used when finding solutions.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Throws:</th><td class="field-body"><a class="reference internal" href="Error.html#_CPPv2N3mod10LogicErrorE" title="mod::LogicError"><code class="xref cpp cpp-class docutils literal"><span class="pre">LogicError</span></code></a> if the model is locked.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="_CPPv2NK3mod6DGFlow9listModelEv">
+<span id="mod::DGFlow::listModelC"></span>void <code class="descclassname"></code><code class="descname">listModel</code><span class="sig-paren">(</span><span class="sig-paren">)</span> <em class="property">const</em><a class="headerlink" href="#_CPPv2NK3mod6DGFlow9listModelEv" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>List all settings of the model.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="_CPPv2N3mod6DGFlow9setSolverERKN9DGFlowAux6SolverE">
+<span id="mod::DGFlow::setSolver__DGFlowAux::SolverCR"></span>void <code class="descclassname"></code><code class="descname">setSolver</code><span class="sig-paren">(</span><em class="property">const</em> DGFlowAux::<a class="reference internal" href="#_CPPv2N3mod9DGFlowAux6SolverE" title="mod::DGFlowAux::Solver">Solver</a> &amp;<em>solver</em><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv2N3mod6DGFlow9setSolverERKN9DGFlowAux6SolverE" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Set which solver to use, e.g., a simple optimization with only the optimal solution, or enumeration solving for finding many solutions.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="_CPPv2NK3mod6DGFlow4dumpEv">
+<span id="mod::DGFlow::dumpC"></span>std::string <code class="descclassname"></code><code class="descname">dump</code><span class="sig-paren">(</span><span class="sig-paren">)</span> <em class="property">const</em><a class="headerlink" href="#_CPPv2NK3mod6DGFlow4dumpEv" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Dump all model settings and all solutions found to a file. This file can be loaded in again.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">the filename with the dumped model.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Throws:</th><td class="field-body"><a class="reference internal" href="Error.html#_CPPv2N3mod10LogicErrorE" title="mod::LogicError"><code class="xref cpp cpp-class docutils literal"><span class="pre">LogicError</span></code></a> if calculation has not been done.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="_CPPv2N3mod6DGFlow4calcEv">
+<span id="mod::DGFlow::calc"></span><code class="descclassname"></code><code class="descname">calc</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv2N3mod6DGFlow4calcEv" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Find solutions using the current solver.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Throws:</th><td class="field-body"><a class="reference internal" href="Error.html#_CPPv2N3mod10LogicErrorE" title="mod::LogicError"><code class="xref cpp cpp-class docutils literal"><span class="pre">LogicError</span></code></a> if calculation has already been done.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="_CPPv2NK3mod6DGFlow12getSolutionsEv">
+<span id="mod::DGFlow::getSolutionsC"></span>DGFlowAux::<a class="reference internal" href="#_CPPv2N3mod9DGFlowAux11SolutionSetE" title="mod::DGFlowAux::SolutionSet">SolutionSet</a> <code class="descclassname"></code><code class="descname">getSolutions</code><span class="sig-paren">(</span><span class="sig-paren">)</span> <em class="property">const</em><a class="headerlink" href="#_CPPv2NK3mod6DGFlow12getSolutionsEv" title="Permalink to this definition">¶</a><br /></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">the found solutions for the model.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Throws:</th><td class="field-body"><a class="reference internal" href="Error.html#_CPPv2N3mod10LogicErrorE" title="mod::LogicError"><code class="xref cpp cpp-class docutils literal"><span class="pre">LogicError</span></code></a> if calculation has not been done.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="_CPPv2N3mod6DGFlow4makeENSt10shared_ptrI2DGEE">
+<span id="mod::DGFlow::make__std::shared_ptr:DG:"></span><em class="property">static</em> std::shared_ptr&lt;<a class="reference internal" href="#_CPPv2N3mod6DGFlowE" title="mod::DGFlow">DGFlow</a>&gt; <code class="descclassname"></code><code class="descname">make</code><span class="sig-paren">(</span>std::shared_ptr&lt;<a class="reference internal" href="DG.html#_CPPv2N3mod2DGE" title="mod::DG">DG</a>&gt; <em>dg</em><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv2N3mod6DGFlow4makeENSt10shared_ptrI2DGEE" title="Permalink to this definition">¶</a><br /></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">a clean flow model for the given derivation graph.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Throws:</th><td class="field-body"><a class="reference internal" href="Error.html#_CPPv2N3mod10LogicErrorE" title="mod::LogicError"><code class="xref cpp cpp-class docutils literal"><span class="pre">LogicError</span></code></a> if the given derivation graph has not been calculated.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="_CPPv2N3mod6DGFlow8flowDumpENSt10shared_ptrI2DGEERKNSt6stringE">
+<span id="mod::DGFlow::flowDump__std::shared_ptr:DG:.ssCR"></span><em class="property">static</em> std::shared_ptr&lt;<a class="reference internal" href="#_CPPv2N3mod6DGFlowE" title="mod::DGFlow">DGFlow</a>&gt; <code class="descclassname"></code><code class="descname">flowDump</code><span class="sig-paren">(</span>std::shared_ptr&lt;<a class="reference internal" href="DG.html#_CPPv2N3mod2DGE" title="mod::DG">DG</a>&gt; <em>dg</em>, <em class="property">const</em> std::string &amp;<em>file</em><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv2N3mod6DGFlow8flowDumpENSt10shared_ptrI2DGEERKNSt6stringE" title="Permalink to this definition">¶</a><br /></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">a flow model (possibly with solutions) corresponding to the model stored in the given file.
+The given derivation graph must match the derivation graph originally used to create the dump.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Throws:</th><td class="field-body"><a class="reference internal" href="Error.html#_CPPv2N3mod10InputErrorE" title="mod::InputError"><code class="xref cpp cpp-class docutils literal"><span class="pre">InputError</span></code></a> on bad data or when the given derivation graph does not match the data.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+</div>
+<div class="section" id="class-dgflow-transitproxy">
+<h2>Class <code class="docutils literal"><span class="pre">DGFlow::TransitProxy</span></code><a class="headerlink" href="#class-dgflow-transitproxy" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="_CPPv2N3mod6DGFlow12TransitProxyE">
+<span id="mod::DGFlow::TransitProxy"></span><em class="property">class </em><code class="descclassname">DGFlow::</code><code class="descname">TransitProxy</code><a class="headerlink" href="#_CPPv2N3mod6DGFlow12TransitProxyE" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>This class provides access to the transit extension of a flow model.</p>
+<dl class="function">
+<dt id="_CPPv2NK3mod6DGFlow12TransitProxy10printGraphENSt10shared_ptrI5GraphEE">
+<span id="mod::DGFlow::TransitProxy::printGraph__std::shared_ptr:Graph:C"></span>void <code class="descclassname"></code><code class="descname">printGraph</code><span class="sig-paren">(</span>std::shared_ptr&lt;<a class="reference internal" href="Graph.html#_CPPv2N3mod5GraphE" title="mod::Graph">Graph</a>&gt; <em>g</em><span class="sig-paren">)</span> <em class="property">const</em><a class="headerlink" href="#_CPPv2NK3mod6DGFlow12TransitProxy10printGraphENSt10shared_ptrI5GraphEE" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Print the expanded network of the vertex represented by the graph <code class="docutils literal"><span class="pre">g</span></code>.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Throws:</th><td class="field-body"><a class="reference internal" href="Error.html#_CPPv2N3mod10LogicErrorE" title="mod::LogicError"><code class="xref cpp cpp-class docutils literal"><span class="pre">LogicError</span></code></a> if the given graph does not belong to the underlying derivation graph.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="class-dgflow-overallautocatalysisproxy">
+<h2>Class <code class="docutils literal"><span class="pre">DGFlow::OverallAutocatalysisProxy</span></code><a class="headerlink" href="#class-dgflow-overallautocatalysisproxy" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="_CPPv2N3mod6DGFlow25OverallAutocatalysisProxyE">
+<span id="mod::DGFlow::OverallAutocatalysisProxy"></span><em class="property">class </em><code class="descclassname">DGFlow::</code><code class="descname">OverallAutocatalysisProxy</code><a class="headerlink" href="#_CPPv2N3mod6DGFlow25OverallAutocatalysisProxyE" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>This class provides access to the extension for overall autocatalysis of a flow model.</p>
+<dl class="function">
+<dt id="_CPPv2N3mod6DGFlow25OverallAutocatalysisProxy6enableEv">
+<span id="mod::DGFlow::OverallAutocatalysisProxy::enable"></span>void <code class="descclassname"></code><code class="descname">enable</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv2N3mod6DGFlow25OverallAutocatalysisProxy6enableEv" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Enable the extension. This will also enable the transit extension and configure it to
+disallow direct flow through inverse edges, both internal and input/output.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Throws:</th><td class="field-body"><a class="reference internal" href="Error.html#_CPPv2N3mod10LogicErrorE" title="mod::LogicError"><code class="xref cpp cpp-class docutils literal"><span class="pre">LogicError</span></code></a> if the model is locked.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="_CPPv2N3mod6DGFlow25OverallAutocatalysisProxy17setForceExistenceEb">
+<span id="mod::DGFlow::OverallAutocatalysisProxy::setForceExistence__b"></span>void <code class="descclassname"></code><code class="descname">setForceExistence</code><span class="sig-paren">(</span>bool <em>value</em><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv2N3mod6DGFlow25OverallAutocatalysisProxy17setForceExistenceEb" title="Permalink to this definition">¶</a><br /></dt>
+<dt id="_CPPv2NK3mod6DGFlow25OverallAutocatalysisProxy17getForceExistenceEv">
+<span id="mod::DGFlow::OverallAutocatalysisProxy::getForceExistenceC"></span>bool <code class="descclassname"></code><code class="descname">getForceExistence</code><span class="sig-paren">(</span><span class="sig-paren">)</span> <em class="property">const</em><a class="headerlink" href="#_CPPv2NK3mod6DGFlow25OverallAutocatalysisProxy17getForceExistenceEv" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Control or query whether or not a solution must be overall autocatalytic.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="_CPPv2N3mod6DGFlow25OverallAutocatalysisProxy16setStrictTransitEb">
+<span id="mod::DGFlow::OverallAutocatalysisProxy::setStrictTransit__b"></span>void <code class="descclassname"></code><code class="descname">setStrictTransit</code><span class="sig-paren">(</span>bool <em>value</em><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv2N3mod6DGFlow25OverallAutocatalysisProxy16setStrictTransitEb" title="Permalink to this definition">¶</a><br /></dt>
+<dt id="_CPPv2NK3mod6DGFlow25OverallAutocatalysisProxy16getStrictTransitEv">
+<span id="mod::DGFlow::OverallAutocatalysisProxy::getStrictTransitC"></span>bool <code class="descclassname"></code><code class="descname">getStrictTransit</code><span class="sig-paren">(</span><span class="sig-paren">)</span> <em class="property">const</em><a class="headerlink" href="#_CPPv2NK3mod6DGFlow25OverallAutocatalysisProxy16getStrictTransitEv" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Control or query whether transit flow in overall autocatalytic vertices is restricted or not.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="_CPPv2N3mod6DGFlow25OverallAutocatalysisProxy15setBFSExclusiveEb">
+<span id="mod::DGFlow::OverallAutocatalysisProxy::setBFSExclusive__b"></span>void <code class="descclassname"></code><code class="descname">setBFSExclusive</code><span class="sig-paren">(</span>bool <em>value</em><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv2N3mod6DGFlow25OverallAutocatalysisProxy15setBFSExclusiveEb" title="Permalink to this definition">¶</a><br /></dt>
+<dt id="_CPPv2NK3mod6DGFlow25OverallAutocatalysisProxy15getBFSExclusiveEv">
+<span id="mod::DGFlow::OverallAutocatalysisProxy::getBFSExclusiveC"></span>bool <code class="descclassname"></code><code class="descname">getBFSExclusive</code><span class="sig-paren">(</span><span class="sig-paren">)</span> <em class="property">const</em><a class="headerlink" href="#_CPPv2NK3mod6DGFlow25OverallAutocatalysisProxy15getBFSExclusiveEv" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Control or query whether or not vertices must be exclusively overall autocatalytic,
+as determined by breadth-first marking.</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="class-dgflow-overallcatalysisproxy">
+<h2>Class <code class="docutils literal"><span class="pre">DGFlow::OverallCatalysisProxy</span></code><a class="headerlink" href="#class-dgflow-overallcatalysisproxy" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="_CPPv2N3mod6DGFlow21OverallCatalysisProxyE">
+<span id="mod::DGFlow::OverallCatalysisProxy"></span><em class="property">class </em><code class="descclassname">DGFlow::</code><code class="descname">OverallCatalysisProxy</code><a class="headerlink" href="#_CPPv2N3mod6DGFlow21OverallCatalysisProxyE" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>This class provides access to the extension for overall catalysis of a flow model.</p>
+<dl class="function">
+<dt id="_CPPv2N3mod6DGFlow21OverallCatalysisProxy6enableEv">
+<span id="mod::DGFlow::OverallCatalysisProxy::enable"></span>void <code class="descclassname"></code><code class="descname">enable</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv2N3mod6DGFlow21OverallCatalysisProxy6enableEv" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Enable the extension. This will also enable the transit extension and configure it to
+disallow direct flow through inverse edges, both internal and input/output.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Throws:</th><td class="field-body"><a class="reference internal" href="Error.html#_CPPv2N3mod10LogicErrorE" title="mod::LogicError"><code class="xref cpp cpp-class docutils literal"><span class="pre">LogicError</span></code></a> if the model is locked.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="_CPPv2N3mod6DGFlow21OverallCatalysisProxy17setForceExistenceEb">
+<span id="mod::DGFlow::OverallCatalysisProxy::setForceExistence__b"></span>void <code class="descclassname"></code><code class="descname">setForceExistence</code><span class="sig-paren">(</span>bool <em>value</em><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv2N3mod6DGFlow21OverallCatalysisProxy17setForceExistenceEb" title="Permalink to this definition">¶</a><br /></dt>
+<dt id="_CPPv2NK3mod6DGFlow21OverallCatalysisProxy17getForceExistenceEv">
+<span id="mod::DGFlow::OverallCatalysisProxy::getForceExistenceC"></span>bool <code class="descclassname"></code><code class="descname">getForceExistence</code><span class="sig-paren">(</span><span class="sig-paren">)</span> <em class="property">const</em><a class="headerlink" href="#_CPPv2NK3mod6DGFlow21OverallCatalysisProxy17getForceExistenceEv" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Control or query whether or not a solution must be overall catalytic.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="_CPPv2N3mod6DGFlow21OverallCatalysisProxy16setStrictTransitEb">
+<span id="mod::DGFlow::OverallCatalysisProxy::setStrictTransit__b"></span>void <code class="descclassname"></code><code class="descname">setStrictTransit</code><span class="sig-paren">(</span>bool <em>value</em><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv2N3mod6DGFlow21OverallCatalysisProxy16setStrictTransitEb" title="Permalink to this definition">¶</a><br /></dt>
+<dt id="_CPPv2NK3mod6DGFlow21OverallCatalysisProxy16getStrictTransitEv">
+<span id="mod::DGFlow::OverallCatalysisProxy::getStrictTransitC"></span>bool <code class="descclassname"></code><code class="descname">getStrictTransit</code><span class="sig-paren">(</span><span class="sig-paren">)</span> <em class="property">const</em><a class="headerlink" href="#_CPPv2NK3mod6DGFlow21OverallCatalysisProxy16getStrictTransitEv" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Control or query whether transit flow in overall catalytic vertices is restricted or not.</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="linear-expressions-and-constraints">
+<h2>Linear Expressions and Constraints<a class="headerlink" href="#linear-expressions-and-constraints" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="_CPPv2N3mod9DGFlowAux6LinExpE">
+<span id="mod::DGFlowAux::LinExp"></span><em class="property">class </em><code class="descclassname">DGFlowAux::</code><code class="descname">LinExp</code><a class="headerlink" href="#_CPPv2N3mod9DGFlowAux6LinExpE" title="Permalink to this definition">¶</a><br /></dt>
+<dd></dd></dl>
+
+<dl class="class">
+<dt id="_CPPv2N3mod9DGFlowAux13LinConstraintE">
+<span id="mod::DGFlowAux::LinConstraint"></span><em class="property">class </em><code class="descclassname">DGFlowAux::</code><code class="descname">LinConstraint</code><a class="headerlink" href="#_CPPv2N3mod9DGFlowAux13LinConstraintE" title="Permalink to this definition">¶</a><br /></dt>
+<dd></dd></dl>
+
+<p>Linear expressions and constraints can be implicitly created from variable specifiers and operators,
+meaning one rarely need to instantiate them explicitly.
+However creating the zero-expression might sometimes be useful (e.g., in a sum expression)
+and can be done simply with the expression <code class="docutils literal"><span class="pre">DGFlowAux::LinExp()</span></code>.</p>
+<p>A variable specifier is a representation of either a single ILP variable or a sum of ILP variables.
+The addition, multiplication and division operators are overloaded for variable specifiers and
+linear expressions such that expressions can be written in the natural manner.</p>
+<p>The operators <code class="docutils literal"><span class="pre">&lt;=</span></code>, <code class="docutils literal"><span class="pre">==</span></code> and <code class="docutils literal"><span class="pre">&gt;=</span></code> are overloaded on linear expressions to make the creation of
+linear constraints easier. However, one argument to the operator must be a linear expression while
+the other argument must be a number.</p>
+</div>
+<div class="section" id="variable-specifiers">
+<h2>Variable Specifiers<a class="headerlink" href="#variable-specifiers" title="Permalink to this headline">¶</a></h2>
+<p>All variable specifiers are defined in the namespace <code class="docutils literal"><span class="pre">DGFlowVar</span></code>. See <span class="xref std std-ref">dgFlowCommon</span> for an overview of the specifiers.</p>
+</div>
+<div class="section" id="class-dgflowaux-sequencequery">
+<h2>Class <code class="docutils literal"><span class="pre">DGFlowAux::SequenceQuery</span></code><a class="headerlink" href="#class-dgflowaux-sequencequery" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="_CPPv2N3mod9DGFlowAux13SequenceQueryE">
+<span id="mod::DGFlowAux::SequenceQuery"></span><em class="property">class </em><code class="descclassname">DGFlowAux::</code><code class="descname">SequenceQuery</code><a class="headerlink" href="#_CPPv2N3mod9DGFlowAux13SequenceQueryE" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Representation of a query for a flow sequence.</p>
+</dd></dl>
+
+<div class="section" id="id1">
+<h3>Synopsis<a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h3>
+<div class="highlight-c++"><div class="highlight"><pre><span></span><span class="k">struct</span> <span class="n">SequenceQuery</span> <span class="p">{</span>
+    <span class="n">SequenceQuery</span><span class="p">();</span>
+    <span class="kt">void</span> <span class="nf">setMultiplicity</span><span class="p">(</span><span class="kt">unsigned</span> <span class="kt">int</span> <span class="n">multiplicity</span><span class="p">);</span>
+    <span class="kt">unsigned</span> <span class="kt">int</span> <span class="nf">getMultiplicity</span><span class="p">()</span> <span class="k">const</span><span class="p">;</span>
+    <span class="kt">void</span> <span class="nf">setBorrow</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">shared_ptr</span><span class="o">&lt;</span><span class="n">Graph</span><span class="o">&gt;</span> <span class="n">g</span><span class="p">,</span> <span class="kt">unsigned</span> <span class="kt">int</span> <span class="n">count</span><span class="p">);</span>
+    <span class="kt">unsigned</span> <span class="kt">int</span> <span class="nf">getBorrow</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">shared_ptr</span><span class="o">&lt;</span><span class="n">Graph</span><span class="o">&gt;</span> <span class="n">g</span><span class="p">)</span> <span class="k">const</span><span class="p">;</span>
+    <span class="kt">void</span> <span class="nf">setConstrainRouting</span><span class="p">(</span><span class="kt">bool</span> <span class="n">v</span><span class="p">);</span>
+    <span class="kt">bool</span> <span class="nf">getConstrainRouting</span><span class="p">()</span> <span class="k">const</span><span class="p">;</span>
+<span class="k">public</span><span class="o">:</span>
+    <span class="n">lib</span><span class="o">::</span><span class="n">Flow</span><span class="o">::</span><span class="n">SequenceQuery</span> <span class="n">getQuery</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">shared_ptr</span><span class="o">&lt;</span><span class="n">DG</span><span class="o">&gt;</span> <span class="n">dg</span><span class="p">)</span> <span class="k">const</span><span class="p">;</span>
+<span class="k">private</span><span class="o">:</span>
+    <span class="kt">unsigned</span> <span class="kt">int</span> <span class="n">multiplicity</span><span class="p">;</span>
+    <span class="n">std</span><span class="o">::</span><span class="n">unordered_map</span><span class="o">&lt;</span><span class="n">std</span><span class="o">::</span><span class="n">shared_ptr</span><span class="o">&lt;</span><span class="n">mod</span><span class="o">::</span><span class="n">Graph</span><span class="o">&gt;</span><span class="p">,</span> <span class="kt">unsigned</span> <span class="kt">int</span><span class="o">&gt;</span> <span class="n">borrow</span><span class="p">;</span>
+    <span class="kt">bool</span> <span class="n">constrainRouting</span><span class="p">;</span>
+<span class="p">};</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="id2">
+<h3>Details<a class="headerlink" href="#id2" title="Permalink to this headline">¶</a></h3>
+<dl class="function">
+<dt id="_CPPv2N3mod9DGFlowAux13SequenceQuery13SequenceQueryEv">
+<span id="mod::DGFlowAux::SequenceQuery::SequenceQuery"></span><code class="descclassname"></code><code class="descname">SequenceQuery</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv2N3mod9DGFlowAux13SequenceQuery13SequenceQueryEv" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Construct a query with multiplicity 1 and no borrowing.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="_CPPv2N3mod9DGFlowAux13SequenceQuery15setMultiplicityEj">
+<span id="mod::DGFlowAux::SequenceQuery::setMultiplicity__unsigned-i"></span>void <code class="descclassname"></code><code class="descname">setMultiplicity</code><span class="sig-paren">(</span>unsigned int <em>multiplicity</em><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv2N3mod9DGFlowAux13SequenceQuery15setMultiplicityEj" title="Permalink to this definition">¶</a><br /></dt>
+<dt id="_CPPv2NK3mod9DGFlowAux13SequenceQuery15getMultiplicityEv">
+<span id="mod::DGFlowAux::SequenceQuery::getMultiplicityC"></span>unsigned int <code class="descclassname"></code><code class="descname">getMultiplicity</code><span class="sig-paren">(</span><span class="sig-paren">)</span> <em class="property">const</em><a class="headerlink" href="#_CPPv2NK3mod9DGFlowAux13SequenceQuery15getMultiplicityEv" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Set/get the multiplicity of the query. It must be at least 1.
+:throws: (set) <a class="reference internal" href="Error.html#_CPPv2N3mod10LogicErrorE" title="mod::LogicError"><code class="xref cpp cpp-class docutils literal"><span class="pre">mod::LogicError</span></code></a> if the multiplicity is 0.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="_CPPv2N3mod9DGFlowAux13SequenceQuery9setBorrowENSt10shared_ptrI5GraphEEj">
+<span id="mod::DGFlowAux::SequenceQuery::setBorrow__std::shared_ptr:Graph:.unsigned-i"></span>void <code class="descclassname"></code><code class="descname">setBorrow</code><span class="sig-paren">(</span>std::shared_ptr&lt;<a class="reference internal" href="Graph.html#_CPPv2N3mod5GraphE" title="mod::Graph">Graph</a>&gt; <em>g</em>, unsigned int <em>count</em><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv2N3mod9DGFlowAux13SequenceQuery9setBorrowENSt10shared_ptrI5GraphEEj" title="Permalink to this definition">¶</a><br /></dt>
+<dt id="_CPPv2NK3mod9DGFlowAux13SequenceQuery9getBorrowENSt10shared_ptrI5GraphEE">
+<span id="mod::DGFlowAux::SequenceQuery::getBorrow__std::shared_ptr:Graph:C"></span>unsigned int <code class="descclassname"></code><code class="descname">getBorrow</code><span class="sig-paren">(</span>std::shared_ptr&lt;<a class="reference internal" href="Graph.html#_CPPv2N3mod5GraphE" title="mod::Graph">Graph</a>&gt; <em>g</em><span class="sig-paren">)</span> <em class="property">const</em><a class="headerlink" href="#_CPPv2NK3mod9DGFlowAux13SequenceQuery9getBorrowENSt10shared_ptrI5GraphEE" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Set/get the amount of flow allowed to be borrowed at the vertex represented by the graph.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="_CPPv2N3mod9DGFlowAux13SequenceQuery19setConstrainRoutingEb">
+<span id="mod::DGFlowAux::SequenceQuery::setConstrainRouting__b"></span>void <code class="descclassname"></code><code class="descname">setConstrainRouting</code><span class="sig-paren">(</span>bool <em>v</em><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv2N3mod9DGFlowAux13SequenceQuery19setConstrainRoutingEb" title="Permalink to this definition">¶</a><br /></dt>
+<dt id="_CPPv2NK3mod9DGFlowAux13SequenceQuery19getConstrainRoutingEv">
+<span id="mod::DGFlowAux::SequenceQuery::getConstrainRoutingC"></span>bool <code class="descclassname"></code><code class="descname">getConstrainRouting</code><span class="sig-paren">(</span><span class="sig-paren">)</span> <em class="property">const</em><a class="headerlink" href="#_CPPv2NK3mod9DGFlowAux13SequenceQuery19getConstrainRoutingEv" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Set/get whether routing edges must conform to the flow. Setting this to <code class="docutils literal"><span class="pre">false</span></code> may give sequences violating flow constraints.</p>
+</dd></dl>
+
+</div>
+</div>
+<div class="section" id="class-dgflowaux-solution">
+<h2>Class <code class="docutils literal"><span class="pre">DGFlowAux::Solution</span></code><a class="headerlink" href="#class-dgflowaux-solution" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="_CPPv2N3mod9DGFlowAux8SolutionE">
+<span id="mod::DGFlowAux::Solution"></span><em class="property">class </em><code class="descclassname">DGFlowAux::</code><code class="descname">Solution</code><a class="headerlink" href="#_CPPv2N3mod9DGFlowAux8SolutionE" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>An object of this class represents a solution for a specific flow model.</p>
+</dd></dl>
+
+<div class="section" id="id3">
+<h3>Synopsis<a class="headerlink" href="#id3" title="Permalink to this headline">¶</a></h3>
+<div class="highlight-c++"><div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">Solution</span> <span class="p">{</span>
+    <span class="k">friend</span> <span class="k">class</span> <span class="nc">SolutionSet</span><span class="p">;</span>
+    <span class="n">Solution</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">shared_ptr</span><span class="o">&lt;</span><span class="n">DGFlow</span><span class="o">&gt;</span> <span class="n">dgFlow</span><span class="p">,</span> <span class="kt">unsigned</span> <span class="kt">int</span> <span class="n">id</span><span class="p">);</span>
+<span class="k">public</span><span class="o">:</span>
+    <span class="n">lib</span><span class="o">::</span><span class="n">Flow</span><span class="o">::</span><span class="n">Solution</span> <span class="n">makeSolution</span><span class="p">()</span> <span class="k">const</span><span class="p">;</span>
+<span class="k">public</span><span class="o">:</span>
+    <span class="kt">unsigned</span> <span class="kt">int</span> <span class="n">getId</span><span class="p">()</span> <span class="k">const</span><span class="p">;</span>
+    <span class="n">std</span><span class="o">::</span><span class="n">shared_ptr</span><span class="o">&lt;</span><span class="n">mod</span><span class="o">::</span><span class="n">DGFlow</span><span class="o">&gt;</span> <span class="n">getDGFlow</span><span class="p">()</span> <span class="k">const</span><span class="p">;</span>
+    <span class="kt">double</span> <span class="nf">eval</span><span class="p">(</span><span class="k">const</span> <span class="n">LinExp</span> <span class="o">&amp;</span><span class="n">exp</span><span class="p">)</span> <span class="k">const</span><span class="p">;</span>
+    <span class="kt">void</span> <span class="nf">print</span><span class="p">(</span><span class="k">const</span> <span class="n">DGPrintData</span> <span class="o">&amp;</span><span class="n">data</span><span class="p">,</span> <span class="k">const</span> <span class="n">Printer</span> <span class="o">&amp;</span><span class="n">printer</span><span class="p">)</span> <span class="k">const</span><span class="p">;</span>
+    <span class="kt">void</span> <span class="nf">haxListDerivations</span><span class="p">()</span> <span class="k">const</span><span class="p">;</span>
+    <span class="c1">// :throws: :class:`mod::LogicError` if at least one graph in the query does not represent a vertex in the underlying derivation graph.</span>
+    <span class="kt">bool</span> <span class="nf">hasSequence</span><span class="p">(</span><span class="k">const</span> <span class="n">SequenceQuery</span> <span class="o">&amp;</span><span class="n">query</span><span class="p">)</span> <span class="k">const</span><span class="p">;</span>
+    <span class="c1">// :throws: :class:`mod::LogicError` if at least one graph in the query does not represent a vertex in the underlying derivation graph.</span>
+    <span class="kt">bool</span> <span class="nf">hasDAG</span><span class="p">(</span><span class="k">const</span> <span class="n">SequenceQuery</span> <span class="o">&amp;</span><span class="n">query</span><span class="p">)</span> <span class="k">const</span><span class="p">;</span>
+    <span class="c1">// :throws: :class:`mod::LogicError` if at least one graph in the query does not represent a vertex in the underlying derivation graph.</span>
+    <span class="c1">// :throws: :class:`LogicError` if the sequence does not exist.</span>
+    <span class="n">DGTransition</span><span class="o">::</span><span class="n">Sequence</span> <span class="n">getSequence</span><span class="p">(</span><span class="k">const</span> <span class="n">SequenceQuery</span> <span class="o">&amp;</span><span class="n">query</span><span class="p">)</span> <span class="k">const</span><span class="p">;</span>
+    <span class="c1">// :throws: :class:`mod::LogicError` if at least one graph in the query does not represent a vertex in the underlying derivation graph.</span>
+    <span class="c1">// :throws: :class:`LogicError` if the DAG does not exist.</span>
+    <span class="n">DGTransition</span><span class="o">::</span><span class="n">DAG</span> <span class="n">getDAG</span><span class="p">(</span><span class="k">const</span> <span class="n">SequenceQuery</span> <span class="o">&amp;</span><span class="n">query</span><span class="p">)</span> <span class="k">const</span><span class="p">;</span>
+    <span class="c1">// :throws: :class:`LogicError` if the two solutions are not on the same derivation graph.</span>
+    <span class="kt">bool</span> <span class="nf">equal</span><span class="p">(</span><span class="k">const</span> <span class="n">Solution</span> <span class="o">&amp;</span><span class="n">other</span><span class="p">,</span> <span class="k">const</span> <span class="n">LinExp</span> <span class="o">&amp;</span><span class="n">vars</span><span class="p">)</span> <span class="k">const</span><span class="p">;</span>
+    <span class="c1">// object equality, not the same as equal</span>
+    <span class="k">friend</span> <span class="kt">bool</span> <span class="k">operator</span><span class="o">==</span><span class="p">(</span><span class="k">const</span> <span class="n">Solution</span> <span class="o">&amp;</span><span class="n">lhs</span><span class="p">,</span> <span class="k">const</span> <span class="n">Solution</span> <span class="o">&amp;</span><span class="n">rhs</span><span class="p">);</span>
+<span class="k">private</span><span class="o">:</span>
+    <span class="n">std</span><span class="o">::</span><span class="n">shared_ptr</span><span class="o">&lt;</span><span class="n">DGFlow</span><span class="o">&gt;</span> <span class="n">dgFlow</span><span class="p">;</span>
+    <span class="kt">unsigned</span> <span class="kt">int</span> <span class="n">id</span><span class="p">;</span>
+<span class="p">};</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="id4">
+<h3>Details<a class="headerlink" href="#id4" title="Permalink to this headline">¶</a></h3>
+<dl class="function">
+<dt id="_CPPv2NK3mod9DGFlowAux8Solution5getIdEv">
+<span id="mod::DGFlowAux::Solution::getIdC"></span>unsigned int <code class="descclassname"></code><code class="descname">getId</code><span class="sig-paren">(</span><span class="sig-paren">)</span> <em class="property">const</em><a class="headerlink" href="#_CPPv2NK3mod9DGFlowAux8Solution5getIdEv" title="Permalink to this definition">¶</a><br /></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">an id for the solution which is unique among all solutions from the parent <a class="reference internal" href="#_CPPv2N3mod6DGFlowE" title="mod::DGFlow"><code class="xref cpp cpp-class docutils literal"><span class="pre">DGFlow</span></code></a> object.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="_CPPv2NK3mod9DGFlowAux8Solution9getDGFlowEv">
+<span id="mod::DGFlowAux::Solution::getDGFlowC"></span>std::shared_ptr&lt;<a class="reference internal" href="#_CPPv2N3mod6DGFlowE" title="mod::DGFlow">DGFlow</a>&gt; <code class="descclassname"></code><code class="descname">getDGFlow</code><span class="sig-paren">(</span><span class="sig-paren">)</span> <em class="property">const</em><a class="headerlink" href="#_CPPv2NK3mod9DGFlowAux8Solution9getDGFlowEv" title="Permalink to this definition">¶</a><br /></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">the flow model that produced this solution.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="_CPPv2NK3mod9DGFlowAux8Solution4evalERK6LinExp">
+<span id="mod::DGFlowAux::Solution::eval__LinExpCRC"></span>double <code class="descclassname"></code><code class="descname">eval</code><span class="sig-paren">(</span><em class="property">const</em> <a class="reference internal" href="#_CPPv2N3mod9DGFlowAux6LinExpE" title="mod::DGFlowAux::LinExp">LinExp</a> &amp;<em>exp</em><span class="sig-paren">)</span> <em class="property">const</em><a class="headerlink" href="#_CPPv2NK3mod9DGFlowAux8Solution4evalERK6LinExp" title="Permalink to this definition">¶</a><br /></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">the value of the given linear expression evaluated on the solution.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="_CPPv2NK3mod9DGFlowAux8Solution5printERK11DGPrintDataRK7Printer">
+<span id="mod::DGFlowAux::Solution::print__DGPrintDataCR.PrinterCRC"></span>void <code class="descclassname"></code><code class="descname">print</code><span class="sig-paren">(</span><em class="property">const</em> <a class="reference internal" href="DGPrinter.html#_CPPv2N3mod11DGPrintDataE" title="mod::DGPrintData">DGPrintData</a> &amp;<em>data</em>, <em class="property">const</em> <a class="reference internal" href="#_CPPv2N3mod9DGFlowAux7PrinterE" title="mod::DGFlowAux::Printer">Printer</a> &amp;<em>printer</em><span class="sig-paren">)</span> <em class="property">const</em><a class="headerlink" href="#_CPPv2NK3mod9DGFlowAux8Solution5printERK11DGPrintDataRK7Printer" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Print the solution using the settings in the given printer.
+:throws: <a class="reference internal" href="Error.html#_CPPv2N3mod10LogicErrorE" title="mod::LogicError"><code class="xref cpp cpp-class docutils literal"><span class="pre">LogicError</span></code></a> if the given print data does not belong to the underlying derivation graph.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="_CPPv2NK3mod9DGFlowAux8Solution18haxListDerivationsEv">
+<span id="mod::DGFlowAux::Solution::haxListDerivationsC"></span>void <code class="descclassname"></code><code class="descname">haxListDerivations</code><span class="sig-paren">(</span><span class="sig-paren">)</span> <em class="property">const</em><a class="headerlink" href="#_CPPv2NK3mod9DGFlowAux8Solution18haxListDerivationsEv" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>List the solution in more human readable form.
+Don&#8217;t expect this function to stay in this form.</p>
+</dd></dl>
+
+</div>
+</div>
+<div class="section" id="class-dgflowaux-solutionset">
+<h2>Class <code class="docutils literal"><span class="pre">DGFlowAux::SolutionSet</span></code><a class="headerlink" href="#class-dgflowaux-solutionset" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="_CPPv2N3mod9DGFlowAux11SolutionSetE">
+<span id="mod::DGFlowAux::SolutionSet"></span><em class="property">class </em><code class="descclassname">DGFlowAux::</code><code class="descname">SolutionSet</code><a class="headerlink" href="#_CPPv2N3mod9DGFlowAux11SolutionSetE" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>An object of this class represents the solutions for a specific flow model.</p>
+</dd></dl>
+
+<div class="section" id="id5">
+<h3>Synopsis<a class="headerlink" href="#id5" title="Permalink to this headline">¶</a></h3>
+<div class="highlight-c++"><div class="highlight"><pre><span></span><span class="k">struct</span> <span class="n">SolutionSet</span> <span class="p">{</span>
+    <span class="k">struct</span> <span class="n">const_iterator</span> <span class="p">{</span>
+        <span class="k">using</span> <span class="n">difference_type</span> <span class="o">=</span> <span class="n">std</span><span class="o">::</span><span class="kt">size_t</span><span class="p">;</span>
+        <span class="k">using</span> <span class="n">value_type</span> <span class="o">=</span> <span class="n">Solution</span><span class="p">;</span>
+        <span class="k">using</span> <span class="n">reference</span> <span class="o">=</span> <span class="n">Solution</span><span class="p">;</span>
+        <span class="k">using</span> <span class="n">iterator_category</span> <span class="o">=</span> <span class="n">std</span><span class="o">::</span><span class="n">forward_iterator_tag</span><span class="p">;</span>
+        <span class="k">using</span> <span class="n">pointer</span> <span class="o">=</span> <span class="kt">void</span><span class="p">;</span>
+    <span class="k">private</span><span class="o">:</span>
+        <span class="k">friend</span> <span class="k">class</span> <span class="nc">SolutionSet</span><span class="p">;</span>
+        <span class="n">const_iterator</span><span class="p">(</span><span class="k">const</span> <span class="n">SolutionSet</span> <span class="o">&amp;</span><span class="n">set</span><span class="p">,</span> <span class="kt">unsigned</span> <span class="kt">int</span> <span class="n">id</span><span class="p">);</span>
+    <span class="k">public</span><span class="o">:</span>
+        <span class="kt">bool</span> <span class="k">operator</span><span class="o">!=</span><span class="p">(</span><span class="n">const_iterator</span> <span class="n">other</span><span class="p">)</span> <span class="k">const</span><span class="p">;</span>
+        <span class="kt">bool</span> <span class="k">operator</span><span class="o">==</span><span class="p">(</span><span class="n">const_iterator</span> <span class="n">other</span><span class="p">)</span> <span class="k">const</span><span class="p">;</span>
+        <span class="n">const_iterator</span> <span class="k">operator</span><span class="o">++</span><span class="p">();</span>
+        <span class="n">const_iterator</span> <span class="k">operator</span><span class="o">++</span><span class="p">(</span><span class="kt">int</span><span class="p">);</span>
+        <span class="n">Solution</span> <span class="k">operator</span><span class="o">*</span><span class="p">()</span> <span class="k">const</span><span class="p">;</span>
+    <span class="k">private</span><span class="o">:</span>
+        <span class="k">const</span> <span class="n">SolutionSet</span> <span class="o">&amp;</span><span class="n">set</span><span class="p">;</span>
+        <span class="kt">unsigned</span> <span class="kt">int</span> <span class="n">id</span><span class="p">;</span>
+    <span class="p">};</span>
+    <span class="k">using</span> <span class="n">iterator</span> <span class="o">=</span> <span class="n">const_iterator</span><span class="p">;</span>
+<span class="k">public</span><span class="o">:</span>
+    <span class="n">SolutionSet</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">shared_ptr</span><span class="o">&lt;</span><span class="n">DGFlow</span><span class="o">&gt;</span> <span class="n">dgFlow</span><span class="p">);</span>
+    <span class="n">std</span><span class="o">::</span><span class="n">shared_ptr</span><span class="o">&lt;</span><span class="n">DGFlow</span><span class="o">&gt;</span> <span class="n">getDGFlow</span><span class="p">()</span> <span class="k">const</span><span class="p">;</span>
+    <span class="k">friend</span> <span class="n">std</span><span class="o">::</span><span class="n">ostream</span> <span class="o">&amp;</span><span class="k">operator</span><span class="o">&lt;&lt;</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">ostream</span> <span class="o">&amp;</span><span class="n">s</span><span class="p">,</span> <span class="k">const</span> <span class="n">SolutionSet</span> <span class="o">&amp;</span><span class="n">set</span><span class="p">);</span>
+    <span class="kt">void</span> <span class="nf">list</span><span class="p">()</span> <span class="k">const</span><span class="p">;</span>
+    <span class="kt">unsigned</span> <span class="kt">int</span> <span class="nf">size</span><span class="p">()</span> <span class="k">const</span><span class="p">;</span>
+    <span class="kt">void</span> <span class="nf">print</span><span class="p">(</span><span class="k">const</span> <span class="n">DGPrintData</span> <span class="o">&amp;</span><span class="n">data</span><span class="p">,</span> <span class="k">const</span> <span class="n">Printer</span> <span class="o">&amp;</span><span class="n">printer</span><span class="p">)</span> <span class="k">const</span><span class="p">;</span>
+    <span class="kt">void</span> <span class="nf">printVectors</span><span class="p">()</span> <span class="k">const</span><span class="p">;</span>
+    <span class="n">const_iterator</span> <span class="nf">begin</span><span class="p">()</span> <span class="k">const</span><span class="p">;</span>
+    <span class="n">const_iterator</span> <span class="nf">end</span><span class="p">()</span> <span class="k">const</span><span class="p">;</span>
+    <span class="n">Solution</span> <span class="k">operator</span><span class="p">[](</span><span class="kt">unsigned</span> <span class="kt">int</span> <span class="n">i</span><span class="p">)</span> <span class="k">const</span><span class="p">;</span>
+<span class="k">private</span><span class="o">:</span>
+    <span class="n">Solution</span> <span class="n">makeSolution</span><span class="p">(</span><span class="kt">unsigned</span> <span class="kt">int</span> <span class="n">id</span><span class="p">)</span> <span class="k">const</span><span class="p">;</span>
+<span class="k">private</span><span class="o">:</span>
+    <span class="n">std</span><span class="o">::</span><span class="n">shared_ptr</span><span class="o">&lt;</span><span class="n">DGFlow</span><span class="o">&gt;</span> <span class="n">dgFlow</span><span class="p">;</span>
+    <span class="kt">unsigned</span> <span class="kt">int</span> <span class="n">numSolutions</span><span class="p">;</span>
+<span class="p">};</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="id6">
+<h3>Details<a class="headerlink" href="#id6" title="Permalink to this headline">¶</a></h3>
+<dl class="function">
+<dt id="_CPPv2N3mod9DGFlowAux11SolutionSet11SolutionSetENSt10shared_ptrI6DGFlowEE">
+<span id="mod::DGFlowAux::SolutionSet::SolutionSet__std::shared_ptr:DGFlow:"></span><code class="descclassname"></code><code class="descname">SolutionSet</code><span class="sig-paren">(</span>std::shared_ptr&lt;<a class="reference internal" href="#_CPPv2N3mod6DGFlowE" title="mod::DGFlow">DGFlow</a>&gt; <em>dgFlow</em><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv2N3mod9DGFlowAux11SolutionSet11SolutionSetENSt10shared_ptrI6DGFlowEE" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Construct a representation of the solutions for the given flow model.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="_CPPv2N3mod9DGFlowAux11SolutionSet9getDGFlowEv">
+<span id="mod::DGFlowAux::SolutionSet::getDGFlow"></span>std::shared_ptr&lt;<a class="reference internal" href="#_CPPv2N3mod6DGFlowE" title="mod::DGFlow">DGFlow</a>&gt; <code class="descclassname"></code><code class="descname">getDGFlow</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv2N3mod9DGFlowAux11SolutionSet9getDGFlowEv" title="Permalink to this definition">¶</a><br /></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">the flow model that produced these solutions.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="_CPPv2NK3mod9DGFlowAux11SolutionSet4listEv">
+<span id="mod::DGFlowAux::SolutionSet::listC"></span>void <code class="descclassname"></code><code class="descname">list</code><span class="sig-paren">(</span><span class="sig-paren">)</span> <em class="property">const</em><a class="headerlink" href="#_CPPv2NK3mod9DGFlowAux11SolutionSet4listEv" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>List overall information about each solution.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="_CPPv2NK3mod9DGFlowAux11SolutionSet4sizeEv">
+<span id="mod::DGFlowAux::SolutionSet::sizeC"></span>unsigned int <code class="descclassname"></code><code class="descname">size</code><span class="sig-paren">(</span><span class="sig-paren">)</span> <em class="property">const</em><a class="headerlink" href="#_CPPv2NK3mod9DGFlowAux11SolutionSet4sizeEv" title="Permalink to this definition">¶</a><br /></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">the number of solutions in the flow model.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="_CPPv2NK3mod9DGFlowAux11SolutionSet5printERK11DGPrintDataRK7Printer">
+<span id="mod::DGFlowAux::SolutionSet::print__DGPrintDataCR.PrinterCRC"></span>void <code class="descclassname"></code><code class="descname">print</code><span class="sig-paren">(</span><em class="property">const</em> <a class="reference internal" href="DGPrinter.html#_CPPv2N3mod11DGPrintDataE" title="mod::DGPrintData">DGPrintData</a> &amp;<em>data</em>, <em class="property">const</em> <a class="reference internal" href="#_CPPv2N3mod9DGFlowAux7PrinterE" title="mod::DGFlowAux::Printer">Printer</a> &amp;<em>printer</em><span class="sig-paren">)</span> <em class="property">const</em><a class="headerlink" href="#_CPPv2NK3mod9DGFlowAux11SolutionSet5printERK11DGPrintDataRK7Printer" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Print all solutions using the given flow printer.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="_CPPv2NK3mod9DGFlowAux11SolutionSet12printVectorsEv">
+<span id="mod::DGFlowAux::SolutionSet::printVectorsC"></span>void <code class="descclassname"></code><code class="descname">printVectors</code><span class="sig-paren">(</span><span class="sig-paren">)</span> <em class="property">const</em><a class="headerlink" href="#_CPPv2NK3mod9DGFlowAux11SolutionSet12printVectorsEv" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>(Deprecated) Print some solution data in an old format.
+Use the <a class="reference internal" href="#_CPPv2NK3mod6DGFlow4dumpEv" title="mod::DGFlow::dump"><code class="xref cpp cpp-func docutils literal"><span class="pre">DGFlow::dump()</span></code></a> instead.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="_CPPv2NK3mod9DGFlowAux11SolutionSet5beginEv">
+<span id="mod::DGFlowAux::SolutionSet::beginC"></span>const_iterator <code class="descclassname"></code><code class="descname">begin</code><span class="sig-paren">(</span><span class="sig-paren">)</span> <em class="property">const</em><a class="headerlink" href="#_CPPv2NK3mod9DGFlowAux11SolutionSet5beginEv" title="Permalink to this definition">¶</a><br /></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">an iterator to the first solution.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="_CPPv2NK3mod9DGFlowAux11SolutionSet3endEv">
+<span id="mod::DGFlowAux::SolutionSet::endC"></span>const_iterator <code class="descclassname"></code><code class="descname">end</code><span class="sig-paren">(</span><span class="sig-paren">)</span> <em class="property">const</em><a class="headerlink" href="#_CPPv2NK3mod9DGFlowAux11SolutionSet3endEv" title="Permalink to this definition">¶</a><br /></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">an iterator to after the last solution.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="_CPPv2NK3mod9DGFlowAux11SolutionSetixEj">
+<span id="mod::DGFlowAux::SolutionSet::subscript-operator__unsigned-iC"></span><a class="reference internal" href="#_CPPv2N3mod9DGFlowAux8SolutionE" title="mod::DGFlowAux::Solution">Solution</a> <code class="descclassname"></code><code class="descname">operator[]</code><span class="sig-paren">(</span>unsigned int <em>i</em><span class="sig-paren">)</span> <em class="property">const</em><a class="headerlink" href="#_CPPv2NK3mod9DGFlowAux11SolutionSetixEj" title="Permalink to this definition">¶</a><br /></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">the solution at the given index.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Throws:</th><td class="field-body"><a class="reference internal" href="Error.html#_CPPv2N3mod10LogicErrorE" title="mod::LogicError"><code class="xref cpp cpp-class docutils literal"><span class="pre">LogicError</span></code></a> if the index is out of bounds.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+</div>
+<div class="section" id="class-dgflowaux-solver">
+<h2>Class <code class="docutils literal"><span class="pre">DGFlowAux::Solver</span></code><a class="headerlink" href="#class-dgflowaux-solver" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="_CPPv2N3mod9DGFlowAux6SolverE">
+<span id="mod::DGFlowAux::Solver"></span><em class="property">class </em><code class="descclassname">DGFlowAux::</code><code class="descname">Solver</code><a class="headerlink" href="#_CPPv2N3mod9DGFlowAux6SolverE" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Base class for all available solvers.</p>
+</dd></dl>
+
+</div>
+<div class="section" id="class-dgflowaux-solve">
+<h2>Class <code class="docutils literal"><span class="pre">DGFlowAux::Solve</span></code><a class="headerlink" href="#class-dgflowaux-solve" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="_CPPv2N3mod9DGFlowAux5SolveE">
+<span id="mod::DGFlowAux::Solve"></span><em class="property">class </em><code class="descclassname">DGFlowAux::</code><code class="descname">Solve</code> : DGFlowAux::<a class="reference internal" href="#_CPPv2N3mod9DGFlowAux6SolverE" title="mod::DGFlowAux::Solver">Solver</a><a class="headerlink" href="#_CPPv2N3mod9DGFlowAux5SolveE" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>The basic solver, finding only a single optimal solution.</p>
+</dd></dl>
+
+</div>
+<div class="section" id="class-dgflowaux-enumerate">
+<h2>Class <code class="docutils literal"><span class="pre">DGFlowAux::Enumerate</span></code><a class="headerlink" href="#class-dgflowaux-enumerate" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="_CPPv2N3mod9DGFlowAux9EnumerateE">
+<span id="mod::DGFlowAux::Enumerate"></span><em class="property">class </em><code class="descclassname">DGFlowAux::</code><code class="descname">Enumerate</code> : DGFlowAux::<a class="reference internal" href="#_CPPv2N3mod9DGFlowAux6SolverE" title="mod::DGFlowAux::Solver">Solver</a><a class="headerlink" href="#_CPPv2N3mod9DGFlowAux9EnumerateE" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>(deprecated) A solver for enumerating solutions, based on populate.
+Solutions are supposed to be enumerated in order of optimality,
+but this is not always the case with this solver.</p>
+<dl class="member">
+<dt id="_CPPv2N3mod9DGFlowAux9Enumerate6absGapE">
+<span id="mod::DGFlowAux::Enumerate::absGap__i"></span>int <code class="descclassname"></code><code class="descname">absGap</code> = 1 &lt;&lt; 30<a class="headerlink" href="#_CPPv2N3mod9DGFlowAux9Enumerate6absGapE" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>The maximum allowed distance to the optimal solution.</p>
+</dd></dl>
+
+<dl class="member">
+<dt id="_CPPv2N3mod9DGFlowAux9Enumerate15maxNumSolutionsE">
+<span id="mod::DGFlowAux::Enumerate::maxNumSolutions__unsigned-i"></span>unsigned int <code class="descclassname"></code><code class="descname">maxNumSolutions</code> = 1 &lt;&lt; 30<a class="headerlink" href="#_CPPv2N3mod9DGFlowAux9Enumerate15maxNumSolutionsE" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>The maximum number of solutions to find.</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="class-dgflowaux-enumerateby">
+<h2>Class <code class="docutils literal"><span class="pre">DGFlowAux::EnumerateBy</span></code><a class="headerlink" href="#class-dgflowaux-enumerateby" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="_CPPv2N3mod9DGFlowAux11EnumerateByE">
+<span id="mod::DGFlowAux::EnumerateBy"></span><em class="property">class </em><code class="descclassname">DGFlowAux::</code><code class="descname">EnumerateBy</code> : DGFlowAux::<a class="reference internal" href="#_CPPv2N3mod9DGFlowAux6SolverE" title="mod::DGFlowAux::Solver">Solver</a><a class="headerlink" href="#_CPPv2N3mod9DGFlowAux11EnumerateByE" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>A solver for enumerating solutions, based on a tree search on the domain of a subset of the variables.
+Solutions are are enumerated in order of optimality.</p>
+<dl class="member">
+<dt id="_CPPv2N3mod9DGFlowAux11EnumerateBy6absGapE">
+<span id="mod::DGFlowAux::EnumerateBy::absGap__i"></span>int <code class="descclassname"></code><code class="descname">absGap</code> = 1 &lt;&lt; 30<a class="headerlink" href="#_CPPv2N3mod9DGFlowAux11EnumerateBy6absGapE" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>The maximum allowed distance to the optimal solution.</p>
+</dd></dl>
+
+<dl class="member">
+<dt id="_CPPv2N3mod9DGFlowAux11EnumerateBy15maxNumSolutionsE">
+<span id="mod::DGFlowAux::EnumerateBy::maxNumSolutions__unsigned-i"></span>unsigned int <code class="descclassname"></code><code class="descname">maxNumSolutions</code> = 1 &lt;&lt; 30<a class="headerlink" href="#_CPPv2N3mod9DGFlowAux11EnumerateBy15maxNumSolutionsE" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>The maximum number of solutions to find.</p>
+</dd></dl>
+
+<dl class="member">
+<dt id="_CPPv2N3mod9DGFlowAux11EnumerateBy23enumerationVarSpecifierE">
+<span id="mod::DGFlowAux::EnumerateBy::enumerationVarSpecifier__boost::optional:LinExp:"></span>boost::optional&lt;<a class="reference internal" href="#_CPPv2N3mod9DGFlowAux6LinExpE" title="mod::DGFlowAux::LinExp">LinExp</a>&gt; <code class="descclassname"></code><code class="descname">enumerationVarSpecifier</code><a class="headerlink" href="#_CPPv2N3mod9DGFlowAux11EnumerateBy23enumerationVarSpecifierE" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>A linear expression for specifying which variables&#8217; domains will be used for enumeration.
+Coefficients have no meaning. As default all non-transit edge variables, including I/O edges, are used.</p>
+</dd></dl>
+
+<dl class="member">
+<dt id="_CPPv2N3mod9DGFlowAux11EnumerateBy18transitEnumerationE">
+<span id="mod::DGFlowAux::EnumerateBy::transitEnumeration__std::unordered_set:std::shared_ptr:Graph::"></span>std::unordered_set&lt;std::shared_ptr&lt;<a class="reference internal" href="Graph.html#_CPPv2N3mod5GraphE" title="mod::Graph">Graph</a>&gt;&gt; <code class="descclassname"></code><code class="descname">transitEnumeration</code><a class="headerlink" href="#_CPPv2N3mod9DGFlowAux11EnumerateBy18transitEnumerationE" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>A set of graphs specifying a set of vertices in the derivation graph.
+For the specified vertices the transit edges will participate in the enumeration.</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="class-dgflowaux-populate">
+<h2>Class <code class="docutils literal"><span class="pre">DGFlowAux::Populate</span></code><a class="headerlink" href="#class-dgflowaux-populate" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="_CPPv2N3mod9DGFlowAux8PopulateE">
+<span id="mod::DGFlowAux::Populate"></span><em class="property">class </em><code class="descclassname">DGFlowAux::</code><code class="descname">Populate</code> : DGFlowAux::<a class="reference internal" href="#_CPPv2N3mod9DGFlowAux6SolverE" title="mod::DGFlowAux::Solver">Solver</a><a class="headerlink" href="#_CPPv2N3mod9DGFlowAux8PopulateE" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>A solver for finding multiple solutions, based on the populate mechanic in CPLEX.</p>
+<dl class="member">
+<dt id="_CPPv2N3mod9DGFlowAux8Populate6absGapE">
+<span id="mod::DGFlowAux::Populate::absGap__i"></span>int <code class="descclassname"></code><code class="descname">absGap</code> = 1 &lt;&lt; 30<a class="headerlink" href="#_CPPv2N3mod9DGFlowAux8Populate6absGapE" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>The maximum allowed distance to the optimal solution.</p>
+</dd></dl>
+
+<dl class="member">
+<dt id="_CPPv2N3mod9DGFlowAux8Populate15maxNumSolutionsE">
+<span id="mod::DGFlowAux::Populate::maxNumSolutions__unsigned-i"></span>unsigned int <code class="descclassname"></code><code class="descname">maxNumSolutions</code> = 1 &lt;&lt; 30<a class="headerlink" href="#_CPPv2N3mod9DGFlowAux8Populate15maxNumSolutionsE" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>The maximum number of solutions to find.</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="class-dgflowaux-printer">
+<h2>Class <code class="docutils literal"><span class="pre">DGFlowAux::Printer</span></code><a class="headerlink" href="#class-dgflowaux-printer" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="_CPPv2N3mod9DGFlowAux7PrinterE">
+<span id="mod::DGFlowAux::Printer"></span><em class="property">class </em><code class="descclassname">DGFlowAux::</code><code class="descname">Printer</code><a class="headerlink" href="#_CPPv2N3mod9DGFlowAux7PrinterE" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>An object of this class represents options for printing flow solutions.</p>
+</dd></dl>
+
+<div class="section" id="id7">
+<h3>Synopsis<a class="headerlink" href="#id7" title="Permalink to this headline">¶</a></h3>
+<div class="highlight-c++"><div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">Printer</span> <span class="p">{</span>
+    <span class="n">Printer</span><span class="p">(</span><span class="k">const</span> <span class="n">Printer</span><span class="o">&amp;</span><span class="p">)</span> <span class="o">=</span> <span class="k">delete</span><span class="p">;</span>
+    <span class="n">Printer</span> <span class="o">&amp;</span><span class="k">operator</span><span class="o">=</span><span class="p">(</span><span class="k">const</span> <span class="n">Printer</span><span class="o">&amp;</span><span class="p">)</span> <span class="o">=</span> <span class="k">delete</span><span class="p">;</span>
+    <span class="n">Printer</span><span class="p">(</span><span class="n">Printer</span><span class="o">&amp;&amp;</span><span class="p">)</span> <span class="o">=</span> <span class="k">delete</span><span class="p">;</span>
+    <span class="n">Printer</span> <span class="o">&amp;</span><span class="k">operator</span><span class="o">=</span><span class="p">(</span><span class="n">Printer</span><span class="o">&amp;&amp;</span><span class="p">)</span> <span class="o">=</span> <span class="k">delete</span><span class="p">;</span>
+<span class="k">public</span><span class="o">:</span>
+    <span class="n">Printer</span><span class="p">();</span>
+    <span class="o">~</span><span class="n">Printer</span><span class="p">();</span>
+    <span class="n">DGPrinter</span> <span class="o">&amp;</span><span class="n">getDGPrinter</span><span class="p">();</span>
+    <span class="k">const</span> <span class="n">DGPrinter</span> <span class="o">&amp;</span><span class="n">getDGPrinter</span><span class="p">()</span> <span class="k">const</span><span class="p">;</span>
+    <span class="n">lib</span><span class="o">::</span><span class="n">IO</span><span class="o">::</span><span class="n">DGFlow</span><span class="o">::</span><span class="n">Write</span><span class="o">::</span><span class="n">Printer</span> <span class="o">&amp;</span><span class="n">getPrinter</span><span class="p">()</span> <span class="k">const</span><span class="p">;</span>
+    <span class="kt">void</span> <span class="nf">setWithFlowLabels</span><span class="p">(</span><span class="kt">bool</span> <span class="n">value</span><span class="p">);</span>
+    <span class="kt">bool</span> <span class="nf">getWithFlowLabels</span><span class="p">()</span> <span class="k">const</span><span class="p">;</span>
+    <span class="kt">void</span> <span class="nf">pushInOutEdgeLabel</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">function</span><span class="o">&lt;</span><span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">shared_ptr</span><span class="o">&lt;</span><span class="n">Graph</span><span class="o">&gt;</span><span class="p">,</span> <span class="n">std</span><span class="o">::</span><span class="n">shared_ptr</span><span class="o">&lt;</span><span class="n">DG</span><span class="o">&gt;</span><span class="p">,</span> <span class="kt">bool</span><span class="p">)</span> <span class="o">&gt;</span> <span class="n">f</span><span class="p">);</span>
+    <span class="kt">void</span> <span class="nf">popInOutEdgeLabel</span><span class="p">();</span>
+    <span class="kt">void</span> <span class="nf">setPrintUnfiltered</span><span class="p">(</span><span class="kt">bool</span> <span class="n">value</span><span class="p">);</span>
+    <span class="kt">bool</span> <span class="nf">getPrintUnfiltered</span><span class="p">()</span> <span class="k">const</span><span class="p">;</span>
+    <span class="kt">void</span> <span class="nf">setPrintFiltered</span><span class="p">(</span><span class="kt">bool</span> <span class="n">value</span><span class="p">);</span>
+    <span class="kt">bool</span> <span class="nf">getPrintFiltered</span><span class="p">()</span> <span class="k">const</span><span class="p">;</span>
+    <span class="kt">void</span> <span class="nf">setColourUnfiltered</span><span class="p">(</span><span class="kt">bool</span> <span class="n">value</span><span class="p">);</span>
+    <span class="kt">bool</span> <span class="nf">getColourUnfiltered</span><span class="p">()</span> <span class="k">const</span><span class="p">;</span>
+<span class="k">private</span><span class="o">:</span>
+    <span class="n">std</span><span class="o">::</span><span class="n">unique_ptr</span><span class="o">&lt;</span><span class="n">DGPrinter</span><span class="o">&gt;</span> <span class="n">dgPrinter</span><span class="p">;</span>
+    <span class="n">std</span><span class="o">::</span><span class="n">unique_ptr</span><span class="o">&lt;</span><span class="n">lib</span><span class="o">::</span><span class="n">IO</span><span class="o">::</span><span class="n">DGFlow</span><span class="o">::</span><span class="n">Write</span><span class="o">::</span><span class="n">Printer</span><span class="o">&gt;</span> <span class="n">printer</span><span class="p">;</span>
+<span class="p">};</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="id8">
+<h3>Details<a class="headerlink" href="#id8" title="Permalink to this headline">¶</a></h3>
+<dl class="function">
+<dt id="_CPPv2N3mod9DGFlowAux7Printer12getDGPrinterEv">
+<span id="mod::DGFlowAux::Printer::getDGPrinter"></span><a class="reference internal" href="DGPrinter.html#_CPPv2N3mod9DGPrinterE" title="mod::DGPrinter">DGPrinter</a> &amp;<code class="descclassname"></code><code class="descname">getDGPrinter</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv2N3mod9DGFlowAux7Printer12getDGPrinterEv" title="Permalink to this definition">¶</a><br /></dt>
+<dt id="_CPPv2NK3mod9DGFlowAux7Printer12getDGPrinterEv">
+<span id="mod::DGFlowAux::Printer::getDGPrinterC"></span><em class="property">const</em> <a class="reference internal" href="DGPrinter.html#_CPPv2N3mod9DGPrinterE" title="mod::DGPrinter">DGPrinter</a> &amp;<code class="descclassname"></code><code class="descname">getDGPrinter</code><span class="sig-paren">(</span><span class="sig-paren">)</span> <em class="property">const</em><a class="headerlink" href="#_CPPv2NK3mod9DGFlowAux7Printer12getDGPrinterEv" title="Permalink to this definition">¶</a><br /></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">a reference to the <a class="reference internal" href="DGPrinter.html#_CPPv2N3mod9DGPrinterE" title="mod::DGPrinter"><code class="xref cpp cpp-class docutils literal"><span class="pre">DGPrinter</span></code></a> used when printing flow solutions.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="_CPPv2N3mod9DGFlowAux7Printer18pushInOutEdgeLabelENSt8functionIFNSt6stringENSt10shared_ptrI5GraphEENSt10shared_ptrI2DGEEbEEE">
+void <code class="descclassname"></code><code class="descname">pushInOutEdgeLabel</code><span class="sig-paren">(</span>std::function&lt;std::string<span class="sig-paren">(</span>std::shared_ptr&lt;<a class="reference internal" href="Graph.html#_CPPv2N3mod5GraphE" title="mod::Graph">Graph</a>&gt;, std::shared_ptr&lt;<a class="reference internal" href="DG.html#_CPPv2N3mod2DGE" title="mod::DG">DG</a>&gt;, bool<span class="sig-paren">)</span>&gt; <em>f</em><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv2N3mod9DGFlowAux7Printer18pushInOutEdgeLabelENSt8functionIFNSt6stringENSt10shared_ptrI5GraphEENSt10shared_ptrI2DGEEbEEE" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Add another function for in-/out-edge labelling.
+The result of this function is appended to each label using the edge label separator
+of the underlying <a class="reference internal" href="DGPrinter.html#_CPPv2N3mod9DGPrinterE" title="mod::DGPrinter"><code class="xref cpp cpp-class docutils literal"><span class="pre">DGPrinter</span></code></a>.
+The last argument given to the function is <code class="docutils literal"><span class="pre">true</span></code> for the in-edge, and <code class="docutils literal"><span class="pre">false</span></code> for the out-edge.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="_CPPv2N3mod9DGFlowAux7Printer17popInOutEdgeLabelEv">
+<span id="mod::DGFlowAux::Printer::popInOutEdgeLabel"></span>void <code class="descclassname"></code><code class="descname">popInOutEdgeLabel</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv2N3mod9DGFlowAux7Printer17popInOutEdgeLabelEv" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Remove the last pushed in/out edge labelling function.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="_CPPv2N3mod9DGFlowAux7Printer18setPrintUnfilteredEb">
+<span id="mod::DGFlowAux::Printer::setPrintUnfiltered__b"></span>void <code class="descclassname"></code><code class="descname">setPrintUnfiltered</code><span class="sig-paren">(</span>bool <em>value</em><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv2N3mod9DGFlowAux7Printer18setPrintUnfilteredEb" title="Permalink to this definition">¶</a><br /></dt>
+<dt id="_CPPv2NK3mod9DGFlowAux7Printer18getPrintUnfilteredEv">
+<span id="mod::DGFlowAux::Printer::getPrintUnfilteredC"></span>bool <code class="descclassname"></code><code class="descname">getPrintUnfiltered</code><span class="sig-paren">(</span><span class="sig-paren">)</span> <em class="property">const</em><a class="headerlink" href="#_CPPv2NK3mod9DGFlowAux7Printer18getPrintUnfilteredEv" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Control whether or not the unfiltered version of a solution is printed.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="_CPPv2N3mod9DGFlowAux7Printer16setPrintFilteredEb">
+<span id="mod::DGFlowAux::Printer::setPrintFiltered__b"></span>void <code class="descclassname"></code><code class="descname">setPrintFiltered</code><span class="sig-paren">(</span>bool <em>value</em><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv2N3mod9DGFlowAux7Printer16setPrintFilteredEb" title="Permalink to this definition">¶</a><br /></dt>
+<dt id="_CPPv2NK3mod9DGFlowAux7Printer16getPrintFilteredEv">
+<span id="mod::DGFlowAux::Printer::getPrintFilteredC"></span>bool <code class="descclassname"></code><code class="descname">getPrintFiltered</code><span class="sig-paren">(</span><span class="sig-paren">)</span> <em class="property">const</em><a class="headerlink" href="#_CPPv2NK3mod9DGFlowAux7Printer16getPrintFilteredEv" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Control whether or not the filtered version of a solution is printed.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="_CPPv2N3mod9DGFlowAux7Printer19setColourUnfilteredEb">
+<span id="mod::DGFlowAux::Printer::setColourUnfiltered__b"></span>void <code class="descclassname"></code><code class="descname">setColourUnfiltered</code><span class="sig-paren">(</span>bool <em>value</em><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv2N3mod9DGFlowAux7Printer19setColourUnfilteredEb" title="Permalink to this definition">¶</a><br /></dt>
+<dt id="_CPPv2NK3mod9DGFlowAux7Printer19getColourUnfilteredEv">
+<span id="mod::DGFlowAux::Printer::getColourUnfilteredC"></span>bool <code class="descclassname"></code><code class="descname">getColourUnfiltered</code><span class="sig-paren">(</span><span class="sig-paren">)</span> <em class="property">const</em><a class="headerlink" href="#_CPPv2NK3mod9DGFlowAux7Printer19getColourUnfilteredEv" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Control whether or not the vertices and edges with non-zero flow are coloured in the unfiltered version of solutions.</p>
+</dd></dl>
+
+</div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="../index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">DGFlow.h</a><ul>
+<li><a class="reference internal" href="#class-dgflow">Class <code class="docutils literal"><span class="pre">DGFlow</span></code></a><ul>
+<li><a class="reference internal" href="#synopsis">Synopsis</a></li>
+<li><a class="reference internal" href="#details">Details</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#class-dgflow-transitproxy">Class <code class="docutils literal"><span class="pre">DGFlow::TransitProxy</span></code></a></li>
+<li><a class="reference internal" href="#class-dgflow-overallautocatalysisproxy">Class <code class="docutils literal"><span class="pre">DGFlow::OverallAutocatalysisProxy</span></code></a></li>
+<li><a class="reference internal" href="#class-dgflow-overallcatalysisproxy">Class <code class="docutils literal"><span class="pre">DGFlow::OverallCatalysisProxy</span></code></a></li>
+<li><a class="reference internal" href="#linear-expressions-and-constraints">Linear Expressions and Constraints</a></li>
+<li><a class="reference internal" href="#variable-specifiers">Variable Specifiers</a></li>
+<li><a class="reference internal" href="#class-dgflowaux-sequencequery">Class <code class="docutils literal"><span class="pre">DGFlowAux::SequenceQuery</span></code></a><ul>
+<li><a class="reference internal" href="#id1">Synopsis</a></li>
+<li><a class="reference internal" href="#id2">Details</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#class-dgflowaux-solution">Class <code class="docutils literal"><span class="pre">DGFlowAux::Solution</span></code></a><ul>
+<li><a class="reference internal" href="#id3">Synopsis</a></li>
+<li><a class="reference internal" href="#id4">Details</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#class-dgflowaux-solutionset">Class <code class="docutils literal"><span class="pre">DGFlowAux::SolutionSet</span></code></a><ul>
+<li><a class="reference internal" href="#id5">Synopsis</a></li>
+<li><a class="reference internal" href="#id6">Details</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#class-dgflowaux-solver">Class <code class="docutils literal"><span class="pre">DGFlowAux::Solver</span></code></a></li>
+<li><a class="reference internal" href="#class-dgflowaux-solve">Class <code class="docutils literal"><span class="pre">DGFlowAux::Solve</span></code></a></li>
+<li><a class="reference internal" href="#class-dgflowaux-enumerate">Class <code class="docutils literal"><span class="pre">DGFlowAux::Enumerate</span></code></a></li>
+<li><a class="reference internal" href="#class-dgflowaux-enumerateby">Class <code class="docutils literal"><span class="pre">DGFlowAux::EnumerateBy</span></code></a></li>
+<li><a class="reference internal" href="#class-dgflowaux-populate">Class <code class="docutils literal"><span class="pre">DGFlowAux::Populate</span></code></a></li>
+<li><a class="reference internal" href="#class-dgflowaux-printer">Class <code class="docutils literal"><span class="pre">DGFlowAux::Printer</span></code></a><ul>
+<li><a class="reference internal" href="#id7">Synopsis</a></li>
+<li><a class="reference internal" href="#id8">Details</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../_sources/libmod/DGFlow.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">MØD 65d3c41 documentation</a> &#187;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2013-2015, Jakob Lykke Andersen.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.5a3.
+    </div>
+  </body>
+</html>

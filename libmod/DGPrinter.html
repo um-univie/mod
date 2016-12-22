@@ -1,0 +1,445 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>2.2.6. DGPrinter.h &#8212; MØD 65d3c41 documentation</title>
+    
+    <link rel="stylesheet" href="../_static/classic.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '65d3c41',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="2.2.7. DGStrat.h" href="DGStrat.html" />
+    <link rel="prev" title="2.2.5. DGGraphInterface.h" href="DGGraphInterface.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="DGStrat.html" title="2.2.7. DGStrat.h"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="DGGraphInterface.html" title="2.2.5. DGGraphInterface.h"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">MØD 65d3c41 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="libmod.html" >2. libMØD</a> &#187;</li>
+          <li class="nav-item nav-item-2"><a href="api.html" accesskey="U">2.2. API Reference</a> &#187;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="dgprinter-h">
+<span id="cpp-dgprinter"></span><h1>2.2.6. DGPrinter.h<a class="headerlink" href="#dgprinter-h" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="class-dgprintdata">
+<h2>2.2.6.1. Class <code class="docutils literal"><span class="pre">DGPrintData</span></code><a class="headerlink" href="#class-dgprintdata" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="_CPPv2N3mod11DGPrintDataE">
+<span id="mod::DGPrintData"></span><em class="property">class </em><code class="descclassname"></code><code class="descname">DGPrintData</code><a class="headerlink" href="#_CPPv2N3mod11DGPrintDataE" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>This class is used to hold extra data about how a specific derivation graph
+is visualised.</p>
+</dd></dl>
+
+<div class="section" id="synopsis">
+<h3>2.2.6.1.1. Synopsis<a class="headerlink" href="#synopsis" title="Permalink to this headline">¶</a></h3>
+<div class="highlight-c++"><div class="highlight"><pre><span></span><span class="k">struct</span> <span class="n">DGPrintData</span> <span class="p">{</span>
+    <span class="n">DGPrintData</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">shared_ptr</span><span class="o">&lt;</span><span class="n">DG</span><span class="o">&gt;</span> <span class="n">dg</span><span class="p">);</span>
+    <span class="n">DGPrintData</span><span class="p">(</span><span class="k">const</span> <span class="n">DGPrintData</span> <span class="o">&amp;</span><span class="n">other</span><span class="p">);</span>
+    <span class="n">DGPrintData</span><span class="p">(</span><span class="n">DGPrintData</span> <span class="o">&amp;&amp;</span><span class="n">other</span><span class="p">);</span>
+    <span class="o">~</span><span class="n">DGPrintData</span><span class="p">();</span>
+    <span class="n">lib</span><span class="o">::</span><span class="n">IO</span><span class="o">::</span><span class="n">DG</span><span class="o">::</span><span class="n">Write</span><span class="o">::</span><span class="n">Data</span> <span class="o">&amp;</span><span class="n">getData</span><span class="p">();</span>
+    <span class="n">lib</span><span class="o">::</span><span class="n">IO</span><span class="o">::</span><span class="n">DG</span><span class="o">::</span><span class="n">Write</span><span class="o">::</span><span class="n">Data</span> <span class="o">&amp;</span><span class="n">getData</span><span class="p">()</span> <span class="k">const</span><span class="p">;</span>
+    <span class="n">std</span><span class="o">::</span><span class="n">shared_ptr</span><span class="o">&lt;</span><span class="n">DG</span><span class="o">&gt;</span> <span class="n">getDG</span><span class="p">()</span> <span class="k">const</span><span class="p">;</span>
+    <span class="kt">void</span> <span class="nf">makeDuplicate</span><span class="p">(</span><span class="n">DerivationRef</span> <span class="n">dRef</span><span class="p">,</span> <span class="kt">unsigned</span> <span class="kt">int</span> <span class="n">eDup</span><span class="p">);</span>
+    <span class="kt">void</span> <span class="nf">removeDuplicate</span><span class="p">(</span><span class="n">DerivationRef</span> <span class="n">dRef</span><span class="p">,</span> <span class="kt">unsigned</span> <span class="kt">int</span> <span class="n">eDup</span><span class="p">);</span>
+    <span class="kt">void</span> <span class="nf">reconnectTail</span><span class="p">(</span><span class="n">DerivationRef</span> <span class="n">dRef</span><span class="p">,</span> <span class="kt">unsigned</span> <span class="kt">int</span> <span class="n">eDup</span><span class="p">,</span> <span class="n">std</span><span class="o">::</span><span class="n">shared_ptr</span><span class="o">&lt;</span><span class="n">Graph</span><span class="o">&gt;</span> <span class="n">g</span><span class="p">,</span> <span class="kt">unsigned</span> <span class="kt">int</span> <span class="n">vDupTar</span><span class="p">);</span> <span class="c1">// TODO: make overload with explicit source</span>
+    <span class="kt">void</span> <span class="nf">reconnectHead</span><span class="p">(</span><span class="n">DerivationRef</span> <span class="n">dRef</span><span class="p">,</span> <span class="kt">unsigned</span> <span class="kt">int</span> <span class="n">eDup</span><span class="p">,</span> <span class="n">std</span><span class="o">::</span><span class="n">shared_ptr</span><span class="o">&lt;</span><span class="n">Graph</span><span class="o">&gt;</span> <span class="n">g</span><span class="p">,</span> <span class="kt">unsigned</span> <span class="kt">int</span> <span class="n">vDupTar</span><span class="p">);</span> <span class="c1">// TODO: make overload with explicit source</span>
+<span class="k">private</span><span class="o">:</span>
+    <span class="n">std</span><span class="o">::</span><span class="n">shared_ptr</span><span class="o">&lt;</span><span class="n">DG</span><span class="o">&gt;</span> <span class="n">dg</span><span class="p">;</span>
+    <span class="n">std</span><span class="o">::</span><span class="n">unique_ptr</span><span class="o">&lt;</span><span class="n">lib</span><span class="o">::</span><span class="n">IO</span><span class="o">::</span><span class="n">DG</span><span class="o">::</span><span class="n">Write</span><span class="o">::</span><span class="n">Data</span><span class="o">&gt;</span> <span class="n">data</span><span class="p">;</span>
+<span class="p">};</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="details">
+<h3>2.2.6.1.2. Details<a class="headerlink" href="#details" title="Permalink to this headline">¶</a></h3>
+<dl class="function">
+<dt id="_CPPv2N3mod11DGPrintData11DGPrintDataENSt10shared_ptrI2DGEE">
+<span id="mod::DGPrintData::DGPrintData__std::shared_ptr:DG:"></span><code class="descclassname"></code><code class="descname">DGPrintData</code><span class="sig-paren">(</span>std::shared_ptr&lt;<a class="reference internal" href="DG.html#_CPPv2N3mod2DGE" title="mod::DG">DG</a>&gt; <em>dg</em><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv2N3mod11DGPrintData11DGPrintDataENSt10shared_ptrI2DGEE" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Construct a data object where all derivations have a single version, 0, connected to version 0 of all heads and tails.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="_CPPv2NK3mod11DGPrintData5getDGEv">
+<span id="mod::DGPrintData::getDGC"></span>std::shared_ptr&lt;<a class="reference internal" href="DG.html#_CPPv2N3mod2DGE" title="mod::DG">DG</a>&gt; <code class="descclassname"></code><code class="descname">getDG</code><span class="sig-paren">(</span><span class="sig-paren">)</span> <em class="property">const</em><a class="headerlink" href="#_CPPv2NK3mod11DGPrintData5getDGEv" title="Permalink to this definition">¶</a><br /></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">the derivation graph the object holds data for.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="_CPPv2N3mod11DGPrintData13makeDuplicateE13DerivationRefj">
+<span id="mod::DGPrintData::makeDuplicate__DerivationRef.unsigned-i"></span>void <code class="descclassname"></code><code class="descname">makeDuplicate</code><span class="sig-paren">(</span><a class="reference internal" href="DG.html#_CPPv2N3mod13DerivationRefE" title="mod::DerivationRef">DerivationRef</a> <em>dRef</em>, unsigned int <em>eDup</em><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv2N3mod11DGPrintData13makeDuplicateE13DerivationRefj" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Create another version of the given derivation and give it the given duplicate number.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="_CPPv2N3mod11DGPrintData15removeDuplicateE13DerivationRefj">
+<span id="mod::DGPrintData::removeDuplicate__DerivationRef.unsigned-i"></span>void <code class="descclassname"></code><code class="descname">removeDuplicate</code><span class="sig-paren">(</span><a class="reference internal" href="DG.html#_CPPv2N3mod13DerivationRefE" title="mod::DerivationRef">DerivationRef</a> <em>dRef</em>, unsigned int <em>eDup</em><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv2N3mod11DGPrintData15removeDuplicateE13DerivationRefj" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Remove the version of the given derivation with the given duplicate number.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="_CPPv2N3mod11DGPrintData13reconnectTailE13DerivationRefjNSt10shared_ptrI5GraphEEj">
+<span id="mod::DGPrintData::reconnectTail__DerivationRef.unsigned-i.std::shared_ptr:Graph:.unsigned-i"></span>void <code class="descclassname"></code><code class="descname">reconnectTail</code><span class="sig-paren">(</span><a class="reference internal" href="DG.html#_CPPv2N3mod13DerivationRefE" title="mod::DerivationRef">DerivationRef</a> <em>dRef</em>, unsigned int <em>eDup</em>, std::shared_ptr&lt;<a class="reference internal" href="Graph.html#_CPPv2N3mod5GraphE" title="mod::Graph">Graph</a>&gt; <em>g</em>, unsigned int <em>vDupTar</em><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv2N3mod11DGPrintData13reconnectTailE13DerivationRefjNSt10shared_ptrI5GraphEEj" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Reconnect an arbitrary version of the tail specified by the given graph in the derivation duplicate given.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="_CPPv2N3mod11DGPrintData13reconnectHeadE13DerivationRefjNSt10shared_ptrI5GraphEEj">
+<span id="mod::DGPrintData::reconnectHead__DerivationRef.unsigned-i.std::shared_ptr:Graph:.unsigned-i"></span>void <code class="descclassname"></code><code class="descname">reconnectHead</code><span class="sig-paren">(</span><a class="reference internal" href="DG.html#_CPPv2N3mod13DerivationRefE" title="mod::DerivationRef">DerivationRef</a> <em>dRef</em>, unsigned int <em>eDup</em>, std::shared_ptr&lt;<a class="reference internal" href="Graph.html#_CPPv2N3mod5GraphE" title="mod::Graph">Graph</a>&gt; <em>g</em>, unsigned int <em>vDupTar</em><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv2N3mod11DGPrintData13reconnectHeadE13DerivationRefjNSt10shared_ptrI5GraphEEj" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Reconnect an arbitrary version of the head specified by the given graph in the derivation duplicate given.</p>
+</dd></dl>
+
+</div>
+</div>
+<div class="section" id="class-dgprinter">
+<h2>2.2.6.2. Class <code class="docutils literal"><span class="pre">DGPrinter</span></code><a class="headerlink" href="#class-dgprinter" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="_CPPv2N3mod9DGPrinterE">
+<span id="mod::DGPrinter"></span><em class="property">class </em><code class="descclassname"></code><code class="descname">DGPrinter</code><a class="headerlink" href="#_CPPv2N3mod9DGPrinterE" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>This class is used to configure how derivation graphs are visualised,
+how much is visualised and which extra properties are printed.</p>
+</dd></dl>
+
+<div class="section" id="id1">
+<h3>2.2.6.2.1. Synopsis<a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h3>
+<div class="highlight-c++"><div class="highlight"><pre><span></span><span class="k">struct</span> <span class="n">DGPrinter</span> <span class="p">{</span>
+    <span class="n">DGPrinter</span><span class="p">();</span>
+    <span class="n">DGPrinter</span><span class="p">(</span><span class="k">const</span> <span class="n">DGPrinter</span><span class="o">&amp;</span><span class="p">)</span> <span class="o">=</span> <span class="k">delete</span><span class="p">;</span>
+    <span class="n">DGPrinter</span> <span class="o">&amp;</span><span class="k">operator</span><span class="o">=</span><span class="p">(</span><span class="k">const</span> <span class="n">DGPrinter</span><span class="o">&amp;</span><span class="p">)</span> <span class="o">=</span> <span class="k">delete</span><span class="p">;</span>
+    <span class="o">~</span><span class="n">DGPrinter</span><span class="p">();</span>
+    <span class="n">lib</span><span class="o">::</span><span class="n">IO</span><span class="o">::</span><span class="n">DG</span><span class="o">::</span><span class="n">Write</span><span class="o">::</span><span class="n">Printer</span> <span class="o">&amp;</span><span class="n">getPrinter</span><span class="p">()</span> <span class="k">const</span><span class="p">;</span>
+    <span class="n">GraphPrinter</span> <span class="o">&amp;</span><span class="n">getGraphPrinter</span><span class="p">();</span>
+    <span class="k">const</span> <span class="n">GraphPrinter</span> <span class="o">&amp;</span><span class="n">getGraphPrinter</span><span class="p">()</span> <span class="k">const</span><span class="p">;</span>
+    <span class="kt">void</span> <span class="nf">setWithShortcutEdges</span><span class="p">(</span><span class="kt">bool</span> <span class="n">value</span><span class="p">);</span>
+    <span class="kt">bool</span> <span class="nf">getWithShortcutEdges</span><span class="p">()</span> <span class="k">const</span><span class="p">;</span>
+    <span class="kt">void</span> <span class="nf">setWithGraphImages</span><span class="p">(</span><span class="kt">bool</span> <span class="n">value</span><span class="p">);</span>
+    <span class="kt">bool</span> <span class="nf">getWithGraphImages</span><span class="p">()</span> <span class="k">const</span><span class="p">;</span>
+    <span class="kt">void</span> <span class="nf">setLabelsAsLatexMath</span><span class="p">(</span><span class="kt">bool</span> <span class="n">value</span><span class="p">);</span>
+    <span class="kt">bool</span> <span class="nf">getLabelsAsLatexMath</span><span class="p">()</span> <span class="k">const</span><span class="p">;</span>
+    <span class="kt">void</span> <span class="nf">pushVertexVisible</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">function</span><span class="o">&lt;</span><span class="kt">bool</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">shared_ptr</span><span class="o">&lt;</span><span class="n">Graph</span><span class="o">&gt;</span><span class="p">,</span> <span class="n">std</span><span class="o">::</span><span class="n">shared_ptr</span><span class="o">&lt;</span><span class="n">DG</span><span class="o">&gt;</span><span class="p">)</span> <span class="o">&gt;</span> <span class="n">f</span><span class="p">);</span>
+    <span class="kt">void</span> <span class="nf">popVertexVisible</span><span class="p">();</span>
+    <span class="kt">void</span> <span class="nf">pushEdgeVisible</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">function</span><span class="o">&lt;</span><span class="kt">bool</span><span class="p">(</span><span class="n">DerivationRef</span><span class="p">)</span> <span class="o">&gt;</span> <span class="n">f</span><span class="p">);</span>
+    <span class="kt">void</span> <span class="nf">popEdgeVisible</span><span class="p">();</span>
+    <span class="kt">void</span> <span class="nf">setWithShortcutEdgesAfterVisibility</span><span class="p">(</span><span class="kt">bool</span> <span class="n">value</span><span class="p">);</span>
+    <span class="kt">bool</span> <span class="nf">getWithShortcutEdgesAfterVisibility</span><span class="p">()</span> <span class="k">const</span><span class="p">;</span>
+    <span class="kt">void</span> <span class="nf">setVertexLabelSep</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">string</span> <span class="n">sep</span><span class="p">);</span>
+    <span class="k">const</span> <span class="n">std</span><span class="o">::</span><span class="n">string</span> <span class="o">&amp;</span><span class="n">getVertexLabelSep</span><span class="p">();</span>
+    <span class="kt">void</span> <span class="nf">setEdgeLabelSep</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">string</span> <span class="n">sep</span><span class="p">);</span>
+    <span class="k">const</span> <span class="n">std</span><span class="o">::</span><span class="n">string</span> <span class="o">&amp;</span><span class="n">getEdgeLabelSep</span><span class="p">();</span>
+    <span class="kt">void</span> <span class="nf">pushVertexLabel</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">function</span><span class="o">&lt;</span><span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">shared_ptr</span><span class="o">&lt;</span><span class="n">Graph</span><span class="o">&gt;</span><span class="p">,</span> <span class="n">std</span><span class="o">::</span><span class="n">shared_ptr</span><span class="o">&lt;</span><span class="n">DG</span><span class="o">&gt;</span><span class="p">)</span> <span class="o">&gt;</span> <span class="n">f</span><span class="p">);</span>
+    <span class="kt">void</span> <span class="nf">popVertexLabel</span><span class="p">();</span>
+    <span class="kt">void</span> <span class="nf">pushEdgeLabel</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">function</span><span class="o">&lt;</span><span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="p">(</span><span class="n">DerivationRef</span><span class="p">)</span> <span class="o">&gt;</span> <span class="n">f</span><span class="p">);</span>
+    <span class="kt">void</span> <span class="nf">popEdgeLabel</span><span class="p">();</span>
+    <span class="kt">void</span> <span class="nf">setWithGraphName</span><span class="p">(</span><span class="kt">bool</span> <span class="n">value</span><span class="p">);</span>
+    <span class="kt">bool</span> <span class="nf">getWithGraphName</span><span class="p">()</span> <span class="k">const</span><span class="p">;</span>
+    <span class="kt">void</span> <span class="nf">setWithRuleName</span><span class="p">(</span><span class="kt">bool</span> <span class="n">value</span><span class="p">);</span>
+    <span class="kt">bool</span> <span class="nf">getWithRuleName</span><span class="p">()</span> <span class="k">const</span><span class="p">;</span>
+    <span class="kt">void</span> <span class="nf">setWithRuleId</span><span class="p">(</span><span class="kt">bool</span> <span class="n">value</span><span class="p">);</span>
+    <span class="kt">bool</span> <span class="nf">getWithRuleId</span><span class="p">()</span> <span class="k">const</span><span class="p">;</span>
+    <span class="kt">void</span> <span class="nf">pushVertexColour</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">function</span><span class="o">&lt;</span><span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">shared_ptr</span><span class="o">&lt;</span><span class="n">Graph</span><span class="o">&gt;</span><span class="p">,</span> <span class="n">std</span><span class="o">::</span><span class="n">shared_ptr</span><span class="o">&lt;</span><span class="n">DG</span><span class="o">&gt;</span><span class="p">)</span> <span class="o">&gt;</span> <span class="n">f</span><span class="p">,</span> <span class="kt">bool</span> <span class="n">extendToEdges</span><span class="p">);</span>
+    <span class="kt">void</span> <span class="nf">popVertexColour</span><span class="p">();</span>
+    <span class="kt">void</span> <span class="nf">pushEdgeColour</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">function</span><span class="o">&lt;</span><span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="p">(</span><span class="n">DerivationRef</span><span class="p">)</span> <span class="o">&gt;</span> <span class="n">f</span><span class="p">);</span>
+    <span class="kt">void</span> <span class="nf">popEdgeColour</span><span class="p">();</span>
+<span class="k">private</span><span class="o">:</span>
+    <span class="n">std</span><span class="o">::</span><span class="n">unique_ptr</span><span class="o">&lt;</span><span class="n">GraphPrinter</span><span class="o">&gt;</span> <span class="n">graphPrinter</span><span class="p">;</span>
+    <span class="n">std</span><span class="o">::</span><span class="n">unique_ptr</span><span class="o">&lt;</span><span class="n">lib</span><span class="o">::</span><span class="n">IO</span><span class="o">::</span><span class="n">DG</span><span class="o">::</span><span class="n">Write</span><span class="o">::</span><span class="n">Printer</span><span class="o">&gt;</span> <span class="n">printer</span><span class="p">;</span>
+<span class="p">};</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="id2">
+<h3>2.2.6.2.2. Details<a class="headerlink" href="#id2" title="Permalink to this headline">¶</a></h3>
+<dl class="function">
+<dt id="_CPPv2N3mod9DGPrinter15getGraphPrinterEv">
+<span id="mod::DGPrinter::getGraphPrinter"></span><a class="reference internal" href="GraphPrinter.html#_CPPv2N3mod12GraphPrinterE" title="mod::GraphPrinter">GraphPrinter</a> &amp;<code class="descclassname"></code><code class="descname">getGraphPrinter</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv2N3mod9DGPrinter15getGraphPrinterEv" title="Permalink to this definition">¶</a><br /></dt>
+<dt id="_CPPv2NK3mod9DGPrinter15getGraphPrinterEv">
+<span id="mod::DGPrinter::getGraphPrinterC"></span><em class="property">const</em> <a class="reference internal" href="GraphPrinter.html#_CPPv2N3mod12GraphPrinterE" title="mod::GraphPrinter">GraphPrinter</a> &amp;<code class="descclassname"></code><code class="descname">getGraphPrinter</code><span class="sig-paren">(</span><span class="sig-paren">)</span> <em class="property">const</em><a class="headerlink" href="#_CPPv2NK3mod9DGPrinter15getGraphPrinterEv" title="Permalink to this definition">¶</a><br /></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">a reference to the <a class="reference internal" href="GraphPrinter.html#_CPPv2N3mod12GraphPrinterE" title="mod::GraphPrinter"><code class="xref cpp cpp-class docutils literal"><span class="pre">GraphPrinter</span></code></a> used for graphs in vertices of the DG.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="_CPPv2N3mod9DGPrinter20setWithShortcutEdgesEb">
+<span id="mod::DGPrinter::setWithShortcutEdges__b"></span>void <code class="descclassname"></code><code class="descname">setWithShortcutEdges</code><span class="sig-paren">(</span>bool <em>value</em><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv2N3mod9DGPrinter20setWithShortcutEdgesEb" title="Permalink to this definition">¶</a><br /></dt>
+<dt id="_CPPv2NK3mod9DGPrinter20getWithShortcutEdgesEv">
+<span id="mod::DGPrinter::getWithShortcutEdgesC"></span>bool <code class="descclassname"></code><code class="descname">getWithShortcutEdges</code><span class="sig-paren">(</span><span class="sig-paren">)</span> <em class="property">const</em><a class="headerlink" href="#_CPPv2NK3mod9DGPrinter20getWithShortcutEdgesEv" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Control whether or not hyperedges <span class="math">\((T, H)\)</span> with <span class="math">\(|T| = |H| = 1\)</span>
+are printed as a simple arrow without the usual rectangle.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="_CPPv2N3mod9DGPrinter18setWithGraphImagesEb">
+<span id="mod::DGPrinter::setWithGraphImages__b"></span>void <code class="descclassname"></code><code class="descname">setWithGraphImages</code><span class="sig-paren">(</span>bool <em>value</em><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv2N3mod9DGPrinter18setWithGraphImagesEb" title="Permalink to this definition">¶</a><br /></dt>
+<dt id="_CPPv2NK3mod9DGPrinter18getWithGraphImagesEv">
+<span id="mod::DGPrinter::getWithGraphImagesC"></span>bool <code class="descclassname"></code><code class="descname">getWithGraphImages</code><span class="sig-paren">(</span><span class="sig-paren">)</span> <em class="property">const</em><a class="headerlink" href="#_CPPv2NK3mod9DGPrinter18getWithGraphImagesEv" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Control whether or not each vertex is printed with a image of its graph in it.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="_CPPv2N3mod9DGPrinter20setLabelsAsLatexMathEb">
+<span id="mod::DGPrinter::setLabelsAsLatexMath__b"></span>void <code class="descclassname"></code><code class="descname">setLabelsAsLatexMath</code><span class="sig-paren">(</span>bool <em>value</em><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv2N3mod9DGPrinter20setLabelsAsLatexMathEb" title="Permalink to this definition">¶</a><br /></dt>
+<dt id="_CPPv2NK3mod9DGPrinter20getLabelsAsLatexMathEv">
+<span id="mod::DGPrinter::getLabelsAsLatexMathC"></span>bool <code class="descclassname"></code><code class="descname">getLabelsAsLatexMath</code><span class="sig-paren">(</span><span class="sig-paren">)</span> <em class="property">const</em><a class="headerlink" href="#_CPPv2NK3mod9DGPrinter20getLabelsAsLatexMathEv" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Control whether or not labels on vertices and hyperedges are put inline <span class="math">\(\LaTeX\)</span> math.
+Specifically, a label <code class="docutils literal"><span class="pre">label</span></code> is written as <code class="docutils literal"><span class="pre">$\mathrm{label'}$</span></code>, with <code class="docutils literal"><span class="pre">label'</span></code> being
+<code class="docutils literal"><span class="pre">label</span></code> with all space characters escaped.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="_CPPv2N3mod9DGPrinter17pushVertexVisibleENSt8functionIFbNSt10shared_ptrI5GraphEENSt10shared_ptrI2DGEEEEE">
+void <code class="descclassname"></code><code class="descname">pushVertexVisible</code><span class="sig-paren">(</span>std::function&lt;bool<span class="sig-paren">(</span>std::shared_ptr&lt;<a class="reference internal" href="Graph.html#_CPPv2N3mod5GraphE" title="mod::Graph">Graph</a>&gt;, std::shared_ptr&lt;<a class="reference internal" href="DG.html#_CPPv2N3mod2DGE" title="mod::DG">DG</a>&gt;<span class="sig-paren">)</span>&gt; <em>f</em><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv2N3mod9DGPrinter17pushVertexVisibleENSt8functionIFbNSt10shared_ptrI5GraphEENSt10shared_ptrI2DGEEEEE" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Add another function controlling the visibility of vertices.
+All visibility functions must return <code class="docutils literal"><span class="pre">true</span></code> for a vertex to be visible.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="_CPPv2N3mod9DGPrinter16popVertexVisibleEv">
+<span id="mod::DGPrinter::popVertexVisible"></span>void <code class="descclassname"></code><code class="descname">popVertexVisible</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv2N3mod9DGPrinter16popVertexVisibleEv" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Remove the last pushed vertex visibility function.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="_CPPv2N3mod9DGPrinter15pushEdgeVisibleENSt8functionIFb13DerivationRefEEE">
+void <code class="descclassname"></code><code class="descname">pushEdgeVisible</code><span class="sig-paren">(</span>std::function&lt;bool<span class="sig-paren">(</span><a class="reference internal" href="DG.html#_CPPv2N3mod13DerivationRefE" title="mod::DerivationRef">DerivationRef</a><span class="sig-paren">)</span>&gt; <em>f</em><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv2N3mod9DGPrinter15pushEdgeVisibleENSt8functionIFb13DerivationRefEEE" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Add another function controlling the visibility of hyperedges.
+All visibility functions must return <code class="docutils literal"><span class="pre">true</span></code> for a hyperedge to be visible.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="_CPPv2N3mod9DGPrinter14popEdgeVisibleEv">
+<span id="mod::DGPrinter::popEdgeVisible"></span>void <code class="descclassname"></code><code class="descname">popEdgeVisible</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv2N3mod9DGPrinter14popEdgeVisibleEv" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Remove the last pushed hyperedge visibility function.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="_CPPv2N3mod9DGPrinter35setWithShortcutEdgesAfterVisibilityEb">
+<span id="mod::DGPrinter::setWithShortcutEdgesAfterVisibility__b"></span>void <code class="descclassname"></code><code class="descname">setWithShortcutEdgesAfterVisibility</code><span class="sig-paren">(</span>bool <em>value</em><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv2N3mod9DGPrinter35setWithShortcutEdgesAfterVisibilityEb" title="Permalink to this definition">¶</a><br /></dt>
+<dt id="_CPPv2NK3mod9DGPrinter35getWithShortcutEdgesAfterVisibilityEv">
+<span id="mod::DGPrinter::getWithShortcutEdgesAfterVisibilityC"></span>bool <code class="descclassname"></code><code class="descname">getWithShortcutEdgesAfterVisibility</code><span class="sig-paren">(</span><span class="sig-paren">)</span> <em class="property">const</em><a class="headerlink" href="#_CPPv2NK3mod9DGPrinter35getWithShortcutEdgesAfterVisibilityEv" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Control whether or not hyperedges are depicted as simple arrows when all but 1 head and tail are hidden.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="_CPPv2N3mod9DGPrinter17setVertexLabelSepENSt6stringE">
+<span id="mod::DGPrinter::setVertexLabelSep__ss"></span>void <code class="descclassname"></code><code class="descname">setVertexLabelSep</code><span class="sig-paren">(</span>std::string <em>sep</em><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv2N3mod9DGPrinter17setVertexLabelSepENSt6stringE" title="Permalink to this definition">¶</a><br /></dt>
+<dt id="_CPPv2N3mod9DGPrinter17getVertexLabelSepEv">
+<span id="mod::DGPrinter::getVertexLabelSep"></span><em class="property">const</em> std::string &amp;<code class="descclassname"></code><code class="descname">getVertexLabelSep</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv2N3mod9DGPrinter17getVertexLabelSepEv" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Set/get the string used as separator between each part of each vertex label.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="_CPPv2N3mod9DGPrinter15setEdgeLabelSepENSt6stringE">
+<span id="mod::DGPrinter::setEdgeLabelSep__ss"></span>void <code class="descclassname"></code><code class="descname">setEdgeLabelSep</code><span class="sig-paren">(</span>std::string <em>sep</em><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv2N3mod9DGPrinter15setEdgeLabelSepENSt6stringE" title="Permalink to this definition">¶</a><br /></dt>
+<dt id="_CPPv2N3mod9DGPrinter15getEdgeLabelSepEv">
+<span id="mod::DGPrinter::getEdgeLabelSep"></span><em class="property">const</em> std::string &amp;<code class="descclassname"></code><code class="descname">getEdgeLabelSep</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv2N3mod9DGPrinter15getEdgeLabelSepEv" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Set/get the string used as separator between each part of each edge label.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="_CPPv2N3mod9DGPrinter15pushVertexLabelENSt8functionIFNSt6stringENSt10shared_ptrI5GraphEENSt10shared_ptrI2DGEEEEE">
+void <code class="descclassname"></code><code class="descname">pushVertexLabel</code><span class="sig-paren">(</span>std::function&lt;std::string<span class="sig-paren">(</span>std::shared_ptr&lt;<a class="reference internal" href="Graph.html#_CPPv2N3mod5GraphE" title="mod::Graph">Graph</a>&gt;, std::shared_ptr&lt;<a class="reference internal" href="DG.html#_CPPv2N3mod2DGE" title="mod::DG">DG</a>&gt;<span class="sig-paren">)</span>&gt; <em>f</em><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv2N3mod9DGPrinter15pushVertexLabelENSt8functionIFNSt6stringENSt10shared_ptrI5GraphEENSt10shared_ptrI2DGEEEEE" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Add another function for vertex labelling. The result of this function is appended to each label.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="_CPPv2N3mod9DGPrinter14popVertexLabelEv">
+<span id="mod::DGPrinter::popVertexLabel"></span>void <code class="descclassname"></code><code class="descname">popVertexLabel</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv2N3mod9DGPrinter14popVertexLabelEv" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Remove the last pushed vertex labelling function.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="_CPPv2N3mod9DGPrinter13pushEdgeLabelENSt8functionIFNSt6stringE13DerivationRefEEE">
+void <code class="descclassname"></code><code class="descname">pushEdgeLabel</code><span class="sig-paren">(</span>std::function&lt;std::string<span class="sig-paren">(</span><a class="reference internal" href="DG.html#_CPPv2N3mod13DerivationRefE" title="mod::DerivationRef">DerivationRef</a><span class="sig-paren">)</span>&gt; <em>f</em><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv2N3mod9DGPrinter13pushEdgeLabelENSt8functionIFNSt6stringE13DerivationRefEEE" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Add another function for edge labelling. The result of this function is appended to each label.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="_CPPv2N3mod9DGPrinter12popEdgeLabelEv">
+<span id="mod::DGPrinter::popEdgeLabel"></span>void <code class="descclassname"></code><code class="descname">popEdgeLabel</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv2N3mod9DGPrinter12popEdgeLabelEv" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Remove the last pushed edge labelling function.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="_CPPv2N3mod9DGPrinter16setWithGraphNameEb">
+<span id="mod::DGPrinter::setWithGraphName__b"></span>void <code class="descclassname"></code><code class="descname">setWithGraphName</code><span class="sig-paren">(</span>bool <em>value</em><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv2N3mod9DGPrinter16setWithGraphNameEb" title="Permalink to this definition">¶</a><br /></dt>
+<dt id="_CPPv2NK3mod9DGPrinter16getWithGraphNameEv">
+<span id="mod::DGPrinter::getWithGraphNameC"></span>bool <code class="descclassname"></code><code class="descname">getWithGraphName</code><span class="sig-paren">(</span><span class="sig-paren">)</span> <em class="property">const</em><a class="headerlink" href="#_CPPv2NK3mod9DGPrinter16getWithGraphNameEv" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Control whether or not graph names are appended to the vertex labels (see also <a class="reference internal" href="#_CPPv2N3mod9DGPrinter15pushVertexLabelENSt8functionIFNSt6stringENSt10shared_ptrI5GraphEENSt10shared_ptrI2DGEEEEE" title="mod::DGPrinter::pushVertexLabel"><code class="xref cpp cpp-func docutils literal"><span class="pre">pushVertexLabel()</span></code></a>).</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="_CPPv2N3mod9DGPrinter15setWithRuleNameEb">
+<span id="mod::DGPrinter::setWithRuleName__b"></span>void <code class="descclassname"></code><code class="descname">setWithRuleName</code><span class="sig-paren">(</span>bool <em>value</em><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv2N3mod9DGPrinter15setWithRuleNameEb" title="Permalink to this definition">¶</a><br /></dt>
+<dt id="_CPPv2NK3mod9DGPrinter15getWithRuleNameEv">
+<span id="mod::DGPrinter::getWithRuleNameC"></span>bool <code class="descclassname"></code><code class="descname">getWithRuleName</code><span class="sig-paren">(</span><span class="sig-paren">)</span> <em class="property">const</em><a class="headerlink" href="#_CPPv2NK3mod9DGPrinter15getWithRuleNameEv" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Control whether or not rules names are appended to the edge labels (see also <a class="reference internal" href="#_CPPv2N3mod9DGPrinter13pushEdgeLabelENSt8functionIFNSt6stringE13DerivationRefEEE" title="mod::DGPrinter::pushEdgeLabel"><code class="xref cpp cpp-func docutils literal"><span class="pre">pushEdgeLabel()</span></code></a>).</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="_CPPv2N3mod9DGPrinter13setWithRuleIdEb">
+<span id="mod::DGPrinter::setWithRuleId__b"></span>void <code class="descclassname"></code><code class="descname">setWithRuleId</code><span class="sig-paren">(</span>bool <em>value</em><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv2N3mod9DGPrinter13setWithRuleIdEb" title="Permalink to this definition">¶</a><br /></dt>
+<dt id="_CPPv2NK3mod9DGPrinter13getWithRuleIdEv">
+<span id="mod::DGPrinter::getWithRuleIdC"></span>bool <code class="descclassname"></code><code class="descname">getWithRuleId</code><span class="sig-paren">(</span><span class="sig-paren">)</span> <em class="property">const</em><a class="headerlink" href="#_CPPv2NK3mod9DGPrinter13getWithRuleIdEv" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Control whether or not rules IDs are appended to the edge labels (see also <a class="reference internal" href="#_CPPv2N3mod9DGPrinter13pushEdgeLabelENSt8functionIFNSt6stringE13DerivationRefEEE" title="mod::DGPrinter::pushEdgeLabel"><code class="xref cpp cpp-func docutils literal"><span class="pre">pushEdgeLabel()</span></code></a>).</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="_CPPv2N3mod9DGPrinter16pushVertexColourENSt8functionIFNSt6stringENSt10shared_ptrI5GraphEENSt10shared_ptrI2DGEEEEEb">
+void <code class="descclassname"></code><code class="descname">pushVertexColour</code><span class="sig-paren">(</span>std::function&lt;std::string<span class="sig-paren">(</span>std::shared_ptr&lt;<a class="reference internal" href="Graph.html#_CPPv2N3mod5GraphE" title="mod::Graph">Graph</a>&gt;, std::shared_ptr&lt;<a class="reference internal" href="DG.html#_CPPv2N3mod2DGE" title="mod::DG">DG</a>&gt;<span class="sig-paren">)</span>&gt; <em>f</em>, bool <em>extendToEdges</em>, <span class="sig-paren">)</span><a class="headerlink" href="#_CPPv2N3mod9DGPrinter16pushVertexColourENSt8functionIFNSt6stringENSt10shared_ptrI5GraphEENSt10shared_ptrI2DGEEEEEb" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Add another function for colouring vertices. The final colour of a vertex is the result of the first colour function returning a non-empty string.
+The functions are evaluated in the order they are pushed and the resulting string is used directly as a colour in Tikz.
+A hyperedge is also coloured if at least one head and one tail <em>can</em> be coloured with a colour for which <code class="docutils literal"><span class="pre">extendToEdges</span></code> is <code class="docutils literal"><span class="pre">true</span></code>.
+In this case, the hyperedge (and a subset of the head and tail connectors) is coloured with the first applicable colour.
+The edge extension of vertex colour takes lower precedence than explicitly added hyperedge colouring functions.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="_CPPv2N3mod9DGPrinter15popVertexColourEv">
+<span id="mod::DGPrinter::popVertexColour"></span>void <code class="descclassname"></code><code class="descname">popVertexColour</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv2N3mod9DGPrinter15popVertexColourEv" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Remove the last pushed vertex colouring function.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="_CPPv2N3mod9DGPrinter14pushEdgeColourENSt8functionIFNSt6stringE13DerivationRefEEE">
+void <code class="descclassname"></code><code class="descname">pushEdgeColour</code><span class="sig-paren">(</span>std::function&lt;std::string<span class="sig-paren">(</span><a class="reference internal" href="DG.html#_CPPv2N3mod13DerivationRefE" title="mod::DerivationRef">DerivationRef</a><span class="sig-paren">)</span>&gt; <em>f</em><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv2N3mod9DGPrinter14pushEdgeColourENSt8functionIFNSt6stringE13DerivationRefEEE" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Add another function for colouring hyperedges. The final colour of a hyperedge (and all of its head and tail connectors) is the result of the
+first colour function returning a non-empty string.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="_CPPv2N3mod9DGPrinter13popEdgeColourEv">
+<span id="mod::DGPrinter::popEdgeColour"></span>void <code class="descclassname"></code><code class="descname">popEdgeColour</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv2N3mod9DGPrinter13popEdgeColourEv" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Remove the last pushed hyperedge colouring function.</p>
+</dd></dl>
+
+</div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="../index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">2.2.6. DGPrinter.h</a><ul>
+<li><a class="reference internal" href="#class-dgprintdata">2.2.6.1. Class <code class="docutils literal"><span class="pre">DGPrintData</span></code></a><ul>
+<li><a class="reference internal" href="#synopsis">2.2.6.1.1. Synopsis</a></li>
+<li><a class="reference internal" href="#details">2.2.6.1.2. Details</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#class-dgprinter">2.2.6.2. Class <code class="docutils literal"><span class="pre">DGPrinter</span></code></a><ul>
+<li><a class="reference internal" href="#id1">2.2.6.2.1. Synopsis</a></li>
+<li><a class="reference internal" href="#id2">2.2.6.2.2. Details</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="DGGraphInterface.html"
+                        title="previous chapter">2.2.5. DGGraphInterface.h</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="DGStrat.html"
+                        title="next chapter">2.2.7. DGStrat.h</a></p>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../_sources/libmod/DGPrinter.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="DGStrat.html" title="2.2.7. DGStrat.h"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="DGGraphInterface.html" title="2.2.5. DGGraphInterface.h"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">MØD 65d3c41 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="libmod.html" >2. libMØD</a> &#187;</li>
+          <li class="nav-item nav-item-2"><a href="api.html" >2.2. API Reference</a> &#187;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2013-2015, Jakob Lykke Andersen.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.5a3.
+    </div>
+  </body>
+</html>

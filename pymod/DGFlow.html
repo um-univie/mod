@@ -1,0 +1,881 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>DGFlow &#8212; MØD 65d3c41 documentation</title>
+    
+    <link rel="stylesheet" href="../_static/classic.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '65d3c41',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">MØD 65d3c41 documentation</a> &#187;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="dgflow">
+<span id="py-dgflow"></span><h1>DGFlow<a class="headerlink" href="#dgflow" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="class-dgflow">
+<h2>Class <code class="docutils literal"><span class="pre">DGFlow</span></code><a class="headerlink" href="#class-dgflow" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="mod.DGFlow">
+<em class="property">class </em><code class="descclassname">mod.</code><code class="descname">DGFlow</code><a class="headerlink" href="#mod.DGFlow" title="Permalink to this definition">¶</a></dt>
+<dd><p>A <a class="reference internal" href="#mod.DGFlow" title="mod.DGFlow"><code class="xref py py-class docutils literal"><span class="pre">DGFlow</span></code></a> object represents a flow model on a given derivation graph.
+A model consists of a set of extensions with the Base extension modelling the edge flow and input/output flow.
+Each extension is accessed using proxy objects returned by the main model class.</p>
+<dl class="attribute">
+<dt id="mod.DGFlow.id">
+<code class="descname">id</code><a class="headerlink" href="#mod.DGFlow.id" title="Permalink to this definition">¶</a></dt>
+<dd><p>The unique instance id for the <a class="reference internal" href="#mod.DGFlow" title="mod.DGFlow"><code class="xref py py-class docutils literal"><span class="pre">DGFlow</span></code></a> object.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Type:</th><td class="field-body">unsigned int</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="mod.DGFlow.dg">
+<code class="descname">dg</code><a class="headerlink" href="#mod.DGFlow.dg" title="Permalink to this definition">¶</a></dt>
+<dd><p>The underlying derivation graph.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Type:</th><td class="field-body"><a class="reference internal" href="DG.html#mod.DG" title="mod.DG"><code class="xref py py-class docutils literal"><span class="pre">DG</span></code></a></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="mod.DGFlow.addSource">
+<code class="descname">addSource</code><span class="sig-paren">(</span><em>g</em><span class="sig-paren">)</span><a class="headerlink" href="#mod.DGFlow.addSource" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>g</strong> (<a class="reference internal" href="Graph.html#mod.Graph" title="mod.Graph"><code class="xref py py-class docutils literal"><span class="pre">Graph</span></code></a>) &#8211; the graph to be added as a source in the model.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="mod.DGFlow.addSink">
+<code class="descname">addSink</code><span class="sig-paren">(</span><em>g</em><span class="sig-paren">)</span><a class="headerlink" href="#mod.DGFlow.addSink" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>g</strong> (<a class="reference internal" href="Graph.html#mod.Graph" title="mod.Graph"><code class="xref py py-class docutils literal"><span class="pre">Graph</span></code></a>) &#8211; the graph to be added as a sink in the model.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="mod.DGFlow.allowHyperLoops">
+<code class="descname">allowHyperLoops</code><a class="headerlink" href="#mod.DGFlow.allowHyperLoops" title="Permalink to this definition">¶</a></dt>
+<dd><p>Control or query whether or not flow is allowed through loop hyper-edges.
+I.e., hyperedges with identical left and right side.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Type:</th><td class="field-body">bool</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Note:</th><td class="field-body">This setting may be changed when certain modules are enabled.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="mod.DGFlow.allowReverse">
+<code class="descname">allowReverse</code><a class="headerlink" href="#mod.DGFlow.allowReverse" title="Permalink to this definition">¶</a></dt>
+<dd><p>Controls whether or not flow in solutions may go through
+one derivation and then directly afterwards the reverse derivation.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Type:</th><td class="field-body">bool</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Note:</th><td class="field-body">This setting may be modified when certain modules are enabled.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="mod.DGFlow.allowIOReverse">
+<code class="descname">allowIOReverse</code><a class="headerlink" href="#mod.DGFlow.allowIOReverse" title="Permalink to this definition">¶</a></dt>
+<dd><p>Controls whether or not flow in solutions may go through
+an input edge and directly afterwards through the corresponding output edge.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Type:</th><td class="field-body">bool</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Note:</th><td class="field-body">This setting may be modified when certain modules are enabled.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="mod.DGFlow.transit">
+<code class="descname">transit</code><a class="headerlink" href="#mod.DGFlow.transit" title="Permalink to this definition">¶</a></dt>
+<dd><p>Access the transit extension.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Type:</th><td class="field-body"><a class="reference internal" href="#mod.DGFlowTransit" title="mod.DGFlowTransit"><code class="xref py py-class docutils literal"><span class="pre">DGFlowTransit</span></code></a></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="mod.DGFlow.overallAutocatalysis">
+<code class="descname">overallAutocatalysis</code><a class="headerlink" href="#mod.DGFlow.overallAutocatalysis" title="Permalink to this definition">¶</a></dt>
+<dd><p>Access the overall autocatalysis extension.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Type:</th><td class="field-body"><a class="reference internal" href="#mod.DGFlowOverallAutocatalysis" title="mod.DGFlowOverallAutocatalysis"><code class="xref py py-class docutils literal"><span class="pre">DGFlowOverallAutocatalysis</span></code></a></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="mod.DGFlow.overallCatalysis">
+<code class="descname">overallCatalysis</code><a class="headerlink" href="#mod.DGFlow.overallCatalysis" title="Permalink to this definition">¶</a></dt>
+<dd><p>Access the overall catalysis extension.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Type:</th><td class="field-body"><a class="reference internal" href="#mod.DGFlowOverallCatalysis" title="mod.DGFlowOverallCatalysis"><code class="xref py py-class docutils literal"><span class="pre">DGFlowOverallCatalysis</span></code></a></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="mod.DGFlow.addConstraint">
+<code class="descname">addConstraint</code><span class="sig-paren">(</span><em>c</em><span class="sig-paren">)</span><a class="headerlink" href="#mod.DGFlow.addConstraint" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>c</strong> (<code class="xref py py-class docutils literal"><span class="pre">DGFlowLinConstraint</span></code>) &#8211; the linear constraint to add to the model (see <a class="reference internal" href="#dgflowlinexpandconstraints-label"><span class="std std-ref">Linear Expressions and Constraints</span></a>).</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="mod.DGFlow.vertexFilter">
+<code class="descname">vertexFilter</code><a class="headerlink" href="#mod.DGFlow.vertexFilter" title="Permalink to this definition">¶</a></dt>
+<dd><p>(Write-only) Predicate controlling which vertices of the derivation graph may have flow through them.</p>
+<p>Example: setting <code class="docutils literal"><span class="pre">vertexFilter</span></code> to <code class="docutils literal"><span class="pre">lambda</span> <span class="pre">g:</span> <span class="pre">g.numVertices</span> <span class="pre">&lt;=</span> <span class="pre">42</span></code> will effectively exclude all
+graphs with more than 42 vertices from the derivation graph.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Type:</th><td class="field-body">bool(<a class="reference internal" href="Graph.html#mod.Graph" title="mod.Graph"><code class="xref py py-class docutils literal"><span class="pre">Graph</span></code></a>) or bool</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="mod.DGFlow.objectiveFunction">
+<code class="descname">objectiveFunction</code><a class="headerlink" href="#mod.DGFlow.objectiveFunction" title="Permalink to this definition">¶</a></dt>
+<dd><p>(Write-only) The objective function for the model, which will be minimized.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Type:</th><td class="field-body"><code class="xref py py-class docutils literal"><span class="pre">DGFlowLinExp</span></code> (see <a class="reference internal" href="#dgflowlinexpandconstraints-label"><span class="std std-ref">Linear Expressions and Constraints</span></a>)</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="mod.DGFlow.listModel">
+<code class="descname">listModel</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#mod.DGFlow.listModel" title="Permalink to this definition">¶</a></dt>
+<dd><p>List the model with all settings.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="mod.DGFlow.setSolverEnumerateBy">
+<code class="descname">setSolverEnumerateBy</code><span class="sig-paren">(</span><em>absGap=2**30</em>, <em>maxNumSolutions=2**30</em><span class="sig-paren">)</span><a class="headerlink" href="#mod.DGFlow.setSolverEnumerateBy" title="Permalink to this definition">¶</a></dt>
+<dd><p>Sets a new solver for the model. This is the default solver, with <code class="docutils literal"><span class="pre">maxNumSolutions=1</span></code>.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>absGap</strong> (<em>int</em>) &#8211; A solution is only feasible if its objective value is at most <code class="docutils literal"><span class="pre">absGap</span></code> above the optimal value.</li>
+<li><strong>maxNumSolutions</strong> (<em>unsigned int</em>) &#8211; The maximum number of solutions to find when solving.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="mod.DGFlow.dump">
+<code class="descname">dump</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#mod.DGFlow.dump" title="Permalink to this definition">¶</a></dt>
+<dd><p>Exports the object with all solutions to a file.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">the filename with the exported model.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">string</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="mod.DGFlow.calc">
+<code class="descname">calc</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#mod.DGFlow.calc" title="Permalink to this definition">¶</a></dt>
+<dd><p>Locks the model and solves it.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="mod.DGFlow.solutions">
+<code class="descname">solutions</code><a class="headerlink" href="#mod.DGFlow.solutions" title="Permalink to this definition">¶</a></dt>
+<dd><p>(Read-only) After solving, this is all the found solutions.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Type:</th><td class="field-body"><a class="reference internal" href="#mod.DGFlowSolutionSet" title="mod.DGFlowSolutionSet"><code class="xref py py-class docutils literal"><span class="pre">DGFlowSolutionSet</span></code></a></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="function">
+<dt id="mod.dgFlow">
+<code class="descclassname">mod.</code><code class="descname">dgFlow</code><span class="sig-paren">(</span><em>dg</em><span class="sig-paren">)</span><a class="headerlink" href="#mod.dgFlow" title="Permalink to this definition">¶</a></dt>
+<dd><p>Construct a default initialized flow model.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>dg</strong> &#8211; the derivation graph which the flow model should model.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Type:</th><td class="field-body"><a class="reference internal" href="DG.html#mod.DG" title="mod.DG"><code class="xref py py-class docutils literal"><span class="pre">DG</span></code></a></td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">a flow model.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body"><a class="reference internal" href="#mod.DGFlow" title="mod.DGFlow"><code class="xref py py-class docutils literal"><span class="pre">DGFlow</span></code></a></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="mod.dgFlowDump">
+<code class="descclassname">mod.</code><code class="descname">dgFlowDump</code><span class="sig-paren">(</span><em>dg</em>, <em>f</em><span class="sig-paren">)</span><a class="headerlink" href="#mod.dgFlowDump" title="Permalink to this definition">¶</a></dt>
+<dd><p>Load a previously dumped model with solutions.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>dg</strong> &#8211; the derivation graph which the dumped flow model is build upon.</li>
+<li><strong>f</strong> (<em>string</em>) &#8211; name of the file with the model to be loaded.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Type:</th><td class="field-body"><p class="first"><a class="reference internal" href="DG.html#mod.DG" title="mod.DG"><code class="xref py py-class docutils literal"><span class="pre">DG</span></code></a></p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">a flow model with solutions.</p>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last"><a class="reference internal" href="#mod.DGFlow" title="mod.DGFlow"><code class="xref py py-class docutils literal"><span class="pre">DGFlow</span></code></a></p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="class-dgflowtransit">
+<h2>Class <code class="docutils literal"><span class="pre">DGFlowTransit</span></code><a class="headerlink" href="#class-dgflowtransit" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="mod.DGFlowTransit">
+<em class="property">class </em><code class="descclassname">mod.</code><code class="descname">DGFlowTransit</code><a class="headerlink" href="#mod.DGFlowTransit" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="method">
+<dt id="mod.DGFlowTransit.printGraph">
+<code class="descname">printGraph</code><span class="sig-paren">(</span><em>g</em><span class="sig-paren">)</span><a class="headerlink" href="#mod.DGFlowTransit.printGraph" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>g</strong> (<a class="reference internal" href="Graph.html#mod.Graph" title="mod.Graph"><code class="xref py py-class docutils literal"><span class="pre">Graph</span></code></a>) &#8211; the graph representing the vertex in the derivation graph which should be printed.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="class-dgflowoverallautocatalysis">
+<h2>Class <code class="docutils literal"><span class="pre">DGFlowOverallAutocatalysis</span></code><a class="headerlink" href="#class-dgflowoverallautocatalysis" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="mod.DGFlowOverallAutocatalysis">
+<em class="property">class </em><code class="descclassname">mod.</code><code class="descname">DGFlowOverallAutocatalysis</code><a class="headerlink" href="#mod.DGFlowOverallAutocatalysis" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="method">
+<dt id="mod.DGFlowOverallAutocatalysis.enable">
+<code class="descname">enable</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#mod.DGFlowOverallAutocatalysis.enable" title="Permalink to this definition">¶</a></dt>
+<dd><p>Enable the extension. This will also enable the transit extension and configure it to
+disallow direct flow through inverse edges, both internal and input/output.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="mod.DGFlowOverallAutocatalysis.forceExistence">
+<code class="descname">forceExistence</code><a class="headerlink" href="#mod.DGFlowOverallAutocatalysis.forceExistence" title="Permalink to this definition">¶</a></dt>
+<dd><p>Controls whether or not a solution must be overall autocatalytic.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Type:</th><td class="field-body">bool</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="mod.DGFlowOverallAutocatalysis.strictTransit">
+<code class="descname">strictTransit</code><a class="headerlink" href="#mod.DGFlowOverallAutocatalysis.strictTransit" title="Permalink to this definition">¶</a></dt>
+<dd><p>Controls whether transit flow in overall autocatalytic vertices is restricted or not.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Type:</th><td class="field-body">bool</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="mod.DGFlowOverallAutocatalysis.bfsExclusive">
+<code class="descname">bfsExclusive</code><a class="headerlink" href="#mod.DGFlowOverallAutocatalysis.bfsExclusive" title="Permalink to this definition">¶</a></dt>
+<dd><p>Controls whether or not vertices must be exclusively overall autocatalytic,
+as determined by breadth-first marking.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Type:</th><td class="field-body">bool</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="class-dgflowoverallcatalysis">
+<h2>Class <code class="docutils literal"><span class="pre">DGFlowOverallCatalysis</span></code><a class="headerlink" href="#class-dgflowoverallcatalysis" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="mod.DGFlowOverallCatalysis">
+<em class="property">class </em><code class="descclassname">mod.</code><code class="descname">DGFlowOverallCatalysis</code><a class="headerlink" href="#mod.DGFlowOverallCatalysis" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="method">
+<dt id="mod.DGFlowOverallCatalysis.enable">
+<code class="descname">enable</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#mod.DGFlowOverallCatalysis.enable" title="Permalink to this definition">¶</a></dt>
+<dd><p>Enable the extension. This will also enable the transit extension and configure it to
+disallow direct flow through inverse edges, both internal and input/output.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="mod.DGFlowOverallCatalysis.forceExistence">
+<code class="descname">forceExistence</code><a class="headerlink" href="#mod.DGFlowOverallCatalysis.forceExistence" title="Permalink to this definition">¶</a></dt>
+<dd><p>Controls whether or not a solution must be overall catalytic.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Type:</th><td class="field-body">bool</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="mod.DGFlowOverallCatalysis.strictTransit">
+<code class="descname">strictTransit</code><a class="headerlink" href="#mod.DGFlowOverallCatalysis.strictTransit" title="Permalink to this definition">¶</a></dt>
+<dd><p>Controls whether transit flow in overall catalytic vertices is restricted or not.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Type:</th><td class="field-body">bool</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="linear-expressions-and-constraints">
+<span id="dgflowlinexpandconstraints-label"></span><h2>Linear Expressions and Constraints<a class="headerlink" href="#linear-expressions-and-constraints" title="Permalink to this headline">¶</a></h2>
+<p>Linear expressions (<code class="xref py py-class docutils literal"><span class="pre">DGFlowLinExp</span></code>) and constraints (<code class="xref py py-class docutils literal"><span class="pre">DGFlowLinConstraint</span></code>)
+can be implicitly created from variable specifiers and operators, meaning one rarely
+need to instantiate them explicitly.
+However creating the zero-expression might sometimes be useful (e.g., in a sum expression)
+and can be done simply with the expression <code class="docutils literal"><span class="pre">DGFlowLinExp()</span></code>.</p>
+<p>A variable specifier is a representation of either a single ILP variable or a sum of ILP variables.
+The addition, multiplication and division operators are overloaded for variable specifiers and
+linear expressions such that expressions can be written in the natural manner.</p>
+<p>The operators <code class="docutils literal"><span class="pre">&lt;=</span></code>, <code class="docutils literal"><span class="pre">==</span></code> and <code class="docutils literal"><span class="pre">&gt;=</span></code> are overloaded on linear expressions to make the creation of
+linear constraints easier. However, one argument to the operator must be a linear expression while
+the other argument must be a number.</p>
+<p>All variable specifiers are defined in module scope. See <span class="xref std std-ref">dgFlowCommon</span> for an overview of the specifiers.</p>
+</div>
+<div class="section" id="class-dgflowsequencequery">
+<h2>Class <code class="docutils literal"><span class="pre">DGFlowSequenceQuery</span></code><a class="headerlink" href="#class-dgflowsequencequery" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="mod.DGFlowSequenceQuery">
+<em class="property">class </em><code class="descclassname">mod.</code><code class="descname">DGFlowSequenceQuery</code><a class="headerlink" href="#mod.DGFlowSequenceQuery" title="Permalink to this definition">¶</a></dt>
+<dd><p>Representation of a query for a flow sequence.</p>
+<dl class="method">
+<dt id="mod.DGFlowSequenceQuery.__init__">
+<code class="descname">__init__</code><span class="sig-paren">(</span><em>self</em><span class="sig-paren">)</span><a class="headerlink" href="#mod.DGFlowSequenceQuery.__init__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Construct a query with multiplicity 1 and no borrowing.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="mod.DGFlowSequenceQuery.multiplicity">
+<code class="descname">multiplicity</code><a class="headerlink" href="#mod.DGFlowSequenceQuery.multiplicity" title="Permalink to this definition">¶</a></dt>
+<dd><p>Access the multiplicity of the query. It must be at least 1.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Type:</th><td class="field-body">uint</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="mod.DGFlowSequenceQuery.__getitem__">
+<code class="descname">__getitem__</code><span class="sig-paren">(</span><em>self</em>, <em>g</em><span class="sig-paren">)</span><a class="headerlink" href="#mod.DGFlowSequenceQuery.__getitem__" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>g</strong> (<a class="reference internal" href="Graph.html#mod.Graph" title="mod.Graph"><code class="xref py py-class docutils literal"><span class="pre">Graph</span></code></a>) &#8211; a graph representing a vertex in the derivation graph the query is intended for.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">the amount of flow allowed to be borrowed at the vertex represented by the graph.</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">uint</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="mod.DGFlowSequenceQuery.__setitem__">
+<code class="descname">__setitem__</code><span class="sig-paren">(</span><em>self</em>, <em>g</em>, <em>count</em><span class="sig-paren">)</span><a class="headerlink" href="#mod.DGFlowSequenceQuery.__setitem__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set the amount of flow allowed to be borrowed at the vertex represented by the graph.
+:param g: a graph representing a vertex in the derivation graph the query is intended for.
+:type g: <a class="reference internal" href="Graph.html#mod.Graph" title="mod.Graph"><code class="xref py py-class docutils literal"><span class="pre">Graph</span></code></a>
+:param uint count: the amount of tokens</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="mod.DGFlowSequenceQuery.constrainRouting">
+<code class="descname">constrainRouting</code><a class="headerlink" href="#mod.DGFlowSequenceQuery.constrainRouting" title="Permalink to this definition">¶</a></dt>
+<dd><p>Access whether routing edges must conform to the flow. Setting this to <code class="docutils literal"><span class="pre">false</span></code> may give sequences violating flow constraints.</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="class-dgflowsolution">
+<h2>Class <code class="docutils literal"><span class="pre">DGFlowSolution</span></code><a class="headerlink" href="#class-dgflowsolution" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="mod.DGFlowSolution">
+<em class="property">class </em><code class="descclassname">mod.</code><code class="descname">DGFlowSolution</code><a class="headerlink" href="#mod.DGFlowSolution" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="attribute">
+<dt id="mod.DGFlowSolution.id">
+<code class="descname">id</code><a class="headerlink" href="#mod.DGFlowSolution.id" title="Permalink to this definition">¶</a></dt>
+<dd><p>(Read-only) An id for the solution which is unique among all solutions from the parent <a class="reference internal" href="#mod.DGFlow" title="mod.DGFlow"><code class="xref py py-class docutils literal"><span class="pre">DGFlow</span></code></a> object.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Type:</th><td class="field-body">unsigned int</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="mod.DGFlowSolution.dgFlow">
+<code class="descname">dgFlow</code><a class="headerlink" href="#mod.DGFlowSolution.dgFlow" title="Permalink to this definition">¶</a></dt>
+<dd><p>(Read-only) The flow model that produced this solution.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Type:</th><td class="field-body"><a class="reference internal" href="#mod.DGFlow" title="mod.DGFlow"><code class="xref py py-class docutils literal"><span class="pre">DGFlow</span></code></a></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="mod.DGFlowSolution.eval">
+<code class="descname">eval</code><span class="sig-paren">(</span><em>exp</em><span class="sig-paren">)</span><a class="headerlink" href="#mod.DGFlowSolution.eval" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">the value of the given linear expression evaluated on the solution.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Parameters:</th><td class="field-body"><strong>exp</strong> (<code class="xref py py-class docutils literal"><span class="pre">DGFlowLinExp</span></code>) &#8211; the linear expression to be evaluated on the solution.</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">double</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="mod.DGFlowSolution.print">
+<code class="descname">print</code><span class="sig-paren">(</span><em>printer=DGFlowPrinter()</em>, <em>data=None</em><span class="sig-paren">)</span><a class="headerlink" href="#mod.DGFlowSolution.print" title="Permalink to this definition">¶</a></dt>
+<dd><p>Print the solution using the settings in the given printer and the structure information in the data object.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>printer</strong> (<a class="reference internal" href="#mod.DGFlowPrinter" title="mod.DGFlowPrinter"><code class="xref py py-class docutils literal"><span class="pre">DGFlowPrinter</span></code></a>) &#8211; the printer to use governing the appearance.</li>
+<li><strong>data</strong> (<a class="reference internal" href="DGPrinter.html#mod.DGPrintData" title="mod.DGPrintData"><code class="xref py py-class docutils literal"><span class="pre">DGPrintData</span></code></a>) &#8211; the extra data to use encoding the structure of the graph.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="mod.DGFlowSolution.haxListDerivations">
+<code class="descname">haxListDerivations</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#mod.DGFlowSolution.haxListDerivations" title="Permalink to this definition">¶</a></dt>
+<dd><p>List the solution in more human readable form.
+Don&#8217;t expect this function to stay in this form.</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="class-dgflowsolutionset">
+<h2>Class <code class="docutils literal"><span class="pre">DGFlowSolutionSet</span></code><a class="headerlink" href="#class-dgflowsolutionset" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="mod.DGFlowSolutionSet">
+<em class="property">class </em><code class="descclassname">mod.</code><code class="descname">DGFlowSolutionSet</code><a class="headerlink" href="#mod.DGFlowSolutionSet" title="Permalink to this definition">¶</a></dt>
+<dd><p>A class representing the set of solutions from a single model.</p>
+<dl class="attribute">
+<dt id="mod.DGFlowSolutionSet.dgFlow">
+<code class="descname">dgFlow</code><a class="headerlink" href="#mod.DGFlowSolutionSet.dgFlow" title="Permalink to this definition">¶</a></dt>
+<dd><p>(Read-only) The flow model that produced these solutions.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Type:</th><td class="field-body"><a class="reference internal" href="#mod.DGFlow" title="mod.DGFlow"><code class="xref py py-class docutils literal"><span class="pre">DGFlow</span></code></a></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="mod.DGFlowSolutionSet.list">
+<code class="descname">list</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#mod.DGFlowSolutionSet.list" title="Permalink to this definition">¶</a></dt>
+<dd><p>List overall information about each solution.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="mod.DGFlowSolutionSet.size">
+<code class="descname">size</code><a class="headerlink" href="#mod.DGFlowSolutionSet.size" title="Permalink to this definition">¶</a></dt>
+<dd><p>The number of solutions in the flow model.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Type:</th><td class="field-body">unsigned int</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="mod.DGFlowSolutionSet.print">
+<code class="descname">print</code><span class="sig-paren">(</span><em>printer=DGFlowPrinter()</em>, <em>data=None</em><span class="sig-paren">)</span><a class="headerlink" href="#mod.DGFlowSolutionSet.print" title="Permalink to this definition">¶</a></dt>
+<dd><p>Print solutions using the settings in the given printer and the structure information in the data object.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>printer</strong> (<a class="reference internal" href="#mod.DGFlowPrinter" title="mod.DGFlowPrinter"><code class="xref py py-class docutils literal"><span class="pre">DGFlowPrinter</span></code></a>) &#8211; the printer to use governing the appearance.</li>
+<li><strong>data</strong> (<a class="reference internal" href="DGPrinter.html#mod.DGPrintData" title="mod.DGPrintData"><code class="xref py py-class docutils literal"><span class="pre">DGPrintData</span></code></a>) &#8211; the extra data to use encoding the structure of the graph.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="mod.DGFlowSolutionSet.printVectors">
+<code class="descname">printVectors</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#mod.DGFlowSolutionSet.printVectors" title="Permalink to this definition">¶</a></dt>
+<dd><p>(Deprecated) Print some solution data in an old format.
+Use the <a class="reference internal" href="#mod.DGFlow.dump" title="mod.DGFlow.dump"><code class="xref py py-meth docutils literal"><span class="pre">DGFlow.dump()</span></code></a> instead.</p>
+</dd></dl>
+
+</dd></dl>
+
+<div class="section" id="other">
+<h3>Other<a class="headerlink" href="#other" title="Permalink to this headline">¶</a></h3>
+<p>The solution set class additionally supports indexing to retrieve
+specific solutions and iteration over the range of solutions.
+E.g., the following iterates through each solution in the flow model <code class="docutils literal"><span class="pre">flow</span></code>:</p>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="k">for</span> <span class="n">sol</span> <span class="ow">in</span> <span class="n">flow</span><span class="o">.</span><span class="n">solutions</span><span class="p">:</span>
+    <span class="k">pass</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="section" id="class-dgflowprinter">
+<h2>Class <code class="docutils literal"><span class="pre">DGFlowPrinter</span></code><a class="headerlink" href="#class-dgflowprinter" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="mod.DGFlowPrinter">
+<em class="property">class </em><code class="descclassname">mod.</code><code class="descname">DGFlowPrinter</code><a class="headerlink" href="#mod.DGFlowPrinter" title="Permalink to this definition">¶</a></dt>
+<dd><p>An object of this class holds information on how derivation graphs with flow are visualised.</p>
+<dl class="attribute">
+<dt id="mod.DGFlowPrinter.dgPrinter">
+<code class="descname">dgPrinter</code><a class="headerlink" href="#mod.DGFlowPrinter.dgPrinter" title="Permalink to this definition">¶</a></dt>
+<dd><p>(Read-only) Retrieve the <a class="reference internal" href="DGPrinter.html#mod.DGPrinter" title="mod.DGPrinter"><code class="xref py py-class docutils literal"><span class="pre">DGPrinter</span></code></a> used when printing solutions.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Type:</th><td class="field-body"><a class="reference internal" href="DGPrinter.html#mod.DGPrinter" title="mod.DGPrinter"><code class="xref py py-class docutils literal"><span class="pre">DGPrinter</span></code></a></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="mod.DGFlowPrinter.withFlowLabels">
+<code class="descname">withFlowLabels</code><a class="headerlink" href="#mod.DGFlowPrinter.withFlowLabels" title="Permalink to this definition">¶</a></dt>
+<dd><p>Control whether or not a flow label is appended to each hyperedge label (see also <a class="reference internal" href="DGPrinter.html#mod.DGPrinter.pushEdgeLabel" title="mod.DGPrinter.pushEdgeLabel"><code class="xref py py-meth docutils literal"><span class="pre">DGPrinter.pushEdgeLabel()</span></code></a>).</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Type:</th><td class="field-body">bool</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="mod.DGFlowPrinter.pushInOutEdgeLabel">
+<code class="descname">pushInOutEdgeLabel</code><span class="sig-paren">(</span><em>f</em><span class="sig-paren">)</span><a class="headerlink" href="#mod.DGFlowPrinter.pushInOutEdgeLabel" title="Permalink to this definition">¶</a></dt>
+<dd><p>Add another function for in-/out-edge labelling.
+The result of this function is appended to each label using the edge label separator
+of the underlying <a class="reference internal" href="DGPrinter.html#mod.DGPrinter" title="mod.DGPrinter"><code class="xref py py-class docutils literal"><span class="pre">DGPrinter</span></code></a>.
+The last argument given to the function is <code class="docutils literal"><span class="pre">true</span></code> for the in-edge, and <code class="docutils literal"><span class="pre">false</span></code> for the out-edge.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>f</strong> (string(<a class="reference internal" href="Graph.html#mod.Graph" title="mod.Graph"><code class="xref py py-class docutils literal"><span class="pre">Graph</span></code></a>, <a class="reference internal" href="DG.html#mod.DG" title="mod.DG"><code class="xref py py-class docutils literal"><span class="pre">DG</span></code></a>, bool)) &#8211; the function to push for labelling in-/out-edges.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="mod.DGFlowPrinter.popInOutEdgeLabel">
+<code class="descname">popInOutEdgeLabel</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#mod.DGFlowPrinter.popInOutEdgeLabel" title="Permalink to this definition">¶</a></dt>
+<dd><p>Remove the last pushed in/out edge labelling function.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="mod.DGFlowPrinter.printUnfiltered">
+<code class="descname">printUnfiltered</code><a class="headerlink" href="#mod.DGFlowPrinter.printUnfiltered" title="Permalink to this definition">¶</a></dt>
+<dd><p>Control whether or not the unfiltered version of a solution is printed.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Type:</th><td class="field-body">bool</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="mod.DGFlowPrinter.printFiltered">
+<code class="descname">printFiltered</code><a class="headerlink" href="#mod.DGFlowPrinter.printFiltered" title="Permalink to this definition">¶</a></dt>
+<dd><p>Control whether or not the filtered version of a solution is printed.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Type:</th><td class="field-body">bool</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="mod.DGFlowPrinter.colourUnfiltered">
+<code class="descname">colourUnfiltered</code><a class="headerlink" href="#mod.DGFlowPrinter.colourUnfiltered" title="Permalink to this definition">¶</a></dt>
+<dd><p>Control whether or not the vertices and edges with non-zero flow are coloured in the unfiltered version of solutions.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Type:</th><td class="field-body">bool</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="../index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">DGFlow</a><ul>
+<li><a class="reference internal" href="#class-dgflow">Class <code class="docutils literal"><span class="pre">DGFlow</span></code></a></li>
+<li><a class="reference internal" href="#class-dgflowtransit">Class <code class="docutils literal"><span class="pre">DGFlowTransit</span></code></a></li>
+<li><a class="reference internal" href="#class-dgflowoverallautocatalysis">Class <code class="docutils literal"><span class="pre">DGFlowOverallAutocatalysis</span></code></a></li>
+<li><a class="reference internal" href="#class-dgflowoverallcatalysis">Class <code class="docutils literal"><span class="pre">DGFlowOverallCatalysis</span></code></a></li>
+<li><a class="reference internal" href="#linear-expressions-and-constraints">Linear Expressions and Constraints</a></li>
+<li><a class="reference internal" href="#class-dgflowsequencequery">Class <code class="docutils literal"><span class="pre">DGFlowSequenceQuery</span></code></a></li>
+<li><a class="reference internal" href="#class-dgflowsolution">Class <code class="docutils literal"><span class="pre">DGFlowSolution</span></code></a></li>
+<li><a class="reference internal" href="#class-dgflowsolutionset">Class <code class="docutils literal"><span class="pre">DGFlowSolutionSet</span></code></a><ul>
+<li><a class="reference internal" href="#other">Other</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#class-dgflowprinter">Class <code class="docutils literal"><span class="pre">DGFlowPrinter</span></code></a></li>
+</ul>
+</li>
+</ul>
+
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../_sources/pymod/DGFlow.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">MØD 65d3c41 documentation</a> &#187;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2013-2015, Jakob Lykke Andersen.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.5a3.
+    </div>
+  </body>
+</html>
