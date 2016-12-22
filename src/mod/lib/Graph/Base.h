@@ -1,7 +1,7 @@
 #ifndef MOD_LIB_GRAPH_BASE_H
 #define MOD_LIB_GRAPH_BASE_H
 
-#include <mod/lib/Graph/LabelledGraph.h>
+#include <mod/lib/Graph/GraphDecl.h>
 
 #include <iosfwd>
 #include <set>

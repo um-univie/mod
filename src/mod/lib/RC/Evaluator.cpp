@@ -6,7 +6,7 @@
 #include <mod/Rule.h>
 #include <mod/lib/Graph/Single.h>
 #include <mod/lib/IO/RC.h>
-#include <mod/lib/RC/Core.h>
+#include <mod/lib/RC/ComposeRuleReal.h>
 #include <mod/lib/RC/MatchMaker/Common.h>
 #include <mod/lib/RC/MatchMaker/Parallel.h>
 #include <mod/lib/RC/MatchMaker/Sub.h>
@@ -67,13 +67,11 @@ struct EvalVisitor : public boost::static_visitor<std::unordered_set<std::shared
 		std::unordered_set<std::shared_ptr<mod::Rule> > result;
 		for(auto rFirst : firstResult) {
 			for(auto rSecond : secondResult) {
-				std::vector<lib::Rule::Real*> resultVec;
-				auto reporter = [&resultVec] (std::unique_ptr<lib::Rule::Real> r) {
+				std::vector<lib::Rules::Real*> resultVec;
+				auto reporter = [&resultVec] (std::unique_ptr<lib::Rules::Real> r) {
 					resultVec.push_back(r.release());
 				};
-				assert(rFirst->getReal());
-				assert(rSecond->getReal());
-				composer(*rFirst->getReal(), *rSecond->getReal(), reporter);
+				composer(rFirst->getRule(), rSecond->getRule(), reporter);
 				for(auto *r : resultVec) {
 					if(compose.getDiscardNonchemical() && !r->isChemical()) {
 						delete r;
@@ -82,7 +80,7 @@ struct EvalVisitor : public boost::static_visitor<std::unordered_set<std::shared
 					auto rWrapped = evaluator.checkIfNew(r);
 					bool isNew = evaluator.addRule(rWrapped);
 					if(isNew) evaluator.giveProductStatus(rWrapped);
-					evaluator.suggestComposition(rFirst->getReal(), rSecond->getReal(), rWrapped->getReal());
+					evaluator.suggestComposition(&rFirst->getRule(), &rSecond->getRule(), &rWrapped->getRule());
 					result.insert(rWrapped);
 				}
 			}
@@ -91,36 +89,36 @@ struct EvalVisitor : public boost::static_visitor<std::unordered_set<std::shared
 	}
 
 	std::unordered_set<std::shared_ptr<mod::Rule> > operator()(const mod::RCExp::ComposeCommon &common) {
-		auto composer = [&common, this](const lib::Rule::Real &rFirst, const lib::Rule::Real & rSecond,
-				std::function<void(std::unique_ptr<lib::Rule::Real>) > reporter) {
+		auto composer = [&common, this](const lib::Rules::Real &rFirst, const lib::Rules::Real &rSecond,
+				std::function<void(std::unique_ptr<lib::Rules::Real>) > reporter) {
 			RC::Common mm(common.getMaxmimum(), common.getConnected());
-			lib::RC::composeRules(rFirst, rSecond, mm, reporter);
+			lib::RC::composeRuleRealByMatchMaker(rFirst, rSecond, mm, reporter);
 		};
 		return composeTemplate(common, composer);
 	}
 
 	std::unordered_set<std::shared_ptr<mod::Rule> > operator()(const mod::RCExp::ComposeParallel &common) {
-		auto composer = [&common, this](const lib::Rule::Real &rFirst, const lib::Rule::Real & rSecond,
-				std::function<void(std::unique_ptr<lib::Rule::Real>) > reporter) {
-			lib::RC::composeRules(rFirst, rSecond, lib::RC::Parallel(), reporter);
+		auto composer = [&common, this](const lib::Rules::Real &rFirst, const lib::Rules::Real & rSecond,
+				std::function<void(std::unique_ptr<lib::Rules::Real>) > reporter) {
+			lib::RC::composeRuleRealByMatchMaker(rFirst, rSecond, lib::RC::Parallel(), reporter);
 		};
 		return composeTemplate(common, composer);
 	}
 
 	std::unordered_set<std::shared_ptr<mod::Rule> > operator()(const mod::RCExp::ComposeSub &sub) {
-		auto composer = [&sub, this](const lib::Rule::Real &rFirst, const lib::Rule::Real & rSecond,
-				std::function<void(std::unique_ptr<lib::Rule::Real>) > reporter) {
+		auto composer = [&sub, this](const lib::Rules::Real &rFirst, const lib::Rules::Real & rSecond,
+				std::function<void(std::unique_ptr<lib::Rules::Real>) > reporter) {
 			RC::Sub mm(sub.getAllowPartial());
-			lib::RC::composeRules(rFirst, rSecond, mm, reporter);
+			lib::RC::composeRuleRealByMatchMaker(rFirst, rSecond, mm, reporter);
 		};
 		return composeTemplate(sub, composer);
 	}
 
 	std::unordered_set<std::shared_ptr<mod::Rule> > operator()(const mod::RCExp::ComposeSuper &super) {
-		auto composer = [&super, this](const lib::Rule::Real &rFirst, const lib::Rule::Real & rSecond,
-				std::function<void(std::unique_ptr<lib::Rule::Real>) > reporter) {
+		auto composer = [&super, this](const lib::Rules::Real &rFirst, const lib::Rules::Real & rSecond,
+				std::function<void(std::unique_ptr<lib::Rules::Real>) > reporter) {
 			RC::Super mm(super.getAllowPartial(), super.getEnforceConstraints());
-			lib::RC::composeRules(rFirst, rSecond, mm, reporter);
+			lib::RC::composeRuleRealByMatchMaker(rFirst, rSecond, mm, reporter);
 		};
 		return composeTemplate(super, composer);
 	}
@@ -217,17 +215,17 @@ void Evaluator::giveProductStatus(std::shared_ptr<mod::Rule> r) {
 	products.insert(r);
 }
 
-std::shared_ptr<mod::Rule> Evaluator::checkIfNew(lib::Rule::Real *rCand) const {
+std::shared_ptr<mod::Rule> Evaluator::checkIfNew(lib::Rules::Real *rCand) const {
 	for(auto rOther : database) {
-		if(lib::Rule::makeIsomorphismPredicate()(rOther->getReal(), rCand)) {
+		if(lib::Rules::makeIsomorphismPredicate()(&rOther->getRule(), rCand)) {
 			delete rCand;
 			return rOther;
 		}
 	}
-	return mod::Rule::makeRule(std::unique_ptr<lib::Rule::Real>(rCand));
+	return mod::Rule::makeRule(std::unique_ptr<lib::Rules::Real>(rCand));
 }
 
-void Evaluator::suggestComposition(const lib::Rule::Real *rFirst, const lib::Rule::Real *rSecond, const lib::Rule::Real *rResult) {
+void Evaluator::suggestComposition(const lib::Rules::Real *rFirst, const lib::Rules::Real *rSecond, const lib::Rules::Real *rResult) {
 	Vertex vComp = getVertexFromArgs(rFirst, rSecond);
 	Vertex vResult = getVertexFromRule(rResult);
 	for(Vertex vOut : asRange(adjacent_vertices(vComp, rcg))) {
@@ -238,7 +236,7 @@ void Evaluator::suggestComposition(const lib::Rule::Real *rFirst, const lib::Rul
 	rcg[pResult.first].kind = EdgeKind::Result;
 }
 
-Evaluator::Vertex Evaluator::getVertexFromRule(const lib::Rule::Real *r) {
+Evaluator::Vertex Evaluator::getVertexFromRule(const lib::Rules::Real *r) {
 	auto iter = ruleToVertex.find(r);
 	if(iter == end(ruleToVertex)) {
 		Vertex v = add_vertex(rcg);
@@ -249,7 +247,7 @@ Evaluator::Vertex Evaluator::getVertexFromRule(const lib::Rule::Real *r) {
 	return iter->second;
 }
 
-Evaluator::Vertex Evaluator::getVertexFromArgs(const lib::Rule::Real *rFirst, const lib::Rule::Real *rSecond) {
+Evaluator::Vertex Evaluator::getVertexFromArgs(const lib::Rules::Real *rFirst, const lib::Rules::Real *rSecond) {
 	Vertex vFirst = getVertexFromRule(rFirst),
 			vSecond = getVertexFromRule(rSecond);
 	auto iter = argsToVertex.find(std::make_pair(rFirst, rSecond));

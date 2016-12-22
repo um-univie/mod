@@ -3,7 +3,6 @@
 #include <mod/BuildConfig.h>
 #include <mod/DG.h>
 #include <mod/Graph.h>
-#include <mod/lib/Chem/SBML.h>
 #include <mod/lib/DG/Hyper.h>
 #include <mod/lib/IO/IO.h>
 

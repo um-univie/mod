@@ -1,7 +1,7 @@
 #ifndef MOD_LIB_GRAPH_PROPERTY_H
-#define	MOD_LIB_GRAPH_PROPERTY_H
+#define MOD_LIB_GRAPH_PROPERTY_H
 
-#include <mod/lib/GraphUtil.h>
+#include <mod/Error.h>
 #include <mod/lib/Graph/GraphDecl.h>
 #include <mod/lib/IO/IO.h>
 
@@ -24,6 +24,7 @@ public:
 public:
 	void verify(const GraphType *g) const;
 	explicit Prop(const GraphType &g);
+	Prop(const Prop &other, const GraphType &g);
 	void addVertex(Vertex v, const VertexType &label);
 	void addEdge(Edge e, const EdgeType &label);
 	const VertexType &operator[](Vertex v) const;
@@ -33,7 +34,7 @@ public:
 protected:
 	const GraphType &g;
 	std::vector<VertexType> vertexState;
-	EdgeMap<GraphType, EdgeType> edgeState;
+	std::vector<EdgeType> edgeState;
 public:
 
 	struct Handler {
@@ -71,7 +72,11 @@ void Prop<Derived, VertexType, EdgeType>::verify(const GraphType *g) const {
 }
 
 template<typename Derived, typename VertexType, typename EdgeType>
-Prop<Derived, VertexType, EdgeType>::Prop(const GraphType &g) : g(g), edgeState(g) { }
+Prop<Derived, VertexType, EdgeType>::Prop(const GraphType &g) : g(g) { }
+
+template<typename Derived, typename VertexType, typename EdgeType>
+Prop<Derived, VertexType, EdgeType>::Prop(const Prop &other, const GraphType &g)
+: g(g), vertexState(other.vertexState), edgeState(other.edgeState) { }
 
 template<typename Derived, typename VertexType, typename EdgeType>
 void Prop<Derived, VertexType, EdgeType>::addVertex(Vertex v, const VertexType &value) {
@@ -84,7 +89,8 @@ void Prop<Derived, VertexType, EdgeType>::addVertex(Vertex v, const VertexType &
 template<typename Derived, typename VertexType, typename EdgeType>
 void Prop<Derived, VertexType, EdgeType>::addEdge(Edge e, const EdgeType &value) {
 	assert(num_edges(g) == edgeState.size() + 1);
-	edgeState.add(e, value);
+	assert(get(boost::edge_index_t(), g, e) == edgeState.size());
+	edgeState.push_back(value);
 	verify(&g);
 }
 
@@ -97,9 +103,8 @@ const VertexType &Prop<Derived, VertexType, EdgeType>::operator[](Vertex v) cons
 template<typename Derived, typename VertexType, typename EdgeType>
 const EdgeType &Prop<Derived, VertexType, EdgeType>::operator[](Edge e) const {
 	verify(&g);
-	auto iter = edgeState.find(e);
-	assert(iter != end(edgeState));
-	return iter->second;
+	assert(get(boost::edge_index_t(), g, e) < edgeState.size());
+	return edgeState[get(boost::edge_index_t(), g, e)];
 }
 
 template<typename Derived, typename VertexType, typename EdgeType>
@@ -116,4 +121,4 @@ const Derived &Prop<Derived, VertexType, EdgeType>::getDerived() const {
 } // namespace lib
 } // namespace mod
 
-#endif	/* MOD_LIB_GRAPH_PROPERTY_H */
+#endif /* MOD_LIB_GRAPH_PROPERTY_H */

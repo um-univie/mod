@@ -1,5 +1,5 @@
 #ifndef MOD_LIB_DG_NONHYPER_H
-#define	MOD_LIB_DG_NONHYPER_H
+#define MOD_LIB_DG_NONHYPER_H
 
 #include <mod/Graph.h>
 #include <mod/lib/DG/GraphDecl.h>
@@ -60,7 +60,7 @@ protected: // calculation
 	// if found, returns the found graph and false, additionally the given graph is deleted
 	// if not found, returns the given wrapped given graph and true
 	// does NOT change the graphDatabse
-	std::pair<std::shared_ptr<mod::Graph>, bool> checkIfNew(std::unique_ptr<lib::Graph::GraphType> gBoost, std::unique_ptr<lib::Graph::PropStringType> labelState) const;
+	std::pair<std::shared_ptr<mod::Graph>, bool> checkIfNew(std::unique_ptr<lib::Graph::GraphType> gBoost, std::unique_ptr<lib::Graph::PropString> labelState) const;
 	// gives a graph product status, i.e., rename it, put it in the product list and maybe print a status message
 	void giveProductStatus(std::shared_ptr<mod::Graph> g);
 	// adds the graph to the database if it's not there already
@@ -72,10 +72,11 @@ protected: // calculation
 	const lib::Graph::Merge *addToMergeStore(const lib::Graph::Merge *g);
 	// checks if this derivation already exists
 	// if it does then the edge descriptor of that derivation is returned, otherwise the edge descriptor is bogus
-	std::pair<Edge, bool> isDerivation(const lib::Graph::Base *left, const lib::Graph::Base *right, const lib::Rule::Base *r) const;
+	std::pair<Edge, bool> isDerivation(const lib::Graph::Base *left, const lib::Graph::Base *right, const lib::Rules::Real *r) const;
 	// adds a derivation if it does not exist already
 	// the edge descriptor of the derivation is returned, along with the existence status before the call
-	std::pair<Edge, bool> suggestDerivation(const lib::Graph::Base *gSrc, const lib::Graph::Base *gTar, const Rule::Base *r);
+	// the rule may be nullptr
+	std::pair<Edge, bool> suggestDerivation(const lib::Graph::Base *gSrc, const lib::Graph::Base *gTar, const lib::Rules::Real *r);
 	const GraphType &getGraphDuringCalculation() const;
 private: // calculation
 	// adds the graph as a vertex, if it's not there already, and returns the vertex
@@ -89,8 +90,7 @@ public: // post calculation
 	const StdGraphSet &getGraphDatabase() const;
 	const std::vector<std::shared_ptr<mod::Graph> > &getProducts() const;
 	void print() const;
-	mod::DerivationRef getDerivationRef(const std::vector<std::shared_ptr<mod::Graph> > &educts,
-			const std::vector<std::shared_ptr<mod::Graph> > &products, const bool verbose) const;
+	mod::DerivationRef getDerivationRef(const std::vector<HyperVertex> &sources, const std::vector<HyperVertex> &targets) const;
 	std::vector<mod::DerivationRef> getAllDerivationRefs() const;
 protected:
 	virtual void listImpl(std::ostream &s) const = 0;
@@ -115,4 +115,4 @@ public:
 } // namespace lib
 } // namespace mod
 
-#endif	/* MOD_LIB_DG_NONHYPER_H */
+#endif /* MOD_LIB_DG_NONHYPER_H */

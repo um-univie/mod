@@ -100,10 +100,8 @@ config = getConfig()
 Derivation.__repr__ = Derivation.__str__
 
 def _Derivation__getattribute__(self, name):
-	if name == "left":
-		return _unwrap(self._left)
-	elif name == "right":
-		return _unwrap(self._right)
+	if name == "left" or name == "right":
+		return object.__getattribute__(self, "_" + name)
 	else:
 		return object.__getattribute__(self, name)
 Derivation.__getattribute__ = _Derivation__getattribute__
@@ -116,6 +114,10 @@ def _Derivation__setattr__(self, name, value):
 	else:
 		_NoNew__setattr__(self, name, value)
 Derivation.__setattr__ = _Derivation__setattr__
+
+def _Derivation__hash__(self):
+	assert False
+Derivation.__hash__ = _Derivation__hash__
 
 #----------------------------------------------------------
 # DG
@@ -135,18 +137,42 @@ def _DG_print(self, printer=None, data=None):
 	_DG_print_orig(self, data, printer)
 DG.print = _DG_print
 
-_DG_getDerivationRef_orig = DG.getDerivationRef
-def _DG_getDerivationRef(self, educts, products):
-	return _DG_getDerivationRef_orig(self, _wrap(VecGraph, educts), _wrap(VecGraph, products))
-DG.getDerivationRef = _DG_getDerivationRef
+_DG_findEdge_orig = DG.findEdge
+def _DG_findEdge(self, srcsI, tarsI):
+	srcs = list(srcsI)
+	tars = list(tarsI)
+	if len(srcs) == 0: s = None
+	elif isinstance(srcs[0], Graph): s = VecGraph
+	else: s = VecDGVertex
+	if len(tars) == 0: t = None
+	elif isinstance(tars[0], Graph): t = VecGraph
+	else: t = VecDGVertex
+	if s is None and t is None:
+		s = VecDGVertex
+		t = VecDGVertex
+	elif s is None:
+		s = t
+	elif t is None:
+		t = s
+	return _DG_findEdge_orig(self, _wrap(s, srcs), _wrap(t, tars))
+DG.findEdge = _DG_findEdge
 
 DG.__repr__ = DG.__str__
 
+def _DG_vertexGraphs(self):
+	print("Warning: DG.vertexGraphs is deprecated, use the graph property on DGVertex with DG.vertices instead.")
+	for v in self.vertices:
+		yield v.graph
+
 def _DG__getattribute__(self, name):
-	if name == "graphDatabase":
+	if name == "derivations":
+		print("Warning: DG.derivations is deprecated, use DG.edges instead.")
+		print("Note: Returning DG.edges.")
+		return self.edges
+	elif name == "graphDatabase":
 		return _unwrap(self._graphDatabase)
 	elif name == "vertexGraphs":
-		return _unwrap(self._vertexGraphs)
+		return _DG_vertexGraphs(self)
 	elif name == "products":
 		return _unwrap(self._products)
 	elif name == "printOptions":
@@ -169,6 +195,31 @@ DG.__setattr__ = _DG__setattr__
 
 DG.__eq__ = lambda self, other: self.id == other.id
 DG.__hash__ = lambda self: self.id
+
+
+#----------------------------------------------------------
+# DGHyperEdge
+#----------------------------------------------------------
+
+_DGHyperEdge_print_orig = DGHyperEdge.print
+DGHyperEdge.print = lambda self, printer=GraphPrinter(), matchColour="Melon": _DGHyperEdge_print_orig(self, printer, matchColour)
+
+def _DGHyperEdge__getattribute__(self, name):
+	if name == "derivation":
+		print("Warning: DGHyperEdge.derivation is deprecated")
+		d = Derivation()
+		for vSrc in self.sources:
+			d.left.append(vSrc.graph)
+		for vTar in self.targets:
+			d.right.append(vTar.graph)
+		if len(self.rules) == 0:
+			print("Can not get derivation from hyperedge with no rules")
+		if len(self.rules) > 0:
+			d.rule = list(self.rules)[0]
+		return d
+	return object.__getattribute__(self, name)
+DGHyperEdge.__getattribute__ = _DGHyperEdge__getattribute__
+
 
 #----------------------------------------------------------
 # DerivationRef
@@ -287,7 +338,7 @@ DGStrat.makeSort = _DGStrat_makeSort
 # Graph
 #----------------------------------------------------------
 
-inputGraphs = g = []
+inputGraphs = []
 
 _Graph_print_orig = Graph.print
 def _Graph_print(self, first=None, second=None):
@@ -379,7 +430,7 @@ def rcEvaluator(rules):
 # Rule
 #----------------------------------------------------------
 
-inputRules = r = []
+inputRules = []
 
 _Rule_print_orig = Rule.print
 def _Rule_print(self, first=None, second=None):

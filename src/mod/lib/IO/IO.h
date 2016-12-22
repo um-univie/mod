@@ -1,33 +1,12 @@
 #ifndef MOD_LIB_IO_IO_H
 #define	MOD_LIB_IO_IO_H
 
-#include <fstream>
 #include <iosfwd>
-#include <utility>
+#include <string>
 
 namespace mod {
 namespace lib {
 namespace IO {
-
-struct FileHandle {
-	explicit FileHandle(std::string name);
-
-	operator std::ostream &() {
-		return stream;
-	}
-
-	operator std::string() {
-		return name;
-	}
-
-	template<typename T>
-	friend std::ostream &operator<<(FileHandle &s, T &&t) {
-		return s.stream << std::forward<T>(t);
-	}
-private:
-	std::ofstream stream;
-	std::string name;
-};
 
 std::string getUniqueFilePrefix();
 std::string escapeForLatex(const std::string &str);

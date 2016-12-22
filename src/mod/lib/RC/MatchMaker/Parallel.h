@@ -8,8 +8,8 @@ namespace RC {
 struct Parallel {
 
 	template<typename Callback>
-	void makeMatches(const Rule::Real &rFirst, const Rule::Real &rSecond, Callback callback) {
-		using Map = jla_boost::GraphMorphism::InvertibleVectorVertexMap<lib::Rule::GraphType, lib::Rule::GraphType>;
+	void makeMatches(const lib::Rules::Real &rFirst, const lib::Rules::Real &rSecond, Callback callback) {
+		using Map = jla_boost::GraphMorphism::InvertibleVectorVertexMap<lib::Rules::GraphType, lib::Rules::GraphType>;
 		const auto &gFirst = rFirst.getGraph();
 		const auto &gSecond = rSecond.getGraph();
 		Map map(gSecond, gFirst);

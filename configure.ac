@@ -13,7 +13,6 @@ LT_INIT([shared disable-static])
 AC_CONFIG_MACRO_DIR([m4])
 m4_include([m4/ax_prefix_config_h.m4])
 m4_include([m4/ax_boost_base.m4])
-m4_include([m4/ax_cxx_compile_stdcxx_11.m4])
 
 AC_CONFIG_HEADERS([src/mod/BuildConfig.h_])
 AX_PREFIX_CONFIG_H([src/mod/BuildConfig.h], [MOD], [src/mod/BuildConfig.h_])
@@ -25,7 +24,7 @@ AX_PREFIX_CONFIG_H([src/mod/BuildConfig.h], [MOD], [src/mod/BuildConfig.h_])
 # search build-generated sources, distributed source, and our Boost files
 AM_CPPFLAGS="-I\$(top_builddir)/src -I\$(top_srcdir)/src"
 AM_CPPFLAGS="$AM_CPPFLAGS -DBOOST_SPIRIT_USE_PHOENIX_V3 -DBOOST_RESULT_OF_USE_DECLTYPE $BOOST_CPPFLAGS -DBOOST_SYSTEM_NO_DEPRECATED"
-AM_CXXFLAGS="-Wno-unused-local-typedefs -Wno-unused-parameter -Wno-comment -Wno-maybe-uninitialized -Wno-deprecated-declarations"
+AM_CXXFLAGS="-std=c++14 -Wno-unused-local-typedefs -Wno-unused-parameter -Wno-comment -Wno-maybe-uninitialized -Wno-deprecated-declarations"
 AM_LDFLAGS="-no-undefined"
 AM_LDLIBS=""
 # so we can restore before each test
@@ -55,7 +54,7 @@ default_enable_pymod="yes"
 ##########################################################################
 # C++11 ------------------------------------------------------------------
 # Boost ------------------------------------------------------------------
-boostReqVersion="1.56.0"
+boostReqVersion="1.59.0"
 # Graphviz --------------------------------------------------------------
 # if PostMØD checks
 # Open Babel -------------------------------------------------------------
@@ -68,9 +67,6 @@ obabelReqVersion="2.3.2"
 # if PostMØD checks
 # Python -----------------------------------------------------------------
 # PYTHON_LDLIBS
-# libSBML ----------------------------------------------------------------
-default_with_SBML="no"
-# HAVE_SBML
 # Sphinx -----------------------------------------------------------------
 default_enable_sphinx="yes"
 # ENABLE_SPHINX
@@ -182,36 +178,15 @@ if test "$with_OpenBabel" != no -a "$with_OpenBabel" != "yes"; then
 	addLPath "$with_OpenBabel/lib"
 fi
 
-# libSBML ----------------------------------------------------------------
-AC_ARG_WITH([SBML],
-	[AS_HELP_STRING([--with-SBML=arg],
-		[yes: enable libSBML, no: disable libSBML, <prefix>: use libSBML from specified location. Note that libSBML must be compiled with C++ namespace wrapping.])],
-	[], [with_SBML=$default_with_SBML])
-if test "$with_SBML" != "no" -a "$with_SBML" != "yes"; then
-	addIPath "$with_SBML/include"
-	addLPath "$with_SBML/lib"
-fi
-
+# Python -----------------------------------------------------------------
 if test "$enable_pymod" = "yes"; then
-	AC_PATH_PROG([PYTHON], [python3], [no])
-	if test "$PYTHON" = "no"; then
-		AC_MSG_ERROR([Could not find the python3 interpreter. It must be found via PATH.])
-	fi
-	AC_PATH_PROG([PYTHON_CONFIG], [python3-config], [no])
+	AC_CHECK_PROGS([PYTHON_CONFIG], [python3-config], [no])
 	if test "$PYTHON_CONFIG" = "no"; then
-		AC_MSG_ERROR([Could not find python3-config. It must be found via PATH.])
+		AC_MSG_ERROR([python3-config could not be found.])
 	fi
-	PYTHON_CPPFLAGS=$(python3-config --includes)
-	for a in $PYTHON_CPPFLAGS; do
-		if test "${a:0:2}" = "-I"; then
-			addIPath "${a:2}"
-		fi
-	done
-	PYTHON_LDFLAGS=$(python3-config --ldflags)
-	for a in $PYTHON_LDFLAGS; do
-		if test "${a:0:2}" = "-L"; then
-			addLPath "${a:2}"
-		fi
+	for p in $(python3-config --includes); do
+		inc="${p#-I}"
+		addIPath "$inc"
 	done
 fi
 
@@ -222,8 +197,6 @@ fi
 # Compiler Stuff ---------------------------------------------------------
 AC_PROG_CXXCPP
 AC_PROG_CXX
-CXXFLAGS=""
-AX_CXX_COMPILE_STDCXX_11([noext])
 AM_CXXFLAGS="$AM_CXXFLAGS $CXXFLAGS"
 CXXFLAGS=""
 AC_LANG([C++])
@@ -357,54 +330,6 @@ if test "$enable_pymod" = "yes"; then
 	AC_SUBST([PYTHON_LDLIBS])
 	PYTHON_VERSION=$(python3 -c "import sys; print(sys.version_info.minor);")
 fi
-
-# libSBML ----------------------------------------------------------------
-restoreFlags
-if test "$with_SBML" != "no"; then
-	AC_DEFINE(HAVE_SBML, 1, [Define if you have libSBML available.])
-
-	AC_MSG_CHECKING([for libSBML library headers])
-	AC_COMPILE_IFELSE([AC_LANG_SOURCE([
-			#define LIBSBML_USE_CPP_NAMESPACE
-			#include <sbml/SBMLDocument.h>
-		])],
-		[AC_MSG_RESULT([yes])],
-		[
-			AC_MSG_RESULT([no])
-			AC_MSG_NOTICE([libSBML is enabled but not found.])
-			printPaths
-			AC_MSG_ERROR([Use --with-SBML=<prefix> to set path for SBML installation folder.])
-		])
-
-	AC_MSG_CHECKING([for libSBML library])
-	AC_LINK_IFELSE([AC_LANG_SOURCE([
-			#define LIBSBML_USE_CPP_NAMESPACE
-			#include <sbml/SBMLDocument.h>
-			int main() {return 0;}
-		])],
-		[AC_MSG_RESULT([yes])],
-		[
-			AC_MSG_RESULT([no])
-			AC_MSG_NOTICE([libSBML is enabled but not found.])
-			printPaths
-			AC_MSG_ERROR([Use --with-SBML=<prefix> to set path for SBML installation folder.])
-		])
-
-	AC_MSG_CHECKING([for namespace wrapping of libSBML])
-	AC_LINK_IFELSE([AC_LANG_SOURCE([
-			#define LIBSBML_USE_CPP_NAMESPACE
-			#include <sbml/SBMLDocument.h>
-			using namespace libsbml;
-			int main() {return 0;}
-		])],
-		[AC_MSG_RESULT([yes])],
-		[
-			AC_MSG_RESULT([no])
-			AC_MSG_NOTICE([libSBML does not appear to be compiled with C++ namespace wrapping, which is required.])
-			AC_MSG_ERROR([Give '-DWITH_CPP_NAMESPACE=yes' as argument to 'cmake' when configuring libSBML.])
-		])
-fi
-AM_CONDITIONAL([HAVE_SBML], [test "$with_SBML" != "no"])
 
 # Sphinx -----------------------------------------------------------------
 restoreFlags

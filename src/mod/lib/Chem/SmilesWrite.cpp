@@ -244,11 +244,13 @@ struct AuxData {
 					+ numAromatic[get(boost::vertex_index_t(), g, v)];
 			VSizeType hydrogenDegree = numHydrogen[get(boost::vertex_index_t(), g, v)];
 			char charge = molState[v].getCharge();
-			return 10000000 * (degree - hydrogenDegree)
-					+ 100000 * (valenceWithAromatic - hydrogenDegree)
-					+ 1000 * molState[v].getAtomId()
-					+ 100 * (charge == 0 ? 0 : charge < 0 ? 1 : 2)
-					+ 10 * std::abs(charge)
+			bool radical = molState[v].getRadical();
+			return 100000000 * (degree - hydrogenDegree)
+					+ 1000000 * (valenceWithAromatic - hydrogenDegree)
+					+ 10000 * molState[v].getAtomId()
+					+ 1000 * (charge == 0 ? 0 : charge < 0 ? 1 : 2)
+					+ 100 * std::abs(charge)
+					+ 10 * (radical ? 1 : 0)
 					+ hydrogenDegree;
 		}
 	}
@@ -594,7 +596,7 @@ struct SmilesWriter {
 
 	void getLabel(Vertex v) {
 		bool hasBrackets = true;
-		if(molState[v].getCharge() == 0
+		if(molState[v].getCharge() == 0 && !molState[v].getRadical()
 				&& isInSmilesOrganicSubset(molState[v].getAtomId())
 				&& isValenceForOrganicSubsetNormal(v)) {
 			// if the hydrogen count is such that it can be deduced, then remove brackets
@@ -619,6 +621,9 @@ struct SmilesWriter {
 					if(std::abs(charge) > 9) MOD_ABORT;
 					output += ('0' + std::abs(charge));
 				}
+			}
+			if(molState[v].getRadical()) {
+				output += '.';
 			}
 		}
 		if(hasBrackets) output += ']';

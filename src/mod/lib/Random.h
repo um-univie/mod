@@ -2,7 +2,6 @@
 #define	MOD_LIB_RANDOM_H
 
 #include <jla_boost/graph/PairToRangeAdaptor.hpp>
-#include <jla_boost/Memory.hpp>
 
 #include <boost/graph/graph_traits.hpp>
 #include <boost/graph/properties.hpp>
@@ -47,7 +46,7 @@ std::unique_ptr<Graph> makePermutedGraph(const Graph &g, Initialiser initialize,
 		vertexFromId.push_back(v);
 	}
 	auto oldFromPermuted = makePermutation(num_vertices(g));
-	auto gPermutedPtr = make_unique<Graph>();
+	auto gPermutedPtr = std::make_unique<Graph>();
 	initialize(*gPermutedPtr);
 	auto &gPermuted = *gPermutedPtr;
 	std::map<Vertex, Vertex> permutedVertexFromOld;

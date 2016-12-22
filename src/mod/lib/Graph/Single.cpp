@@ -7,15 +7,15 @@
 #include <mod/lib/Chem/Smiles.h>
 #include <mod/lib/Graph/DFSEncoding.h>
 #include <mod/lib/Graph/Properties/Depiction.h>
+#include <mod/lib/Graph/Properties/Molecule.h>
+#include <mod/lib/Graph/Properties/String.h>
 #include <mod/lib/GraphMorphism/LabelledMorphism.h>
+#include <mod/lib/GraphMorphism/VF2Finder.hpp>
 #include <mod/lib/IO/IO.h>
 #include <mod/lib/IO/Graph.h>
 #include <mod/lib/LabelledGraph.h>
 #include <mod/lib/Random.h>
-#include <mod/lib/Rule/Real.h>
-
-#include <jla_boost/Memory.hpp>
-#include <jla_boost/graph/morphism/VF2Finder.hpp>
+#include <mod/lib/Rules/Real.h>
 
 #include <boost/graph/connected_components.hpp>
 #include <boost/graph/graph_traits.hpp>
@@ -33,7 +33,7 @@ const std::string getGraphName(unsigned int id) {
 	return "g_{" + boost::lexical_cast<std::string>(id) + "}";
 }
 
-bool sanityCheck(const GraphType &g, const PropStringType &pString, std::ostream &s) {
+bool sanityCheck(const GraphType &g, const PropString &pString, std::ostream &s) {
 	std::vector<std::pair<Vertex, Vertex> > edgesSorted;
 	edgesSorted.reserve(num_edges(g));
 	for(Edge e : asRange(edges(g))) {
@@ -73,7 +73,7 @@ bool sanityCheck(const GraphType &g, const PropStringType &pString, std::ostream
 
 } // namespace 
 
-Single::Single(std::unique_ptr<GraphType> g, std::unique_ptr<PropStringType> pString)
+Single::Single(std::unique_ptr<GraphType> g, std::unique_ptr<PropString> pString)
 : g(std::move(g), std::move(pString)),
 id(nextGraphNum++), name(getGraphName(id)) {
 	if(!sanityCheck(getGraph(), getStringState(), IO::log())) {
@@ -129,22 +129,22 @@ const std::string &Single::getSmiles() const {
 		std::string text;
 		text += "Graph " + boost::lexical_cast<std::string>(getId()) + " with name '" + getName() + "' is not a molecule.\n";
 		text += "Can not generate SMILES string. GraphDFS is\n\t" + getGraphDFS().first + "\n";
-		throw FatalError(std::move(text));
+		throw LogicError(std::move(text));
 	}
 }
 
 std::shared_ptr<mod::Rule> Single::getBindRule() const {
-	if(!bindRule) bindRule = Rule::Real::createSide(getGraph(), getStringState(), Rule::Membership::Right, getName());
+	if(!bindRule) bindRule = lib::Rules::Real::createSide(getGraph(), getStringState(), lib::Rules::Membership::Right, getName());
 	return bindRule;
 }
 
 std::shared_ptr<mod::Rule> Single::getIdRule() const {
-	if(!idRule) idRule = Rule::Real::createSide(getGraph(), getStringState(), Rule::Membership::Context, getName());
+	if(!idRule) idRule = lib::Rules::Real::createSide(getGraph(), getStringState(), lib::Rules::Membership::Context, getName());
 	return idRule;
 }
 
 std::shared_ptr<mod::Rule> Single::getUnbindRule() const {
-	if(!unbindRule) unbindRule = Rule::Real::createSide(getGraph(), getStringState(), Rule::Membership::Left, getName());
+	if(!unbindRule) unbindRule = lib::Rules::Real::createSide(getGraph(), getStringState(), lib::Rules::Membership::Left, getName());
 	return unbindRule;
 }
 
@@ -168,11 +168,6 @@ unsigned int Single::getEdgeLabelCount(const std::string &label) const {
 	return count;
 }
 
-const PropMolecule &Single::getMoleculeState() const {
-	if(!moleculeState) moleculeState.reset(new PropMolecule(get_graph(g), get_string(g)));
-	return *moleculeState;
-}
-
 DepictionData &Single::getDepictionData() {
 	if(!depictionData) depictionData.reset(new DepictionData(getGraph(), getStringState(), getMoleculeState()));
 	return *depictionData;
@@ -190,8 +185,12 @@ const GraphType &Single::getGraph() const {
 	return get_graph(g);
 }
 
-const PropStringType &Single::getStringState() const {
+const PropString &Single::getStringState() const {
 	return get_string(g);
+}
+
+const PropMolecule &Single::getMoleculeState() const {
+	return get_molecule(g);
 }
 
 //------------------------------------------------------------------------------
@@ -200,6 +199,7 @@ const PropStringType &Single::getStringState() const {
 
 namespace {
 namespace GM = jla_boost::GraphMorphism;
+namespace GM_MOD = lib::GraphMorphism;
 
 template<typename Finder>
 std::size_t morphism(const Single &gDomain, const Single &gCodomain, std::size_t maxNumMatches, Finder finder) {
@@ -211,7 +211,7 @@ std::size_t morphism(const Single &gDomain, const Single &gCodomain, std::size_t
 } // namespace
 
 std::size_t Single::isomorphismVF2(const Single &gDom, const Single &gCodom, std::size_t maxNumMatches) {
-	return morphism(gDom, gCodom, maxNumMatches, GM::VF2Isomorphism());
+	return morphism(gDom, gCodom, maxNumMatches, GM_MOD::VF2Isomorphism());
 }
 
 bool Single::isomorphismBrokenSmilesAndVF2(const Single &gDom, const Single &gCodom) {
@@ -241,7 +241,7 @@ std::size_t Single::isomorphism(const Single &gDom, const Single &gCodom, std::s
 }
 
 std::size_t Single::monomorphism(const Single &gDom, const Single &gCodom, std::size_t maxNumMatches) {
-	return morphism(gDom, gCodom, maxNumMatches, GM::VF2Monomorphism());
+	return morphism(gDom, gCodom, maxNumMatches, GM_MOD::VF2Monomorphism());
 }
 
 bool Single::nameLess(const Single *g1, const Single *g2) {
@@ -252,10 +252,10 @@ bool Single::nameLess(const Single *g1, const Single *g2) {
 }
 
 Single makePermutation(const Single &g) {
-	std::unique_ptr<PropStringType> pString;
+	std::unique_ptr<PropString> pString;
 	auto gBoost = lib::makePermutedGraph(g.getGraph(),
 			[&pString](GraphType & gNew) {
-				pString.reset(new PropStringType(gNew));
+				pString.reset(new PropString(gNew));
 			},
 	[&g, &pString](Vertex vOld, const GraphType &gOld, Vertex vNew, GraphType & gNew) {
 		pString->addVertex(vNew, g.getStringState()[vOld]);

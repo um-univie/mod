@@ -39,15 +39,20 @@ OBJECTFILES= \
 	${OBJECTDIR}/_ext/f98eca90/Collections.o \
 	${OBJECTDIR}/_ext/f98eca90/Config.o \
 	${OBJECTDIR}/_ext/f98eca90/DG.o \
+	${OBJECTDIR}/_ext/f98eca90/DGGraphInterface.o \
+	${OBJECTDIR}/_ext/f98eca90/DGPrinter.o \
 	${OBJECTDIR}/_ext/f98eca90/DGStrat.o \
 	${OBJECTDIR}/_ext/f98eca90/Derivation.o \
 	${OBJECTDIR}/_ext/f98eca90/Error.o \
 	${OBJECTDIR}/_ext/f98eca90/Function.o \
 	${OBJECTDIR}/_ext/f98eca90/Graph.o \
+	${OBJECTDIR}/_ext/f98eca90/GraphGraphInterface.o \
+	${OBJECTDIR}/_ext/f98eca90/GraphPrinter.o \
 	${OBJECTDIR}/_ext/f98eca90/Misc.o \
 	${OBJECTDIR}/_ext/f98eca90/Module.o \
 	${OBJECTDIR}/_ext/f98eca90/RC.o \
-	${OBJECTDIR}/_ext/f98eca90/Rule.o
+	${OBJECTDIR}/_ext/f98eca90/Rule.o \
+	${OBJECTDIR}/_ext/f98eca90/RuleGraphInterface.o
 
 
 # C Compiler Flags
@@ -79,67 +84,92 @@ dist/lib/mod/mod_.so: ${OBJECTFILES}
 ${OBJECTDIR}/_ext/f98eca90/Chem.o: ../src/mod/Py/Chem.cpp 
 	${MKDIR} -p ${OBJECTDIR}/_ext/f98eca90
 	${RM} "$@.d"
-	$(COMPILE.cc) -g -DBOOST_RESULT_OF_USE_DECLTYPE -DBOOST_SPIRIT_USE_PHOENIX_V3=1 -I${HOME}/programs/include -I${CND_BASEDIR}/../srcExtra -I${CND_BASEDIR}/../src -I/usr/include/python3.3m -I/usr/include/python3.2mu `pkg-config --cflags python3` -std=c++11  -fPIC  -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/_ext/f98eca90/Chem.o ../src/mod/Py/Chem.cpp
+	$(COMPILE.cc) -g -DBOOST_RESULT_OF_USE_DECLTYPE -DBOOST_SPIRIT_USE_PHOENIX_V3=1 -I${HOME}/programs/include -I${CND_BASEDIR}/../srcExtra -I${CND_BASEDIR}/../src -I/usr/include/python3.3m -I/usr/include/python3.2mu `pkg-config --cflags python3` -std=c++14  -fPIC  -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/_ext/f98eca90/Chem.o ../src/mod/Py/Chem.cpp
 
 ${OBJECTDIR}/_ext/f98eca90/Collections.o: ../src/mod/Py/Collections.cpp 
 	${MKDIR} -p ${OBJECTDIR}/_ext/f98eca90
 	${RM} "$@.d"
-	$(COMPILE.cc) -g -DBOOST_RESULT_OF_USE_DECLTYPE -DBOOST_SPIRIT_USE_PHOENIX_V3=1 -I${HOME}/programs/include -I${CND_BASEDIR}/../srcExtra -I${CND_BASEDIR}/../src -I/usr/include/python3.3m -I/usr/include/python3.2mu `pkg-config --cflags python3` -std=c++11  -fPIC  -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/_ext/f98eca90/Collections.o ../src/mod/Py/Collections.cpp
+	$(COMPILE.cc) -g -DBOOST_RESULT_OF_USE_DECLTYPE -DBOOST_SPIRIT_USE_PHOENIX_V3=1 -I${HOME}/programs/include -I${CND_BASEDIR}/../srcExtra -I${CND_BASEDIR}/../src -I/usr/include/python3.3m -I/usr/include/python3.2mu `pkg-config --cflags python3` -std=c++14  -fPIC  -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/_ext/f98eca90/Collections.o ../src/mod/Py/Collections.cpp
 
 ${OBJECTDIR}/_ext/f98eca90/Config.o: ../src/mod/Py/Config.cpp 
 	${MKDIR} -p ${OBJECTDIR}/_ext/f98eca90
 	${RM} "$@.d"
-	$(COMPILE.cc) -g -DBOOST_RESULT_OF_USE_DECLTYPE -DBOOST_SPIRIT_USE_PHOENIX_V3=1 -I${HOME}/programs/include -I${CND_BASEDIR}/../srcExtra -I${CND_BASEDIR}/../src -I/usr/include/python3.3m -I/usr/include/python3.2mu `pkg-config --cflags python3` -std=c++11  -fPIC  -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/_ext/f98eca90/Config.o ../src/mod/Py/Config.cpp
+	$(COMPILE.cc) -g -DBOOST_RESULT_OF_USE_DECLTYPE -DBOOST_SPIRIT_USE_PHOENIX_V3=1 -I${HOME}/programs/include -I${CND_BASEDIR}/../srcExtra -I${CND_BASEDIR}/../src -I/usr/include/python3.3m -I/usr/include/python3.2mu `pkg-config --cflags python3` -std=c++14  -fPIC  -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/_ext/f98eca90/Config.o ../src/mod/Py/Config.cpp
 
 ${OBJECTDIR}/_ext/f98eca90/DG.o: ../src/mod/Py/DG.cpp 
 	${MKDIR} -p ${OBJECTDIR}/_ext/f98eca90
 	${RM} "$@.d"
-	$(COMPILE.cc) -g -DBOOST_RESULT_OF_USE_DECLTYPE -DBOOST_SPIRIT_USE_PHOENIX_V3=1 -I${HOME}/programs/include -I${CND_BASEDIR}/../srcExtra -I${CND_BASEDIR}/../src -I/usr/include/python3.3m -I/usr/include/python3.2mu `pkg-config --cflags python3` -std=c++11  -fPIC  -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/_ext/f98eca90/DG.o ../src/mod/Py/DG.cpp
+	$(COMPILE.cc) -g -DBOOST_RESULT_OF_USE_DECLTYPE -DBOOST_SPIRIT_USE_PHOENIX_V3=1 -I${HOME}/programs/include -I${CND_BASEDIR}/../srcExtra -I${CND_BASEDIR}/../src -I/usr/include/python3.3m -I/usr/include/python3.2mu `pkg-config --cflags python3` -std=c++14  -fPIC  -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/_ext/f98eca90/DG.o ../src/mod/Py/DG.cpp
+
+${OBJECTDIR}/_ext/f98eca90/DGGraphInterface.o: ../src/mod/Py/DGGraphInterface.cpp 
+	${MKDIR} -p ${OBJECTDIR}/_ext/f98eca90
+	${RM} "$@.d"
+	$(COMPILE.cc) -g -DBOOST_RESULT_OF_USE_DECLTYPE -DBOOST_SPIRIT_USE_PHOENIX_V3=1 -I${HOME}/programs/include -I${CND_BASEDIR}/../srcExtra -I${CND_BASEDIR}/../src -I/usr/include/python3.3m -I/usr/include/python3.2mu `pkg-config --cflags python3` -std=c++14  -fPIC  -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/_ext/f98eca90/DGGraphInterface.o ../src/mod/Py/DGGraphInterface.cpp
+
+${OBJECTDIR}/_ext/f98eca90/DGPrinter.o: ../src/mod/Py/DGPrinter.cpp 
+	${MKDIR} -p ${OBJECTDIR}/_ext/f98eca90
+	${RM} "$@.d"
+	$(COMPILE.cc) -g -DBOOST_RESULT_OF_USE_DECLTYPE -DBOOST_SPIRIT_USE_PHOENIX_V3=1 -I${HOME}/programs/include -I${CND_BASEDIR}/../srcExtra -I${CND_BASEDIR}/../src -I/usr/include/python3.3m -I/usr/include/python3.2mu `pkg-config --cflags python3` -std=c++14  -fPIC  -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/_ext/f98eca90/DGPrinter.o ../src/mod/Py/DGPrinter.cpp
 
 ${OBJECTDIR}/_ext/f98eca90/DGStrat.o: ../src/mod/Py/DGStrat.cpp 
 	${MKDIR} -p ${OBJECTDIR}/_ext/f98eca90
 	${RM} "$@.d"
-	$(COMPILE.cc) -g -DBOOST_RESULT_OF_USE_DECLTYPE -DBOOST_SPIRIT_USE_PHOENIX_V3=1 -I${HOME}/programs/include -I${CND_BASEDIR}/../srcExtra -I${CND_BASEDIR}/../src -I/usr/include/python3.3m -I/usr/include/python3.2mu `pkg-config --cflags python3` -std=c++11  -fPIC  -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/_ext/f98eca90/DGStrat.o ../src/mod/Py/DGStrat.cpp
+	$(COMPILE.cc) -g -DBOOST_RESULT_OF_USE_DECLTYPE -DBOOST_SPIRIT_USE_PHOENIX_V3=1 -I${HOME}/programs/include -I${CND_BASEDIR}/../srcExtra -I${CND_BASEDIR}/../src -I/usr/include/python3.3m -I/usr/include/python3.2mu `pkg-config --cflags python3` -std=c++14  -fPIC  -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/_ext/f98eca90/DGStrat.o ../src/mod/Py/DGStrat.cpp
 
 ${OBJECTDIR}/_ext/f98eca90/Derivation.o: ../src/mod/Py/Derivation.cpp 
 	${MKDIR} -p ${OBJECTDIR}/_ext/f98eca90
 	${RM} "$@.d"
-	$(COMPILE.cc) -g -DBOOST_RESULT_OF_USE_DECLTYPE -DBOOST_SPIRIT_USE_PHOENIX_V3=1 -I${HOME}/programs/include -I${CND_BASEDIR}/../srcExtra -I${CND_BASEDIR}/../src -I/usr/include/python3.3m -I/usr/include/python3.2mu `pkg-config --cflags python3` -std=c++11  -fPIC  -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/_ext/f98eca90/Derivation.o ../src/mod/Py/Derivation.cpp
+	$(COMPILE.cc) -g -DBOOST_RESULT_OF_USE_DECLTYPE -DBOOST_SPIRIT_USE_PHOENIX_V3=1 -I${HOME}/programs/include -I${CND_BASEDIR}/../srcExtra -I${CND_BASEDIR}/../src -I/usr/include/python3.3m -I/usr/include/python3.2mu `pkg-config --cflags python3` -std=c++14  -fPIC  -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/_ext/f98eca90/Derivation.o ../src/mod/Py/Derivation.cpp
 
 ${OBJECTDIR}/_ext/f98eca90/Error.o: ../src/mod/Py/Error.cpp 
 	${MKDIR} -p ${OBJECTDIR}/_ext/f98eca90
 	${RM} "$@.d"
-	$(COMPILE.cc) -g -DBOOST_RESULT_OF_USE_DECLTYPE -DBOOST_SPIRIT_USE_PHOENIX_V3=1 -I${HOME}/programs/include -I${CND_BASEDIR}/../srcExtra -I${CND_BASEDIR}/../src -I/usr/include/python3.3m -I/usr/include/python3.2mu `pkg-config --cflags python3` -std=c++11  -fPIC  -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/_ext/f98eca90/Error.o ../src/mod/Py/Error.cpp
+	$(COMPILE.cc) -g -DBOOST_RESULT_OF_USE_DECLTYPE -DBOOST_SPIRIT_USE_PHOENIX_V3=1 -I${HOME}/programs/include -I${CND_BASEDIR}/../srcExtra -I${CND_BASEDIR}/../src -I/usr/include/python3.3m -I/usr/include/python3.2mu `pkg-config --cflags python3` -std=c++14  -fPIC  -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/_ext/f98eca90/Error.o ../src/mod/Py/Error.cpp
 
 ${OBJECTDIR}/_ext/f98eca90/Function.o: ../src/mod/Py/Function.cpp 
 	${MKDIR} -p ${OBJECTDIR}/_ext/f98eca90
 	${RM} "$@.d"
-	$(COMPILE.cc) -g -DBOOST_RESULT_OF_USE_DECLTYPE -DBOOST_SPIRIT_USE_PHOENIX_V3=1 -I${HOME}/programs/include -I${CND_BASEDIR}/../srcExtra -I${CND_BASEDIR}/../src -I/usr/include/python3.3m -I/usr/include/python3.2mu `pkg-config --cflags python3` -std=c++11  -fPIC  -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/_ext/f98eca90/Function.o ../src/mod/Py/Function.cpp
+	$(COMPILE.cc) -g -DBOOST_RESULT_OF_USE_DECLTYPE -DBOOST_SPIRIT_USE_PHOENIX_V3=1 -I${HOME}/programs/include -I${CND_BASEDIR}/../srcExtra -I${CND_BASEDIR}/../src -I/usr/include/python3.3m -I/usr/include/python3.2mu `pkg-config --cflags python3` -std=c++14  -fPIC  -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/_ext/f98eca90/Function.o ../src/mod/Py/Function.cpp
 
 ${OBJECTDIR}/_ext/f98eca90/Graph.o: ../src/mod/Py/Graph.cpp 
 	${MKDIR} -p ${OBJECTDIR}/_ext/f98eca90
 	${RM} "$@.d"
-	$(COMPILE.cc) -g -DBOOST_RESULT_OF_USE_DECLTYPE -DBOOST_SPIRIT_USE_PHOENIX_V3=1 -I${HOME}/programs/include -I${CND_BASEDIR}/../srcExtra -I${CND_BASEDIR}/../src -I/usr/include/python3.3m -I/usr/include/python3.2mu `pkg-config --cflags python3` -std=c++11  -fPIC  -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/_ext/f98eca90/Graph.o ../src/mod/Py/Graph.cpp
+	$(COMPILE.cc) -g -DBOOST_RESULT_OF_USE_DECLTYPE -DBOOST_SPIRIT_USE_PHOENIX_V3=1 -I${HOME}/programs/include -I${CND_BASEDIR}/../srcExtra -I${CND_BASEDIR}/../src -I/usr/include/python3.3m -I/usr/include/python3.2mu `pkg-config --cflags python3` -std=c++14  -fPIC  -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/_ext/f98eca90/Graph.o ../src/mod/Py/Graph.cpp
+
+${OBJECTDIR}/_ext/f98eca90/GraphGraphInterface.o: ../src/mod/Py/GraphGraphInterface.cpp 
+	${MKDIR} -p ${OBJECTDIR}/_ext/f98eca90
+	${RM} "$@.d"
+	$(COMPILE.cc) -g -DBOOST_RESULT_OF_USE_DECLTYPE -DBOOST_SPIRIT_USE_PHOENIX_V3=1 -I${HOME}/programs/include -I${CND_BASEDIR}/../srcExtra -I${CND_BASEDIR}/../src -I/usr/include/python3.3m -I/usr/include/python3.2mu `pkg-config --cflags python3` -std=c++14  -fPIC  -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/_ext/f98eca90/GraphGraphInterface.o ../src/mod/Py/GraphGraphInterface.cpp
+
+${OBJECTDIR}/_ext/f98eca90/GraphPrinter.o: ../src/mod/Py/GraphPrinter.cpp 
+	${MKDIR} -p ${OBJECTDIR}/_ext/f98eca90
+	${RM} "$@.d"
+	$(COMPILE.cc) -g -DBOOST_RESULT_OF_USE_DECLTYPE -DBOOST_SPIRIT_USE_PHOENIX_V3=1 -I${HOME}/programs/include -I${CND_BASEDIR}/../srcExtra -I${CND_BASEDIR}/../src -I/usr/include/python3.3m -I/usr/include/python3.2mu `pkg-config --cflags python3` -std=c++14  -fPIC  -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/_ext/f98eca90/GraphPrinter.o ../src/mod/Py/GraphPrinter.cpp
 
 ${OBJECTDIR}/_ext/f98eca90/Misc.o: ../src/mod/Py/Misc.cpp 
 	${MKDIR} -p ${OBJECTDIR}/_ext/f98eca90
 	${RM} "$@.d"
-	$(COMPILE.cc) -g -DBOOST_RESULT_OF_USE_DECLTYPE -DBOOST_SPIRIT_USE_PHOENIX_V3=1 -I${HOME}/programs/include -I${CND_BASEDIR}/../srcExtra -I${CND_BASEDIR}/../src -I/usr/include/python3.3m -I/usr/include/python3.2mu `pkg-config --cflags python3` -std=c++11  -fPIC  -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/_ext/f98eca90/Misc.o ../src/mod/Py/Misc.cpp
+	$(COMPILE.cc) -g -DBOOST_RESULT_OF_USE_DECLTYPE -DBOOST_SPIRIT_USE_PHOENIX_V3=1 -I${HOME}/programs/include -I${CND_BASEDIR}/../srcExtra -I${CND_BASEDIR}/../src -I/usr/include/python3.3m -I/usr/include/python3.2mu `pkg-config --cflags python3` -std=c++14  -fPIC  -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/_ext/f98eca90/Misc.o ../src/mod/Py/Misc.cpp
 
 ${OBJECTDIR}/_ext/f98eca90/Module.o: ../src/mod/Py/Module.cpp 
 	${MKDIR} -p ${OBJECTDIR}/_ext/f98eca90
 	${RM} "$@.d"
-	$(COMPILE.cc) -g -DBOOST_RESULT_OF_USE_DECLTYPE -DBOOST_SPIRIT_USE_PHOENIX_V3=1 -I${HOME}/programs/include -I${CND_BASEDIR}/../srcExtra -I${CND_BASEDIR}/../src -I/usr/include/python3.3m -I/usr/include/python3.2mu `pkg-config --cflags python3` -std=c++11  -fPIC  -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/_ext/f98eca90/Module.o ../src/mod/Py/Module.cpp
+	$(COMPILE.cc) -g -DBOOST_RESULT_OF_USE_DECLTYPE -DBOOST_SPIRIT_USE_PHOENIX_V3=1 -I${HOME}/programs/include -I${CND_BASEDIR}/../srcExtra -I${CND_BASEDIR}/../src -I/usr/include/python3.3m -I/usr/include/python3.2mu `pkg-config --cflags python3` -std=c++14  -fPIC  -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/_ext/f98eca90/Module.o ../src/mod/Py/Module.cpp
 
 ${OBJECTDIR}/_ext/f98eca90/RC.o: ../src/mod/Py/RC.cpp 
 	${MKDIR} -p ${OBJECTDIR}/_ext/f98eca90
 	${RM} "$@.d"
-	$(COMPILE.cc) -g -DBOOST_RESULT_OF_USE_DECLTYPE -DBOOST_SPIRIT_USE_PHOENIX_V3=1 -I${HOME}/programs/include -I${CND_BASEDIR}/../srcExtra -I${CND_BASEDIR}/../src -I/usr/include/python3.3m -I/usr/include/python3.2mu `pkg-config --cflags python3` -std=c++11  -fPIC  -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/_ext/f98eca90/RC.o ../src/mod/Py/RC.cpp
+	$(COMPILE.cc) -g -DBOOST_RESULT_OF_USE_DECLTYPE -DBOOST_SPIRIT_USE_PHOENIX_V3=1 -I${HOME}/programs/include -I${CND_BASEDIR}/../srcExtra -I${CND_BASEDIR}/../src -I/usr/include/python3.3m -I/usr/include/python3.2mu `pkg-config --cflags python3` -std=c++14  -fPIC  -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/_ext/f98eca90/RC.o ../src/mod/Py/RC.cpp
 
 ${OBJECTDIR}/_ext/f98eca90/Rule.o: ../src/mod/Py/Rule.cpp 
 	${MKDIR} -p ${OBJECTDIR}/_ext/f98eca90
 	${RM} "$@.d"
-	$(COMPILE.cc) -g -DBOOST_RESULT_OF_USE_DECLTYPE -DBOOST_SPIRIT_USE_PHOENIX_V3=1 -I${HOME}/programs/include -I${CND_BASEDIR}/../srcExtra -I${CND_BASEDIR}/../src -I/usr/include/python3.3m -I/usr/include/python3.2mu `pkg-config --cflags python3` -std=c++11  -fPIC  -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/_ext/f98eca90/Rule.o ../src/mod/Py/Rule.cpp
+	$(COMPILE.cc) -g -DBOOST_RESULT_OF_USE_DECLTYPE -DBOOST_SPIRIT_USE_PHOENIX_V3=1 -I${HOME}/programs/include -I${CND_BASEDIR}/../srcExtra -I${CND_BASEDIR}/../src -I/usr/include/python3.3m -I/usr/include/python3.2mu `pkg-config --cflags python3` -std=c++14  -fPIC  -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/_ext/f98eca90/Rule.o ../src/mod/Py/Rule.cpp
+
+${OBJECTDIR}/_ext/f98eca90/RuleGraphInterface.o: ../src/mod/Py/RuleGraphInterface.cpp 
+	${MKDIR} -p ${OBJECTDIR}/_ext/f98eca90
+	${RM} "$@.d"
+	$(COMPILE.cc) -g -DBOOST_RESULT_OF_USE_DECLTYPE -DBOOST_SPIRIT_USE_PHOENIX_V3=1 -I${HOME}/programs/include -I${CND_BASEDIR}/../srcExtra -I${CND_BASEDIR}/../src -I/usr/include/python3.3m -I/usr/include/python3.2mu `pkg-config --cflags python3` -std=c++14  -fPIC  -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/_ext/f98eca90/RuleGraphInterface.o ../src/mod/Py/RuleGraphInterface.cpp
 
 # Subprojects
 .build-subprojects:

@@ -13,21 +13,21 @@ namespace mod {
 namespace lib {
 namespace Graph {
 
-DepictionData::DepictionData(const GraphType &g, const PropStringType &pString, const PropMolecule &moleculeState)
-: g(g), moleculeState(moleculeState), hasMoleculeEncoding(true) {
+DepictionData::DepictionData(const GraphType &g, const PropString &pString, const PropMolecule &pMol)
+: g(g), moleculeState(pMol), hasMoleculeEncoding(true) {
 	{ // vertexData
 		std::vector<bool> atomUsed(AtomIds::Max + 1, false);
 		Chem::markSpecialAtomsUsed(atomUsed);
 		std::vector<Vertex> verticesToProcess;
 		for(Vertex v : asRange(vertices(g))) {
-			unsigned char atomId = moleculeState[v].getAtomId();
+			unsigned char atomId = pMol[v].getAtomId();
 			if(atomId != AtomIds::Invalid) atomUsed[atomId] = true;
 			else verticesToProcess.push_back(v);
 		}
 		// map non-atom labels to atoms
 		std::map<std::string, AtomId> labelNoChargeToAtomId;
 		for(Vertex v : verticesToProcess) {
-			std::string label = Chem::extractCharge(pString[v]).first;
+			std::string label = std::get<0>(Chem::extractChargeRadical(pString[v]));
 			auto iter = labelNoChargeToAtomId.find(label);
 			if(iter == end(labelNoChargeToAtomId)) {
 				unsigned char atomId = 1;
@@ -44,12 +44,12 @@ DepictionData::DepictionData(const GraphType &g, const PropStringType &pString, 
 				}
 			}
 			auto atomId = iter->second;
-			nonAtomToPhonyAtom[v] = AtomData(atomId, moleculeState[v].getCharge());
+			nonAtomToPhonyAtom[v] = AtomData(atomId, pMol[v].getCharge(), pMol[v].getRadical());
 		}
 	}
 	{ // edgeData
 		for(Edge e : asRange(edges(g))) {
-			if(moleculeState[e] == BondType::Invalid) nonBondEdges[e] = pString[e];
+			if(pMol[e] == BondType::Invalid) nonBondEdges[e] = pString[e];
 		}
 	}
 
@@ -69,7 +69,11 @@ Charge DepictionData::getCharge(Vertex v) const {
 	return moleculeState[v].getCharge();
 }
 
-std::string DepictionData::getVertexLabelNoCharge(Vertex v) const {
+bool DepictionData::getRadical(Vertex v) const {
+	return moleculeState[v].getRadical();
+}
+
+std::string DepictionData::getVertexLabelNoChargeRadical(Vertex v) const {
 	if(!hasMoleculeEncoding) MOD_ABORT;
 	auto atomId = getAtomId(v);
 	if(atomId != AtomIds::Invalid) return Chem::symbolFromAtomId(atomId);
@@ -116,7 +120,7 @@ bool DepictionData::getHasCoordinates() const {
 	else return false;
 #else
 	return false;
-#endif		
+#endif  
 }
 
 double DepictionData::getX(Vertex v, bool withHydrogen) const {

@@ -1,52 +1,94 @@
 #include "Rule.h"
 
-#include <mod/Graph.h>
+#include <mod/GraphPrinter.h>
 #include <mod/Misc.h>
+#include <mod/RuleGraphInterface.h>
 #include <mod/lib/IO/IO.h>
 #include <mod/lib/IO/Rule.h>
-#include <mod/lib/Rule/Properties/Depiction.h>
-#include <mod/lib/Rule/Real.h>
-#include <mod/lib/Rule/Shallow.h>
-
-#include <jla_boost/Memory.hpp>
+#include <mod/lib/Rules/Properties/Depiction.h>
+#include <mod/lib/Rules/Real.h>
 
 #include <sstream>
 
 namespace mod {
 
 struct Rule::Pimpl {
-	Pimpl(std::unique_ptr<lib::Rule::Real> r);
-	Pimpl(std::unique_ptr<lib::Rule::Shallow> r);
-	lib::Rule::Base &getBase();
+
+	Pimpl(std::unique_ptr<lib::Rules::Real> r) : r(std::move(r)) {
+		assert(this->r);
+	}
 public:
-	const std::unique_ptr<lib::Rule::Real> real;
-	const std::unique_ptr<lib::Rule::Shallow> shallow;
+	const std::unique_ptr<lib::Rules::Real> r;
 };
 
-Rule::Rule(std::unique_ptr<lib::Rule::Real> r) : p(new Pimpl(std::move(r))) { }
-
-Rule::Rule(std::unique_ptr<lib::Rule::Shallow> r) : p(new Pimpl(std::move(r))) { }
+Rule::Rule(std::unique_ptr<lib::Rules::Real> r) : p(new Pimpl(std::move(r))) { }
 
 Rule::~Rule() { }
 
 unsigned int Rule::getId() const {
-	return p->getBase().getId();
+	return getRule().getId();
 }
 
 std::ostream &operator<<(std::ostream &s, const Rule &r) {
-	return s << "'" << r.p->getBase().getName() << "'";
+	return s << "'" << r.getName() << "'";
 }
 
-const lib::Rule::Base &Rule::getBase() const {
-	return p->getBase();
+const lib::Rules::Real &Rule::getRule() const {
+	return *p->r.get();
 }
 
-const lib::Rule::Real *Rule::getReal() const {
-	return p->real.get();
+//------------------------------------------------------------------------------
+
+std::size_t Rule::numVertices() const {
+	return num_vertices(p->r->getGraph());
 }
 
-const lib::Rule::Shallow *Rule::getShallow() const {
-	return p->shallow.get();
+Rule::VertexRange Rule::vertices() const {
+	return VertexRange(p->r->getAPIReference());
+}
+
+std::size_t Rule::numEdges() const {
+	return num_edges(p->r->getGraph());
+}
+
+Rule::EdgeRange Rule::edges() const {
+	return EdgeRange(p->r->getAPIReference());
+}
+
+Rule::LeftGraph Rule::getLeft() const {
+	return LeftGraph(p->r->getAPIReference());
+}
+
+Rule::ContextGraph Rule::getContext() const {
+	return ContextGraph(p->r->getAPIReference());
+}
+
+Rule::RightGraph Rule::getRight() const {
+	return RightGraph(p->r->getAPIReference());
+}
+
+//------------------------------------------------------------------------------
+
+std::shared_ptr<Rule> Rule::makeInverse() const {
+	lib::Rules::LabelledRule dpoRule(getRule().getDPORule(), true);
+	if(getConfig().rule.ignoreConstraintsDuringInversion.get()) {
+		if(dpoRule.leftComponentMatchConstraints.size() > 0
+				|| dpoRule.rightComponentMatchConstraints.size() > 0) {
+			lib::IO::log() << "WARNING: inversion of rule strips constraints.\n";
+		}
+	} else {
+		if(dpoRule.leftComponentMatchConstraints.size() > 0) {
+			throw LogicError("Can not invert rule with left-side component constraints.");
+		}
+		if(dpoRule.rightComponentMatchConstraints.size() > 0) {
+			throw LogicError("Can not invert rule with right-side component constraints.");
+		}
+	}
+	dpoRule.invert();
+	bool ignore = getConfig().rule.ignoreConstraintsDuringInversion.get();
+	if(ignore) dpoRule.rightComponentMatchConstraints.clear();
+	auto rInner = std::make_unique<lib::Rules::Real>(std::move(dpoRule));
+	return makeRule(std::move(rInner));
 }
 
 std::pair<std::string, std::string> Rule::print() const {
@@ -57,72 +99,45 @@ std::pair<std::string, std::string> Rule::print() const {
 }
 
 std::pair<std::string, std::string> Rule::print(const GraphPrinter &first, const GraphPrinter &second) const {
-	if(p->real) {
-		assert(!p->shallow);
-		return lib::IO::Rule::Write::summary(*p->real, first.getOptions(), second.getOptions());
-	} else {
-		assert(p->shallow);
-		lib::IO::log() << "Notice: the rule '" << p->shallow->getName() << "' is shallow and is not printed." << std::endl;
-		return std::make_pair("", "");
-	}
+	return lib::IO::Rules::Write::summary(getRule(), first.getOptions(), second.getOptions());
 }
 
 std::string Rule::getGMLString(bool withCoords) const {
-	if(p->real) {
-		if(withCoords && !p->real->getDepictionData().getHasCoordinates())
-			throw LogicError("Coordinates are not available for this rule (" + getName() + ").");
-		assert(!p->shallow);
-		std::stringstream ss;
-		lib::IO::Rule::Write::gml(*p->real, withCoords, ss);
-		return ss.str();
-	} else {
-		assert(p->shallow);
-		lib::IO::log() << "Notice: the rule '" << p->shallow->getName() << "' is shallow and is not printed as GML." << std::endl;
-		return "NoGMLStringAvailable";
-	}
+	if(withCoords && !getRule().getDepictionData().getHasCoordinates())
+		throw LogicError("Coordinates are not available for this rule (" + getName() + ").");
+	std::stringstream ss;
+	lib::IO::Rules::Write::gml(getRule(), withCoords, ss);
+	return ss.str();
 }
 
 std::string Rule::printGML(bool withCoords) const {
-	if(p->real) {
-		if(withCoords && !p->real->getDepictionData().getHasCoordinates())
-			throw LogicError("Coordinates are not available for this rule (" + getName() + ").");
-		assert(!p->shallow);
-		return lib::IO::Rule::Write::gml(*p->real, withCoords);
-	} else {
-		assert(p->shallow);
-		lib::IO::log() << "Notice: the rule '" << p->shallow->getName() << "' is shallow and is not printed as GML." << std::endl;
-		return "NoGMLFilePrinted";
-	}
+	if(withCoords && !getRule().getDepictionData().getHasCoordinates())
+		throw LogicError("Coordinates are not available for this rule (" + getName() + ").");
+	return lib::IO::Rules::Write::gml(*p->r, withCoords);
 }
 
 const std::string &Rule::getName() const {
-	return p->getBase().getName();
+	return getRule().getName();
 }
 
 void Rule::setName(std::string name) {
-	p->getBase().setName(name);
+	p->r->setName(name);
 }
 
 std::size_t Rule::getNumLeftComponents() const {
-	if(!getReal()) throw LogicError("The the rule is fake.");
-	return getReal()->getNumLeftComponents();
+	return getRule().getDPORule().numLeftComponents;
 }
 
 std::size_t Rule::getNumRightComponents() const {
-	if(!getReal()) throw LogicError("The the rule is fake.");
-	return getReal()->getNumRightComponents();
+	return getRule().getDPORule().numRightComponents;
 }
 
 std::size_t Rule::isomorphism(std::shared_ptr<Rule> r, std::size_t maxNumMatches) const {
-	if(!this->getReal()) throw LogicError("This rule may not be fake.");
-	if(!r->getReal()) throw LogicError("The other rule may not be fake.");
-	return lib::Rule::Real::isomorphism(*this->getReal(), *r->getReal(), maxNumMatches);
+	return lib::Rules::Real::isomorphism(this->getRule(), r->getRule(), maxNumMatches);
 }
 
 std::size_t Rule::monomorphism(std::shared_ptr<Rule> r, std::size_t maxNumMatches) const {
-	if(!this->getReal()) throw LogicError("This rule may not be fake.");
-	if(!r->getReal()) throw LogicError("The other rule may not be fake.");
-	return lib::Rule::Real::monomorphism(*this->getReal(), *r->getReal(), maxNumMatches);
+	return lib::Rules::Real::monomorphism(this->getRule(), r->getRule(), maxNumMatches);
 }
 
 //------------------------------------------------------------------------------
@@ -131,9 +146,9 @@ std::size_t Rule::monomorphism(std::shared_ptr<Rule> r, std::size_t maxNumMatche
 
 namespace {
 
-std::shared_ptr<Rule> handleLoadedRule(lib::IO::Rule::Read::Data &&data, bool invert, const std::string &dataSource, std::ostringstream &err) {
+std::shared_ptr<Rule> handleLoadedRule(lib::IO::Rules::Read::Data &&data, bool invert, const std::string &dataSource, std::ostringstream &err) {
 	if(!data.rule) {
-		err << "Could not load rule from " << dataSource << "." << std::endl;
+		err << "\nCould not load rule from " << dataSource << "." << std::endl;
 		throw InputError(err.str());
 	}
 	assert(data.rule->pString);
@@ -154,10 +169,10 @@ std::shared_ptr<Rule> handleLoadedRule(lib::IO::Rule::Read::Data &&data, bool in
 				data.rule->leftComponentMatchConstraints.clear();
 			}
 		}
-		lib::Rule::Real::invert(get_graph(*data.rule), *data.rule->pString);
+		data.rule->invert();
 		if(data.name) data.name.get() += ", inverse";
 	}
-	auto libRes = make_unique<lib::Rule::Real>(std::move(*data.rule));
+	auto libRes = std::make_unique<lib::Rules::Real>(std::move(*data.rule));
 	if(data.name) libRes->setName(std::move(data.name.get()));
 	return Rule::makeRule(std::move(libRes));
 }
@@ -167,7 +182,7 @@ std::shared_ptr<Rule> handleLoadedRule(lib::IO::Rule::Read::Data &&data, bool in
 std::shared_ptr<Rule> Rule::ruleGMLString(const std::string &data, bool invert) {
 	std::istringstream ss(data);
 	std::ostringstream err;
-	return handleLoadedRule(lib::IO::Rule::Read::gml(ss, err), invert, "<inline GML string>", err);
+	return handleLoadedRule(lib::IO::Rules::Read::gml(ss, err), invert, "<inline GML string>", err);
 }
 
 std::shared_ptr<Rule> Rule::ruleGML(const std::string &file, bool invert) {
@@ -175,42 +190,13 @@ std::shared_ptr<Rule> Rule::ruleGML(const std::string &file, bool invert) {
 	std::ifstream ifs(fullFilename);
 	if(!ifs) throw InputError("Could not open rule GML file '" + file + "' ('" + fullFilename + "').\n");
 	std::ostringstream err;
-	return handleLoadedRule(lib::IO::Rule::Read::gml(ifs, err), invert, "file '" + fullFilename + "'", err);
+	return handleLoadedRule(lib::IO::Rules::Read::gml(ifs, err), invert, "file '" + fullFilename + "'", err);
 }
 
-std::shared_ptr<Rule> Rule::makeRule(std::unique_ptr<lib::Rule::Real> r) {
+std::shared_ptr<Rule> Rule::makeRule(std::unique_ptr<lib::Rules::Real> r) {
 	std::shared_ptr<Rule> rWrapped(new Rule(std::move(r)));
-	rWrapped->p->getBase().setAPIReference(rWrapped);
+	rWrapped->p->r->setAPIReference(rWrapped);
 	return rWrapped;
 }
-
-std::shared_ptr<Rule> Rule::makeRule(std::unique_ptr<lib::Rule::Shallow> r) {
-	std::shared_ptr<Rule> rWrapped(new Rule(std::move(r)));
-	rWrapped->p->getBase().setAPIReference(rWrapped);
-	return rWrapped;
-}
-
-//------------------------------------------------------------------------------
-// Pimpl impl
-//------------------------------------------------------------------------------
-
-Rule::Pimpl::Pimpl(std::unique_ptr<lib::Rule::Real> r) : real(std::move(r)) {
-	assert(this->real);
-}
-
-Rule::Pimpl::Pimpl(std::unique_ptr<lib::Rule::Shallow> r) : shallow(std::move(r)) {
-	assert(this->shallow);
-}
-
-lib::Rule::Base &Rule::Pimpl::getBase() {
-	if(real) {
-		assert(!shallow);
-		return *real;
-	} else {
-		assert(shallow);
-		return *shallow;
-	}
-}
-
 
 } // namespace mod

@@ -10,15 +10,15 @@
 namespace mod {
 class Rule;
 namespace lib {
-namespace Rule {
+namespace Rules {
 class Real;
-} // namespace Rule
+} // namespace Rules
 namespace DG {
 namespace Strategies {
 
 struct Rule : Strategy {
 	Rule(std::shared_ptr<mod::Rule> r);
-	Rule(const lib::Rule::Real *r);
+	Rule(const lib::Rules::Real *r);
 	Strategy *clone() const override;
 	void printInfo(std::ostream &s) const override;
 	bool isConsumed(const lib::Graph::Single *g) const override;
@@ -26,7 +26,7 @@ private:
 	void executeImpl(std::ostream &s, const GraphState &input) override;
 private:
 	std::shared_ptr<mod::Rule> r;
-	const lib::Rule::Real *rRaw;
+	const lib::Rules::Real *rRaw;
 	std::unordered_set<const lib::Graph::Single*> consumedGraphs; // all those from lhs of derivations
 };
 

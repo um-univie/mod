@@ -3,6 +3,7 @@
 #include <mod/Derivation.h>
 #include <mod/Rule.h>
 #include <mod/lib/Graph/Single.h>
+#include <mod/lib/Rules/Real.h>
 
 namespace mod {
 namespace lib {
@@ -35,7 +36,9 @@ void NonHyperDerivations::calculateImpl() {
 		};
 		auto *left = makeSide(der.left);
 		auto *right = makeSide(der.right);
-		this->suggestDerivation(left, right, &der.rule->getBase());
+		const lib::Rules::Real *rule = nullptr;
+		if(der.rule) rule = &der.rule->getRule();
+		this->suggestDerivation(left, right, rule);
 	}
 	derivations.release();
 }

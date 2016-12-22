@@ -2,7 +2,6 @@
 
 #include <mod/Graph.h>
 #include <mod/Rule.h>
-#include <mod/lib/Chem/SBML.h>
 #include <mod/lib/DG/Dump.h>
 #include <mod/lib/DG/NonHyper.h>
 #include <mod/lib/Graph/Merge.h>
@@ -10,14 +9,13 @@
 #include <mod/lib/Graph/Properties/String.h>
 #include <mod/lib/IO/IO.h>
 #include <mod/lib/IO/ParserCommon.h>
-#include <mod/lib/Rule/Shallow.h>
-
-#include <jla_boost/Memory.hpp>
 
 #include <boost/fusion/adapted/std_pair.hpp>
 #include <boost/spirit/include/qi_alternative.hpp>
+#include <boost/spirit/include/qi_and_predicate.hpp>
 #include <boost/spirit/include/qi_attr.hpp>
 #include <boost/spirit/include/qi_char_.hpp>
+#include <boost/spirit/include/qi_difference.hpp>
 #include <boost/spirit/include/qi_eps.hpp>
 #include <boost/spirit/include/qi_kleene.hpp>
 #include <boost/spirit/include/qi_lexeme.hpp>
@@ -47,7 +45,6 @@ struct Derivation {
 namespace {
 
 struct NonHyperAbstract : public lib::DG::NonHyper {
-
 	NonHyperAbstract(const std::vector<Derivation> &derivations)
 	: NonHyper({}), derivationsForConstruction(&derivations) {
 		calculate();
@@ -66,9 +63,9 @@ private:
 				for(const auto &e : side) {
 					auto iter = strToGraph.find(e.second);
 					if(iter == end(strToGraph)) {
-						auto gBoost = make_unique<lib::Graph::GraphType>();
-						auto pString = make_unique<lib::Graph::PropStringType>(*gBoost);
-						auto gLib = make_unique<lib::Graph::Single>(std::move(gBoost), std::move(pString));
+						auto gBoost = std::make_unique<lib::Graph::GraphType>();
+						auto pString = std::make_unique<lib::Graph::PropString>(*gBoost);
+						auto gLib = std::make_unique<lib::Graph::Single>(std::move(gBoost), std::move(pString));
 						auto g = mod::Graph::makeGraph(std::move(gLib));
 						addProduct(g); // this renames it
 						g->setName(e.second);
@@ -94,8 +91,6 @@ private:
 			};
 			Side left = makeSide(der.left);
 			Side right = makeSide(der.right);
-			auto r = mod::Rule::makeRule(make_unique<lib::Rule::Shallow>());
-			rules.push_back(r);
 			auto *leftMerge = new lib::Graph::Merge();
 			auto *rightMerge = new lib::Graph::Merge();
 			for(const auto &e : left) {
@@ -120,11 +115,9 @@ private:
 			} else {
 				rightLinked = addToMergeStore(rightMerge);
 			}
-			suggestDerivation(leftLinked, rightLinked, &r->getBase());
+			suggestDerivation(leftLinked, rightLinked, nullptr);
 			if(der.reverse) {
-				auto r = mod::Rule::makeRule(make_unique<lib::Rule::Shallow>());
-				rules.push_back(r);
-				suggestDerivation(rightLinked, leftLinked, &r->getBase());
+				suggestDerivation(rightLinked, leftLinked, nullptr);
 			}
 		}
 		derivationsForConstruction = nullptr;
@@ -175,16 +168,6 @@ namespace IO {
 namespace DG {
 namespace Read {
 
-lib::DG::Matrix *sbml(const std::string &file, std::ostream &err) {
-	std::ifstream fileInStream(file.c_str());
-	if(!fileInStream.is_open()) {
-		err << "SBML file not found, '" << file << "'" << std::endl;
-		return nullptr;
-	}
-	fileInStream.close();
-	return Chem::loadNetworkFromSBML(file);
-}
-
 lib::DG::NonHyper *dump(const std::vector<std::shared_ptr<mod::Graph> > &graphs, const std::vector<std::shared_ptr<mod::Rule> > &rules, const std::string &file, std::ostream &err) {
 	std::ifstream fileInStream(file.c_str());
 	if(!fileInStream.is_open()) {
@@ -203,8 +186,8 @@ lib::DG::NonHyper *abstract(std::istream &s, std::ostream &err) {
 
 	std::vector<Derivation> derivations;
 
-	QiRule < std::string()>::type grIdentifier = qi::lexeme[qi::char_("A-Za-z_") >> *qi::char_("A-Za-z0-9:_-")];
-	QiRule<unsigned int()>::type grCoef = qi::uint_ | (qi::eps >> qi::attr(1));
+	QiRule < std::string()>::type grIdentifier = qi::lexeme[*(qi::char_ - qi::space)];
+	QiRule<unsigned int()>::type grCoef = qi::lexeme[qi::uint_ >> &qi::space] | (qi::eps >> qi::attr(1));
 	QiRule < std::pair<unsigned int, std::string>()>::type element = grCoef >> grIdentifier;
 	QiRule < Derivation::List()>::type grSide = element % '+';
 	QiRule<bool()>::type grArrow = ("->" >> qi::attr(false)) | ("<=>" >> qi::attr(true));
@@ -213,22 +196,6 @@ lib::DG::NonHyper *abstract(std::istream &s, std::ostream &err) {
 	bool res = parse(iterStart, iterEnd, grammar, derivations, err);
 	s.flags(oldFlags);
 	if(!res) return nullptr;
-
-	IO::log() << "Data:" << std::endl;
-	for(const auto &der : derivations) {
-		auto printSide = [](const Derivation::List & side) {
-			for(unsigned int i = 0; i < side.size(); i++) {
-				if(i > 0) IO::log() << " + ";
-				if(side[i].first != 1) IO::log() << side[i].first << " ";
-				IO::log() << side[i].second;
-			}
-		};
-		printSide(der.left);
-		if(der.reverse) IO::log() << " <=> ";
-		else IO::log() << " -> ";
-		printSide(der.right);
-		IO::log() << std::endl;
-	}
 	return new NonHyperAbstract(derivations);
 }
 

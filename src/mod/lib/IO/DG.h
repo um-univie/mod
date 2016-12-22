@@ -2,6 +2,7 @@
 #define	MOD_LIB_IO_DG_H
 
 #include <mod/lib/DG/Hyper.h>
+#include <mod/lib/IO/FileHandle.h>
 #include <mod/lib/IO/Graph.h>
 #include <mod/lib/IO/IO.h>
 
@@ -15,13 +16,11 @@ class Rule;
 namespace lib {
 namespace DG {
 class Hyper;
-class Matrix;
 class NonHyper;
 } // namespace DG
 namespace IO {
 namespace DG {
 namespace Read {
-lib::DG::Matrix *sbml(const std::string &file, std::ostream &err);
 lib::DG::NonHyper *dump(const std::vector<std::shared_ptr<mod::Graph> > &graphs, const std::vector<std::shared_ptr<mod::Rule> > &rules, const std::string &file, std::ostream &err);
 lib::DG::NonHyper *abstract(std::istream &s, std::ostream &err);
 } // namespace Read

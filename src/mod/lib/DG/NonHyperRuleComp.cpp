@@ -73,7 +73,7 @@ struct NonHyperRuleComp::ExecutionEnv : public Strategies::ExecutionEnv {
 		return true;
 	}
 
-	std::shared_ptr<mod::Graph> checkIfNew(std::unique_ptr<lib::Graph::GraphType> g, std::unique_ptr<lib::Graph::PropStringType> pString) const {
+	std::shared_ptr<mod::Graph> checkIfNew(std::unique_ptr<lib::Graph::GraphType> g, std::unique_ptr<lib::Graph::PropString> pString) const {
 		return owner.checkIfNew(std::move(g), std::move(pString)).first;
 	}
 
@@ -95,11 +95,11 @@ struct NonHyperRuleComp::ExecutionEnv : public Strategies::ExecutionEnv {
 		return owner.addToMergeStore(g);
 	}
 
-	bool isDerivation(const lib::Graph::Base *left, const lib::Graph::Base *right, const lib::Rule::Base* r) const {
+	bool isDerivation(const lib::Graph::Base *left, const lib::Graph::Base *right, const lib::Rules::Real *r) const {
 		return owner.isDerivation(left, right, r).second;
 	}
 
-	bool suggestDerivation(const lib::Graph::Base *left, const lib::Graph::Base *right, const lib::Rule::Base* r) {
+	bool suggestDerivation(const lib::Graph::Base *left, const lib::Graph::Base *right, const lib::Rules::Real *r) {
 		return owner.suggestDerivation(left, right, r).second;
 	}
 

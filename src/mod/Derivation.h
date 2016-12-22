@@ -1,5 +1,5 @@
 #ifndef MOD_DERIVATION_H
-#define	MOD_DERIVATION_H
+#define MOD_DERIVATION_H
 
 #include <memory>
 #include <vector>
@@ -39,4 +39,4 @@ public:
 
 } // namespace mod
 
-#endif	/* MOD_DERIVATION_H */
+#endif /* MOD_DERIVATION_H */

@@ -1,5 +1,5 @@
 #ifndef MOD_LIB_IO_MATCHCONSTRAINT_H
-#define	MOD_LIB_IO_MATCHCONSTRAINT_H
+#define MOD_LIB_IO_MATCHCONSTRAINT_H
 
 #include <mod/Error.h>
 #include <mod/lib/GraphMorphism/MatchConstraint.h>
@@ -36,6 +36,10 @@ struct PrintVisitor : lib::GraphMorphism::MatchConstraint::Visitor<Graph, void> 
 		}
 		s << "}| " << c.op << " " << c.count;
 	}
+
+	virtual void operator()(const lib::GraphMorphism::MatchConstraint::ShortestPath<Graph> &c) const override {
+		s << "shortestPath(" << c.vSrc << ", " << c.vTar << ") " << c.op << " " << c.length;
+	}
 private:
 	std::ostream &s;
 };
@@ -46,23 +50,36 @@ struct GMLPrintVisitor : lib::GraphMorphism::MatchConstraint::Visitor<Graph, voi
 	GMLPrintVisitor(std::ostream &s, const Graph &g, std::string prefix) : s(s), g(g), prefix(std::move(prefix)) { }
 
 	virtual void operator()(const lib::GraphMorphism::MatchConstraint::VertexAdjacency<Graph> &c) const override {
-		s << prefix << "constrainAdj [" << std::endl;
-		s << prefix << "	id " << get(boost::vertex_index_t(), g, c.vConstrained) << std::endl;
-		s << prefix << "	op " << c.op << std::endl;
-		s << prefix << "	count " << c.count << std::endl;
+		s << prefix << "constrainAdj [\n";
+		s << prefix << "	id " << get(boost::vertex_index_t(), g, c.vConstrained) << "\n";
+		s << prefix << "	op \"" << c.op << "\"\n";
+		s << prefix << "	count " << c.count << "\n";
 		s << prefix << "	nodeLabels [";
 		for(const auto &str : c.vertexLabels) s << " label \"" << str << "\"";
-		s << " ]" << std::endl;
+		s << " ]\n";
 		s << prefix << "	edgeLabels [";
 		for(const auto &str : c.edgeLabels) s << " label \"" << str << "\"";
-		s << " ]" << std::endl;
-		s << prefix << "]" << std::endl;
+		s << " ]\n";
+		s << prefix << "]\n";
+	}
+
+	virtual void operator()(const lib::GraphMorphism::MatchConstraint::ShortestPath<Graph> &c) const override {
+		s << prefix << "constrainShortestPath [\n";
+		s << prefix << "	source " << get(boost::vertex_index_t(), g, c.vSrc)
+				<< " target " << get(boost::vertex_index_t(), g, c.vTar) << "\n";
+		s << prefix << "	op \"" << c.op << "\" length " << c.length << "\n";
+		s << prefix << "]\n";
 	}
 private:
 	std::ostream &s;
 	const Graph &g;
 	std::string prefix;
 };
+
+template<typename Graph>
+auto makeGMLPrintVisitor(std::ostream &s, const Graph &g, std::string prefix) {
+	return GMLPrintVisitor<Graph>(s, g, prefix);
+}
 
 } // namespace Write
 } // namespace MatchConstraint
@@ -93,4 +110,4 @@ std::ostream &operator<<(std::ostream &s, const Constraint<Graph> &c) {
 } // namespace lib
 } // namespace mod
 
-#endif	/* MOD_LIB_IO_MATCHCONSTRAINT_H */
+#endif /* MOD_LIB_IO_MATCHCONSTRAINT_H */

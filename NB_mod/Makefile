@@ -59,6 +59,7 @@ build: .build-post
 	mkdir -p ${CND_BASEDIR}/dist
 	mkdir -p ${CND_BASEDIR}/dist/bin
 	mkdir -p ${CND_BASEDIR}/dist/share/mod
+	mkdir -p ${CND_BASEDIR}/dist/share/mod/plugins
 	cp ${CND_BASEDIR}/../src/bin/mod ${CND_BASEDIR}/dist/bin/
 	cp ${CND_BASEDIR}/../src/bin/mod_post ${CND_BASEDIR}/dist/bin/
 	cp ${CND_BASEDIR}/../src/bin/mod_genSummaryMakefile ${CND_BASEDIR}/dist/bin/
@@ -69,9 +70,10 @@ build: .build-post
 	cp ${CND_BASEDIR}/../src/share/mod/mod.sty ${CND_BASEDIR}/dist/share/mod/
 	cp ${CND_BASEDIR}/../src/share/mod/mod.mk ${CND_BASEDIR}/dist/share/mod/
 	cp ${CND_BASEDIR}/../src/share/mod/obabel.supp ${CND_BASEDIR}/dist/share/mod/
-	cp ${CND_BASEDIR}/../src/share/mod/libSBML.supp ${CND_BASEDIR}/dist/share/mod/
 	cp ${CND_BASEDIR}/../src/share/mod/python.supp ${CND_BASEDIR}/dist/share/mod/
 	echo "NB" > ${CND_BASEDIR}/dist/share/mod/VERSION
+	echo "name: mod" > ${CND_BASEDIR}/dist/share/mod/plugins/00_mod
+	echo "path: ${CND_BASEDIR}/dist/lib" >> ${CND_BASEDIR}/dist/share/mod/plugins/00_mod
 
 #${CND_BASEDIR}/../src/share/mod/commonPreamble.tex
 
@@ -88,7 +90,6 @@ clean: .clean-post
 	rm -f ${CND_BASEDIR}/dist/share/mod/summary.tex
 	rm -f ${CND_BASEDIR}/dist/share/mod/figureTemplate.tex
 	rm -f ${CND_BASEDIR}/dist/share/mod/obabel.supp
-	rm -f ${CND_BASEDIR}/dist/share/mod/libSBML.supp
 	rm -f ${CND_BASEDIR}/dist/share/mod/python.supp
 
 .clean-pre:

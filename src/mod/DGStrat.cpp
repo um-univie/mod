@@ -1,6 +1,7 @@
 #include "DGStrat.h"
 
 #include <mod/DG.h>
+#include <mod/Error.h>
 #include <mod/Rule.h>
 #include <mod/lib/DG/Strategies/Strategy.h>
 #include <mod/lib/DG/Strategies/Add.h>
@@ -15,8 +16,6 @@
 #include <mod/lib/DG/Strategies/Sort.h>
 #include <mod/lib/DG/Strategies/Take.h>
 #include <mod/lib/IO/IO.h>
-
-#include <jla_boost/Memory.hpp>
 
 #include <ostream>
 
@@ -94,25 +93,25 @@ DGStrat::Pimpl::Pimpl(std::unique_ptr<lib::DG::Strategies::Strategy> strategy) :
 //------------------------------------------------------------------------------
 
 std::shared_ptr<DGStrat> DGStrat::makeAdd(bool onlyUniverse, const std::vector<std::shared_ptr<Graph> > &graphs) {
-	return std::shared_ptr<DGStrat>(new DGStrat(make_unique<lib::DG::Strategies::Add>(graphs, onlyUniverse)));
+	return std::shared_ptr<DGStrat>(new DGStrat(std::make_unique<lib::DG::Strategies::Add>(graphs, onlyUniverse)));
 }
 
 std::shared_ptr<DGStrat> DGStrat::makeAdd(bool onlyUniverse, const std::shared_ptr<mod::Function<std::vector<std::shared_ptr<mod::Graph> >() > > generator) {
-	return std::shared_ptr<DGStrat>(new DGStrat(make_unique<lib::DG::Strategies::Add>(generator, onlyUniverse)));
+	return std::shared_ptr<DGStrat>(new DGStrat(std::make_unique<lib::DG::Strategies::Add>(generator, onlyUniverse)));
 }
 
 std::shared_ptr<DGStrat> DGStrat::makeExecute(std::shared_ptr<mod::Function<void(const mod::DGStrat::GraphState&)> > func) {
-	return std::shared_ptr<DGStrat>(new DGStrat(make_unique<lib::DG::Strategies::Execute>(func)));
+	return std::shared_ptr<DGStrat>(new DGStrat(std::make_unique<lib::DG::Strategies::Execute>(func)));
 }
 
 std::shared_ptr<DGStrat> DGStrat::makeFilter(bool alsoUniverse,
 		std::shared_ptr<mod::Function<bool(std::shared_ptr<mod::Graph>, const mod::DGStrat::GraphState&, bool)> > filterFunc) {
-	return std::shared_ptr<DGStrat>(new DGStrat(make_unique<lib::DG::Strategies::Filter>(filterFunc, alsoUniverse)));
+	return std::shared_ptr<DGStrat>(new DGStrat(std::make_unique<lib::DG::Strategies::Filter>(filterFunc, alsoUniverse)));
 }
 
 std::shared_ptr<DGStrat> DGStrat::makeLeftPredicate(std::shared_ptr<mod::Function<bool(const mod::Derivation&)> > predicate,
 		std::shared_ptr<DGStrat> strat) {
-	return std::shared_ptr<DGStrat>(new DGStrat(make_unique<lib::DG::Strategies::LeftPredicate>(predicate, strat->getStrategy().clone())));
+	return std::shared_ptr<DGStrat>(new DGStrat(std::make_unique<lib::DG::Strategies::LeftPredicate>(predicate, strat->getStrategy().clone())));
 }
 
 std::shared_ptr<DGStrat> DGStrat::makeParallel(const std::vector<std::shared_ptr<DGStrat> > &strategies) {
@@ -121,39 +120,39 @@ std::shared_ptr<DGStrat> DGStrat::makeParallel(const std::vector<std::shared_ptr
 	}
 	std::vector<lib::DG::Strategies::Strategy*> cloned;
 	for(std::shared_ptr<DGStrat> strat : strategies) cloned.push_back(strat->getStrategy().clone());
-	return std::shared_ptr<DGStrat>(new DGStrat(make_unique<lib::DG::Strategies::Parallel>(cloned)));
+	return std::shared_ptr<DGStrat>(new DGStrat(std::make_unique<lib::DG::Strategies::Parallel>(cloned)));
 }
 
 std::shared_ptr<DGStrat> DGStrat::makeRepeat(std::size_t limit, std::shared_ptr<DGStrat> strategy) {
-	return std::shared_ptr<DGStrat>(new DGStrat(make_unique<lib::DG::Strategies::Repeat>(strategy->getStrategy().clone(), limit)));
+	return std::shared_ptr<DGStrat>(new DGStrat(std::make_unique<lib::DG::Strategies::Repeat>(strategy->getStrategy().clone(), limit)));
 }
 
 std::shared_ptr<DGStrat> DGStrat::makeRevive(std::shared_ptr<DGStrat> strategy) {
-	return std::shared_ptr<DGStrat>(new DGStrat(make_unique<lib::DG::Strategies::Revive>(strategy->getStrategy().clone())));
+	return std::shared_ptr<DGStrat>(new DGStrat(std::make_unique<lib::DG::Strategies::Revive>(strategy->getStrategy().clone())));
 }
 
 std::shared_ptr<DGStrat> DGStrat::makeRightPredicate(std::shared_ptr<mod::Function<bool(const mod::Derivation&)> > predicate,
 		std::shared_ptr<DGStrat> strat) {
-	return std::shared_ptr<DGStrat>(new DGStrat(make_unique<lib::DG::Strategies::RightPredicate>(predicate, strat->getStrategy().clone())));
+	return std::shared_ptr<DGStrat>(new DGStrat(std::make_unique<lib::DG::Strategies::RightPredicate>(predicate, strat->getStrategy().clone())));
 }
 
 std::shared_ptr<DGStrat> DGStrat::makeRule(std::shared_ptr<Rule> rule) {
-	return std::shared_ptr<DGStrat>(new DGStrat(make_unique<lib::DG::Strategies::Rule>(rule)));
+	return std::shared_ptr<DGStrat>(new DGStrat(std::make_unique<lib::DG::Strategies::Rule>(rule)));
 }
 
 std::shared_ptr<DGStrat> DGStrat::makeSequence(const std::vector<std::shared_ptr<DGStrat> > &strategies) {
 	std::vector< lib::DG::Strategies::Strategy*> cloned;
 	for(std::shared_ptr<DGStrat> strat : strategies) cloned.push_back(strat->getStrategy().clone());
-	return std::shared_ptr<DGStrat>(new DGStrat(make_unique<lib::DG::Strategies::Sequence>(cloned)));
+	return std::shared_ptr<DGStrat>(new DGStrat(std::make_unique<lib::DG::Strategies::Sequence>(cloned)));
 }
 
 std::shared_ptr<DGStrat> DGStrat::makeSort(bool doUniverse,
 		std::shared_ptr<mod::Function<bool(std::shared_ptr<mod::Graph>, std::shared_ptr<mod::Graph>, const mod::DGStrat::GraphState&)> > less) {
-	return std::shared_ptr<DGStrat>(new DGStrat(make_unique<lib::DG::Strategies::Sort>(less, doUniverse)));
+	return std::shared_ptr<DGStrat>(new DGStrat(std::make_unique<lib::DG::Strategies::Sort>(less, doUniverse)));
 }
 
 std::shared_ptr<DGStrat> DGStrat::makeTake(bool doUniverse, unsigned int limit) {
-	return std::shared_ptr<DGStrat>(new DGStrat(make_unique<lib::DG::Strategies::Take>(limit, doUniverse)));
+	return std::shared_ptr<DGStrat>(new DGStrat(std::make_unique<lib::DG::Strategies::Take>(limit, doUniverse)));
 }
 
 } // namespace mod

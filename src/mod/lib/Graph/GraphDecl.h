@@ -1,14 +1,13 @@
 #ifndef MOD_LIB_GRAPH_GRAPHDECL_H
 #define MOD_LIB_GRAPH_GRAPHDECL_H
 
-#include <boost/graph/adjacency_list.hpp>
-#include <boost/graph/graph_traits.hpp>
+#include <jla_boost/graph/EdgeIndexedAdjacencyList.hpp>
 
 namespace mod {
 namespace lib {
 namespace Graph {
 
-using GraphType = boost::adjacency_list< boost::vecS, boost::vecS, boost::undirectedS>;
+using GraphType = jla_boost::EdgeIndexedAdjacencyList<boost::undirectedS>;
 using Vertex = boost::graph_traits<GraphType>::vertex_descriptor;
 using Edge = boost::graph_traits<GraphType>::edge_descriptor;
 

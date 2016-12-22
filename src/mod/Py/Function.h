@@ -1,5 +1,5 @@
 #ifndef MOD_PY_FUNCTION_H
-#define	MOD_PY_FUNCTION_H
+#define MOD_PY_FUNCTION_H
 
 // The wrapping and haxing of reference counts could probably be done simpler.
 // The arg wrapping should also be looked into.
@@ -82,6 +82,8 @@ struct FunctionWrapper<R(Args...)> : mod::Function<R(Args...)>, py::wrapper<Func
 	}
 };
 
+#if BOOST_VERSION < 106300
+
 // sharedToStd* is adapted from http://stackoverflow.com/questions/6326757/conversion-from-boostshared-ptr-to-stdshared-ptr
 
 template<typename T>
@@ -91,6 +93,17 @@ template<typename T>
 std::shared_ptr<T> sharedToStd(boost::shared_ptr<T> p) {
 	return std::shared_ptr<T>(p.get(), std::bind(&sharedToStd_doRelease<T>, p, std::placeholders::_1));
 }
+
+#else
+
+// It is used in the __init__ file so just make it an identity function.
+
+template<typename T>
+std::shared_ptr<T> sharedToStd(std::shared_ptr<T> p) {
+	return p;
+}
+
+#endif
 
 } // namespace detail
 
@@ -103,17 +116,26 @@ void exportFunc(const char *name) {
 	// sharedToStd holds the boost::shared_ptr in the deleter of the std::shared_ptr
 	using Func = mod::Function<Sig>;
 	using Wrap = detail::FunctionWrapper<Sig>;
-	py::class_<Wrap, boost::shared_ptr<Wrap>, boost::noncopyable>(name)
+#if BOOST_VERSION < 106300
+	using SharedPtr = boost::shared_ptr<Func>;
+	using StoragePtr = boost::shared_ptr<Wrap>;
+#else
+	using SharedPtr = std::shared_ptr<Func>;
+	using StoragePtr = std::shared_ptr<Wrap>;
+#endif
+	py::class_<Wrap, StoragePtr, boost::noncopyable>(name)
 			.def("clone", py::pure_virtual(&Func::clone))
 			.def("__str__", py::pure_virtual(&Func::print))
 			.def("__call__", py::pure_virtual(&Func::operator()))
 			;
-	py::implicitly_convertible<boost::shared_ptr<Wrap>, boost::shared_ptr<Func> >();
+	py::implicitly_convertible<StoragePtr, SharedPtr>();
+#if BOOST_VERSION < 106300
 	py::register_ptr_to_python<std::shared_ptr<Func> >();
+#endif
 	py::def("_sharedToStd", &detail::sharedToStd<Func>);
 }
 
 } // namespace Py
 } // namespace mod
 
-#endif	/* MOD_PY_FUNCTION_H */
+#endif /* MOD_PY_FUNCTION_H */

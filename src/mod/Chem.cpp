@@ -26,6 +26,7 @@ std::ostream &operator<<(std::ostream &s, const AtomData &data) {
 	if(data.charge > 1 || data.charge < -1) s << std::abs(data.charge);
 	if(data.charge < 0) s << '-';
 	else s << '+';
+	if(data.radical) s << '.';
 	return s;
 }
 

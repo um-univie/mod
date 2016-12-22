@@ -1,5 +1,5 @@
 #ifndef MOD_LIB_DG_GRAPHDECL_H
-#define	MOD_LIB_DG_GRAPHDECL_H
+#define MOD_LIB_DG_GRAPHDECL_H
 
 #include <boost/graph/adjacency_list.hpp>
 
@@ -9,9 +9,9 @@ namespace Graph {
 struct Base;
 struct Single;
 } // namespace Graph
-namespace Rule {
-struct Base;
-} // namespace Rule
+namespace Rules {
+struct Real;
+} // namespace Rules
 namespace DG {
 // NonHyper
 struct NonHyperVProp;
@@ -27,7 +27,7 @@ struct NonHyperVProp {
 };
 
 struct NonHyperEProp {
-	std::vector<const lib::Rule::Base*> rules;
+	std::vector<const lib::Rules::Real*> rules;
 	boost::optional<NonHyperEdge> reverse;
 };
 
@@ -44,7 +44,7 @@ enum class HyperVertexKind {
 struct HyperVProp {
 	HyperVertexKind kind;
 	const lib::Graph::Single *graph; // != nullptr <=> the vertex is a hyper vertex
-	std::vector<const lib::Rule::Base*> rules; // not empty <=> the vertex is a hyper edge
+	std::vector<const lib::Rules::Real*> rules; // not empty => the vertex is a hyper edge, but it may be empty otherwise
 	NonHyperVertex inVertex, outVertex; // only defined for kind == RuleKind
 	HyperVertex reverse; // == null_vertex() <=> no reverse, only defined for kind == RuleKind
 };
@@ -53,4 +53,4 @@ struct HyperVProp {
 } // namespace lib
 } // namespace mod
 
-#endif	/* MOD_LIB_DG_GRAPHDECL_H */
+#endif /* MOD_LIB_DG_GRAPHDECL_H */

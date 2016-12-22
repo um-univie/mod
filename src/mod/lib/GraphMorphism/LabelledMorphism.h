@@ -3,8 +3,10 @@
 
 #include <mod/Config.h>
 
+#include <mod/lib/GraphMorphism/Finder.hpp>
 #include <mod/lib/LabelledGraph.h>
-#include <jla_boost/graph/morphism/Finder.hpp>
+
+#include <jla_boost/graph/morphism/Callbacks.hpp>
 #include <jla_boost/graph/morphism/Predicates.hpp>
 
 namespace mod {
@@ -19,8 +21,8 @@ auto get_vertex_order_impl(const OuterGraph &gOuter, int) -> decltype(get_vertex
 
 template<typename OuterGraph>
 std::vector<typename boost::graph_traits<typename LabelledGraphTraits<OuterGraph>::GraphType>::vertex_descriptor>
-get_vertex_order_impl(const OuterGraph &gOuter, long /* worse than int */) {
-	return get_vertex_order(jla_boost::GraphMorphism::DefaultFinderArgsProvider(), get_graph(gOuter));
+get_vertex_order_impl(const OuterGraph &gOuter, ... /* worse than everything */) {
+	return get_vertex_order(DefaultFinderArgsProvider(), get_graph(gOuter));
 }
 
 template<typename OuterGraph>
@@ -63,9 +65,8 @@ public:
 	StringLabelPredWrapper(PredWrapper predWrapper) : predWrapper(predWrapper) { }
 
 	template<typename OuterDomain, typename OuterCodomain, typename Pred>
-	auto operator()(const OuterDomain &gDomain, const OuterCodomain &gCodomain, Pred pred) const
-	-> decltype(this->predWrapper(gDomain, gCodomain, GM::makePropertyPredicate(get_string(gDomain), get_string(gCodomain), pred))) {
-		return predWrapper(gDomain, gCodomain, GM::makePropertyPredicate(get_string(gDomain), get_string(gCodomain), pred));
+	auto operator()(const OuterDomain &gDomain, const OuterCodomain &gCodomain, Pred pred) const {
+		return predWrapper(gDomain, gCodomain, GM::makePropertyPredicateEq(get_string(gDomain), get_string(gCodomain), pred));
 	}
 };
 

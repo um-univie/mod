@@ -220,10 +220,17 @@ else # $1 == --mode
 				local fileMolNoExt=$3
 				echo "	echo -n '\summaryGraph' >> $texFile" >> $makefile
 				echo -n "	echo '{\\texttt{$(latexEsc $name)}}" >> $makefile
-				echo -n "{$fileNoExt}{\\texttt{$(latexEsc $fileNoExt)}}" >> $makefile
-				echo -n "{$fileMolNoExt}{\\texttt{$(latexEsc $fileMolNoExt)}}" >> $makefile
+				echo -n "{\summaryGraphFile{$fileNoExt}{\\texttt{$(latexEsc $fileNoExt)}}}" >> $makefile
+				if test "x$fileMolNoExt" != "x"; then
+					echo -n "{\summaryGraphFile{$fileMolNoExt}{\\texttt{$(latexEsc $fileMolNoExt)}}}" >> $makefile
+				else
+					echo -n "{}" >> $makefile
+				fi
 				echo "' >> $texFile" >> $makefile
-				echo -n " $fileNoExt.pdf $fileMolNoExt.pdf" >> $makefileDep
+				echo -n " $fileNoExt.pdf" >> $makefileDep
+				if test "x$fileMolNoExt" != "x"; then
+					echo -n " $fileMolNoExt.pdf" >> $makefileDep
+				fi
 			}
 
 			# name fileNoExt fileMolNoExt fileCombinedNoExt fileConstraints
@@ -233,41 +240,32 @@ else # $1 == --mode
 				local fileMolNoExt=$3
 				local fileCombinedNoExt=$4
 				local fileConstraints=$5
-				echo -n "	echo -n '\summaryRule{$(latexEsc $name)}" >> $makefile
-				echo -n "{$fileNoExt}{$(latexEsc $fileNoExt)}" >> $makefile
-				echo -n "{$fileMolNoExt}{$(latexEsc $fileMolNoExt)}" >> $makefile
-				echo -n "{$fileCombinedNoExt}{$(latexEsc $fileCombinedNoExt)}" >> $makefile
+				echo -n "	echo '\summaryRule{$(latexEsc $name)}" >> $makefile
+				echo -n "{\summaryRuleSpan{$fileNoExt}{$(latexEsc $fileNoExt)}}" >> $makefile
+				if test "x$fileMolNoExt" != "x"; then
+					echo -n "{\summaryRuleSpan{$fileMolNoExt}{$(latexEsc $fileMolNoExt)}}" >> $makefile
+				else
+					echo -n "{}" >> $makefile
+				fi
+				if test "x$fileCombinedNoExt" != "x"; then
+					echo -n "{\summaryRuleCombined{$fileCombinedNoExt}{$(latexEsc $fileCombinedNoExt)}}" >> $makefile
+				else
+					echo -n "{}" >> $makefile
+				fi
 				echo -n "{$fileConstraints}" >> $makefile
 				echo "' >> $texFile" >> $makefile
 				
-				echo -n " $fileNoExt.L.pdf $fileMolNoExt.L.pdf" >> $makefileDep
-				echo -n " $fileNoExt.K.pdf $fileMolNoExt.K.pdf" >> $makefileDep
-				echo -n " $fileNoExt.R.pdf $fileMolNoExt.R.pdf" >> $makefileDep
-				echo -n " $fileCombinedNoExt.pdf" >> $makefileDep
-			}
-
-			# r_ID name fileLeft fileContext fileRight fileComb fileConstraints
-			function summaryRuleOld {
-				local idName=$1
-				local name=$2
-				local fLeft=$3
-				local fContext=$4
-				local fRight=$5
-				local fComb=$6
-				local fConstraints=$7
-				echo "	echo -n '\summaryRule' >> $texFile" >> $makefile
-				echo "	diff $fLeft.pdf $fLeft.graphDFS.pdf &> /dev/null && \\" >> $makefile
-				echo "		diff $fRight.pdf $fRight.graphDFS.pdf &> /dev/null && \\" >> $makefile
-				echo "		echo -n 'GV' >> $texFile || echo -n 'Both' >> $texFile" >> $makefile
-				echo "	echo '{\\texttt{$(latexEsc $idName, $name)}}' >> $texFile" >> $makefile
-				echo "	echo -e '\t{$fLeft}{$(latexEsc $fLeft)}' >> $texFile" >> $makefile
-				echo "	echo -e '\t{$fContext}{$(latexEsc $fContext)}' >> $texFile" >> $makefile
-				echo "	echo -e '\t{$fRight}{$(latexEsc $fRight)}' >> $texFile" >> $makefile
-				echo "	echo -n '\summaryRuleRest' >> $texFile" >> $makefile
-				echo "	echo '{$fComb}{$(latexEsc $fComb)}' >> $texFile" >> $makefile
-				echo "	echo -e '\t{../$fConstraints}' >> $texFile" >> $makefile
-
-				echo -n " $fLeft.pdf $fLeft.graphDFS.pdf $fContext.pdf $fRight.pdf $fRight.graphDFS.pdf $fComb.pdf" >> $makefileDep
+				echo -n " ${fileNoExt}_L.pdf" >> $makefileDep
+				echo -n " ${fileNoExt}_K.pdf" >> $makefileDep
+				echo -n " ${fileNoExt}_R.pdf" >> $makefileDep
+				if test "x$fileMolNoExt" != "x"; then
+					echo -n " ${fileMolNoExt}_L.pdf" >> $makefileDep
+					echo -n " ${fileMolNoExt}_K.pdf" >> $makefileDep
+					echo -n " ${fileMolNoExt}_R.pdf" >> $makefileDep
+				fi
+				if test "x$fileCombinedNoExt" != "x"; then
+					echo -n " $fileCombinedNoExt.pdf" >> $makefileDep
+				fi
 			}
 
 			# fileNoExt1 fileNoExt2
@@ -277,9 +275,9 @@ else # $1 == --mode
 				echo "	echo '\summaryDerivation{$fileNoExt1}{$(latexEsc $fileNoExt1)}{$fileNoExt2}{$(latexEsc $fileNoExt2)}' >> $texFile" >> $makefile
 				
 				local f=$fileNoExt1
-				echo -n " $f.derL.pdf $f.derK.pdf $f.derR.pdf" >> $makefileDep
+				echo -n " ${f}_derL.pdf ${f}_derK.pdf ${f}_derR.pdf" >> $makefileDep
 				local f=$fileNoExt2
-				echo -n " $f.derG.pdf $f.derD.pdf $f.derH.pdf" >> $makefileDep
+				echo -n " ${f}_derG.pdf ${f}_derD.pdf ${f}_derH.pdf" >> $makefileDep
 			}
 
 			# name fileNoExt
@@ -331,7 +329,7 @@ else # $1 == --mode
 				local graphType=$1
 				local fileNoExt=$2
 				local noOverlay=$3
-				echo -n " $fileNoExt.plain $fileNoExt.coord.tex" >> $makefileClean
+				echo -n " $fileNoExt.plain ${fileNoExt}_coord.tex" >> $makefileClean
 				function common {
 					grep image $fileNoExt.dot | sed "s/.* image=\"\([^\"]*\)\".*/\1/" | while read f; do
 						echo -n " $f" >> $makefileImpl
@@ -340,11 +338,11 @@ else # $1 == --mode
 					echo "	$this --mode coordsFromGV $graphType \"$fileNoExt\" $noOverlay" >> $makefileImpl
 				}
 				# extra dependency to avoid race conditions, see http://www.gnu.org/software/automake/manual/html_node/Multiple-Outputs.html
-				echo -n "$fileNoExt.coord.tex:" >> $makefileImpl
+				echo -n "${fileNoExt}_coord.tex:" >> $makefileImpl
 				common
-				echo -n "$fileNoExt.plain: $fileNoExt.coord.tex" >> $makefileImpl
+				echo -n "$fileNoExt.plain: ${fileNoExt}_coord.tex" >> $makefileImpl
 				common
-				echo -n " $fileNoExt.plain $fileNoExt.coord.tex" >> $makefileDep
+				echo -n " $fileNoExt.plain ${fileNoExt}_coord.tex" >> $makefileDep
 			}
 
 			# fileNoExt [fileCoordsNoExt]
@@ -460,11 +458,15 @@ else # $1 == --mode
 		local graphType=$1
 		local fileNoExt=$2
 		local noOverlay=$3
-		local coordFile=${fileNoExt}.coord.tex
+		local coordFile=${fileNoExt}_coord.tex
 		local gvArgsVar="gvArgs_$graphType"
 		local gvArgs="-Tplain ${!gvArgsVar} -o $fileNoExt.plain"
 		# this now assumes that dot will create the coordinates
 		dot $gvArgs $fileNoExt.dot
+		res=$?
+		if test $res -ne 0; then
+			return $res
+		fi
 		echo "% dummy" > $coordFile.$$
 		# check size of graph
 		grep "^graph" $fileNoExt.plain | awk '{if($3 > 50 || $4 > 50) {exit 1} else {exit 0}}'
@@ -473,7 +475,7 @@ else # $1 == --mode
 			height=$(grep "^graph" $fileNoExt.plain | awk '{print $4}')
 			#echo "Dimension of $fileNoExt ($width, $height) too large for Latex, default to Graphviz."
 			echo "$dimensionTooLargeString" >> $coordFile.$$
-			local gvArgs="-Tpdf ${!gvArgsVar} -o $fileNoExt.coord.pdf"
+			local gvArgs="-Tpdf ${!gvArgsVar} -o ${fileNoExt}_coord.pdf"
 			dot $gvArgs $fileNoExt.dot
 		fi
 		cat $fileNoExt.plain | awk -v noOverlay="x$noOverlay" '

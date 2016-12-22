@@ -37,7 +37,7 @@ Usage
 
   Shows the help output of the script.
 
-.. option:: --version
+.. option:: --version, -v
 
   Print the version of MØD and exit (the version is always printed in the start).
 
@@ -87,6 +87,37 @@ Usage
 .. option:: -e <code>
 
   When ``python3`` is the VM, execute ``code`` (with a line break afterwards).
+
+.. option:: -i
+
+  Use interactive mode for the Python interpreter (i.e., pass ``-i`` as additional argument),
+  but disable the log.
+  If ``ipython3`` is available it will be used as interpreter, otherwise ``python3`` is used.
+
+.. option:: -q
+
+  Use quite mode. Certain messages are not printed.
+
+
+
+Plugins (Loading of Additional Modules)
+#######################################
+
+It can be useful to always import additional modules when using MØD.
+This can be achieved by writing a file in the following format::
+
+  name: <module name>
+  path: <Python import path>
+
+When ``mod`` uses such a file, it will append ``<Python import path>`` to ``PYTHONPATH``,
+and insert both ``import <module name>`` and ``from <module name> import *`` into the preamble.
+The plugin specification file must be placed in a directory that is also mentioned in the
+following environment variable.
+
+.. envvar:: MOD_PLUGIN_PATH
+
+  A colon separated list of paths to search for plugins. Non-directory paths are skipped.
+  All files (non-recursively) in each specified directory are checked for plugin information.
 
 
 PyMØD Preamble
