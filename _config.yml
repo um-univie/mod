@@ -1,1 +1,2 @@
 include: ["_downloads", "_sources", "_static"]
+gems: ["jekyll-redirect-from"]
