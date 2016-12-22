@@ -1,7 +1,8 @@
 #include <mod/Py/Common.h>
 
-#include <mod/Chem.h>
 #include <mod/Graph.h>
+#include <mod/GraphGraphInterface.h>
+#include <mod/GraphPrinter.h>
 
 #include <iomanip>
 
@@ -57,13 +58,15 @@ void Graph_doExport() {
 			// rst:		               print(first, second=None)
 			// rst:
 			// rst:			Print the graph, using either the default options or the options in ``first`` and ``second``.
+			// rst:			If ``first`` and ``second`` are the same, only one depiction will be made.
 			// rst:
 			// rst:			:param first: the printing options used for the first depiction.
 			// rst:			:type first: :class:`GraphPrinter`
 			// rst:			:param second: the printing options used for the second depiction.
-			// rst:				If it is ``None`` then it is set to``first``.
+			// rst:				If it is ``None`` then it is set to ``first``.
 			// rst:			:type second: :class:`GraphPrinter`
 			// rst:			:returns: the names for the PDF-files that will be compiled in post-processing.
+			// rst:				If ``first`` and ``second`` are the same, the two file prefixes are equal.
 			// rst:			:rtype: (string, string)
 			.def("print", printWithoutOptions)
 			.def("print", printWithOptions)
@@ -97,6 +100,7 @@ void Graph_doExport() {
 			// rst:			(Read-only) If the graph models a molecule, this is the canonical :ref:`SMILES string <graph-smiles>` for it.
 			// rst:
 			// rst:			:type: string
+			// rst:			:raises: :any:`LogicError` if the graph is not a molecule.
 			.add_property("smiles", py::make_function(&mod::Graph::getSmiles, py::return_value_policy<py::copy_const_reference>()))
 			// rst:		.. py:attribute:: graphDFS
 			// rst:
@@ -185,7 +189,22 @@ void Graph_doExport() {
 			// rst:
 			// rst:			:type: string
 			.add_property("imageCommand", &mod::Graph::getImageCommand, &mod::Graph::setImageCommand)
-	;
+			// rst:		.. py:method:: getVertexFromExternalId(id)
+			// rst:
+			// rst:			If the graph was not loaded from an external data format, then this function
+			// rst:			always return a null descriptor.
+			// rst:			If the graph was loaded from a SMILES string, but *any* class label was not unique,
+			// rst:			then the function always return a null descriptor.
+			// rst:
+			// rst:			.. note:: In general there is no correlation between external and internal ids.
+			// rst:
+			// rst:			:param id: the external id to find the vertex descriptor for.
+			// rst:			:type id: int
+			// rst:			:returns: the vertex descriptor for the given external id.
+			// rst:		            The descriptor is null if the external id was not used.
+			// rst;			:rtype: :py:class:`Vertex`
+			.def("getVertexFromExternalId", &mod::Graph::getVertexFromExternalId)
+			;
 
 	// rst: .. py:method:: graphGMLString(s, name=None)
 	// rst:
@@ -227,220 +246,6 @@ void Graph_doExport() {
 	// rst:		:rtype: :class:`Graph`
 	// rst:		:raises: :class:`InputError` on bad input.
 	py::def("smiles", &mod::Graph::smiles);
-
-
-
-
-	// rst: .. py:class:: GraphVertex
-	// rst:
-	// rst:		A descriptor of either a vertex in a graph, or a null vertex.
-	// rst:
-	py::class_<mod::Graph::Vertex>("GraphVertex", py::no_init)
-			// rst:		.. py:function:: __init__(self)
-			// rst: 
-			// rst:			Constructs a null descriptor.
-			.def(py::init<>())
-			.def(str(py::self))
-			.def(py::self == py::self)
-			.def(py::self != py::self)
-			// rst:		.. py:attribute:: id
-			// rst:
-			// rst:			(Read-only) The index of the vertex. It will be in the range :math:`[0, numVertices[`.
-			// rst:
-			// rst:			:type: int
-			// rst:			:raises: :py:class:`LogicError` if it is a null descriptor.
-			.add_property("id", &mod::Graph::Vertex::getId)
-			// rst:		.. py:attribute:: graph
-			// rst:
-			// rst:			(Read-only) The graph the vertex belongs to.
-			// rst:
-			// rst:			:type: :py:class:`Graph`
-			// rst:			:raises: :py:class:`LogicError` if it is a null descriptor.
-			.add_property("graph", &mod::Graph::Vertex::getGraph)
-			// rst:		.. py:attribute:: degree
-			// rst:
-			// rst:			(Read-only) The degree of the vertex.
-			// rst:
-			// rst:			:type: int
-			// rst:			:raises: :py:class:`LogicError` if it is a null descriptor.
-			.add_property("degree", &mod::Graph::Vertex::getDegree)
-			// rst:		.. py:attribute:: incidentEdges
-			// rst:
-			// rst:			(Read-only) A range of incident edges to this vertex.
-			// rst:
-			// rst:			:type: :py:class:`IncidentEdgeRange`
-			// rst:			:raises: :py:class:`LogicError` if it is a null descriptor.
-			.add_property("incidentEdges", &mod::Graph::Vertex::incidentEdges)
-			// rst:		.. py:attribute:: stringLabel
-			// rst:
-			// rst:			(Read-only) The string label of the vertex.
-			// rst:
-			// rst:			:type: string
-			// rst:			:raises: :py:class:`LogicError` if it is a null descriptor.
-			.add_property("stringLabel", py::make_function(&mod::Graph::Vertex::getStringLabel, py::return_value_policy<py::copy_const_reference>()))
-			// rst:		.. py:attribute:: atomId
-			// rst:
-			// rst:			(Read-only) The atom id of the vertex.
-			// rst:
-			// rst:			:type: :py:class:`AtomId`
-			// rst:			:raises: :py:class:`LogicError` if it is a null descriptor.
-			.add_property("atomId", &mod::Graph::Vertex::getAtomId)
-			// rst:		.. py:attribute:: charge
-			// rst:
-			// rst:			(Read-only) The charge of the vertex.
-			// rst:
-			// rst:			:type: :py:class:`Charge`
-			// rst:			:raises: :py:class:`LogicError` if it is a null descriptor.
-			.add_property("charge", &mod::Graph::Vertex::getCharge)
-			;
-
-
-
-	// rst: .. py:class:: GraphEdge
-	// rst:
-	// rst:		A descriptor of either an edge in a graph, or a null edge.
-	// rst:
-	py::class_<mod::Graph::Edge>("GraphEdge", py::no_init)
-			// rst:		.. py:function:: __init__(self)
-			// rst:
-			// rst:			Constructs a null descriptor.
-			.def(py::init<>())
-			.def(str(py::self))
-			.def(py::self == py::self)
-			.def(py::self != py::self)
-			// rst:		.. py:attribute:: graph
-			// rst:
-			// rst:			(Read-only) The graph the edge belongs to.
-			// rst:
-			// rst:			:type: :py:class:`Graph`
-			// rst:			:raises: :py:class:`LogicError` if it is a null descriptor.
-			.add_property("graph", &mod::Graph::Edge::getGraph)
-			// rst:		.. py:attribute:: source
-			// rst:
-			// rst:			(Read-only) The source vertex of the edge.
-			// rst:
-			// rst:			:type: :py:class:`GraphVertex`
-			// rst: 		:raises: :py:class:`LogicError` if it is a null descriptor.
-			.add_property("source", &mod::Graph::Edge::source)
-			// rst:		.. attribute:: target
-			// rst:
-			// rst:			(Read-only) The target vertex of the edge.
-			// rst:
-			// rst:			:type: :py:class:`GraphVertex`
-			// rst: 		:raises: :py:class:`LogicError` if it is a null descriptor.
-			.add_property("target", &mod::Graph::Edge::target)
-			// rst:		.. py:attribute:: stringLabel
-			// rst:
-			// rst:			(Read-only) The string label of the edge.
-			// rst:
-			// rst:			:type: string
-			// rst:			:raises: :py:class:`LogicError` if it is a null descriptor.
-			.add_property("stringLabel", py::make_function(&mod::Graph::Edge::getStringLabel, py::return_value_policy<py::copy_const_reference>()))
-			// rst:		.. py:attribute:: bondType
-			// rst:
-			// rst:			(Read-only) The bond type of the edge.
-			// rst:
-			// rst:			:type: :py:class:`BondType`
-			// rst:			:raises: :py:class:`LogicError` if it is a null descriptor.
-			.add_property("bondType", &mod::Graph::Edge::getBondType)
-			;
-
-
-
-	py::class_<mod::Graph::VertexRange>("GraphVertexRange", py::no_init)
-			.def("__iter__", py::iterator<mod::Graph::VertexRange>())
-			.def("__getitem__", &mod::Graph::VertexRange::operator[])
-			;
-	py::class_<mod::Graph::EdgeRange>("GraphEdgeRange", py::no_init)
-			.def("__iter__", py::iterator<mod::Graph::EdgeRange>())
-			;
-	py::class_<mod::Graph::IncidentEdgeRange>("GraphIncidentEdgeRange", py::no_init)
-			.def("__iter__", py::iterator<mod::Graph::IncidentEdgeRange>())
-			;
-
-
-
-
-
-
-
-	// rst: .. py:class:: GraphPrinter
-	// rst:
-	// rst:		This class is used to configure how graphs are visualised.
-	// rst:
-	// rst:		.. warning:: Some of these options greatly alter how graphs are depicted
-	// rst:			and the result may not accurately represent the underlying graph,
-	// rst:			and may make non-molecules look like molecules.
-	// rst:
-	py::class_<mod::GraphPrinter, boost::noncopyable>("GraphPrinter")
-			// rst:		.. py:method:: __init__(self)
-			// rst:
-			// rst:			The default constructor enables edges as bonds and raised charges.
-			// rst:		.. py:method:: setMolDefault()
-			// rst:
-			// rst:			Shortcut for enabling all but thickening and index printing.
-			.def("setMolDefault", &mod::GraphPrinter::setMolDefault)
-			// rst:		.. py:method:: setReactionDefault()
-			// rst:
-			// rst:			Shortcut for enabling all but thickening, index printing and simplification of carbon atoms.
-			.def("setReactionDefault", &mod::GraphPrinter::setReactionDefault)
-			// rst:		.. py:method:: disableAll()
-			// rst:
-			// rst:			Disable all special printing features.
-			.def("disableAll", &mod::GraphPrinter::disableAll)
-			// rst:		.. py:method:: enableAll()
-			// rst:
-			// rst:			Enable all special printing features, except typewriter font.
-			.def("enableAll", &mod::GraphPrinter::enableAll)
-			// rst:		.. py:attribute:: edgesAsBonds
-			// rst:
-			// rst:			Control whether edges with special labels are drawn as chemical bonds.
-			// rst:
-			// rst:			:type: bool
-			.add_property("edgesAsBonds", &mod::GraphPrinter::getEdgesAsBonds, &mod::GraphPrinter::setEdgesAsBonds)
-			// rst:		.. py:attribute:: collapseHydrogens
-			// rst:
-			// rst:			Control whether vertices representing hydrogen atoms are collapsed into their neighbours labels.
-			// rst:
-			// rst:			:type: bool
-			.add_property("collapseHydrogens", &mod::GraphPrinter::getCollapseHydrogens, &mod::GraphPrinter::setCollapseHydrogens)
-			// rst:		.. py:attribute:: raiseCharges
-			// rst:
-			// rst:			Control whether a vertex label suffix encoding a charge is written as a superscript to the rest of the label.
-			// rst:
-			// rst:			:type: bool
-			.add_property("raiseCharges", &mod::GraphPrinter::getRaiseCharges, &mod::GraphPrinter::setRaiseCharges)
-			// rst:		.. py:attribute:: simpleCarbons
-			// rst:
-			// rst:			Control whether some vertices encoding carbon atoms are depicted without any label.
-			// rst:
-			// rst:			:type: bool
-			.add_property("simpleCarbons", &mod::GraphPrinter::getSimpleCarbons, &mod::GraphPrinter::setSimpleCarbons)
-			// rst:		.. py:attribute:: thick
-			// rst:
-			// rst:			Control whether all edges are drawn thicker than normal and all labels are written in bold.
-			// rst:
-			// rst:			:type: bool
-			.add_property("thick", &mod::GraphPrinter::getThick, &mod::GraphPrinter::setThick)
-			// rst:		.. py:attribute:: withColour
-			// rst:
-			// rst:			Control whether colour is applied to certain elements of the graph which are molecule-like.
-			// rst:
-			// rst:			:type: bool
-			.add_property("withColour", &mod::GraphPrinter::getWithColour, &mod::GraphPrinter::setWithColour)
-			// rst:		.. py:attribute:: withIndex
-			// rst:
-			// rst:			Control whether the underlying indices of the vertices are printed.
-			// rst:
-			// rst:			:type: bool
-			.add_property("withIndex", &mod::GraphPrinter::getWithIndex, &mod::GraphPrinter::setWithIndex)
-			// rst:		.. py:attribute:: withTexttt
-			// rst:
-			// rst:			Control whether the vertex and edge labels are written with typewriter font.
-			// rst:
-			// rst:			:type: bool
-			.add_property("withTexttt", &mod::GraphPrinter::getWithTexttt, &mod::GraphPrinter::setWithTexttt)
-			;
 }
 
 } // namespace Py

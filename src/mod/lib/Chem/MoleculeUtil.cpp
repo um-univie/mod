@@ -19,31 +19,34 @@ namespace Chem {
 // Other
 //------------------------------------------------------------------------------
 
-std::pair<std::string, Charge> extractCharge(std::string label) {
-	auto lenRes = extractChargeLen(label);
-	label.erase(lenRes.first);
-	return std::make_pair(std::move(label), lenRes.second);
+std::tuple<std::string, Charge, bool> extractChargeRadical(std::string label) {
+	auto lenRes = extractChargeRadicalLen(label);
+	label.erase(std::get<0>(lenRes));
+	return std::make_tuple(std::move(label), std::get<1>(lenRes), std::get<2>(lenRes));
 }
 
-std::pair<std::size_t, Charge> extractChargeLen(const std::string &label) {
-	std::size_t labelSize = label.size();
+std::tuple<std::size_t, Charge, bool> extractChargeRadicalLen(const std::string &label) {
+	assert(!label.empty());
+	long int lastPos = label.size() - 1;
 	signed char charge = 0;
-	if(label.back() == '+' || label.back() == '-') {
-		// 1 or -1, unless it's a single char label
-		if(labelSize >= 2) {
-			labelSize--;
-			charge = label.back() == '+' ? 1 : -1;
-			char nextToLast = label[labelSize - 1];
-			if(nextToLast >= '0' && nextToLast <= '9') {
-				// 0-9, unless the label become empty
-				if(labelSize >= 2) {
-					labelSize--;
-					charge *= nextToLast - '0';
-				}
+	bool radical = false;
+	if(lastPos >= 0 && label[lastPos] == '.') {
+		radical = true;
+		--lastPos;
+	}
+	if(lastPos >= 1 // "+" and "-" as labels do not have charge
+			&& (label[lastPos] == '+' || label.back() == '-')) {
+		charge = label[lastPos] == '+' ? 1 : -1;
+		--lastPos;
+		if(lastPos >= 1) { // "4+" have charge +1, and label "4"
+			char maybeNum = label[lastPos];
+			if(maybeNum >= '0' && maybeNum <= '9') {
+				charge *= maybeNum - '0';
+				--lastPos;
 			}
 		}
 	}
-	return std::make_pair(labelSize, Charge(charge));
+	return std::make_tuple(lastPos + 1, Charge(charge), radical);
 }
 
 AtomId atomIdFromSymbol(const std::string &label) {
@@ -279,10 +282,10 @@ AtomId atomIdFromSymbol(const std::string &label, std::size_t len) {
 	} else return Invalid;
 }
 
-std::pair<AtomId, Charge> decodeVertexLabel(const std::string &label) {
-	auto lenCharge = extractChargeLen(label);
-	auto atomId = atomIdFromSymbol(label, lenCharge.first);
-	return std::make_pair(atomId, lenCharge.second);
+std::tuple<AtomId, Charge, bool> decodeVertexLabel(const std::string &label) {
+	auto lenChargeRadical = extractChargeRadicalLen(label);
+	auto atomId = atomIdFromSymbol(label, std::get<0>(lenChargeRadical));
+	return std::make_tuple(atomId, std::get<1>(lenChargeRadical), std::get<2>(lenChargeRadical));
 }
 
 BondType decodeEdgeLabel(const std::string &label) {
@@ -308,7 +311,7 @@ std::string symbolFromAtomId(AtomId atomId) {
 	switch(atomId) {
 #define MOD_toString(s) MOD_toString1(s)
 #define MOD_toString1(s) #s
-#define MDO_CHEM_atomIdIter(r, data, t)				\
+#define MDO_CHEM_atomIdIter(r, data, t)                                         \
 	case BOOST_PP_TUPLE_ELEM(MOD_CHEM_ATOM_DATA_ELEM_SIZE(), 0, t): return MOD_toString(BOOST_PP_TUPLE_ELEM(3, 1, t));
 		BOOST_PP_SEQ_FOR_EACH(MDO_CHEM_atomIdIter, ~, MOD_CHEM_ATOM_DATA())
 	default: MOD_ABORT;
@@ -322,10 +325,10 @@ void appendSymbolFromAtomId(std::string &s, AtomId atomId) {
 	switch(atomId) {
 #define MOD_toString(s) MOD_toString1(s)
 #define MOD_toString1(s) #s
-#define MDO_CHEM_atomIdIter(r, data, t)				\
-	case BOOST_PP_TUPLE_ELEM(MOD_CHEM_ATOM_DATA_ELEM_SIZE(), 0, t):									\
-		for(unsigned int i = 0; i < sizeof(MOD_toString(BOOST_PP_TUPLE_ELEM(3, 1, t))) - 1; i++)	\
-			s += MOD_toString(BOOST_PP_TUPLE_ELEM(3, 1, t))[i];										\
+#define MDO_CHEM_atomIdIter(r, data, t)                                                      \
+	case BOOST_PP_TUPLE_ELEM(MOD_CHEM_ATOM_DATA_ELEM_SIZE(), 0, t):                            \
+		for(unsigned int i = 0; i < sizeof(MOD_toString(BOOST_PP_TUPLE_ELEM(3, 1, t))) - 1; i++) \
+			s += MOD_toString(BOOST_PP_TUPLE_ELEM(3, 1, t))[i];                                    \
 		break;
 		BOOST_PP_SEQ_FOR_EACH(MDO_CHEM_atomIdIter, ~, MOD_CHEM_ATOM_DATA())
 	default: MOD_ABORT;

@@ -29,8 +29,9 @@ Vertices / Atoms
 A vertex encodes an atom with a charge if and only if its label conforms to the following grammar.
 
 .. productionlist:: VertexLabel
-   vertexLabel: `atomSymbol` [ charge ]
+   vertexLabel: `atomSymbol` [ charge ] [ radical ]
    charge: `singleDigit` ('-' | '+')
+   radical: '.'
 
 With :token:`atomSymbol` being a properly capitalised atom symbol.
 

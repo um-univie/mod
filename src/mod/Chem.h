@@ -74,10 +74,14 @@ struct AtomData {
 	// rst:
 	// rst:		Construct atom data with :cpp:var:`AtomIds::Invalid` atom id and neutral charge.
 	constexpr AtomData();
-	// rst: .. function:: constexpr AtomData(AtomId atomId, Charge charge)
+	// rst: .. function:: constexpr explicit AtomData(AtomId atomId)
 	// rst:
-	// rst:		Construct atom data with given atom id and charge.
-	constexpr AtomData(AtomId atomId, Charge charge);
+	// rst:		Construct atom data with neutral charge, no radical, and the given atom id.
+	constexpr explicit AtomData(AtomId atomId);
+	// rst: .. function:: constexpr AtomData(AtomId atomId, Charge charge, bool radical)
+	// rst:
+	// rst:		Construct atom data with given atom id, charge, and radical.
+	constexpr AtomData(AtomId atomId, Charge charge, bool radical);
 	// rst: .. function:: constexpr AtomId getAtomId() const
 	// rst:
 	// rst:		Retrieve the atom id.
@@ -86,6 +90,10 @@ struct AtomData {
 	// rst:
 	// rst:		Retrieve the charge.
 	constexpr Charge getCharge() const;
+	// rst: .. function:: constexpr bool getRadical() const
+	// rst:
+	// rst:		Retrieve the radical status.
+	constexpr bool getRadical() const;
 	friend constexpr bool operator==(const AtomData &a1, const AtomData &a2);
 	// rst: .. function:: friend std::ostream &operator<<(std::ostream &s, const AtomData &data)
 	// rst:
@@ -96,6 +104,7 @@ struct AtomData {
 private:
 	AtomId atomId;
 	Charge charge;
+	bool radical;
 };
 // rst-class-end:
 
@@ -127,7 +136,7 @@ std::ostream &operator<<(std::ostream &s, BondType bt);
 //------------------------------------------------------------------------------
 
 // BOOST_PP_SEQ(BOOST_PP_TUPLE(atomId, symbol, name))
-#define MOD_CHEM_ATOM_DATA()     \
+#define MOD_CHEM_ATOM_DATA()   \
 		((1, H, Hydrogen))         \
 		((2, He, Helium))          \
 		((3, Li, Lithium))         \
@@ -284,11 +293,11 @@ inline constexpr AtomId::operator unsigned char() const {
 
 namespace AtomIds {
 constexpr AtomId Invalid;
-#define MDO_CHEM_atomIdIter(r, data, t)    \
+#define MDO_CHEM_atomIdIter(r, data, t)                                         \
 	constexpr AtomId BOOST_PP_TUPLE_ELEM(3, 2, t)(BOOST_PP_TUPLE_ELEM(MOD_CHEM_ATOM_DATA_ELEM_SIZE(), 0, t));
 BOOST_PP_SEQ_FOR_EACH(MDO_CHEM_atomIdIter, ~, MOD_CHEM_ATOM_DATA())
 #undef MDO_CHEM_atomIdIter
-#define MDO_CHEM_atomIdIter(r, data, t)    \
+#define MDO_CHEM_atomIdIter(r, data, t)                                         \
 	constexpr AtomId BOOST_PP_TUPLE_ELEM(3, 1, t)(BOOST_PP_TUPLE_ELEM(MOD_CHEM_ATOM_DATA_ELEM_SIZE(), 0, t));
 BOOST_PP_SEQ_FOR_EACH(MDO_CHEM_atomIdIter, ~, MOD_CHEM_ATOM_DATA())
 #undef MDO_CHEM_atomIdIter
@@ -310,9 +319,12 @@ inline constexpr Charge::operator signed char() const {
 // AtomData
 //------------------------------------------------------------------------------
 
-inline constexpr AtomData::AtomData() { }
+inline constexpr AtomData::AtomData() : AtomData(AtomIds::Invalid) { }
 
-inline constexpr AtomData::AtomData(AtomId atomId, Charge charge) : atomId(atomId), charge(charge) { }
+inline constexpr AtomData::AtomData(AtomId atomId) : AtomData(atomId, Charge(), false) { }
+
+inline constexpr AtomData::AtomData(AtomId atomId, Charge charge, bool radical)
+: atomId(atomId), charge(charge), radical(radical) { }
 
 inline constexpr AtomId AtomData::getAtomId() const {
 	return atomId;
@@ -322,8 +334,15 @@ inline constexpr Charge AtomData::getCharge() const {
 	return charge;
 }
 
+inline constexpr bool AtomData::getRadical() const {
+	return radical;
+}
+
 inline constexpr bool operator==(const AtomData &a1, const AtomData &a2) {
-	return a1.getAtomId() == a2.getAtomId() && a1.getCharge() == a2.getCharge();
+	return a1.getAtomId() == a2.getAtomId()
+			&& a1.getCharge() == a2.getCharge()
+			&& a1.getRadical() == a2.getRadical()
+			;
 }
 
 } // namespace mod

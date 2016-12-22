@@ -9,6 +9,7 @@
 \usepackage{longtable}
 \usepackage[T1]{fontenc}
 \usepackage{lmodern}
+\usepackage{colortbl}
 
 \tikzset{hnodeNormal/.style={draw,ellipse,minimum height=12, minimum width=17,inner sep=1}}
 \tikzset{tnode/.style={draw,circle,fill=black,inner sep=0,minimum size=3}}
@@ -79,18 +80,21 @@
 	\subsubsection{#1}
 }
 
-% name file fileEsc fileMol fileMolEsc
-\newcommand{\summaryGraph}[5]{
+% file fileEsc
+\newcommand{\summaryGraphFile}[2]{%
+	\fbox{
+	\includegraphics{#1}
+	}\\
+	File: #2
+}
+
+% name {file} {fileMol}
+\newcommand{\summaryGraph}[3]{
 	\subsection{#1}
 	\begin{center}
-		\fbox{
-		\includegraphics{#2}
-		}\\
-		File: #3\\
-		\fbox{
-		\includegraphics{#4}
-		}\\
-		File: #5
+		{#2}
+
+		{#3}
 	\end{center}
 }
 
@@ -112,30 +116,35 @@
 		vertex/.style={draw},
 		normal/.style={->,>=triangle 45} 
 	]
-	\node[vertex,label=above:$L$](L)				{\summaryRuleSide{#1.L}};
-	\node[vertex,label=above:$K$](K)[right=of L]	{\summaryRuleSide{#1.K}};
-	\node[vertex,label=above:$R$](R)[right=of K]	{\summaryRuleSide{#1.R}};
+	\node[vertex,label=above:$L$](L)				{\summaryRuleSide{#1_L}};
+	\node[vertex,label=above:$K$](K)[right=of L]	{\summaryRuleSide{#1_K}};
+	\node[vertex,label=above:$R$](R)[right=of K]	{\summaryRuleSide{#1_R}};
 	\draw[normal](K) to (L);
 	\draw[normal](K) to (R);
 	\end{tikzpicture}\\
-	Files: #2.\{L, K, R\}
+	Files: #2\_\{L, K, R\}
+	\end{center}
+}
+
+% fileCombined fileCombinedEsc
+\newcommand{\summaryRuleCombined}[2]{%
+	\begin{center}
+		\fitpic{#1}\\
+		File: #2
 	\end{center}
 }
 
 % name
-%   file fileEsc
-%   fileMol fileMolEsc
-%   fileCombined fileCombinedEsc
+%   {graphLike}
+%   {molLike}
+%   {fileCombined}
 %	fileConstraints
-\newcommand{\summaryRule}[8]{%
+\newcommand{\summaryRule}[5]{%
 	\subsection{#1}
-	\summaryRuleSpan{#2}{#3}
-	\summaryRuleSpan{#4}{#5}
-	\begin{center}
-		\fitpic{#6}\\
-		File: #7
-	\end{center}
-	\verbatiminput{#8}
+	{#2}
+	{#3}
+	{#4}
+	\verbatiminput{#5}
 }
 
 
@@ -162,30 +171,6 @@
 	Files: #3, #5, #7
 }
 
-% name 
-%	fileLeft	fileLeftEsc
-%	fileContext	fileContextEsc
-%	fileRight	fileRightEsc
-\newcommand{\summaryRuleBoth}[7]{
-	\summaryRuleGV{#1}{#2}{#3}{#4}{#5}{#6}{#7}
-	\begin{center}
-	\begin{tikzpicture}[thick,
-		node distance=20pt,
-		vertex/.style={draw},
-		normal/.style={->,>=triangle 45} 
-	]
-	\node[vertex,label=above:$L$](L)	{\summaryRuleSide{#2.graphDFS}};
-	\node[vertex,label=above:$R$](R)[right=of L]	{\summaryRuleSide{#6.graphDFS}};
-	\draw[normal](L) to (R);
-	\end{tikzpicture}
-	\end{center}
-	Files: #3.graphDFS, #7.graphDFS\\
-	Important note: the OpenBabel depiction uses 1-indexing, instead of 0-indexing.\\
-	Important note: all radicals have been removed from the depiction.\\
-	Important note: the OpenBabel depiciton shows molecule fragments, NOT molecules, which means that all hydrogens are explicit seperate atoms.
-		If any implicit hydrogens are shown, it is probably a bug.
-}
-	
 %	fileComb	fileCombEsc
 %	fileConstraints
 \newcommand{\summaryRuleRest}[3]{
@@ -205,22 +190,22 @@
 		vertex/.style={draw},
 		normal/.style={->,>=triangle 45} 
 	]
-	\node[vertex,label=above:$L$](L)            	{\summaryRuleSide{#1.derL}};
-	\node[vertex,label=above:$K$](K)[right=of L]	{\summaryRuleSide{#1.derK}};
-	\node[vertex,label=above:$R$](R)[right=of K]	{\summaryRuleSide{#1.derR}};
+	\node[vertex,label=above:$L$](L)            	{\summaryRuleSide{#1_derL}};
+	\node[vertex,label=above:$K$](K)[right=of L]	{\summaryRuleSide{#1_derK}};
+	\node[vertex,label=above:$R$](R)[right=of K]	{\summaryRuleSide{#1_derR}};
 	\draw[normal](K) to (L);
 	\draw[normal](K) to (R);
-	\node[vertex,label=below:$G$](G)[below=of L]	{\summaryRuleSide{#3.derG}};
-	\node[vertex,label=below:$D$](D)[right=of G]	{\summaryRuleSide{#3.derD}};
-	\node[vertex,label=below:$H$](H)[right=of D]	{\summaryRuleSide{#3.derH}};
+	\node[vertex,label=below:$G$](G)[below=of L]	{\summaryRuleSide{#3_derG}};
+	\node[vertex,label=below:$D$](D)[right=of G]	{\summaryRuleSide{#3_derD}};
+	\node[vertex,label=below:$H$](H)[right=of D]	{\summaryRuleSide{#3_derH}};
 	\draw[normal](D) to (G);
 	\draw[normal](D) to (H);
 	\draw[normal](L) to (G);
 	\draw[normal](K) to (D);
 	\draw[normal](R) to (H);
 	\end{tikzpicture}\\
-	Files: #2.\{derL,derK,derR\}\\
-	Files: #4.\{derG,derD,derH\}
+	Files: #2\_\{derL,derK,derR\}\\
+	Files: #4\_\{derG,derD,derH\}
 	\end{center}
 }
 

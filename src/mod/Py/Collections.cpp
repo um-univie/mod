@@ -2,7 +2,11 @@
 
 #include <mod/Derivation.h>
 #include <mod/DG.h>
+#include <mod/DGGraphInterface.h>
+#include <mod/DGStrat.h>
+#include <mod/Graph.h>
 #include <mod/RC.h>
+#include <mod/Rule.h>
 
 #include <boost/python/suite/indexing/vector_indexing_suite.hpp>
 
@@ -28,15 +32,14 @@ bool operator==(const Expression&, const Expression&) {
 } // namespace mod
 
 namespace mod {
-class DGStrat;
-class Graph;
-class Rule;
 namespace Py {
 
 void Collections_doExport() {
 	// Vector
 	using VecDerivation = std::vector<mod::Derivation>;
 	py::class_<VecDerivation>("VecDerivation").def(py::vector_indexing_suite<VecDerivation, true>());
+	using VecDGVertex = std::vector<mod::DG::Vertex>;
+	py::class_<VecDGVertex>("VecDGVertex").def(py::vector_indexing_suite<VecDGVertex, true>());
 	using VecDerivationRef = std::vector<mod::DerivationRef>;
 	py::class_<VecDerivationRef>("VecDerivationRef").def(py::vector_indexing_suite<VecDerivationRef, true>());
 	using VecDGStrat = std::vector<std::shared_ptr<mod::DGStrat> >;

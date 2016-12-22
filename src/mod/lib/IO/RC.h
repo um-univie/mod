@@ -1,7 +1,9 @@
 #ifndef MOD_LIB_IO_RC_H
 #define MOD_LIB_IO_RC_H
 
-#include <mod/lib/Rule/Real.h>
+#include <mod/lib/Rules/Real.h>
+
+#include <boost/bimap.hpp>
 
 #include <string>
 
@@ -19,18 +21,21 @@ std::string dot(const lib::RC::Evaluator &rc);
 std::string svg(const lib::RC::Evaluator &rc);
 std::string pdf(const lib::RC::Evaluator &rc);
 
-void test(const lib::Rule::Real &rFirst, const lib::Rule::Real &rSecond, const lib::Rule::Real::CoreCoreMap &match, const lib::Rule::Real &rNew);
+using CoreCoreMap = boost::bimap<lib::Rules::Vertex, lib::Rules::Vertex>;
+
+void test(const lib::Rules::Real &rFirst, const lib::Rules::Real &rSecond, const CoreCoreMap &match, const lib::Rules::Real &rNew);
 
 template<typename VertexMap>
-void test(const lib::Rule::Real &rFirst, const lib::Rule::Real &rSecond, const VertexMap &map, const lib::Rule::Real &rNew) {
-	lib::Rule::Real::CoreCoreMap match;
+void test(const lib::Rules::Real &rFirst, const lib::Rules::Real &rSecond, const VertexMap &map, const lib::Rules::Real &rNew) {
+	CoreCoreMap match;
 	for(auto vFirst : asRange(vertices(rFirst.getGraph()))) {
 		auto vSecond = get_inverse(map, rSecond.getGraph(), rFirst.getGraph(), vFirst);
-		if(vSecond == boost::graph_traits<lib::Rule::GraphType>::null_vertex()) continue;
-		match.insert(lib::Rule::Real::CoreCoreMap::relation(vFirst, vSecond));
+		if(vSecond == boost::graph_traits<lib::Rules::GraphType>::null_vertex()) continue;
+		match.insert(CoreCoreMap::relation(vFirst, vSecond));
 	}
 	test(rFirst, rSecond, match, rNew);
 }
+
 } // namespace Write
 } // namespace RC
 } // namespace IO

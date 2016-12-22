@@ -24,9 +24,10 @@ when `Open Babel`_ can not be used.
 GML (Rule)
 ##########
 
-A rule :math:`(L\leftarrow K\rightarrow R)` in GML format is specified as three graphs;
+A rule :math:`(L\leftarrow K\rightarrow R)` in :ref:`GML` format is specified as three graphs;
 :math:`L\backslash K`, :math:`K`, and :math:`R\backslash K`.
-Each graph is specified a a list of vertices and edges. The formal grammar for the GML format is the following.
+Each graph is specified a a list of vertices and edges, similar to a graph in GML format.
+The key-value structure is exemplified by the following grammar.
 
 .. productionlist:: RuleGMLGrammar
    ruleGML: 'rule [' 
@@ -36,28 +37,21 @@ Each graph is specified a a list of vertices and edges. The formal grammar for t
           :    [ `rightSide` ]
           :    `matchConstraint`*
           : ']'
-   ruleId: 'ruleID "' `quoteEscapedString` '"'
-   leftSide: 'left ['
-           :    (`node` | `edge`)*
-           : ']'
-   context: 'context ['
-          :    (`node` | `edge`)*
-          : ']'
-   rightSide: 'right ['
-            :    (`node` | `edge`)*
-            : ']'
-   node: 'node [ id' `unsignedInt` 'label "' `quoteEscapedString` '" ]'
-   edge: 'edge [ source' `unsignedInt` 'target' `unsignedInt` 'label "' `quoteEscapedString` '" ]'
+   ruleId: 'ruleID' `quoteEscapedString`
+   leftSide: 'left [' (`node` | `edge`)* ']'
+   context: 'context [' (`node` | `edge`)* ']'
+   rightSide: 'right [' (`node` | `edge`)* ']'
+   node: 'node [ id' `int` 'label' `quoteEscapedString` ']'
+   edge: 'edge [ source' `int` 'target' `int` 'label' `quoteEscapedString` ']'
    matchConstraint: `adjacency`
    adjacency: 'constrainAdj ['
-            :    'id' `unsignedInt`
-            :    'op' `op`
+            :    'id' `int`
+            :    'op "' `op` '"'
             :    'count' `unsignedInt`
             :    [ 'nodeLabels [' `labelList` ']' ]
             :    [ 'edgeLabels [' `labelList` ']' ]
             : ']'
-   labelList: ('label "' `quoteEscapedString` '"')*
+   labelList: ('label' `quoteEscapedString`)*
    op: '<' | '<=' | '=' | '>=' | '>'
 
-A :token:`quoteEscapedString` is zero or more characters in which a double quotation character must be escaped, i.e., ``\"``.
-GML code may have line comments, starting with ``#``, which are ignored during parsing.
+Note though that list elements can appear in any order.

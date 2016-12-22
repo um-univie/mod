@@ -21,19 +21,7 @@ struct VectorVertexMap {
 	using GraphLeft = GraphLeftT;
 	using GraphRight = GraphRightT;
 	using Storable = std::true_type;
-
-	template<typename GraphLeftU, typename GraphRightU>
-	struct Reinterpret {
-		using type = VectorVertexMap<GraphLeftU, GraphRightU>;
-	};
-
-	template<typename GraphLeftU, typename GraphRightU>
-	static VectorVertexMap<GraphLeftU, GraphRightU>
-	reinterpret(VectorVertexMap<GraphLeft, GraphRight> &&m, const GraphLeft &gLeft, const GraphRight &gRight,
-			const GraphLeftU &gLeftReinterpreted, const GraphRightU &gRightReinterpreted) {
-		// this of course assumes that the vertex_descriptors represent exactly the same on the reinterpreted graphs
-		return VectorVertexMap<GraphLeftU, GraphRightU>(std::move(m.data), gLeftReinterpreted, gRightReinterpreted);
-	}
+public:
 
 	VectorVertexMap(const GraphLeft &gLeft, const GraphRight &gRight)
 	: data(num_vertices(gLeft), boost::graph_traits<GraphRight>::null_vertex()) { }
@@ -54,6 +42,8 @@ struct VectorVertexMap {
 private:
 	template<typename GraphLeftU, typename GraphRightU>
 	friend class VectorVertexMap;
+	template<typename M>
+	friend class VertexMapTraits;
 
 	VectorVertexMap(std::vector<typename boost::graph_traits<GraphRight>::vertex_descriptor> &&data, const GraphLeft &gLeft, const GraphRight &gRight)
 	: data(std::move(data)) {
@@ -64,19 +54,39 @@ private:
 public:
 
 	friend typename boost::graph_traits<GraphRight>::vertex_descriptor
-	get(const VectorVertexMap<GraphLeft, GraphRight> &m, const GraphLeft &gLeft, const GraphRight &gRight,
+	get(const VectorVertexMap &m, const GraphLeft &gLeft, const GraphRight &gRight,
 			typename boost::graph_traits<GraphLeft>::vertex_descriptor v) {
 		auto vId = get(boost::vertex_index_t(), gLeft, v);
 		assert(vId < m.data.size());
 		return m.data[vId];
 	}
 
-	friend void put(VectorVertexMap<GraphLeft, GraphRight> &m, const GraphLeft &gLeft, const GraphRight &gRight,
+	friend void put(VectorVertexMap &m, const GraphLeft &gLeft, const GraphRight &gRight,
 			typename boost::graph_traits<GraphLeft>::vertex_descriptor vLeft,
 			typename boost::graph_traits<GraphRight>::vertex_descriptor vRight) {
 		auto vId = get(boost::vertex_index_t(), gLeft, vLeft);
 		assert(vId < m.data.size());
 		m.data[vId] = vRight;
+	}
+};
+
+template<typename GraphLeftT, typename GraphRightT>
+struct VertexMapTraits<VectorVertexMap<GraphLeftT, GraphRightT> > {
+	using GraphLeft = typename VectorVertexMap<GraphLeftT, GraphRightT>::GraphLeft;
+	using GraphRight = typename VectorVertexMap<GraphLeftT, GraphRightT>::GraphRight;
+	using Storable = typename VectorVertexMap<GraphLeftT, GraphRightT>::Storable;
+
+	template<typename GraphLeftU, typename GraphRightU>
+	struct Reinterpret {
+		using type = VectorVertexMap<GraphLeftU, GraphRightU>;
+	};
+
+	template<typename GraphLeftU, typename GraphRightU>
+	static VectorVertexMap<GraphLeftU, GraphRightU>
+	reinterpret(VectorVertexMap<GraphLeft, GraphRight> &&m, const GraphLeft &gLeft, const GraphRight &gRight,
+			const GraphLeftU &gLeftReinterpreted, const GraphRightU &gRightReinterpreted) {
+		// this of course assumes that the vertex_descriptors represent exactly the same on the reinterpreted graphs
+		return VectorVertexMap<GraphLeftU, GraphRightU>(std::move(m.data), gLeftReinterpreted, gRightReinterpreted);
 	}
 };
 
@@ -132,9 +142,9 @@ struct InvertibleVectorVertexMap {
 	backward(num_vertices(gRight), boost::graph_traits<GraphLeft>::null_vertex()) { }
 
 	template<typename VertexMap>
-	InvertibleVectorVertexMap(VertexMap &&m, const GraphLeft &gLeft, const GraphRight &gRight)
+	InvertibleVectorVertexMap(const VertexMap &m, const GraphLeft &gLeft, const GraphRight &gRight)
 	: InvertibleVectorVertexMap(gLeft, gRight) {
-		BOOST_CONCEPT_ASSERT((InvertibleVertexMapConcept<typename std::remove_reference<VertexMap>::type>));
+		BOOST_CONCEPT_ASSERT((InvertibleVertexMapConcept<VertexMap>));
 		for(auto vLeft : asRange(vertices(gLeft))) {
 			auto vId = get(boost::vertex_index_t(), gLeft, vLeft);
 			forward[vId] = get(m, gLeft, gRight, vLeft);
@@ -150,7 +160,7 @@ struct InvertibleVectorVertexMap {
 					assert(get_inverse(*this, gLeft, gRight, vRight) == vLeft);
 			}
 			for(auto vRight : asRange(vertices(gRight))) {
-				auto vLeft = get(*this, gLeft, gRight, vRight);
+				auto vLeft = get_inverse(*this, gLeft, gRight, vRight);
 				if(vLeft != boost::graph_traits<GraphLeft>::null_vertex())
 					assert(get(*this, gLeft, gRight, vLeft) == vRight);
 			}
@@ -182,7 +192,7 @@ private:
 public:
 
 	friend typename boost::graph_traits<GraphRight>::vertex_descriptor
-	get(const InvertibleVectorVertexMap<GraphLeft, GraphRight> &m, const GraphLeft &gLeft, const GraphRight &gRight,
+	get(const InvertibleVectorVertexMap &m, const GraphLeft &gLeft, const GraphRight &gRight,
 			typename boost::graph_traits<GraphLeft>::vertex_descriptor v) {
 		assert(v != boost::graph_traits<GraphLeft>::null_vertex());
 		auto vId = get(boost::vertex_index_t(), gLeft, v);
@@ -191,7 +201,7 @@ public:
 	}
 
 	friend typename boost::graph_traits<GraphLeft>::vertex_descriptor
-	get_inverse(const InvertibleVectorVertexMap<GraphLeft, GraphRight> &m, const GraphLeft &gLeft, const GraphRight &gRight,
+	get_inverse(const InvertibleVectorVertexMap &m, const GraphLeft &gLeft, const GraphRight &gRight,
 			typename boost::graph_traits<GraphRight>::vertex_descriptor v) {
 		assert(v != boost::graph_traits<GraphRight>::null_vertex());
 		auto vId = get(boost::vertex_index_t(), gRight, v);
@@ -199,7 +209,7 @@ public:
 		return m.backward[vId];
 	}
 
-	friend void put(InvertibleVectorVertexMap<GraphLeft, GraphRight> &m, const GraphLeft &gLeft, const GraphRight &gRight,
+	friend void put(InvertibleVectorVertexMap &m, const GraphLeft &gLeft, const GraphRight &gRight,
 			typename boost::graph_traits<GraphLeft>::vertex_descriptor vLeft,
 			typename boost::graph_traits<GraphRight>::vertex_descriptor vRight) {
 		assert(vLeft != boost::graph_traits<GraphLeft>::null_vertex());

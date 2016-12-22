@@ -29,7 +29,10 @@ def _checkSettings():
 def outputFile(f):
 	_checkSettings()
 	mod.post("post \"cp '%s' '%s/'\"" % (f, _figFolder))
-	return _figFolder + "/" +  os.path.basename(f)
+	res = _figFolder + "/" +  os.path.basename(f)
+	if res.endswith(".pdf"):
+		res = res[0:-4]
+	return res
 
 def texDefine(id, value):
 	_checkSettings()
@@ -77,9 +80,9 @@ def rule(id, r, p):
 		_rules.append(r)
 	f = r.print(p, p)
 	f = f[0]
-	fL = outputFile(f + ".L.pdf")
-	fK = outputFile(f + ".K.pdf")
-	fR = outputFile(f + ".R.pdf")
+	fL = outputFile(f + "_L.pdf")
+	fK = outputFile(f + "_K.pdf")
+	fR = outputFile(f + "_R.pdf")
 	texDefine("rule-" + str(id), "{%s}{%s}{%s}" % (fL, fK, fR))
 
 def ruleGML(id, data, printer):

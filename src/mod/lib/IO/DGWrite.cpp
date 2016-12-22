@@ -5,20 +5,17 @@
 #include <mod/Graph.h>
 #include <mod/Rule.h>
 #include <mod/lib/Algorithm.h>
-#include <mod/lib/Chem/SBML.h>
 #include <mod/lib/DG/Dump.h>
 #include <mod/lib/DG/Hyper.h>
-#include <mod/lib/DG/Matrix.h>
 #include <mod/lib/Graph/Single.h>
+#include <mod/lib/GraphMorphism/VF2Finder.hpp>
 #include <mod/lib/IO/DGWriteDetail.h>
 #include <mod/lib/IO/Graph.h>
 #include <mod/lib/IO/IO.h>
 #include <mod/lib/IO/Rule.h>
-#include <mod/lib/RC/Core.h>
+#include <mod/lib/RC/ComposeRuleReal.h>
 #include <mod/lib/RC/MatchMaker/Super.h>
-#include <mod/lib/Rule/Real.h>
-
-#include <jla_boost/graph/morphism/VF2Finder.hpp>
+#include <mod/lib/Rules/Real.h>
 
 #include <boost/lexical_cast.hpp>
 
@@ -87,7 +84,7 @@ std::string pdfNonHyper(const lib::DG::NonHyper &nonHyper) {
 
 void TikzPrinter::begin() {
 	s << "\\begin{tikzpicture}[" << getConfig().dg.tikzPictureOption.get() << "]\n";
-	s << "\\input{" << coords << "}" << std::endl;
+	s << "\\input{\\modInputPrefix/" << coords << "}" << std::endl;
 }
 
 void TikzPrinter::end() {
@@ -104,7 +101,7 @@ void TikzPrinter::vertex(const std::string &id, const std::string &label, const 
 	s << "\\node[modStyleDGHyperVertex, at=(v-coord-" << id << ")";
 	if(!colour.empty()) s << ", draw=" << colour;
 	s << "] (v-" << id << ") {";
-	if(haveImage) s << "\\includegraphics[scale=\\modDGHyperImageScale] {" << image << "}";
+	if(haveImage) s << "\\includegraphics[scale=\\modDGHyperImageScale] {\\modInputPrefix/" << image << "}";
 	if(haveImage && haveLabel) s << "\\\\";
 	if(haveLabel) {
 		s << "{";
@@ -492,8 +489,8 @@ Options Printer::prePrint(const Data &data) {
 		pushEdgeLabel([this](Vertex v, const lib::DG::Hyper & dg) -> std::string {
 			const auto &g = dg.getGraph();
 			assert(g[v].kind == lib::DG::HyperVertexKind::Edge);
-					std::string res;
-					bool first = true;
+			std::string res;
+			bool first = true;
 			for(auto *r : g[v].rules) {
 				if(!first) res += this->edgeLabelSep;
 						first = false;
@@ -508,8 +505,8 @@ Options Printer::prePrint(const Data &data) {
 		pushEdgeLabel([this](Vertex v, const lib::DG::Hyper & dg) -> std::string {
 			const auto &g = dg.getGraph();
 			assert(g[v].kind == lib::DG::HyperVertexKind::Edge);
-					std::string res;
-					bool first = true;
+			std::string res;
+			bool first = true;
 			for(auto *r : g[v].rules) {
 				if(!first) res += this->edgeLabelSep;
 						first = false;
@@ -653,7 +650,7 @@ void generic(const lib::DG::Hyper &dg, const Options &options, SyntaxPrinter &pr
 	detail::forEachVertex(dg, options, print, true, [&dg, &options, &print, imageCreator](DupVertex vDup) {
 		Vertex v = options.dupGraph[vDup].v;
 		std::string label = options.getVertexLabel(dg, vDup);
-				std::string image;
+		std::string image;
 		if(options.withGraphImages) image = imageCreator(*dg.getGraph()[v].graph);
 				std::string colour = options.getVertexColour(v, dg);
 				std::string id = options.vDupToId(vDup, dg);
@@ -664,9 +661,9 @@ void generic(const lib::DG::Hyper &dg, const Options &options, SyntaxPrinter &pr
 	detail::forEachExplicitHyperEdge(dg, options, print, [&dg, &options, &print](DupVertex vDup) {
 		Vertex v = options.dupGraph[vDup].v;
 		std::string id = options.vDupToId(vDup, dg);
-				std::string label = options.getHyperedgeLabel(v, dg);
-				std::string colour = options.getHyperedgeColour(v, dg);
-				print.hyperEdge(id, label, colour);
+		std::string label = options.getHyperedgeLabel(v, dg);
+		std::string colour = options.getHyperedgeColour(v, dg);
+		print.hyperEdge(id, label, colour);
 	});
 
 	// connectors
@@ -784,7 +781,7 @@ std::string coords(const lib::DG::Hyper &dg, const Options &options, const IO::G
 	std::string type = "dgHyper";
 	if(getConfig().dg.useDotCoords.get()) type = "dgHyperDot";
 	IO::post() << "coordsFromGV " << type << " \"" << fileNoExt << "\"" << std::endl;
-	return fileNoExt + ".coord.tex";
+	return fileNoExt + "_coord.tex";
 }
 
 std::pair<std::string, std::string> tikz(const lib::DG::Hyper &dg, const Options &options, const IO::Graph::Write::Options &graphOptions) {
@@ -817,9 +814,11 @@ void summary(const Data &data, Printer &printer, const IO::Graph::Write::Options
 	std::string fileNoExt = printer.printHyper(data, graphOptions);
 	const auto &dg = data.getDG();
 	fileNoExt.erase(end(fileNoExt) - 4, end(fileNoExt));
-	IO::post() << "summaryDGHyper \"dg_" << dg.getNonHyper().getId() << "\" \"" << fileNoExt << "\"" << std::endl;
-	std::string fileNoExtNonHyper = pdfNonHyper(dg.getNonHyper());
-	IO::post() << "summaryDGNonHyper \"dg_" << dg.getNonHyper().getId() << "\" \"" << fileNoExtNonHyper << "\"" << std::endl;
+	IO::post() << "summaryDGHyper \"dg_" << dg.getNonHyper().getId() << "\" \"" << fileNoExt << "\"\n";
+	if(getConfig().dg.printNonHyper.get()) {
+		std::string fileNoExtNonHyper = pdfNonHyper(dg.getNonHyper());
+		IO::post() << "summaryDGNonHyper \"dg_" << dg.getNonHyper().getId() << "\" \"" << fileNoExtNonHyper << "\"\n";
+	}
 }
 
 } // namespace Write

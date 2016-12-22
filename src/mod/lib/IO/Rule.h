@@ -2,7 +2,8 @@
 #define MOD_LIB_IO_RULE_H
 
 #include <mod/lib/IO/Graph.h> // to make sure the write options are defined
-#include <mod/lib/Rule/Real.h>
+//#include <mod/lib/Graph/GraphDecl.h>
+#include <mod/lib/Rules/LabelledRule.h>
 
 #include <boost/optional.hpp>
 
@@ -10,47 +11,49 @@
 
 namespace mod {
 namespace lib {
+namespace Rules {
+struct Real;
+} // namespace Rules
 namespace IO {
-namespace Rule {
+namespace Rules {
 namespace Read {
 
 struct Data {
-	boost::optional<lib::Rule::LabelledRule> rule;
+	boost::optional<lib::Rules::LabelledRule> rule;
 	boost::optional<std::string> name;
 };
 
 Data gml(std::istream &s, std::ostream &err);
 } // namespace Read
 namespace Write {
-typedef IO::Graph::Write::Options Options;
-using CoreVertex = lib::Rule::Vertex;
-using CoreEdge = lib::Rule::Edge;
+using Options = IO::Graph::Write::Options;
+using CoreVertex = lib::Rules::Vertex;
+using CoreEdge = lib::Rules::Edge;
 // returns the filename _with_ extension
-void gml(const lib::Rule::Real &r, bool withCoords, std::ostream &s);
-std::string gml(const lib::Rule::Real &r, bool withCoords);
+void gml(const lib::Rules::Real &r, bool withCoords, std::ostream &s);
+std::string gml(const lib::Rules::Real &r, bool withCoords);
 // returns the filename without extension
-std::string dotCombined(const lib::Rule::Real &r);
-std::string svgCombined(const lib::Rule::Real &r);
-std::string pdfCombined(const lib::Rule::Real &r);
+std::string dotCombined(const lib::Rules::Real &r);
+std::string svgCombined(const lib::Rules::Real &r);
+std::string pdfCombined(const lib::Rules::Real &r);
 // returns the filename _without_ extension
-std::string dot(const lib::Rule::Real &r); // does not handle labels correctly, is for coordinate generation
-std::string coords(const lib::Rule::Real &r, unsigned int idOffset);
-std::pair<std::string, std::string> tikz(const std::string &fileCoordsNoExt, const lib::Rule::Real &r, unsigned int idOffset, const Options &options,
+std::string dot(const lib::Rules::Real &r); // does not handle labels correctly, is for coordinate generation
+std::string coords(const lib::Rules::Real &r, unsigned int idOffset, int rotation);
+std::pair<std::string, std::string> tikz(const std::string &fileCoordsNoExt, const lib::Rules::Real &r, unsigned int idOffset, const Options &options,
 		const std::string &suffixL, const std::string &suffixK, const std::string &suffixR,
 		std::function<bool(CoreVertex) > visible, std::function<std::string(CoreVertex) > vColour, std::function<std::string(CoreEdge) > eColour,
-		std::function<bool(CoreVertex)> disallowCollapse);
-std::pair<std::string, std::string> tikz(const lib::Rule::Real &r, unsigned int idOffset, const Options &options,
+		std::function<bool(CoreVertex) > disallowCollapse);
+std::pair<std::string, std::string> tikz(const lib::Rules::Real &r, unsigned int idOffset, const Options &options,
 		const std::string &suffixL, const std::string &suffixK, const std::string &suffixR,
 		std::function<bool(CoreVertex) > visible, std::function<std::string(CoreVertex) > vColour, std::function<std::string(CoreEdge) > eColour,
-		std::function<bool(CoreVertex)> disallowCollapse);
-std::string pdf(const lib::Rule::Real &r, const Options &options,
+		std::function<bool(CoreVertex) > disallowCollapse);
+std::string pdf(const lib::Rules::Real &r, const Options &options,
 		const std::string &suffixL, const std::string &suffixK, const std::string &suffixR,
 		std::function<bool(CoreVertex) > visible, std::function<std::string(CoreVertex) > vColour, std::function<std::string(CoreEdge) > eColour);
-//std::string pdfCombined(const lib::Rule::Real &r, const Options &options); // TODO
-std::pair<std::string, std::string> summary(const lib::Rule::Real &r);
-std::pair<std::string, std::string> summary(const lib::Rule::Real &r, const Options &first, const Options &second);
+std::pair<std::string, std::string> summary(const lib::Rules::Real &r);
+std::pair<std::string, std::string> summary(const lib::Rules::Real &r, const Options &first, const Options &second);
 } // namespace Write
-} // namespace Rule
+} // namespace Rules
 } // namespace IO
 } // namespace lib
 } // namespace mod

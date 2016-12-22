@@ -2,24 +2,20 @@
 #define MOD_LIB_GRAPH_MERGE_H
 
 #include <mod/lib/Graph/Base.h>
-#include <mod/lib/Graph/Properties/Molecule.h>
 
 namespace mod {
 namespace lib {
 namespace Graph {
+struct PropMolecule;
+struct PropString;
 struct Single;
 
-class Merge : public Base {
-	Merge(const Merge&) = delete;
-	Merge &operator=(const Merge&) = delete;
-	Merge(Merge&&) = delete;
-	Merge &operator=(Merge&&) = delete;
-public:
+struct Merge : public Base {
 	Merge();
 	~Merge();
 	Merge *clone() const;
 	const GraphType &getGraph() const;
-	const PropStringType &getStringState() const;
+	const PropString &getStringState() const;
 	const PropMolecule &getMoleculeState() const;
 	void printName(std::ostream &s) const;
 	void mergeWith(const Single &g);
@@ -32,7 +28,7 @@ private:
 private:
 	bool locked;
 	mutable std::unique_ptr<GraphType> graphBoost;
-	mutable std::unique_ptr<PropStringType> pString;
+	mutable std::unique_ptr<PropString> pString;
 	mutable std::unique_ptr<PropMolecule> moleculeState;
 public:
 	static bool equal(const Merge &g1, const Merge &g2);

@@ -4,7 +4,6 @@
 #include <mod/DGStrat.h>
 
 #include <mod/lib/DG/NonHyper.h>
-#include <mod/lib/Graph/Base.h>
 
 #include <iosfwd>
 #include <vector>
@@ -18,9 +17,9 @@ class Base;
 class Merge;
 class Single;
 } // namespace Graph
-namespace Rule {
-class Base;
-} // namespace Rule
+namespace Rules {
+class Real;
+} // namespace Rules
 namespace DG {
 namespace Strategies {
 class GraphState;
@@ -35,12 +34,12 @@ struct ExecutionEnv {
 	virtual bool checkLeftPredicate(const mod::Derivation &d) const = 0;
 	// but here everything is defined
 	virtual bool checkRightPredicate(const mod::Derivation &d) const = 0;
-	virtual std::shared_ptr<mod::Graph> checkIfNew(std::unique_ptr<lib::Graph::GraphType> g, std::unique_ptr<lib::Graph::PropStringType> pString) const = 0;
+	virtual std::shared_ptr<mod::Graph> checkIfNew(std::unique_ptr<lib::Graph::GraphType> g, std::unique_ptr<lib::Graph::PropString> pString) const = 0;
 	virtual void giveProductStatus(std::shared_ptr<mod::Graph> g) = 0;
 	virtual bool addProduct(std::shared_ptr<mod::Graph> g) = 0;
 	virtual const lib::Graph::Merge * addToMergeStore(const lib::Graph::Merge *g) = 0;
-	virtual bool isDerivation(const lib::Graph::Base *left, const lib::Graph::Base *right, const lib::Rule::Base *r) const = 0;
-	virtual bool suggestDerivation(const lib::Graph::Base *left, const lib::Graph::Base *right, const lib::Rule::Base *r) = 0;
+	virtual bool isDerivation(const lib::Graph::Base *left, const lib::Graph::Base *right, const lib::Rules::Real *r) const = 0;
+	virtual bool suggestDerivation(const lib::Graph::Base *left, const lib::Graph::Base *right, const lib::Rules::Real *r) = 0;
 	virtual void pushLeftPredicate(std::shared_ptr<mod::Function<bool(const mod::Derivation&)> > pred) = 0;
 	virtual void pushRightPredicate(std::shared_ptr<mod::Function<bool(const mod::Derivation&)> > pred) = 0;
 	virtual void popLeftPredicate() = 0;

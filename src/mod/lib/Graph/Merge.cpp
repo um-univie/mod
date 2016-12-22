@@ -32,7 +32,7 @@ const GraphType &Merge::getGraph() const {
 	return *graphBoost;
 }
 
-const PropStringType &Merge::getStringState() const {
+const PropString &Merge::getStringState() const {
 	calcCache();
 	assert(pString);
 	return *pString;
@@ -78,14 +78,14 @@ void Merge::calcCache() const {
 	assert(getSingles().size() > 0);
 	if(graphBoost) return;
 	graphBoost.reset(new GraphType());
-	pString.reset(new PropStringType(*graphBoost));
+	pString.reset(new PropString(*graphBoost));
 	for(const Graph::Single *g : getSingles()) doMerge(*g);
 	moleculeState.reset(new PropMolecule(*graphBoost, *pString));
 }
 
 void Merge::doMerge(const Single& src) const {
 	const GraphType &sourceBoost = src.getGraph();
-	const PropStringType &sourceLabelState = src.getStringState();
+	const PropString &sourceLabelState = src.getStringState();
 	Vertex map[num_vertices(sourceBoost)];
 
 	for(Vertex v : asRange(vertices(sourceBoost))) {

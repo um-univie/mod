@@ -1,93 +1,34 @@
 #include "Graph.h"
 
-#include <mod/Chem.h>
-#include <mod/Config.h>
 #include <mod/Error.h>
+#include <mod/GraphGraphInterface.h>
+#include <mod/GraphPrinter.h>
 #include <mod/Misc.h>
 #include <mod/lib/Graph/Single.h>
 #include <mod/lib/Graph/Properties/Depiction.h>
+#include <mod/lib/Graph/Properties/Molecule.h>
+#include <mod/lib/Graph/Properties/String.h>
 #include <mod/lib/GraphPimpl.h>
 #include <mod/lib/IO/Graph.h>
-#include <mod/lib/IO/IO.h>
 
-#include <jla_boost/graph/PairToRangeAdaptor.hpp>
-#include <jla_boost/Memory.hpp>
-
-#include <boost/concept_check.hpp>
 #include <boost/graph/connected_components.hpp>
 
-#include <limits>
-#include <sstream>
+#include <cassert>
 
 namespace mod {
-
-//------------------------------------------------------------------------------
-// Vertex
-//------------------------------------------------------------------------------
-
-MOD_GRAPHPIMPL_Define_Vertex(Graph, graph, g->getGraph().getGraph())
-MOD_GRAPHPIMPL_Define_Vertex_Undirected(Graph, graph, g->getGraph().getGraph())
-
-const std::string &Graph::Vertex::getStringLabel() const {
-	if(!g) throw LogicError("Can not get string label on a null vertex.");
-	const auto &graph = g->getGraph().getGraph();
-	using boost::vertices;
-	auto v = *(vertices(graph).first + vId);
-	return g->getGraph().getStringState()[v];
-}
-
-AtomId Graph::Vertex::getAtomId() const {
-	if(!g) throw LogicError("Can not get atom id on a null vertex.");
-	const auto &graph = g->getGraph().getGraph();
-	using boost::vertices;
-	auto v = *(vertices(graph).first + vId);
-	return g->getGraph().getMoleculeState()[v].getAtomId();
-}
-
-Charge Graph::Vertex::getCharge() const {
-	if(!g) throw LogicError("Can not get charge on a null vertex.");
-	const auto &graph = g->getGraph().getGraph();
-	using boost::vertices;
-	auto v = *(vertices(graph).first + vId);
-	return g->getGraph().getMoleculeState()[v].getCharge();
-}
-
-//------------------------------------------------------------------------------
-// Edge
-//------------------------------------------------------------------------------
-
-MOD_GRAPHPIMPL_Define_Indices(Graph, graph, g->getGraph().getGraph())
-
-BOOST_CONCEPT_ASSERT((boost::ForwardIterator<Graph::VertexIterator>));
-BOOST_CONCEPT_ASSERT((boost::ForwardIterator<Graph::EdgeIterator>));
-BOOST_CONCEPT_ASSERT((boost::ForwardIterator<Graph::IncidentEdgeIterator>));
-
-const std::string &Graph::Edge::getStringLabel() const {
-	if(!g) throw LogicError("Can not get string label on a null edge.");
-	const auto &graph = g->getGraph().getGraph();
-	using boost::vertices;
-	auto v = *(vertices(graph).first + vId);
-	auto e = *(out_edges(v, graph).first + eId);
-	return g->getGraph().getStringState()[e];
-}
-
-BondType Graph::Edge::getBondType() const {
-	if(!g) throw LogicError("Can not get bond type on a null edge.");
-	const auto &graph = g->getGraph().getGraph();
-	using boost::vertices;
-	auto v = *(vertices(graph).first + vId);
-	auto e = *(out_edges(v, graph).first + eId);
-	return g->getGraph().getMoleculeState()[e];
-}
 
 //------------------------------------------------------------------------------
 // Graph
 //------------------------------------------------------------------------------
 
 struct Graph::Pimpl {
-	Pimpl(std::unique_ptr<lib::Graph::Single> g);
+
+	Pimpl(std::unique_ptr<lib::Graph::Single> g) : g(std::move(g)) {
+		assert(this->g);
+	}
 public:
 	const std::unique_ptr<lib::Graph::Single> g;
+	std::unique_ptr<const std::map<int, std::size_t> > externalToInternalIds;
 };
 
 Graph::Graph(std::unique_ptr<lib::Graph::Single> g) : p(new Pimpl(std::move(g))) { }
@@ -208,7 +149,7 @@ std::size_t Graph::monomorphism(std::shared_ptr<mod::Graph> g, std::size_t maxNu
 }
 
 std::shared_ptr<Graph> Graph::makePermutation() const {
-	auto gPerm = makeGraph(make_unique<lib::Graph::Single>(lib::Graph::makePermutation(getGraph())));
+	auto gPerm = makeGraph(std::make_unique<lib::Graph::Single>(lib::Graph::makePermutation(getGraph())));
 	gPerm->setName(getName() + " perm");
 	return gPerm;
 }
@@ -229,12 +170,11 @@ std::string Graph::getImageCommand() const {
 	return getGraph().getDepictionData().getImageCommand();
 }
 
-//------------------------------------------------------------------------------
-// Pimpl impl
-//------------------------------------------------------------------------------
-
-Graph::Pimpl::Pimpl(std::unique_ptr<lib::Graph::Single> g) : g(std::move(g)) {
-	assert(this->g);
+Graph::Vertex Graph::getVertexFromExternalId(int id) const {
+	if(!p->externalToInternalIds) return Vertex();
+	auto iter = p->externalToInternalIds->find(id);
+	if(iter == end(*p->externalToInternalIds)) return Vertex();
+	return Vertex(p->g->getAPIReference(), iter->second);
 }
 
 //------------------------------------------------------------------------------
@@ -243,21 +183,22 @@ Graph::Pimpl::Pimpl(std::unique_ptr<lib::Graph::Single> g) : g(std::move(g)) {
 
 namespace {
 
-std::shared_ptr<Graph> handleLoadedGraph(
-		std::unique_ptr<lib::Graph::GraphType> gBoost,
-		std::unique_ptr<lib::Graph::PropStringType> pString, const std::string &source,
+std::shared_ptr<Graph> handleLoadedGraph(lib::IO::Graph::Read::Data data, const std::string &source,
 		std::ostringstream &err) {
-	if(!gBoost || !pString)
+	if(!data.graph) {
 		throw InputError("Error in graph loading from " + source + ".\n" + err.str());
-	{ // check connectedness
-		std::vector<std::size_t> cMap(num_vertices(*gBoost));
-		auto numComponents = boost::connected_components(*gBoost, cMap.data());
-		if(numComponents > 1)
-			throw InputError("Error in graph loading from " + source
-				+ ".\nThe graph is not connected (" + std::to_string(numComponents) + " components).");
 	}
-	auto gInternal = make_unique<lib::Graph::Single>(std::move(gBoost), std::move(pString));
-	std::shared_ptr<Graph> g = Graph::makeGraph(std::move(gInternal));
+	{ // check connectedness
+		std::vector<std::size_t> cMap(num_vertices(*data.graph));
+		auto numComponents = boost::connected_components(*data.graph, cMap.data());
+		if(numComponents > 1) {
+			data.clear();
+			throw InputError("Error in graph loading from " + source
+					+ ".\nThe graph is not connected (" + std::to_string(numComponents) + " components).");
+		}
+	}
+	auto gInternal = std::make_unique<lib::Graph::Single>(std::move(data.graph), std::move(data.label));
+	std::shared_ptr<Graph> g = Graph::makeGraph(std::move(gInternal), std::move(data.externalToInternalIds));
 	return g;
 }
 
@@ -267,7 +208,7 @@ std::shared_ptr<Graph> Graph::graphGMLString(const std::string &data) {
 	std::istringstream ss(data);
 	std::ostringstream err;
 	auto gData = lib::IO::Graph::Read::gml(ss, err);
-	return handleLoadedGraph(std::move(gData.first), std::move(gData.second), "inline GML string", err);
+	return handleLoadedGraph(std::move(gData), "inline GML string", err);
 }
 
 std::shared_ptr<Graph> Graph::graphGML(const std::string &file) {
@@ -279,120 +220,33 @@ std::shared_ptr<Graph> Graph::graphGML(const std::string &file) {
 		throw InputError(err.str());
 	}
 	auto gData = lib::IO::Graph::Read::gml(ifs, err);
-	return handleLoadedGraph(std::move(gData.first), std::move(gData.second), "file, '" + file + "'", err);
+	return handleLoadedGraph(std::move(gData), "file, '" + file + "'", err);
 }
 
 std::shared_ptr<Graph> Graph::graphDFS(const std::string &graphDFS) {
 	std::ostringstream err;
 	auto gData = lib::IO::Graph::Read::dfs(graphDFS, err);
-	return handleLoadedGraph(std::move(gData.first), std::move(gData.second), "graphDFS, '" + graphDFS + "'", err);
+	return handleLoadedGraph(std::move(gData), "graphDFS, '" + graphDFS + "'", err);
 }
 
 std::shared_ptr<Graph> Graph::smiles(const std::string &smiles) {
 	std::ostringstream err;
 	auto gData = lib::IO::Graph::Read::smiles(smiles, err);
-	return handleLoadedGraph(std::move(gData.first), std::move(gData.second), "smiles string, '" + smiles + "'", err);
+	return handleLoadedGraph(std::move(gData), "smiles string, '" + smiles + "'", err);
 }
 
 std::shared_ptr<Graph> Graph::makeGraph(std::unique_ptr<lib::Graph::Single> g) {
+	return makeGraph(std::move(g), { });
+}
+
+std::shared_ptr<Graph> Graph::makeGraph(std::unique_ptr<lib::Graph::Single> g, std::map<int, std::size_t> externalToInternalIds) {
 	if(!g) MOD_ABORT;
 	std::shared_ptr<Graph> wrapped = std::shared_ptr<Graph > (new Graph(std::move(g)));
 	wrapped->p->g->setAPIReference(wrapped);
+	if(!externalToInternalIds.empty()) {
+		wrapped->p->externalToInternalIds = std::make_unique<std::map<int, std::size_t> >(std::move(externalToInternalIds));
+	}
 	return wrapped;
-}
-
-//------------------------------------------------------------------------------
-// GraphPrinter
-//------------------------------------------------------------------------------
-
-GraphPrinter::GraphPrinter() : options(new lib::IO::Graph::Write::Options()) {
-	options->EdgesAsBonds(true).RaiseCharges(true);
-}
-
-GraphPrinter::~GraphPrinter() { }
-
-const lib::IO::Graph::Write::Options &GraphPrinter::getOptions() const {
-	return *options;
-}
-
-void GraphPrinter::setMolDefault() {
-	options->All().Thick(false).WithIndex(false);
-}
-
-void GraphPrinter::setReactionDefault() {
-	options->All().Thick(false).WithIndex(false).SimpleCarbons(false);
-}
-
-void GraphPrinter::disableAll() {
-	options->Non();
-}
-
-void GraphPrinter::enableAll() {
-	options->All();
-}
-
-void GraphPrinter::setEdgesAsBonds(bool value) {
-	options->EdgesAsBonds(value);
-}
-
-bool GraphPrinter::getEdgesAsBonds() const {
-	return options->edgesAsBonds;
-}
-
-void GraphPrinter::setCollapseHydrogens(bool value) {
-	options->CollapseHydrogens(value);
-}
-
-bool GraphPrinter::getCollapseHydrogens() const {
-	return options->collapseHydrogens;
-}
-
-void GraphPrinter::setRaiseCharges(bool value) {
-	options->RaiseCharges(value);
-}
-
-bool GraphPrinter::getRaiseCharges() const {
-	return options->raiseCharges;
-}
-
-void GraphPrinter::setSimpleCarbons(bool value) {
-	options->SimpleCarbons(value);
-}
-
-bool GraphPrinter::getSimpleCarbons() const {
-	return options->simpleCarbons;
-}
-
-void GraphPrinter::setThick(bool value) {
-	options->Thick(value);
-}
-
-bool GraphPrinter::getThick() const {
-	return options->thick;
-}
-
-void GraphPrinter::setWithColour(bool value) {
-	options->WithColour(value);
-}
-
-bool GraphPrinter::getWithColour() const {
-	return options->withColour;
-}
-
-void GraphPrinter::setWithIndex(bool value) {
-	options->WithIndex(value);
-}
-
-bool GraphPrinter::getWithIndex() const {
-	return options->withIndex;
-}
-
-void GraphPrinter::setWithTexttt(bool value) {
-	options->WithTexttt(value);
-}
-
-bool GraphPrinter::getWithTexttt() const {
-	return options->withTexttt;
 }
 
 } // namespace mod

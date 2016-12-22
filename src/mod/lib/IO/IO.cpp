@@ -1,8 +1,11 @@
 #include "IO.h"
 
+#include <mod/Error.h>
+
 #include <boost/lexical_cast.hpp>
 
 #include <cmath>
+#include <fstream>
 #include <iostream>
 
 namespace mod {
@@ -36,15 +39,6 @@ private:
 PostStream postStream;
 
 } // namespace
-
-FileHandle::FileHandle(std::string name) : name(name) {
-	stream.open(name.c_str());
-	if(!stream) {
-		IO::log() << "Could not open file '" << name << "'." << std::endl;
-		IO::log() << "Does 'out/' exist?" << std::endl;
-		std::exit(1);
-	}
-}
 
 std::string getUniqueFilePrefix() {
 	static int count = 0;

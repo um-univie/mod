@@ -6,16 +6,16 @@
 #include <mod/lib/DG/Hyper.h>
 #include <mod/lib/Graph/Single.h>
 #include <mod/lib/GraphMorphism/LabelledMorphism.h>
+#include <mod/lib/GraphMorphism/VF2Finder.hpp>
+#include <mod/lib/IO/FileHandle.h>
 #include <mod/lib/IO/IO.h>
 #include <mod/lib/IO/MatchConstraint.h>
 #include <mod/lib/IO/Rule.h>
-#include <mod/lib/RC/Core.h>
+#include <mod/lib/RC/ComposeRuleReal.h>
 #include <mod/lib/RC/MatchMaker/Super.h>
-#include <mod/lib/Rule/Real.h>
+#include <mod/lib/Rules/Real.h>
 
 #include <jla_boost/graph/morphism/Predicates.hpp>
-#include <jla_boost/graph/morphism/VF2Finder.hpp>
-#include <jla_boost/Memory.hpp>
 
 #include <boost/lexical_cast.hpp>
 
@@ -27,14 +27,13 @@ namespace Write {
 namespace {
 namespace GM = jla_boost::GraphMorphism;
 
-std::vector<lib::Rule::Real*> findCompleteRules(const lib::DG::NonHyper &dg, lib::DG::HyperVertex v) {
+std::vector<lib::Rules::Real*> findCompleteRules(const lib::DG::NonHyper &dg, lib::DG::HyperVertex v) {
 	const lib::DG::HyperGraphType &dgGraph = dg.getHyper().getGraph();
 	assert(v != dgGraph.null_vertex());
 	using Vertex = lib::DG::HyperVertex;
 	assert(dgGraph[v].kind == lib::DG::HyperVertexKind::Edge);
 	assert(dgGraph[v].rules.size() == 1);
-	const lib::Rule::Real *rReal = dgGraph[v].rules.front()->getAPIReference()->getReal();
-	assert(rReal);
+	const lib::Rules::Real &rReal = dgGraph[v].rules.front()->getAPIReference()->getRule();
 	lib::Graph::Merge eductMerge, productMerge;
 	for(Vertex vAdj : asRange(inv_adjacent_vertices(v, dgGraph)))
 		eductMerge.mergeWith(*dgGraph[vAdj].graph);
@@ -42,34 +41,32 @@ std::vector<lib::Rule::Real*> findCompleteRules(const lib::DG::NonHyper &dg, lib
 		productMerge.mergeWith(*dgGraph[vAdj].graph);
 	eductMerge.lock();
 	productMerge.lock();
-	std::shared_ptr<mod::Rule> identifyL = lib::Rule::Real::createSide(eductMerge.getGraph(), eductMerge.getStringState(), lib::Rule::Membership::Context, "G");
-	std::shared_ptr<mod::Rule> identifyR = lib::Rule::Real::createSide(productMerge.getGraph(), productMerge.getStringState(), lib::Rule::Membership::Context, "H");
-	std::vector<lib::Rule::Real*> matchingLR;
+	std::shared_ptr<mod::Rule> identifyL = lib::Rules::Real::createSide(eductMerge.getGraph(), eductMerge.getStringState(), lib::Rules::Membership::Context, "G");
+	std::shared_ptr<mod::Rule> identifyR = lib::Rules::Real::createSide(productMerge.getGraph(), productMerge.getStringState(), lib::Rules::Membership::Context, "H");
+	std::vector<lib::Rules::Real*> matchingLR;
 	{
-		std::vector<lib::Rule::Real*> matchingL;
+		std::vector<lib::Rules::Real*> matchingL;
 		{
 			//			IO::log() << "Derivation: compose identifyL -> rReal" << std::endl;
-			auto reporter = [&matchingL, &dg] (std::unique_ptr<lib::Rule::Real> r) {
+			auto reporter = [&matchingL, &dg] (std::unique_ptr<lib::Rules::Real> r) {
 				auto *rPtr = r.release();
-				auto p = findAndInsert(matchingL, rPtr, lib::Rule::makeIsomorphismPredicate());
+				auto p = findAndInsert(matchingL, rPtr, lib::Rules::makeIsomorphismPredicate());
 				if(!p.second) delete rPtr;
 			};
-			assert(identifyL->getReal());
 			lib::RC::Super mm(false, true);
-			lib::RC::composeRules(*identifyL->getReal(), *rReal, mm, reporter);
+			lib::RC::composeRuleRealByMatchMaker(identifyL->getRule(), rReal, mm, reporter);
 		}
 		for(auto *r : matchingL) {
 			//			IO::log() << "Derivation: compose matchingL -> identifyR" << std::endl;
-			auto reporter = [&matchingLR, &dg] (std::unique_ptr<lib::Rule::Real> r) {
+			auto reporter = [&matchingLR, &dg] (std::unique_ptr<lib::Rules::Real> r) {
 				auto *rPtr = r.release();
-				auto p = findAndInsert(matchingLR, rPtr, lib::Rule::makeIsomorphismPredicate());
+				auto p = findAndInsert(matchingLR, rPtr, lib::Rules::makeIsomorphismPredicate());
 				if(!p.second) delete rPtr;
 			};
 			assert(r);
-			assert(identifyR->getReal());
 			// TODO: we should do isomorphism here instead
 			lib::RC::Super mm(false, true);
-			lib::RC::composeRules(*r, *identifyR->getReal(), mm, reporter);
+			lib::RC::composeRuleRealByMatchMaker(*r, identifyR->getRule(), mm, reporter);
 			delete r;
 		}
 	}
@@ -79,13 +76,13 @@ std::vector<lib::Rule::Real*> findCompleteRules(const lib::DG::NonHyper &dg, lib
 template<typename F>
 struct MR {
 
-	MR(F f, bool &derivationFound, const lib::Rule::Real *rLower)
+	MR(F f, bool &derivationFound, const lib::Rules::Real *rLower)
 	: f(f), derivationFound(derivationFound), rLower(rLower) { }
 
 	template<typename Morphism>
-	bool operator()(Morphism &&m, const lib::Rule::GraphType &gUpper, const lib::Rule::GraphType &gLower) {
+	bool operator()(Morphism &&m, const lib::Rules::GraphType &gUpper, const lib::Rules::GraphType &gLower) {
 		std::vector<bool> notInRule(num_vertices(gLower), true);
-		std::map<lib::Rule::Vertex, lib::Rule::Vertex> inverseMap;
+		std::map<lib::Rules::Vertex, lib::Rules::Vertex> inverseMap;
 		for(auto vUpper : asRange(vertices(gUpper))) {
 			auto vLower = get(m, gUpper, gLower, vUpper);
 			std::size_t id = get(boost::vertex_index_t(), gLower, vLower);
@@ -102,21 +99,20 @@ public:
 	std::size_t matchCount = 0;
 	F f;
 	bool &derivationFound;
-	const lib::Rule::Real *rLower;
+	const lib::Rules::Real *rLower;
 };
 
 template<typename F>
 void forEachMatch(const lib::DG::NonHyper &dg, lib::DG::HyperVertex v, F f) {
 	const lib::DG::HyperGraphType &dgGraph = dg.getHyper().getGraph();
 	assert(dgGraph[v].rules.size() == 1);
-	const lib::Rule::Real *rReal = dgGraph[v].rules.front()->getAPIReference()->getReal();
-	assert(rReal);
+	const lib::Rules::Real &rReal = dgGraph[v].rules.front()->getAPIReference()->getRule();
 	bool derivationFound = false;
-	std::vector<lib::Rule::Real*> matchingLR = findCompleteRules(dg, v);
-	for(const lib::Rule::Real *rLower : matchingLR) {
+	std::vector<lib::Rules::Real*> matchingLR = findCompleteRules(dg, v);
+	for(const lib::Rules::Real *rLower : matchingLR) {
 		MR<F> mr(f, derivationFound, rLower);
-		lib::GraphMorphism::morphismSelectByLabelSettings(rReal->getDPORule(), rLower->getDPORule(),
-				GM::VF2Monomorphism(), std::ref(mr), lib::Rule::MembershipPredWrapper());
+		lib::GraphMorphism::morphismSelectByLabelSettings(rReal.getDPORule(), rLower->getDPORule(),
+				lib::GraphMorphism::VF2Monomorphism(), std::ref(mr), lib::Rules::MembershipPredWrapper());
 		delete rLower;
 	}
 	if(!derivationFound) IO::log() << "WARNING: derivation " << get(boost::vertex_index_t(), dgGraph, v) << " does not exist." << std::endl;
@@ -127,8 +123,7 @@ void forEachMatch(const lib::DG::NonHyper &dg, lib::DG::HyperVertex v, F f) {
 void summary(const lib::DG::NonHyper &dg, lib::DG::HyperVertex v, const IO::Graph::Write::Options &options, const std::string &matchColour) {
 	const lib::DG::HyperGraphType &dgGraph = dg.getHyper().getGraph();
 	assert(dgGraph[v].rules.size() == 1);
-	const lib::Rule::Real *rReal = dgGraph[v].rules.front()->getAPIReference()->getReal();
-	assert(rReal);
+	const lib::Rules::Real &rReal = dgGraph[v].rules.front()->getAPIReference()->getRule();
 
 	if(!getConfig().dg.dryDerivationPrinting.get()) {
 		IO::post() << "summarySectionNoEscape \"Derivation " << get(boost::vertex_index_t(), dgGraph, v) << ", \\{";
@@ -150,31 +145,31 @@ void summary(const lib::DG::NonHyper &dg, lib::DG::HyperVertex v, const IO::Grap
 			std::string file = getUniqueFilePrefix() + "der_constraints.tex";
 			FileHandle s(file);
 			s << "\\begin{verbatim}" << std::endl;
-			for(const auto &c : rReal->getLeftConstraints())
+			for(const auto &c : rReal.getDPORule().leftComponentMatchConstraints)
 				s << *c << '\n';
 			s << "\\end{verbatim}" << std::endl;
 			IO::post() << "summaryInput \"" << file << "\"" << std::endl;
 		}
 	}
-	auto f = [&options, &matchColour](const lib::Rule::Real &rLower, const lib::Rule::GraphType &gUpper, const lib::Rule::GraphType &gLower,
-			const std::vector<bool> &notInRule, const std::map<lib::Rule::Vertex, lib::Rule::Vertex> &inverseMap, const std::string & strMatch) {
+	auto f = [&options, &matchColour](const lib::Rules::Real &rLower, const lib::Rules::GraphType &gUpper, const lib::Rules::GraphType &gLower,
+			const std::vector<bool> &notInRule, const std::map<lib::Rules::Vertex, lib::Rules::Vertex> &inverseMap, const std::string & strMatch) {
 		if(!getConfig().dg.dryDerivationPrinting.get()) {
-			auto visibleRule = [&notInRule, &gLower](lib::Rule::Vertex v) {
+			auto visibleRule = [&notInRule, &gLower](lib::Rules::Vertex v) {
 				return !notInRule[get(boost::vertex_index_t(), gLower, v)];
 			};
-			auto visibleInstantiation = [](lib::Rule::Vertex v) {
+			auto visibleInstantiation = [](lib::Rules::Vertex v) {
 				return true;
 			};
-			auto vColourRule = [&matchColour](lib::Rule::Vertex) -> std::string {
+			auto vColourRule = [&matchColour](lib::Rules::Vertex) -> std::string {
 				return matchColour;
 			};
-			auto eColourRule = [&matchColour](lib::Rule::Edge) -> std::string {
+			auto eColourRule = [&matchColour](lib::Rules::Edge) -> std::string {
 				return matchColour;
 			};
-			auto vColourInstantiation = [&matchColour, &visibleRule] (lib::Rule::Vertex v) -> std::string {
+			auto vColourInstantiation = [&matchColour, &visibleRule] (lib::Rules::Vertex v) -> std::string {
 				return visibleRule(v) ? matchColour : "";
 			};
-			auto eColourInstantiation = [&matchColour, &visibleRule, &gUpper, &gLower, &inverseMap] (lib::Rule::Edge e) -> std::string {
+			auto eColourInstantiation = [&matchColour, &visibleRule, &gUpper, &gLower, &inverseMap] (lib::Rules::Edge e) -> std::string {
 				unsigned int vSrcId = get(boost::vertex_index_t(), gLower, source(e, gLower));
 				unsigned int vTarId = get(boost::vertex_index_t(), gLower, target(e, gLower));
 				auto iterSrc = inverseMap.find(vSrcId);
@@ -185,11 +180,11 @@ void summary(const lib::DG::NonHyper &dg, lib::DG::HyperVertex v, const IO::Grap
 				auto p = edge(vSrc, vTar, gUpper);
 				return p.second ? matchColour : "";
 			};
-			std::string fileNoExt1 = IO::Rule::Write::pdf(rLower, options, strMatch + ".derL", strMatch + ".derK", strMatch + ".derR", visibleRule, vColourRule, eColourRule);
-			std::string fileNoExt2 = IO::Rule::Write::pdf(rLower, options, strMatch + ".derG", strMatch + ".derD", strMatch + ".derH", visibleInstantiation, vColourInstantiation, eColourInstantiation);
-			IO::post() << "summaryDerivation \"" << fileNoExt1 << "." << strMatch << "\" \"" << fileNoExt2 << "." << strMatch << "\"" << std::endl;
+			std::string fileNoExt1 = IO::Rules::Write::pdf(rLower, options, strMatch + "_derL", strMatch + "_derK", strMatch + "_derR", visibleRule, vColourRule, eColourRule);
+			std::string fileNoExt2 = IO::Rules::Write::pdf(rLower, options, strMatch + "_derG", strMatch + "_derD", strMatch + "_derH", visibleInstantiation, vColourInstantiation, eColourInstantiation);
+			IO::post() << "summaryDerivation \"" << fileNoExt1 << "_" << strMatch << "\" \"" << fileNoExt2 << "_" << strMatch << "\"" << std::endl;
 		}
-		IO::Rule::Write::gml(rLower, false);
+		IO::Rules::Write::gml(rLower, false);
 	};
 	forEachMatch(dg, v, f);
 }

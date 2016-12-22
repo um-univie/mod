@@ -8,12 +8,11 @@
 #include <mod/lib/DG/Strategies/GraphState.h>
 #include <mod/lib/Graph/Merge.h>
 #include <mod/lib/Graph/Single.h>
+#include <mod/lib/Graph/Properties/String.h>
 #include <mod/lib/IO/IO.h>
-#include <mod/lib/RC/Core.h>
+#include <mod/lib/RC/ComposeRuleReal.h>
 #include <mod/lib/RC/MatchMaker/Super.h>
-#include <mod/lib/Rule/Real.h>
-
-#include <jla_boost/Memory.hpp>
+#include <mod/lib/Rules/Real.h>
 
 namespace mod {
 namespace lib {
@@ -21,13 +20,14 @@ namespace DG {
 namespace Strategies {
 
 Rule::Rule(std::shared_ptr<mod::Rule> r)
-: Strategy(std::max(r->getReal()->getNumLeftComponents(), r->getReal()->getNumRightComponents())), r(r), rRaw(r->getReal()) {
-	assert(rRaw->getNumLeftComponents() > 0);
+: Strategy(std::max(r->getRule().getDPORule().numLeftComponents, r->getRule().getDPORule().numRightComponents)),
+r(r), rRaw(&r->getRule()) {
+	assert(rRaw->getDPORule().numLeftComponents > 0);
 }
 
-Rule::Rule(const lib::Rule::Real* r)
-: Strategy(std::max(r->getNumLeftComponents(), r->getNumRightComponents())), rRaw(r) {
-	assert(r->getNumLeftComponents() > 0);
+Rule::Rule(const lib::Rules::Real* r)
+: Strategy(std::max(r->getDPORule().numLeftComponents, r->getDPORule().numRightComponents)), rRaw(r) {
+	assert(r->getDPORule().numLeftComponents > 0);
 }
 
 Strategy *Rule::clone() const {
@@ -54,7 +54,7 @@ bool Rule::isConsumed(const lib::Graph::Single *g) const {
 namespace {
 
 struct BoundRule {
-	const lib::Rule::Real *rule;
+	const lib::Rules::Real *rule;
 	std::vector<const lib::Graph::Single*> boundGraphs;
 };
 
@@ -70,13 +70,13 @@ struct BoundRuleStorage {
 	BoundRuleStorage(std::vector<BoundRule> &ruleStore, const BoundRule &rule, const lib::Graph::Single *graph)
 	: ruleStore(ruleStore), rule(rule), graph(graph) { }
 
-	void add(lib::Rule::Real *r) {
+	void add(lib::Rules::Real *r) {
 		BoundRule p{r, rule.boundGraphs};
 		p.boundGraphs.push_back(graph);
 		bool found = false;
-		bool doBoundRulesDuplicateCheck = true;
+		const bool doBoundRulesDuplicateCheck = true;
+		// if it's only right side, we will rather split it instead
 		if(doBoundRulesDuplicateCheck && !r->isOnlyRightSide()) {
-			// if it's only right side, we will rather split it instead
 			std::vector<const lib::Graph::Single*> &rThis = p.boundGraphs;
 
 			std::sort(begin(rThis), end(rThis), [](const lib::Graph::Single *g1, const lib::Graph::Single * g2) {
@@ -98,19 +98,21 @@ struct BoundRuleStorage {
 					}
 				}
 				if(doContinue) continue;
-				found = 1 == lib::Rule::Real::isomorphism(*r, *rp.rule, 1);
+				found = 1 == lib::Rules::Real::isomorphism(*r, *rp.rule, 1);
 				if(found) break;
 			}
 		}
-		if(found) delete r;
-		else {
+		if(found) {
+			//			IO::log() << "Duplicate BRP found" << std::endl;
+			delete r;
+		} else {
 			ruleStore.push_back(p);
 			if(getConfig().dg.calculateDetailsVerbose.get()) {
 				IO::log() << "DG::RuleComp\tadded <"
 						<< r->getName() << ", {";
 				for(const lib::Graph::Single *g : p.boundGraphs)
 					IO::log() << " " << g->getName();
-				IO::log() << " }> onlyRight: " << std::boolalpha << r->isOnlySide(lib::Rule::Membership::Right) << std::endl;
+				IO::log() << " }> onlyRight: " << std::boolalpha << r->isOnlySide(lib::Rules::Membership::Right) << std::endl;
 			}
 		}
 	}
@@ -123,7 +125,7 @@ private:
 void handleBoundRulePair(Context context, const BoundRule &brp) {
 	assert(brp.rule);
 	// use a smart pointer so the rule for sure is deallocated, even though we do a 'continue'
-	const lib::Rule::Real *theRule = brp.rule;
+	const lib::Rules::Real *theRule = brp.rule;
 	assert(theRule->isOnlyRightSide()); // otherwise, it should have been deallocated. All max component results should be only right side
 	mod::Derivation d;
 	d.rule = context.r;
@@ -137,22 +139,22 @@ void handleBoundRulePair(Context context, const BoundRule &brp) {
 		}
 	}
 	if(getConfig().dg.calculateDetailsVerbose.get()) IO::log() << "Splitting " << theRule->getName() << " into "
-		<< theRule->getNumRightComponents() << " graphs" << std::endl;
+		<< theRule->getDPORule().numRightComponents << " graphs" << std::endl;
 	const std::vector<const lib::Graph::Single*> &educts = brp.boundGraphs;
-	if(theRule->getNumRightComponents() == 0) MOD_ABORT; // continue;
+	if(theRule->getDPORule().numRightComponents == 0) MOD_ABORT; // continue;
 	using Vertex = lib::Graph::Vertex;
 	using Edge = lib::Graph::Edge;
-	std::vector<std::pair<std::unique_ptr<lib::Graph::GraphType>, std::unique_ptr<lib::Graph::PropStringType> > > products(theRule->getNumRightComponents());
+	std::vector<std::pair<std::unique_ptr<lib::Graph::GraphType>, std::unique_ptr<lib::Graph::PropString> > > products(theRule->getDPORule().numRightComponents);
 	for(unsigned int i = 0; i < products.size(); i++) {
-		auto g = make_unique<lib::Graph::GraphType>();
-		auto pString = make_unique<lib::Graph::PropStringType>(*g);
+		auto g = std::make_unique<lib::Graph::GraphType>();
+		auto pString = std::make_unique<lib::Graph::PropString>(*g);
 		products[i] = std::make_pair(std::move(g), std::move(pString));
 	}
-	const auto &compMap = theRule->getCompMapRight();
-	const auto &gRight = theRule->getRight();
+	const auto &compMap = theRule->getDPORule().rightComponents;
+	const auto &gRight = get_right(theRule->getDPORule());
 	auto labelRight = theRule->getStringState().getRight();
-	typedef boost::graph_traits<lib::Rule::DPOProjection>::vertex_descriptor SideVertex;
-	typedef boost::graph_traits<lib::Rule::DPOProjection>::edge_descriptor SideEdge;
+	typedef boost::graph_traits<lib::Rules::DPOProjection>::vertex_descriptor SideVertex;
+	typedef boost::graph_traits<lib::Rules::DPOProjection>::edge_descriptor SideEdge;
 	std::unordered_map<SideVertex, Vertex> vertexMap;
 	for(SideVertex vSide : asRange(vertices(gRight))) {
 		unsigned int comp = compMap[get(boost::vertex_index_t(), gRight, vSide)];
@@ -240,7 +242,7 @@ void handleBoundRulePair(Context context, const BoundRule &brp) {
 		productSub->lock();
 		product = context.executionEnv.addToMergeStore(productSub);
 	}
-	bool inserted = context.executionEnv.suggestDerivation(educt, product, context.r->getReal());
+	bool inserted = context.executionEnv.suggestDerivation(educt, product, &context.r->getRule());
 	if(inserted) {
 		for(const lib::Graph::Single *g : educts)
 			context.consumedGraphs.insert(g);
@@ -258,15 +260,14 @@ unsigned int bindGraphs(Context context, const GraphRange &graphRange, const std
 			if(getConfig().dg.calculateDetailsVerbose.get()) IO::log() << "NonHyperRuleComp\ttrying " << p.rule->getName() << " . " << g->getName() << std::endl;
 			std::vector<BoundRule> resultRules;
 			BoundRuleStorage ruleStore(resultRules, p, g);
-			auto reporter = [&ruleStore] (std::unique_ptr<lib::Rule::Real> r) {
+			auto reporter = [&ruleStore] (std::unique_ptr<lib::Rules::Real> r) {
 				ruleStore.add(r.release());
 			};
-			assert(g->getBindRule()->getReal());
 			assert(p.rule);
-			const lib::Rule::Real &rFirst = *g->getBindRule()->getReal();
-			const lib::Rule::Real &rSecond = *p.rule;
+			const lib::Rules::Real &rFirst = g->getBindRule()->getRule();
+			const lib::Rules::Real &rSecond = *p.rule;
 			lib::RC::Super mm(true, true);
-			lib::RC::composeRules(rFirst, rSecond, mm, reporter);
+			lib::RC::composeRuleRealByMatchMaker(rFirst, rSecond, mm, reporter);
 			for(const BoundRule &brp : resultRules) {
 				processedRules++;
 				if(context.executionEnv.doExit()) delete brp.rule;
@@ -290,7 +291,7 @@ void Rule::executeImpl(std::ostream& s, const GraphState &input) {
 		if(Verbose) s << indent << "(skipping)" << std::endl;
 		return;
 	}
-	std::vector<std::vector<BoundRule> > intermediaryRules(rRaw->getNumLeftComponents() + 1);
+	std::vector<std::vector<BoundRule> > intermediaryRules(rRaw->getDPORule().numLeftComponents + 1);
 	{
 		BoundRule p;
 		p.rule = rRaw;
@@ -299,7 +300,7 @@ void Rule::executeImpl(std::ostream& s, const GraphState &input) {
 	Context context{r, getExecutionEnv(), output, consumedGraphs};
 	const auto &subset = input.getSubset(0);
 	const auto &universe = input.getUniverse();
-	for(unsigned int i = 1; i <= rRaw->getNumLeftComponents(); i++) {
+	for(unsigned int i = 1; i <= rRaw->getDPORule().numLeftComponents; i++) {
 		if(Verbose) {
 			IO::log() << indent << "Binding component " << i << " with ";
 			if(i == 1) {

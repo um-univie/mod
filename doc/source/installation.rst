@@ -8,15 +8,15 @@ Futher below are specific instructions on how to install these dependencies.
 * This documentation requires `Sphinx`_, preferably in the newest development version (``--enable-doc-checks``, ``--disable-doc-checks``).
 * libMØD:
 
-  - A C++ compiler with reasonable C++11 support is needed. GCC 4.7 or later should work.
-  - `Boost`_ dev, >= 1.56 (``--with-boost=<path>``).
+  - A C++ compiler with reasonable C++14 support is needed. GCC 5.1 or later should work.
+  - `Boost`_ dev, 1.59 or >= 1.61 (``--with-boost=<path>``).
   - (optional) `Open Babel`_ dev, >= 2.3.2 (``--with-OpenBabel=yes|no|<path>``).
-  - (optional, default off) `libSBML`_ (``--with-SBML=yes|no|<path>``).
 
 * PyMØD (``--enable-pymod``, ``--disable-pymod``):
 
   - Python 3 dev
   - Boost.Python built with Python 3
+  - (Optional) IPython 3
 
 * PostMØD (``--enable-postmod``, ``--disable-postmod``):
 
@@ -34,9 +34,11 @@ Futher below are specific instructions on how to install these dependencies.
 Ubuntu
 ^^^^^^
 
-- (>= Ubuntu 15.10) Boost: ``libboost-regex-dev libboost-system-dev``.
-- (>= Ubuntu 15.10) Boost.Python: ``python3-dev libboost-python-dev``.
-- (< Ubuntu 15.10) Boost, Boost.Python: ``python3-dev``, and see :ref:`install_boost_python`.
+Install the following packages.
+
+- (>= Ubuntu 16.10) Boost: ``libboost-regex-dev libboost-system-dev``.
+- (>= Ubuntu 16.10) Boost.Python: ``python3-dev libboost-python-dev``.
+- (< Ubuntu 16.10) Boost, Boost.Python: ``python3-dev``, and then see :ref:`install_boost_python`.
 - (>= Ubuntu 14.04) Open Babel: ``libopenbabel-dev``.
 - (< Ubuntu 14.04) Open Babel: install from source.
 - ``pdflatex``: ``texlive-full`` (less can do it, will be refined in the future).
@@ -48,19 +50,15 @@ Ubuntu
 Fedora
 ^^^^^^
 
-- Boost: ``boost-devel boost-regex boost-system``.
-- Boost.Python: ``python3-devel boost-python3-devel``.
-- Boost, Boost.Python: ``python3-devel``, and see :ref:`install_boost_python`.
+Install the following packages.
+
+- (>= Fedora 24) Boost: ``boost-devel boost-regex boost-system``.
+- (>= Fedora 24) Boost.Python: ``python3-devel boost-python3-devel``.
+- (< Fedora 24) Boost, Boost.Python: ``python3-devel``, and then see :ref:`install_boost_python`.
 - Open Babel: ``openbabel-devel``.
 - ``pdflatex``: ``texlive-scheme-full`` (less can do it, will be refined in the future).
 - ``pdf2svg``: ``pdf2svg``.
 - Graphviz: ``graphviz``.
-
-
-Common
-^^^^^^
-
-- libSBML: install from source, see :ref:`install_libsbml`.
 
 
 .. _install_boost_python:
@@ -74,9 +72,9 @@ Basic Installation
 """"""""""""""""""
 
 Boost uses a custom build system which may be difficult to use.
-The general procedure for compiling and installing Bosot is the following.
+A procedure for compiling and installing Boost with Python 3 for Boost.Python is the following.
 
-1. ``./bootstrap.sh`` (optionally give ``--prefix=some/path`` to specify a non-standard installation path.
+1. ``./bootstrap.sh --with-python=python3`` (optionally give ``--prefix=some/path`` to specify a non-standard installation path.
 2. ``./b2`` (optionally give ``-j N`` (similar to GNU Make) to compile with multiple threads)
 3. ``./b2 install`` (optionally give ``--prefix=some/path`` to specify a non-standard installation path (if not done earlier).
 
@@ -84,14 +82,12 @@ After ``bootstrap.sh`` has been run, the file ``project-config.jam``
 has been created, which can be edited to customise installation path and a lot of other
 things. All edits should be done before running ``b2``.
 
-Custom Python Version (e.g., Python 3 for Boost.Python)
-"""""""""""""""""""""""""""""""""""""""""""""""""""""""
+Non-standard Python Installation
+""""""""""""""""""""""""""""""""
 
-This can be achieved in multiple ways. If the custom version (here assumed to be 3.3) is
-installed in the normal system location, then passing ``--with-python=python3`` to
-``bootstrap.sh`` should work. This adds a line similar to
-"``using python : 3.3 ;``" to ``project-config.jam``. After compilation
-(running ``b2``) the file ``stage/lib/libboost_python3.so`` should exist.
+Passing ``--with-python=python3`` to ``bootstrap.sh`` should work.
+This adds a line similar to "``using python : 3.3 ;``" to ``project-config.jam``.
+After compilation (running ``b2``) the file ``stage/lib/libboost_python3.so`` should exist.
 If not, it did not detect Python 3 properly.
 
 If Python is installed in a non-standard location, add the a line similar to
@@ -115,40 +111,4 @@ Graphviz
 
 A package with the sources of Graphviz can be downloaded from `http://graphviz.org`.
 Make sure that the status output in the end of ``configure`` includes ``pangocairo:    Yes`` and ``rsvg:          Yes``.
-
-
-.. _install_libsbml:
-
-libSBML
-^^^^^^^
-
-Note that at version 5.8 (and probably other versions too) the library is
-transitioning from using Autotools to CMake and both build systems coexist.
-The following assumes CMake is used.
-
-The option ``-DWITH_CPP_NAMESPACE=yes`` **must** be used for configuration.
-This will wrap the complete library in the C++ namespace ``libsbml``, which is
-currently not the default behaviour.
-
-(The following should not be needed, but if libMØD compilation fails with
-libSBML related errors, then try it)
-In version 5.8 (and maybe other versions), the build system does not
-install the correct header files when namespace wrapping is enabled.
-After installation, open the file
-
-.. code-block:: bash
-
-    <installation prefix>/include/sbml/common/libsbml-namespace.h
-
-Change line 42 from
-
-.. code-block:: c++
-
-    /* #undef LIBSBML_USE_CPP_NAMESPACE \*/
-
-to
-
-.. code-block:: c++
-
-    #define LIBSBML_USE_CPP_NAMESPACE
 

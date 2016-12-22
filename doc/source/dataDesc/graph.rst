@@ -26,18 +26,15 @@ when `Open Babel`_ can not be used.
 GML (Graph)
 ############
 
-In the GML format graphs are specified as a list of vertices and edges.
-The following specifies the grammar for the format.
+A graph can be specified as :ref:`GML` by giving a list of vertices and edges with the key ``graph``.
+The following grammar exemplifies the required key-value structure.
 
 .. productionlist:: GraphGMLGrammar
-   graphGML: 'graph ['
-           :    (`node` | `edge`)*
-           : ']'
-   node: 'node [ id' `unsignedInt` 'label "' `quoteEscapedString` '" ]'
-   edge: 'edge [ source' `unsignedInt` 'target' `unsignedInt` 'label "' `quoteEscapedString` '" ]'
+   graphGML: 'graph [' (`node` | `edge`)* ']'
+   node: 'node [ id' `int` 'label' `quoteEscapedString` ']'
+   edge: 'edge [ source' `int` 'target' `int` 'label' `quoteEscapedString` ']'
 
-A :token:`quoteEscapedString` is zero or more characters in which a double quotation character must be escaped, i.e., ``\"``.
-GML code may have line comments, starting with ``#``, which are ignored during parsing.
+Note though that list elements can appear in any order.
 
 
 .. _graph-smiles:
@@ -47,13 +44,14 @@ SMILES
 
 The `Simplified molecular-input line-entry system` is a line notation for molecules.
 MØD can load most SMILES strings, and converts them internally to labelled graphs.
-The SMILES strings of graphs which represents molecules can be printed.
-The printed strings are canonical in the sense that the same version of MØD will print
+For graphs that are sufficiently molecule-like, a SMILES string can be generated.
+The generated strings are canonical in the sense that the same version of MØD will print
 the same SMILES string for isomorphic molecules.
 
 .. warning:: The SMILES canonicalisation algorithm is the original CANGEN algorithm that does not work in general,
    and some molecules with specific symmetries thus have multiple "canonical" forms.
-   This problem will be fixed at some point.
+   This problem will be fixed at some point. To properly check for isomorphism, load the graphs and call the
+   appropriate method.
 
 The reading of SMILES strings is based on the `OpenSMILES <http://www.opensmiles.org/>`_
 specification, but with the following notes/changes.
@@ -75,6 +73,8 @@ specification, but with the following notes/changes.
   but ``C1=CC=CC=C1`` is a different molecule.
 - The final graph will conform to the molecule encoding scheme described below.
 - Implicit hydrogens are added following a more complicated procedure.
+- A bracketed atom can have a radical by writing a dot (``.``) between the position of the
+  charge and the position of the class.
 
 The written SMILES strings are intended to be canonical and may not conform to any "prettyness" standards.
 

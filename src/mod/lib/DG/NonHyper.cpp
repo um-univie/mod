@@ -2,6 +2,7 @@
 
 #include <mod/Config.h>
 #include <mod/DG.h>
+#include <mod/DGGraphInterface.h>
 #include <mod/Error.h>
 #include <mod/Graph.h>
 #include <mod/Rule.h>
@@ -10,12 +11,12 @@
 #include <mod/lib/Graph/Base.h>
 #include <mod/lib/Graph/Merge.h>
 #include <mod/lib/Graph/Single.h>
+#include <mod/lib/Graph/Properties/Molecule.h>
+#include <mod/lib/Graph/Properties/String.h>
 #include <mod/lib/IO/DG.h>
 #include <mod/lib/IO/IO.h>
-#include <mod/lib/Rule/Base.h>
 
 #include <jla_boost/graph/PairToRangeAdaptor.hpp>
-#include <jla_boost/Memory.hpp>
 
 #include <boost/lexical_cast.hpp>
 #include <boost/make_shared.hpp>
@@ -88,10 +89,10 @@ bool NonHyper::addGraphAsVertex(std::shared_ptr<mod::Graph> g) {
 	return inserted;
 }
 
-std::pair<std::shared_ptr<mod::Graph>, bool> NonHyper::checkIfNew(std::unique_ptr<lib::Graph::GraphType> gBoost, std::unique_ptr<lib::Graph::PropStringType> pString) const {
+std::pair<std::shared_ptr<mod::Graph>, bool> NonHyper::checkIfNew(std::unique_ptr<lib::Graph::GraphType> gBoost, std::unique_ptr<lib::Graph::PropString> pString) const {
 	assert(gBoost);
 	assert(pString);
-	auto gCand = make_unique<lib::Graph::Single>(std::move(gBoost), std::move(pString));
+	auto gCand = std::make_unique<lib::Graph::Single>(std::move(gBoost), std::move(pString));
 	for(std::shared_ptr<mod::Graph> g : graphDatabase) {
 		bool isEqual = 1 == lib::Graph::Single::isomorphism(*gCand, g->getGraph(), 1);
 		if(isEqual) return std::make_pair(g, false);
@@ -142,6 +143,7 @@ bool NonHyper::addProduct(std::shared_ptr<mod::Graph> g) {
 }
 
 const lib::Graph::Merge *NonHyper::addToMergeStore(const lib::Graph::Merge *g) {
+	assert(!g->getSingles().empty());
 	std::pair < MergeStore::const_iterator, bool> p = mergedGraphs.insert(g);
 	if(!p.second) {
 		delete g;
@@ -149,7 +151,7 @@ const lib::Graph::Merge *NonHyper::addToMergeStore(const lib::Graph::Merge *g) {
 	return *p.first;
 }
 
-std::pair < NonHyper::Edge, bool> NonHyper::isDerivation(const lib::Graph::Base *left, const lib::Graph::Base *right, const lib::Rule::Base *r) const {
+std::pair < NonHyper::Edge, bool> NonHyper::isDerivation(const lib::Graph::Base *left, const lib::Graph::Base *right, const lib::Rules::Real *r) const {
 	std::map<const Graph::Base*, Vertex>::const_iterator iterLeft = graphToVertex.find(left);
 	if(iterLeft == end(graphToVertex)) return std::make_pair(Edge(), false);
 	std::map<const Graph::Base*, Vertex>::const_iterator iterRight = graphToVertex.find(right);
@@ -157,21 +159,23 @@ std::pair < NonHyper::Edge, bool> NonHyper::isDerivation(const lib::Graph::Base 
 	return edge(iterLeft->second, iterRight->second, dg);
 }
 
-std::pair<NonHyper::Edge, bool> NonHyper::suggestDerivation(const lib::Graph::Base *gSrc, const lib::Graph::Base *gTar, const lib::Rule::Base* r) {
+std::pair<NonHyper::Edge, bool> NonHyper::suggestDerivation(const lib::Graph::Base *gSrc, const lib::Graph::Base *gTar, const lib::Rules::Real* r) {
 	// make vertices for to and from
 	Vertex vSrc = getVertex(gSrc), vTar = getVertex(gTar);
 	std::pair<Edge, bool> e = edge(vSrc, vTar, dg);
 	if(!e.second) {
 		e = add_edge(vSrc, vTar, dg);
-		dg[e.first].rules.push_back(r);
+		if(r) dg[e.first].rules.push_back(r);
 		hyperCreator->addEdge(e.first);
 	} else {
 		e.second = false;
-		// TODO: add r to dg[e.first].rules
-		// TODO: hyperCreator->addRuleToEdge(e.first)
-		assert(dg[e.first].rules.size() == 1);
-		if(dg[e.first].rules.front() != r) {
-			lib::IO::log() << "DG warning: rule on derivation ignored" << std::endl;
+		if(r) {
+			auto &rules = dg[e.first].rules;
+			auto iter = std::find(rules.begin(), rules.end(), r);
+			if(iter == rules.end()) {
+				rules.push_back(r);
+				// TODO: hyperCreator->addRuleToEdge(e.first)
+			}
 		}
 	}
 	return e;
@@ -241,34 +245,31 @@ void NonHyper::print() const {
 	IO::post() << "summaryDGNonHyper \"dg_" << getId() << "\" \"" << fileNoExt << "\"" << std::endl;
 }
 
-mod::DerivationRef NonHyper::getDerivationRef(const std::vector<std::shared_ptr<mod::Graph> > &educts,
-		const std::vector<std::shared_ptr<mod::Graph> > &products, const bool verbose) const {
+mod::DerivationRef NonHyper::getDerivationRef(const std::vector<Hyper::Vertex> &sources, const std::vector<Hyper::Vertex> &targets) const {
+	const auto &dg = getHyper().getGraph();
 	if(!getHasCalculated()) std::abort();
+	for(auto v : sources) assert(dg[v].kind == HyperVertexKind::Vertex);
+	for(auto v : targets) assert(dg[v].kind == HyperVertexKind::Vertex);
+
 	const lib::Graph::Base *educt, *product;
-	if(educts.size() == 1) educt = &educts.front()->getGraph();
+	if(sources.size() == 1) educt = dg[sources.front()].graph;
 	else {
 		lib::Graph::Merge eductMerge;
-		for(std::shared_ptr<mod::Graph> g : educts) eductMerge.mergeWith(g->getGraph());
+		for(auto v : sources) eductMerge.mergeWith(*dg[v].graph);
 		eductMerge.lock();
 		MergeStore::const_iterator iter = mergedGraphs.find(&eductMerge);
 		if(iter == end(mergedGraphs)) {
-			if(verbose) IO::log() << "Educt set" << std::endl << "\t{";
-			for(std::shared_ptr<mod::Graph> g : educts) if(verbose) IO::log() << " '" << g->getName() << "'";
-			if(verbose) IO::log() << " }" << std::endl << "is not part of the derivation graph." << std::endl;
 			return DerivationRef();
 		}
 		educt = *iter;
 	}
-	if(products.size() == 1) product = &products.front()->getGraph();
+	if(targets.size() == 1) product = dg[targets.front()].graph;
 	else {
 		Graph::Merge productMerge;
-		for(std::shared_ptr<mod::Graph> g : products) productMerge.mergeWith(g->getGraph());
+		for(auto v : targets) productMerge.mergeWith(*dg[v].graph);
 		productMerge.lock();
 		MergeStore::const_iterator iter = mergedGraphs.find(&productMerge);
 		if(iter == end(mergedGraphs)) {
-			if(verbose) IO::log() << "Product set" << std::endl << "\t{";
-			for(std::shared_ptr<mod::Graph> g : products) if(verbose) IO::log() << " '" << g->getName() << "'";
-			if(verbose) IO::log() << " }" << std::endl << "is not part of the derivation graph." << std::endl;
 			return DerivationRef();
 		}
 		product = *iter;
@@ -281,7 +282,6 @@ mod::DerivationRef NonHyper::getDerivationRef(const std::vector<std::shared_ptr<
 	Vertex vSrc = iterEduct->second, vTar = iterProduct->second;
 	std::pair<Edge, bool> p = edge(vSrc, vTar, getGraph());
 	if(!p.second) {
-		if(verbose) IO::log() << "No derivation found from educt set to product set." << std::endl;
 		return DerivationRef();
 	}
 	const HyperGraphType &dgHyper = getHyper().getGraph();
@@ -319,8 +319,8 @@ void NonHyper::diff(const NonHyper &dg1, const NonHyper &dg2) {
 	};
 	// diff vertices
 	std::unordered_set<std::shared_ptr<mod::Graph> > vertexGraphsUnique;
-	for(auto g : dg1.getHyper().getVertexGraphs()) vertexGraphsUnique.insert(g);
-	for(auto g : dg2.getHyper().getVertexGraphs()) vertexGraphsUnique.insert(g);
+	for(auto vertex : dg1.getAPIReference()->vertices()) vertexGraphsUnique.insert(vertex.getGraph());
+	for(auto vertex : dg2.getAPIReference()->vertices()) vertexGraphsUnique.insert(vertex.getGraph());
 	std::vector<std::shared_ptr<mod::Graph> > vertexGraphs(begin(vertexGraphsUnique), end(vertexGraphsUnique));
 	std::sort(begin(vertexGraphs), end(vertexGraphs), [] (std::shared_ptr<mod::Graph> g1, std::shared_ptr<mod::Graph> g2) {
 		return g1->getName() < g2->getName();

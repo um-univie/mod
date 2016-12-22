@@ -5,8 +5,8 @@
 #include <string>
 #include <vector>
 
-// rst: This file contains the functinoality used for reporting errors.
-// rst: In the description of the execeptions we use the standard terminology (see e.g., `Exception Safety <http://en.wikipedia.org/wiki/Exception_safety>`_).
+// rst: This file contains the functionality used for reporting errors.
+// rst: In the description of the exceptions we use the standard terminology (see e.g., `Exception Safety <http://en.wikipedia.org/wiki/Exception_safety>`_).
 // rst: If nothing else is specified a thrown exception from MØD provides no exception safety.
 // rst: Any exception thrown from MØD or any dependencies are intented to derive from ``std::exception``,
 // rst: and any exception from MØD derives from :class:`Exception`.
@@ -126,7 +126,7 @@ struct LogicError : public Exception {
 // rst-class-end:
 
 void fatal(std::string function, std::string file, std::size_t line) __attribute__((__noreturn__)); // TODO: change to C++11 syntax at some point
-#define MOD_ABORT fatal(__func__, __FILE__, __LINE__)
+#define MOD_ABORT mod::fatal(__func__, __FILE__, __LINE__)
 
 } // namespace mod
 

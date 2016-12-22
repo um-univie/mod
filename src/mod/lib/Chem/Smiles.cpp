@@ -45,8 +45,8 @@ bool isInSmilesOrganicSubset(AtomId atomId) {
 	}
 }
 
-void addImplicitHydrogens(lib::Graph::GraphType &g, lib::Graph::PropStringType &pString, lib::Graph::Vertex v, AtomId atomId,
-		std::function<void(lib::Graph::GraphType&, lib::Graph::PropStringType&, lib::Graph::Vertex) > hydrogenAdder) {
+void addImplicitHydrogens(lib::Graph::GraphType &g, lib::Graph::PropString &pString, lib::Graph::Vertex v, AtomId atomId,
+		std::function<void(lib::Graph::GraphType&, lib::Graph::PropString&, lib::Graph::Vertex) > hydrogenAdder) {
 	//==========================================================================
 	// WARNING: keep in sync with the smiles writer
 	//==========================================================================

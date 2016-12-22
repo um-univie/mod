@@ -68,10 +68,14 @@ void Chem_doExport() {
 			// rst:
 			// rst: 		Construct atom data with :py:const:`AtomIds::Invalid` atom id and neutral charge.
 			.def(py::init<>())
+			// rst:		.. py:method:: __init__(self, atomId)
+			// rst:
+			// rst:			Construct atom data with neutral charge, no radical, and the given atom id.
+			.def(py::init<AtomId>())
 			// rst:		.. py:method:: __init__(self, atomId, charge)
 			// rst:
 			// rst:			Construct atom data with given atom id and charge.
-			.def(py::init<AtomId, Charge>())
+			.def(py::init<AtomId, Charge, bool>())
 			// rst:		.. py:attribute: atomId
 			// rst:
 			// rst:			(Read-only) The atom id.
@@ -84,6 +88,12 @@ void Chem_doExport() {
 			// rst:
 			// rst:			:type: :py:class:`Charge`
 			.add_property("charge", &mod::AtomData::getCharge)
+			// rst:		.. py::attribute:: radical
+			// rst:
+			// rst:			(Read-only) The radical.
+			// rst:
+			// rst:			:type: bool
+			.add_property("radical", &mod::AtomData::getRadical)
 			// rst:		.. py::method:: __str__(self)
 			// rst:
 			// rst:			:returns: A string representation of the atom data adhering to the string encoding of atoms (see :ref:`mol-enc`).

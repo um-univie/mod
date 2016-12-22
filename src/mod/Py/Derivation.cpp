@@ -1,18 +1,11 @@
 #include <mod/Py/Common.h>
 
 #include <mod/Derivation.h>
+#include <mod/Rule.h>
 
 namespace mod {
 namespace Py {
 namespace {
-
-const mod::Derivation::GraphList &getLeft(const mod::Derivation &d) {
-	return d.left;
-}
-
-void setLeft(mod::Derivation &d, mod::Derivation::GraphList list) {
-	d.left = list;
-}
 
 std::shared_ptr<mod::Rule> getRule(const mod::Derivation &d) {
 	return d.rule;
@@ -20,14 +13,6 @@ std::shared_ptr<mod::Rule> getRule(const mod::Derivation &d) {
 
 void setRule(mod::Derivation &d, std::shared_ptr<mod::Rule> r) {
 	d.rule = r;
-}
-
-const mod::Derivation::GraphList &getRight(const mod::Derivation &d) {
-	return d.right;
-}
-
-void setRight(mod::Derivation &d, mod::Derivation::GraphList list) {
-	d.right = list;
 }
 
 } // namespace 
@@ -44,7 +29,7 @@ void Derivation_doExport() {
 			// rst:			Represents the multi-set of left graphs :math:`G` in a derivation :math:`G\Rightarrow^p H`.
 			// rst:
 			// rst:			:type: list of :class:`Graph`
-			.add_property("_left", py::make_function(&getLeft, py::return_value_policy<py::copy_const_reference>()), &setLeft)
+			.def_readwrite("_left", &mod::Derivation::left)
 			// rst:		.. py:attribute:: rule
 			// rst:
 			// rst:			Represents the transformation rule :math:`p` in a derivation :math:`G\Rightarrow^p H`.
@@ -56,7 +41,7 @@ void Derivation_doExport() {
 			// rst:			Represents the multi-set of right graphs :math:`G` in a derivation :math:`G\Rightarrow^p H`.
 			// rst:
 			// rst:			:type: list of :class:`Graph`
-			.add_property("_right", py::make_function(&getRight, py::return_value_policy<py::copy_const_reference>()), &setRight)
+			.def_readwrite("_right", &mod::Derivation::right)
 			;
 }
 

@@ -6,13 +6,13 @@
 #include <mod/lib/DG/Hyper.h>
 #include <mod/lib/Graph/Merge.h>
 #include <mod/lib/Graph/Single.h>
+#include <mod/lib/Graph/Properties/String.h>
 #include <mod/lib/IO/Graph.h>
 #include <mod/lib/IO/IO.h>
 #include <mod/lib/IO/ParserCommon.h>
-#include <mod/lib/Rule/Shallow.h>
+#include <mod/lib/Rules/Real.h>
 
 #include <jla_boost/graph/PairToRangeAdaptor.hpp>
-#include <jla_boost/Memory.hpp>
 
 #include <boost/spirit/include/qi_char_.hpp>
 #include <boost/spirit/include/qi_difference.hpp>
@@ -33,7 +33,7 @@ namespace {
 
 struct ConstructionData {
 	const std::vector<std::shared_ptr<mod::Rule> > &rules;
-	std::vector<std::tuple<unsigned int, std::string, std::unique_ptr<lib::Graph::GraphType>, std::unique_ptr<lib::Graph::PropStringType> > > vertices;
+	std::vector<std::tuple<unsigned int, std::string, std::unique_ptr<lib::Graph::GraphType>, std::unique_ptr<lib::Graph::PropString> > > vertices;
 	const std::vector<std::tuple<unsigned int, std::string> > rulesParsed;
 	const std::vector < std::tuple<unsigned int, unsigned int, std::vector<int> > > edges;
 };
@@ -62,17 +62,12 @@ private:
 			auto iter = std::find_if(begin(rules), end(rules), [&t](std::shared_ptr<mod::Rule> r) -> bool {
 				return r->getName() == get<1>(t);
 			});
-			std::shared_ptr<mod::Rule> r;
-			if(iter == end(rules)) {
-				auto rInternal = make_unique<lib::Rule::Shallow>();
-				rInternal->setName(get<1>(t));
-				r = mod::Rule::makeRule(std::move(rInternal));
-			} else {
-				r = *iter;
+			if(iter != end(rules)) {
+				std::shared_ptr<mod::Rule> r = *iter;
 				IO::log() << "Rule linked: " << r->getName() << std::endl;
+				this->rules.push_back(r);
+				ruleMap[get<0>(t)] = r;
 			}
-			this->rules.push_back(r);
-			ruleMap[get<0>(t)] = r;
 		}
 
 		// do merge of vertices and edges in order of increasing id
@@ -89,8 +84,8 @@ private:
 				iVertices++;
 			} else if(iEdges < edges.size() && get<0>(edges[iEdges]) == id) {
 				const auto &e = edges[iEdges];
-				auto mEduct = make_unique<lib::Graph::Merge>();
-				auto mProduct = make_unique<lib::Graph::Merge>();
+				auto mEduct = std::make_unique<lib::Graph::Merge>();
+				auto mProduct = std::make_unique<lib::Graph::Merge>();
 				for(int adj : get<2>(e)) {
 					assert(adj != 0);
 					unsigned int id = std::abs(adj) - 1;
@@ -103,7 +98,7 @@ private:
 				mProduct->lock();
 				auto rIter = ruleMap.find(get<1>(e));
 				assert(rIter != end(ruleMap));
-				const auto *r = &rIter->second->getBase();
+				const auto *r = &rIter->second->getRule();
 				const lib::Graph::Base *gEduct, *gProduct;
 				if(mEduct->getSingles().size() == 1) {
 					gEduct = *begin(mEduct->getSingles());
@@ -160,7 +155,7 @@ NonHyper *load(const std::vector<std::shared_ptr<mod::Graph> > &graphs, const st
 	IteratorType iterEnd;
 
 	unsigned int numVertices, numEdges, numRules;
-	std::vector<std::tuple<unsigned int, std::string, std::unique_ptr<lib::Graph::GraphType>, std::unique_ptr<lib::Graph::PropStringType> > > vertices;
+	std::vector<std::tuple<unsigned int, std::string, std::unique_ptr<lib::Graph::GraphType>, std::unique_ptr<lib::Graph::PropString> > > vertices;
 	std::vector<std::tuple<unsigned int, std::string> > rulesParsed;
 	std::vector<std::tuple<unsigned int, unsigned int, std::vector<int> > > edges;
 
@@ -176,11 +171,11 @@ NonHyper *load(const std::vector<std::shared_ptr<mod::Graph> > &graphs, const st
 		PARSE('"' >> qi::lexeme[*(qi::char_ - '"') >> '"'], name);
 		PARSE('"' >> qi::lexeme[*(qi::char_ - '"') >> '"'], dfs);
 		auto gData = IO::Graph::Read::dfs(dfs, err);
-		if(!gData.first) {
+		if(!gData.graph) {
 			err << "GraphDFS \"" << dfs << "\" could not be parsed for vertex " << id << std::endl;
 			return nullptr;
 		}
-		vertices.emplace_back(id, name, std::move(gData.first), std::move(gData.second));
+		vertices.emplace_back(id, name, std::move(gData.graph), std::move(gData.label));
 		validVertices.insert(id);
 	}
 	for(unsigned int i = 0; i < numRules; i++) {
@@ -268,7 +263,7 @@ void write(const NonHyper &dgNonHyper, std::ostream &s) {
 		else numEdges++;
 	}
 
-	std::set<const lib::Rule::Base*, lib::Rule::Less> rules;
+	std::set<const lib::Rules::Real*, lib::Rules::LessById> rules;
 
 	for(Vertex v : asRange(vertices(dg))) {
 		if(dg[v].kind != VertexKind::Edge) continue;
@@ -289,13 +284,13 @@ void write(const NonHyper &dgNonHyper, std::ostream &s) {
 	}
 
 
-	for(const lib::Rule::Base *r : rules) s << "rule:\t" << r->getId() << "\t\"" << r->getName() << "\"" << std::endl;
+	for(const lib::Rules::Real *r : rules) s << "rule:\t" << r->getId() << "\t\"" << r->getName() << "\"" << std::endl;
 
 	for(Vertex v : asRange(vertices(dg))) {
 		if(dg[v].kind != VertexKind::Edge) continue;
 		unsigned int id = get(boost::vertex_index_t(), dg, v);
 		assert(dg[v].rules.size() == 1);
-		const lib::Rule::Base *r = dg[v].rules.front();
+		const lib::Rules::Real *r = dg[v].rules.front();
 		s << "edge:\t" << id << "\t" << r->getId() << "\t";
 
 		std::vector<int> coefs;

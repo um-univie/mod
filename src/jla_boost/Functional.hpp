@@ -1,5 +1,7 @@
 #ifndef JLA_BOOST_FUNCTIONAL_H
-#define	JLA_BOOST_FUNCTIONAL_H
+#define JLA_BOOST_FUNCTIONAL_H
+
+#include <functional> // so we can act as replacement
 
 namespace jla_boost {
 

@@ -18,8 +18,9 @@ PropMolecule::PropMolecule(const GraphType &g, const PropString &pString) : Base
 	for(Vertex v : asRange(vertices(g))) {
 		AtomId atomId;
 		Charge charge;
-		std::tie(atomId, charge) = Chem::decodeVertexLabel(pString[v]);
-		this->vertexState[get(boost::vertex_index_t(), g, v)] = AtomData(atomId, charge);
+		bool radical;
+		std::tie(atomId, charge, radical) = Chem::decodeVertexLabel(pString[v]);
+		this->vertexState[get(boost::vertex_index_t(), g, v)] = AtomData(atomId, charge, radical);
 		if(atomId == AtomIds::Invalid) isMolecule = false;
 	}
 
@@ -27,10 +28,11 @@ PropMolecule::PropMolecule(const GraphType &g, const PropString &pString) : Base
 	this->edgeState.reserve(num_edges(g));
 	for(Edge e : asRange(edges(g))) {
 		BondType bt = Chem::decodeEdgeLabel(pString[e]);
-		this->edgeState.add(e, bt);
+		assert(get(boost::edge_index_t(), g, e) == this->edgeState.size());
+		this->edgeState.push_back(bt);
 		if(bt == BondType::Invalid) isMolecule = false;
 	}
-	
+
 	verify(&g);
 }
 

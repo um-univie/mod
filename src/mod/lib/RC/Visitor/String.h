@@ -3,7 +3,7 @@
 
 #include <mod/lib/RC/Visitor/Compound.h>
 
-#include <mod/lib/Rule/Properties/String.h>
+#include <mod/lib/Rules/Properties/String.h>
 
 namespace mod {
 namespace lib {
@@ -16,7 +16,7 @@ public:
 
 	template<bool Verbose, typename RuleFirst, typename RuleSecond, typename InvertibleVertexMap, typename Result>
 	bool init(const RuleFirst &rFirst, const RuleSecond &rSecond, const InvertibleVertexMap &match, Result &result) {
-		result.rResult.pString = make_unique<typename Result::RuleResult::PropStringType>(get_graph(result.rResult));
+		result.rResult.pString = std::make_unique<typename Result::RuleResult::PropStringType>(get_graph(result.rResult));
 		return true;
 	}
 

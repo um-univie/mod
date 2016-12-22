@@ -12,6 +12,10 @@
             <sourceRootList>
                 <sourceRootElem>../src/mod</sourceRootElem>
                 <sourceRootElem>../src/jla_boost</sourceRootElem>
+                <sourceRootElem>../src/gml</sourceRootElem>
+                <sourceRootElem>../src/mod</sourceRootElem>
+                <sourceRootElem>../src/jla_boost</sourceRootElem>
+                <sourceRootElem>../src/gml</sourceRootElem>
             </sourceRootList>
             <confList>
                 <confElem>

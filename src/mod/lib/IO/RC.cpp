@@ -1,14 +1,13 @@
 #include "RC.h"
 
 #include <mod/Config.h>
+#include <mod/lib/IO/FileHandle.h>
 #include <mod/lib/IO/IO.h>
 #include <mod/lib/IO/Rule.h>
 #include <mod/lib/RC/Evaluator.h>
-#include <mod/lib/Rule/Real.h>
-#include <mod/lib/Rule/Properties/Depiction.h>
-#include <mod/lib/Rule/Properties/String.h>
-
-#include <jla_boost/Memory.hpp>
+#include <mod/lib/Rules/Real.h>
+#include <mod/lib/Rules/Properties/Depiction.h>
+#include <mod/lib/Rules/Properties/String.h>
 
 namespace mod {
 namespace lib {
@@ -71,10 +70,10 @@ std::string pdf(const lib::RC::Evaluator &rc) {
 	return fileNoExt;
 }
 
-void test(const lib::Rule::Real &rFirst, const lib::Rule::Real &rSecond, const lib::Rule::Real::CoreCoreMap &match, const lib::Rule::Real &rNew) {
-	using CoreVertex = lib::Rule::Vertex;
-	using CoreEdge = lib::Rule::Edge;
-	IO::Rule::Write::Options options;
+void test(const lib::Rules::Real &rFirst, const lib::Rules::Real &rSecond, const CoreCoreMap &match, const lib::Rules::Real &rNew) {
+	using CoreVertex = lib::Rules::Vertex;
+	using CoreEdge = lib::Rules::Edge;
+	IO::Rules::Write::Options options;
 	options.CollapseHydrogens(true);
 	options.EdgesAsBonds(true);
 	if(getConfig().rc.matchesWithIndex.get())
@@ -90,9 +89,9 @@ void test(const lib::Rule::Real &rFirst, const lib::Rule::Real &rSecond, const l
 	};
 	// make a fake rule with all the vertices and edges, just for coords
 	std::map<CoreVertex, CoreVertex> vFirstToCommon, vSecondToCommon, vNewToCommon;
-	auto dpoCommon = rFirst.clone();
-	lib::Rule::GraphType &gComon = get_graph(dpoCommon);
-	lib::Rule::PropStringCore &pStringCommon = *dpoCommon.pString;
+	lib::Rules::LabelledRule dpoCommon(rFirst.getDPORule(), false);
+	lib::Rules::GraphType &gComon = get_graph(dpoCommon);
+	lib::Rules::PropStringCore &pStringCommon = *dpoCommon.pString;
 	for(CoreVertex v : asRange(vertices(rFirst.getGraph()))) vFirstToCommon[v] = v;
 	// TODO: this will completely break if vertices are deleted in the composed rule
 	for(CoreVertex v : asRange(vertices(rNew.getGraph())))
@@ -104,8 +103,8 @@ void test(const lib::Rule::Real &rFirst, const lib::Rule::Real &rSecond, const l
 		else {
 			CoreVertex vCommon = add_vertex(gComon);
 			vSecondToCommon[v] = vCommon;
-			gComon[vCommon].membership = lib::Rule::Membership::Context;
-			const std::string &label = rSecond.getGraph()[v].membership == lib::Rule::Membership::Left
+			gComon[vCommon].membership = lib::Rules::Membership::Context;
+			const std::string &label = rSecond.getGraph()[v].membership == lib::Rules::Membership::Left
 					? rSecond.getStringState().getLeft()[v]
 					: rSecond.getStringState().getRight()[v];
 			pStringCommon.add(vCommon, label, label);
@@ -124,16 +123,16 @@ void test(const lib::Rule::Real &rFirst, const lib::Rule::Real &rSecond, const l
 		auto pEdge = edge(vSrc, vTar, gComon);
 		if(pEdge.second) continue;
 		pEdge = add_edge(vSrc, vTar, gComon);
-		gComon[pEdge.first].membership = lib::Rule::Membership::Context;
-		const std::string &label = rSecond.getGraph()[e].membership == lib::Rule::Membership::Left
+		gComon[pEdge.first].membership = lib::Rules::Membership::Context;
+		const std::string &label = rSecond.getGraph()[e].membership == lib::Rules::Membership::Left
 				? rSecond.getStringState().getLeft()[e]
 				: rSecond.getStringState().getRight()[e];
 		pStringCommon.add(pEdge.first, label, label);
 	}
-	lib::Rule::Real rCommon(std::move(dpoCommon));
-	lib::Rule::Real rFirstCopy(rFirst.clone());
-	lib::Rule::Real rSecondCopy(rSecond.clone());
-	lib::Rule::Real rNewCopy(rNew.clone());
+	lib::Rules::Real rCommon(std::move(dpoCommon));
+	lib::Rules::Real rFirstCopy(lib::Rules::LabelledRule(rFirst.getDPORule(), false));
+	lib::Rules::Real rSecondCopy(lib::Rules::LabelledRule(rSecond.getDPORule(), false));
+	lib::Rules::Real rNewCopy(lib::Rules::LabelledRule(rNew.getDPORule(), false));
 	rFirstCopy.getDepictionData().copyCoords(rCommon.getDepictionData(), vFirstToCommon);
 	rSecondCopy.getDepictionData().copyCoords(rCommon.getDepictionData(), vSecondToCommon);
 	rNewCopy.getDepictionData().copyCoords(rCommon.getDepictionData(), vNewToCommon);
@@ -161,9 +160,9 @@ void test(const lib::Rule::Real &rFirst, const lib::Rule::Real &rSecond, const l
 		assert(iter != end(vNewToCommon));
 		return matchVerticesInCommon.find(iter->second) != end(matchVerticesInCommon);
 	};
-	auto rawFilesFirst = IO::Rule::Write::tikz(rFirstCopy, 0, options, "L", "K", "R", visible, vColour, eColour, disallowCollapseFirst);
-	auto rawFilesSecond = IO::Rule::Write::tikz(rSecondCopy, secondIdOffset, options, "L", "K", "R", visible, vColour, eColour, disallowCollapseSecond);
-	auto rawFilesNew = IO::Rule::Write::tikz(rNewCopy, 0, options, "L", "K", "R", visible, vColour, eColour, disallowCollapseNew);
+	auto rawFilesFirst = IO::Rules::Write::tikz(rFirstCopy, 0, options, "L", "K", "R", visible, vColour, eColour, disallowCollapseFirst);
+	auto rawFilesSecond = IO::Rules::Write::tikz(rSecondCopy, secondIdOffset, options, "L", "K", "R", visible, vColour, eColour, disallowCollapseSecond);
+	auto rawFilesNew = IO::Rules::Write::tikz(rNewCopy, 0, options, "L", "K", "R", visible, vColour, eColour, disallowCollapseNew);
 	FileHandle s(getUniqueFilePrefix() + "rcMatch.tex");
 	//	IO::log() << "rFirstFiles: " << rawFilesFirst.first << ", " << rawFilesFirst.second << std::endl;
 	//	IO::log() << "rSecondFiles: " << rawFilesSecond.first << ", " << rawFilesSecond.second << std::endl;
@@ -179,12 +178,12 @@ void test(const lib::Rule::Real &rFirst, const lib::Rule::Real &rSecond, const l
 				\draw[->, >=triangle 45] (A) to node[above] {)XXX" + edgeLabel + R"XXX(} (B);
 				\end{tikzpicture})XXX";
 		};
-		s << "\\input{\\modInputPrefix/" << rawFilesFirst.first << ".L.tex}" << std::endl;
+		s << "\\input{\\modInputPrefix/" << rawFilesFirst.first << "_L.tex}" << std::endl;
 		s << arrow("$r_1$") << std::endl;
-		s << "\\input{\\modInputPrefix/" << rawFilesFirst.first << ".R.tex}" << std::endl;
+		s << "\\input{\\modInputPrefix/" << rawFilesFirst.first << "_R.tex}" << std::endl;
 		s << "\\\\" << std::endl;
 		s << "\\mbox{}\\hfill";
-		s << "\\input{\\modInputPrefix/" << rawFilesSecond.first << ".L.tex}" << std::endl;
+		s << "\\input{\\modInputPrefix/" << rawFilesSecond.first << "_L.tex}" << std::endl;
 		{ // the match lines
 			s << "\\begin{tikzpicture}[remember picture, overlay]" << std::endl;
 			for(auto m : match.left) {
@@ -198,11 +197,11 @@ void test(const lib::Rule::Real &rFirst, const lib::Rule::Real &rSecond, const l
 			s << "\\end{tikzpicture}" << std::endl;
 		}
 		s << arrow("$r_2$") << std::endl;
-		s << "\\input{\\modInputPrefix/" << rawFilesSecond.first << ".R.tex}" << std::endl;
+		s << "\\input{\\modInputPrefix/" << rawFilesSecond.first << "_R.tex}" << std::endl;
 		s << "\\\\" << std::endl;
-		s << "\\input{\\modInputPrefix/" << rawFilesNew.first << ".L.tex}" << std::endl;
+		s << "\\input{\\modInputPrefix/" << rawFilesNew.first << "_L.tex}" << std::endl;
 		s << arrow("$r$") << std::endl;
-		s << "\\input{\\modInputPrefix/" << rawFilesNew.first << ".R.tex}" << std::endl;
+		s << "\\input{\\modInputPrefix/" << rawFilesNew.first << "_R.tex}" << std::endl;
 		s << "}" << std::endl;
 	}
 	FileHandle sAux(getUniqueFilePrefix() + "rcMatch_aux.tex");

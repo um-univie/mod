@@ -2,7 +2,7 @@
 #define	MOD_LIB_RC_VISITOR_COMPOUND_H
 
 #include <mod/lib/RC/Result.h>
-#include <mod/lib/Rule/Real.h>
+#include <mod/lib/Rules/Real.h>
 
 #include <cassert>
 

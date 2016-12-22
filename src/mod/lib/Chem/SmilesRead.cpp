@@ -9,8 +9,6 @@
 #include <mod/lib/IO/IO.h>
 #include <mod/lib/IO/ParserCommon.h>
 
-#include <jla_boost/Memory.hpp>
-
 #include <boost/fusion/include/std_pair.hpp>
 #include <boost/lexical_cast.hpp>
 
@@ -25,6 +23,8 @@
 #include <boost/spirit/include/qi_string.hpp>
 #include <boost/spirit/include/qi_symbols.hpp>
 #include <boost/spirit/include/qi_uint.hpp>
+
+#include <map>
 
 using namespace mod::lib::IO::Parser;
 
@@ -81,6 +81,7 @@ struct Atom {
 	Chiral chiral;
 	unsigned int hCount = 0;
 	Charge charge;
+	bool radical;
 	int class_ = -1;
 public:
 	bool isAromatic;
@@ -107,8 +108,8 @@ public:
 				s << (a.charge < 0 ? '-' : '+');
 				if(std::abs(a.charge) > 1) s << (int) std::abs(a.charge);
 			}
-			if(a.class_ != -1)
-				s << ":" << a.class_;
+			if(a.radical) s << '.';
+			if(a.class_ != -1) s << ":" << a.class_;
 			s << "]";
 		}
 		return s;
@@ -214,7 +215,7 @@ struct Parser : public qi::grammar<Iter, Chain()> {
 		branch.name("branch");
 		atom %= bracketAtom | shorthandAtom;
 		atom.name("atom");
-		bracketAtom %= qi::lit('[') > isotope > symbol > chiral > hcount > charge > class_ > ']';
+		bracketAtom %= qi::lit('[') > isotope > symbol > chiral > hcount > charge > radical > class_ > ']';
 		bracketAtom.name("bracketAtom");
 		shorthandAtom %= shorthandSymbol;
 		shorthandAtom.name("aliphaticOrganicAtom|aromaticOrganicAtom|implicitWildcardAtom");
@@ -233,6 +234,8 @@ struct Parser : public qi::grammar<Iter, Chain()> {
 		chargeNum.name("chargeNum");
 		charge %= (qi::char_("+-") | qi::attr(0)) >> chargeNum;
 		charge.name("charge");
+		radical %= (qi::lit('.') >> qi::attr(true)) | qi::attr(false);
+		radical.name("radical");
 		class_ %= (qi::lit(':') > qi::uint_)
 				| qi::attr(-1);
 		class_.name("class");
@@ -240,7 +243,7 @@ struct Parser : public qi::grammar<Iter, Chain()> {
 		for(auto atomId : getSmilesOrganicSubset())
 			shorthandSymbol.add(symbolFromAtomId(atomId), symbolFromAtomId(atomId));
 		for(std::string str :{"b", "c", "n", "o", "s", "p"})
-		shorthandSymbol.add(str, str);
+			shorthandSymbol.add(str, str);
 		shorthandSymbol.add("*", "*");
 		shorthandSymbol.name("aliphaticOrganic|aromaticOrganic|wildcardSymbol");
 		for(char c :{'-', '=', '#', '$', ':', '/', '\\'}) bondSymbol.add(std::string(1, c), c);
@@ -274,6 +277,7 @@ private:
 	qi::rule<Iter, unsigned int() > hcount;
 	qi::rule<Iter, int() > chargeNum;
 	qi::rule<Iter, std::pair<char, int>() > charge;
+	qi::rule<Iter, bool() > radical;
 	qi::rule<Iter, unsigned int() > class_;
 	qi::symbols<char, std::string> shorthandSymbol, elementSymbol, aromaticSymbol;
 	qi::symbols<char, unsigned int> bondSymbol;
@@ -283,14 +287,14 @@ private:
 	phx::function<ErrorHandler<Iter> > errorHandler;
 };
 
-void addHydrogen(lib::Graph::GraphType &g, lib::Graph::PropStringType &pString, Vertex p) {
+void addHydrogen(lib::Graph::GraphType &g, lib::Graph::PropString &pString, Vertex p) {
 	Vertex v = add_vertex(g);
 	pString.addVertex(v, "H");
 	Edge e = add_edge(v, p, g).first;
 	pString.addEdge(e, "-");
 }
 
-bool addBond(lib::Graph::GraphType &g, lib::Graph::PropStringType &pString, Atom &p, Atom &v, char bond, Edge &e, std::ostream &err) {
+bool addBond(lib::Graph::GraphType &g, lib::Graph::PropString &pString, Atom &p, Atom &v, char bond, Edge &e, std::ostream &err) {
 	std::string edgeLabel;
 	switch(bond) {
 	case '/': // note: fall-through to make / and \ implicit
@@ -327,7 +331,7 @@ bool addBond(lib::Graph::GraphType &g, lib::Graph::PropStringType &pString, Atom
 
 struct Converter {
 
-	Converter(lib::Graph::GraphType &g, lib::Graph::PropStringType &pString, std::ostream &err)
+	Converter(lib::Graph::GraphType &g, lib::Graph::PropString &pString, std::ostream &err)
 	: g(g), pString(pString), parent(nullptr), status(true), err(err) { }
 
 	void operator()(Chain &c) {
@@ -437,12 +441,13 @@ struct Converter {
 					if(a.charge < 0) label += '-';
 					else if(a.charge > 0) label += '+';
 				}
+				if(a.radical) label += '.';
 				if(a.class_ != -1) {
 					if(getConfig().graph.appendSmilesClass.get()) {
 						label += ":";
 						label += boost::lexical_cast<std::string>(a.class_);
-					} else if(getConfig().graph.printSmilesParsingWarnings.get())
-						IO::log() << "WARNING: class information in SMILES string ignored." << std::endl;
+					}
+					classToVertexId.emplace(a.class_, a.vertex);
 				}
 			}
 		} // end if(wildcard)
@@ -451,20 +456,21 @@ struct Converter {
 	}
 private:
 	lib::Graph::GraphType &g;
-	lib::Graph::PropStringType &pString;
+	lib::Graph::PropString &pString;
 	Atom *parent;
 	char parentBond;
 	Edge *parentEdge;
 public:
 	bool status;
 	std::map<char, std::pair<Atom*, RingBond*> > openRings;
+	std::multimap<std::size_t, Vertex> classToVertexId;
 private:
 	std::ostream &err;
 };
 
 struct ExplicitHydrogenAdder {
 
-	ExplicitHydrogenAdder(lib::Graph::GraphType &g, lib::Graph::PropStringType &pString) : g(g), pString(pString) { }
+	ExplicitHydrogenAdder(lib::Graph::GraphType &g, lib::Graph::PropString &pString) : g(g), pString(pString) { }
 
 	void operator()(Chain &c) {
 		(*this)(c.branchedAtom);
@@ -487,12 +493,12 @@ struct ExplicitHydrogenAdder {
 	}
 private:
 	lib::Graph::GraphType &g;
-	lib::Graph::PropStringType &pString;
+	lib::Graph::PropString &pString;
 };
 
 struct ImplicitHydrogenAdder {
 
-	ImplicitHydrogenAdder(lib::Graph::GraphType &g, lib::Graph::PropStringType &pString) : g(g), pString(pString) { }
+	ImplicitHydrogenAdder(lib::Graph::GraphType &g, lib::Graph::PropString &pString) : g(g), pString(pString) { }
 
 	void operator()(Chain &c) {
 		(*this)(c.branchedAtom);
@@ -514,18 +520,18 @@ struct ImplicitHydrogenAdder {
 	}
 private:
 	lib::Graph::GraphType &g;
-	lib::Graph::PropStringType &pString;
+	lib::Graph::PropString &pString;
 };
 
-std::pair<std::unique_ptr<lib::Graph::GraphType>, std::unique_ptr<lib::Graph::PropStringType> > parseSmiles(const std::string &smiles, std::ostream &err) {
+lib::IO::Graph::Read::Data parseSmiles(const std::string &smiles, std::ostream &err) {
 	using IteratorType = std::string::const_iterator;
 	IteratorType iterStart = begin(smiles), iterEnd = end(smiles);
 	Parser<IteratorType> parser(err);
 	Chain ast;
 	bool res = IO::Parser::parse(err, iterStart, iterEnd, parser, ast);
-	if(!res) return std::make_pair(nullptr, nullptr);
-	auto gPtr = make_unique<lib::Graph::GraphType>();
-	auto pStringPtr = make_unique<lib::Graph::PropStringType>(*gPtr);
+	if(!res) return lib::IO::Graph::Read::Data();
+	auto gPtr = std::make_unique<lib::Graph::GraphType>();
+	auto pStringPtr = std::make_unique<lib::Graph::PropString>(*gPtr);
 	std::stringstream astStr;
 	astStr << ast;
 	if(smiles != astStr.str()) {
@@ -535,24 +541,33 @@ std::pair<std::unique_ptr<lib::Graph::GraphType>, std::unique_ptr<lib::Graph::Pr
 	}
 	Converter conv(*gPtr, *pStringPtr, err);
 	conv(ast);
-	if(!conv.status) return std::make_pair(nullptr, nullptr);
+	if(!conv.status) return lib::IO::Graph::Read::Data();
 	if(conv.openRings.size() > 0) {
 		err << "Error in SMILES conversion: unclosed rings (";
 		auto iter = begin(conv.openRings);
 		err << (int) iter->first;
 		for(iter++; iter != end(conv.openRings); iter++) err << ", " << (int) iter->first;
 		err << ")" << std::endl;
-		return std::make_pair(nullptr, nullptr);
+		return lib::IO::Graph::Read::Data();
 	}
 	(ExplicitHydrogenAdder(*gPtr, *pStringPtr))(ast);
 	(ImplicitHydrogenAdder(*gPtr, *pStringPtr)(ast));
-	return std::make_pair(std::move(gPtr), std::move(pStringPtr));
+	auto data = lib::IO::Graph::Read::Data(std::move(gPtr), std::move(pStringPtr));
+	bool isValid = std::all_of(conv.classToVertexId.begin(), conv.classToVertexId.end(), [&conv](auto &vp) {
+		return conv.classToVertexId.count(vp.first) == 1;
+	});
+	if(isValid) {
+		for(auto &&vp : conv.classToVertexId) {
+			data.externalToInternalIds[vp.first] = get(boost::vertex_index_t(), *gPtr, vp.second);
+		}
+	}
+	return data;
 }
 
 } // namespace
 } // namespace Smiles
 
-std::pair<std::unique_ptr<lib::Graph::GraphType>, std::unique_ptr<lib::Graph::PropStringType> > readSmiles(const std::string &smiles, std::ostream &err) {
+lib::IO::Graph::Read::Data readSmiles(const std::string &smiles, std::ostream &err) {
 	return Smiles::parseSmiles(smiles, err);
 }
 
@@ -570,6 +585,7 @@ BOOST_FUSION_ADAPT_STRUCT(mod::lib::Chem::Smiles::Atom,
 		(mod::lib::Chem::Smiles::Chiral, chiral)
 		(unsigned int, hCount)
 		(mod::lib::Chem::Smiles::Charge, charge)
+		(bool, radical)
 		(int, class_)
 		)
 BOOST_FUSION_ADAPT_STRUCT(mod::lib::Chem::Smiles::Branch,

@@ -7,7 +7,6 @@
 #include <mod/lib/IO/ParserCommon.h>
 
 #include <jla_boost/graph/PairToRangeAdaptor.hpp>
-#include <jla_boost/Memory.hpp>
 
 #include <boost/lexical_cast.hpp>
 
@@ -158,7 +157,7 @@ private:
 
 struct Converter : public boost::static_visitor<std::pair<GVertex, bool> > {
 
-	Converter(GraphType &g, PropStringType &pString, std::ostream &s) : g(g), pString(pString), s(s), error(false) { }
+	Converter(GraphType &g, PropString &pString, std::ostream &s) : g(g), pString(pString), s(s), error(false) { }
 
 	bool convert(Chain &chain) {
 		std::pair<GVertex, bool> res = convert(chain.head, g.null_vertex());
@@ -228,15 +227,16 @@ struct Converter : public boost::static_visitor<std::pair<GVertex, bool> > {
 	}
 private:
 	GraphType &g;
-	PropStringType &pString;
+	PropString &pString;
 	std::ostream &s;
-	std::map<unsigned int, GVertex> idVertexMap;
 	bool error;
+public:
+	std::map<unsigned int, GVertex> idVertexMap;
 };
 
 struct ImplicitHydrogenAdder : public boost::static_visitor<void> {
 
-	ImplicitHydrogenAdder(GraphType &g, PropStringType &pString) : g(g), pString(pString) { }
+	ImplicitHydrogenAdder(GraphType &g, PropString &pString) : g(g), pString(pString) { }
 
 	void operator()(const Chain &chain) {
 		(*this)(chain.head);
@@ -261,7 +261,7 @@ struct ImplicitHydrogenAdder : public boost::static_visitor<void> {
 			auto atomId = lib::Chem::atomIdFromSymbol(vertex.label);
 			if(std::find(begin(lib::Chem::getSmilesOrganicSubset()), end(lib::Chem::getSmilesOrganicSubset()), atomId)
 					== end(lib::Chem::getSmilesOrganicSubset())) MOD_ABORT;
-			auto hydrogenAdder = [](lib::Graph::GraphType &g, lib::Graph::PropStringType &pString, lib::Graph::Vertex p) {
+			auto hydrogenAdder = [](lib::Graph::GraphType &g, lib::Graph::PropString &pString, lib::Graph::Vertex p) {
 				GVertex v = add_vertex(g);
 				pString.addVertex(v, "H");
 				GEdge e = add_edge(v, p, g).first;
@@ -272,27 +272,31 @@ struct ImplicitHydrogenAdder : public boost::static_visitor<void> {
 	}
 private:
 	GraphType &g;
-	PropStringType &pString;
+	PropString &pString;
 };
 
 } // namespace detail
 
-std::pair<std::unique_ptr<GraphType>, std::unique_ptr<PropStringType> > parse(const std::string &dfs, std::ostream &s) {
+lib::IO::Graph::Read::Data parse(const std::string &dfs, std::ostream &s) {
 	const detail::Parser<std::string::const_iterator> parser(s);
 	detail::Chain chain;
 	std::string::const_iterator iterBegin = dfs.begin(), iterEnd = dfs.end();
 	bool result = lib::IO::Parser::parse(s, iterBegin, iterEnd, parser, chain);
-	if(!result) return std::make_pair(nullptr, nullptr);
-	auto g = make_unique<GraphType>();
-	auto pString = make_unique<PropStringType>(*g);
+	if(!result) return lib::IO::Graph::Read::Data();
+	auto g = std::make_unique<GraphType>();
+	auto pString = std::make_unique<PropString>(*g);
 	detail::Converter conv(*g, *pString, s);
 	if(conv.convert(chain)) {
 		detail::ImplicitHydrogenAdder adder(*g, *pString);
 		adder(chain);
 		write(*g, *pString);
-		return std::make_pair(std::move(g), std::move(pString));
+		auto data = lib::IO::Graph::Read::Data(std::move(g), std::move(pString));
+		for(auto &&vp : conv.idVertexMap) {
+			data.externalToInternalIds[vp.first] = get(boost::vertex_index_t(), *g, vp.second);
+		}
+		return data;
 	} else {
-		return std::make_pair(nullptr, nullptr);
+		return lib::IO::Graph::Read::Data();
 	}
 }
 
@@ -454,21 +458,21 @@ private:
 	const std::vector<bool> targetForRing;
 };
 
-std::pair<Chain, std::map<unsigned int, unsigned int> > write(const lib::Graph::GraphType &g, const PropStringType &pString) {
+std::pair<Chain, std::map<unsigned int, unsigned int> > write(const lib::Graph::GraphType &g, const PropString &pString) {
 	using namespace detail;
 	using GEdgeIter = lib::Graph::GraphType::out_edge_iterator;
 	typedef std::pair<GVertex, std::pair<GEdgeIter, GEdgeIter> > VertexInfo;
-	std::vector<Vertex*> realVertices(boost::num_vertices(g), nullptr);
+	std::vector<Vertex*> realVertices(num_vertices(g), nullptr);
 	Chain chain;
 	chain.hasNonSmilesRingClosure = false;
 
-	std::vector<Colour> colour(boost::num_vertices(g), Colour::White);
-	std::vector<bool> targetForRing(boost::num_vertices(g), false);
+	std::vector<Colour> colour(num_vertices(g), Colour::White);
+	std::vector<bool> targetForRing(num_vertices(g), false);
 	std::map<GEdge, Colour> edgeColour;
 	for(GEdge e : asRange(edges(g))) edgeColour[e] = Colour::White;
 	std::stack<VertexInfo> stack;
 	{ // discover root
-		GVertex cur = *boost::vertices(g).first;
+		GVertex cur = *vertices(g).first;
 		unsigned int curId = get(boost::vertex_index_t(), g, cur);
 		assert(curId < colour.size());
 		colour[curId] = Colour::Grey;
@@ -478,7 +482,7 @@ std::pair<Chain, std::map<unsigned int, unsigned int> > write(const lib::Graph::
 		lv.id = curId;
 		lv.label = pString[cur];
 		realVertices[curId]->vertex = lv;
-		stack.push(std::make_pair(cur, boost::out_edges(cur, g)));
+		stack.push(std::make_pair(cur, out_edges(cur, g)));
 	}
 	while(!stack.empty()) {
 		GVertex cur = stack.top().first;
@@ -521,7 +525,7 @@ std::pair<Chain, std::map<unsigned int, unsigned int> > write(const lib::Graph::
 				cur = next;
 				curId = nextId;
 				curVertex = nextVertex;
-				boost::tie(iter, iterEnd) = boost::out_edges(next, g);
+				boost::tie(iter, iterEnd) = out_edges(next, g);
 				//				std::cout << "CurVertex: " << pString(cur)<< std::endl;
 			} else if(colour[nextId] == Colour::Grey) { // back edge, maybe an already traversed edge
 				//				std::cout << "grey" << std::endl;
@@ -555,8 +559,8 @@ std::pair<Chain, std::map<unsigned int, unsigned int> > write(const lib::Graph::
 
 } // namespace detail
 
-std::pair<std::string, bool> write(const lib::Graph::GraphType &g, const PropStringType &pString) {
-	if(boost::num_vertices(g) == 0) return std::make_pair("", false);
+std::pair<std::string, bool> write(const lib::Graph::GraphType &g, const PropString &pString) {
+	if(num_vertices(g) == 0) return std::make_pair("", false);
 	using namespace detail;
 	std::pair<Chain, std::map<unsigned int, unsigned int> > res = detail::write(g, pString);
 	Chain &chain = res.first;

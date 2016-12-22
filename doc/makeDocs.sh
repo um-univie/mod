@@ -13,10 +13,10 @@ if [ $? -ne 0 ]; then
 fi
 
 function doBuild {
-	paperOpt="-D latex_paper_size=a4"
-	allOpts="-d $topBuildDir/doc/doctrees $paperOpt $topSrcDir/doc/source"
+	allOpts="-d $topBuildDir/doc/doctrees $topSrcDir/doc/source"
 	mkdir -p $topSrcDir/doc/source/_static
 	$sphinxBuild -b html $allOpts $topBuildDir/doc/build/html
+	echo "$sphinxBuild -b html $allOpts $topBuildDir/doc/build/html"
 }
 
 function outputRST {

@@ -4,7 +4,6 @@ root_PWD=$(pwd)
 numThreads=2
 doBuild="yes"
 withOpenBabel="yes"
-withSBML="yes"
 prefix="--prefix=$HOME/test/modTestInstall"
 while true; do
 	case $1 in
@@ -19,15 +18,10 @@ while true; do
 		;;
 	"nooptional")
 		withOpenBabel="no"
-		withSBML="no"
 		shift
 		;;
 	"noobabel")
 		withOpenBabel="no"
-		shift
-		;;
-	"nosbml")
-		withSBML="no"
 		shift
 		;;
 	"nobuild")
@@ -48,11 +42,6 @@ while true; do
 done
 
 args=""
-if test "$withSBML" = "yes"; then
-	args="$args	--with-SBML=$HOME/programs"
-else
-	args="$args --with-SBML=no"
-fi
 if test "$withOpenBabel" = "yes"; then
 	#args="$args	--with-OpenBabel=$HOME/programs"
 	# Use the repo version now.
@@ -60,11 +49,10 @@ if test "$withOpenBabel" = "yes"; then
 else
 	args="$args --with-OpenBabel=no"
 fi
-args="$args	--with-boost=$HOME/programs"
+args="$args	--with-boost=$HOME/programs$suffix"
 args="$args	$prefix $@"
 
-./generateAutomakeFiles.sh						\
-	&& autoreconf -fi							\
+./repo-bootstrap.sh								\
 	&& rm -rf preBuild && mkdir preBuild		\
 	&& cd preBuild && ../configure $args		\
 	&& make dist								\
@@ -107,7 +95,7 @@ else
 	function makeMakefile {
 		echo 'PKG_CONFIG_PATH := $(PKG_CONFIG_PATH):$(HOME)/test/modTestInstall/lib/pkgconfig'
 		echo 'CPPFLAGS        := $(shell PKG_CONFIG_PATH=$(PKG_CONFIG_PATH) pkg-config --cflags mod)'
-		echo 'CXXFLAGS        := -std=c++11'
+		echo 'CXXFLAGS        := -std=c++14'
 		echo 'LDLIBS          := $(shell PKG_CONFIG_PATH=$(PKG_CONFIG_PATH) pkg-config --libs mod)'
 		echo ""
 		echo "test: test.o"
@@ -130,6 +118,14 @@ else
 	res=$?
 	if [ $res -ne 0 ]; then
 		echo "Compilation or run of test program failed."
+		exit $res
+	fi
+	echo "Test wrapper"
+	echo "======================================================================"
+	$HOME/test/modTestInstall/bin/mod -e "smiles('O').print()"
+	res=$?
+	if [ $res -ne 0 ]; then
+		echo "Running the wrapper script failed."
 		exit $res
 	fi
 fi

@@ -15,9 +15,9 @@ namespace RCExp {
 class Expression;
 } // namespace RCExp
 namespace lib {
-namespace Rule {
+namespace Rules {
 class Real;
-} // namespace Rule
+} // namespace Rules
 namespace RC {
 
 struct Evaluator {
@@ -32,7 +32,7 @@ struct Evaluator {
 
 	struct VProp {
 		VertexKind kind;
-		const lib::Rule::Real *rule;
+		const lib::Rules::Real *rule;
 	};
 
 	struct EProp {
@@ -58,18 +58,18 @@ public: // evalutation interface
 	// if found, the rule is deleted and the database rule is returned
 	// otherwise, the rule is wrapped and returned
 	// does NOT add to the database
-	std::shared_ptr<mod::Rule> checkIfNew(lib::Rule::Real *rCand) const;
+	std::shared_ptr<mod::Rule> checkIfNew(lib::Rules::Real *rCand) const;
 	// records a composition
-	void suggestComposition(const lib::Rule::Real *rFirst, const lib::Rule::Real *rSecond, const lib::Rule::Real *rResult);
+	void suggestComposition(const lib::Rules::Real *rFirst, const lib::Rules::Real *rSecond, const lib::Rules::Real *rResult);
 private: // graph interface
-	Vertex getVertexFromRule(const lib::Rule::Real *r);
-	Vertex getVertexFromArgs(const lib::Rule::Real *rFirst, const lib::Rule::Real *rSecond);
+	Vertex getVertexFromRule(const lib::Rules::Real *r);
+	Vertex getVertexFromArgs(const lib::Rules::Real *rFirst, const lib::Rules::Real *rSecond);
 private:
 	std::unordered_set<std::shared_ptr<mod::Rule> > database, products;
 private:
 	GraphType rcg;
-	std::unordered_map<const lib::Rule::Real*, Vertex> ruleToVertex;
-	std::map<std::pair<const lib::Rule::Real*, const lib::Rule::Real*>, Vertex> argsToVertex;
+	std::unordered_map<const lib::Rules::Real*, Vertex> ruleToVertex;
+	std::map<std::pair<const lib::Rules::Real*, const lib::Rules::Real*>, Vertex> argsToVertex;
 };
 
 } // namespace RC

@@ -3,7 +3,6 @@
 
 #include <jla_boost/graph/dpo/Rule.hpp>
 #include <jla_boost/graph/morphism/VectorVertexMap.hpp>
-#include <jla_boost/Memory.hpp>
 
 namespace mod {
 namespace lib {

@@ -2,8 +2,7 @@
 #define MOD_LIB_GRAPH_DEPICTION_H
 
 #include <mod/BuildConfig.h>
-#include <mod/lib/Graph/Base.h>
-#include <mod/lib/Graph/Properties/Molecule.h>
+#include <mod/lib/Graph/GraphDecl.h>
 
 #ifdef MOD_HAVE_OPENBABEL
 #include <openbabel/mol.h>
@@ -17,6 +16,8 @@ enum class BondType;
 template<typename Sig> class Function;
 namespace lib {
 namespace Graph {
+struct PropMolecule;
+struct PropString;
 
 class DepictionData {
 	DepictionData(const DepictionData&) = delete;
@@ -24,10 +25,11 @@ class DepictionData {
 	DepictionData(DepictionData&&) = delete;
 	DepictionData &operator=(DepictionData&&) = delete;
 public:
-	DepictionData(const GraphType &g, const PropStringType &pString, const PropMolecule &moleculeState);
+	DepictionData(const GraphType &g, const PropString &pString, const PropMolecule &moleculeState);
 	AtomId getAtomId(Vertex v) const; // shortcut to moleculeState
 	Charge getCharge(Vertex v) const; // shortcut to moleculeState
-	std::string getVertexLabelNoCharge(Vertex v) const;
+	bool getRadical(Vertex v) const; // shortcut to moleculeState
+	std::string getVertexLabelNoChargeRadical(Vertex v) const;
 	BondType getBondData(Edge e) const; // shortcut to moleculeState
 	std::string getEdgeLabel(Edge e) const;
 	const AtomData &operator()(Vertex v) const; // fake data

@@ -90,6 +90,7 @@ struct Config {
 #define MOD_CONFIG_DATA()                                                       \
 	/* rst: .. todo:: write documentation for all settings */                     \
 	((Common, common,                                                             \
+		((bool, quite, false))                                                      \
 		((unsigned int, numThreads, 1))                                             \
 	))                                                                            \
 	((ComponentSG, componentSG,                                                   \
@@ -113,6 +114,7 @@ struct Config {
 		((std::string, tikzPictureOption, "scale=\\modDGHyperScale"))               \
 		((bool, disallowEmptyParallelStrategies, true))                             \
 		((bool, printVertexIds, false))                                             \
+		((bool, printNonHyper, false))                                              \
 	))                                                                            \
 	((Graph, graph,                                                               \
 		((bool, verboseCache, false))                                               \
@@ -128,8 +130,12 @@ struct Config {
 	))                                                                            \
 	((Rule, rule,                                                                 \
 		((bool, ignoreConstraintsDuringInversion, false))                           \
-		((std::string, changeColour, "purple"))                                     \
+		((std::string, changeColour, ""))                                           \
+		((std::string, changeColourL, "NavyBlue"))                                  \
+		((std::string, changeColourK, "Purple"))                                    \
+		((std::string, changeColourR, "Green"))                                     \
 		((bool, printChangedEdgesInContext, false))                                 \
+		((bool, printCombined, true))                                               \
 	))                                                                            \
 	((RC, rc,                                                                     \
 		((bool, verbose, false))                                                    \

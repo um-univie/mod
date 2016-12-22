@@ -3,8 +3,8 @@
 
 #include <mod/Chem.h>
 
-#include <mod/lib/Graph/Base.h>
-#include <mod/lib/Rule/Base.h>
+#include <boost/graph/graph_traits.hpp>
+#include <boost/graph/properties.hpp>
 
 #include <string>
 #include <vector>
@@ -12,17 +12,17 @@
 namespace mod {
 
 inline bool isCleanHydrogen(const AtomData &ad) {
-	return ad.getAtomId() == AtomIds::Hydrogen && ad.getCharge() == 0;
+	return ad == AtomData(AtomIds::H);
 }
 
 namespace lib {
 namespace Chem {
 
-std::pair<std::string, Charge> extractCharge(std::string label);
-std::pair<std::size_t, Charge> extractChargeLen(const std::string &label);
+std::tuple<std::string, Charge, bool> extractChargeRadical(std::string label);
+std::tuple<std::size_t, Charge, bool> extractChargeRadicalLen(const std::string &label);
 AtomId atomIdFromSymbol(const std::string &label);
 AtomId atomIdFromSymbol(const std::string &label, std::size_t len);
-std::pair<AtomId, Charge> decodeVertexLabel(const std::string &label); // we don't return an AtomData, because a label explicitly can only hold atomId and charge
+std::tuple<AtomId, Charge, bool> decodeVertexLabel(const std::string &label); // we don't return an AtomData, because a label explicitly can only hold atomId and charge
 BondType decodeEdgeLabel(const std::string &label);
 void markSpecialAtomsUsed(std::vector<bool> &used);
 std::string symbolFromAtomId(AtomId atomId);

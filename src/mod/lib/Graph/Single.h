@@ -3,6 +3,7 @@
 
 #include <mod/Config.h>
 #include <mod/lib/Graph/Base.h>
+#include <mod/lib/Graph/LabelledGraph.h>
 
 #include <boost/optional/optional.hpp>
 
@@ -18,7 +19,7 @@ struct PropMolecule;
 struct DepictionData;
 
 struct Single : public Base {
-	Single(std::unique_ptr<GraphType> g, std::unique_ptr<PropStringType> pString);
+	Single(std::unique_ptr<GraphType> g, std::unique_ptr<PropString> pString);
 	Single(Single &&) = default;
 	~Single();
 	const LabelledGraph &getLabelledGraph() const;
@@ -35,12 +36,12 @@ struct Single : public Base {
 	std::shared_ptr<mod::Rule> getUnbindRule() const;
 	unsigned int getVertexLabelCount(const std::string &label) const;
 	unsigned int getEdgeLabelCount(const std::string &label) const;
-	const PropMolecule &getMoleculeState() const;
 	DepictionData &getDepictionData();
 	const DepictionData &getDepictionData() const;
 public: // deprecated interface
 	const GraphType &getGraph() const;
-	const PropStringType &getStringState() const;
+	const PropString &getStringState() const;
+	const PropMolecule &getMoleculeState() const;
 private:
 	LabelledGraph g;
 	const std::size_t id;
@@ -50,8 +51,6 @@ private:
 	mutable bool dfsHasNonSmilesRingClosure;
 	mutable boost::optional<std::string> smiles;
 	mutable std::shared_ptr<mod::Rule> bindRule, idRule, unbindRule;
-
-	mutable std::unique_ptr<const PropMolecule> moleculeState;
 	mutable std::unique_ptr<DepictionData> depictionData;
 public:
 	static std::size_t isomorphismVF2(const Single &gDom, const Single &gCodom, std::size_t maxNumMatches);
@@ -71,6 +70,7 @@ struct IsomorphismPredicate {
 		return 1 == Single::isomorphism(*gDom, *gCodom, 1);
 	}
 };
+
 } // namespace detail
 
 inline detail::IsomorphismPredicate makeIsomorphismPredicate() {

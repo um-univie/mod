@@ -28,7 +28,6 @@ refLinks = {
 	"ChemFig" :    "http://www.ctan.org/pkg/chemfig",
 	"GGL" :        "http://www.tbi.univie.ac.at/software/GGL",
 	"Graphviz" :   "http://www.graphviz.org",
-	"libSBML" :    "http://sbml.org/Software/libSBML",
 	"LoLA" :       "http://www.informatik.uni-rostock.de/tpp/lola/",
 	"Open Babel" : "http://openbabel.org",
 	"PNAPI" :      "http://service-technology.org/pnapi/index.html",
@@ -61,6 +60,8 @@ extensions = [
     'sphinx.ext.mathjax',
     'sphinx.ext.ifconfig',
 ]
+
+cpp_index_common_prefix = ["mod::"]
 
 todo_include_todos = True
 

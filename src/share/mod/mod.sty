@@ -1,15 +1,18 @@
 \NeedsTeXFormat{LaTeX2e}[1994/06/01]
 \ProvidesPackage{mod}[2015/05/01 The MedØlDatschgerl Package]
 
+\newcommand{\modName}{Med\O lDatschgerl}
+\newcommand{\modAbbr}{M\O D}
+
 \RequirePackage{grffile}
 \RequirePackage{verbatim}
 \RequirePackage[dvipsnames]{xcolor}
 \RequirePackage{tikz}
 \usetikzlibrary{shapes,positioning,arrows,fit,calc,matrix,shadows,decorations.pathmorphing}
 
-
-\newcommand{\modName}{Med\O lDatschgerl}
-\newcommand{\modAbbr}{M\O D}
+\newcommand{\modset}[1]{%
+	\pgfqkeys{/mod}{#1}%
+}
 
 %------------------------------------------------------------------------------
 % Settings
@@ -49,10 +52,6 @@
 \newcounter{mod@figCounter}
 
 \def\mod@graphPrinter{p}
-
-\newcommand{\modset}[1]{%
-	\pgfqkeys{/mod}{#1}%
-}
 
 \pgfqkeys{/mod}{
 	graph base/.style={},

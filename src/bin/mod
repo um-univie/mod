@@ -1,13 +1,11 @@
 #!/bin/bash
 
-echo "MØD Wrapper --------------------------------------------------------"
-
 function printHelp {
 	echo "MØD Wrapper usage:"
 	echo "$0 [wrapper options] [shared options] [vm options]"
 	echo "Wrapper Options:"
 	echo "	--help, -h      Show this and return."
-	echo "	--version       Print version and exit."
+	echo "	--version, -v   Print version and exit."
 	echo "	--get-latex     Copy mod.sty and mod.mk to the current folder."
 	echo "	--nopost        Do not generate the summary."
 	echo "	--profile       Use callgrind to profile the execution."
@@ -16,9 +14,14 @@ function printHelp {
 	echo "	--debug         Start gdb with the program."
 	echo "	clean           Delete out/ and summary/. Any other args are ignored."
 	echo "	-j <N>          Set number of available threads for post processing."
+	echo "	-i              Enter interactive mode after execution, and disable the log."
+	echo "	-q              Use quite mode."
 }
 
 # Args
+doPrintHelp="false"
+doVersion="false"
+getLatex="false"
 post="true"
 profile="false"
 memcheck="false"
@@ -26,15 +29,15 @@ debug="false"
 clean="false"
 vgArgs=""
 pymod="true"
+interactive="false"
+quite="false"
 interceptedArgs=""
 summaryArgs=""
 
 # File names
 modvm="modvm"
-pythonvm="python3"
 summaryMaker="mod_post"
 obabelSupp="obabel.supp"
-libsbmlSupp="libSBML.supp"
 pythonSupp="python.supp"
 
 # Find prefix
@@ -55,20 +58,8 @@ else
 		exit 1
 	fi
 fi
-
 export MOD_PREFIX
-echo "Prefix: $MOD_PREFIX"
-echo -n "MedØlDatschgerl version "
-cat $MOD_PREFIX/share/mod/VERSION
-echo ""
 
-# Check summary maker
-stat $MOD_PREFIX/bin/$summaryMaker &> /dev/null
-if [ $? -ne 0 ]; then
-	echo "Summary maker, \"$MOD_PREFIX/bin/$summaryMaker\", not found."
-	echo "Post processing disabled"
-	post="false"
-fi
 
 args=()
 summaryArgs=()
@@ -77,16 +68,16 @@ summaryArgs=()
 while test "$1" != ""; do
 	case $1 in
 		"--help"|"-h" )
-			printHelp $0
-			exit 0
+			doPrintHelp="true"
+			shift
 			;;
-		"--version" )
-			exit 0
+		"--version"|"-v" )
+			doVersion="true"
+			shift
 			;;
 		"--get-latex" )
-			echo "cp $MOD_PREFIX/share/mod/mod.{sty,mk} ./"
-			cp $MOD_PREFIX/share/mod/mod.{sty,mk} ./
-			exit $?
+			getLatex="true"
+			shift
 			;;
 		"--nopost" )
 			post="false"
@@ -120,12 +111,115 @@ while test "$1" != ""; do
 			shift
 			shift
 			;;
+		"-i" )
+			interactive="true"
+			shift
+			;;
+		"-q" )
+			quite="true"
+			shift
+			;;
 		* )
 			args+=("$1")
 			shift
 			;;
 	esac
 done
+
+if test "$quite" = "false"; then
+	echo "MØD Wrapper --------------------------------------------------------"
+	echo "Prefix: $MOD_PREFIX"
+	echo -n "MedØlDatschgerl version "
+fi
+if test "$quite" = "false" -o "$doVersion" = "true"; then
+	cat $MOD_PREFIX/share/mod/VERSION
+fi
+
+
+if test "$doPrintHelp" = "true"; then
+	printHelp $0
+	exit 0
+fi
+if test "$doVersion" = "true"; then
+	exit 0
+fi
+if test "$getLatex" = "true"; then
+	if test "$quite" = "false"; then
+		echo "cp $MOD_PREFIX/share/mod/mod.{sty,mk} ./"
+	fi
+	cp $MOD_PREFIX/share/mod/mod.{sty,mk} ./
+	exit $?
+fi
+
+
+
+if test "$quite" = "false"; then
+	echo "Plugins ------------------------------------------------------------"
+fi
+pySearchPaths=""
+plugins=()
+function loadPluginFile {
+	function getVar {
+		varName=$1
+		f="$2"
+		grep "^$varName:" "$f" &> /dev/null
+		res=$?
+		if test $res -ne 0; then
+			echo "Bad plugin file, '$varName' not found: $f"
+			return $res
+		fi
+		numLines=$(grep "^$varName:" "$f" | wc -l)
+		if test $numLines -ne 1; then
+			echo "Bad plugin file, multiple '$varName' lines ($numLines): $f"
+			return 1
+		fi
+		grep "^$varName:" "$f" | sed -e "s/^$varName:[ \t]*//" -e "s/[ \t]*$//"
+		return 0
+	}
+	if ! test -f "$f"; then
+		echo "Bad plugin file, not a regular file: $f"
+		continue
+	fi
+	name=$(getVar name "$f")
+	if test $? -ne 0; then
+		echo $name
+		continue
+	fi
+	pluginPath=$(getVar path "$f")
+	if test $? -ne 0; then
+		echo $pluginPath
+		continue
+	fi
+	plugins+=($name)
+	pySearchPath="$pySearchPath:$pluginPath"
+	if test "$quite" = "false"; then
+		echo " $name: $pluginPath"
+	fi
+}
+function loadPlugins {
+	path="$1"
+	if test ! -d "$path"; then
+		return
+	fi
+	for f in $(ls $path/*); do
+		loadPluginFile "$f"
+	done
+}
+
+globalPluginPath="$MOD_PREFIX/share/mod/plugins"
+if test "$quite" = "false"; then
+	echo "Global ($globalPluginPath):"
+fi
+loadPlugins "$globalPluginPath"
+IFS=":" read -ra paths <<< "$MOD_PLUGIN_PATH"
+for p in ${paths[@]}; do
+	if test "$quite" = "false"; then
+		echo "Additional ($p):"
+	fi
+	loadPlugins "$p"
+done
+
+
 
 # Create precommand (gdb/valgrind/...)
 precommand=""
@@ -143,7 +237,6 @@ elif [ $memcheck = "true" ]; then
 		fi
 	}
 	checkSuppFile $obabelSupp
-	checkSuppFile $libsbmlSupp
 	if [ $pymod = "true" ]; then
 		checkSuppFile $pythonSupp
 	fi
@@ -151,7 +244,7 @@ elif [ $memcheck = "true" ]; then
 		precommand="$precommand --vgdb=yes --vgdb-error=0"
 	fi
 	precommand="$precommand --leak-check=full --track-origins=yes --num-callers=50 --gen-suppressions=all $vgArgs"
-	precommand="$precommand --suppressions=$MOD_PREFIX/share/mod/$obabelSupp --suppressions=$MOD_PREFIX/share/mod/$libsbmlSupp"
+	precommand="$precommand --suppressions=$MOD_PREFIX/share/mod/$obabelSupp"
 	if [ $pymod = "true" ]; then
 		precommand="$precommand --suppressions=$MOD_PREFIX/share/mod/$pythonSupp"
 	fi
@@ -175,8 +268,12 @@ else
 fi
 
 function executeVM {
-	echo "Running VM ---------------------------------------------------------"
-	time "$@"
+	if test "$quite" = "false"; then
+		echo "Running VM ---------------------------------------------------------"
+		time "$@"
+	else
+		"$@"
+	fi
 }
 
 function executeVMPython {
@@ -188,17 +285,29 @@ import ctypes
 import os
 import sys
 sys.setdlopenflags(sys.getdlopenflags() | ctypes.RTLD_GLOBAL)
-import mod
-from mod import *
+
+# Plugins
+#--------------------------------------------------------------
+EOF
+		for plugin in ${plugins[@]}; do
+			echo "import $plugin"
+			echo "from $plugin import *"
+		done
+
+		cat << "EOF"
+
+#--------------------------------------------------------------
 
 mod.includedFiles = set()
 
 def include(fName, checkDup=True, putDup=True, skipDup=True):
 	t = fName.rpartition("/")
 	if(fName != prefixFilename(fName)):
-		print("Executing code from '", fName, "' ('", prefixFilename(fName), "')", sep="")
+		if not mod.config.common.quite:
+			print("Executing code from '", fName, "' ('", prefixFilename(fName), "')", sep="")
 	else:
-		print("Executing code from '", fName, "'", sep="")
+		if not mod.config.common.quite:
+			print("Executing code from '", fName, "'", sep="")
 	fPrefixed = prefixFilename(fName)
 	skip = False
 	ino = os.stat(fPrefixed).st_ino
@@ -214,17 +323,19 @@ def include(fName, checkDup=True, putDup=True, skipDup=True):
 	if t[1] != "":
 		pushFilePrefix(t[0] + t[1])
 	if skip:
-		print("Skipping inclusion (already included)")
+		if not mod.config.common.quite:
+			print("Skipping inclusion (already included)")
 	else:
 		with open(fPrefixed) as f:
 			code = compile(f.read(), fName, 'exec')
 		exec(code, globals())
 	if t[1] != "":
 		popFilePrefix()
-	if(fName != prefixFilename(fName)):
-		print("End of code from '", fName, "' ('", prefixFilename(fName), "')", sep="")
-	else:
-		print("End of code from '", fName, "'", sep="")
+	if not mod.config.common.quite:
+		if(fName != prefixFilename(fName)):
+			print("End of code from '", fName, "' ('", prefixFilename(fName), "')", sep="")
+		else:
+			print("End of code from '", fName, "'", sep="")
 mod.include = include
 EOF
 	}
@@ -232,6 +343,9 @@ EOF
 	preamble >> $pyFile
 
 	echo '# From command line arguments' >> $pyFile
+	if test "$quite" = "true"; then
+		echo "config.common.quite = True" >> $pyFile
+	fi
 	while [ $1 ]; do
 		case $1 in
 			"-f" )
@@ -255,12 +369,32 @@ EOF
 				;;
 		esac
 	done
-	export PYTHONPATH="$PYTHONPATH:$MOD_PREFIX/lib:$(pwd)"
-	echo "Input --------------------------------------------------------------"
-	echo "(see $pyFile)"
-	echo "Command ------------------------------------------------------------"
-	echo "$precommand $pythonvm $pyFile"
-	executeVM $precommand $pythonvm $pyFile
+	export PYTHONPATH="$PYTHONPATH:$pySearchPath:$(pwd)"
+	echo "# PYTHONPATH=$PYTHONPATH" >> $pyFile
+	if test "$quite" = "false"; then
+		echo "Input --------------------------------------------------------------"
+		echo "(see $pyFile)"
+		echo "Command ------------------------------------------------------------"
+	fi
+	pythonvm="python3"
+	if [ "$interactive" = "true" ]; then
+		which ipython3 &> /dev/null
+		if test $? -eq 0; then
+			pythonvm="ipython3"
+		fi
+		if test "$quite" = "false"; then
+			echo "$precommand $pythonvm -i $pyFile"
+		fi
+		executeVM $precommand $pythonvm -i $pyFile
+		ret=$?
+	else
+		if test "$quite" = "false"; then
+			echo "$precommand $pythonvm $pyFile"
+		fi
+		executeVM $precommand $pythonvm $pyFile 2>&1 | tee out/log.txt
+		ret=${PIPESTATUS[0]}
+	fi
+	return $ret
 }
 
 function executeVMClean {
@@ -271,8 +405,8 @@ if [ $clean = "true" ]; then
 	executeVMClean
 	exit $?
 elif [ "$pymod" = "true" ]; then
-	executeVMPython "${args[@]}" 2>&1 | tee out/log.txt
-	ret=${PIPESTATUS[0]}
+	executeVMPython "${args[@]}"
+	ret=$?
 else
 	echo "Neither 'clean' or 'pymod'? What is going on?"
 	exit 1

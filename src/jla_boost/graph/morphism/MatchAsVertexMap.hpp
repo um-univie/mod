@@ -26,7 +26,7 @@ struct MatchAsVertexMap {
 		return MatchAsVertexMap<GraphLeftU, GraphRightU, Map, MapInv>(m.map, m.mapInv);
 	}
 
-	MatchAsVertexMap(Map map, MapInv mapInv) : map(map), mapInv(mapInv) { }
+	MatchAsVertexMap(Map map, MapInv mapInv) : map(std::move(map)), mapInv(std::move(mapInv)) { }
 private:
 	Map map;
 	MapInv mapInv;

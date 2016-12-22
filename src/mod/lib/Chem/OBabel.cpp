@@ -106,9 +106,9 @@ std::unique_ptr<OpenBabel::OBMol> makeOBMol(const lib::Graph::GraphType &g,
 	return makeOBMolImpl(g, atomData, bondData, withHydrogen, false);
 }
 
-std::unique_ptr<OpenBabel::OBMol> makeOBMol(const lib::Rule::GraphType &g,
-		std::function<const AtomData &(lib::Rule::Vertex) > atomData,
-		std::function<BondType(lib::Rule::Edge) > bondData) {
+std::unique_ptr<OpenBabel::OBMol> makeOBMol(const lib::Rules::GraphType &g,
+		std::function<const AtomData &(lib::Rules::Vertex) > atomData,
+		std::function<BondType(lib::Rules::Edge) > bondData) {
 	return makeOBMolImpl(g, atomData, bondData, true, true);
 }
 

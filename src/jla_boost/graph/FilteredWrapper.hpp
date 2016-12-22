@@ -1,7 +1,7 @@
 #ifndef JLA_BOOST_GRAPH_FILTEREDWRAPPER_H
-#define	JLA_BOOST_GRAPH_FILTEREDWRAPPER_H
+#define JLA_BOOST_GRAPH_FILTEREDWRAPPER_H
 
-#include <jla_boost/graph/morphism/VertexMap.hpp>
+#include <jla_boost/graph/AdaptorTraits.hpp>
 #include <jla_boost/graph/PairToRangeAdaptor.hpp>
 
 #include <utility>
@@ -165,7 +165,14 @@ in_degree(typename boost::graph_traits<jla_boost::FilteredWrapper<Graph> >::vert
 		const jla_boost::FilteredWrapper<Graph> &g) {
 	return in_degree(v, g.g);
 }
-//degree(e, g)	degree_size_type
+
+template<typename Graph>
+typename boost::graph_traits<jla_boost::FilteredWrapper<Graph> >::degree_size_type
+degree(typename boost::graph_traits<jla_boost::FilteredWrapper<Graph> >::vertex_descriptor v,
+		const jla_boost::FilteredWrapper<Graph> &g) {
+	return degree(v, g.g);
+}
+
 // AdjacencyGraph 
 //adjacent_vertices(v, g)	std::pair<adjacency_iterator, adjacency_iterator>
 
@@ -282,13 +289,11 @@ vertex(typename boost::graph_traits<jla_boost::FilteredWrapper<Graph> >::vertice
 	for(typename boost::graph_traits<jla_boost::FilteredWrapper<Graph> >::vertex_descriptor v : asRange(vertices(g))) {
 		if(get(boost::vertex_index_t(), g, v) == n) return v;
 	}
-	MOD_ABORT;
+	assert(false);
 }
 
-namespace GraphMorphism {
-
 template<typename Graph>
-struct ReinterpreterTraits<jla_boost::FilteredWrapper<Graph> > {
+struct GraphAdaptorTraits<jla_boost::FilteredWrapper<Graph> > {
 	using type = Graph;
 
 	static const Graph &unwrap(const jla_boost::FilteredWrapper<Graph> &g) {
@@ -296,7 +301,6 @@ struct ReinterpreterTraits<jla_boost::FilteredWrapper<Graph> > {
 	}
 };
 
-} // namespace GraphMorphism
 } // namespace jla_boost
 
-#endif	/* JLA_BOOST_GRAPH_FILTEREDWRAPPER_H */
+#endif /* JLA_BOOST_GRAPH_FILTEREDWRAPPER_H */

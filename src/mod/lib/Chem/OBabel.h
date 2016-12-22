@@ -2,11 +2,11 @@
 #define	MOD_LIB_CHEM_OBABEL_H
 
 #include <mod/BuildConfig.h>
-#include <mod/lib/Graph/Base.h>
+#include <mod/lib/Graph/GraphDecl.h>
 #ifndef MOD_HAVE_OPENBABEL
 #include <mod/lib/IO/IO.h>
 #else
-#include <mod/lib/Rule/LabelledRule.h>
+#include <mod/lib/Rules/LabelledRule.h>
 
 #include <openbabel/mol.h>
 #include <iosfwd>
@@ -31,9 +31,9 @@ std::unique_ptr<OpenBabel::OBMol> makeOBMol(const lib::Graph::GraphType &g,
 		std::function<const AtomData &(lib::Graph::Vertex) > atomData,
 		std::function<BondType(lib::Graph::Edge) > bondData,
 		bool withHydrogen);
-std::unique_ptr<OpenBabel::OBMol> makeOBMol(const lib::Rule::GraphType &g,
-		std::function<const AtomData &(lib::Rule::Vertex) > atomData,
-		std::function<BondType(lib::Rule::Edge) > bondData);
+std::unique_ptr<OpenBabel::OBMol> makeOBMol(const lib::Rules::GraphType &g,
+		std::function<const AtomData &(lib::Rules::Vertex) > atomData,
+		std::function<BondType(lib::Rules::Edge) > bondData);
 double getMolarMass(OpenBabel::OBMol &mol); // will truncate by *1024, cast to unsigned int, /1024
 double getEnergy(OpenBabel::OBMol &mol);
 void print2Dsvg(std::ostream &s, OpenBabel::OBMol &mol);

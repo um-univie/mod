@@ -4,16 +4,14 @@
 #include <mod/Config.h>
 #include <mod/Error.h>
 #include <mod/Graph.h>
-#include <mod/lib/DG/Matrix.h>
 #include <mod/lib/DG/NonHyper.h>
 #include <mod/lib/Graph/Single.h>
 #include <mod/lib/IO/DG.h>
 #include <mod/lib/IO/Graph.h>
 #include <mod/lib/IO/IO.h>
-#include <mod/lib/Rule/Base.h>
+#include <mod/lib/Rules/Real.h>
 
 #include <jla_boost/graph/PairToRangeAdaptor.hpp>
-#include <jla_boost/Memory.hpp>
 
 #include <boost/graph/adjacency_list.hpp>
 
@@ -52,7 +50,6 @@ void HyperCreator::addEdge(NonHyper::Edge eNon) {
 	hyper[v].kind = HyperVertexKind::Edge;
 	hyper[v].graph = nullptr;
 	hyper[v].rules = dg[eNon].rules;
-	assert(dg[eNon].rules.size() == 1); // TODO: do we actually need do something special here?
 	hyper[v].inVertex = vSrcNon;
 	hyper[v].outVertex = vTarNon;
 	hyper[v].reverse = hyper.null_vertex();
@@ -90,76 +87,13 @@ void HyperCreator::setReverse(NonHyper::Edge e, NonHyper::Edge eBack) {
 //------------------------------------------------------------------------------
 
 Hyper::Hyper(const NonHyper &dg)
-: hasCalculated(false), nonHyper(dg), matrixSparse(nullptr) { }
+: hasCalculated(false), nonHyper(dg) { }
 
 std::pair<std::unique_ptr<Hyper>, HyperCreator> Hyper::makeHyper(const NonHyper &dg) {
 	auto hyper = std::unique_ptr<Hyper>(new Hyper(dg));
 	auto &hyperRef = *hyper;
 	return std::make_pair(std::move(hyper), HyperCreator(hyperRef));
 }
-
-//Hyper::Hyper(const NonHyper &dgClass, int dummy)
-//: hasCalculated(true), nonHyper(dgClass), vpGraph(nullptr), matrixSparse(nullptr) {
-//	const NonHyperGraphType &dg = dgClass.getGraph();
-//
-//	// first go through each vertex in dg, and create the needed vertices in dgHyper representing graphs
-//
-//	for(Vertex v : asRange(vertices(dg))) {
-//		const lib::Graph::Base *g = dg[v].graph;
-//		assert(g);
-//		for(const lib::Graph::Single *gSingle : g->getSingles()) addVertex(gSingle);
-//	}
-//
-//	// then go through all edge and add vertices for them, and edges
-//	std::map<NonHyperEdge, Vertex> edgeToHyper;
-//
-//	for(NonHyperEdge e : asRange(edges(dg))) {
-//		const lib::Rule::Base *r = dg[e].rule;
-//		Vertex from = source(e, dg);
-//		const lib::Graph::Base *gFrom = dg[from].graph;
-//		Vertex to = target(e, dg);
-//		const lib::Graph::Base *gTo = dg[to].graph;
-//		// it's a hyper edge, so first add the vertex implemening the edge
-//		Hyper::Vertex v = add_vertex(hyper);
-//		hyper[v].kind = VertexKind::Edge;
-//		hyper[v].graph = nullptr;
-//		hyper[v].rule = r;
-//		hyper[v].reverse = hyper.null_vertex();
-//		hyper[v].inVertex = from;
-//		hyper[v].outVertex = to;
-//		// insert to map
-//		edgeToHyper[e] = v;
-//		// fix reverse
-//		boost::optional<NonHyperEdge> reverse = dg[e].reverse;
-//		if(reverse) {
-//			auto iter = edgeToHyper.find(reverse.get());
-//			if(iter != end(edgeToHyper)) {
-//				// if both edge have been added, then fix it
-//				Vertex ourReverse = iter->second;
-//				hyper[v].reverse = ourReverse;
-//				hyper[ourReverse].reverse = v;
-//			}
-//		}
-//
-//		// add in edges to the rule
-//		{ // from
-//			for(const lib::Graph::Single *g : gFrom->getSingles()) {
-//				// get the vertex descriptor representing this graph
-//				Hyper::Vertex vFrom = getVertexFromGraph(g);
-//				add_edge(vFrom, v, hyper);
-//			}
-//		}
-//
-//		// add out edges from the rule
-//		{ // to
-//			for(const lib::Graph::Single *g : gTo->getSingles()) {
-//				// get the vertex descriptor representing this graph
-//				Hyper::Vertex vTo = getVertexFromGraph(g);
-//				add_edge(v, vTo, hyper);
-//			}
-//		}
-//	}
-//}
 
 void Hyper::addVertex(const lib::Graph::Single *g) {
 	{ // sanity check
@@ -175,13 +109,10 @@ void Hyper::addVertex(const lib::Graph::Single *g) {
 		hyper[vNew].kind = VertexKind::Vertex;
 		hyper[vNew].graph = g;
 		graphToHyperVertex[g] = vNew;
-		vertexGraphs.push_back(g->getAPIReference());
 	}
 }
 
-Hyper::~Hyper() {
-	delete matrixSparse;
-}
+Hyper::~Hyper() { }
 
 const NonHyper &Hyper::getNonHyper() const {
 	return nonHyper;
@@ -189,12 +120,6 @@ const NonHyper &Hyper::getNonHyper() const {
 
 const Hyper::GraphType &Hyper::getGraph() const {
 	return hyper;
-}
-
-const Matrix &Hyper::getMatrixSparse() const {
-	if(!hasCalculated) std::abort();
-	if(!matrixSparse) matrixSparse = new Matrix(*this);
-	return *matrixSparse;
 }
 
 void Hyper::printStats(std::ostream &s) const {
@@ -314,59 +239,6 @@ void Hyper::printStats(std::ostream &s) const {
 	s << "------------------------------------------------------------------" << std::endl;
 }
 
-void Hyper::printIncidence(std::ostream &s, const std::shared_ptr<mod::Graph> g) const {
-	if(!isVertexGraph(g)) {
-		s << "The graph '" << g->getName() << "' is not part of the derivation graph." << std::endl;
-		return;
-	}
-	Vertex v = getVertexFromGraph(&g->getGraph());
-	{// first the in transformations
-		s << "In:" << std::endl;
-
-		for(Edge eIn : asRange(in_edges(v, hyper))) {
-			Vertex vRule = source(eIn, hyper);
-			NonHyperVertex vIn = hyper[vRule].inVertex;
-			NonHyperVertex vOut = hyper[vRule].outVertex;
-
-			assert(hyper[vRule].kind == VertexKind::Edge);
-
-			int ruleId = get(boost::vertex_index_t(), hyper, vRule);
-			const lib::Graph::Base *gIn = nonHyper.getGraph()[vIn].graph;
-			const lib::Graph::Base *gOut = nonHyper.getGraph()[vOut].graph;
-			s << ruleId << ":\t";
-			gIn->printName(s);
-			s << "\t->{";
-			for(auto *r : hyper[vRule].rules) s << " " << r->getName();
-			s << " } (" << get(boost::vertex_index_t(), hyper, hyper[vRule].reverse) << ")" << "\t";
-			gOut->printName(s);
-			s << std::endl;
-		}
-	}
-	{ // and the out transformations
-		s << "Out:" << std::endl;
-
-		for(Edge eOut : asRange(out_edges(v, hyper))) {
-			Vertex vRule = target(eOut, hyper);
-			NonHyperVertex vIn = hyper[vRule].inVertex;
-			NonHyperVertex vOut = hyper[vRule].outVertex;
-
-			assert(hyper[vRule].kind == VertexKind::Edge);
-
-			int ruleId = get(boost::vertex_index_t(), hyper, vRule);
-			const Graph::Base *gIn = nonHyper.getGraph()[vIn].graph;
-			const Graph::Base *gOut = nonHyper.getGraph()[vOut].graph;
-			s << ruleId << ":\t";
-			gIn->printName(s);
-			s << "\t->{";
-			for(auto *r : hyper[vRule].rules) s << " " << r->getName();
-			s << " } (" << get(boost::vertex_index_t(), hyper, hyper[vRule].reverse) << ")" << "\t";
-			gOut->printName(s);
-			s << std::endl;
-		}
-	}
-	s << "Notice: end of incident hyper edges." << std::endl;
-}
-
 Hyper::Vertex Hyper::getVertexFromDerivationRef(mod::DerivationRef dRef) const {
 	assert(dRef.isValid());
 	auto vIterPair = vertices(getGraph());
@@ -388,10 +260,6 @@ bool Hyper::isVertexGraph(std::shared_ptr<mod::Graph> g) const {
 	return iter != graphToHyperVertex.end();
 }
 
-const std::vector<std::shared_ptr<mod::Graph> > &Hyper::getVertexGraphs() const {
-	return vertexGraphs;
-}
-
 mod::DerivationRef Hyper::getDerivationRef(Vertex v) const {
 	if(v == hyper.null_vertex()) return DerivationRef();
 	if(hyper[v].kind != VertexKind::Edge) return DerivationRef();
@@ -410,91 +278,12 @@ mod::Derivation Hyper::getDerivation(Vertex v) const {
 	Derivation d;
 	for(Vertex vIn : asRange(inv_adjacent_vertices(v, hyper)))
 		d.left.push_back(hyper[vIn].graph->getAPIReference());
-	assert(hyper[v].rules.size() == 1);
-	d.rule = hyper[v].rules.front()->getAPIReference();
+	if(!hyper[v].rules.empty()) {
+		d.rule = hyper[v].rules.front()->getAPIReference();
+	}
 	for(Vertex vOut : asRange(adjacent_vertices(v, hyper)))
 		d.right.push_back(hyper[vOut].graph->getAPIReference());
 	return d;
-}
-
-unsigned int Hyper::getFirstDerivation() const {
-	for(Vertex v : asRange(vertices(getGraph()))) {
-		if(getGraph()[v].kind == VertexKind::Edge) return get(boost::vertex_index_t(), getGraph(), v);
-	}
-	return num_vertices(getGraph());
-}
-
-unsigned int Hyper::getEndDerivation() const {
-	return num_vertices(getGraph());
-}
-
-unsigned int Hyper::getNextDerivation(unsigned int id) const {
-	auto vIterPair = vertices(getGraph());
-	auto vIter = vIterPair.first;
-	assert(vIterPair.second - vIterPair.first > id);
-	for(vIter += id + 1; vIter != vIterPair.second; vIter++) {
-		Vertex v = *vIter;
-		if(getGraph()[v].kind == VertexKind::Edge) return get(boost::vertex_index_t(), getGraph(), v);
-	}
-	return num_vertices(getGraph());
-}
-
-mod::DerivationRef Hyper::dereferenceDerivation(unsigned int id) const {
-	auto vIterPair = vertices(getGraph());
-	auto vIter = vIterPair.first;
-	assert(vIterPair.second - vIterPair.first > id);
-	Vertex v = *(vIter + id);
-	return getDerivationRef(v);
-}
-
-unsigned int Hyper::getFirstInDerivation(Vertex v) const {
-	assert(getGraph()[v].kind == VertexKind::Vertex);
-	return 0;
-}
-
-unsigned int Hyper::getEndInDerivation(Vertex v) const {
-	assert(getGraph()[v].kind == VertexKind::Vertex);
-	return in_degree(v, getGraph());
-}
-
-unsigned int Hyper::getNextInDerivation(unsigned int id, Vertex v) const {
-	assert(getGraph()[v].kind == VertexKind::Vertex);
-	assert(id < in_degree(v, getGraph()));
-	return id + 1;
-}
-
-mod::DerivationRef Hyper::dereferenceInDerivation(unsigned int id, Vertex v) const {
-	assert(getGraph()[v].kind == VertexKind::Vertex);
-	auto vIterPair = inv_adjacent_vertices(v, getGraph());
-	auto vIter = vIterPair.first;
-	assert(vIterPair.second - vIterPair.first > id);
-	Vertex vAdj = *(vIter + id);
-	return getDerivationRef(vAdj);
-}
-
-unsigned int Hyper::getFirstOutDerivation(Vertex v) const {
-	assert(getGraph()[v].kind == VertexKind::Vertex);
-	return 0;
-}
-
-unsigned int Hyper::getEndOutDerivation(Vertex v) const {
-	assert(getGraph()[v].kind == VertexKind::Vertex);
-	return out_degree(v, getGraph());
-}
-
-unsigned int Hyper::getNextOutDerivation(unsigned int id, Vertex v) const {
-	assert(getGraph()[v].kind == VertexKind::Vertex);
-	assert(id < out_degree(v, getGraph()));
-	return id + 1;
-}
-
-mod::DerivationRef Hyper::dereferenceOutDerivation(unsigned int id, Vertex v) const {
-	assert(getGraph()[v].kind == VertexKind::Vertex);
-	auto vIterPair = adjacent_vertices(v, getGraph());
-	auto vIter = vIterPair.first;
-	assert(vIterPair.second - vIterPair.first > id);
-	Vertex vAdj = *(vIter + id);
-	return getDerivationRef(vAdj);
 }
 
 void Hyper::temp_compare(const Hyper &a, const Hyper &b) {
