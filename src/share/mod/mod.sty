@@ -4,6 +4,7 @@
 \newcommand{\modName}{Med\O lDatschgerl}
 \newcommand{\modAbbr}{M\O D}
 
+\RequirePackage{ifthen}
 \RequirePackage{grffile}
 \RequirePackage{verbatim}
 \RequirePackage[dvipsnames]{xcolor}
@@ -50,6 +51,9 @@
 }
 
 \newcounter{mod@figCounter}
+\newcommand\modIfIdDefined[1]{%
+	\ifcsname mod@figDef-#1\endcsname%
+}
 
 \def\mod@graphPrinter{p}
 
@@ -71,6 +75,12 @@
 		false/.code={\mod@writeLine{\mod@graphPrinter.#2=False}}
 	}
 }
+\def\mod@graphPrinter@installCall#1#2{%
+	\pgfqkeys{/mod/#1}{
+		.value forbidden,
+		.code={\mod@writeLine{\mod@graphPrinter.#2()}}%
+	}%
+}
 \mod@graphPrinter@installOption{edges as bonds}{edgesAsBonds}
 \mod@graphPrinter@installOption{collapse hydrogens}{collapseHydrogens}
 \mod@graphPrinter@installOption{raise charges}{raiseCharges}
@@ -79,12 +89,20 @@
 \mod@graphPrinter@installOption{with colour}{withColour}
 \mod@graphPrinter@installOption{with index}{withIndex}
 \mod@graphPrinter@installOption{with texttt}{withTexttt}
+\pgfkeys{
+	/mod/rotation/.value required,
+	/mod/rotation/.code={\mod@writeLine{\mod@graphPrinter.rotation = #1}}
+}
+\mod@graphPrinter@installOption{with raw stereo}{withRawStereo}
+\mod@graphPrinter@installOption{with pretty stereo}{withPrettyStereo}
 \def\mod@graphPrinter@installCall#1#2{%
 	\pgfqkeys{/mod/#1}{
 		.value forbidden,
 		.code={\mod@writeLine{\mod@graphPrinter.#2()}}%
 	}%
 }
+\mod@graphPrinter@installOption{mirror}{mirror}
+
 \mod@graphPrinter@installCall{molecule}{setMolDefault}
 \mod@graphPrinter@installCall{reaction}{setReactionDefault}
 \mod@graphPrinter@installCall{all}{enableAll}
@@ -94,7 +112,26 @@
 	\mod@writeLine{\mod@graphPrinter = GraphPrinter()}%
 	\pgfqkeys{\expandafter/mod}{molecule, graph base, graph, #1}%
 }
+\def\mod@figGraphInclude#1#2{%
+	\ifthenelse{\equal{\detokenize{#1}}{\detokenize{inline}}} {%
+		\xdef\mod@graph@inline{True}%
+	}{%
+		\xdef\mod@graph@inline{False}%
+	}%
+	\ifcsname mod@figDef-graph-\mod@graph@id\endcsname%
+		\ifthenelse{\equal{\detokenize{#1}}{\detokenize{inline}}} {%
+			\expandafter\input{\csname mod@figDef-graph-\mod@graph@id\endcsname}%
+		}{%
+			\expandafter\includegraphics\expandafter[#1]{\csname mod@figDef-graph-\mod@graph@id\endcsname}%
+		}%
+	\else%
+		\fbox{%
+			 Missing PDF for #2 (id \mod@graph@id)%
+		}%
+	\fi%
+}
 \def\mod@figGraphEnd{%
+	\xdef\modLastId{graph-\mod@graph@id}
 	\stepcounter{mod@figCounter}%
 }
 
@@ -115,15 +152,9 @@
 	\mod@figGraphBegin{graphGML, #1}%
 	\xdef\mod@graph@id{\arabic{mod@figCounter}}%
 	\edef\mod@f{#3}%
-	\ifcsname mod@figDef-graph-\mod@graph@id\endcsname%
-		\expandafter\includegraphics\expandafter[#2]{\csname mod@figDef-graph-\mod@graph@id\endcsname}%
-	\else%
-		\fbox{%
-			 Missing PDF for smiles (id \mod@graph@id)%
-		}%
-	\fi%
+	\mod@figGraphInclude{#2}{GraphGML}%
 	\mod@figGraphEnd%
-	\mod@writeLine{mod.latex.graphGML(id=\mod@graph@id, data='\mod@f', printer=\mod@graphPrinter)}%
+	\mod@writeLine{mod.latex.graphGML(id=\mod@graph@id, data='\mod@f', printer=\mod@graphPrinter, inline=\mod@graph@inline)}%
 }
 % rst: \smiles[<options>][<includegraphics options>]{<smiles string>}
 \def\smiles{\@testopt\mod@smiles@i{}}
@@ -131,13 +162,7 @@
 \def\mod@smiles@ii[#1][#2]{%
 	\mod@figGraphBegin{smiles, #1}%
 	\xdef\mod@graph@id{\arabic{mod@figCounter}}%
-	\ifcsname mod@figDef-graph-\mod@graph@id\endcsname%
-		\expandafter\includegraphics\expandafter[#2]{\csname mod@figDef-graph-\mod@graph@id\endcsname}%
-	\else%
-		\fbox{%
-			 Missing PDF for smiles (id \mod@graph@id)%
-		}%
-	\fi%
+	\mod@figGraphInclude{#2}{SMILES}%
 	\mod@figGraphEnd%
 	\begingroup%
 		\everyeof{\@nil}%
@@ -147,7 +172,7 @@
 }
 \def\mod@smiles@final#1{%
 		\expandafter\mod@deftonil\expandafter\mod@smiles@data\scantokens{#1}%
-		\mod@writeLine{mod.latex.smiles(id=\mod@graph@id, data='\mod@smiles@data', printer=\mod@graphPrinter)}%
+		\mod@writeLine{mod.latex.smiles(id=\mod@graph@id, data='\mod@smiles@data', printer=\mod@graphPrinter, inline=\mod@graph@inline)}%
 	\endgroup%
 }
 % rst: \graphDFS[<options>][<includegraphics options>]{<graphDFS string>}
@@ -156,13 +181,7 @@
 \def\mod@graphDFS@ii[#1][#2]{%
 	\mod@figGraphBegin{graphDFS, #1}%
 	\xdef\mod@graph@id{\arabic{mod@figCounter}}%
-	\ifcsname mod@figDef-graph-\mod@graph@id\endcsname%
-		\expandafter\includegraphics\expandafter[#2]{\csname mod@figDef-graph-\mod@graph@id\endcsname}%
-	\else%
-		\fbox{%
-			 Missing PDF for graphDFS (id \mod@graph@id)%
-		}%
-	\fi%
+	\mod@figGraphInclude{#2}{GraphDFS}%
 	\mod@figGraphEnd%
 	\begingroup%
 		\everyeof{\@nil}%
@@ -172,7 +191,7 @@
 }
 \def\mod@graphDFS@final#1{%
 		\expandafter\mod@deftonil\expandafter\mod@graphDFS@data\scantokens{#1}%
-		\mod@writeLine{mod.latex.graphDFS(id=\mod@graph@id, data='\mod@graphDFS@data', printer=\mod@graphPrinter)}%
+		\mod@writeLine{mod.latex.graphDFS(id=\mod@graph@id, data='\mod@graphDFS@data', printer=\mod@graphPrinter, inline=\mod@graph@inline)}%
 	\endgroup%
 }
 
@@ -199,6 +218,7 @@
 
 
 \newcommand{\modInputPrefix}{.}
+\newcommand{\modStereoShape}{\textsc}
 
 \newlength\mod@testWidth
 \newcommand{\modFitpic}[1]{%
@@ -213,15 +233,16 @@
 %------------------------------------------------------------------------------
 % Graph (and molecule)
 %------------------------------------------------------------------------------
+\newcommand{\modIdPrefix}{}
 \newcommand{\modGraphScale}{1.2}
 \newcommand{\modBondSep}{0.25em}
 \newcommand{\modEdgeShortening}{0.2em}
 \newcommand{\modHashLength}{1pt}
 \newcommand{\modHashSep}{2pt}
 
-\tikzset{modStyleGraphVertex/.style={inner sep=0, outer sep=0, text height=1.6ex, text depth=.05ex}}
-\tikzset{modStyleCarbon/.style={inner sep=0, outer sep=0, minimum size=0, text height=0, text depth=0}}
-\tikzset{modStyleCarbonIndex/.style={inner sep=0, outer sep=0, minimum size=0, text height=1ex, text depth=0}}
+\tikzset{modStyleGraphVertex/.style={rectangle, inner sep=0, outer sep=0, minimum size=0, text height=1.6ex, text depth=.05ex}}
+\tikzset{modStyleCarbon/.style={                inner sep=0, outer sep=0, minimum size=0, text height=0,     text depth=0}}
+\tikzset{modStyleCarbonIndex/.style={           inner sep=1, outer sep=0, minimum size=0, text height=.5ex,  text depth=0}}
 \tikzset{modStyleGraphEdgeNoDraw/.style={}}
 \tikzset{modStyleGraphEdge/.style={modStyleGraphEdgeNoDraw, draw}}
 \tikzset{modStyleGraphWedgeNoDraw/.style={}}
@@ -238,62 +259,127 @@
 % idFrom idTo fromOffset toOffset
 %	-> creates v-idFrom-idTo and v-idTo-idFrom
 \newcommand{\modCreateEdgeEnds}[4]{%
-	\modGetAngle{v-#1}{v-#2}
-	\path[modStyleGraphEdgeNoDraw] (v-#1) to
-		node [shape=coordinate, pos=0, shift=($(\modRes:#3*\modEdgeShortening)$)] (v-#1-#2) {}
-		node [shape=coordinate, pos=1, shift=($(\modRes+180:#4*\modEdgeShortening)$)] (v-#2-#1) {}
-		(v-#2);
+	\modGetAngle{\modIdPrefix v-#1}{\modIdPrefix v-#2}
+	\path[modStyleGraphEdgeNoDraw] (\modIdPrefix v-#1) to
+		node [shape=coordinate, pos=0, shift=($(\modRes:#3*\modEdgeShortening)$)] (\modIdPrefix v-#1-#2) {}
+		node [shape=coordinate, pos=1, shift=($(\modRes+180:#4*\modEdgeShortening)$)] (\modIdPrefix v-#2-#1) {}
+		(\modIdPrefix v-#2);
 }
 
-% idFrom idTo fromOffset toOffset label options
+% No 3D
+%------------------------------------------------------------------------------
+
+% idFrom idTo fromOffset toOffset options annotations
 \newcommand{\modDrawGraphEdge}[6]{%
 	\modCreateEdgeEnds{#1}{#2}{#3}{#4}
-	\path[modStyleGraphEdge, #6] (v-#1-#2) to node[auto] {#5} (v-#2-#1);
+	\path[modStyleGraphEdge, #5] (\modIdPrefix v-#1-#2) to #6 (\modIdPrefix v-#2-#1);
+}
+\newcommand{\modDrawSingleBond}{\modDrawGraphEdge}
+
+% idFrom idTo fromOffset toOffset options annotations
+\newcommand{\modDrawAromaticBond}[6]{%
+	\modCreateEdgeEnds{#1}{#2}{#3}{#4}
+	\modGetAngle{\modIdPrefix v-#1}{\modIdPrefix v-#2}
+	\path[modStyleGraphEdge, #5]
+		($(\modIdPrefix v-#1-#2) + (\modRes+90:\modBondSep/2)$) to
+		($(\modIdPrefix v-#2-#1) + (\modRes+90:\modBondSep/2)$);
+	\path[modStyleGraphEdge, dashed, #5]
+		($(\modIdPrefix v-#1-#2) + (\modRes-90:\modBondSep/2)$) to #6
+		($(\modIdPrefix v-#2-#1) + (\modRes-90:\modBondSep/2)$);
+}
+% idFrom idTo fromOffset toOffset options annotations
+\newcommand{\modDrawDoubleBond}[6]{%
+	\modCreateEdgeEnds{#1}{#2}{#3}{#4}
+	\modGetAngle{\modIdPrefix v-#1}{\modIdPrefix v-#2}
+	\path[modStyleGraphEdge, #5]
+		($(\modIdPrefix v-#1-#2) + (\modRes+90:\modBondSep/2)$) to
+		($(\modIdPrefix v-#2-#1) + (\modRes+90:\modBondSep/2)$);
+	\path[modStyleGraphEdge, #5]
+		($(\modIdPrefix v-#1-#2) + (\modRes-90:\modBondSep/2)$) to #6
+		($(\modIdPrefix v-#2-#1) + (\modRes-90:\modBondSep/2)$);
+}
+% idFrom idTo fromOffset toOffset options annotations
+\newcommand{\modDrawTripleBond}[6]{%
+	\modDrawSingleBond{#1}{#2}{#3}{#4}{#5}{}
+	\modCreateEdgeEnds{#1}{#2}{#3}{#4} % hmm, shouldn't they be created by the \modDrawSingleBond call? or is it a subscope?
+	\modGetAngle{\modIdPrefix v-#1}{\modIdPrefix v-#2}
+	\path[modStyleGraphEdge, #5]
+		($(\modIdPrefix v-#1-#2) + (\modRes+90:\modBondSep)$) to
+		($(\modIdPrefix v-#2-#1) + (\modRes+90:\modBondSep)$);
+	\path[modStyleGraphEdge, #5]
+		($(\modIdPrefix v-#1-#2) + (\modRes-90:\modBondSep)$) to #6
+		($(\modIdPrefix v-#2-#1) + (\modRes-90:\modBondSep)$);
 }
 
-% idFrom idTo fromOffset toOffset options
-\newcommand{\modDrawSingleBond}[5]{%
-	\modCreateEdgeEnds{#1}{#2}{#3}{#4}
-	\path[modStyleGraphEdge, #5] (v-#1-#2) to (v-#2-#1);
+% Wedge
+%------------------------------------------------------------------------------
+
+% idFrom idTo fromOffset toOffset options annotations
+\newcommand{\modDrawGraphEdgeWedgeSL}[6]{%
+    \modCreateEdgeEnds{#1}{#2}{#3}{#4}
+    \modGetAngle{\modIdPrefix v-#1}{\modIdPrefix v-#2}
+    \path[modStyleGraphWedge, #5] (\modIdPrefix v-#1-#2)
+        to #6 ($(\modIdPrefix v-#2-#1) + (\modRes+90:\modBondSep)$)
+        to ($(\modIdPrefix v-#2-#1) + (\modRes-90:\modBondSep)$)
+        to (\modIdPrefix v-#1-#2)
+        ;
 }
-% idFrom idTo fromOffset toOffset options
-\newcommand{\modDrawAromaticBond}[5]{%
-	\modCreateEdgeEnds{#1}{#2}{#3}{#4}
-	\modGetAngle{v-#1}{v-#2}
-	\path[modStyleGraphEdge, #5]
-		($(v-#1-#2) + (\modRes+90:\modBondSep/2)$) to
-		($(v-#2-#1) + (\modRes+90:\modBondSep/2)$);
-	\path[modStyleGraphEdge, dashed, #5]
-		($(v-#1-#2) + (\modRes-90:\modBondSep/2)$) to
-		($(v-#2-#1) + (\modRes-90:\modBondSep/2)$);
+\newcommand{\modDrawSingleBondWedgeSL}{\modDrawGraphEdgeWedgeSL}
+
+% idFrom idTo fromOffset toOffset options annotations
+\newcommand{\modDrawGraphEdgeWedgeLS}[6]{%
+    \modCreateEdgeEnds{#1}{#2}{#3}{#4}
+    \modGetAngle{\modIdPrefix v-#1}{\modIdPrefix v-#2}
+    \path[modStyleGraphWedge, #5] (\modIdPrefix v-#2-#1)
+        to #6 ($(\modIdPrefix v-#1-#2) + (\modRes+90:\modBondSep)$)
+        to ($(\modIdPrefix v-#1-#2) + (\modRes-90:\modBondSep)$)
+        to (\modIdPrefix v-#2-#1)
+        ;
 }
-% idFrom idTo fromOffset toOffset options
-\newcommand{\modDrawDoubleBond}[5]{%
-	\modCreateEdgeEnds{#1}{#2}{#3}{#4}
-	\modGetAngle{v-#1}{v-#2}
-	\path[modStyleGraphEdge, #5]
-		($(v-#1-#2) + (\modRes+90:\modBondSep/2)$) to
-		($(v-#2-#1) + (\modRes+90:\modBondSep/2)$);
-	\path[modStyleGraphEdge, #5]
-		($(v-#1-#2) + (\modRes-90:\modBondSep/2)$) to
-		($(v-#2-#1) + (\modRes-90:\modBondSep/2)$);
+\newcommand{\modDrawSingleBondWedgeLS}{\modDrawGraphEdgeWedgeLS}
+
+% Hash
+%------------------------------------------------------------------------------
+
+% idFrom idTo fromOffset toOffset options annotations
+\newcommand{\modDrawGraphEdgeHashSL}[6]{%
+    \modCreateEdgeEnds{#1}{#2}{#3}{#4}
+    \modGetAngle{\modIdPrefix v-#1}{\modIdPrefix v-#2}
+    \begin{scope}
+        \path (\modIdPrefix v-#1-#2)
+            to #6 ($(\modIdPrefix v-#2-#1) + (\modRes+90:\modBondSep)$)
+            to ($(\modIdPrefix v-#2-#1) + (\modRes-90:\modBondSep)$)
+            to (\modIdPrefix v-#1-#2) ;
+        \path[clip] (\modIdPrefix v-#1-#2)
+            to ($(\modIdPrefix v-#2-#1) + (\modRes+90:\modBondSep)$)
+            to ($(\modIdPrefix v-#2-#1) + (\modRes-90:\modBondSep)$)
+            to (\modIdPrefix v-#1-#2) ;
+        \path[modStyleGraphHash, #5] (\modIdPrefix v-#1-#2) to (\modIdPrefix v-#2-#1);
+    \end{scope}
 }
-% idFrom idTo fromOffset toOffset options
-\newcommand{\modDrawTripleBond}[5]{%
-	\modDrawSingleBond{#1}{#2}{#3}{#4}{#5}
-	\modCreateEdgeEnds{#1}{#2}{#3}{#4} % hmm, shouldn't they be created by the \modDrawSingleBond call? or is it a subscope?
-	\modGetAngle{v-#1}{v-#2}
-	\path[modStyleGraphEdge, #5]
-		($(v-#1-#2) + (\modRes+90:\modBondSep)$) to
-		($(v-#2-#1) + (\modRes+90:\modBondSep)$);
-	\path[modStyleGraphEdge, #5]
-		($(v-#1-#2) + (\modRes-90:\modBondSep)$) to
-		($(v-#2-#1) + (\modRes-90:\modBondSep)$);
+\newcommand{\modDrawSingleBondHashSL}{\modDrawGraphEdgeHashSL}
+
+% idFrom idTo fromOffset toOffset options annotations
+\newcommand{\modDrawGraphEdgeHashLS}[6]{%
+    \modCreateEdgeEnds{#1}{#2}{#3}{#4}
+    \modGetAngle{\modIdPrefix v-#1}{\modIdPrefix v-#2}
+    \begin{scope}
+        \path (\modIdPrefix v-#2-#1)
+            to #6 ($(\modIdPrefix v-#1-#2) + (\modRes+90:\modBondSep)$)
+            to ($(\modIdPrefix v-#1-#2) + (\modRes-90:\modBondSep)$)
+            to (\modIdPrefix v-#2-#1) ;
+        \path[clip] (\modIdPrefix v-#2-#1)
+            to ($(\modIdPrefix v-#1-#2) + (\modRes+90:\modBondSep)$)
+            to ($(\modIdPrefix v-#1-#2) + (\modRes-90:\modBondSep)$)
+            to (\modIdPrefix v-#2-#1) ;
+        \path[modStyleGraphHash, #5] (\modIdPrefix v-#2-#1) to (\modIdPrefix v-#1-#2);
+    \end{scope}
 }
+\newcommand{\modDrawSingleBondHashLS}{\modDrawGraphEdgeHashLS}
 
 % RC Match
 %------------------------------------------------------------------------------
-\tikzset{modRCMatchEdge/.style={draw, dashed, red}}
+\tikzset{modRCMatchEdge/.style={draw, dashed, red, shorten <=1pt, shorten >=1pt}}
 \tikzset{modRCMatchEdgeTo/.style={bend right=15}}
 
 %------------------------------------------------------------------------------

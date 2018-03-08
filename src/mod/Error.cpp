@@ -76,6 +76,10 @@ void Exception::printStacktrace(unsigned int frameLimit, std::ostream &s) const 
 	s << "(end of stacktrace)" << std::endl;
 }
 
+void Exception::append(const std::string &text) {
+	this->text += text;
+}
+
 const char *FatalError::what() const noexcept {
 	std::stringstream ss;
 	Exception::printStacktrace(0, ss);

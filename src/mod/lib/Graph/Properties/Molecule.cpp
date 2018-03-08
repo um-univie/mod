@@ -42,18 +42,20 @@ bool PropMolecule::getIsMolecule() const {
 
 #ifdef MOD_HAVE_OPENBABEL
 
-OpenBabel::OBMol &PropMolecule::getOBMol() const {
+const lib::Chem::OBMolHandle &PropMolecule::getOBMol() const {
 	if(!isMolecule) {
 		IO::log() << "MoleculeState: Trying to create OpenBabel::OBMol from non-molecule." << std::endl
 				<< "Should DepictionData be used instead?" << std::endl;
 		MOD_ABORT;
 	}
-	if(!obMol) obMol = Chem::makeOBMol(this->g, [this](Vertex v) -> const AtomData& {
+	if(!obMol) {
+		obMol = Chem::makeOBMol(this->g, [this](Vertex v) -> const AtomData& {
 			return (*this)[v];
 		}, [this](Edge e) {
 			return (*this)[e];
-		}, true);
-	return *obMol;
+		}, jla_boost::AlwaysFalse(), true, nullptr);
+	}
+	return obMol;
 }
 
 #endif
@@ -67,7 +69,7 @@ double PropMolecule::getMolarMass() const {
 		MOD_NO_OPENBABEL_ERROR
 		std::exit(1);
 #else
-		return Chem::getMolarMass(getOBMol());
+		return getOBMol().getMolarMass();
 #endif
 	}
 }
@@ -80,7 +82,7 @@ double PropMolecule::getEnergy() const {
 		IO::log() << "Energy values can be manually cached on graphs if calculation is not desired." << std::endl;
 		std::exit(1);
 #else
-		energy = Chem::getEnergy(getOBMol());
+		energy = getOBMol().getEnergy();
 #endif
 	}
 	return *energy;

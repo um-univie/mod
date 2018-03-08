@@ -3,11 +3,8 @@
 
 #include <mod/BuildConfig.h>
 #include <mod/Chem.h>
+#include <mod/lib/Chem/OBabel.h>
 #include <mod/lib/Graph/Properties/Property.h>
-
-#ifdef MOD_HAVE_OPENBABEL
-#include <openbabel/mol.h>
-#endif
 
 #include <boost/optional.hpp>
 
@@ -22,7 +19,7 @@ public:
 	PropMolecule(const GraphType &g, const PropString &pString);
 	bool getIsMolecule() const;
 #ifdef MOD_HAVE_OPENBABEL
-	OpenBabel::OBMol &getOBMol() const; // should return const, but OpenBabel sucks
+	const lib::Chem::OBMolHandle &getOBMol() const;
 #endif
 	double getMolarMass() const;
 	double getEnergy() const;
@@ -30,7 +27,7 @@ public:
 private:
 	bool isMolecule;
 #ifdef MOD_HAVE_OPENBABEL
-	mutable std::unique_ptr<OpenBabel::OBMol> obMol;
+	mutable lib::Chem::OBMolHandle obMol;
 #endif
 	mutable boost::optional<double> energy;
 };

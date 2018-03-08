@@ -43,23 +43,24 @@ done
 
 args=""
 if test "$withOpenBabel" = "yes"; then
-	#args="$args	--with-OpenBabel=$HOME/programs"
 	# Use the repo version now.
 	args="$args	--with-OpenBabel=yes"
 else
 	args="$args --with-OpenBabel=no"
 fi
 args="$args	--with-boost=$HOME/programs$suffix"
+args="$args	--with-perm_group=$HOME/test/permGroupTestInstall"
+args="$args	--with-graph_canon=$HOME/test/graphCanonTestInstall"
 args="$args	$prefix $@"
 
-./repo-bootstrap.sh								\
+./bootstrap.sh								\
 	&& rm -rf preBuild && mkdir preBuild		\
 	&& cd preBuild && ../configure $args		\
 	&& make dist								\
 	&& cd .. && rm -rf build && mkdir build		\
 	&& cd build									\
 	&& cp ../preBuild/mod-*.tar.gz ./			\
-	&& tar xzf mod-*.tar.gz	&& cd mod-*			\
+	&& tar xzf mod-*.tar.gz	&& cd mod-*/		\
 	&& mkdir build && cd build					\
 	&& ../configure $args
 res=$?
@@ -80,16 +81,15 @@ else
 	fi
 	function makeSource {
 		cd $root_PWD/src
-		for f in $(ls mod/*.h | grep -v BuildConfig.h); do
+		for f in $(find mod -iname "*.h" | grep -v -e BuildConfig.h -e "/lib/" -e "/Py/"); do
 			echo "#include <$f>"
 		done
 		echo ""
 		echo "#include <iostream>"
 		echo ""
 		echo "int main() {"
-		echo "	auto g = mod::Graph::graphDFS(\"[T]\");"
+		echo "	auto g = mod::graph::Graph::graphDFS(\"[T]\");"
 		echo "	std::cout << \"Graph name:	\" << g->getName() << std::endl;"
-		echo "	return 0;"
 		echo "}"
 	}
 	function makeMakefile {
@@ -129,6 +129,6 @@ else
 		exit $res
 	fi
 fi
-cd $root_PWD/build/mod-*
+cd $root_PWD/build/mod-*/
 cd build
 make install-doc

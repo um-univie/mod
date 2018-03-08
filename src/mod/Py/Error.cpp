@@ -20,16 +20,16 @@ PyObject *exportException(const std::string &name) {
 	return exType;
 }
 
-#define MOD_PY_ExportException(Name) {                                \
-	py::class_<Name>(#Name "_", py::no_init);                          \
-	PyObject *exType = exportException(#Name);                         \
-	py::register_exception_translator<Name>([exType](const Name &ex) { \
-		py::object exPy(ex); /* wrap the C++ exception */               \
-		py::object exTypePy(py::handle<>(py::borrowed(exType)));        \
-		/* add the wrapped exception to the Python exception */         \
-		exTypePy.attr("cause") = exPy;                                  \
-		PyErr_SetString(exType, ex.what());                             \
-	});                                                                \
+#define MOD_PY_ExportException(Name) {                                          \
+	py::class_<Name>(#Name "_", py::no_init);                                     \
+	PyObject *exType = exportException(#Name);                                    \
+	py::register_exception_translator<Name>([exType](const Name &ex) {            \
+		py::object exPy(ex); /* wrap the C++ exception */                           \
+		py::object exTypePy(py::handle<>(py::borrowed(exType)));                    \
+		/* add the wrapped exception to the Python exception */                     \
+		exTypePy.attr("cause") = exPy;                                              \
+		PyErr_SetString(exType, ex.what());                                         \
+	});                                                                           \
 }
 
 } // namespace
@@ -47,6 +47,14 @@ void Error_doExport() {
 	// rst:
 	// rst:		See :cpp:class:`LogicError`.
 	MOD_PY_ExportException(LogicError);
+	// rst: .. py:exception:: TermParsingError
+	// rst:
+	// rst:		See :cpp:class:`TermParsingError`.
+	MOD_PY_ExportException(TermParsingError);
+	// rst: .. py:exception:: StereoDeductionError
+	// rst:
+	// rst:		See :cpp:class:`StereoDeductionError`.
+	MOD_PY_ExportException(StereoDeductionError);
 }
 
 } // namespace Py

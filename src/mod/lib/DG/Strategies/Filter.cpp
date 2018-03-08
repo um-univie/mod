@@ -10,7 +10,7 @@ namespace lib {
 namespace DG {
 namespace Strategies {
 
-Filter::Filter(std::shared_ptr<mod::Function<bool(std::shared_ptr<mod::Graph>, const mod::DGStrat::GraphState&, bool)> > filterFunc, bool filterUniverse)
+Filter::Filter(std::shared_ptr<mod::Function<bool(std::shared_ptr<graph::Graph>, const dg::Strategy::GraphState&, bool)> > filterFunc, bool filterUniverse)
 : Strategy(1), filterFunc(filterFunc), filterUniverse(filterUniverse) {
 	assert(filterFunc);
 }
@@ -18,6 +18,8 @@ Filter::Filter(std::shared_ptr<mod::Function<bool(std::shared_ptr<mod::Graph>, c
 Strategy *Filter::clone() const {
 	return new Filter(filterFunc->clone(), filterUniverse);
 }
+
+void Filter::preAddGraphs(std::function<void(std::shared_ptr<graph::Graph>) > add) const { }
 
 void Filter::printInfo(std::ostream &s) const {
 	s << indent << "Filter";
@@ -43,15 +45,15 @@ void Filter::executeImpl(std::ostream &s, const GraphState &input) {
 		indentLevel++;
 	}
 	assert(!output);
-	mod::DGStrat::GraphState graphState(
-			[&input](std::vector<std::shared_ptr<mod::Graph> > &subset) {
+	dg::Strategy::GraphState graphState(
+			[&input](std::vector<std::shared_ptr<graph::Graph> > &subset) {
 				for(const lib::Graph::Single *g : input.getSubset(0)) subset.push_back(g->getAPIReference());
 			},
-	[&input](std::vector<std::shared_ptr<mod::Graph> > &universe) {
+	[&input](std::vector<std::shared_ptr<graph::Graph> > &universe) {
 		for(const lib::Graph::Single *g : input.getUniverse()) universe.push_back(g->getAPIReference());
 	},
-	[this](std::vector<mod::DerivationRef> &derivationRefs) {
-		getExecutionEnv().fillDerivationRefs(derivationRefs);
+	[this](std::vector<dg::DG::HyperEdge> &edges) {
+		getExecutionEnv().fillHyperEdges(edges);
 	});
 	if(!filterUniverse) {
 		output = new GraphState(input.getUniverse());

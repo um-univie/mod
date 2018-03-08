@@ -1,51 +1,44 @@
 #ifndef MOD_LIB_DG_STRATEGIES_STRATEGY_H
 #define MOD_LIB_DG_STRATEGIES_STRATEGY_H
 
-#include <mod/DGStrat.h>
-
+#include <mod/dg/Strategies.h>
 #include <mod/lib/DG/NonHyper.h>
 
 #include <iosfwd>
 #include <vector>
 
 namespace mod {
-class Graph;
-class Rule;
 namespace lib {
-namespace Graph {
-class Base;
-class Merge;
-class Single;
-} // namespace Graph
-namespace Rules {
-class Real;
-} // namespace Rules
 namespace DG {
 namespace Strategies {
 class GraphState;
 
 struct ExecutionEnv {
 
+	ExecutionEnv(LabelSettings labelSettings) : labelSettings(labelSettings) { }
+
 	virtual ~ExecutionEnv() { };
-	virtual bool addGraph(std::shared_ptr<mod::Graph> g) = 0;
-	virtual bool addGraphAsVertex(std::shared_ptr<mod::Graph> g) = 0;
+	virtual bool tryAddGraph(std::shared_ptr<graph::Graph> g) = 0;
+	virtual bool addGraph(std::shared_ptr<graph::Graph> g) = 0;
+	virtual bool addGraphAsVertex(std::shared_ptr<graph::Graph> g) = 0;
 	virtual bool doExit() const = 0;
 	// the right side is always empty
 	virtual bool checkLeftPredicate(const mod::Derivation &d) const = 0;
 	// but here everything is defined
 	virtual bool checkRightPredicate(const mod::Derivation &d) const = 0;
-	virtual std::shared_ptr<mod::Graph> checkIfNew(std::unique_ptr<lib::Graph::GraphType> g, std::unique_ptr<lib::Graph::PropString> pString) const = 0;
-	virtual void giveProductStatus(std::shared_ptr<mod::Graph> g) = 0;
-	virtual bool addProduct(std::shared_ptr<mod::Graph> g) = 0;
-	virtual const lib::Graph::Merge * addToMergeStore(const lib::Graph::Merge *g) = 0;
-	virtual bool isDerivation(const lib::Graph::Base *left, const lib::Graph::Base *right, const lib::Rules::Real *r) const = 0;
-	virtual bool suggestDerivation(const lib::Graph::Base *left, const lib::Graph::Base *right, const lib::Rules::Real *r) = 0;
+	virtual std::shared_ptr<graph::Graph> checkIfNew(std::unique_ptr<lib::Graph::Single> g) const = 0;
+	virtual void giveProductStatus(std::shared_ptr<graph::Graph> g) = 0;
+	virtual bool addProduct(std::shared_ptr<graph::Graph> g) = 0;
+	virtual bool isDerivation(const GraphMultiset &gmsSrc, const GraphMultiset &gmsTar, const lib::Rules::Real *r) const = 0;
+	virtual bool suggestDerivation(const GraphMultiset &gmsSrc, const GraphMultiset &gmsTar, const lib::Rules::Real *r) = 0;
 	virtual void pushLeftPredicate(std::shared_ptr<mod::Function<bool(const mod::Derivation&)> > pred) = 0;
 	virtual void pushRightPredicate(std::shared_ptr<mod::Function<bool(const mod::Derivation&)> > pred) = 0;
 	virtual void popLeftPredicate() = 0;
 	virtual void popRightPredicate() = 0;
 public:
-	virtual void fillDerivationRefs(std::vector<mod::DerivationRef> &refs) const = 0;
+	virtual void fillHyperEdges(std::vector<dg::DG::HyperEdge> &edges) const = 0;
+public:
+	const LabelSettings labelSettings;
 };
 
 struct Strategy {
@@ -55,6 +48,8 @@ struct Strategy {
 	virtual ~Strategy();
 	virtual Strategy *clone() const = 0;
 	void setExecutionEnv(ExecutionEnv &env);
+	virtual void preAddGraphs(std::function<void(std::shared_ptr<graph::Graph>) > add) const = 0;
+	virtual void forEachRule(std::function<void(const lib::Rules::Real&)> f) const = 0;
 	unsigned int getMaxComponents() const;
 	void execute(std::ostream &s, const GraphState &input);
 	virtual void printInfo(std::ostream &s) const = 0;

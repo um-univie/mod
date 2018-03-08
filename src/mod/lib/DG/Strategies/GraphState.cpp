@@ -51,14 +51,14 @@ GraphState::GraphState(const std::vector<const GraphState*> &resultSets) {
 		});
 		GraphState::GraphList result;
 
-		std::set_union(universe.begin(), universe.end(), other.begin(), other.end(), std::back_inserter(result), lib::Graph::Less());
+		std::set_union(universe.begin(), universe.end(), other.begin(), other.end(), std::back_inserter(result), lib::Graph::Single::IdLess());
 		std::swap(result, universe);
 	}
 	// collect all subsets
-	typedef std::map<unsigned int, std::set<const Graph::Single*, lib::Graph::Less> > NewSubsetStore;
+	using NewSubsetStore = std::map<unsigned int, std::set<const Graph::Single*, lib::Graph::Single::IdLess> >;
 	NewSubsetStore newSubsets;
 	// make sure the special 0th subset is there
-	newSubsets.insert(std::make_pair(0, std::set<const Graph::Single*, lib::Graph::Less>()));
+	newSubsets.insert(std::make_pair(0, std::set<const Graph::Single*, lib::Graph::Single::IdLess>()));
 	for(const GraphState *rs : resultSets) {
 		for(const SubsetStore::value_type &p : rs->subsets) {
 			assert(p.first == 0); // TODO: remove
@@ -66,7 +66,7 @@ GraphState::GraphState(const std::vector<const GraphState*> &resultSets) {
 		}
 	}
 
-	typedef std::map<const Graph::Single*, unsigned int> GraphToIndex;
+	using GraphToIndex = std::map<const Graph::Single*, unsigned int>;
 	GraphToIndex graphToIndex;
 	for(unsigned int i = 0; i < universe.size(); i++) graphToIndex[universe[i]] = i;
 

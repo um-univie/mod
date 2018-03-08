@@ -1,5 +1,5 @@
 #include <jla_boost/graph/PairToRangeAdaptor.hpp>
-#include <jla_boost/graph/morphism/vf2.hpp>
+#include <jla_boost/graph/morphism/finders/vf2.hpp>
 
 #include <boost/graph/adjacency_list.hpp>
 #include <boost/graph/graphviz.hpp>

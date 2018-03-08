@@ -18,6 +18,58 @@
 # These first suppressions are manually added, and may be wrong
 {
    <insert_a_suppression_name_here>
+   Memcheck:Cond
+   fun:address_in_range
+   fun:_PyObject_Free
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Value8
+   fun:address_in_range
+   fun:_PyObject_Free
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Addr4
+   fun:address_in_range
+   fun:_PyObject_Free
+}
+
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Addr4
+   fun:address_in_range
+   fun:_PyObject_Realloc
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Cond
+   fun:address_in_range
+   fun:_PyObject_Realloc
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Value8
+   fun:address_in_range
+   fun:_PyObject_Realloc
+}
+
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Addr4
+   fun:address_in_range
+   fun:_PyObject_Free
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Leak
+   match-leak-kinds: possible
+   fun:malloc
+   fun:PyObject_Malloc
+   fun:_PyObject_GC_NewVar
+}
+{
+   <insert_a_suppression_name_here>
    Memcheck:Value8
    fun:PyObject_GC_Del
 }
@@ -113,6 +165,14 @@
 	<insert_a_suppression_name_here>
 	Memcheck:Addr8
 	fun:wcscmp
+}
+
+
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Cond
+   ...
+   fun:wcstombs
 }
 
 {

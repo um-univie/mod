@@ -1,5 +1,10 @@
 #!/bin/bash
 
+if [ "x$1" = "xclean" ]; then
+    rm -rf build doctrees source/reference
+    exit 0
+fi
+
 # the main logic for building is based on the auto-generated Makefile from Sphinx
 
 sphinxBuild=${1:-sphinx-build}
@@ -15,11 +20,12 @@ fi
 function doBuild {
 	allOpts="-d $topBuildDir/doc/doctrees $topSrcDir/doc/source"
 	mkdir -p $topSrcDir/doc/source/_static
-	$sphinxBuild -b html $allOpts $topBuildDir/doc/build/html
+	$sphinxBuild -b html $allOpts $topBuildDir/doc/build/html -j 8 -n
 	echo "$sphinxBuild -b html $allOpts $topBuildDir/doc/build/html"
 }
 
 function outputRST {
+	mkdir -p $topSrcDir/doc/source/$(dirname $1)
 	cat | sed "s/	/    /g" > $topSrcDir/doc/source/$1.rst
 }
 
@@ -119,6 +125,10 @@ BEGIN {
 	} else if($0 ~/^[\t]*\/\/ rst-nested-end:/) {
 		nestedRST[nestedLineNum++] = ""
 		inNested = 0
+	} else if($0 ~/^[\t]*\/\/ rst/) {
+		print "Unknown rst command in line " NR ":" | "cat 1>&2"
+		print $0 | "cat 1>&2"
+		exit 1
 	} else if(inClass) {
 		if(!($0 ~/^[\t]*$/))
 			print "\t"$0
@@ -128,13 +138,16 @@ BEGIN {
 }
 
 function getModHeaders {
-	ls $topSrcDir/src/mod/*.h | sed \
-		-e "s/.*\/src\/mod\///" -e "s/\.h$//" | sort
+	find $topSrcDir/src/mod/ -iname "*.h" \
+		| grep -v -e "/Py/" -e "/lib/"  \
+		| sed -e "s/.*\/src\/mod\///" -e "s/\.h$//" \
+		| sort
 }
 
 function getPyModCPPs {
-	ls $topSrcDir/src/mod/Py/*.cpp | sed \
-		-e "s/.*\/src\/mod\/Py\///" -e "s/\.cpp$//" | sort \
+	find $topSrcDir/src/mod/Py/ -iname "*.cpp" \
+		| sed -e "s/.*\/src\/mod\/Py\///" -e "s/\.cpp$//" \
+		| sort \
 		| grep -v Module | grep -v Collections | grep -v Function
 }
 
@@ -149,6 +162,8 @@ function makeIndex {
 	dataDesc/dataDesc
 	dgStrat/dgStrat
 	
+	knownIssues
+	changes
 	references
 EOF
 	}
@@ -204,7 +219,6 @@ Table of Contents
 
 .. toctree::
 	:maxdepth: 4
-	:numbered:
 	
 EOF
 		indexFiles
@@ -227,20 +241,52 @@ function makeLibMod {
 .. cpp:namespace:: mod
 
 EOF
-		cat $topSrcDir/src/mod/$f.h | filterCPP
+		fFull=$topSrcDir/src/mod/$f.h
+		cat $fFull | filterCPP
+		if [ $? -ne 0 ]; then
+			echo "Error in $fFull" 1>&2
+			return 1
+		fi
 	}
 	for f in $(getModHeaders); do
 		data $f | outputRST libmod/$f
+		if [ ${PIPESTATUS[0]} -ne 0 ]; then
+			return 1
+		fi
 	done
-	function dataToc {
-		cat << "EOF"
+	function getFolders {
+		getModHeaders \
+			| grep "/" | sed "s/\/.*//" | uniq
+	}
+    function folderToc {
+        echo $1
+        cat << "EOF"
+==============================================================================
+
 .. toctree::
-	:maxdepth: 2
+   :maxdepth: 1
 
 EOF
-		getModHeaders | sed 's/^/	/'
+        getModHeaders | grep "^$1" | sed -e "s/^$1\///" -e "s/^/   /"
+    }
+    for f in $(getFolders); do
+        folderToc $f | outputRST libmod/$f/index
+    done
+	function dataToc {
+		echo ".. toctree::"
+		echo "   :maxdepth: 1"
+		echo ""
+		getModHeaders | grep -v "/" | sed 's/^/   /'
+		echo ""
+		echo ".. toctree::"
+		echo "   :maxdepth: 2"
+		echo ""
+		getFolders | sed 's/$/\/index/' | sed 's/^/   /'
 	}
-	dataToc | outputRST libmod/Libmodtoc	
+	dataToc | outputRST libmod/Libmodtoc
+	if [ ${PIPESTATUS[0]} -ne 0 ]; then
+		return 1
+	fi
 }
 
 function makePyMod {
@@ -258,23 +304,52 @@ function makePyMod {
 .. cpp:namespace:: mod
 
 EOF
-		cat $topSrcDir/src/mod/Py/$f.cpp | filterCPP
+		fFull=$topSrcDir/src/mod/Py/$f.cpp
+		cat $fFull | filterCPP
+		if [ $? -ne 0 ]; then
+			echo "Error in $fFull" 1>&2
+			return 1
+		fi
 	}
 	for f in $(getPyModCPPs); do
 		data $f | outputRST pymod/$f
+		if [ ${PIPESTATUS[0]} -ne 0 ]; then
+			return 1
+		fi
 	done
-	function dataToc {
-		cat << "EOF"
+	function getFolders {
+		getPyModCPPs \
+			| grep "/" | sed "s/\/.*//" | uniq
+	}
+    function folderToc {
+        echo $1
+        cat << "EOF"
+==============================================================================
+
 .. toctree::
-	:maxdepth: 2
+   :maxdepth: 1
 
 EOF
-		getPyModCPPs | sed 's/^/	/'
+        getPyModCPPs | grep "^$1" | sed -e "s/^$1\///" -e "s/^/   /"
+    }
+    for f in $(getFolders); do
+        folderToc $f | outputRST pymod/$f/index
+    done
+	function dataToc {
+		echo ".. toctree::"
+		echo "   :maxdepth: 1"
+		echo ""
+		getPyModCPPs | grep -v "/" | sed 's/^/   /'
+		echo ""
+		echo ".. toctree::"
+		echo "   :maxdepth: 2"
+		echo ""
+		getFolders | sed 's/$/\/index/' | sed 's/^/   /'
 	}
 	dataToc | outputRST pymod/Pymodtoc	
 }
 
-makeIndex
-makeLibMod
-makePyMod
+makeIndex || exit 1
+makeLibMod || exit 1
+makePyMod || exit 1
 doBuild

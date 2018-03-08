@@ -1,7 +1,6 @@
 AC_PREREQ([2.68])
 # http://stackoverflow.com/questions/8559456/read-a-version-number-from-a-file-in-configure-ac
-AC_INIT([mod], m4_esyscmd([tr -d '\n' < VERSION]), [jakob@caput.dk])
-AC_LANG([C++])
+AC_INIT([mod], m4_esyscmd_s([cat VERSION]), [jakob@caput.dk])
 AC_CONFIG_AUX_DIR([auxConfig])
 AC_CONFIG_SRCDIR([src/mod/Config.cpp])
 AM_INIT_AUTOMAKE([1.11 foreign silent-rules subdir-objects -Wall -Werror tar-ustar nostdinc])
@@ -29,7 +28,7 @@ AM_LDFLAGS="-no-undefined"
 AM_LDLIBS=""
 # so we can restore before each test
 CPPFLAGS=${CPPFLAGS:-""}
-CXXFLAGS=${CXXFLAGS:-""}
+CXXFLAGS=${CXXFLAGS:-"-g -O3"}
 LDFLAGS=${LDFLAGS:-""}
 LDLIBS=${LDLIBS:-""}
 LIBS=${LIBS:-""}
@@ -52,9 +51,12 @@ default_enable_pymod="yes"
 
 # Individual checks
 ##########################################################################
-# C++11 ------------------------------------------------------------------
 # Boost ------------------------------------------------------------------
-boostReqVersion="1.59.0"
+boostReqVersion="1.64.0"
+# perm_group -------------------------------------------------------------
+permGroupReqVersion="v0.2"
+# graph_canon ------------------------------------------------------------
+graphCanonReqVersion="v0.2"
 # Graphviz --------------------------------------------------------------
 # if PostMØD checks
 # Open Babel -------------------------------------------------------------
@@ -158,14 +160,45 @@ function addLPath {
 	export PKG_CONFIG_PATH
 }
 
+function checkGivenPath {
+	# GCC thinks it's funny to give a hard error with a -I path that is a subfolder of a file
+	# (e.g., /bin/cat/foo), so check that a given path is not regular file.
+	if test -f "$1"; then
+		AC_MSG_ERROR([Path "$1" given to $2 is a regular file. It must be a folder.])
+	fi
+}
+
 # Boost ------------------------------------------------------------------
 AC_ARG_WITH([boost],
 	[AS_HELP_STRING([--with-boost=arg],
 		[yes: enable Boost, <path>: add specified location for dependency searching, no: not an option, you need Boost.])],
 	[], [with_boost=yes])
 if test "$with_boost" != "yes" -a "$with_boost" != "no"; then
+	checkGivenPath "$with_boost" --with-boost
 	addIPath "$with_boost/include"
 	addLPath "$with_boost/lib"
+fi
+
+# perm_group -------------------------------------------------------------
+AC_ARG_WITH([perm_group],
+    [AS_HELP_STRING([--with-perm_group=arg],
+		[yes: enable PermGroup, <path>: add specified location for dependency searching, no: not an option, you need PermGroup.])],
+	[], [with_perm_group=yes])
+if test "$with_perm_group" != "yes" -a "$with_perm_group" != "no"; then
+	checkGivenPath "$with_perm_group" --with-perm_group
+	addIPath "$with_perm_group/include"
+	addLPath "$with_perm_group/lib"
+fi
+
+# graph_canon ------------------------------------------------------------
+AC_ARG_WITH([graph_canon],
+	[AS_HELP_STRING([--with-graph_canon=arg],
+		[yes: enable GraphCanon, <path>: add specified location for dependency searching, no: not an option, you need GraphCanon.])],
+	[], [with_graph_canon=yes])
+if test "$with_graph_canon" != "yes" -a "$with_graph_canon" != "no"; then
+	checkGivenPath "$with_graph_canon" --with-graph_canon
+	addIPath "$with_graph_canon/include"
+	addLPath "$with_graph_canon/lib"
 fi
 
 # Open Babel -------------------------------------------------------------
@@ -174,6 +207,7 @@ AC_ARG_WITH([OpenBabel],
 		[yes: enable Open Babel, no: disable Open Babel, <path>: use Open Babel from specified location.])],
 	[], [with_OpenBabel=$default_with_OpenBabel])
 if test "$with_OpenBabel" != no -a "$with_OpenBabel" != "yes"; then
+	checkGivenPath "$with_OpenBabel" --with-OpenBabel
 	addIPath "$with_OpenBabel/include"
 	addLPath "$with_OpenBabel/lib"
 fi
@@ -195,9 +229,8 @@ fi
 ##########################################################################
 
 # Compiler Stuff ---------------------------------------------------------
-AC_PROG_CXXCPP
 AC_PROG_CXX
-AM_CXXFLAGS="$AM_CXXFLAGS $CXXFLAGS"
+AC_PROG_CXXCPP
 CXXFLAGS=""
 AC_LANG([C++])
 
@@ -239,6 +272,33 @@ else
 	if test $versionOk = "no"; then
 		AC_MSG_ERROR([Boost version too old.])
 	fi
+fi
+
+
+# perm_group -------------------------------------------------------------
+restoreFlags
+if test "$with_perm_group" = "no"; then
+	AC_MSG_ERROR([You have to want the PermGroup library. --with-perm_group=no is not an option.])
+else
+	PKG_CHECK_MODULES([perm_group], [perm-group >= $permGroupReqVersion], [], [
+		AC_MSG_NOTICE([$perm_group_PKG_ERRORS])
+		AC_MSG_NOTICE([PKG_CONFIG_PATH=$PKG_CONFIG_PATH])
+		printPaths
+		AC_MSG_ERROR([Use --with-perm_group=prefix, or set PKG_CONFIG_PATH for non-standard install prefix.])])
+	addIPath "$(pkg-config perm-group --variable=pkgincludedir)"
+fi
+	
+# graph_canon ------------------------------------------------------------
+restoreFlags
+if test "$with_graph_canon" = "no"; then
+	AC_MSG_ERROR([You have to want the GraphCanon library. --with-graph_canon=no is not an option.])
+else
+	PKG_CHECK_MODULES([graph_canon], [graph-canon >= $graphCanonReqVersion], [], [
+		AC_MSG_NOTICE([$graph_canon_PKG_ERRORS])
+		AC_MSG_NOTICE([PKG_CONFIG_PATH=$PKG_CONFIG_PATH])
+		printPaths
+		AC_MSG_ERROR([Use --with-graph_canon=prefix, or set PKG_CONFIG_PATH for non-standard install prefix.])])
+	addIPath "$(pkg-config graph-canon --variable=includedir)"
 fi
 
 # Graphviz ---------------------------------------------------------------
@@ -333,7 +393,7 @@ fi
 
 # Sphinx -----------------------------------------------------------------
 restoreFlags
-AC_CHECK_PROGS([SPHINXBUILD], [sphinx-build sphinx-build3 sphinx-build2], [no])
+AC_CHECK_PROGS([SPHINXBUILD], [sphinx-build sphinx-build3 sphinx-build-3 sphinx-build2], [no])
 if test "$SPHINXBUILD" = "no"; then
 	if test "$enable_doc_checks" = "yes"; then
 		AC_MSG_ERROR([sphinx-build is required for building the documentation.

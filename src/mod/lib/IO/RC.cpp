@@ -129,10 +129,10 @@ void test(const lib::Rules::Real &rFirst, const lib::Rules::Real &rSecond, const
 				: rSecond.getStringState().getRight()[e];
 		pStringCommon.add(pEdge.first, label, label);
 	}
-	lib::Rules::Real rCommon(std::move(dpoCommon));
-	lib::Rules::Real rFirstCopy(lib::Rules::LabelledRule(rFirst.getDPORule(), false));
-	lib::Rules::Real rSecondCopy(lib::Rules::LabelledRule(rSecond.getDPORule(), false));
-	lib::Rules::Real rNewCopy(lib::Rules::LabelledRule(rNew.getDPORule(), false));
+	lib::Rules::Real rCommon(std::move(dpoCommon), rFirst.getLabelType());
+	lib::Rules::Real rFirstCopy(lib::Rules::LabelledRule(rFirst.getDPORule(), false), rFirst.getLabelType());
+	lib::Rules::Real rSecondCopy(lib::Rules::LabelledRule(rSecond.getDPORule(), false), rSecond.getLabelType());
+	lib::Rules::Real rNewCopy(lib::Rules::LabelledRule(rNew.getDPORule(), false), rNew.getLabelType());
 	rFirstCopy.getDepictionData().copyCoords(rCommon.getDepictionData(), vFirstToCommon);
 	rSecondCopy.getDepictionData().copyCoords(rCommon.getDepictionData(), vSecondToCommon);
 	rNewCopy.getDepictionData().copyCoords(rCommon.getDepictionData(), vNewToCommon);
@@ -160,9 +160,12 @@ void test(const lib::Rules::Real &rFirst, const lib::Rules::Real &rSecond, const
 		assert(iter != end(vNewToCommon));
 		return matchVerticesInCommon.find(iter->second) != end(matchVerticesInCommon);
 	};
-	auto rawFilesFirst = IO::Rules::Write::tikz(rFirstCopy, 0, options, "L", "K", "R", visible, vColour, eColour, disallowCollapseFirst);
-	auto rawFilesSecond = IO::Rules::Write::tikz(rSecondCopy, secondIdOffset, options, "L", "K", "R", visible, vColour, eColour, disallowCollapseSecond);
-	auto rawFilesNew = IO::Rules::Write::tikz(rNewCopy, 0, options, "L", "K", "R", visible, vColour, eColour, disallowCollapseNew);
+	auto rawFilesFirst = IO::Rules::Write::tikz(rFirstCopy, 0, options, "L", "K", "R",
+			IO::Rules::Write::BaseArgs{visible, vColour, eColour}, disallowCollapseFirst);
+	auto rawFilesSecond = IO::Rules::Write::tikz(rSecondCopy, secondIdOffset, options, "L", "K", "R",
+			IO::Rules::Write::BaseArgs{visible, vColour, eColour}, disallowCollapseSecond);
+	auto rawFilesNew = IO::Rules::Write::tikz(rNewCopy, 0, options, "L", "K", "R",
+			IO::Rules::Write::BaseArgs{visible, vColour, eColour}, disallowCollapseNew);
 	FileHandle s(getUniqueFilePrefix() + "rcMatch.tex");
 	//	IO::log() << "rFirstFiles: " << rawFilesFirst.first << ", " << rawFilesFirst.second << std::endl;
 	//	IO::log() << "rSecondFiles: " << rawFilesSecond.first << ", " << rawFilesSecond.second << std::endl;

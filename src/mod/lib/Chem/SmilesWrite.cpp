@@ -1,5 +1,6 @@
 // Originally the code came from GGL, but has now been substantially rewritten.
-// See http://www.opensmiles.org/opensmiles.html for specification
+// See http://www.opensmiles.org/opensmiles.html for specification.
+// Note though, that this is still the original CANGEN algorithm which is wrong.
 
 //#define DO_DEBUG
 
@@ -262,8 +263,12 @@ private:
 
 struct SmilesWriter {
 
-	SmilesWriter(const lib::Graph::GraphType &g, const lib::Graph::PropMolecule &molState)
-	: g(g), molState(molState), auxData(g, molState), visited(num_vertices(g), false),
+	int getRank(int idx) {
+		return (*ranks)[idx];
+	}
+
+	SmilesWriter(const lib::Graph::GraphType &g, const lib::Graph::PropMolecule &molState, const std::vector<int> *ranks, bool withIds)
+	: g(g), molState(molState), auxData(g, molState), visited(num_vertices(g), false), withIds(withIds),
 	nextOrder(1), vOrder(num_vertices(g), 0), ringIds(num_vertices(g)), branches(num_vertices(g)) {
 		if(!molState.getIsMolecule()) MOD_ABORT;
 #ifdef DO_DEBUG
@@ -272,9 +277,9 @@ struct SmilesWriter {
 		for(Edge e : asRange(edges(g))) {
 			Vertex src = source(e, g), tar = target(e, g);
 			std::cerr << "\t" << get(boost::vertex_index_t(), g, src) << " '"
-					<< symbolFromAtomId(molState(src).getAtomId()) << (int) molState(src).getCharge()
-					<< "' -- '" << bondToChar(molState(e)) << "' -- '"
-					<< symbolFromAtomId(molState(tar).getAtomId()) << (int) molState(tar).getCharge()
+					<< symbolFromAtomId(molState[src].getAtomId()) << (int) molState[src].getCharge()
+					<< "' -- '" << bondToChar(molState[e]) << "' -- '"
+					<< symbolFromAtomId(molState[tar].getAtomId()) << (int) molState[tar].getCharge()
 					<< "' " << get(boost::vertex_index_t(), g, tar) << std::endl;
 		}
 #endif
@@ -292,7 +297,12 @@ struct SmilesWriter {
 				assert(num_edges(g) == 1);
 				Edge e = *edges(g).first;
 				if(molState[e] == BondType::Single) {
-					output = "[H][H]";
+					if(withIds) {
+						output = "[H:" + boost::lexical_cast<std::string>(get(boost::vertex_index_t(), g, v1)) + "]"
+								+ "[H:" + boost::lexical_cast<std::string>(get(boost::vertex_index_t(), g, v2)) + "]";
+					} else {
+						output = "[H][H]";
+					}
 					return;
 				}
 			}
@@ -303,13 +313,31 @@ struct SmilesWriter {
 			if(isCleanHydrogen(molState[v])) visited[get(boost::vertex_index_t(), g, v)] = true;
 		}
 
-		ranks = canonicalise();
 		auto idx = get(boost::vertex_index_t(), g);
-		auto vStartIter = std::find_if(vertices(g).first, vertices(g).second, [this, &idx](Vertex v) {
-			return ranks[idx[v]] == 1;
-		});
-		assert(vStartIter != vertices(g).second);
-		Vertex start = *vStartIter;
+		Vertex start;
+		std::vector<int> cangenRanks;
+		if(ranks) {
+			this->ranks = ranks;
+			//  find the minimum vertex by rank, which has not been visited (i.e., is not a clean hydrogen)
+			const auto vStartIter = std::min_element(vertices(g).first, vertices(g).second, [this, &idx](Vertex a, Vertex b) {
+				const auto ia = idx[a], ib = idx[b];
+				const auto va = visited[ia], vb = visited[ib];
+				if(va) return false;
+					if(vb) return true;
+						return getRank(ia) < getRank(ib);
+					});
+			assert(vStartIter != vertices(g).second);
+			start = *vStartIter;
+		} else {
+			const auto r = canonicalise();
+			std::copy(r.begin(), r.end(), std::back_inserter(cangenRanks));
+			this->ranks = &cangenRanks;
+			const auto vStartIter = std::find_if(vertices(g).first, vertices(g).second, [this, &idx](Vertex v) {
+				return getRank(idx[v]) == 1;
+			});
+			assert(vStartIter != vertices(g).second);
+			start = *vStartIter;
+		}
 
 		for(Vertex v : asRange(vertices(g))) {
 			if(visited[idx[v]]) continue;
@@ -370,7 +398,7 @@ struct SmilesWriter {
 #ifdef DO_DEBUG
 		std::cerr << "\tinitial values" << std::endl;
 		for(Vertex v : sortedVertices) {
-			std::cerr << "\t\t" << idx[v] << " '" << symbolFromAtomId(molState(v).getAtomId()) << (int) molState(v).getCharge() << "' " << vertexValue[idx[v]] << std::endl;
+			std::cerr << "\t\t" << idx[v] << " '" << symbolFromAtomId(molState[v].getAtomId()) << (int) molState[v].getCharge() << "' " << vertexValue[idx[v]] << std::endl;
 		}
 #endif
 
@@ -387,7 +415,7 @@ struct SmilesWriter {
 #ifdef DO_DEBUG
 		std::cerr << "\tinitial ranks" << std::endl;
 		for(Vertex v : sortedVertices) {
-			std::cerr << "\t\t" << idx[v] << " '" << symbolFromAtomId(molState(v).getAtomId()) << (int) molState(v).getCharge() << "' " << vertexValue[idx[v]] << std::endl;
+			std::cerr << "\t\t" << idx[v] << " '" << symbolFromAtomId(molState[v].getAtomId()) << (int) molState[v].getCharge() << "' " << vertexValue[idx[v]] << std::endl;
 		}
 #endif
 
@@ -425,7 +453,7 @@ struct SmilesWriter {
 #ifdef DO_DEBUG
 				std::cerr << "\tinner loop ranks" << std::endl;
 				for(Vertex v : sortedVertices) {
-					std::cerr << "\t\t" << idx[v] << " '" << symbolFromAtomId(molState(v).getAtomId()) << (int) molState(v).getCharge() << "' " << vertexValue[idx[v]] << std::endl;
+					std::cerr << "\t\t" << idx[v] << " '" << symbolFromAtomId(molState[v].getAtomId()) << (int) molState[v].getCharge() << "' " << vertexValue[idx[v]] << std::endl;
 				}
 #endif
 			} while(vertexValue[idx[sortedVertices.back()]] != numNonVisitedVertices // continue if we still have ties
@@ -452,7 +480,7 @@ struct SmilesWriter {
 #ifdef DO_DEBUG
 			std::cerr << "\tafter tie break ranks" << std::endl;
 			for(Vertex v : sortedVertices) {
-				std::cerr << "\t\t" << idx[v] << " '" << symbolFromAtomId(molState(v).getAtomId()) << (int) molState(v).getCharge() << "' " << vertexValue[idx[v]] << std::endl;
+				std::cerr << "\t\t" << idx[v] << " '" << symbolFromAtomId(molState[v].getAtomId()) << (int) molState[v].getCharge() << "' " << vertexValue[idx[v]] << std::endl;
 			}
 #endif
 		}
@@ -461,6 +489,9 @@ struct SmilesWriter {
 
 	unsigned int preBuildDFS(Vertex v, Vertex p) {
 		auto idx = get(boost::vertex_index_t(), g);
+#ifdef DO_DEBUG
+		std::cerr << "preBuildDFS: " << idx[v] << std::endl;
+#endif  
 		assert(!preBuildVisited[idx[v]]);
 
 		preBuildVisited[idx[v]] = true;
@@ -480,7 +511,7 @@ struct SmilesWriter {
 			bool isMulti1 = bt1 == BondType::Double || bt1 == BondType::Triple;
 			bool isMulti2 = bt2 == BondType::Double || bt2 == BondType::Triple;
 			if(isMulti1 != isMulti2) return isMulti2;
-			return ranks[idx[target(e1, g)]] < ranks[idx[target(e2, g)]];
+			return getRank(idx[target(e1, g)]) < getRank(idx[target(e2, g)]);
 		};
 		std::sort(edgesNotVisited.begin(), edgesNotVisited.end(), comp);
 		std::sort(edgesVisited.begin(), edgesVisited.end(), comp);
@@ -518,7 +549,7 @@ struct SmilesWriter {
 					bool isMulti1 = bt1 == BondType::Double || bt1 == BondType::Triple;
 					bool isMulti2 = bt2 == BondType::Double || bt2 == BondType::Triple;
 				if(isMulti1 != isMulti2) return isMulti2;
-					return ranks[idx[vTar1]] < ranks[idx[vTar2]];
+					return getRank(idx[vTar1]) < getRank(idx[vTar2]);
 				});
 		if(ringClosures.size() >= 100) {
 			IO::log() << "ERROR in SMILES writing. Too many ring closures with current scheme." << std::endl;
@@ -536,7 +567,7 @@ struct SmilesWriter {
 					bool isMulti1 = bt1 == BondType::Double || bt1 == BondType::Triple;
 					bool isMulti2 = bt2 == BondType::Double || bt2 == BondType::Triple;
 				if(isMulti1 != isMulti2) return isMulti2;
-					return ranks[idx[vSrc1]] < ranks[idx[vSrc2]];
+					return getRank(idx[vSrc1]) < getRank(idx[vSrc2]);
 				});
 		// open before close
 		for(const auto &p : ringClosures) ringIds[idx[source(p.first, g)]].emplace_back(BondType::Invalid, p.second);
@@ -602,6 +633,7 @@ struct SmilesWriter {
 			// if the hydrogen count is such that it can be deduced, then remove brackets
 			hasBrackets = false;
 		}
+		if(withIds) hasBrackets = true;
 		if(hasBrackets) output += '[';
 		assert(molState[v].getAtomId() != AtomIds::Invalid);
 		appendSymbolFromAtomId(output, molState[v].getAtomId());
@@ -624,6 +656,10 @@ struct SmilesWriter {
 			}
 			if(molState[v].getRadical()) {
 				output += '.';
+			}
+			if(withIds) {
+				output += ':';
+				output += boost::lexical_cast<std::string>(get(boost::vertex_index_t(), g, v));
 			}
 		}
 		if(hasBrackets) output += ']';
@@ -662,6 +698,7 @@ struct SmilesWriter {
 			if(numBonds == BondVector(1, 0, 0, 2) && hCount == 0) return true;
 			if(numBonds == BondVector(2, 1, 0, 0) && hCount == 0) return true;
 			if(numBonds == BondVector(0, 0, 0, 3) && hCount == 0) return true;
+			[[fallthrough]];
 		case Phosphorus:
 			switch(valence) {
 			case 3: return true;
@@ -693,7 +730,8 @@ private:
 	const lib::Graph::PropMolecule &molState;
 	const AuxData auxData;
 	std::vector<bool> visited, preBuildVisited;
-	std::vector<unsigned long long int> ranks;
+	const std::vector<int> *ranks;
+	const bool withIds;
 	VSizeType nextOrder;
 	std::vector<VSizeType> vOrder;
 	std::vector<std::pair<Edge, unsigned char> > ringClosures;
@@ -705,8 +743,8 @@ public:
 
 } // namespace
 
-std::string getSmiles(const lib::Graph::GraphType &g, const lib::Graph::PropMolecule &molState) {
-	SmilesWriter writer(g, molState);
+std::string getSmiles(const lib::Graph::GraphType &g, const lib::Graph::PropMolecule &molState, const std::vector<int> *ranks, bool withIds) {
+	SmilesWriter writer(g, molState, ranks, withIds);
 	return writer.output;
 }
 

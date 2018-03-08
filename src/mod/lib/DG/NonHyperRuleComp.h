@@ -1,7 +1,7 @@
 #ifndef MOD_LIB_DG_NONHYPERRULECOMP_H
 #define	MOD_LIB_DG_NONHYPERRULECOMP_H
 
-#include <mod/DGStrat.h>
+#include <mod/dg/Strategies.h>
 #include <mod/lib/DG/NonHyper.h>
 
 namespace mod {
@@ -18,8 +18,8 @@ class Rule;
 } // namespace Strategies
 
 struct NonHyperRuleComp : public NonHyper {
-	NonHyperRuleComp(const std::vector<std::shared_ptr<mod::Graph> > &graphDatabase,
-			Strategies::Strategy *strategy);
+	NonHyperRuleComp(const std::vector<std::shared_ptr<graph::Graph> > &graphDatabase,
+			Strategies::Strategy *strategy, LabelSettings labelSettings, bool ignoreRuleLabelTypes);
 	~NonHyperRuleComp();
 	std::string getType() const;
 	void printStrategyInfo(std::ostream &s) const;

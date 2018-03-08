@@ -123,11 +123,6 @@ help: .help-post
 .help-post: .help-impl
 # Add your post 'help' code here...
 
-#../src/mod/VM/Parser/Common.h.gch: ../src/mod/VM/Parser/Common.h
-#	${RM} ${CND_BASEDIR}/../src/mod/VM/Parser/Common.h.gch.d
-#	g++ -O3 -std=c++0x -fno-strict-aliasing -DIL_STD -DMOD_USE_PCH -g -Wall -I${HOME}/ILOG_CPLEX/cplex/include -I${HOME}/ILOG_CPLEX/concert/include \
-#		-I${HOME}/programs/include/openbabel-2.0 -I${HOME}/programs/include -I${CND_BASEDIR}/../src ${CND_BASEDIR}/../src/mod/VM/Parser/Common.h
-
 # include project implementation makefile
 include nbproject/Makefile-impl.mk
 

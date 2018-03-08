@@ -66,6 +66,9 @@ std::string escapeForLatex(const std::string &str) {
 			res += "\\";
 			res += c;
 			break;
+		case '*':
+			res += "\\ensuremath{*}";
+			break;
 		default:
 			res += c;
 		}

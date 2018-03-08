@@ -1,15 +1,18 @@
 #include "Rule.h"
 
 #include <mod/Config.h>
-#include <mod/GraphPrinter.h>
+#include <mod/graph/Printer.h>
 #include <mod/lib/Chem/MoleculeUtil.h>
 #include <mod/lib/Chem/OBabel.h>
 #include <mod/lib/IO/FileHandle.h>
 #include <mod/lib/IO/GraphWriteDetail.h>
-#include <mod/lib/IO/MatchConstraint.h>
+#include <mod/lib/IO/MorphismConstraints.h>
+#include <mod/lib/IO/Term.h>
 #include <mod/lib/Rules/Real.h>
 #include <mod/lib/Rules/Properties/String.h>
 #include <mod/lib/Rules/Properties/Depiction.h>
+#include <mod/lib/Rules/Properties/Term.h>
+#include <mod/lib/Term/WAM.h>
 
 #include <boost/lexical_cast.hpp>
 
@@ -65,7 +68,7 @@ void gmlSide(const lib::Rules::Real &r, std::ostream& s, lib::Rules::Membership 
 		}
 		s << "\"";
 		if(withCoords)
-			s << " vis2d [ x " << depict.getX(v) << " y " << depict.getY(v) << " ]";
+			s << " vis2d [ x " << depict.getX(v, true) << " y " << depict.getY(v, true) << " ]";
 		s << " ]\n";
 	}
 
@@ -118,6 +121,18 @@ void printEdgeStyle(std::ostream &s, lib::Rules::Membership eSide, int src, int 
 void gml(const lib::Rules::Real &r, bool withCoords, std::ostream &s) {
 	s << "rule [" << std::endl;
 	s << "\truleID \"" << r.getName() << "\"\n";
+	if(r.getLabelType()) {
+		s << "\tlabelType \"";
+		switch(r.getLabelType().get()) {
+		case LabelType::String:
+			s << "string";
+			break;
+		case LabelType::Term:
+			s << "term";
+			break;
+		}
+		s << "\"\n";
+	}
 	{
 		std::stringstream str;
 		gmlSide(r, str, lib::Rules::Membership::Left, withCoords);
@@ -133,9 +148,9 @@ void gml(const lib::Rules::Real &r, bool withCoords, std::ostream &s) {
 		gmlSide(r, str, lib::Rules::Membership::Right, withCoords);
 		if(str.str().size() > 0) s << "\tright [\n" << str.str() << "\t]\n";
 	}
-	for(const auto &c : r.getDPORule().leftComponentMatchConstraints) {
-		auto printer = lib::IO::MatchConstraint::Write::makeGMLPrintVisitor(s, get_left(r.getDPORule()), "\t");
-		c->visit(printer);
+	auto printer = lib::IO::MatchConstraint::Write::makeGMLPrintVisitor(s, get_left(r.getDPORule()), "\t");
+	for(const auto &c : r.getDPORule().leftMatchConstraints) {
+		c->accept(printer);
 	}
 	s << "]";
 }
@@ -287,18 +302,36 @@ std::string dot(const lib::Rules::Real &r) {
 
 struct CoordsCacheEntry {
 	std::size_t id;
+	bool collapseHydrogens;
 	int rotation;
+	bool mirror;
 public:
 
 	friend bool operator<(const CoordsCacheEntry &a, const CoordsCacheEntry &b) {
-		return std::tie(a.id, a.rotation)
-				< std::tie(b.id, b.rotation);
+		return std::tie(a.id, a.collapseHydrogens, a.rotation, a.mirror)
+				< std::tie(b.id, b.collapseHydrogens, b.rotation, b.mirror);
 	}
 };
 
-std::string coords(const lib::Rules::Real &r, unsigned int idOffset, int rotation) {
+namespace {
+
+bool disallowVertexCollapse(const lib::Rules::Real &r, const CoreVertex v, std::function<bool(CoreVertex) > disallowCollapse) {
+	if(getConfig().rule.collapseChangedHydrogens.get())
+		return disallowCollapse(v);
+	if(r.getGraph()[v].membership != lib::Rules::Membership::Context)
+		return true;
+	for(const auto e : asRange(out_edges(v, r.getGraph()))) {
+		if(r.getGraph()[e].membership != lib::Rules::Membership::Context)
+			return true;
+	}
+	return disallowCollapse(v);
+}
+
+} // namespace
+
+std::string coords(const lib::Rules::Real &r, unsigned int idOffset, const Options &options, std::function<bool(CoreVertex) > disallowCollapse_) {
 	static std::map<CoordsCacheEntry, std::string> cache;
-	auto iter = cache.find({r.getId(), rotation});
+	const auto iter = cache.find({r.getId(), options.collapseHydrogens, options.rotation, options.mirror});
 	if(iter != end(cache)) return iter->second;
 	std::string fileNoExt = getFilePrefix(r);
 	const auto &depict = r.getDepictionData();
@@ -310,109 +343,219 @@ std::string coords(const lib::Rules::Real &r, unsigned int idOffset, int rotatio
 		dot(r);
 		IO::post() << "coordsFromGV rule \"" << fileNoExt << "\" noOverlay" << std::endl;
 		fileNoExt = fileNoExt + "_coord";
-		cache[{r.getId(), rotation}
+		cache[{r.getId(), true, options.rotation, options.mirror}
+		] = fileNoExt;
+		cache[{r.getId(), false, options.rotation, options.mirror}
 		] = fileNoExt;
 		return fileNoExt;
 	} else {
-		using Vertex = lib::Rules::Vertex;
-		using Edge = lib::Rules::Edge;
 		const auto &g = r.getGraph();
-		std::string fileNoExt = getFilePrefix(r) + "_coord";
+		const std::string molString = options.collapseHydrogens ? "_mol" : "";
+		const std::string fileNoExt = getFilePrefix(r) + molString + "_coord";
 		FileHandle s(fileNoExt + ".tex");
-		s << "% dummy" << std::endl;
-		for(Vertex v : asRange(vertices(g))) {
-			unsigned int vId = get(boost::vertex_index_t(), g, v);
+		s << "% dummy\n";
+		const bool useCollapsedCoords = [&]() {
+			if(!options.collapseHydrogens) return false;
+			for(const auto v : asRange(vertices(g))) {
+				if(disallowCollapse_(v)) return false;
+			}
+			return true;
+		}();
+
+		for(const auto v : asRange(vertices(g))) {
+			const auto vId = get(boost::vertex_index_t(), g, v);
+			const bool printCoord = [&]() {
+				if(!useCollapsedCoords) return true;
+				if(disallowVertexCollapse(r, v, disallowCollapse_)) return true;
+				return !Chem::isCollapsible(v, g, depict, depict, [&depict](const auto v) {
+					return depict.hasImportantStereo(v);
+				});
+			}();
+			if(!printCoord) continue;
 			double x, y;
-			std::tie(x, y) = pointRotation(
-					depict.getX(v),
-					depict.getY(v),
-					rotation);
+			std::tie(x, y) = pointTransform(
+					depict.getX(v, !useCollapsedCoords),
+					depict.getY(v, !useCollapsedCoords),
+					options.rotation, options.mirror);
 			s << "\\coordinate[overlay] (v-coord-" << (vId + idOffset) << ") at (" << std::fixed << x << ", " << y << ") {};" << std::endl;
 		}
-		cache[{r.getId(), rotation}
-		] = fileNoExt;
+		if(options.collapseHydrogens && !useCollapsedCoords) {
+			// don't cache these as the user predicate influences it
+		} else {
+			cache[{r.getId(), options.collapseHydrogens, options.rotation, options.mirror}
+			] = fileNoExt;
+		}
 		return fileNoExt;
 	}
 }
 
+namespace {
+
+template<lib::Rules::Membership membership>
+struct AdvOptions {
+
+	AdvOptions(const lib::Rules::Real &r, unsigned int idOffset, const BaseArgs &args, std::function<bool(CoreVertex) > disallowCollapse)
+	: idOffset(idOffset), changeColour(changeColourFromMembership()), r(r), args(args), disallowCollapse_(disallowCollapse) { }
+private:
+
+	static std::string changeColourFromMembership() {
+		std::string side = []() {
+			switch(membership) {
+			case lib::Rules::Membership::Left: return getConfig().rule.changeColourL.get();
+			case lib::Rules::Membership::Context: return getConfig().rule.changeColourK.get();
+			case lib::Rules::Membership::Right: return getConfig().rule.changeColourR.get();
+			}
+		}();
+		if(side.empty()) return getConfig().rule.changeColour.get();
+		else return side;
+	}
+
+public:
+
+	std::string getColour(CoreVertex v) const {
+		bool isChanged = r.getGraph()[v].membership != lib::Rules::Membership::Context
+				|| r.getStringState().isChanged(v);
+		if(isChanged) {
+			return changeColour;
+		} else return args.vColour(v);
+	}
+
+	std::string getColour(CoreEdge e) const {
+		bool isChanged = r.getGraph()[e].membership != lib::Rules::Membership::Context
+				|| r.getStringState().isChanged(e);
+		if(isChanged) {
+			return changeColour;
+		} else return args.eColour(e);
+	}
+
+	bool isVisible(CoreVertex v) const {
+		return args.visible(v);
+	}
+
+	std::string getShownId(CoreVertex v) const {
+		return boost::lexical_cast<std::string>(get(boost::vertex_index_t(), r.getGraph(), v));
+	}
+
+	bool overwriteWithIndex(CoreVertex) const {
+		return false;
+	}
+
+	lib::IO::Graph::Write::EdgeFake3DType getEdgeFake3DType(CoreEdge e, bool withHydrogen) const {
+		const auto get = [&](const auto &depict) {
+			return depict.getEdgeFake3DType(e, withHydrogen);
+		};
+		const auto &depict = r.getDepictionData();
+		switch(membership) {
+		case lib::Rules::Membership::Left: return get(depict.getLeft());
+		case lib::Rules::Membership::Context: return get(depict.getContext());
+		case lib::Rules::Membership::Right: return get(depict.getRight());
+		}
+	}
+
+	std::string getOpts(CoreVertex v) const {
+		return std::string();
+	}
+private:
+
+	std::string getStereoStringVertex(const CoreVertex v, const auto f) const {
+		const auto apply = [&](const auto &lg) {
+			const auto &conf = *get_stereo(lg)[v];
+			const auto getNeighbourId = [&](const lib::Stereo::EmbeddingEdge & emb) {
+				const auto &g = get_graph(lg);
+				return get(boost::vertex_index_t(), g, target(emb.getEdge(v, g), g));
+			};
+			std::string res = f(conf, getNeighbourId);
+			if(!get_stereo(r.getDPORule()).inContext(v)) {
+				res = "{\\color{" + getConfig().rule.changeColourL.get() + "}" + res + "}";
+			}
+			return res;
+		};
+
+		const auto &lr = r.getDPORule();
+		switch(membership) {
+		case lib::Rules::Membership::Left: return apply(get_labelled_left(lr));
+		case lib::Rules::Membership::Right: return apply(get_labelled_right(lr));
+		case lib::Rules::Membership::Context:
+			if(get_stereo(lr).inContext(v)) {
+				const auto &lg = get_labelled_left(r.getDPORule());
+				const auto &conf = *get_stereo(lg)[v];
+				const auto getNeighbourId = [&](const lib::Stereo::EmbeddingEdge & emb) {
+					const auto &g = get_graph(lg);
+					return get(boost::vertex_index_t(), g, target(emb.getEdge(v, g), g));
+				};
+				return f(conf, getNeighbourId);
+			} else return "";
+		}
+	}
+public:
+
+	std::string getRawStereoString(CoreVertex v) const {
+		return getStereoStringVertex(v, [&](const auto &conf, auto getNId) {
+			return conf.asRawString(getNId);
+		});
+	}
+
+	std::string getPrettyStereoString(CoreVertex v) const {
+		return getStereoStringVertex(v, [&](const auto &conf, auto getNId) {
+			return conf.asPrettyString(getNId);
+		});
+	}
+
+	std::string getStereoString(CoreEdge e) const {
+		const auto apply = [&](const auto &lg) {
+			const auto cat = get_stereo(lg)[e];
+			std::string res = boost::lexical_cast<std::string>(cat);
+			if(!get_stereo(r.getDPORule()).inContext(e)) {
+				res = "{\\color{" + getConfig().rule.changeColourL.get() + "}" + res + "}";
+			}
+			return res;
+		};
+
+		const auto &lr = r.getDPORule();
+		switch(membership) {
+		case lib::Rules::Membership::Left: return apply(get_labelled_left(lr));
+		case lib::Rules::Membership::Right: return apply(get_labelled_right(lr));
+		case lib::Rules::Membership::Context:
+			if(get_stereo(lr).inContext(e)) {
+				const auto &lg = get_labelled_left(r.getDPORule());
+				const auto cat = get_stereo(lg)[e];
+				return boost::lexical_cast<std::string>(cat);
+			} else return "";
+		}
+	}
+
+	std::string getEdgeAnnotation(CoreEdge) const {
+		return "";
+	}
+
+	bool disallowCollapse(CoreVertex v) const {
+		return disallowVertexCollapse(r, v, disallowCollapse_);
+	}
+public:
+	const unsigned int idOffset;
+private:
+	const std::string changeColour;
+	const lib::Rules::Real &r;
+	const BaseArgs &args;
+	std::function<bool(CoreVertex) > disallowCollapse_;
+};
+
+} // namespace
+
 std::pair<std::string, std::string> tikz(const std::string &fileCoordsNoExt, const lib::Rules::Real &r, unsigned int idOffset, const Options &options,
-		const std::string &suffixL, const std::string &suffixK, const std::string &suffixR,
-		std::function<bool(CoreVertex) > visible,
-		std::function<std::string(CoreVertex) > vColour,
-		std::function<std::string(CoreEdge) > eColour,
+		const std::string &suffixL, const std::string &suffixK, const std::string &suffixR, const BaseArgs &args,
 		std::function<bool(CoreVertex) > disallowCollapse) {
-	std::string strOptions = options;
+	std::string strOptions = options.getStringEncoding();
 	std::string fileNoExt = IO::getUniqueFilePrefix() + "r_" + boost::lexical_cast<std::string>(r.getId());
 	fileNoExt += "_" + strOptions;
-
-	struct AdvOptions {
-
-		AdvOptions(const lib::Rules::Real &r, unsigned int idOffset, std::function<bool(CoreVertex) > visible,
-				std::function<std::string(CoreVertex) > vColour, std::function<std::string(CoreEdge) > eColour,
-				std::function<bool(CoreVertex) > disallowCollapse, lib::Rules::Membership membership)
-		: idOffset(idOffset), changeColour(changeColourFromMembership(membership)), r(r), visible(visible), vColour(vColour), eColour(eColour),
-		disallowCollapse_(disallowCollapse) { }
-
-		static std::string changeColourFromMembership(lib::Rules::Membership membership) {
-			std::string side = [membership]() {
-				switch(membership) {
-				case lib::Rules::Membership::Left: return getConfig().rule.changeColourL.get();
-				case lib::Rules::Membership::Context: return getConfig().rule.changeColourK.get();
-				case lib::Rules::Membership::Right: return getConfig().rule.changeColourR.get();
-				}
-				MOD_ABORT;
-			}();
-			if(side.empty()) return getConfig().rule.changeColour.get();
-			else return side;
-		}
-
-		bool isVisible(CoreVertex v) const {
-			return visible(v);
-		}
-
-		std::string getColour(CoreVertex v) const {
-			bool isChanged = r.getGraph()[v].membership != lib::Rules::Membership::Context
-					|| r.getStringState().isChanged(v);
-			if(isChanged) {
-				return changeColour;
-			} else return vColour(v);
-		}
-
-		std::string getColour(CoreEdge e) const {
-			bool isChanged = r.getGraph()[e].membership != lib::Rules::Membership::Context
-					|| r.getStringState().isChanged(e);
-			if(isChanged) {
-				return changeColour;
-			} else return eColour(e);
-		}
-
-		bool disallowCollapse(CoreVertex v) const {
-			if(r.getGraph()[v].membership != lib::Rules::Membership::Context)
-				return true;
-			for(auto e : asRange(out_edges(v, r.getGraph()))) {
-				if(r.getGraph()[e].membership != lib::Rules::Membership::Context)
-					return true;
-			}
-			return disallowCollapse_(v);
-		}
-	public:
-		const unsigned int idOffset;
-	private:
-		const std::string changeColour;
-		const lib::Rules::Real &r;
-		std::function<bool(CoreVertex) > visible;
-		std::function<std::string(CoreVertex) > vColour;
-		std::function<std::string(CoreEdge) > eColour;
-		std::function<bool(CoreVertex) > disallowCollapse_;
-	};
 
 	std::string fileCoords = fileCoordsNoExt + ".tex";
 	{ // left
 		FileHandle s(fileNoExt + "_" + suffixL + ".tex");
 		const auto &g = get_left(r.getDPORule());
 		const auto &depict = r.getDepictionData().getLeft();
-		AdvOptions adv(r, idOffset, visible, vColour, eColour, disallowCollapse, lib::Rules::Membership::Left);
-		IO::Graph::Write::tikz(s, options, g, depict, fileCoords, adv);
+		const auto adv = AdvOptions<lib::Rules::Membership::Left>(r, idOffset, args, disallowCollapse);
+		IO::Graph::Write::tikz(s, options, g, depict, fileCoords, adv, jla_boost::Nop<>(), "");
 	}
 	{ // context
 		FileHandle s(fileNoExt + "_" + suffixK + ".tex");
@@ -420,88 +563,244 @@ std::pair<std::string, std::string> tikz(const std::string &fileCoordsNoExt, con
 		const auto &depict = r.getDepictionData().getContext();
 
 		struct EdgeVisible {
-
-			EdgeVisible() : r(nullptr) { }
+			EdgeVisible() = default;
 
 			EdgeVisible(const lib::Rules::Real &r) : r(&r) { }
 
-			bool operator()(CoreEdge e) const {
+			bool operator()(const CoreEdge e) const {
 				if(getConfig().rule.printChangedEdgesInContext.get()) return true;
 				return !r->getStringState().isChanged(e);
 			}
 		private:
-			const lib::Rules::Real *r;
+			const lib::Rules::Real *r = nullptr;
 		};
 		boost::filtered_graph<lib::Rules::DPOProjection, EdgeVisible> gFiltered(g, EdgeVisible(r));
-		AdvOptions adv(r, idOffset, visible, vColour, eColour, disallowCollapse, lib::Rules::Membership::Context);
-		IO::Graph::Write::tikz(s, options, gFiltered, depict, fileCoords, adv);
+		const auto adv = AdvOptions<lib::Rules::Membership::Context>(r, idOffset, args, disallowCollapse);
+		IO::Graph::Write::tikz(s, options, gFiltered, depict, fileCoords, adv, jla_boost::Nop<>(), "");
 	}
 	{ // right
 		FileHandle s(fileNoExt + "_" + suffixR + ".tex");
 		const auto &g = get_right(r.getDPORule());
 		const auto &depict = r.getDepictionData().getRight();
-		AdvOptions adv(r, idOffset, visible, vColour, eColour, disallowCollapse, lib::Rules::Membership::Right);
-		IO::Graph::Write::tikz(s, options, g, depict, fileCoords, adv);
+		const auto adv = AdvOptions<lib::Rules::Membership::Right>(r, idOffset, args, disallowCollapse);
+		IO::Graph::Write::tikz(s, options, g, depict, fileCoords, adv, jla_boost::Nop<>(), "");
 	}
 	return std::make_pair(fileNoExt, fileCoordsNoExt);
 }
 
 std::pair<std::string, std::string> tikz(const lib::Rules::Real &r, unsigned int idOffset, const Options &options,
-		const std::string &suffixL, const std::string &suffixK, const std::string &suffixR,
-		std::function<bool(CoreVertex) > visible, std::function<std::string(CoreVertex) > vColour, std::function<std::string(CoreEdge) > eColour,
+		const std::string &suffixL, const std::string &suffixK, const std::string &suffixR, const BaseArgs &args,
 		std::function<bool(CoreVertex) > disallowCollapse) {
-	std::string fileCoordsNoExt = coords(r, idOffset /*, options.collapseHydrogens*/, options.rotation);
-	return tikz(fileCoordsNoExt, r, idOffset, options, suffixL, suffixK, suffixR, visible, vColour, eColour, disallowCollapse);
+	std::string fileCoordsNoExt = coords(r, idOffset, options, disallowCollapse);
+	return tikz(fileCoordsNoExt, r, idOffset, options, suffixL, suffixK, suffixR, args, disallowCollapse);
 }
 
 std::string pdf(const lib::Rules::Real &r, const Options &options,
-		const std::string &suffixL, const std::string &suffixK, const std::string &suffixR,
-		std::function<bool(CoreVertex) > visible, std::function<std::string(CoreVertex) > vColour, std::function<std::string(CoreEdge) > eColour) {
+		const std::string &suffixL, const std::string &suffixK, const std::string &suffixR, const BaseArgs &args) {
 	std::string fileNoExt, fileCoordsNoExt;
 	const unsigned int idOffset = 0;
-	auto disallowCollapse = [](CoreVertex v) {
-		return false;
-	};
-	std::tie(fileNoExt, fileCoordsNoExt) = tikz(r, idOffset, options, suffixL, suffixK, suffixR, visible, vColour, eColour, disallowCollapse);
-	IO::post() << "compileTikz \"" << fileNoExt << "_" << suffixL << "\" \"" << fileCoordsNoExt << "\"" << std::endl;
-	IO::post() << "compileTikz \"" << fileNoExt << "_" << suffixK << "\" \"" << fileCoordsNoExt << "\"" << std::endl;
-	IO::post() << "compileTikz \"" << fileNoExt << "_" << suffixR << "\" \"" << fileCoordsNoExt << "\"" << std::endl;
+	std::tie(fileNoExt, fileCoordsNoExt) = tikz(r, idOffset, options, suffixL, suffixK, suffixR, args, jla_boost::AlwaysFalse());
+	IO::post() << "compileTikz \"" << fileNoExt << "_" << suffixL << "\" \"" << fileCoordsNoExt << "\"\n";
+	IO::post() << "compileTikz \"" << fileNoExt << "_" << suffixK << "\" \"" << fileCoordsNoExt << "\"\n";
+	IO::post() << "compileTikz \"" << fileNoExt << "_" << suffixR << "\" \"" << fileCoordsNoExt << "\"\n";
+	IO::post().flush();
 	return fileNoExt;
 }
 
+std::pair<std::string, std::string> tikzTransitionState(const std::string &fileCoordsNoExt, const lib::Rules::Real &r, unsigned int idOffset, const Options &options,
+		const std::string &suffix, const BaseArgs &args) {
+	MOD_ABORT;
+}
+
+std::pair<std::string, std::string> tikzTransitionState(const lib::Rules::Real &r, unsigned int idOffset, const Options &options,
+		const std::string &suffix, const BaseArgs &args) {
+	MOD_ABORT;
+}
+
+std::string pdfTransitionState(const lib::Rules::Real &r, const Options &options,
+		const std::string &suffix, const BaseArgs &args) {
+	std::string fileNoExt, fileCoordsNoExt;
+	const unsigned int idOffset = 0;
+	std::tie(fileNoExt, fileCoordsNoExt) = tikzTransitionState(r, idOffset, options, suffix, args);
+	IO::post() << "compileTikz \"" << fileNoExt << "_" << suffix << "\" \"" << fileCoordsNoExt << "\"" << std::endl;
+	return fileNoExt;
+}
+
+std::string pdfCombined(const lib::Rules::Real &r, const Options &options) {
+	MOD_ABORT;
+}
+
 std::pair<std::string, std::string> summary(const lib::Rules::Real &r) {
-	GraphPrinter first;
-	GraphPrinter second;
+	graph::Printer first;
+	graph::Printer second;
 	second.setReactionDefault();
 	return summary(r, first.getOptions(), second.getOptions());
 }
 
 std::pair<std::string, std::string> summary(const lib::Rules::Real &r, const Options &first, const Options &second) {
-	auto visible = [](CoreVertex) {
-		return true;
-	};
-	auto vColour = [](CoreVertex) -> std::string {
-		return "";
-	};
-	auto eColour = [](CoreEdge) -> std::string {
-		return "";
-	};
-	std::string graphLike = pdf(r, first, "L", "K", "R", visible, vColour, eColour);
-	std::string molLike = first == second ? "" : pdf(r, second, "L", "K", "R", visible, vColour, eColour);
+	auto visible = jla_boost::AlwaysTrue();
+	auto vColour = jla_boost::Nop<std::string>();
+	auto eColour = jla_boost::Nop<std::string>();
+	const BaseArgs args{visible, vColour, eColour};
+	std::string graphLike = pdf(r, first, "L", "K", "R", args);
+	std::string molLike = first == second ? "" : pdf(r, second, "L", "K", "R", args);
 	std::string combined = getConfig().rule.printCombined.get()
 			? pdfCombined(r /*, Options().EdgesAsBonds().RaiseCharges()*/)
 			: "";
 	std::string constraints = getUniqueFilePrefix() + "r_" + boost::lexical_cast<std::string>(r.getId()) + "_constraints.tex";
 	{
 		FileHandle s(constraints);
-		for(const auto &c : r.getDPORule().leftComponentMatchConstraints)
-			s << *c << '\n';
+		auto printer = lib::IO::MatchConstraint::Write::makeTexPrintVisitor(s, get_left(r.getDPORule()));
+		for(const auto &c : r.getDPORule().leftMatchConstraints) {
+			c->accept(printer);
+			s << "\n";
+		}
 	}
 	IO::post() << "summaryRule \"" << r.getName() << "\" \"" << graphLike << "\" \"" << molLike << "\" \"" << combined << "\" \"" << constraints << "\"" << std::endl;
 	if(molLike.empty())
 		return std::make_pair(graphLike, graphLike);
 	else
 		return std::make_pair(graphLike, molLike);
+}
+
+void termState(const lib::Rules::Real &r) {
+	using Vertex = lib::Rules::Vertex;
+	using Edge = lib::Rules::Edge;
+	using Membership = lib::Rules::Membership;
+	using namespace lib::Term;
+	IO::post() << "summarySubsection \"Term State for " << r.getName() << "\"" << std::endl;
+	FileHandle s(getUniqueFilePrefix() + "termState.tex");
+	s << "\\begin{verbatim}\n";
+	const auto &termState = r.getTermState();
+	if(isValid(termState)) {
+		std::unordered_map<Address, std::set<std::pair<Vertex, Membership> > > addrToVertex;
+		std::unordered_map<Address, std::set<std::pair<Edge, Membership> > > addrToEdge;
+		std::unordered_map<Address, std::set<std::string> > addrToConstraintInfo;
+		auto insertVertex = [&addrToVertex](std::size_t addr, Vertex v, Membership membership) {
+			Address a{AddressType::Heap, addr};
+			addrToVertex[a].insert({v, membership});
+		};
+		auto insertEdge = [&addrToEdge](std::size_t addr, Edge e, Membership membership) {
+			Address a{AddressType::Heap, addr};
+			addrToEdge[a].insert({e, membership});
+		};
+		for(Vertex v : asRange(vertices(r.getGraph()))) {
+			switch(r.getGraph()[v].membership) {
+			case Membership::Left:
+				insertVertex(termState.getLeft()[v], v, Membership::Left);
+				break;
+			case Membership::Right:
+				insertVertex(termState.getRight()[v], v, Membership::Right);
+				break;
+			case Membership::Context:
+				insertVertex(termState.getLeft()[v], v, Membership::Left);
+				insertVertex(termState.getRight()[v], v, Membership::Right);
+				break;
+			}
+		}
+		for(Edge e : asRange(edges(r.getGraph()))) {
+			switch(r.getGraph()[e].membership) {
+			case Membership::Left:
+				insertEdge(termState.getLeft()[e], e, Membership::Left);
+				break;
+			case Membership::Right:
+				insertEdge(termState.getRight()[e], e, Membership::Right);
+				break;
+			case Membership::Context:
+				insertEdge(termState.getLeft()[e], e, Membership::Left);
+				insertEdge(termState.getRight()[e], e, Membership::Right);
+				break;
+			}
+		}
+
+		struct Visitor : lib::GraphMorphism::Constraints::AllVisitor<lib::Rules::SideGraphType> {
+
+			Visitor(std::unordered_map<Address, std::set<std::string> > &addrMap, const lib::Rules::GraphType &g)
+			: addrMap(addrMap), g(g) { }
+
+			virtual void operator()(const lib::GraphMorphism::Constraints::VertexAdjacency<lib::Rules::SideGraphType> &c) override {
+				const auto vStr = boost::lexical_cast<std::string>(get(boost::vertex_index_t(), g, c.vConstrained));
+				for(const auto a : c.vertexTerms) {
+					Address addr{AddressType::Heap, a};
+					std::string msg = "VertexAdj(" + vStr + ", " + side + ", V)";
+					addrMap[addr].insert(std::move(msg));
+				}
+				for(const auto a : c.edgeTerms) {
+					Address addr{AddressType::Heap, a};
+					std::string msg = "VertexAdj(" + vStr + ", " + side + ", E)";
+					addrMap[addr].insert(std::move(msg));
+				}
+			}
+
+			virtual void operator()(const lib::GraphMorphism::Constraints::ShortestPath<lib::Rules::SideGraphType> &c) override { }
+		private :
+			int counter = 0;
+		public:
+			std::unordered_map<Address, std::set<std::string> > &addrMap;
+			const lib::Rules::GraphType &g;
+			std::string side;
+		};
+		Visitor vis(addrToConstraintInfo, r.getGraph());
+		vis.side = "L";
+		for(const auto &c : r.getDPORule().leftMatchConstraints)
+			c->accept(vis);
+		vis.side = "R";
+		for(const auto &c : r.getDPORule().rightMatchConstraints)
+			c->accept(vis);
+
+		lib::IO::Term::Write::wam(getMachine(termState), lib::Term::getStrings(), s, [&](Address addr, std::ostream & s) {
+			s << "        ";
+			bool first = true;
+			for(auto vm : addrToVertex[addr]) {
+				if(!first) s << ", ";
+						first = false;
+						s << "v(" << get(boost::vertex_index_t(), r.getGraph(), vm.first) << ", ";
+					switch(vm.second) {
+					case Membership::Left:
+						s << "L";
+						break;
+					case Membership::Right:
+						s << "R";
+						break;
+					case Membership::Context:
+						s << "K";
+						break;
+					}
+				s << ")";
+			}
+			for(auto em : addrToEdge[addr]) {
+				if(!first) s << ", ";
+						first = false;
+						s << "e("
+						<< get(boost::vertex_index_t(), r.getGraph(), source(em.first, r.getGraph()))
+						<< ", "
+						<< get(boost::vertex_index_t(), r.getGraph(), target(em.first, r.getGraph()))
+						<< ", ";
+					switch(em.second) {
+					case Membership::Left:
+						s << "L";
+						break;
+					case Membership::Right:
+						s << "R";
+						break;
+					case Membership::Context:
+						s << "K";
+						break;
+					}
+				s << ")";
+			}
+			for(auto &msg : addrToConstraintInfo[addr]) {
+				if(!first) s << ", ";
+						first = false;
+						s << msg;
+				}
+		});
+	} else {
+		std::string msg = "Parsing failed for rule '" + r.getName() + "'. " + termState.getParsingError();
+		throw TermParsingError(std::move(msg));
+	}
+	s << "\\end{verbatim}\n";
+	IO::post() << "summaryInput \"" << std::string(s) << "\"" << std::endl;
 }
 
 } // namespace Write

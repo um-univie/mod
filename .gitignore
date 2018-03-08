@@ -1,5 +1,6 @@
 *.swp
 *~
+__pycache__/
 
 /aclocal.m4
 /ar-lib
@@ -19,7 +20,6 @@
 /m4/lt~obsolete.m4
 /Makefile.in
 /missing
-/pnapi/
 /preBuild/
 /VERSION
 /src/Makefile.am
@@ -50,6 +50,5 @@
 /doc/source/toc.rst
 /doc/source/libmod/[A-Z]*.rst
 /doc/source/pymod/[A-Z]*.rst
-
-/server/node_modules/
-/server/src/static/examples/list.json
+/doc/source/libmod/[^/]*/
+/doc/source/pymod/[^/]*/

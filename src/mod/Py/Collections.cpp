@@ -1,12 +1,12 @@
 #include <mod/Py/Common.h>
 
 #include <mod/Derivation.h>
-#include <mod/DG.h>
-#include <mod/DGGraphInterface.h>
-#include <mod/DGStrat.h>
-#include <mod/Graph.h>
-#include <mod/RC.h>
-#include <mod/Rule.h>
+#include <mod/dg/DG.h>
+#include <mod/dg/GraphInterface.h>
+#include <mod/dg/Strategies.h>
+#include <mod/graph/Graph.h>
+#include <mod/rule/CompositionExpr.h>
+#include <mod/rule/Rule.h>
 
 #include <boost/python/suite/indexing/vector_indexing_suite.hpp>
 
@@ -21,6 +21,7 @@ bool operator==(const Derivation&, const Derivation&) {
 	std::exit(1);
 }
 
+namespace rule {
 namespace RCExp {
 
 bool operator==(const Expression&, const Expression&) {
@@ -29,6 +30,7 @@ bool operator==(const Expression&, const Expression&) {
 }
 
 } // namespace RCExp
+} // namespace rule
 } // namespace mod
 
 namespace mod {
@@ -38,18 +40,18 @@ void Collections_doExport() {
 	// Vector
 	using VecDerivation = std::vector<mod::Derivation>;
 	py::class_<VecDerivation>("VecDerivation").def(py::vector_indexing_suite<VecDerivation, true>());
-	using VecDGVertex = std::vector<mod::DG::Vertex>;
+	using VecDGVertex = std::vector<dg::DG::Vertex>;
 	py::class_<VecDGVertex>("VecDGVertex").def(py::vector_indexing_suite<VecDGVertex, true>());
-	using VecDerivationRef = std::vector<mod::DerivationRef>;
-	py::class_<VecDerivationRef>("VecDerivationRef").def(py::vector_indexing_suite<VecDerivationRef, true>());
-	using VecDGStrat = std::vector<std::shared_ptr<mod::DGStrat> >;
+	using VecDGHyperEdge = std::vector<dg::DG::HyperEdge>;
+	py::class_<VecDGHyperEdge>("VecDGHyperEdge").def(py::vector_indexing_suite<VecDGHyperEdge, true>());
+	using VecDGStrat = std::vector<std::shared_ptr<dg::Strategy> >;
 	py::class_<VecDGStrat>("VecDGStrat").def(py::vector_indexing_suite<VecDGStrat, true>());
-	using VecGraph = std::vector<std::shared_ptr<mod::Graph> >;
+	using VecGraph = std::vector<std::shared_ptr<graph::Graph> >;
 	py::class_<VecGraph>("VecGraph").def(py::vector_indexing_suite<VecGraph, true>());
-	using VecRule = std::vector<std::shared_ptr<mod::Rule> >;
+	using VecRule = std::vector<std::shared_ptr<rule::Rule> >;
 	py::class_<VecRule>("VecRule").def(py::vector_indexing_suite<VecRule, true>());
 
-	using VecRCExpExp = std::vector<mod::RCExp::Expression>;
+	using VecRCExpExp = std::vector<rule::RCExp::Expression>;
 	py::class_<VecRCExpExp>("VecRCExpExp").def(py::vector_indexing_suite<VecRCExpExp, true>());
 
 	// Pair

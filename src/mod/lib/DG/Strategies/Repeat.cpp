@@ -22,6 +22,14 @@ Strategy *Repeat::clone() const {
 	return new Repeat(strat->clone(), limit);
 }
 
+void Repeat::preAddGraphs(std::function<void(std::shared_ptr<graph::Graph>) > add) const {
+	strat->preAddGraphs(add);
+}
+
+void Repeat::forEachRule(std::function<void(const lib::Rules::Real&)> f) const {
+	strat->forEachRule(f);
+}
+
 void Repeat::printInfo(std::ostream &s) const {
 	s << indent << "Repeat, limit = " << limit << std::endl;
 	indentLevel++;

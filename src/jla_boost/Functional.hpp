@@ -5,6 +5,23 @@
 
 namespace jla_boost {
 
+template<typename Ret = void>
+struct Nop {
+
+	template<typename ...Args>
+	Ret operator()(Args&&...) const {
+		return Ret();
+	}
+};
+
+struct Identity {
+
+	template<typename T>
+	T operator()(T &&t) const {
+		return std::forward<T>(t);
+	}
+};
+
 struct AlwaysTrue {
 
 	template<typename ...Args>
@@ -23,5 +40,5 @@ struct AlwaysFalse {
 
 } // namespace jla_boost
 
-#endif	/* JLA_BOOST_FUNCTIONAL_H */
+#endif /* JLA_BOOST_FUNCTIONAL_H */
 

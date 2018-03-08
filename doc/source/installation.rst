@@ -9,7 +9,7 @@ Futher below are specific instructions on how to install these dependencies.
 * libMØD:
 
   - A C++ compiler with reasonable C++14 support is needed. GCC 5.1 or later should work.
-  - `Boost`_ dev, 1.59 or >= 1.61 (``--with-boost=<path>``).
+  - `Boost`_ dev >= 1.64 (``--with-boost=<path>``).
   - (optional) `Open Babel`_ dev, >= 2.3.2 (``--with-OpenBabel=yes|no|<path>``).
 
 * PyMØD (``--enable-pymod``, ``--disable-pymod``):
@@ -36,9 +36,10 @@ Ubuntu
 
 Install the following packages.
 
-- (>= Ubuntu 16.10) Boost: ``libboost-regex-dev libboost-system-dev``.
-- (>= Ubuntu 16.10) Boost.Python: ``python3-dev libboost-python-dev``.
-- (< Ubuntu 16.10) Boost, Boost.Python: ``python3-dev``, and then see :ref:`install_boost_python`.
+.. - (>= Ubuntu 16.10) Boost: ``libboost-regex-dev libboost-system-dev``.
+.. - (>= Ubuntu 16.10) Boost.Python: ``python3-dev libboost-python-dev``.
+
+- Boost, Boost.Python: ``python3-dev``, and then see :ref:`install_boost_python`.
 - (>= Ubuntu 14.04) Open Babel: ``libopenbabel-dev``.
 - (< Ubuntu 14.04) Open Babel: install from source.
 - ``pdflatex``: ``texlive-full`` (less can do it, will be refined in the future).
@@ -52,9 +53,9 @@ Fedora
 
 Install the following packages.
 
-- (>= Fedora 24) Boost: ``boost-devel boost-regex boost-system``.
-- (>= Fedora 24) Boost.Python: ``python3-devel boost-python3-devel``.
-- (< Fedora 24) Boost, Boost.Python: ``python3-devel``, and then see :ref:`install_boost_python`.
+- (>= Fedora 27) Boost: ``boost-devel boost-regex boost-system``.
+- (>= Fedora 27) Boost.Python: ``python3-devel boost-python3-devel``.
+- (< Fedora 27) Boost, Boost.Python: ``python3-devel``, and then see :ref:`install_boost_python`.
 - Open Babel: ``openbabel-devel``.
 - ``pdflatex``: ``texlive-scheme-full`` (less can do it, will be refined in the future).
 - ``pdf2svg``: ``pdf2svg``.

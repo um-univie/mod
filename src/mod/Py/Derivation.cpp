@@ -1,18 +1,18 @@
 #include <mod/Py/Common.h>
 
 #include <mod/Derivation.h>
-#include <mod/Rule.h>
+#include <mod/rule/Rule.h>
 
 namespace mod {
 namespace Py {
 namespace {
 
-std::shared_ptr<mod::Rule> getRule(const mod::Derivation &d) {
-	return d.rule;
+std::shared_ptr<rule::Rule> getRule(const mod::Derivation &d) {
+	return d.r;
 }
 
-void setRule(mod::Derivation &d, std::shared_ptr<mod::Rule> r) {
-	d.rule = r;
+void setRule(mod::Derivation &d, std::shared_ptr<rule::Rule> r) {
+	d.r = r;
 }
 
 } // namespace 

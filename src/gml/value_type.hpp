@@ -1,6 +1,10 @@
 #ifndef GML_VALUE_TYPE_HPP
 #define GML_VALUE_TYPE_HPP
 
+#include <boost/variant/static_visitor.hpp>
+
+#include <gml/ast.hpp>
+
 #include <cassert>
 #include <iosfwd>
 

@@ -35,3 +35,6 @@ GML code may have line comments, starting with ``#``. They are ignored during pa
 .. include:: graph.rst
 
 .. include:: molEnc.rst
+
+.. include:: term.rst
+

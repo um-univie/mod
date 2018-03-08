@@ -1,28 +1,36 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<configurationDescriptor version="97">
+<configurationDescriptor version="100">
   <logicalFolder name="root" displayName="root" projectFiles="true" kind="ROOT">
     <logicalFolder name="mod" displayName="mod" projectFiles="true">
       <logicalFolder name="f1" displayName="Py" projectFiles="true">
+        <logicalFolder name="dg" displayName="dg" projectFiles="true">
+          <itemPath>../src/mod/Py/dg/DG.cpp</itemPath>
+          <itemPath>../src/mod/Py/dg/GraphInterface.cpp</itemPath>
+          <itemPath>../src/mod/Py/dg/Printer.cpp</itemPath>
+          <itemPath>../src/mod/Py/dg/Strategies.cpp</itemPath>
+        </logicalFolder>
+        <logicalFolder name="graph" displayName="graph" projectFiles="true">
+          <itemPath>../src/mod/Py/graph/Automorphism.cpp</itemPath>
+          <itemPath>../src/mod/Py/graph/Graph.cpp</itemPath>
+          <itemPath>../src/mod/Py/graph/GraphInterface.cpp</itemPath>
+          <itemPath>../src/mod/Py/graph/Printer.cpp</itemPath>
+        </logicalFolder>
+        <logicalFolder name="rule" displayName="rule" projectFiles="true">
+          <itemPath>../src/mod/Py/rule/Composition.cpp</itemPath>
+          <itemPath>../src/mod/Py/rule/GraphInterface.cpp</itemPath>
+          <itemPath>../src/mod/Py/rule/Rule.cpp</itemPath>
+        </logicalFolder>
         <itemPath>../src/mod/Py/Chem.cpp</itemPath>
         <itemPath>../src/mod/Py/Collections.cpp</itemPath>
         <itemPath>../src/mod/Py/Common.h</itemPath>
         <itemPath>../src/mod/Py/Config.cpp</itemPath>
-        <itemPath>../src/mod/Py/DG.cpp</itemPath>
-        <itemPath>../src/mod/Py/DGGraphInterface.cpp</itemPath>
-        <itemPath>../src/mod/Py/DGPrinter.cpp</itemPath>
-        <itemPath>../src/mod/Py/DGStrat.cpp</itemPath>
         <itemPath>../src/mod/Py/Derivation.cpp</itemPath>
         <itemPath>../src/mod/Py/Error.cpp</itemPath>
         <itemPath>../src/mod/Py/Function.cpp</itemPath>
         <itemPath>../src/mod/Py/Function.h</itemPath>
-        <itemPath>../src/mod/Py/Graph.cpp</itemPath>
-        <itemPath>../src/mod/Py/GraphGraphInterface.cpp</itemPath>
-        <itemPath>../src/mod/Py/GraphPrinter.cpp</itemPath>
         <itemPath>../src/mod/Py/Misc.cpp</itemPath>
         <itemPath>../src/mod/Py/Module.cpp</itemPath>
-        <itemPath>../src/mod/Py/RC.cpp</itemPath>
-        <itemPath>../src/mod/Py/Rule.cpp</itemPath>
-        <itemPath>../src/mod/Py/RuleGraphInterface.cpp</itemPath>
+        <itemPath>../src/mod/Py/Term.cpp</itemPath>
       </logicalFolder>
     </logicalFolder>
     <logicalFolder name="TestFiles"
@@ -53,11 +61,15 @@
           <standard>11</standard>
           <commandlineTool>time g++</commandlineTool>
           <incDir>
+            <pElem>${CND_BASEDIR}/../../perm_group/include</pElem>
+            <pElem>${CND_BASEDIR}/../../graph_canon/include</pElem>
             <pElem>${HOME}/programs/include</pElem>
-            <pElem>${CND_BASEDIR}/../srcExtra</pElem>
+            <pElem>${CND_BASEDIR}/../NB_mod/srcExtra</pElem>
             <pElem>${CND_BASEDIR}/../src</pElem>
             <pElem>/usr/include/python3.3m</pElem>
             <pElem>/usr/include/python3.2mu</pElem>
+            <pElem>/usr/include/openbabel-2.0</pElem>
+            <pElem>${HOME}/programs/include/openbabel-2.0</pElem>
           </incDir>
           <commandLine>-O3 -fno-strict-aliasing -fPIC -Wall -Wextra -Wno-unused-local-typedefs -Wno-comment -Wno-deprecated-declarations</commandLine>
           <preprocessorList>
@@ -103,14 +115,6 @@
       </item>
       <item path="../src/mod/Py/Config.cpp" ex="false" tool="1" flavor2="0">
       </item>
-      <item path="../src/mod/Py/DG.cpp" ex="false" tool="1" flavor2="0">
-      </item>
-      <item path="../src/mod/Py/DGGraphInterface.cpp" ex="false" tool="1" flavor2="0">
-      </item>
-      <item path="../src/mod/Py/DGPrinter.cpp" ex="false" tool="1" flavor2="0">
-      </item>
-      <item path="../src/mod/Py/DGStrat.cpp" ex="false" tool="1" flavor2="0">
-      </item>
       <item path="../src/mod/Py/Derivation.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="../src/mod/Py/Error.cpp" ex="false" tool="1" flavor2="0">
@@ -119,27 +123,45 @@
       </item>
       <item path="../src/mod/Py/Function.h" ex="false" tool="3" flavor2="0">
       </item>
-      <item path="../src/mod/Py/Graph.cpp" ex="false" tool="1" flavor2="0">
-      </item>
-      <item path="../src/mod/Py/GraphGraphInterface.cpp"
-            ex="false"
-            tool="1"
-            flavor2="0">
-      </item>
-      <item path="../src/mod/Py/GraphPrinter.cpp" ex="false" tool="1" flavor2="0">
-      </item>
       <item path="../src/mod/Py/Misc.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="../src/mod/Py/Module.cpp" ex="false" tool="1" flavor2="0">
       </item>
-      <item path="../src/mod/Py/RC.cpp" ex="false" tool="1" flavor2="0">
+      <item path="../src/mod/Py/Term.cpp" ex="false" tool="1" flavor2="0">
       </item>
-      <item path="../src/mod/Py/Rule.cpp" ex="false" tool="1" flavor2="0">
+      <item path="../src/mod/Py/dg/DG.cpp" ex="false" tool="1" flavor2="0">
       </item>
-      <item path="../src/mod/Py/RuleGraphInterface.cpp"
+      <item path="../src/mod/Py/dg/GraphInterface.cpp"
             ex="false"
             tool="1"
             flavor2="0">
+      </item>
+      <item path="../src/mod/Py/dg/Printer.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../src/mod/Py/dg/Strategies.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../src/mod/Py/graph/Automorphism.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../src/mod/Py/graph/Graph.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../src/mod/Py/graph/GraphInterface.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../src/mod/Py/graph/Printer.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../src/mod/Py/rule/Composition.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../src/mod/Py/rule/GraphInterface.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../src/mod/Py/rule/Rule.cpp" ex="false" tool="1" flavor2="0">
       </item>
     </conf>
   </confs>

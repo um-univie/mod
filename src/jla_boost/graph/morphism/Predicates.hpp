@@ -9,31 +9,32 @@ namespace GraphMorphism {
 // PropertyPredicate
 //------------------------------------------------------------------------------
 
-template<typename Pred, typename PropLeft, typename PropRight, typename Next>
+template<typename Pred, typename PropDomain, typename PropCodomain, typename Next>
 struct PropertyPredicate {
 
-	PropertyPredicate(Pred pred, PropLeft pLeft, PropRight pRight, Next next)
-	: pred(pred), pLeft(pLeft), pRight(pRight), next(next) { }
+	PropertyPredicate(Pred pred, PropDomain pDomain, PropCodomain pCodomain, Next next)
+	: pred(pred), pDomain(pDomain), pCodomain(pCodomain), next(next) { }
 
-	template<typename VertexOrEdge>
-	bool operator()(VertexOrEdge veLeft, VertexOrEdge veRight) {
-		return pred(get(pLeft, veLeft), get(pRight, veRight)) && next(veLeft, veRight);
+	template<typename VEDomain, typename VECodomain, typename ...Args>
+	bool operator()(const VEDomain &veDomain, const VECodomain &veCodomain, Args&&... args) const {
+		return pred(get(pDomain, veDomain), get(pCodomain, veCodomain))
+				&& next(veDomain, veCodomain, std::forward<Args>(args)...);
 	}
 private:
 	Pred pred;
-	PropLeft pLeft;
-	PropRight pRight;
+	PropDomain pDomain;
+	PropCodomain pCodomain;
 	Next next;
 };
 
-template<typename Pred, typename PropLeft, typename PropRight, typename Next = AlwaysTrue>
-auto makePropertyPredicate(Pred pred, PropLeft &&pLeft, PropRight &&pRight, Next next = AlwaysTrue()) {
-	return PropertyPredicate<Pred, PropLeft, PropRight, Next>(pred, std::forward<PropLeft>(pLeft), std::forward<PropRight>(pRight), next);
+template<typename Pred, typename PropDomain, typename PropCodomain, typename Next = AlwaysTrue>
+auto makePropertyPredicate(Pred pred, PropDomain &&pDomain, PropCodomain &&pCodomain, Next next = AlwaysTrue()) {
+	return PropertyPredicate<Pred, PropDomain, PropCodomain, Next>(pred, std::forward<PropDomain>(pDomain), std::forward<PropCodomain>(pCodomain), next);
 }
 
-template<typename PropLeft, typename PropRight, typename Next = AlwaysTrue>
-auto makePropertyPredicateEq(PropLeft &&pLeft, PropRight &&pRight, Next next = AlwaysTrue()) {
-	return makePropertyPredicate(std::equal_to<>(), std::forward<PropLeft>(pLeft), std::forward<PropRight>(pRight), next);
+template<typename PropDomain, typename PropCodomain, typename Next = AlwaysTrue>
+auto makePropertyPredicateEq(PropDomain &&pDomain, PropCodomain &&pCodomain, Next next = AlwaysTrue()) {
+	return makePropertyPredicate(std::equal_to<>(), std::forward<PropDomain>(pDomain), std::forward<PropCodomain>(pCodomain), next);
 }
 
 } // namespace GraphMorphism

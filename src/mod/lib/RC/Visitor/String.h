@@ -1,5 +1,5 @@
 #ifndef MOD_LIB_RC_VISITOR_STRING_H
-#define	MOD_LIB_RC_VISITOR_STRING_H
+#define MOD_LIB_RC_VISITOR_STRING_H
 
 #include <mod/lib/RC/Visitor/Compound.h>
 
@@ -16,7 +16,7 @@ public:
 
 	template<bool Verbose, typename RuleFirst, typename RuleSecond, typename InvertibleVertexMap, typename Result>
 	bool init(const RuleFirst &rFirst, const RuleSecond &rSecond, const InvertibleVertexMap &match, Result &result) {
-		result.rResult.pString = std::make_unique<typename Result::RuleResult::PropStringType>(get_graph(result.rResult));
+		result.rResult.pString = std::make_unique<typename Result::RuleResult::PropStringType > (get_graph(result.rResult));
 		return true;
 	}
 
@@ -55,6 +55,12 @@ public:
 		copyEdge(rSecond, result.rResult, eSecond, eResult, *rSecond.pString);
 	}
 public:
+
+	template<typename RuleFirst, typename RuleSecond, typename InvertibleVertexMap, typename Result, typename VertexFirst>
+	void printVertexFirst(const RuleFirst &rFirst, const RuleSecond &rSecond, const InvertibleVertexMap &match, const Result &result,
+			std::ostream &s, const VertexFirst &vFirst) {
+		rFirst.pString->print(s, vFirst);
+	}
 
 	template<typename RuleFirst, typename RuleSecond, typename InvertibleVertexMap, typename Result, typename VertexSecond>
 	void printVertexSecond(const RuleFirst &rFirst, const RuleSecond &rSecond, const InvertibleVertexMap &match, const Result &result,
@@ -168,4 +174,4 @@ private:
 } // namespace lib
 } // namespace mod
 
-#endif	/* MOD_LIB_RC_VISITOR_STRING_H */
+#endif /* MOD_LIB_RC_VISITOR_STRING_H */

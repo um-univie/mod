@@ -1,5 +1,5 @@
 #ifndef MOD_LIB_CHEM_MOLECULEUTIL_H
-#define	MOD_LIB_CHEM_MOLECULEUTIL_H
+#define MOD_LIB_CHEM_MOLECULEUTIL_H
 
 #include <mod/Chem.h>
 
@@ -29,16 +29,15 @@ std::string symbolFromAtomId(AtomId atomId);
 void appendSymbolFromAtomId(std::string &s, AtomId atomId);
 char bondToChar(BondType bt);
 
-template<typename Graph, typename AtomDataT, typename EdgeDataT>
-bool isCollapsible(typename boost::graph_traits<Graph>::vertex_descriptor v, const Graph &g, const AtomDataT &atomData, const EdgeDataT &edgeData) {
-	typedef typename boost::graph_traits<Graph>::vertex_descriptor Vertex;
-	typedef typename boost::graph_traits<Graph>::edge_descriptor Edge;
+template<typename Graph, typename AtomDataT, typename EdgeDataT, typename HasImportantStereo>
+bool isCollapsible(const auto v, const Graph &g, const AtomDataT &atomData, const EdgeDataT &edgeData, const HasImportantStereo &hasImportantStereo) {
 	if(!isCleanHydrogen(atomData(v))) return false;
 	if(out_degree(v, g) != 1) return false;
-	Edge e = *out_edges(v, g).first;
-	BondType eType = edgeData(e);
+	const auto e = *out_edges(v, g).first;
+	const auto eType = edgeData(e);
 	if(eType != BondType::Single) return false;
-	Vertex vAdj = target(e, g);
+	const auto vAdj = target(e, g);
+	if(hasImportantStereo(vAdj)) return false;
 	if(!isCleanHydrogen(atomData(vAdj))) return true;
 	// collapse the highest id vertex in H_2
 	return get(boost::vertex_index_t(), g, v) > get(boost::vertex_index_t(), g, vAdj);
@@ -48,4 +47,4 @@ bool isCollapsible(typename boost::graph_traits<Graph>::vertex_descriptor v, con
 } // namespace lib
 } // namespace mod
 
-#endif	/* MOD_LIB_CHEM_MOLECULEUTIL_H */
+#endif /* MOD_LIB_CHEM_MOLECULEUTIL_H */

@@ -1,5 +1,5 @@
 #ifndef MOD_LIB_RC_VISITOR_COMPOUND_H
-#define	MOD_LIB_RC_VISITOR_COMPOUND_H
+#define MOD_LIB_RC_VISITOR_COMPOUND_H
 
 #include <mod/lib/RC/Result.h>
 #include <mod/lib/Rules/Real.h>
@@ -50,6 +50,10 @@ public:
 			const EdgeSecond &eSecond, const EdgeResult &eResult) { }
 public:
 
+	template<typename RuleFirst, typename RuleSecond, typename InvertibleVertexMap, typename Result, typename VertexFirst>
+	void printVertexFirst(const RuleFirst &rFirst, const RuleSecond &rSecond, const InvertibleVertexMap &match, const Result &result,
+			std::ostream &s, const VertexFirst &vFirst) { }
+
 	template<typename RuleFirst, typename RuleSecond, typename InvertibleVertexMap, typename Result, typename VertexSecond>
 	void printVertexSecond(const RuleFirst &rFirst, const RuleSecond &rSecond, const InvertibleVertexMap &match, const Result &result,
 			std::ostream &s, const VertexSecond &vSecond) { }
@@ -94,7 +98,7 @@ struct Compound<Visitor, Visitors...> : Compound<Visitors...> {
 	using Base = Compound<Visitors...>;
 
 	Compound(Visitor visitor, Visitors ...visitors)
-	: Base(visitors...), visitor(visitor) { }
+	: Base(std::move(visitors)...), visitor(std::move(visitor)) { }
 
 	template<bool Verbose, typename RuleFirst, typename RuleSecond, typename InvertibleVertexMap, typename Result>
 	bool init(const RuleFirst &rFirst, const RuleSecond &rSecond, InvertibleVertexMap &match, Result &result) {
@@ -141,6 +145,13 @@ public:
 		Base::template copyEdgeSecond<Verbose>(rFirst, rSecond, match, result, eSecond, eResult);
 	}
 public:
+
+	template<typename RuleFirst, typename RuleSecond, typename InvertibleVertexMap, typename Result, typename VertexFirst>
+	void printVertexFirst(const RuleFirst &rFirst, const RuleSecond &rSecond, const InvertibleVertexMap &match, const Result &result,
+			std::ostream &s, const VertexFirst &vFirst) {
+		visitor.printVertexFirst(rFirst, rSecond, match, result, s, vFirst);
+		Base::template printVertexFirst(rFirst, rSecond, match, result, s, vFirst);
+	}
 
 	template<typename RuleFirst, typename RuleSecond, typename InvertibleVertexMap, typename Result, typename VertexSecond>
 	void printVertexSecond(const RuleFirst &rFirst, const RuleSecond &rSecond, const InvertibleVertexMap &match, const Result &result,
@@ -211,8 +222,8 @@ private:
 using Null = Compound<>;
 
 template<typename ...Visitors>
-Compound<Visitors...> makeVisitor(Visitors ...visitors) {
-	return Compound < Visitors...>(visitors...);
+Compound<Visitors...> makeVisitor(Visitors... visitors) {
+	return Compound < Visitors...>(std::move(visitors)...);
 }
 
 } // namespace Visitor
@@ -220,4 +231,4 @@ Compound<Visitors...> makeVisitor(Visitors ...visitors) {
 } // namespace lib
 } // namespace mod
 
-#endif	/* MOD_LIB_RC_VISITOR_COMPOUND_H */
+#endif /* MOD_LIB_RC_VISITOR_COMPOUND_H */

@@ -1,29 +1,28 @@
 #include "Dump.h"
 
-#include <mod/Graph.h>
 #include <mod/Error.h>
-#include <mod/Rule.h>
+#include <mod/graph/Graph.h>
+#include <mod/rule/Rule.h>
 #include <mod/lib/DG/Hyper.h>
-#include <mod/lib/Graph/Merge.h>
 #include <mod/lib/Graph/Single.h>
+#include <mod/lib/Graph/Properties/Stereo.h>
 #include <mod/lib/Graph/Properties/String.h>
 #include <mod/lib/IO/Graph.h>
 #include <mod/lib/IO/IO.h>
-#include <mod/lib/IO/ParserCommon.h>
+#include <mod/lib/IO/ParsingUtil.h>
 #include <mod/lib/Rules/Real.h>
 
 #include <jla_boost/graph/PairToRangeAdaptor.hpp>
 
-#include <boost/spirit/include/qi_char_.hpp>
-#include <boost/spirit/include/qi_difference.hpp>
-#include <boost/spirit/include/qi_int.hpp>
-#include <boost/spirit/include/qi_kleene.hpp>
-#include <boost/spirit/include/qi_lit.hpp>
-#include <boost/spirit/include/qi_lexeme.hpp>
-#include <boost/spirit/include/qi_sequence.hpp>
-#include <boost/spirit/include/qi_uint.hpp>
-
-using namespace mod::lib::IO::Parser;
+#include <boost/spirit/home/x3/char/char.hpp>
+#include <boost/spirit/home/x3/char/char_class.hpp>
+#include <boost/spirit/home/x3/directive/lexeme.hpp>
+#include <boost/spirit/home/x3/numeric/int.hpp>
+#include <boost/spirit/home/x3/numeric/uint.hpp>
+#include <boost/spirit/home/x3/string/literal_string.hpp>
+#include <boost/spirit/home/x3/operator/difference.hpp>
+#include <boost/spirit/home/x3/operator/kleene.hpp>
+#include <boost/spirit/include/support_multi_pass.hpp>
 
 namespace mod {
 namespace lib {
@@ -32,17 +31,17 @@ namespace Dump {
 namespace {
 
 struct ConstructionData {
-	const std::vector<std::shared_ptr<mod::Rule> > &rules;
+	const std::vector<std::shared_ptr<rule::Rule> > &rules;
 	std::vector<std::tuple<unsigned int, std::string, std::unique_ptr<lib::Graph::GraphType>, std::unique_ptr<lib::Graph::PropString> > > vertices;
 	const std::vector<std::tuple<unsigned int, std::string> > rulesParsed;
-	const std::vector < std::tuple<unsigned int, unsigned int, std::vector<int> > > edges;
+	const std::vector<std::tuple<unsigned int, std::vector<unsigned int>, std::vector<int> > > edges;
 };
 
 struct NonHyperDump : public NonHyper {
 
-	NonHyperDump(const std::vector<std::shared_ptr<mod::Graph> > &graphs,
+	NonHyperDump(const std::vector<std::shared_ptr<graph::Graph> > &graphs,
 			ConstructionData &&constructionData)
-	: NonHyper(graphs), constructionData(&constructionData) {
+	: NonHyper(graphs,{LabelType::String, LabelRelation::Isomorphism}), constructionData(&constructionData) {
 		calculate();
 	}
 private:
@@ -52,18 +51,18 @@ private:
 	}
 
 	void calculateImpl() {
-		const std::vector<std::shared_ptr<mod::Rule> > &rules = constructionData->rules;
+		const std::vector<std::shared_ptr<rule::Rule> > &rules = constructionData->rules;
 		auto &vertices = constructionData->vertices;
 		const auto &rulesParsed = constructionData->rulesParsed;
 		const auto &edges = constructionData->edges;
-		std::unordered_map<unsigned int, std::shared_ptr<mod::Rule> > ruleMap;
-		std::unordered_map<unsigned int, std::shared_ptr<mod::Graph> > graphMap;
+		std::unordered_map<unsigned int, std::shared_ptr<rule::Rule> > ruleMap;
+		std::unordered_map<unsigned int, std::shared_ptr<graph::Graph> > graphMap;
 		for(const auto &t : rulesParsed) {
-			auto iter = std::find_if(begin(rules), end(rules), [&t](std::shared_ptr<mod::Rule> r) -> bool {
+			auto iter = std::find_if(begin(rules), end(rules), [&t](std::shared_ptr<rule::Rule> r) -> bool {
 				return r->getName() == get<1>(t);
 			});
 			if(iter != end(rules)) {
-				std::shared_ptr<mod::Rule> r = *iter;
+				std::shared_ptr<rule::Rule> r = *iter;
 				IO::log() << "Rule linked: " << r->getName() << std::endl;
 				this->rules.push_back(r);
 				ruleMap[get<0>(t)] = r;
@@ -76,7 +75,8 @@ private:
 		for(unsigned int id = 0; id < vertices.size() + edges.size(); id++) {
 			if(iVertices < vertices.size() && get<0>(vertices[iVertices]) == id) {
 				auto &v = vertices[iVertices];
-				auto p = checkIfNew(std::move(get<2>(v)), std::move(get<3>(v)));
+				auto gCand = std::make_unique<lib::Graph::Single>(std::move(get<2>(v)), std::move(get<3>(v)), nullptr);
+				auto p = checkIfNew(std::move(gCand));
 				bool wasNew = addGraphAsVertex(p.first);
 				graphMap[id] = p.first;
 				if(!p.second) IO::log() << "Graph linked: " << get<1>(v) << " -> " << p.first->getName() << std::endl;
@@ -84,33 +84,25 @@ private:
 				iVertices++;
 			} else if(iEdges < edges.size() && get<0>(edges[iEdges]) == id) {
 				const auto &e = edges[iEdges];
-				auto mEduct = std::make_unique<lib::Graph::Merge>();
-				auto mProduct = std::make_unique<lib::Graph::Merge>();
+				std::vector<const lib::Graph::Single*> srcGraphs, tarGraphs;
 				for(int adj : get<2>(e)) {
 					assert(adj != 0);
 					unsigned int id = std::abs(adj) - 1;
-					auto *m = adj < 0 ? mEduct.get() : mProduct.get();
+					auto &m = adj < 0 ? srcGraphs : tarGraphs;
 					auto gIter = graphMap.find(id);
 					assert(gIter != end(graphMap));
-					m->mergeWith(gIter->second->getGraph());
+					m.push_back(&gIter->second->getGraph());
 				}
-				mEduct->lock();
-				mProduct->lock();
-				auto rIter = ruleMap.find(get<1>(e));
-				assert(rIter != end(ruleMap));
-				const auto *r = &rIter->second->getRule();
-				const lib::Graph::Base *gEduct, *gProduct;
-				if(mEduct->getSingles().size() == 1) {
-					gEduct = *begin(mEduct->getSingles());
-				} else {
-					gEduct = addToMergeStore(mEduct.release());
+				GraphMultiset gmsSrc(std::move(srcGraphs)), gmsTar(std::move(tarGraphs));
+				const auto &ruleIds = get<1>(e);
+				suggestDerivation(gmsSrc, gmsTar, nullptr);
+				for(const auto rId : ruleIds) {
+					auto rIter = ruleMap.find(rId);
+					if(rIter == end(ruleMap)) MOD_ABORT; // TODO: what should we do when the user haven't given us all the rules?
+					assert(rIter != end(ruleMap));
+					const auto *r = &rIter->second->getRule();
+					suggestDerivation(gmsSrc, gmsTar, r);
 				}
-				if(mProduct->getSingles().size() == 1) {
-					gProduct = *begin(mProduct->getSingles());
-				} else {
-					gProduct = addToMergeStore(mProduct.release());
-				}
-				suggestDerivation(gEduct, gProduct, r);
 				iEdges++;
 			} else {
 				MOD_ABORT;
@@ -121,22 +113,34 @@ private:
 
 	void listImpl(std::ostream &s) const { }
 private:
-	std::vector<std::shared_ptr<mod::Rule> > rules;
+	std::vector<std::shared_ptr<rule::Rule> > rules;
 	ConstructionData *constructionData;
 };
 
+using BaseIteratorType = std::istream_iterator<char>;
+using IteratorType = spirit::multi_pass<BaseIteratorType>;
+using PosIter = IO::PositionIter<IteratorType>;
+
 template<typename Parser, typename Attr>
-bool parse(IteratorType iterRealStart, IteratorType &iterStart, IteratorType iterEnd, Parser &parser, Attr &attr) {
-	bool res = qi::phrase_parse(iterStart, iterEnd, parser, qi::space, attr);
-	if(!res) {
-		(lib::IO::Parser::ErrorHandler<IteratorType, true>(std::cout))(iterRealStart, iterEnd, iterStart, "Error in DG dump file");
+bool parse(IteratorType &textFirst, PosIter &first, const PosIter &last, const Parser &p, Attr &attr, std::ostream &err) {
+	try {
+		bool res = IO::detail::ParseDispatch<x3::space_type>::parse(first, last, p, attr, x3::space);
+		if(!res) {
+			err << "Error while parsing DG dump.\n";
+			IO::detail::doParserError(textFirst, first, last, lib::IO::log());
+			return false;
+		}
+		return res;
+	} catch(const x3::expectation_failure<PosIter> &e) {
+		err << "Error while parsing DG dump.\n";
+		IO::detail::doParserExpectationError(e, textFirst, last, err);
+		return false;
 	}
-	return res;
 }
 
 } // namespace
 
-NonHyper *load(const std::vector<std::shared_ptr<mod::Graph> > &graphs, const std::vector<std::shared_ptr<mod::Rule> > &rules, std::istream &s, std::ostream &err) {
+NonHyper *load(const std::vector<std::shared_ptr<graph::Graph> > &graphs, const std::vector<std::shared_ptr<rule::Rule> > &rules, std::istream &s, std::ostream &err) {
 
 	struct FlagsHolder {
 		std::istream &s;
@@ -150,39 +154,43 @@ NonHyper *load(const std::vector<std::shared_ptr<mod::Graph> > &graphs, const st
 			s.flags(flags);
 		}
 	} flagsHolder(s);
-	IteratorType iterStart = spirit::make_default_multi_pass(BaseIteratorType(s));
-	IteratorType iterRealStart = iterStart;
-	IteratorType iterEnd;
+	IteratorType textFirst = spirit::make_default_multi_pass(BaseIteratorType(s));
+	IteratorType textLast;
+	PosIter first(textFirst), last(textLast);
 
 	unsigned int numVertices, numEdges, numRules;
 	std::vector<std::tuple<unsigned int, std::string, std::unique_ptr<lib::Graph::GraphType>, std::unique_ptr<lib::Graph::PropString> > > vertices;
 	std::vector<std::tuple<unsigned int, std::string> > rulesParsed;
-	std::vector<std::tuple<unsigned int, unsigned int, std::vector<int> > > edges;
+	std::vector<std::tuple<unsigned int, std::vector<unsigned int>, std::vector<int> > > edges;
 
 	std::unordered_set<unsigned int> validVertices, validRules;
-#define PARSE(p, a) if(!parse(iterRealStart, iterStart, iterEnd, p, a)) return nullptr
-	PARSE("numVertices:" >> qi::uint_, numVertices);
-	PARSE("numEdges:" >> qi::uint_, numEdges);
-	PARSE("numRules:" >> qi::uint_, numRules);
+#define PARSE(p, a) if(!parse(textFirst, first, last, p, a, err)) return nullptr
+#define TRY_PARSE(p, a) parse(textFirst, first, last, p, a, err)
+	unsigned int version = 1;
+	TRY_PARSE("version:" >> x3::uint_, version);
+	PARSE("numVertices:" >> x3::uint_, numVertices);
+	PARSE("numEdges:" >> x3::uint_, numEdges);
+	PARSE("numRules:" >> x3::uint_, numRules);
 	for(unsigned int i = 0; i < numVertices; i++) {
 		unsigned int id;
 		std::string name, dfs;
-		PARSE("vertex:" >> qi::uint_, id);
-		PARSE('"' >> qi::lexeme[*(qi::char_ - '"') >> '"'], name);
-		PARSE('"' >> qi::lexeme[*(qi::char_ - '"') >> '"'], dfs);
+		PARSE("vertex:" >> x3::uint_, id);
+		PARSE('"' >> x3::lexeme[*(x3::char_ - '"') >> '"'], name);
+		PARSE('"' >> x3::lexeme[*(x3::char_ - '"') >> '"'], dfs);
 		auto gData = IO::Graph::Read::dfs(dfs, err);
-		if(!gData.graph) {
+		if(!gData.g) {
 			err << "GraphDFS \"" << dfs << "\" could not be parsed for vertex " << id << std::endl;
 			return nullptr;
 		}
-		vertices.emplace_back(id, name, std::move(gData.graph), std::move(gData.label));
+		if(gData.pStereo) MOD_ABORT;
+		vertices.emplace_back(id, name, std::move(gData.g), std::move(gData.pString));
 		validVertices.insert(id);
 	}
 	for(unsigned int i = 0; i < numRules; i++) {
 		unsigned int id;
 		std::string name;
-		PARSE("rule:" >> qi::uint_, id);
-		PARSE('"' >> qi::lexeme[*(qi::char_ - '"') >> '"'], name);
+		PARSE("rule:" >> x3::uint_, id);
+		PARSE('"' >> x3::lexeme[*(x3::char_ - '"') >> '"'], name);
 		rulesParsed.emplace_back(id, name);
 		if(validRules.find(id) != end(validRules)) {
 			err << "Parsed data is corrupt, duplicate rule id, " << id << std::endl;
@@ -191,14 +199,24 @@ NonHyper *load(const std::vector<std::shared_ptr<mod::Graph> > &graphs, const st
 		validRules.insert(id);
 	}
 	for(unsigned int i = 0; i < numEdges; i++) {
-		unsigned int id, ruleId;
+		unsigned int id;
+		std::vector<unsigned int> ruleIds;
 		std::vector<int> adj;
-		PARSE("edge:" >> qi::uint_, id);
-		PARSE(qi::uint_, ruleId);
-		PARSE(*qi::int_, adj);
-		if(validRules.find(ruleId) == end(validRules)) {
-			err << "Parsed data is corrupt, ruleId, " << ruleId << ", out of range [0, " << numRules << "[ for edge " << id << std::endl;
-			return nullptr;
+		PARSE("edge:" >> x3::uint_, id);
+		unsigned int numRules;
+		if(version == 1) numRules = 1;
+		else PARSE(x3::uint_, numRules);
+		for(std::size_t i = 0; i < numRules; ++i) {
+			unsigned int ruleId;
+			PARSE(x3::uint_, ruleId);
+			ruleIds.push_back(ruleId);
+		}
+		PARSE(*x3::int_, adj);
+		for(const auto rId : ruleIds) {
+			if(validRules.find(rId) == end(validRules)) {
+				err << "Parsed data is corrupt, ruleId, " << rId << ", out of range [0, " << numRules << "[ for edge " << id << std::endl;
+				return nullptr;
+			}
 		}
 		for(int a : adj) {
 			if(a == 0) {
@@ -214,7 +232,7 @@ NonHyper *load(const std::vector<std::shared_ptr<mod::Graph> > &graphs, const st
 				return nullptr;
 			}
 		}
-		edges.emplace_back(id, ruleId, adj);
+		edges.emplace_back(id, ruleIds, adj);
 	}
 	using Vertex = decltype(vertices)::value_type;
 	using Edge = decltype(edges)::value_type;
@@ -251,67 +269,65 @@ NonHyper *load(const std::vector<std::shared_ptr<mod::Graph> > &graphs, const st
 	return new NonHyperDump(graphs, ConstructionData{rules, std::move(vertices), rulesParsed, edges});
 }
 
-void write(const NonHyper &dgNonHyper, std::ostream &s) {
+void write(const NonHyper &dgNonHyper, std::ostream & s) {
+	if(dgNonHyper.getLabelSettings().withStereo) {
+		throw mod::LogicError("Can not yet dump DGs with stereo data.");
+	}
 	using Vertex = lib::DG::HyperVertex;
 	using Edge = lib::DG::HyperEdge;
 	using VertexKind = lib::DG::HyperVertexKind;
 	const lib::DG::HyperGraphType &dg = dgNonHyper.getHyper().getGraph();
 	unsigned int numVertices = 0, numEdges = 0;
 
-	for(Vertex v : asRange(vertices(dg))) {
+	for(const auto v : asRange(vertices(dg))) {
 		if(dg[v].kind == VertexKind::Vertex) numVertices++;
 		else numEdges++;
 	}
 
 	std::set<const lib::Rules::Real*, lib::Rules::LessById> rules;
 
-	for(Vertex v : asRange(vertices(dg))) {
+	for(const auto v : asRange(vertices(dg))) {
 		if(dg[v].kind != VertexKind::Edge) continue;
-		assert(dg[v].rules.size() == 1); // TODO: we don't need to do something special here, right?
-		for(auto *r : dg[v].rules) rules.insert(r);
+		for(const auto *r : dg[v].rules) rules.insert(r);
 	}
 
-	s << "numVertices:\t" << numVertices << std::endl;
-	s << "numEdges:\t" << numEdges << std::endl;
-	s << "numRules:\t" << rules.size() << std::endl;
+	s << "version:\t2\n";
+	s << "numVertices:\t" << numVertices << "\n";
+	s << "numEdges:\t" << numEdges << "\n";
+	s << "numRules:\t" << rules.size() << "\n";
 
-	for(Vertex v : asRange(vertices(dg))) {
+	for(const auto v : asRange(vertices(dg))) {
 		if(dg[v].kind != VertexKind::Vertex) continue;
-		unsigned int id = get(boost::vertex_index_t(), dg, v);
+		const auto id = get(boost::vertex_index_t(), dg, v);
 		const lib::Graph::Single *g = dg[v].graph;
 		assert(g);
-		s << "vertex:\t" << id << "\t\"" << g->getName() << "\"\t\"" << g->getGraphDFS().first << "\"" << std::endl;
+		s << "vertex:\t" << id << "\t\"" << g->getName() << "\"\t\"" << g->getGraphDFS().first << "\"\n";
 	}
 
+	for(const auto *r : rules) s << "rule:\t" << r->getId() << "\t\"" << r->getName() << "\"\n";
 
-	for(const lib::Rules::Real *r : rules) s << "rule:\t" << r->getId() << "\t\"" << r->getName() << "\"" << std::endl;
-
-	for(Vertex v : asRange(vertices(dg))) {
+	for(const auto v : asRange(vertices(dg))) {
 		if(dg[v].kind != VertexKind::Edge) continue;
-		unsigned int id = get(boost::vertex_index_t(), dg, v);
-		assert(dg[v].rules.size() == 1);
-		const lib::Rules::Real *r = dg[v].rules.front();
-		s << "edge:\t" << id << "\t" << r->getId() << "\t";
+		const auto id = get(boost::vertex_index_t(), dg, v);
+		s << "edge:\t" << id << "\t" << dg[v].rules.size();
+		for(const auto *r : dg[v].rules) s << " " << r->getId();
+		s << "\t";
 
 		std::vector<int> coefs;
-
-		for(Edge e : asRange(in_edges(v, dg))) {
-			Vertex v = source(e, dg);
-			unsigned int id = 1 + get(boost::vertex_index_t(), dg, v);
+		for(const auto e : asRange(in_edges(v, dg))) {
+			const auto v = source(e, dg);
+			const auto id = 1 + get(boost::vertex_index_t(), dg, v);
 			coefs.push_back(-id);
 		}
-
-		for(Edge e : asRange(out_edges(v, dg))) {
-			Vertex v = target(e, dg);
-			unsigned int id = 1 + get(boost::vertex_index_t(), dg, v);
+		for(const auto e : asRange(out_edges(v, dg))) {
+			const auto v = target(e, dg);
+			const auto id = 1 + get(boost::vertex_index_t(), dg, v);
 			coefs.push_back(id);
 		}
-
 		std::sort(begin(coefs), end(coefs));
-
 		for(int coef : coefs) s << coef << " ";
 
-		s << std::endl;
+		s << "\n";
 	}
 }
 

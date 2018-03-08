@@ -10,12 +10,14 @@ namespace lib {
 namespace DG {
 namespace Strategies {
 
-Execute::Execute(std::shared_ptr<mod::Function<void(const mod::DGStrat::GraphState&)> > func)
+Execute::Execute(std::shared_ptr<mod::Function<void(const dg::Strategy::GraphState&)> > func)
 : Strategy::Strategy(0), func(func) { }
 
 Strategy *Execute::clone() const {
 	return new Execute(func->clone());
 }
+
+void Execute::preAddGraphs(std::function<void(std::shared_ptr<graph::Graph>) > add) const { }
 
 void Execute::printInfo(std::ostream &s) const {
 	s << indent << "Execute";
@@ -37,15 +39,15 @@ bool Execute::isConsumed(const lib::Graph::Single *g) const {
 
 void Execute::executeImpl(std::ostream &s, const GraphState &input) {
 	if(getConfig().dg.calculateVerbose.get()) printInfo(s);
-	mod::DGStrat::GraphState gs(
-			[&input](std::vector<std::shared_ptr<mod::Graph> > &subset) {
+	dg::Strategy::GraphState gs(
+			[&input](std::vector<std::shared_ptr<graph::Graph> > &subset) {
 				for(const lib::Graph::Single *g : input.getSubset(0)) subset.push_back(g->getAPIReference());
 			},
-	[&input](std::vector<std::shared_ptr<mod::Graph> > &universe) {
+	[&input](std::vector<std::shared_ptr<graph::Graph> > &universe) {
 		for(const lib::Graph::Single *g : input.getUniverse()) universe.push_back(g->getAPIReference());
 	},
-	[this](std::vector<mod::DerivationRef> &derivationRefs) {
-		getExecutionEnv().fillDerivationRefs(derivationRefs);
+	[this](std::vector<dg::DG::HyperEdge> &edges) {
+		getExecutionEnv().fillHyperEdges(edges);
 	});
 	(*func)(gs);
 }

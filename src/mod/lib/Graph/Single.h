@@ -2,8 +2,15 @@
 #define MOD_LIB_GRAPH_SINGLE_H
 
 #include <mod/Config.h>
-#include <mod/lib/Graph/Base.h>
+#include <mod/graph/ForwardDecl.h>
+#include <mod/rule/ForwardDecl.h>
+#include <mod/lib/Graph/GraphDecl.h>
 #include <mod/lib/Graph/LabelledGraph.h>
+
+#include <graph_canon/ordered_graph.hpp>
+
+#include <perm_group/group/generated.hpp>
+#include <perm_group/permutation/built_in.hpp>
 
 #include <boost/optional/optional.hpp>
 
@@ -11,29 +18,35 @@
 #include <string>
 
 namespace mod {
-class Graph;
-class Rule;
 namespace lib {
 namespace Graph {
 struct PropMolecule;
 struct DepictionData;
 
-struct Single : public Base {
-	Single(std::unique_ptr<GraphType> g, std::unique_ptr<PropString> pString);
+struct Single {
+	using CanonIdxMap = boost::iterator_property_map<std::vector<int>::const_iterator,
+			decltype(get(boost::vertex_index_t(), GraphType()))>;
+	using CanonForm = graph_canon::ordered_graph<GraphType, CanonIdxMap>;
+	using AutGroup = perm_group::generated_group<std::vector<int> >;
+public:
+	// requires g != nullptr, pString != nullptr
+	// pStereo may be null
+	Single(std::unique_ptr<GraphType> g, std::unique_ptr<PropString> pString, std::unique_ptr<PropStereo> pStereo);
+public:
 	Single(Single &&) = default;
 	~Single();
 	const LabelledGraph &getLabelledGraph() const;
 	std::size_t getId() const;
-	std::shared_ptr<mod::Graph> getAPIReference() const;
-	void setAPIReference(std::shared_ptr<mod::Graph> g);
-	void printName(std::ostream &s) const;
+	std::shared_ptr<graph::Graph> getAPIReference() const;
+	void setAPIReference(std::shared_ptr<graph::Graph> g);
 	const std::string &getName() const;
 	void setName(std::string name);
 	const std::pair<const std::string&, bool> getGraphDFS() const;
 	const std::string &getSmiles() const;
-	std::shared_ptr<mod::Rule> getBindRule() const;
-	std::shared_ptr<mod::Rule> getIdRule() const;
-	std::shared_ptr<mod::Rule> getUnbindRule() const;
+	const std::string &getSmilesWithIds() const;
+	std::shared_ptr<rule::Rule> getBindRule() const;
+	std::shared_ptr<rule::Rule> getIdRule() const;
+	std::shared_ptr<rule::Rule> getUnbindRule() const;
 	unsigned int getVertexLabelCount(const std::string &label) const;
 	unsigned int getEdgeLabelCount(const std::string &label) const;
 	DepictionData &getDepictionData();
@@ -42,22 +55,38 @@ public: // deprecated interface
 	const GraphType &getGraph() const;
 	const PropString &getStringState() const;
 	const PropMolecule &getMoleculeState() const;
+public:
+	const CanonForm &getCanonForm(LabelType labelType, bool withStereo) const;
+	const AutGroup &getAutGroup(LabelType labelType, bool withStereo) const;
 private:
 	LabelledGraph g;
 	const std::size_t id;
-	std::weak_ptr<mod::Graph> apiReference;
+	std::weak_ptr<graph::Graph> apiReference;
 	std::string name;
 	mutable boost::optional<std::string> dfs;
 	mutable bool dfsHasNonSmilesRingClosure;
-	mutable boost::optional<std::string> smiles;
-	mutable std::shared_ptr<mod::Rule> bindRule, idRule, unbindRule;
+	mutable boost::optional<std::string> smiles, smilesWithIds;
+	mutable std::shared_ptr<rule::Rule> bindRule, idRule, unbindRule;
+	mutable std::unique_ptr<std::vector<Vertex> > vertexOrder;
+	mutable std::vector<int> canon_perm_string;
+	mutable std::unique_ptr<const CanonForm> canon_form_string;
+	mutable std::unique_ptr<const AutGroup> aut_group_string;
 	mutable std::unique_ptr<DepictionData> depictionData;
 public:
-	static std::size_t isomorphismVF2(const Single &gDom, const Single &gCodom, std::size_t maxNumMatches);
-	static bool isomorphismBrokenSmilesAndVF2(const Single &gDom, const Single &gCodom);
-	static std::size_t isomorphism(const Single &gDom, const Single &gCodom, std::size_t maxNumMatches);
-	static std::size_t monomorphism(const Single &gDom, const Single &gCodom, std::size_t maxNumMatches);
+	static std::size_t isomorphismVF2(const Single &gDom, const Single &gCodom, std::size_t maxNumMatches, LabelSettings labelSettings);
+	static bool isomorphismBrokenSmilesAndVF2(const Single &gDom, const Single &gCodom, LabelSettings labelSettings);
+	static std::size_t isomorphism(const Single &gDom, const Single &gCodom, std::size_t maxNumMatches, LabelSettings labelSettings);
+	static std::size_t monomorphism(const Single &gDom, const Single &gCodom, std::size_t maxNumMatches, LabelSettings labelSettings);
 	static bool nameLess(const Single *g1, const Single *g2);
+	static bool canonicalCompare(const Single &g1, const Single &g2, LabelType labelType, bool withStereo);
+public:
+
+	struct IdLess {
+
+		bool operator()(const Single *g1, const Single *g2) const {
+			return g1->getId() < g2->getId();
+		}
+	};
 };
 
 Single makePermutation(const Single &g);
@@ -66,15 +95,20 @@ namespace detail {
 
 struct IsomorphismPredicate {
 
+	IsomorphismPredicate(LabelType labelType, bool withStereo)
+	: settings(labelType, LabelRelation::Isomorphism, withStereo, LabelRelation::Isomorphism) { }
+
 	bool operator()(const Single *gDom, const Single *gCodom) const {
-		return 1 == Single::isomorphism(*gDom, *gCodom, 1);
+		return 1 == Single::isomorphism(*gDom, *gCodom, 1, settings);
 	}
+private:
+	LabelSettings settings;
 };
 
 } // namespace detail
 
-inline detail::IsomorphismPredicate makeIsomorphismPredicate() {
-	return detail::IsomorphismPredicate();
+inline detail::IsomorphismPredicate makeIsomorphismPredicate(LabelType labelType, bool withStereo) {
+	return detail::IsomorphismPredicate(labelType, withStereo);
 }
 
 } // namespace Graph

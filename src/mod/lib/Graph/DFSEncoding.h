@@ -1,7 +1,6 @@
 #ifndef MOD_LIB_GRAPH_DFSENCODING_H
 #define	MOD_LIB_GRAPH_DFSENCODING_H
 
-#include <mod/lib/Graph/GraphDecl.h>
 #include <mod/lib/IO/Graph.h>
 
 #include <iosfwd>
@@ -14,7 +13,7 @@ struct PropString;
 namespace DFSEncoding {
 
 lib::IO::Graph::Read::Data parse(const std::string &dfs, std::ostream &s);
-std::pair<std::string, bool> write(const GraphType &g, const PropString &labelState);
+std::pair<std::string, bool> write(const GraphType &g, const PropString &pString);
 
 } // namespace DFSEncoding
 } // namespace Graph

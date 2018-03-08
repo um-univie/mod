@@ -1,7 +1,6 @@
 #ifndef MOD_LIB_CHEM_SMILES_H
 #define MOD_LIB_CHEM_SMILES_H
 
-#include <mod/lib/Graph/GraphDecl.h>
 #include <mod/lib/IO/Graph.h>
 
 #include <string>
@@ -15,7 +14,7 @@ struct PropString;
 } // namespace Graph
 namespace Chem {
 
-std::string getSmiles(const lib::Graph::GraphType &g, const lib::Graph::PropMolecule &molState);
+std::string getSmiles(const lib::Graph::GraphType &g, const lib::Graph::PropMolecule &molState, const std::vector<int> *ranks, bool withIds);
 lib::IO::Graph::Read::Data readSmiles(const std::string &smiles, std::ostream &err);
 const std::vector<AtomId> &getSmilesOrganicSubset();
 bool isInSmilesOrganicSubset(AtomId atomId);

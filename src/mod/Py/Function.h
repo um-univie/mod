@@ -7,6 +7,8 @@
 
 #include <mod/Function.h>
 
+#include <boost/python.hpp>
+
 #include <iostream>
 
 namespace mod {

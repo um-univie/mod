@@ -1,5 +1,5 @@
 #ifndef JLA_BOOST_GRAPH_PAIRTORANGEADAPTOR_H
-#define	JLA_BOOST_GRAPH_PAIRTORANGEADAPTOR_H
+#define JLA_BOOST_GRAPH_PAIRTORANGEADAPTOR_H
 
 #include <utility>
 
@@ -27,9 +27,14 @@ inline range<Iter> asRange(const std::pair<Iter, Iter> &x) {
 	return range<Iter>(x);
 }
 
+template<typename Iter>
+inline range<Iter> asRange(Iter first, Iter last) {
+	return asRange(std::make_pair(first, last));
+}
+
 } // namespace jla_boost
 namespace mod { // HAX!
 using jla_boost::asRange;
 } // namespace mod
 
-#endif	/* JLA_BOOST_GRAPH_PAIRTORANGEADAPTOR_H */
+#endif /* JLA_BOOST_GRAPH_PAIRTORANGEADAPTOR_H */

@@ -28,9 +28,7 @@ refLinks = {
 	"ChemFig" :    "http://www.ctan.org/pkg/chemfig",
 	"GGL" :        "http://www.tbi.univie.ac.at/software/GGL",
 	"Graphviz" :   "http://www.graphviz.org",
-	"LoLA" :       "http://www.informatik.uni-rostock.de/tpp/lola/",
 	"Open Babel" : "http://openbabel.org",
-	"PNAPI" :      "http://service-technology.org/pnapi/index.html",
 	"Sphinx" :     "http://sphinx-doc.org",
 	"Tikz" :       "http://www.ctan.org/pkg/pgf",
 }
@@ -49,16 +47,17 @@ References
 
 
 # If your documentation needs a minimal Sphinx version, state it here.
-needs_sphinx = '1.4'
+needs_sphinx = '1.7.1'
 
 # Add any Sphinx extension module names here, as strings. They can be
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
 # ones.
+sys.path.append(os.path.abspath('extensions'))
 extensions = [
-    'sphinx.ext.autodoc',
     'sphinx.ext.todo',
     'sphinx.ext.mathjax',
-    'sphinx.ext.ifconfig',
+	'sphinx.ext.githubpages',
+	'ignore_missing_refs'
 ]
 
 cpp_index_common_prefix = ["mod::"]
@@ -79,7 +78,7 @@ master_doc = 'index'
 
 # General information about the project.
 project = u'MØD'
-copyright = u'2013-2015, Jakob Lykke Andersen'
+copyright = u'2013-2018, Jakob Lykke Andersen'
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the
@@ -110,7 +109,8 @@ exclude_patterns = [
 	'pymod/Pymodtoc.rst',
 	'dataDesc/molEnc.rst',
 	'dataDesc/graph.rst',
-	'dataDesc/rule.rst'
+	'dataDesc/rule.rst',
+	'dataDesc/term.rst'
 ]
 
 # The reST default role (used for this markup: `text`) to use for all
@@ -147,7 +147,9 @@ html_theme = 'classic'
 # Theme options are theme-specific and customize the look and feel of a theme
 # further.  For a list of options available for each theme, see the
 # documentation.
-#html_theme_options = { 
+html_theme_options = { 
+    "body_max_width": None 
+}
 
 # Add any paths that contain custom themes here, relative to this directory.
 #html_theme_path = []

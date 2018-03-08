@@ -3,6 +3,10 @@
 
 #include <mod/Error.h>
 
+#include <algorithm>
+#include <cassert>
+#include <tuple>
+
 // - findAndInsert
 // - MultiDimSelector
 

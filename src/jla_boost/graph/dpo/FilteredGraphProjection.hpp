@@ -10,10 +10,9 @@
 namespace jla_boost {
 namespace GraphDPO {
 
-template<typename DPORule>
+template<typename GraphType>
 struct FilteredGraphProjection {
 	using Self = FilteredGraphProjection;
-	using GraphType = typename PushoutRuleTraits<DPORule>::GraphType;
 
 	struct Filter {
 
@@ -157,11 +156,11 @@ public:
 
 } // namespace GraphDPO
 
-template<typename DPORule>
-struct GraphAdaptorTraits<GraphDPO::FilteredGraphProjection<DPORule> > {
-	using type = typename GraphDPO::PushoutRuleTraits<DPORule>::GraphType;
+template<typename GraphType>
+struct GraphAdaptorTraits<GraphDPO::FilteredGraphProjection<GraphType> > {
+	using type = GraphType;
 
-	static const type &unwrap(const GraphDPO::FilteredGraphProjection<DPORule> &g) {
+	static const type &unwrap(const GraphDPO::FilteredGraphProjection<GraphType> &g) {
 		return g.gInner;
 	}
 };
@@ -172,14 +171,14 @@ namespace boost {
 // PropertyGraph
 //------------------------------------------------------------------------------
 
-template<typename DPORule, typename Property>
-struct property_map<jla_boost::GraphDPO::FilteredGraphProjection<DPORule>, Property>
-: property_map<typename jla_boost::GraphDPO::FilteredGraphProjection<DPORule>::GraphType, Property> {
+template<typename GraphType, typename Property>
+struct property_map<jla_boost::GraphDPO::FilteredGraphProjection<GraphType>, Property>
+: property_map<GraphType, Property> {
 };
 
-template<typename DPORule, typename Property>
-struct property_map<const jla_boost::GraphDPO::FilteredGraphProjection<DPORule>, Property>
-: property_map<typename jla_boost::GraphDPO::FilteredGraphProjection<DPORule>::GraphType, Property> {
+template<typename GraphType, typename Property>
+struct property_map<const jla_boost::GraphDPO::FilteredGraphProjection<GraphType>, Property>
+: property_map<GraphType, Property> {
 };
 
 } // namespace boost

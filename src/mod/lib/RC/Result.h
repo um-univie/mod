@@ -2,7 +2,7 @@
 #define	MOD_LIB_RC_RESULT_H
 
 #include <jla_boost/graph/dpo/Rule.hpp>
-#include <jla_boost/graph/morphism/VectorVertexMap.hpp>
+#include <jla_boost/graph/morphism/models/Vector.hpp>
 
 namespace mod {
 namespace lib {
@@ -54,8 +54,8 @@ struct BaseResult {
 	mSecondToResult(get_graph(rSecond), get_graph(rResult)) { }
 public:
 	RuleResult rResult;
-	jla_boost::GraphMorphism::VectorVertexMap<GraphFirst, GraphResult> mFirstToResult;
-	jla_boost::GraphMorphism::VectorVertexMap<GraphSecond, GraphResult> mSecondToResult;
+	jla_boost::GraphMorphism::InvertibleVectorVertexMap<GraphFirst, GraphResult> mFirstToResult;
+	jla_boost::GraphMorphism::InvertibleVectorVertexMap<GraphSecond, GraphResult> mSecondToResult;
 };
 
 } // namespace RC

@@ -1,7 +1,7 @@
 #ifndef MOD_LIB_DG_STRATEGIES_DERIVATIONPREDICATES_H
 #define	MOD_LIB_DG_STRATEGIES_DERIVATIONPREDICATES_H
 
-#include <mod/DGStrat.h>
+#include <mod/dg/Strategies.h>
 #include <mod/lib/DG/Strategies/Strategy.h>
 
 namespace mod {
@@ -14,6 +14,8 @@ protected:
 	DerivationPredicate(std::shared_ptr<mod::Function<bool(const mod::Derivation&)> > predicate, Strategy *strat);
 public:
 	virtual ~DerivationPredicate();
+	void preAddGraphs(std::function<void(std::shared_ptr<graph::Graph>) > add) const;
+	void forEachRule(std::function<void(const lib::Rules::Real&)> f) const;
 	void printInfo(std::ostream &s) const;
 	const GraphState &getOutput() const;
 	bool isConsumed(const lib::Graph::Single *g) const;

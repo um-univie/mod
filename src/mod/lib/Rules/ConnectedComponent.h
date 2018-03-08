@@ -1,7 +1,7 @@
 #ifndef MOD_LIB_RULES_CONNECTEDCOMPONENT_H
 #define MOD_LIB_RULES_CONNECTEDCOMPONENT_H
 
-#include <boost/graph/graph_traits.hpp>
+#include <boost/graph/properties.hpp>
 
 namespace mod {
 namespace lib {

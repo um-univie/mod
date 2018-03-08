@@ -10,12 +10,14 @@ namespace lib {
 namespace DG {
 namespace Strategies {
 
-Sort::Sort(std::shared_ptr<mod::Function<bool(std::shared_ptr<mod::Graph>, std::shared_ptr<mod::Graph>, const mod::DGStrat::GraphState&)> > less, bool doUniverse)
+Sort::Sort(std::shared_ptr<mod::Function<bool(std::shared_ptr<graph::Graph>, std::shared_ptr<graph::Graph>, const dg::Strategy::GraphState&)> > less, bool doUniverse)
 : Strategy(0), less(less), doUniverse(doUniverse) { }
 
 Strategy *Sort::clone() const {
 	return new Sort(less->clone(), doUniverse);
 }
+
+void Sort::preAddGraphs(std::function<void(std::shared_ptr<graph::Graph>) > add) const { }
 
 void Sort::printInfo(std::ostream &s) const {
 	s << indent << "Sort";
@@ -42,15 +44,15 @@ void Sort::executeImpl(std::ostream &s, const GraphState &input) {
 	}
 
 	assert(!output);
-	mod::DGStrat::GraphState gs(
-			[&input](std::vector<std::shared_ptr<mod::Graph> > &subset) {
+	dg::Strategy::GraphState gs(
+			[&input](std::vector<std::shared_ptr<graph::Graph> > &subset) {
 				for(const lib::Graph::Single *g : input.getSubset(0)) subset.push_back(g->getAPIReference());
 			},
-	[&input](std::vector<std::shared_ptr<mod::Graph> > &universe) {
+	[&input](std::vector<std::shared_ptr<graph::Graph> > &universe) {
 		for(const lib::Graph::Single *g : input.getUniverse()) universe.push_back(g->getAPIReference());
 	},
-	[this](std::vector<mod::DerivationRef> &derivationRefs) {
-		getExecutionEnv().fillDerivationRefs(derivationRefs);
+	[this](std::vector<dg::DG::HyperEdge> &edges) {
+		getExecutionEnv().fillHyperEdges(edges);
 	});
 	auto comp = [&gs, this](const lib::Graph::Single *g1, const lib::Graph::Single * g2) -> bool {
 		return (*less)(g1->getAPIReference(), g2->getAPIReference(), gs);

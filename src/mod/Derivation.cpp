@@ -1,7 +1,7 @@
 #include "Derivation.h"
 
-#include <mod/Graph.h>
-#include <mod/Rule.h>
+#include <mod/graph/Graph.h>
+#include <mod/rule/Rule.h>
 
 #include <ostream>
 
@@ -11,7 +11,7 @@ std::ostream &operator<<(std::ostream &s, const Derivation &d) {
 	s << "{";
 	for(auto g : d.left) s << " '" << g->getName() << "'";
 	s << " }";
-	if(d.rule) s << ", '" << d.rule->getName() << "'";
+	if(d.r) s << ", '" << d.r->getName() << "'";
 	s << ", {";
 	for(auto g : d.right) s << " '" << g->getName() << "'";
 	s << " }";

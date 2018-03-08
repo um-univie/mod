@@ -47,6 +47,12 @@ struct ListWithKey {
 	}
 
 	template<typename ExprT>
+	auto operator()(ExprT &&expr, std::size_t lowerBound) const
+	-> ListWithKey<Type, AttrHandler, Expr..., decltype(asConverter(expr))> {
+		return (*this)(std::forward<ExprT>(expr), lowerBound, std::numeric_limits<std::size_t>::max());
+	}
+
+	template<typename ExprT>
 	auto operator()(ExprT &&expr) const
 	-> ListWithKey<Type, AttrHandler, Expr..., decltype(asConverter(expr))> {
 		return (*this)(std::forward<ExprT>(expr), 0, std::numeric_limits<std::size_t>::max());

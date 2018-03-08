@@ -1,8 +1,9 @@
 #ifndef MOD_LIB_RULES_GRAPHDECL_H
 #define MOD_LIB_RULES_GRAPHDECL_H
 
-#include <jla_boost/graph/dpo/Rule.hpp>
 #include <jla_boost/graph/EdgeIndexedAdjacencyList.hpp>
+#include <jla_boost/graph/dpo/FilteredGraphProjection.hpp>
+#include <jla_boost/graph/dpo/Rule.hpp>
 
 namespace mod {
 namespace lib {
@@ -21,6 +22,7 @@ struct EProp {
 using GraphType = jla_boost::EdgeIndexedAdjacencyList<boost::undirectedS, VProp, EProp>;
 using Vertex = boost::graph_traits<GraphType>::vertex_descriptor;
 using Edge = boost::graph_traits<GraphType>::edge_descriptor;
+using SideGraphType = jla_boost::GraphDPO::FilteredGraphProjection<GraphType>;
 
 struct MembershipPropertyMap {
 
