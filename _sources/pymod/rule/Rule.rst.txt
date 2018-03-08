@@ -1,0 +1,183 @@
+.. _py-rule/Rule:
+
+**********************************************************
+rule/Rule
+**********************************************************
+.. default-domain:: py
+
+.. py:currentmodule:: mod
+.. cpp:namespace:: mod
+
+
+Class ``Rule``
+--------------------------------------------------------------------------------------------------------------------------------
+
+.. py:class:: Rule
+
+    Model of a transformation rule in the Double Pushout formalism.
+
+    .. py:attribute:: id
+
+        (Read-only) The unique instance id among all :class:`Rule` instances.
+
+        :type: unsigned int
+    .. py:attribute:: numVertices
+
+        (Read-only) The number of vertices in the rule.
+
+        :type: int
+    .. py:attribute:: vertices
+
+        (Read-only) An iterable of all vertices in the rule.
+
+        :type: :py:class:`RuleVertexRange`
+    .. py:attribute:: numEdges
+
+        (Read-only) The number of edges in the rule.
+
+        :type: int
+    .. py:attribute:: edges
+
+        (Read-only) An iterable of all edges in the rule.
+
+        :type: :py:class:`RuleEdgeRange`
+    .. py:attribute:: left
+
+        (Read-only) A proxy object representing the left graph of the rule.
+
+        :type: :py:class:`RuleLeftGraph`
+    .. py:attribute:: context
+
+        (Read-only) A proxy object representing the context graph of the rule.
+
+        :type: :py:class:`RuleContextGraph`
+    .. py:attribute:: right
+
+        (Read-only) A proxy object representing the right graph of the rule.
+
+        :type: :py:class:`RuleRightGraph`
+    .. py:method:: makeInverse()
+
+        :returns: a rule representing the inversion of this rule.
+        :rtype: :class:`Rule`
+        :raises: :class:`LogicError` if inversion is not possible (due to matching constraints).
+    .. py:method:: print()
+                   print(first, second=None)
+
+        Print the rule, using either the default options or the options in ``first`` and ``second``.
+        If ``first`` and ``second`` are the same, only one depiction will be made.
+
+        :param first: the printing options used for the first depiction.
+        :type first: :class:`GraphPrinter`
+        :param second: the printing options used for the second depiction.
+            If it is ``None`` then it is set to ``first``.
+        :type second: :class:`GraphPrinter`
+
+        :returns: a pair of filename prefixes for the PDF-files that will be compiled in post-processing.
+            The actual names can be obtained by appending ``_L.pdf``, ``_K.pdf``, and ``_R.pdf`` for
+            respectively the left side, context, and right side graphs.
+            If ``first`` and ``second`` are the same, the two file prefixes are equal.
+        :rtype: (string, string)
+    .. py:method:: printTermState
+
+        Print the term state for the rule.
+    .. py:method:: getGMLString(withCoords=False)
+
+        :returns: the :ref:`GML <rule-gml>` representation of the rule,
+                  optionally with generated 2D coordinates.
+        :rtype: string
+        :raises: :py:class:`LogicError` when coordinates are requested, but
+                 none can be generated.
+    .. py:method:: printGML(withCoords=False)
+
+        Print the rule in :ref:`GML <rule-gml>` format,
+        optionally with generated 2D coordinates.
+
+        :returns: the filename of the printed GML file.
+        :rtype: string
+        :raises: :py:class:`LogicError` when coordinates are requested, but
+                 none can be generated.
+    .. py:attribute:: name
+
+        The name of the rule. The default name includes the unique instance id.
+
+        :type: string
+    .. py:attribute:: labelType
+
+        (Read-only) The intended label type for this rule, or None if no specific label type is intended.
+
+        :type: :py:class:`LabelType`
+    .. py:attribute:: numLeftComponents
+
+        (Read-only) The number of connected components of the left graph.
+
+        :type: :cpp:type:`std::size_t`
+    .. py:attribute:: numRightComponents
+
+        (Read-only) The number of connected components of the right graph.
+
+        :type: :cpp:type:`std::size_t`
+    .. py:method:: isomorphism(other, maxNumMatches=1, labelSettings=LabelSettings(LabelType.String, LabelRelation.Isomorphism))
+    
+        :param other: the other :class:`Rule` for comparison.
+        :type other: :class:`Rule`
+        :param maxNumMatches: the maximum number of isomorphisms to search for.
+        :type maxNumMatches: :cpp:any:`std::size_t`
+        :param labelSettings: the label settings to use during the search.
+        :type labelSettings: :py:class:`LabelSettings`
+        :returns: the number of isomorphisms found between ``other`` and this rule, but at most ``maxNumMatches``.
+        :rtype: :cpp:any:`std::size_t`
+    .. py:method:: monomorphism(host, maxNumMatches=1, labelSettings=LabelSettings(LabelType.String, LabelRelation.Isomorphism))
+    
+        :param host: the host :class:`Rule` to check for subgraphs.
+        :type host: :class:`Rule`
+        :param maxNumMatches: the maximum number of morphisms to search for.
+        :type maxNumMatches: :cpp:any:`std::size_t`
+        :param labelSettings: the label settings to use during the search.
+        :type labelSettings: :py:class:`LabelSettings`
+        :returns: the number of monomorphisms from this rule to subgraphs of ``host``, though at most ``maxNumMatches``.
+        :rtype: :cpp:any:`std::size_t`
+    .. py:method:: getVertexFromExternalId(id)
+
+        If the rule was not loaded from an external data format, then this function
+        always return a null descriptor.
+
+        .. note:: In general there is no correlation between external and internal ids.
+
+        :param id: the external id to find the vertex descriptor for.
+        :type id: int
+        :returns: the vertex descriptor for the given external id.
+                The descriptor is null if the external id was not used.
+        :rtype: :py:class:`RuleVertex`
+    .. py::attribute:: minExternalId
+                       maxExternalId
+
+        If the rule was not loaded from an external data format, then these attributes
+        are always return 0. Otherwise, they are the minimum/maximum external id from which
+        non-null vertices can be obtained from :py:meth:`getVertexFromExternalId`.
+        If no such minimum and maximum exists, then they are 0.
+
+        :type: int
+.. py:method:: ruleGMLString(s, invert=False)
+
+    Load a rule from a :ref:`GML <rule-gml>` string, and store either that rule or its inverse.
+    The name of the rule is the one specified in the GML string, though when ``invert=True``
+    the string ", inverse" is appended to the name.
+
+    .. note::
+
+        If the GML string specifies matching constraints it is not possible to invert the rule.
+        There is however a configuration option to ignore matching constraints when inverting rules.
+
+    :param string s: the GML string to load a rule from.
+    :param bool invert: whether or not to invert the loaded rule.
+    :returns: the rule in the GML string, possibly inverted.
+    :rtype: :class:`Rule`
+.. py:method:: ruleGML(s, invert=False)
+    
+    Read ``file`` and pass the contents to :py:func:`ruleGMLString`.
+
+    :param string s: name of the GML file to be loaded.
+    :param bool invert: whether or not to invert the loaded rule.
+    :returns: the rule in the GML file, possibly inverted.
+    :rtype: :class:`Rule`

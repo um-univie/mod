@@ -1,0 +1,542 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>2.2.10.5. rule/Rule.h &#8212; MØD v0.7.0 documentation</title>
+    <link rel="stylesheet" href="../../_static/classic.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    <script type="text/javascript" src="../../_static/documentation_options.js"></script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="3. PyMØD" href="../../pymod/pymod.html" />
+    <link rel="prev" title="2.2.10.4. rule/GraphInterface.h" href="GraphInterface.html" /> 
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="../../pymod/pymod.html" title="3. PyMØD"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="GraphInterface.html" title="2.2.10.4. rule/GraphInterface.h"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">MØD v0.7.0 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../libmod.html" >2. libMØD</a> &#187;</li>
+          <li class="nav-item nav-item-2"><a href="../api.html" >2.2. API Reference</a> &#187;</li>
+          <li class="nav-item nav-item-3"><a href="index.html" accesskey="U">2.2.10. rule</a> &#187;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="rule-rule-h">
+<span id="cpp-rule-rule"></span><h1>2.2.10.5. rule/Rule.h<a class="headerlink" href="#rule-rule-h" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="class-rule-rule">
+<h2>2.2.10.5.1. Class <code class="docutils literal notranslate"><span class="pre">rule::Rule</span></code><a class="headerlink" href="#class-rule-rule" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="_CPPv3N3mod4rule4RuleE">
+<span id="_CPPv2N3mod4rule4RuleE"></span><span id="mod::rule::Rule"></span><em class="property">class </em>rule<code class="descclassname">::</code><code class="descname">Rule</code><a class="headerlink" href="#_CPPv3N3mod4rule4RuleE" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Model of a transformation rule in the Double Pushout formalism.
+See <a class="reference internal" href="GraphInterface.html#cpp-rule-graphinterface"><span class="std std-ref">rule/GraphInterface.h</span></a> for the documentation for the
+graph interface for this class.</p>
+</dd></dl>
+
+<div class="section" id="synopsis">
+<h3>2.2.10.5.1.1. Synopsis<a class="headerlink" href="#synopsis" title="Permalink to this headline">¶</a></h3>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="k">struct</span> <span class="n">Rule</span> <span class="p">{</span>
+    <span class="k">class</span> <span class="nc">Vertex</span><span class="p">;</span>
+    <span class="k">class</span> <span class="nc">Edge</span><span class="p">;</span>
+    <span class="k">class</span> <span class="nc">VertexIterator</span><span class="p">;</span>
+    <span class="k">class</span> <span class="nc">VertexRange</span><span class="p">;</span>
+    <span class="k">class</span> <span class="nc">EdgeIterator</span><span class="p">;</span>
+    <span class="k">class</span> <span class="nc">EdgeRange</span><span class="p">;</span>
+    <span class="k">class</span> <span class="nc">IncidentEdgeIterator</span><span class="p">;</span>
+    <span class="k">class</span> <span class="nc">IncidentEdgeRange</span><span class="p">;</span>
+<span class="k">public</span><span class="o">:</span>
+    <span class="k">class</span> <span class="nc">LeftGraph</span><span class="p">;</span>
+    <span class="k">class</span> <span class="nc">ContextGraph</span><span class="p">;</span>
+    <span class="k">class</span> <span class="nc">RightGraph</span><span class="p">;</span>
+<span class="k">private</span><span class="o">:</span>
+    <span class="n">Rule</span><span class="p">(</span><span class="k">const</span> <span class="n">Rule</span><span class="o">&amp;</span><span class="p">)</span> <span class="o">=</span> <span class="k">delete</span><span class="p">;</span>
+    <span class="n">Rule</span> <span class="o">&amp;</span><span class="k">operator</span><span class="o">=</span><span class="p">(</span><span class="k">const</span> <span class="n">Rule</span><span class="o">&amp;</span><span class="p">)</span> <span class="o">=</span> <span class="k">delete</span><span class="p">;</span>
+    <span class="n">Rule</span><span class="p">(</span><span class="n">Rule</span><span class="o">&amp;&amp;</span><span class="p">)</span> <span class="o">=</span> <span class="k">delete</span><span class="p">;</span>
+    <span class="n">Rule</span> <span class="o">&amp;</span><span class="k">operator</span><span class="o">=</span><span class="p">(</span><span class="n">Rule</span><span class="o">&amp;&amp;</span><span class="p">)</span> <span class="o">=</span> <span class="k">delete</span><span class="p">;</span>
+<span class="k">private</span><span class="o">:</span>
+    <span class="n">Rule</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">unique_ptr</span><span class="o">&lt;</span><span class="n">lib</span><span class="o">::</span><span class="n">Rules</span><span class="o">::</span><span class="n">Real</span><span class="o">&gt;</span> <span class="n">r</span><span class="p">);</span>
+<span class="k">public</span><span class="o">:</span>
+    <span class="o">~</span><span class="n">Rule</span><span class="p">();</span>
+    <span class="kt">unsigned</span> <span class="kt">int</span> <span class="nf">getId</span><span class="p">()</span> <span class="k">const</span><span class="p">;</span>
+    <span class="k">friend</span> <span class="n">std</span><span class="o">::</span><span class="n">ostream</span> <span class="o">&amp;</span><span class="k">operator</span><span class="o">&lt;&lt;</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">ostream</span> <span class="o">&amp;</span><span class="n">s</span><span class="p">,</span> <span class="k">const</span> <span class="n">Rule</span> <span class="o">&amp;</span><span class="n">r</span><span class="p">);</span>
+    <span class="k">const</span> <span class="n">lib</span><span class="o">::</span><span class="n">Rules</span><span class="o">::</span><span class="n">Real</span> <span class="o">&amp;</span><span class="n">getRule</span><span class="p">()</span> <span class="k">const</span><span class="p">;</span>
+<span class="k">public</span><span class="o">:</span> <span class="c1">// graph interface</span>
+    <span class="n">std</span><span class="o">::</span><span class="kt">size_t</span> <span class="n">numVertices</span><span class="p">()</span> <span class="k">const</span><span class="p">;</span>
+    <span class="n">VertexRange</span> <span class="nf">vertices</span><span class="p">()</span> <span class="k">const</span><span class="p">;</span>
+    <span class="n">std</span><span class="o">::</span><span class="kt">size_t</span> <span class="n">numEdges</span><span class="p">()</span> <span class="k">const</span><span class="p">;</span>
+    <span class="n">EdgeRange</span> <span class="nf">edges</span><span class="p">()</span> <span class="k">const</span><span class="p">;</span>
+    <span class="n">LeftGraph</span> <span class="nf">getLeft</span><span class="p">()</span> <span class="k">const</span><span class="p">;</span>
+    <span class="n">ContextGraph</span> <span class="nf">getContext</span><span class="p">()</span> <span class="k">const</span><span class="p">;</span>
+    <span class="n">RightGraph</span> <span class="nf">getRight</span><span class="p">()</span> <span class="k">const</span><span class="p">;</span>
+<span class="k">public</span><span class="o">:</span>
+    <span class="n">std</span><span class="o">::</span><span class="n">shared_ptr</span><span class="o">&lt;</span><span class="n">Rule</span><span class="o">&gt;</span> <span class="n">makeInverse</span><span class="p">()</span> <span class="k">const</span><span class="p">;</span>
+    <span class="n">std</span><span class="o">::</span><span class="n">pair</span><span class="o">&lt;</span><span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="p">,</span> <span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="o">&gt;</span> <span class="n">print</span><span class="p">()</span> <span class="k">const</span><span class="p">;</span>
+    <span class="n">std</span><span class="o">::</span><span class="n">pair</span><span class="o">&lt;</span><span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="p">,</span> <span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="o">&gt;</span> <span class="n">print</span><span class="p">(</span><span class="k">const</span> <span class="n">graph</span><span class="o">::</span><span class="n">Printer</span> <span class="o">&amp;</span><span class="n">first</span><span class="p">,</span> <span class="k">const</span> <span class="n">graph</span><span class="o">::</span><span class="n">Printer</span> <span class="o">&amp;</span><span class="n">second</span><span class="p">)</span> <span class="k">const</span><span class="p">;</span>
+    <span class="kt">void</span> <span class="nf">printTermState</span><span class="p">()</span> <span class="k">const</span><span class="p">;</span>
+    <span class="n">std</span><span class="o">::</span><span class="n">string</span> <span class="n">getGMLString</span><span class="p">(</span><span class="kt">bool</span> <span class="n">withCoords</span> <span class="o">=</span> <span class="nb">false</span><span class="p">)</span> <span class="k">const</span><span class="p">;</span>
+    <span class="n">std</span><span class="o">::</span><span class="n">string</span> <span class="n">printGML</span><span class="p">(</span><span class="kt">bool</span> <span class="n">withCoords</span> <span class="o">=</span> <span class="nb">false</span><span class="p">)</span> <span class="k">const</span><span class="p">;</span>
+    <span class="k">const</span> <span class="n">std</span><span class="o">::</span><span class="n">string</span> <span class="o">&amp;</span><span class="n">getName</span><span class="p">()</span> <span class="k">const</span><span class="p">;</span>
+    <span class="kt">void</span> <span class="nf">setName</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">string</span> <span class="n">name</span><span class="p">);</span>
+    <span class="n">boost</span><span class="o">::</span><span class="n">optional</span><span class="o">&lt;</span><span class="n">LabelType</span><span class="o">&gt;</span> <span class="n">getLabelType</span><span class="p">()</span> <span class="k">const</span><span class="p">;</span>
+    <span class="n">std</span><span class="o">::</span><span class="kt">size_t</span> <span class="n">getNumLeftComponents</span><span class="p">()</span> <span class="k">const</span><span class="p">;</span>
+    <span class="n">std</span><span class="o">::</span><span class="kt">size_t</span> <span class="n">getNumRightComponents</span><span class="p">()</span> <span class="k">const</span><span class="p">;</span>
+    <span class="n">std</span><span class="o">::</span><span class="kt">size_t</span> <span class="n">isomorphism</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">shared_ptr</span><span class="o">&lt;</span><span class="n">Rule</span><span class="o">&gt;</span> <span class="n">r</span><span class="p">,</span> <span class="n">std</span><span class="o">::</span><span class="kt">size_t</span> <span class="n">maxNumMatches</span><span class="p">,</span> <span class="n">LabelSettings</span> <span class="n">labelSettings</span><span class="p">)</span> <span class="k">const</span><span class="p">;</span>
+    <span class="n">std</span><span class="o">::</span><span class="kt">size_t</span> <span class="n">monomorphism</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">shared_ptr</span><span class="o">&lt;</span><span class="n">Rule</span><span class="o">&gt;</span> <span class="n">r</span><span class="p">,</span> <span class="n">std</span><span class="o">::</span><span class="kt">size_t</span> <span class="n">maxNumMatches</span><span class="p">,</span> <span class="n">LabelSettings</span> <span class="n">labelSettings</span><span class="p">)</span> <span class="k">const</span><span class="p">;</span>
+    <span class="n">Vertex</span> <span class="nf">getVertexFromExternalId</span><span class="p">(</span><span class="kt">int</span> <span class="n">id</span><span class="p">)</span> <span class="k">const</span><span class="p">;</span>
+    <span class="kt">int</span> <span class="nf">getMinExternalId</span><span class="p">()</span> <span class="k">const</span><span class="p">;</span>
+    <span class="kt">int</span> <span class="nf">getMaxExternalId</span><span class="p">()</span> <span class="k">const</span><span class="p">;</span>
+<span class="k">public</span><span class="o">:</span>
+    <span class="k">static</span> <span class="n">std</span><span class="o">::</span><span class="n">shared_ptr</span><span class="o">&lt;</span><span class="n">Rule</span><span class="o">&gt;</span> <span class="n">ruleGMLString</span><span class="p">(</span><span class="k">const</span> <span class="n">std</span><span class="o">::</span><span class="n">string</span> <span class="o">&amp;</span><span class="n">data</span><span class="p">,</span> <span class="kt">bool</span> <span class="n">invert</span><span class="p">);</span>
+    <span class="k">static</span> <span class="n">std</span><span class="o">::</span><span class="n">shared_ptr</span><span class="o">&lt;</span><span class="n">Rule</span><span class="o">&gt;</span> <span class="n">ruleGML</span><span class="p">(</span><span class="k">const</span> <span class="n">std</span><span class="o">::</span><span class="n">string</span> <span class="o">&amp;</span><span class="n">file</span><span class="p">,</span> <span class="kt">bool</span> <span class="n">invert</span><span class="p">);</span>
+    <span class="k">static</span> <span class="n">std</span><span class="o">::</span><span class="n">shared_ptr</span><span class="o">&lt;</span><span class="n">Rule</span><span class="o">&gt;</span> <span class="n">makeRule</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">unique_ptr</span><span class="o">&lt;</span><span class="n">lib</span><span class="o">::</span><span class="n">Rules</span><span class="o">::</span><span class="n">Real</span><span class="o">&gt;</span> <span class="n">r</span><span class="p">);</span>
+    <span class="k">static</span> <span class="n">std</span><span class="o">::</span><span class="n">shared_ptr</span><span class="o">&lt;</span><span class="n">Rule</span><span class="o">&gt;</span> <span class="n">makeRule</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">unique_ptr</span><span class="o">&lt;</span><span class="n">lib</span><span class="o">::</span><span class="n">Rules</span><span class="o">::</span><span class="n">Real</span><span class="o">&gt;</span> <span class="n">r</span><span class="p">,</span> <span class="n">std</span><span class="o">::</span><span class="n">map</span><span class="o">&lt;</span><span class="kt">int</span><span class="p">,</span> <span class="n">std</span><span class="o">::</span><span class="kt">size_t</span><span class="o">&gt;</span> <span class="n">externalToInternalIds</span><span class="p">);</span>
+<span class="k">private</span><span class="o">:</span>
+    <span class="k">struct</span> <span class="n">Pimpl</span><span class="p">;</span>
+    <span class="n">std</span><span class="o">::</span><span class="n">unique_ptr</span><span class="o">&lt;</span><span class="n">Pimpl</span><span class="o">&gt;</span> <span class="n">p</span><span class="p">;</span>
+<span class="p">};</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="details">
+<h3>2.2.10.5.1.2. Details<a class="headerlink" href="#details" title="Permalink to this headline">¶</a></h3>
+<dl class="function">
+<dt id="_CPPv3NK3mod4rule4Rule5getIdEv">
+<span id="_CPPv2NK3mod4rule4Rule5getIdEv"></span><span id="mod::rule::Rule::getIdC"></span>unsigned int <code class="descname">getId</code><span class="sig-paren">(</span><span class="sig-paren">)</span> <em class="property">const</em><a class="headerlink" href="#_CPPv3NK3mod4rule4Rule5getIdEv" title="Permalink to this definition">¶</a><br /></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">the unique instance id among all <a class="reference internal" href="#_CPPv3N3mod4rule4RuleE" title="mod::rule::Rule"><code class="xref cpp cpp-class docutils literal notranslate"><span class="pre">Rule</span></code></a> instances.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="_CPPv3NK3mod4rule4Rule11numVerticesEv">
+<span id="_CPPv2NK3mod4rule4Rule11numVerticesEv"></span><span id="mod::rule::Rule::numVerticesC"></span>std::size_t <code class="descname">numVertices</code><span class="sig-paren">(</span><span class="sig-paren">)</span> <em class="property">const</em><a class="headerlink" href="#_CPPv3NK3mod4rule4Rule11numVerticesEv" title="Permalink to this definition">¶</a><br /></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">the number of vertices in the rule.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="_CPPv3NK3mod4rule4Rule8verticesEv">
+<span id="_CPPv2NK3mod4rule4Rule8verticesEv"></span><span id="mod::rule::Rule::verticesC"></span><a class="reference internal" href="GraphInterface.html#_CPPv3N3mod4rule4Rule11VertexRangeE" title="mod::rule::Rule::VertexRange">VertexRange</a> <code class="descname">vertices</code><span class="sig-paren">(</span><span class="sig-paren">)</span> <em class="property">const</em><a class="headerlink" href="#_CPPv3NK3mod4rule4Rule8verticesEv" title="Permalink to this definition">¶</a><br /></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">a range of all vertices in the rule.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="_CPPv3NK3mod4rule4Rule8numEdgesEv">
+<span id="_CPPv2NK3mod4rule4Rule8numEdgesEv"></span><span id="mod::rule::Rule::numEdgesC"></span>std::size_t <code class="descname">numEdges</code><span class="sig-paren">(</span><span class="sig-paren">)</span> <em class="property">const</em><a class="headerlink" href="#_CPPv3NK3mod4rule4Rule8numEdgesEv" title="Permalink to this definition">¶</a><br /></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">the number of edges in the rule.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="_CPPv3NK3mod4rule4Rule5edgesEv">
+<span id="_CPPv2NK3mod4rule4Rule5edgesEv"></span><span id="mod::rule::Rule::edgesC"></span><a class="reference internal" href="GraphInterface.html#_CPPv3N3mod4rule4Rule9EdgeRangeE" title="mod::rule::Rule::EdgeRange">EdgeRange</a> <code class="descname">edges</code><span class="sig-paren">(</span><span class="sig-paren">)</span> <em class="property">const</em><a class="headerlink" href="#_CPPv3NK3mod4rule4Rule5edgesEv" title="Permalink to this definition">¶</a><br /></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">a range of all edges in the rule.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="_CPPv3NK3mod4rule4Rule7getLeftEv">
+<span id="_CPPv2NK3mod4rule4Rule7getLeftEv"></span><span id="mod::rule::Rule::getLeftC"></span><a class="reference internal" href="GraphInterface.html#_CPPv3N3mod4rule4Rule9LeftGraphE" title="mod::rule::Rule::LeftGraph">LeftGraph</a> <code class="descname">getLeft</code><span class="sig-paren">(</span><span class="sig-paren">)</span> <em class="property">const</em><a class="headerlink" href="#_CPPv3NK3mod4rule4Rule7getLeftEv" title="Permalink to this definition">¶</a><br /></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">a proxy object representing the left graph of the rule.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="_CPPv3NK3mod4rule4Rule10getContextEv">
+<span id="_CPPv2NK3mod4rule4Rule10getContextEv"></span><span id="mod::rule::Rule::getContextC"></span><a class="reference internal" href="GraphInterface.html#_CPPv3N3mod4rule4Rule12ContextGraphE" title="mod::rule::Rule::ContextGraph">ContextGraph</a> <code class="descname">getContext</code><span class="sig-paren">(</span><span class="sig-paren">)</span> <em class="property">const</em><a class="headerlink" href="#_CPPv3NK3mod4rule4Rule10getContextEv" title="Permalink to this definition">¶</a><br /></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">a proxy object representing the context graph of the rule.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="_CPPv3NK3mod4rule4Rule8getRightEv">
+<span id="_CPPv2NK3mod4rule4Rule8getRightEv"></span><span id="mod::rule::Rule::getRightC"></span><a class="reference internal" href="GraphInterface.html#_CPPv3N3mod4rule4Rule10RightGraphE" title="mod::rule::Rule::RightGraph">RightGraph</a> <code class="descname">getRight</code><span class="sig-paren">(</span><span class="sig-paren">)</span> <em class="property">const</em><a class="headerlink" href="#_CPPv3NK3mod4rule4Rule8getRightEv" title="Permalink to this definition">¶</a><br /></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">a proxy object representing the rule graph of the rule.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="_CPPv3NK3mod4rule4Rule11makeInverseEv">
+<span id="_CPPv2NK3mod4rule4Rule11makeInverseEv"></span><span id="mod::rule::Rule::makeInverseC"></span>std::shared_ptr&lt;<a class="reference internal" href="#_CPPv3N3mod4rule4RuleE" title="mod::rule::Rule">Rule</a>&gt; <code class="descname">makeInverse</code><span class="sig-paren">(</span><span class="sig-paren">)</span> <em class="property">const</em><a class="headerlink" href="#_CPPv3NK3mod4rule4Rule11makeInverseEv" title="Permalink to this definition">¶</a><br /></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">a rule representing the inversion of this rule.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Raises:</th><td class="field-body"><a class="reference internal" href="../Error.html#_CPPv3N3mod10LogicErrorE" title="mod::LogicError"><code class="xref cpp cpp-class docutils literal notranslate"><span class="pre">LogicError</span></code></a> if inversion is not possible (due to matching constraints).</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="_CPPv3NK3mod4rule4Rule5printEv">
+<span id="_CPPv2NK3mod4rule4Rule5printEv"></span><span id="mod::rule::Rule::printC"></span>std::pair&lt;std::string, std::string&gt; <code class="descname">print</code><span class="sig-paren">(</span><span class="sig-paren">)</span> <em class="property">const</em><a class="headerlink" href="#_CPPv3NK3mod4rule4Rule5printEv" title="Permalink to this definition">¶</a><br /></dt>
+<dt id="_CPPv3NK3mod4rule4Rule5printERKN5graph7PrinterERKN5graph7PrinterE">
+<span id="_CPPv2NK3mod4rule4Rule5printERKN5graph7PrinterERKN5graph7PrinterE"></span><span id="mod::rule::Rule::print__graph::PrinterCR.graph::PrinterCRC"></span>std::pair&lt;std::string, std::string&gt; <code class="descname">print</code><span class="sig-paren">(</span><em class="property">const</em> graph::<a class="reference internal" href="../graph/Printer.html#_CPPv3N3mod5graph7PrinterE" title="mod::graph::Printer">Printer</a> &amp;<em>first</em>, <em class="property">const</em> graph::<a class="reference internal" href="../graph/Printer.html#_CPPv3N3mod5graph7PrinterE" title="mod::graph::Printer">Printer</a> &amp;<em>second</em><span class="sig-paren">)</span> <em class="property">const</em><a class="headerlink" href="#_CPPv3NK3mod4rule4Rule5printERKN5graph7PrinterERKN5graph7PrinterE" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Print the rule, using either the default options or the options in <code class="docutils literal notranslate"><span class="pre">first</span></code> and <code class="docutils literal notranslate"><span class="pre">second</span></code>.
+If <code class="docutils literal notranslate"><span class="pre">first</span></code> and <code class="docutils literal notranslate"><span class="pre">second</span></code> are the same, only one depiction will be made.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">a pair of filename prefixes for the PDF-files that will be compiled in post-processing.
+The actual names can be obtained by appending <code class="docutils literal notranslate"><span class="pre">_L.pdf</span></code>, <code class="docutils literal notranslate"><span class="pre">_K.pdf</span></code>, and <code class="docutils literal notranslate"><span class="pre">_R.pdf</span></code> for
+respectively the left side, context, and right side graphs.
+If <code class="docutils literal notranslate"><span class="pre">first</span></code> and <code class="docutils literal notranslate"><span class="pre">second</span></code> are the same, the two file prefixes are equal.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="_CPPv3NK3mod4rule4Rule14printTermStateEv">
+<span id="_CPPv2NK3mod4rule4Rule14printTermStateEv"></span><span id="mod::rule::Rule::printTermStateC"></span>void <code class="descname">printTermState</code><span class="sig-paren">(</span><span class="sig-paren">)</span> <em class="property">const</em><a class="headerlink" href="#_CPPv3NK3mod4rule4Rule14printTermStateEv" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Print the term state for the rule.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="_CPPv3NK3mod4rule4Rule12getGMLStringEb">
+<span id="_CPPv2NK3mod4rule4Rule12getGMLStringEb"></span><span id="mod::rule::Rule::getGMLString__bC"></span>std::string <code class="descname">getGMLString</code><span class="sig-paren">(</span>bool <em>withCoords</em> = false<span class="sig-paren">)</span> <em class="property">const</em><a class="headerlink" href="#_CPPv3NK3mod4rule4Rule12getGMLStringEb" title="Permalink to this definition">¶</a><br /></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">the <a class="reference internal" href="../../dataDesc/dataDesc.html#rule-gml"><span class="std std-ref">GML</span></a> representation of the rule,
+optionally with generated 2D coordinates.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Throws:</th><td class="field-body"><a class="reference internal" href="../Error.html#_CPPv3N3mod10LogicErrorE" title="mod::LogicError"><code class="xref cpp cpp-any docutils literal notranslate"><span class="pre">LogicError</span></code></a> when coordinates are requested, but
+none can be generated.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="_CPPv3NK3mod4rule4Rule8printGMLEb">
+<span id="_CPPv2NK3mod4rule4Rule8printGMLEb"></span><span id="mod::rule::Rule::printGML__bC"></span>std::string <code class="descname">printGML</code><span class="sig-paren">(</span>bool <em>withCoords</em> = false<span class="sig-paren">)</span> <em class="property">const</em><a class="headerlink" href="#_CPPv3NK3mod4rule4Rule8printGMLEb" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Print the rule in <a class="reference internal" href="../../dataDesc/dataDesc.html#rule-gml"><span class="std std-ref">GML</span></a> format,
+optionally with generated 2D coordinates.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">the filename of the printed GML file.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Throws:</th><td class="field-body"><a class="reference internal" href="../Error.html#_CPPv3N3mod10LogicErrorE" title="mod::LogicError"><code class="xref cpp cpp-any docutils literal notranslate"><span class="pre">LogicError</span></code></a> when coordinates are requested, but
+none can be generated.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="_CPPv3NK3mod4rule4Rule7getNameEv">
+<span id="_CPPv2NK3mod4rule4Rule7getNameEv"></span><span id="mod::rule::Rule::getNameC"></span><em class="property">const</em> std::string &amp;<code class="descname">getName</code><span class="sig-paren">(</span><span class="sig-paren">)</span> <em class="property">const</em><a class="headerlink" href="#_CPPv3NK3mod4rule4Rule7getNameEv" title="Permalink to this definition">¶</a><br /></dt>
+<dt id="_CPPv3N3mod4rule4Rule7setNameENSt6stringE">
+<span id="_CPPv2N3mod4rule4Rule7setNameENSt6stringE"></span><span id="mod::rule::Rule::setName__ss"></span>void <code class="descname">setName</code><span class="sig-paren">(</span>std::string <em>name</em><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv3N3mod4rule4Rule7setNameENSt6stringE" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Access the name of the rule.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="_CPPv3NK3mod4rule4Rule12getLabelTypeEv">
+<span id="_CPPv2NK3mod4rule4Rule12getLabelTypeEv"></span><span id="mod::rule::Rule::getLabelTypeC"></span>boost::optional&lt;<a class="reference internal" href="../Config.html#_CPPv3N3mod9LabelTypeE" title="mod::LabelType">LabelType</a>&gt; <code class="descname">getLabelType</code><span class="sig-paren">(</span><span class="sig-paren">)</span> <em class="property">const</em><a class="headerlink" href="#_CPPv3NK3mod4rule4Rule12getLabelTypeEv" title="Permalink to this definition">¶</a><br /></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">the intended label type for this rule, or nothing if no specific label type is intended.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="_CPPv3NK3mod4rule4Rule20getNumLeftComponentsEv">
+<span id="_CPPv2NK3mod4rule4Rule20getNumLeftComponentsEv"></span><span id="mod::rule::Rule::getNumLeftComponentsC"></span>std::size_t <code class="descname">getNumLeftComponents</code><span class="sig-paren">(</span><span class="sig-paren">)</span> <em class="property">const</em><a class="headerlink" href="#_CPPv3NK3mod4rule4Rule20getNumLeftComponentsEv" title="Permalink to this definition">¶</a><br /></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">the number of connected components in the left graph.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="_CPPv3NK3mod4rule4Rule21getNumRightComponentsEv">
+<span id="_CPPv2NK3mod4rule4Rule21getNumRightComponentsEv"></span><span id="mod::rule::Rule::getNumRightComponentsC"></span>std::size_t <code class="descname">getNumRightComponents</code><span class="sig-paren">(</span><span class="sig-paren">)</span> <em class="property">const</em><a class="headerlink" href="#_CPPv3NK3mod4rule4Rule21getNumRightComponentsEv" title="Permalink to this definition">¶</a><br /></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">the number of connected components in the right graph.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="_CPPv3NK3mod4rule4Rule11isomorphismENSt10shared_ptrI4RuleEENSt6size_tE13LabelSettings">
+<span id="_CPPv2NK3mod4rule4Rule11isomorphismENSt10shared_ptrI4RuleEENSt6size_tE13LabelSettings"></span><span id="mod::rule::Rule::isomorphism__std::shared_ptr:Rule:.std::s.LabelSettingsC"></span>std::size_t <code class="descname">isomorphism</code><span class="sig-paren">(</span>std::shared_ptr&lt;<a class="reference internal" href="#_CPPv3N3mod4rule4RuleE" title="mod::rule::Rule">Rule</a>&gt; <em>r</em>, std::size_t <em>maxNumMatches</em>, <a class="reference internal" href="../Config.html#_CPPv3N3mod13LabelSettingsE" title="mod::LabelSettings">LabelSettings</a> <em>labelSettings</em><span class="sig-paren">)</span> <em class="property">const</em><a class="headerlink" href="#_CPPv3NK3mod4rule4Rule11isomorphismENSt10shared_ptrI4RuleEENSt6size_tE13LabelSettings" title="Permalink to this definition">¶</a><br /></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">the number of isomorphisms found between <code class="docutils literal notranslate"><span class="pre">r</span></code> and this graph, but at most <code class="docutils literal notranslate"><span class="pre">maxNumMatches</span></code>.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="_CPPv3NK3mod4rule4Rule12monomorphismENSt10shared_ptrI4RuleEENSt6size_tE13LabelSettings">
+<span id="_CPPv2NK3mod4rule4Rule12monomorphismENSt10shared_ptrI4RuleEENSt6size_tE13LabelSettings"></span><span id="mod::rule::Rule::monomorphism__std::shared_ptr:Rule:.std::s.LabelSettingsC"></span>std::size_t <code class="descname">monomorphism</code><span class="sig-paren">(</span>std::shared_ptr&lt;<a class="reference internal" href="#_CPPv3N3mod4rule4RuleE" title="mod::rule::Rule">Rule</a>&gt; <em>r</em>, std::size_t <em>maxNumMatches</em>, <a class="reference internal" href="../Config.html#_CPPv3N3mod13LabelSettingsE" title="mod::LabelSettings">LabelSettings</a> <em>labelSettings</em><span class="sig-paren">)</span> <em class="property">const</em><a class="headerlink" href="#_CPPv3NK3mod4rule4Rule12monomorphismENSt10shared_ptrI4RuleEENSt6size_tE13LabelSettings" title="Permalink to this definition">¶</a><br /></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">the number of monomorphism from this rule to subgraphs of <code class="docutils literal notranslate"><span class="pre">r</span></code>, though at most <code class="docutils literal notranslate"><span class="pre">maxNumMatches</span></code>.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="_CPPv3NK3mod4rule4Rule23getVertexFromExternalIdEi">
+<span id="_CPPv2NK3mod4rule4Rule23getVertexFromExternalIdEi"></span><span id="mod::rule::Rule::getVertexFromExternalId__iC"></span><a class="reference internal" href="GraphInterface.html#_CPPv3N3mod4rule4Rule6VertexE" title="mod::rule::Rule::Vertex">Vertex</a> <code class="descname">getVertexFromExternalId</code><span class="sig-paren">(</span>int <em>id</em><span class="sig-paren">)</span> <em class="property">const</em><a class="headerlink" href="#_CPPv3NK3mod4rule4Rule23getVertexFromExternalIdEi" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>If the rule was not loaded from an external data format, then this function
+always return a null descriptor.</p>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">In general there is no correlation between external and internal ids.</p>
+</div>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">the vertex descriptor for the given external id.
+The descriptor is null if the external id was not used.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="_CPPv3NK3mod4rule4Rule16getMinExternalIdEv">
+<span id="_CPPv2NK3mod4rule4Rule16getMinExternalIdEv"></span><span id="mod::rule::Rule::getMinExternalIdC"></span>int <code class="descname">getMinExternalId</code><span class="sig-paren">(</span><span class="sig-paren">)</span> <em class="property">const</em><a class="headerlink" href="#_CPPv3NK3mod4rule4Rule16getMinExternalIdEv" title="Permalink to this definition">¶</a><br /></dt>
+<dt id="_CPPv3NK3mod4rule4Rule16getMaxExternalIdEv">
+<span id="_CPPv2NK3mod4rule4Rule16getMaxExternalIdEv"></span><span id="mod::rule::Rule::getMaxExternalIdC"></span>int <code class="descname">getMaxExternalId</code><span class="sig-paren">(</span><span class="sig-paren">)</span> <em class="property">const</em><a class="headerlink" href="#_CPPv3NK3mod4rule4Rule16getMaxExternalIdEv" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>If the rule was not loaded from an external data format, then these functions
+always return 0. Otherwise, return the minimum/maximum external id from which
+non-null vertices can be obtained from <a class="reference internal" href="#_CPPv3NK3mod4rule4Rule23getVertexFromExternalIdEi" title="mod::rule::Rule::getVertexFromExternalId"><code class="xref cpp cpp-func docutils literal notranslate"><span class="pre">getVertexFromExternalId()</span></code></a>.
+If no such minimum and maximum exists, then 0 will be returned.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="_CPPv3N3mod4rule4Rule13ruleGMLStringERKNSt6stringEb">
+<span id="_CPPv2N3mod4rule4Rule13ruleGMLStringERKNSt6stringEb"></span><span id="mod::rule::Rule::ruleGMLString__ssCR.b"></span><em class="property">static</em> std::shared_ptr&lt;<a class="reference internal" href="#_CPPv3N3mod4rule4RuleE" title="mod::rule::Rule">Rule</a>&gt; <code class="descname">ruleGMLString</code><span class="sig-paren">(</span><em class="property">const</em> std::string &amp;<em>data</em>, bool <em>invert</em><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv3N3mod4rule4Rule13ruleGMLStringERKNSt6stringEb" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Load a rule from a <a class="reference internal" href="../../dataDesc/dataDesc.html#rule-gml"><span class="std std-ref">GML</span></a> string, and store either that rule or its inverse.
+The name of the rule is the one specified in the GML string, though when <code class="docutils literal notranslate"><span class="pre">invert=True</span></code>
+the string “, inverse” is appended to the name.</p>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">If the GML string specifies matching constraints it is not possible to invert the rule.
+There is however a configuration option to ignore matching constraints when inverting rules.</p>
+</div>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">the loaded (possibly inverted) rule.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Throws:</th><td class="field-body"><a class="reference internal" href="../Error.html#_CPPv3N3mod10InputErrorE" title="mod::InputError"><code class="xref cpp cpp-class docutils literal notranslate"><span class="pre">InputError</span></code></a> on bad data and when inversion fails due to constraints.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="_CPPv3N3mod4rule4Rule7ruleGMLERKNSt6stringEb">
+<span id="_CPPv2N3mod4rule4Rule7ruleGMLERKNSt6stringEb"></span><span id="mod::rule::Rule::ruleGML__ssCR.b"></span><em class="property">static</em> std::shared_ptr&lt;<a class="reference internal" href="#_CPPv3N3mod4rule4RuleE" title="mod::rule::Rule">Rule</a>&gt; <code class="descname">ruleGML</code><span class="sig-paren">(</span><em class="property">const</em> std::string &amp;<em>file</em>, bool <em>invert</em><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv3N3mod4rule4Rule7ruleGMLERKNSt6stringEb" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Read <code class="docutils literal notranslate"><span class="pre">file</span></code> and pass the contents to <a class="reference internal" href="#_CPPv3N3mod4rule4Rule13ruleGMLStringERKNSt6stringEb" title="mod::rule::Rule::ruleGMLString"><code class="xref cpp cpp-func docutils literal notranslate"><span class="pre">ruleGMLString()</span></code></a>.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">the loaded (possibly inverted) rule.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Throws:</th><td class="field-body"><a class="reference internal" href="../Error.html#_CPPv3N3mod10InputErrorE" title="mod::InputError"><code class="xref cpp cpp-class docutils literal notranslate"><span class="pre">InputError</span></code></a> on bad data and when inversion fails due to constraints.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="_CPPv3N3mod4rule4Rule8makeRuleENSt10unique_ptrIN3lib5Rules4RealEEE">
+<span id="_CPPv2N3mod4rule4Rule8makeRuleENSt10unique_ptrIN3lib5Rules4RealEEE"></span><span id="mod::rule::Rule::makeRule__std::unique_ptr:lib::Rules::Real:"></span><em class="property">static</em> std::shared_ptr&lt;<a class="reference internal" href="#_CPPv3N3mod4rule4RuleE" title="mod::rule::Rule">Rule</a>&gt; <code class="descname">makeRule</code><span class="sig-paren">(</span>std::unique_ptr&lt;lib::Rules::Real&gt; <em>r</em><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv3N3mod4rule4Rule8makeRuleENSt10unique_ptrIN3lib5Rules4RealEEE" title="Permalink to this definition">¶</a><br /></dt>
+<dt id="_CPPv3N3mod4rule4Rule8makeRuleENSt10unique_ptrIN3lib5Rules4RealEEENSt3mapIiNSt6size_tEEE">
+<span id="_CPPv2N3mod4rule4Rule8makeRuleENSt10unique_ptrIN3lib5Rules4RealEEENSt3mapIiNSt6size_tEEE"></span><span id="mod::rule::Rule::makeRule__std::unique_ptr:lib::Rules::Real:.std::map:i.std::s:"></span><em class="property">static</em> std::shared_ptr&lt;<a class="reference internal" href="#_CPPv3N3mod4rule4RuleE" title="mod::rule::Rule">Rule</a>&gt; <code class="descname">makeRule</code><span class="sig-paren">(</span>std::unique_ptr&lt;lib::Rules::Real&gt; <em>r</em>, std::map&lt;int, std::size_t&gt; <em>externalToInternalIds</em><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv3N3mod4rule4Rule8makeRuleENSt10unique_ptrIN3lib5Rules4RealEEENSt3mapIiNSt6size_tEEE" title="Permalink to this definition">¶</a><br /></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">a rule wrapping the given internal rule object. If an id mapping is given, it will be used for the <a class="reference internal" href="#_CPPv3NK3mod4rule4Rule23getVertexFromExternalIdEi" title="mod::rule::Rule::getVertexFromExternalId"><code class="xref cpp cpp-func docutils literal notranslate"><span class="pre">getVertexFromExternalId()</span></code></a> function.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="../../index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">2.2.10.5. rule/Rule.h</a><ul>
+<li><a class="reference internal" href="#class-rule-rule">2.2.10.5.1. Class <code class="docutils literal notranslate"><span class="pre">rule::Rule</span></code></a><ul>
+<li><a class="reference internal" href="#synopsis">2.2.10.5.1.1. Synopsis</a></li>
+<li><a class="reference internal" href="#details">2.2.10.5.1.2. Details</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="GraphInterface.html"
+                        title="previous chapter">2.2.10.4. rule/GraphInterface.h</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="../../pymod/pymod.html"
+                        title="next chapter">3. PyMØD</a></p>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../../_sources/libmod/rule/Rule.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="../../pymod/pymod.html" title="3. PyMØD"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="GraphInterface.html" title="2.2.10.4. rule/GraphInterface.h"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">MØD v0.7.0 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../libmod.html" >2. libMØD</a> &#187;</li>
+          <li class="nav-item nav-item-2"><a href="../api.html" >2.2. API Reference</a> &#187;</li>
+          <li class="nav-item nav-item-3"><a href="index.html" >2.2.10. rule</a> &#187;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2013-2018, Jakob Lykke Andersen.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.8.0+.
+    </div>
+  </body>
+</html>

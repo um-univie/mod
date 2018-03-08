@@ -1,0 +1,68 @@
+################################################
+MedØlDatschgerl
+################################################
+
+.. toctree::
+    :maxdepth: 1
+    :numbered:
+    
+    installation
+    libmod/libmod
+    pymod/pymod
+    postmod/postmod
+    modWrapper/modWrapper
+    dataDesc/dataDesc
+    dgStrat/dgStrat
+    
+    knownIssues
+    changes
+    references
+
+
+.. _overview:
+
+Overview
+========
+
+This is the documentation for the MedØlDatschgerl (MØD) software package.
+For additional information see the webpage: `<http://mod.imada.sdu.dk>`_.
+
+The package contains the following components.
+
+* libMØD, shared library (``mod``)
+    The main library.
+* PyMØD, Python 3 module (``mod``)
+    Python bindings for the library and extra functionality for easier usage of
+    many features.
+*  PostMØD, Bash Script (``mod_post``)
+    The post processor for compiling figures and summaries.
+* The wrapper script, Bash Script (``mod``)
+    A convenience wrapper for invoking a virtual machine (e.g., ``python3``)
+    with user-supplied code.
+    The wrapper handles output and invokes the post processor.
+    Additionally, it can run the chosen virtual machine through ``gdb``
+    and/or ``valgrind`` (either normal memcheck or callgrind).
+
+
+Indices and Tables
+==================
+
+* :ref:`genindex`
+
+Table of Contents
+=================
+
+.. toctree::
+    :maxdepth: 4
+    
+    installation
+    libmod/libmod
+    pymod/pymod
+    postmod/postmod
+    modWrapper/modWrapper
+    dataDesc/dataDesc
+    dgStrat/dgStrat
+    
+    knownIssues
+    changes
+    references

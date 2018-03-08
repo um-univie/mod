@@ -1,0 +1,300 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>9. Changes &#8212; MØD v0.7.0 documentation</title>
+    <link rel="stylesheet" href="_static/classic.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <script type="text/javascript" src="_static/documentation_options.js"></script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="10. References" href="references.html" />
+    <link rel="prev" title="8. Known Issues" href="knownIssues.html" /> 
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="references.html" title="10. References"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="knownIssues.html" title="8. Known Issues"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">MØD v0.7.0 documentation</a> &#187;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <span class="target" id="module-mod"></span><div class="section" id="changes">
+<h1>9. Changes<a class="headerlink" href="#changes" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="release-0-7-0-2018-03-08">
+<h2>9.1. Release 0.7.0 (2018-03-08)<a class="headerlink" href="#release-0-7-0-2018-03-08" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="incompatible-changes">
+<h3>9.1.1. Incompatible Changes<a class="headerlink" href="#incompatible-changes" title="Permalink to this headline">¶</a></h3>
+<ul class="simple">
+<li>Boost &gt;= 1.64 is now required.</li>
+<li>Two new libraries,
+<a class="reference external" href="https://github.com/jakobandersen/graph_canon">GraphCanon</a> and
+<a class="reference external" href="https://github.com/jakobandersen/perm_group">PermGroup</a>, are now required dependencies.</li>
+<li>Sphinx 1.7.1 is now required for building the documentation.</li>
+<li><a class="reference internal" href="libmod/dg/GraphInterface.html#_CPPv3NK3mod2dg2DG9HyperEdge5printERKN5graph7PrinterERKNSt6stringERKNSt6stringE" title="mod::dg::DG::HyperEdge::print"><code class="xref cpp cpp-any docutils literal notranslate"><span class="pre">dg::DG::HyperEdge::print()</span></code></a>/<a class="reference internal" href="pymod/dg/GraphInterface.html#mod.DGHyperEdge.print" title="mod.DGHyperEdge.print"><code class="xref py py-obj docutils literal notranslate"><span class="pre">DGHyperEdge.print</span></code></a>
+now also takes an argument for colouring vertices/edges
+that are not matched by the rule. The default is now that matched vertices/edges
+are the default colour, while those that are not matched are grey.</li>
+<li>Most of the outer interface headers have now been moved to subfolders,
+and their content has been moved to corresponding namespaces.
+Several classes has been slightly renamed during the move,
+and some headers has been split into multiple header files.</li>
+<li>The previously deprecated class <code class="docutils literal notranslate"><span class="pre">DerivationRef</span></code> has now been removed along with
+<code class="docutils literal notranslate"><span class="pre">DG.derivations</span></code> in the Python interface.</li>
+<li>The previously deprecated method <code class="docutils literal notranslate"><span class="pre">DG.vertexGraphs</span></code> in the Python interface
+has been removed.</li>
+</ul>
+</div>
+<div class="section" id="new-features">
+<h3>9.1.2. New Features<a class="headerlink" href="#new-features" title="Permalink to this headline">¶</a></h3>
+<ul class="simple">
+<li>Added functions to map external ids of graphs and rules to internal vertices.</li>
+<li>Added functions to get vertex coordinates for rules.</li>
+<li><a class="reference internal" href="libmod/dg/DG.html#_CPPv3NK3mod2dg2DG5printERK9PrintDataRK7Printer" title="mod::dg::DG::print"><code class="xref cpp cpp-any docutils literal notranslate"><span class="pre">dg::DG::print()</span></code></a>/<a class="reference internal" href="pymod/dg/DG.html#mod.DG.print" title="mod.DG.print"><code class="xref py py-obj docutils literal notranslate"><span class="pre">DG.print</span></code></a>
+now returns the name of the PDF-file that will be created in post-processing.</li>
+<li>Add <a class="reference internal" href="libmod/dg/Printer.html#_CPPv3N3mod2dg7Printer19setWithInlineGraphsEb" title="mod::dg::Printer::setWithInlineGraphs"><code class="xref cpp cpp-any docutils literal notranslate"><span class="pre">dg::Printer::setWithInlineGraphs()</span></code></a>/<a class="reference internal" href="pymod/dg/Printer.html#mod.DGPrinter.withInlineGraphs" title="mod.DGPrinter.withInlineGraphs"><code class="xref py py-obj docutils literal notranslate"><span class="pre">DGPrinter.withInlineGraphs</span></code></a>
+to input raw tex files for graphs in nodes instead of compiled PDFs.
+The generated tex code for the graphs is different to ensure unique Tikz node names.</li>
+<li>Add <code class="docutils literal notranslate"><span class="pre">inline</span></code> as a special argument for the graph Latex macros to input the raw tex file,
+instead of including a compiled PDF.</li>
+<li>Add <a class="reference internal" href="libmod/graph/Graph.html#_CPPv3NK3mod5graph5Graph16getSmilesWithIdsEv" title="mod::graph::Graph::getSmilesWithIds"><code class="xref cpp cpp-any docutils literal notranslate"><span class="pre">graph::Graph::getSmilesWithIds()</span></code></a>/<a class="reference internal" href="pymod/graph/Graph.html#mod.Graph.smilesWithIds" title="mod.Graph.smilesWithIds"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Graph.smilesWithIds</span></code></a>
+for getting a string annotated with the internal vertex ids in form of the class labels.</li>
+<li>The automorphism group of each graph is now available.</li>
+</ul>
+</div>
+<div class="section" id="experimental-new-features">
+<h3>9.1.3. Experimental New Features<a class="headerlink" href="#experimental-new-features" title="Permalink to this headline">¶</a></h3>
+<ul class="simple">
+<li>Vertex/edge labels in graphs/rules can now be interpreted as first-order terms.
+Syntactic unification is then performed during morphism finding.
+See where <a class="reference internal" href="libmod/Config.html#_CPPv3N3mod13LabelSettingsE" title="mod::LabelSettings"><code class="xref cpp cpp-any docutils literal notranslate"><span class="pre">LabelSettings</span></code></a>/<a class="reference internal" href="pymod/Config.html#mod.LabelSettings" title="mod.LabelSettings"><code class="xref py py-obj docutils literal notranslate"><span class="pre">LabelSettings</span></code></a> is being used.
+Each rule has an optional <a class="reference internal" href="libmod/Config.html#_CPPv3N3mod9LabelTypeE" title="mod::LabelType"><code class="xref cpp cpp-any docutils literal notranslate"><span class="pre">LabelType</span></code></a>/<a class="reference internal" href="pymod/Config.html#mod.LabelType" title="mod.LabelType"><code class="xref py py-obj docutils literal notranslate"><span class="pre">LabelType</span></code></a>
+to signify whether it was designed for use with
+<a class="reference internal" href="libmod/Config.html#_CPPv3N3mod9LabelType6StringE" title="mod::LabelType::String"><code class="xref cpp cpp-any docutils literal notranslate"><span class="pre">LabelType::String</span></code></a>/<a class="reference internal" href="pymod/Config.html#mod.LabelType.String" title="mod.LabelType.String"><code class="xref py py-obj docutils literal notranslate"><span class="pre">LabelType.String</span></code></a> or
+<a class="reference internal" href="libmod/Config.html#_CPPv3N3mod9LabelType4TermE" title="mod::LabelType::Term"><code class="xref cpp cpp-any docutils literal notranslate"><span class="pre">LabelType::Term</span></code></a>/<a class="reference internal" href="pymod/Config.html#mod.LabelType.Term" title="mod.LabelType.Term"><code class="xref py py-obj docutils literal notranslate"><span class="pre">LabelType.Term</span></code></a>.
+Some algorithms will check this property for safety reasons, but the check can be disbled.</li>
+<li>There is now a prototype-implementation of <a class="reference external" href="http://doi.org/10.1007/978-3-319-61470-0_4">http://doi.org/10.1007/978-3-319-61470-0_4</a>,
+for adding stereo-information to graphs/rules.
+Use <a class="reference internal" href="libmod/Config.html#_CPPv3N3mod13LabelSettingsE" title="mod::LabelSettings"><code class="xref cpp cpp-any docutils literal notranslate"><span class="pre">LabelSettings</span></code></a>/<a class="reference internal" href="pymod/Config.html#mod.LabelSettings" title="mod.LabelSettings"><code class="xref py py-obj docutils literal notranslate"><span class="pre">LabelSettings</span></code></a> objects to enable it.
+See the paper for examples on how to use it. The full framework will be implemented and
+documented in a future version.</li>
+</ul>
+</div>
+<div class="section" id="bugs-fixed">
+<h3>9.1.4. Bugs Fixed<a class="headerlink" href="#bugs-fixed" title="Permalink to this headline">¶</a></h3>
+<ul class="simple">
+<li>Multiple rules for the same derivation is now properly recorded.</li>
+<li>Fix documentation of <a class="reference internal" href="libmod/rule/Rule.html#_CPPv3NK3mod4rule4Rule11makeInverseEv" title="mod::rule::Rule::makeInverse"><code class="xref cpp cpp-any docutils literal notranslate"><span class="pre">rule::Rule::makeInverse()</span></code></a>/<a class="reference internal" href="pymod/rule/Rule.html#mod.Rule.makeInverse" title="mod.Rule.makeInverse"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Rule.makeInverse</span></code></a>,
+it throws <a class="reference internal" href="libmod/Error.html#_CPPv3N3mod10LogicErrorE" title="mod::LogicError"><code class="xref cpp cpp-any docutils literal notranslate"><span class="pre">LogicError</span></code></a>/<a class="reference internal" href="pymod/Error.html#mod.LogicError" title="mod.LogicError"><code class="xref py py-obj docutils literal notranslate"><span class="pre">LogicError</span></code></a>
+not <a class="reference internal" href="libmod/Error.html#_CPPv3N3mod10InputErrorE" title="mod::InputError"><code class="xref cpp cpp-any docutils literal notranslate"><span class="pre">InputError</span></code></a>/<a class="reference internal" href="pymod/Error.html#mod.InputError" title="mod.InputError"><code class="xref py py-obj docutils literal notranslate"><span class="pre">InputError</span></code></a>.</li>
+<li>Set the name of a rule from <a class="reference internal" href="libmod/rule/Rule.html#_CPPv3NK3mod4rule4Rule11makeInverseEv" title="mod::rule::Rule::makeInverse"><code class="xref cpp cpp-any docutils literal notranslate"><span class="pre">rule::Rule::makeInverse()</span></code></a>/<a class="reference internal" href="pymod/rule/Rule.html#mod.Rule.makeInverse" title="mod.Rule.makeInverse"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Rule.makeInverse</span></code></a>
+to something more descriptive.</li>
+<li>Fix graph/rule depiction bug with non-zero rotation.</li>
+<li>Fix DG dump loading to also load derivations with no rules.</li>
+<li>Don’t crash when trying <a class="reference internal" href="libmod/dg/DG.html#_CPPv3NK3mod2dg2DG10findVertexENSt10shared_ptrIN5graph5GraphEEE" title="mod::dg::DG::findVertex"><code class="xref cpp cpp-any docutils literal notranslate"><span class="pre">dg::DG::findVertex()</span></code></a>/<a class="reference internal" href="pymod/dg/DG.html#mod.DG.findVertex" title="mod.DG.findVertex"><code class="xref py py-obj docutils literal notranslate"><span class="pre">DG.findVertex</span></code></a>
+with a graph not in the derivation graph.</li>
+<li>Don’t crash when trying to print derivations with multiple rules.</li>
+<li>Fix documentation formatting errors.</li>
+<li>#2, throw exceptions from <a class="reference internal" href="libmod/dg/DG.html#_CPPv3N3mod2dg2DG8ruleCompERKNSt6vectorINSt10shared_ptrIN5graph5GraphEEEEENSt10shared_ptrI8StrategyEE13LabelSettingsb" title="mod::dg::DG::ruleComp"><code class="xref cpp cpp-any docutils literal notranslate"><span class="pre">dg::DG::ruleComp()</span></code></a>/<a class="reference internal" href="pymod/dg/DG.html#mod.dgRuleComp" title="mod.dgRuleComp"><code class="xref py py-obj docutils literal notranslate"><span class="pre">dgRuleComp</span></code></a>
+and <a class="reference internal" href="libmod/dg/DG.html#_CPPv3N3mod2dg2DG4calcEv" title="mod::dg::DG::calc"><code class="xref cpp cpp-any docutils literal notranslate"><span class="pre">dg::DG::calc()</span></code></a>/<a class="reference internal" href="pymod/dg/DG.html#mod.DG.calc" title="mod.DG.calc"><code class="xref py py-obj docutils literal notranslate"><span class="pre">DG.calc</span></code></a> when isomorphic graphs are given.</li>
+<li>Throw more appropriate exception if <a class="reference internal" href="libmod/dg/DG.html#_CPPv3NK3mod2dg2DG5printERK9PrintDataRK7Printer" title="mod::dg::DG::print"><code class="xref cpp cpp-any docutils literal notranslate"><span class="pre">dg::DG::print()</span></code></a>/<a class="reference internal" href="pymod/dg/DG.html#mod.DG.print" title="mod.DG.print"><code class="xref py py-obj docutils literal notranslate"><span class="pre">DG.print</span></code></a>
+is called before <a class="reference internal" href="libmod/dg/DG.html#_CPPv3N3mod2dg2DG4calcEv" title="mod::dg::DG::calc"><code class="xref cpp cpp-any docutils literal notranslate"><span class="pre">dg::DG::calc()</span></code></a>/<a class="reference internal" href="pymod/dg/DG.html#mod.DG.calc" title="mod.DG.calc"><code class="xref py py-obj docutils literal notranslate"><span class="pre">DG.calc</span></code></a>.</li>
+<li>Various issues in graph/rule depiction related to positioning of hydrogens, charges, etc.</li>
+<li>Build system: give better error messages if a file is given where a path is expected.</li>
+<li>The produced SMILES strings are now truely canonical, as the new
+<a class="reference external" href="https://github.com/jakobandersen/graph_canon">GraphCanon</a> library is used.</li>
+<li>Fix <a class="reference internal" href="libmod/Chem.html#_CPPv3N3mod8AtomDataE" title="mod::AtomData"><code class="xref cpp cpp-any docutils literal notranslate"><span class="pre">AtomData</span></code></a>/<a class="reference internal" href="pymod/Chem.html#mod.AtomData" title="mod.AtomData"><code class="xref py py-obj docutils literal notranslate"><span class="pre">AtomData</span></code></a> to properly print radicals on uncharged atoms.</li>
+<li>Throw more friendly exceptions when loading graphs/rules that have loop/parallel edges.</li>
+</ul>
+</div>
+<div class="section" id="other">
+<h3>9.1.5. Other<a class="headerlink" href="#other" title="Permalink to this headline">¶</a></h3>
+<ul class="simple">
+<li>The documentation now has a “Known Issues” section, describing an issue where
+post-processing may fail if <code class="docutils literal notranslate"><span class="pre">pdflatex</span></code> has been upgraded after installation</li>
+</ul>
+</div>
+</div>
+<div class="section" id="release-0-6-0-2016-12-22">
+<h2>9.2. Release 0.6.0 (2016-12-22)<a class="headerlink" href="#release-0-6-0-2016-12-22" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="id1">
+<h3>9.2.1. Incompatible Changes<a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h3>
+<ul class="simple">
+<li>A C++14 compiler is now required (e.g., GCC 5.1 or later).</li>
+<li>The required Boost version is now either 1.59 or at least 1.61.
+Version 1.60 do not work due to <a class="reference external" href="https://github.com/boostorg/python/issues/56">https://github.com/boostorg/python/issues/56</a>.</li>
+<li>Make filenames in post-processing more Latex friendly.</li>
+<li>Rules specified in GML using <code class="docutils literal notranslate"><span class="pre">constrainAdj</span></code> must now enclose the operator in double quotes.</li>
+<li>DG: remove most of the interface related to <code class="docutils literal notranslate"><span class="pre">DerivationRef</span></code>.
+Use the graph interface instead. E.g.,<ul>
+<li>Deprecate <code class="docutils literal notranslate"><span class="pre">DerivationRef</span></code>. They now interconvert with
+<a class="reference internal" href="libmod/dg/GraphInterface.html#_CPPv3N3mod2dg2DG9HyperEdgeE" title="mod::dg::DG::HyperEdge"><code class="xref cpp cpp-any docutils literal notranslate"><span class="pre">dg::DG::HyperEdge</span></code></a>/<a class="reference internal" href="pymod/dg/GraphInterface.html#mod.DGHyperEdge" title="mod.DGHyperEdge"><code class="xref py py-obj docutils literal notranslate"><span class="pre">DGHyperEdge</span></code></a>.</li>
+<li>Change <code class="docutils literal notranslate"><span class="pre">DG::getDerivationRef</span></code> into <a class="reference internal" href="libmod/dg/DG.html#_CPPv3NK3mod2dg2DG8findEdgeERKNSt6vectorI6VertexEERKNSt6vectorI6VertexEE" title="mod::dg::DG::findEdge"><code class="xref cpp cpp-any docutils literal notranslate"><span class="pre">dg::DG::findEdge()</span></code></a>/<a class="reference internal" href="pymod/dg/DG.html#mod.DG.findEdge" title="mod.DG.findEdge"><code class="xref py py-obj docutils literal notranslate"><span class="pre">DG.findEdge</span></code></a>.</li>
+<li>Make <code class="docutils literal notranslate"><span class="pre">DG.derivations</span></code> return the edges instead in the Python interface.
+It is removed in the C++ interface. It will be removed from Python in the future.</li>
+<li>Remove <code class="docutils literal notranslate"><span class="pre">DG::inDerivations</span></code> and <code class="docutils literal notranslate"><span class="pre">DG::outDerivations</span></code>.</li>
+<li>Deprecate <code class="docutils literal notranslate"><span class="pre">DG::vertexGraphs</span></code> in Python, remove in C++.</li>
+</ul>
+</li>
+<li>Move the graph interface for DG and Graph into separate headers:
+<code class="docutils literal notranslate"><span class="pre">DGGraphInterface.h</span></code> and <code class="docutils literal notranslate"><span class="pre">GraphGraphInterface.h</span></code>.</li>
+<li>Move <code class="docutils literal notranslate"><span class="pre">GraphPrinter</span></code> into a separate header.</li>
+<li>Move <code class="docutils literal notranslate"><span class="pre">DGPrinter</span></code> and <code class="docutils literal notranslate"><span class="pre">DGPrintData</span></code> into a separate header.</li>
+<li>All SBML features have been removed from the library.</li>
+<li>The deprecated <code class="docutils literal notranslate"><span class="pre">DG::printMatrix</span></code> function has been removed.</li>
+<li><a class="reference internal" href="libmod/dg/DG.html#_CPPv3N3mod2dg2DG4calcEv" title="mod::dg::DG::calc"><code class="xref cpp cpp-any docutils literal notranslate"><span class="pre">dg::DG::calc()</span></code></a>/<a class="reference internal" href="pymod/dg/DG.html#mod.DG.calc" title="mod.DG.calc"><code class="xref py py-obj docutils literal notranslate"><span class="pre">DG.calc</span></code></a> will no longer print a message when it is done.</li>
+<li><a class="reference internal" href="libmod/dg/DG.html#_CPPv3NK3mod2dg2DG5printERK9PrintDataRK7Printer" title="mod::dg::DG::print"><code class="xref cpp cpp-any docutils literal notranslate"><span class="pre">dg::DG::print()</span></code></a>/<a class="reference internal" href="pymod/dg/DG.html#mod.DG.print" title="mod.DG.print"><code class="xref py py-obj docutils literal notranslate"><span class="pre">DG.print</span></code></a> by default now only prints the hypergraph rendering.
+(For now, set <code class="docutils literal notranslate"><span class="pre">Config::DG::printNonHyper</span></code> to enable printing of the non-hypergraph rendering)</li>
+<li><a class="reference internal" href="libmod/graph/Graph.html#_CPPv3NK3mod5graph5Graph5printEv" title="mod::graph::Graph::print"><code class="xref cpp cpp-any docutils literal notranslate"><span class="pre">graph::Graph::print()</span></code></a>/<a class="reference internal" href="pymod/graph/Graph.html#mod.Graph.print" title="mod.Graph.print"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Graph.print</span></code></a> and
+<a class="reference internal" href="libmod/rule/Rule.html#_CPPv3NK3mod4rule4Rule5printEv" title="mod::rule::Rule::print"><code class="xref cpp cpp-any docutils literal notranslate"><span class="pre">rule::Rule::print()</span></code></a>/<a class="reference internal" href="pymod/rule/Rule.html#mod.Rule.print" title="mod.Rule.print"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Rule.print</span></code></a> will now emit only one depiction when
+the two printers are equal.</li>
+<li><a class="reference internal" href="libmod/rule/Rule.html#_CPPv3NK3mod4rule4Rule5printEv" title="mod::rule::Rule::print"><code class="xref cpp cpp-any docutils literal notranslate"><span class="pre">rule::Rule::print()</span></code></a>/<a class="reference internal" href="pymod/rule/Rule.html#mod.Rule.print" title="mod.Rule.print"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Rule.print</span></code></a>, change the default colours used to indicate
+changes. Now different colours are used in L, K, R.</li>
+<li><a class="reference internal" href="pymod/dg/GraphInterface.html#mod.DGHyperEdge.print" title="mod.DGHyperEdge.print"><code class="xref py py-obj docutils literal notranslate"><span class="pre">DGHyperEdge.print</span></code></a>, change the default match colour.</li>
+<li>Add &lt; operator to vertices and edges of Graph, Rule, and DG.</li>
+</ul>
+</div>
+<div class="section" id="id2">
+<h3>9.2.2. New Features<a class="headerlink" href="#id2" title="Permalink to this headline">¶</a></h3>
+<ul class="simple">
+<li><a class="reference internal" href="libmod/rule/Rule.html#_CPPv3NK3mod4rule4Rule11makeInverseEv" title="mod::rule::Rule::makeInverse"><code class="xref cpp cpp-any docutils literal notranslate"><span class="pre">rule::Rule::makeInverse()</span></code></a>/<a class="reference internal" href="pymod/rule/Rule.html#mod.Rule.makeInverse" title="mod.Rule.makeInverse"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Rule.makeInverse</span></code></a>.</li>
+<li>Reimplementation of GML parsing. It is now less strict with respect to ordering.</li>
+<li>Rule application constraint that checks the shortest path between two given vertices.</li>
+<li>Interactive mode for the wrapper script (option <code class="docutils literal notranslate"><span class="pre">-i</span></code>).
+It will use IPython as interpreter if it is available.</li>
+<li>The molecule model now includes radicals. The SMILES format has been extended to support
+radicals as well.</li>
+<li>Plugin infrastructure to load additional Python modules when using the wrapper script.</li>
+<li>Graph interface for rules: for a rule <span class="math notranslate">\(L \leftarrow K\rightarrow R`\)</span>, the three graphs
+can be accessed. The rule it self acts as the graph that is the pushout of the rule span.</li>
+<li>Graph loading: the ids used in GML and GraphDFS, as well as the class labels in SMILES can now
+be converted into vertices for the loaded graphs. If the class labels of a SMILES string are not
+unique, then none of them are available for querying.</li>
+<li>Add <code class="docutils literal notranslate"><span class="pre">-v</span></code> as alias for <code class="docutils literal notranslate"><span class="pre">--version</span></code> in the wrapper script.</li>
+<li>Add quite mode, <code class="docutils literal notranslate"><span class="pre">-q</span></code>, to the wrapper script.</li>
+<li>Add <a class="reference internal" href="libmod/graph/Printer.html#_CPPv3N3mod5graph7Printer11setRotationEi" title="mod::graph::Printer::setRotation"><code class="xref cpp cpp-any docutils literal notranslate"><span class="pre">graph::Printer::setRotation()</span></code></a>/<a class="reference internal" href="pymod/graph/Printer.html#mod.GraphPrinter.rotation" title="mod.GraphPrinter.rotation"><code class="xref py py-obj docutils literal notranslate"><span class="pre">GraphPrinter.rotation</span></code></a>.
+Internally computed coordinates will be rotated by the set amount of degrees.</li>
+</ul>
+</div>
+<div class="section" id="id3">
+<h3>9.2.3. Bugs Fixed<a class="headerlink" href="#id3" title="Permalink to this headline">¶</a></h3>
+<ul class="simple">
+<li><code class="docutils literal notranslate"><span class="pre">operator&lt;&lt;</span></code> for Derivation: only try to print the rule if there is one.</li>
+<li>Properly throw an exception when graph GML parsing fails.</li>
+<li>Don’t throw an exception while throwing an exception when graphs are disconnected.</li>
+<li>Fix bug in checking of certain <code class="docutils literal notranslate"><span class="pre">constrainAdj</span></code> during certain types of rule composition.</li>
+<li>Properly handle empty vertex/hyperedge ranges for DGs. Thanks to Robert Haas for reporting.</li>
+</ul>
+</div>
+</div>
+<div class="section" id="release-0-5-0-2016-03-07">
+<h2>9.3. Release 0.5.0 (2016-03-07)<a class="headerlink" href="#release-0-5-0-2016-03-07" title="Permalink to this headline">¶</a></h2>
+<p>Initial public version.</p>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">9. Changes</a><ul>
+<li><a class="reference internal" href="#release-0-7-0-2018-03-08">9.1. Release 0.7.0 (2018-03-08)</a><ul>
+<li><a class="reference internal" href="#incompatible-changes">9.1.1. Incompatible Changes</a></li>
+<li><a class="reference internal" href="#new-features">9.1.2. New Features</a></li>
+<li><a class="reference internal" href="#experimental-new-features">9.1.3. Experimental New Features</a></li>
+<li><a class="reference internal" href="#bugs-fixed">9.1.4. Bugs Fixed</a></li>
+<li><a class="reference internal" href="#other">9.1.5. Other</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#release-0-6-0-2016-12-22">9.2. Release 0.6.0 (2016-12-22)</a><ul>
+<li><a class="reference internal" href="#id1">9.2.1. Incompatible Changes</a></li>
+<li><a class="reference internal" href="#id2">9.2.2. New Features</a></li>
+<li><a class="reference internal" href="#id3">9.2.3. Bugs Fixed</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#release-0-5-0-2016-03-07">9.3. Release 0.5.0 (2016-03-07)</a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="knownIssues.html"
+                        title="previous chapter">8. Known Issues</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="references.html"
+                        title="next chapter">10. References</a></p>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/changes.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="references.html" title="10. References"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="knownIssues.html" title="8. Known Issues"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">MØD v0.7.0 documentation</a> &#187;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2013-2018, Jakob Lykke Andersen.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.8.0+.
+    </div>
+  </body>
+</html>

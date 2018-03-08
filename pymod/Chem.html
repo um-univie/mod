@@ -1,0 +1,306 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>3.1.1. Chem &#8212; MØD v0.7.0 documentation</title>
+    <link rel="stylesheet" href="../_static/classic.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <script type="text/javascript" src="../_static/documentation_options.js"></script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="3.1.2. Config" href="Config.html" />
+    <link rel="prev" title="3.1. API Reference" href="api.html" /> 
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="Config.html" title="3.1.2. Config"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="api.html" title="3.1. API Reference"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">MØD v0.7.0 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="pymod.html" >3. PyMØD</a> &#187;</li>
+          <li class="nav-item nav-item-2"><a href="api.html" accesskey="U">3.1. API Reference</a> &#187;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="chem">
+<span id="py-chem"></span><h1>3.1.1. Chem<a class="headerlink" href="#chem" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="class-atomid">
+<h2>3.1.1.1. Class <code class="docutils literal notranslate"><span class="pre">AtomId</span></code><a class="headerlink" href="#class-atomid" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="mod.AtomId">
+<em class="property">class </em><code class="descclassname">mod.</code><code class="descname">AtomId</code><a class="headerlink" href="#mod.AtomId" title="Permalink to this definition">¶</a></dt>
+<dd><p>Representation of the chemical element of an atom.</p>
+<dl class="method">
+<dt id="mod.AtomId.__init__">
+<code class="descname">__init__</code><span class="sig-paren">(</span><em>self</em><span class="sig-paren">)</span><a class="headerlink" href="#mod.AtomId.__init__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Construct an <a class="reference internal" href="#mod.AtomIds.Invalid" title="mod.AtomIds.Invalid"><code class="xref py py-const docutils literal notranslate"><span class="pre">AtomIds.Invalid</span></code></a> atom id.</p>
+</dd></dl>
+
+<dl class="method">
+<dt>
+<code class="descname">__init__</code><span class="sig-paren">(</span><em>self</em>, <em>id</em><span class="sig-paren">)</span></dt>
+<dd><p>Construct a specific atom id. Pre-condition: the id must be at most that of <a class="reference internal" href="#mod.AtomIds.Max" title="mod.AtomIds.Max"><code class="xref py py-const docutils literal notranslate"><span class="pre">AtomIds.Max</span></code></a>.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="mod.AtomId.__int__">
+<code class="descname">__int__</code><span class="sig-paren">(</span><em>self</em><span class="sig-paren">)</span><a class="headerlink" href="#mod.AtomId.__int__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Implicit conversion to an integer type.</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="class-charge">
+<h2>3.1.1.2. Class <code class="docutils literal notranslate"><span class="pre">Charge</span></code><a class="headerlink" href="#class-charge" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="mod.Charge">
+<em class="property">class </em><code class="descclassname">mod.</code><code class="descname">Charge</code><a class="headerlink" href="#mod.Charge" title="Permalink to this definition">¶</a></dt>
+<dd><p>Representation of the charge of an atom.</p>
+<dl class="method">
+<dt id="mod.Charge.__init__">
+<code class="descname">__init__</code><span class="sig-paren">(</span><em>self</em><span class="sig-paren">)</span><a class="headerlink" href="#mod.Charge.__init__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Construct a neutral charge.</p>
+</dd></dl>
+
+<dl class="method">
+<dt>
+<code class="descname">__init__</code><span class="sig-paren">(</span><em>self</em>, <em>c</em><span class="sig-paren">)</span></dt>
+<dd><p>Construct a specific charge. Pre-condition: the charge must be in the range <span class="math notranslate">\([-9, 9]\)</span>.</p>
+</dd></dl>
+
+<dl class="method">
+<dt>
+<code class="descname">__init__</code><span class="sig-paren">(</span><em>self</em><span class="sig-paren">)</span></dt>
+<dd><p>Implicit conversion to an integer type.</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="class-atomdata">
+<h2>3.1.1.3. Class <code class="docutils literal notranslate"><span class="pre">AtomData</span></code><a class="headerlink" href="#class-atomdata" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="mod.AtomData">
+<em class="property">class </em><code class="descclassname">mod.</code><code class="descname">AtomData</code><a class="headerlink" href="#mod.AtomData" title="Permalink to this definition">¶</a></dt>
+<dd><p>Representation of basic data of an atom.</p>
+<dl class="method">
+<dt id="mod.AtomData.__init__">
+<code class="descname">__init__</code><span class="sig-paren">(</span><em>self</em><span class="sig-paren">)</span><a class="headerlink" href="#mod.AtomData.__init__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Construct atom data with <a class="reference internal" href="#mod.AtomIds.Invalid" title="mod.AtomIds.Invalid"><code class="xref py py-const docutils literal notranslate"><span class="pre">AtomIds.Invalid</span></code></a> atom id and neutral charge.</p>
+</dd></dl>
+
+<dl class="method">
+<dt>
+<code class="descname">__init__</code><span class="sig-paren">(</span><em>self</em>, <em>atomId</em><span class="sig-paren">)</span></dt>
+<dd><p>Construct atom data with neutral charge, no radical, and the given atom id.</p>
+</dd></dl>
+
+<dl class="method">
+<dt>
+<code class="descname">__init__</code><span class="sig-paren">(</span><em>self</em>, <em>atomId</em>, <em>charge</em><span class="sig-paren">)</span></dt>
+<dd><p>Construct atom data with given atom id and charge.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="mod.AtomData.charge">
+<code class="descname">charge</code><a class="headerlink" href="#mod.AtomData.charge" title="Permalink to this definition">¶</a></dt>
+<dd><p>(Read-only) The charge.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Type:</th><td class="field-body"><a class="reference internal" href="#mod.Charge" title="mod.Charge">Charge</a></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="class-bondtype">
+<h2>3.1.1.4. Class <code class="docutils literal notranslate"><span class="pre">BondType</span></code><a class="headerlink" href="#class-bondtype" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="mod.BondType">
+<em class="property">class </em><code class="descclassname">mod.</code><code class="descname">BondType</code><a class="headerlink" href="#mod.BondType" title="Permalink to this definition">¶</a></dt>
+<dd><p>Representation of a bond type.</p>
+<dl class="attribute">
+<dt id="mod.BondType.Invalid">
+<code class="descname">Invalid</code><a class="headerlink" href="#mod.BondType.Invalid" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="mod.BondType.Single">
+<code class="descname">Single</code><a class="headerlink" href="#mod.BondType.Single" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="mod.BondType.Aromatic">
+<code class="descname">Aromatic</code><a class="headerlink" href="#mod.BondType.Aromatic" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="mod.BondType.Double">
+<code class="descname">Double</code><a class="headerlink" href="#mod.BondType.Double" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="mod.BondType.Triple">
+<code class="descname">Triple</code><a class="headerlink" href="#mod.BondType.Triple" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="mod.BondType.__str__">
+<code class="descname">__str__</code><span class="sig-paren">(</span><em>self</em><span class="sig-paren">)</span><a class="headerlink" href="#mod.BondType.__str__" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">A string representation of the bond type adhering to the string encoding of bonds (see <a class="reference internal" href="../dataDesc/dataDesc.html#mol-enc"><span class="std std-ref">Molecule Encoding</span></a>).</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Raises:</th><td class="field-body"><a class="reference internal" href="Error.html#mod.LogicError" title="mod.LogicError"><code class="xref py py-class docutils literal notranslate"><span class="pre">LogicError</span></code></a> if the bond type is <a class="reference internal" href="#mod.BondType.Invalid" title="mod.BondType.Invalid"><code class="xref py py-const docutils literal notranslate"><span class="pre">Invalid</span></code></a>.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="class-atomids">
+<h2>3.1.1.5. Class <code class="docutils literal notranslate"><span class="pre">AtomIds</span></code><a class="headerlink" href="#class-atomids" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="mod.AtomIds">
+<em class="property">class </em><code class="descclassname">mod.</code><code class="descname">AtomIds</code><a class="headerlink" href="#mod.AtomIds" title="Permalink to this definition">¶</a></dt>
+<dd><p>This class contains constants for each chemical element, both as their abbreviations and their full names.
+Two additional constants are provided for convenience.</p>
+<dl class="attribute">
+<dt id="mod.AtomIds.Invalid">
+<code class="descname">Invalid</code><a class="headerlink" href="#mod.AtomIds.Invalid" title="Permalink to this definition">¶</a></dt>
+<dd><p>Constant for the invalid atom id.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Type:</th><td class="field-body"><a class="reference internal" href="#mod.AtomId" title="mod.AtomId">AtomId</a></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="mod.AtomIds.Max">
+<code class="descname">Max</code><a class="headerlink" href="#mod.AtomIds.Max" title="Permalink to this definition">¶</a></dt>
+<dd><p>An atom id equal to the atom id with the maximum valid id.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Type:</th><td class="field-body"><a class="reference internal" href="#mod.AtomId" title="mod.AtomId">AtomId</a></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="../index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">3.1.1. Chem</a><ul>
+<li><a class="reference internal" href="#class-atomid">3.1.1.1. Class <code class="docutils literal notranslate"><span class="pre">AtomId</span></code></a></li>
+<li><a class="reference internal" href="#class-charge">3.1.1.2. Class <code class="docutils literal notranslate"><span class="pre">Charge</span></code></a></li>
+<li><a class="reference internal" href="#class-atomdata">3.1.1.3. Class <code class="docutils literal notranslate"><span class="pre">AtomData</span></code></a></li>
+<li><a class="reference internal" href="#class-bondtype">3.1.1.4. Class <code class="docutils literal notranslate"><span class="pre">BondType</span></code></a></li>
+<li><a class="reference internal" href="#class-atomids">3.1.1.5. Class <code class="docutils literal notranslate"><span class="pre">AtomIds</span></code></a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="api.html"
+                        title="previous chapter">3.1. API Reference</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="Config.html"
+                        title="next chapter">3.1.2. Config</a></p>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../_sources/pymod/Chem.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="Config.html" title="3.1.2. Config"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="api.html" title="3.1. API Reference"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">MØD v0.7.0 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="pymod.html" >3. PyMØD</a> &#187;</li>
+          <li class="nav-item nav-item-2"><a href="api.html" >3.1. API Reference</a> &#187;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2013-2018, Jakob Lykke Andersen.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.8.0+.
+    </div>
+  </body>
+</html>

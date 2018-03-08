@@ -1,0 +1,44 @@
+.. _py-graph/Automorphism:
+
+**********************************************************
+graph/Automorphism
+**********************************************************
+.. default-domain:: py
+
+.. py:currentmodule:: mod
+.. cpp:namespace:: mod
+
+
+Class ``GraphAut``
+--------------------------------------------------------------------------------------------------------------------------------
+
+.. py:class:: GraphAut
+
+        An automorphism of a graph.
+
+    .. py:method:: __getitem__(v)
+
+        :param v: the vertex to permute.
+        :type v: :py:class:`GraphVertex`
+        :returns: the image of the given vertex under the permutation.
+        :rtype: :py:class:`GraphVertex`
+
+Class ``GraphAutGroup``
+--------------------------------------------------------------------------------------------------------------------------------
+
+.. py:class:: GraphAutGroup
+
+    A class representing the automorphism group of a :class:`Graph`.
+
+    .. attribute:: gens
+
+        (Read-only) A range of the generators for the group.
+
+        :type: :py:class:`GraphAutGroupGensRange`
+
+Class ``GraphAutGroupGensRange``
+--------------------------------------------------------------------------------------------------------------------------------
+
+.. py:class:: GraphAutGroupGensRange
+
+        A random-access range of :py:class:`GraphAut`.

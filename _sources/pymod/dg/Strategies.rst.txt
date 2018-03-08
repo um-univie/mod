@@ -1,0 +1,158 @@
+.. _py-dg/Strategies:
+
+**********************************************************
+dg/Strategies
+**********************************************************
+.. default-domain:: py
+
+.. py:currentmodule:: mod
+.. cpp:namespace:: mod
+
+This section describes two interfaces for the derivation graph strategies; the basic API and an embedded language which is built on the basic API.
+Usually the embedded strategy language is easiest and sufficient for constructing strategies.
+
+The semantics of the individual strategies are described in :ref:`dgStrat`.
+Note that a :py:class:`DGStrat` is a representation of a strategy and must be given to a derivation graph to be evaluated.
+
+
+The Embedded Strategy Language
+###############################
+
+The strategy language is really a collection of proxy classes with a lot of operator overloading, thus
+the normal syntax and semantics of Python applies.
+
+The following is the grammar for the strategies.
+
+.. productionlist::
+   strat: `strats`
+        : `strat` ">>" `strat`
+        : `rule`
+        : "addSubset(" `graphs` ")"
+        : "addUniverse(" `graphs` ")"
+        : "execute(" `executeFunc` ")"
+        : "filterSubset(" `filterPred` ")"
+        : "filterUniverse(" `filterPred` ")"
+        : "leftPredicate[" `derivationPred` "](" `strat` ")"
+        : "rightPredicate[" `derivationPred` "](" `strat` ")"
+        : "repeat" [ "[" `int` "]" ] "(" `strat` ")"
+        : "revive(" `strat` ")"
+
+A ``strats`` must be an iterable of :token:`strat`.
+A ``graphs`` can either be a single :class:`Graph`, an iterable of graphs, or a function taking no arguments and returning a list of graphs.
+
+The Basic API
+#################
+
+
+Class ``DGStratGraphState``
+--------------------------------------------------------------------------------------------------------------------------------
+
+.. py:class:: DGStratGraphState
+
+    This class represents a graph state with a subset :math:`S` and a universe :math:`U` fulfilling :math:`S\subseteq U`.
+
+    .. py:attribute:: subset
+
+        The subset :math:`\mathcal{S}`.
+
+        :type: list of :py:class:`Graph`
+
+    .. py:attribute:: universe
+
+        The universe :math:`\mathcal{U}`.
+
+        :type: list of :py:class:`Graph`
+
+    .. py:attribute:: hyperEdges
+
+        The references to all derivations in the underlying derivation graph.
+        I.e., some derivations might involve graphs not in the universe.
+
+        :type: list of :py:class:`DGHyperEdge`
+
+
+Class ``DGStrat``
+--------------------------------------------------------------------------------------------------------------------------------
+
+.. py:class:: DGStrat
+
+    .. py:staticmethod:: makeAddStatic(onlyUniverse, graphs)
+
+        :param bool onlyUniverse: if the strategy is :ref:`strat-addUniverse` or :ref:`strat-addSubset`.
+        :param graphs: the graphs to be added by the strategy.
+        :type graphs: list of :class:`Graph`
+        :returns: an :ref:`strat-addUniverse` strategy if ``onlyUniverse`` is ``True``, otherwise an :ref:`strat-addSubset` strategy.
+        :rtype: :class:`DGStrat`
+    .. py:staticmethod:: makeAddDynamic(onlyUniverse, graphsFunc)
+
+        :param bool onlyUniverse: if the strategy is :ref:`strat-addUniverse` or :ref:`strat-addSubset`.
+        :param graphsFunc: a function returning the graphs to be added by the strategy.
+        :type graphsFunc: list of :class:`Graph` ()
+        :returns: an :ref:`strat-addUniverse` strategy if ``onlyUniverse`` is ``True``, otherwise an :ref:`strat-addSubset` strategy.
+        :rtype: :class:`DGStrat`
+    .. py:staticmethod:: makeExecute(func)
+
+        :param func: A function being executed when the strategy is evaluated.
+        :type func: void(:class:`DGStratGraphState`)
+        :returns: an :ref:`strat-execute` strategy.
+        :rtype: :class:`DGStrat`
+    .. py:staticmethod:: makeFilter(alsoUniverse, p)
+
+        :param alsoUniverse: if the strategy is :ref:`strat-filterUniverse` or :ref:`strat-filterSubset`.
+        :type alsoUniverse: bool
+        :param p: the filtering predicate being called for each graph in either the subset or the universe.
+            The predicate is called with the graph and the graph state as arguments, and a bool stating whether or not
+            the call is the first in the filtering process.
+        :type p: bool(:class:`Graph`, :class:`DGStratGraphState`, bool)
+        :returns: a :ref:`strat-filterUniverse` strategy if ``onlyUniverse`` is ``True``, otherwise a :ref:`strat-filterSubset` strategy.
+        :rtype: :class:`DGStrat`
+    .. py:staticmethod:: makeLeftPredicate(p, strat)
+
+        :param p: the predicate to be called on each candidate derivation.
+            Even though the predicate is called with a :class:`Derivation` object, only the left side and the rule of the object is valid.
+        :type p: bool(:class:`Derivation`)
+        :param strat: the sub-strategy to be evaluated under the constraints of the left predicate.
+        :type strat: :class:`DGStrat`
+        :returns: a :ref:`strat-leftPredicate` strategy.
+        :rtype: :class:`DGStrat`
+    .. py:staticmethod:: makeParallel(strats)
+
+        :param strats: the sub-strategies to evaluate.
+        :type strats: list of :class:`DGStrat`
+        :returns: a :ref:`strat-parallel` strategy.
+        :rtype: :class:`DGStrat`
+        :raises: :class:`LogicError` if `strats` is empty.
+    .. py:staticmethod:: makeRepeat(limit, strat)
+
+        :param limit: the maximum number of iterations.
+        :type limit: unsigned int
+        :param strat: the strategy to be repeated.
+        :type strat: :class:`DGStrat`
+        :returns: a :ref:`strat-repeat` strategy.
+        :rtype: :class:`DGStrat`
+    .. py:staticmethod:: makeRevive(strat)
+
+        :param strat: the strategy to encapsulate.
+        :type strat: :class:`DGStrat`
+        :returns: a :ref:`strat-revive` strategy.
+        :rtype: :class:`DGStrat`
+    .. py:staticmethod:: makeRightPredicate(p, strat)
+
+        :param p: the predicate to be called on each candidate derivation.
+        :type p: bool(:class:`Derivation`)
+        :param strat: the sub-strategy to be evaluated under the constraints of the right predicate.
+        :type strat: :class:`DGStrat`
+        :returns: a :ref:`strat-rightPredicate` strategy.
+        :rtype: :class:`DGStrat`
+    .. py:staticmethod:: makeRule(r)
+
+        :param r: the rule to make into a strategy.
+        :type r: :class:`Rule`
+        :returns: a :ref:`strat-rule` strategy.
+        :rtype: :class:`DGStrat`
+    .. py:staticmethod:: makeSequence(strats)
+
+        :param strats: the strategies to evaluate in sequence.
+        :type strats: list of :class:`DGStrat`
+        :retunrs: a :ref:`strat-sequence` strategy.
+        :rtype: :class:`DGStrat`

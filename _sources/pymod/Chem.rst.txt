@@ -1,0 +1,118 @@
+.. _py-Chem:
+
+**********************************************************
+Chem
+**********************************************************
+.. default-domain:: py
+
+.. py:currentmodule:: mod
+.. cpp:namespace:: mod
+
+
+Class ``AtomId``
+--------------------------------------------------------------------------------------------------------------------------------
+
+.. py:class:: AtomId
+
+    Representation of the chemical element of an atom.
+
+    .. py:method:: __init__(self)
+
+        Construct an :py:const:`AtomIds.Invalid` atom id.
+    .. py:method:: __init__(self, id)
+
+        Construct a specific atom id. Pre-condition: the id must be at most that of :py:const:`AtomIds.Max`.
+    .. py:method:: __int__(self)
+
+        Implicit conversion to an integer type.
+
+Class ``Charge``
+--------------------------------------------------------------------------------------------------------------------------------
+
+.. py:class:: Charge
+
+    Representation of the charge of an atom.
+
+    .. py:method:: __init__(self)
+
+        Construct a neutral charge.
+    .. py:method:: __init__(self, c)
+
+        Construct a specific charge. Pre-condition: the charge must be in the range :math:`[-9, 9]`.
+    .. py:method:: __init__(self)
+
+        Implicit conversion to an integer type.
+
+Class ``AtomData``
+--------------------------------------------------------------------------------------------------------------------------------
+
+.. py:class:: AtomData
+
+    Representation of basic data of an atom.
+
+    .. py:method:: __init__(self)
+
+        Construct atom data with :py:const:`AtomIds.Invalid` atom id and neutral charge.
+    .. py:method:: __init__(self, atomId)
+
+        Construct atom data with neutral charge, no radical, and the given atom id.
+    .. py:method:: __init__(self, atomId, charge)
+
+        Construct atom data with given atom id and charge.
+    .. py:attribute: atomId
+
+        (Read-only) The atom id.
+
+        :type: :py:class:`AtomId`
+    .. py:attribute:: charge
+
+        (Read-only) The charge.
+
+        :type: :py:class:`Charge`
+    .. py::attribute:: radical
+
+        (Read-only) The radical.
+
+        :type: bool
+    .. py::method:: __str__(self)
+
+        :returns: A string representation of the atom data adhering to the string encoding of atoms (see :ref:`mol-enc`).
+        :raises: :py::class:`LogicError` if the atom id is :py:const:`AtomIds.Invalid`.
+
+Class ``BondType``
+--------------------------------------------------------------------------------------------------------------------------------
+
+.. py:class:: BondType
+
+    Representation of a bond type.
+
+    .. py:attribute:: Invalid
+    .. py:attribute:: Single
+    .. py:attribute:: Aromatic
+    .. py:attribute:: Double
+    .. py:attribute:: Triple
+    .. py:method:: __str__(self)
+
+        :returns: A string representation of the bond type adhering to the string encoding of bonds (see :ref:`mol-enc`).
+        :raises: :py:class:`LogicError` if the bond type is :py:const:`Invalid`.
+
+Class ``AtomIds``
+--------------------------------------------------------------------------------------------------------------------------------
+
+.. py:class:: AtomIds
+
+    This class contains constants for each chemical element, both as their abbreviations and their full names.
+    Two additional constants are provided for convenience.
+
+    .. py:attribute:: Invalid
+
+        Constant for the invalid atom id.
+
+        :type: :py:class:`AtomId`
+
+    .. py:attribute:: Max
+
+        An atom id equal to the atom id with the maximum valid id.
+
+        :type: :py:class:`AtomId`
+

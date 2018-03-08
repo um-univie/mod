@@ -1,0 +1,491 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>2.2.8.1. dg/DG.h &#8212; MØD v0.7.0 documentation</title>
+    <link rel="stylesheet" href="../../_static/classic.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    <script type="text/javascript" src="../../_static/documentation_options.js"></script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="2.2.8.2. dg/ForwardDecl.h" href="ForwardDecl.html" />
+    <link rel="prev" title="2.2.8. dg" href="index.html" /> 
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="ForwardDecl.html" title="2.2.8.2. dg/ForwardDecl.h"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="index.html" title="2.2.8. dg"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">MØD v0.7.0 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../libmod.html" >2. libMØD</a> &#187;</li>
+          <li class="nav-item nav-item-2"><a href="../api.html" >2.2. API Reference</a> &#187;</li>
+          <li class="nav-item nav-item-3"><a href="index.html" accesskey="U">2.2.8. dg</a> &#187;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="dg-dg-h">
+<span id="cpp-dg-dg"></span><h1>2.2.8.1. dg/DG.h<a class="headerlink" href="#dg-dg-h" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="class-dg-dg">
+<h2>2.2.8.1.1. Class <code class="docutils literal notranslate"><span class="pre">dg::DG</span></code><a class="headerlink" href="#class-dg-dg" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="_CPPv3N3mod2dg2DGE">
+<span id="_CPPv2N3mod2dg2DGE"></span><span id="mod::dg::DG"></span><em class="property">class </em>dg<code class="descclassname">::</code><code class="descname">DG</code><a class="headerlink" href="#_CPPv3N3mod2dg2DGE" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>The main derivation graph class. A derivation graph is a directed hypergraph
+<span class="math notranslate">\(\mathcal{H} = (V, E)\)</span>.
+Each vertex is annotated with a graph, and each hyperedge is annotated with a transformation rule.
+A derivation graph can either be calculated from a strategy or loaded from external data.</p>
+</dd></dl>
+
+<div class="section" id="synopsis">
+<h3>2.2.8.1.1.1. Synopsis<a class="headerlink" href="#synopsis" title="Permalink to this headline">¶</a></h3>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="k">struct</span> <span class="n">DG</span> <span class="p">{</span>
+    <span class="n">DG</span><span class="p">(</span><span class="k">const</span> <span class="n">DG</span><span class="o">&amp;</span><span class="p">)</span> <span class="o">=</span> <span class="k">delete</span><span class="p">;</span>
+    <span class="n">DG</span> <span class="o">&amp;</span><span class="k">operator</span><span class="o">=</span><span class="p">(</span><span class="k">const</span> <span class="n">DG</span><span class="o">&amp;</span><span class="p">)</span> <span class="o">=</span> <span class="k">delete</span><span class="p">;</span>
+<span class="k">public</span><span class="o">:</span>
+    <span class="k">class</span> <span class="nc">Vertex</span><span class="p">;</span>
+    <span class="k">class</span> <span class="nc">HyperEdge</span><span class="p">;</span>
+    <span class="k">class</span> <span class="nc">VertexIterator</span><span class="p">;</span>
+    <span class="k">class</span> <span class="nc">VertexRange</span><span class="p">;</span>
+    <span class="k">class</span> <span class="nc">EdgeIterator</span><span class="p">;</span>
+    <span class="k">class</span> <span class="nc">EdgeRange</span><span class="p">;</span>
+    <span class="k">class</span> <span class="nc">InEdgeIterator</span><span class="p">;</span>
+    <span class="k">class</span> <span class="nc">InEdgeRange</span><span class="p">;</span>
+    <span class="k">class</span> <span class="nc">OutEdgeIterator</span><span class="p">;</span>
+    <span class="k">class</span> <span class="nc">OutEdgeRange</span><span class="p">;</span>
+    <span class="k">class</span> <span class="nc">SourceIterator</span><span class="p">;</span>
+    <span class="k">class</span> <span class="nc">SourceRange</span><span class="p">;</span>
+    <span class="k">class</span> <span class="nc">TargetIterator</span><span class="p">;</span>
+    <span class="k">class</span> <span class="nc">TargetRange</span><span class="p">;</span>
+    <span class="k">class</span> <span class="nc">RuleIterator</span><span class="p">;</span>
+    <span class="k">class</span> <span class="nc">RuleRange</span><span class="p">;</span>
+<span class="k">private</span><span class="o">:</span>
+    <span class="n">DG</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">unique_ptr</span><span class="o">&lt;</span><span class="n">lib</span><span class="o">::</span><span class="n">DG</span><span class="o">::</span><span class="n">NonHyper</span><span class="o">&gt;</span> <span class="n">dg</span><span class="p">);</span>
+<span class="k">public</span><span class="o">:</span>
+    <span class="o">~</span><span class="n">DG</span><span class="p">();</span>
+    <span class="n">std</span><span class="o">::</span><span class="kt">size_t</span> <span class="n">getId</span><span class="p">()</span> <span class="k">const</span><span class="p">;</span>
+    <span class="k">friend</span> <span class="n">std</span><span class="o">::</span><span class="n">ostream</span> <span class="o">&amp;</span><span class="k">operator</span><span class="o">&lt;&lt;</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">ostream</span> <span class="o">&amp;</span><span class="n">s</span><span class="p">,</span> <span class="k">const</span> <span class="n">DG</span> <span class="o">&amp;</span><span class="n">dg</span><span class="p">);</span>
+    <span class="k">const</span> <span class="n">lib</span><span class="o">::</span><span class="n">DG</span><span class="o">::</span><span class="n">NonHyper</span> <span class="o">&amp;</span><span class="n">getNonHyper</span><span class="p">()</span> <span class="k">const</span><span class="p">;</span>
+    <span class="k">const</span> <span class="n">lib</span><span class="o">::</span><span class="n">DG</span><span class="o">::</span><span class="n">Hyper</span> <span class="o">&amp;</span><span class="n">getHyper</span><span class="p">()</span> <span class="k">const</span><span class="p">;</span>
+<span class="k">public</span><span class="o">:</span> <span class="c1">// hypergraph interface</span>
+    <span class="n">std</span><span class="o">::</span><span class="kt">size_t</span> <span class="n">numVertices</span><span class="p">()</span> <span class="k">const</span><span class="p">;</span>
+    <span class="n">VertexRange</span> <span class="nf">vertices</span><span class="p">()</span> <span class="k">const</span><span class="p">;</span>
+    <span class="n">std</span><span class="o">::</span><span class="kt">size_t</span> <span class="n">numEdges</span><span class="p">()</span> <span class="k">const</span><span class="p">;</span>
+    <span class="n">EdgeRange</span> <span class="nf">edges</span><span class="p">()</span> <span class="k">const</span><span class="p">;</span>
+<span class="k">public</span><span class="o">:</span> <span class="c1">// searching for vertices and hyperedges</span>
+    <span class="n">Vertex</span> <span class="n">findVertex</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">shared_ptr</span><span class="o">&lt;</span><span class="n">graph</span><span class="o">::</span><span class="n">Graph</span><span class="o">&gt;</span> <span class="n">g</span><span class="p">)</span> <span class="k">const</span><span class="p">;</span>
+    <span class="n">HyperEdge</span> <span class="nf">findEdge</span><span class="p">(</span><span class="k">const</span> <span class="n">std</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;</span><span class="n">Vertex</span><span class="o">&gt;</span> <span class="o">&amp;</span><span class="n">sources</span><span class="p">,</span> <span class="k">const</span> <span class="n">std</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;</span><span class="n">Vertex</span><span class="o">&gt;</span> <span class="o">&amp;</span><span class="n">targets</span><span class="p">)</span> <span class="k">const</span><span class="p">;</span>
+    <span class="n">HyperEdge</span> <span class="nf">findEdge</span><span class="p">(</span><span class="k">const</span> <span class="n">std</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;</span><span class="n">std</span><span class="o">::</span><span class="n">shared_ptr</span><span class="o">&lt;</span><span class="n">graph</span><span class="o">::</span><span class="n">Graph</span><span class="o">&gt;</span> <span class="o">&gt;</span> <span class="o">&amp;</span><span class="n">sources</span><span class="p">,</span> <span class="k">const</span> <span class="n">std</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;</span><span class="n">std</span><span class="o">::</span><span class="n">shared_ptr</span><span class="o">&lt;</span><span class="n">graph</span><span class="o">::</span><span class="n">Graph</span><span class="o">&gt;</span> <span class="o">&gt;</span> <span class="o">&amp;</span><span class="n">targets</span><span class="p">)</span> <span class="k">const</span><span class="p">;</span>
+<span class="k">public</span><span class="o">:</span>
+    <span class="kt">void</span> <span class="n">calc</span><span class="p">();</span>
+    <span class="k">const</span> <span class="n">std</span><span class="o">::</span><span class="n">set</span><span class="o">&lt;</span><span class="n">std</span><span class="o">::</span><span class="n">shared_ptr</span><span class="o">&lt;</span><span class="n">graph</span><span class="o">::</span><span class="n">Graph</span><span class="o">&gt;</span><span class="p">,</span> <span class="n">graph</span><span class="o">::</span><span class="n">GraphLess</span><span class="o">&gt;</span> <span class="o">&amp;</span><span class="n">getGraphDatabase</span><span class="p">()</span> <span class="k">const</span><span class="p">;</span>
+    <span class="k">const</span> <span class="n">std</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;</span><span class="n">std</span><span class="o">::</span><span class="n">shared_ptr</span><span class="o">&lt;</span><span class="n">graph</span><span class="o">::</span><span class="n">Graph</span><span class="o">&gt;</span> <span class="o">&gt;</span> <span class="o">&amp;</span><span class="n">getProducts</span><span class="p">()</span> <span class="k">const</span><span class="p">;</span>
+    <span class="n">std</span><span class="o">::</span><span class="n">string</span> <span class="n">print</span><span class="p">(</span><span class="k">const</span> <span class="n">PrintData</span> <span class="o">&amp;</span><span class="n">data</span><span class="p">,</span> <span class="k">const</span> <span class="n">Printer</span> <span class="o">&amp;</span><span class="n">printer</span><span class="p">)</span> <span class="k">const</span><span class="p">;</span>
+    <span class="n">std</span><span class="o">::</span><span class="n">string</span> <span class="n">dump</span><span class="p">()</span> <span class="k">const</span><span class="p">;</span>
+    <span class="kt">void</span> <span class="nf">list</span><span class="p">()</span> <span class="k">const</span><span class="p">;</span>
+    <span class="kt">void</span> <span class="nf">listStats</span><span class="p">()</span> <span class="k">const</span><span class="p">;</span>
+    <span class="c1">// :throws: :class:`LogicError` if the DG has not been calculated or if the DG is not created from strategies.</span>
+    <span class="n">std</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;</span><span class="n">std</span><span class="o">::</span><span class="n">shared_ptr</span><span class="o">&lt;</span><span class="n">graph</span><span class="o">::</span><span class="n">Graph</span><span class="o">&gt;</span> <span class="o">&gt;</span> <span class="n">getStratOutputSubset</span><span class="p">()</span> <span class="k">const</span><span class="p">;</span>
+<span class="k">private</span><span class="o">:</span>
+    <span class="k">struct</span> <span class="n">Pimpl</span><span class="p">;</span>
+    <span class="n">std</span><span class="o">::</span><span class="n">unique_ptr</span><span class="o">&lt;</span><span class="n">Pimpl</span><span class="o">&gt;</span> <span class="n">p</span><span class="p">;</span>
+<span class="k">public</span><span class="o">:</span>
+    <span class="k">static</span> <span class="n">std</span><span class="o">::</span><span class="n">shared_ptr</span><span class="o">&lt;</span><span class="n">DG</span><span class="o">&gt;</span> <span class="n">derivations</span><span class="p">(</span><span class="k">const</span> <span class="n">std</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;</span><span class="n">Derivation</span><span class="o">&gt;</span> <span class="o">&amp;</span><span class="n">derivations</span><span class="p">);</span>
+    <span class="k">static</span> <span class="n">std</span><span class="o">::</span><span class="n">shared_ptr</span><span class="o">&lt;</span><span class="n">DG</span><span class="o">&gt;</span> <span class="n">abstract</span><span class="p">(</span><span class="k">const</span> <span class="n">std</span><span class="o">::</span><span class="n">string</span> <span class="o">&amp;</span><span class="n">specification</span><span class="p">);</span>
+    <span class="k">static</span> <span class="n">std</span><span class="o">::</span><span class="n">shared_ptr</span><span class="o">&lt;</span><span class="n">DG</span><span class="o">&gt;</span> <span class="n">ruleComp</span><span class="p">(</span><span class="k">const</span> <span class="n">std</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;</span><span class="n">std</span><span class="o">::</span><span class="n">shared_ptr</span><span class="o">&lt;</span><span class="n">graph</span><span class="o">::</span><span class="n">Graph</span><span class="o">&gt;</span> <span class="o">&gt;</span> <span class="o">&amp;</span><span class="n">graphs</span><span class="p">,</span>
+            <span class="n">std</span><span class="o">::</span><span class="n">shared_ptr</span><span class="o">&lt;</span><span class="n">Strategy</span><span class="o">&gt;</span> <span class="n">strategy</span><span class="p">,</span> <span class="n">LabelSettings</span> <span class="n">labelSettings</span><span class="p">,</span> <span class="kt">bool</span> <span class="n">ignoreRuleLabelTypes</span><span class="p">);</span>
+    <span class="k">static</span> <span class="n">std</span><span class="o">::</span><span class="n">shared_ptr</span><span class="o">&lt;</span><span class="n">DG</span><span class="o">&gt;</span> <span class="n">dumpImport</span><span class="p">(</span><span class="k">const</span> <span class="n">std</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;</span><span class="n">std</span><span class="o">::</span><span class="n">shared_ptr</span><span class="o">&lt;</span><span class="n">graph</span><span class="o">::</span><span class="n">Graph</span><span class="o">&gt;</span> <span class="o">&gt;</span> <span class="o">&amp;</span><span class="n">graphs</span><span class="p">,</span> <span class="k">const</span> <span class="n">std</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;</span><span class="n">std</span><span class="o">::</span><span class="n">shared_ptr</span><span class="o">&lt;</span><span class="n">rule</span><span class="o">::</span><span class="n">Rule</span><span class="o">&gt;</span> <span class="o">&gt;</span> <span class="o">&amp;</span><span class="n">rules</span><span class="p">,</span> <span class="k">const</span> <span class="n">std</span><span class="o">::</span><span class="n">string</span> <span class="o">&amp;</span><span class="n">file</span><span class="p">);</span>
+    <span class="k">static</span> <span class="kt">void</span> <span class="nf">diff</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">shared_ptr</span><span class="o">&lt;</span><span class="n">DG</span><span class="o">&gt;</span> <span class="n">dg1</span><span class="p">,</span> <span class="n">std</span><span class="o">::</span><span class="n">shared_ptr</span><span class="o">&lt;</span><span class="n">DG</span><span class="o">&gt;</span> <span class="n">dg2</span><span class="p">);</span>
+<span class="p">};</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="details">
+<h3>2.2.8.1.1.2. Details<a class="headerlink" href="#details" title="Permalink to this headline">¶</a></h3>
+<dl class="function">
+<dt id="_CPPv3NK3mod2dg2DG5getIdEv">
+<span id="_CPPv2NK3mod2dg2DG5getIdEv"></span><span id="mod::dg::DG::getIdC"></span>std::size_t <code class="descname">getId</code><span class="sig-paren">(</span><span class="sig-paren">)</span> <em class="property">const</em><a class="headerlink" href="#_CPPv3NK3mod2dg2DG5getIdEv" title="Permalink to this definition">¶</a><br /></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">the instance identifier for the object.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="_CPPv3NK3mod2dg2DG11getNonHyperEv">
+<span id="_CPPv2NK3mod2dg2DG11getNonHyperEv"></span><span id="mod::dg::DG::getNonHyperC"></span><em class="property">const</em> lib::DG::NonHyper &amp;<code class="descname">getNonHyper</code><span class="sig-paren">(</span><span class="sig-paren">)</span> <em class="property">const</em><a class="headerlink" href="#_CPPv3NK3mod2dg2DG11getNonHyperEv" title="Permalink to this definition">¶</a><br /></dt>
+<dt id="_CPPv3NK3mod2dg2DG8getHyperEv">
+<span id="_CPPv2NK3mod2dg2DG8getHyperEv"></span><span id="mod::dg::DG::getHyperC"></span><em class="property">const</em> lib::DG::Hyper &amp;<code class="descname">getHyper</code><span class="sig-paren">(</span><span class="sig-paren">)</span> <em class="property">const</em><a class="headerlink" href="#_CPPv3NK3mod2dg2DG8getHyperEv" title="Permalink to this definition">¶</a><br /></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">the internal data structures of the derivation graph.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="_CPPv3NK3mod2dg2DG11numVerticesEv">
+<span id="_CPPv2NK3mod2dg2DG11numVerticesEv"></span><span id="mod::dg::DG::numVerticesC"></span>std::size_t <code class="descname">numVertices</code><span class="sig-paren">(</span><span class="sig-paren">)</span> <em class="property">const</em><a class="headerlink" href="#_CPPv3NK3mod2dg2DG11numVerticesEv" title="Permalink to this definition">¶</a><br /></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">the number of vertices in the derivation graph.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Throws:</th><td class="field-body"><a class="reference internal" href="../Error.html#_CPPv3N3mod10LogicErrorE" title="mod::LogicError"><code class="xref cpp cpp-class docutils literal notranslate"><span class="pre">LogicError</span></code></a> if the DG has not been calculated.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="_CPPv3NK3mod2dg2DG8verticesEv">
+<span id="_CPPv2NK3mod2dg2DG8verticesEv"></span><span id="mod::dg::DG::verticesC"></span><a class="reference internal" href="GraphInterface.html#_CPPv3N3mod2dg2DG11VertexRangeE" title="mod::dg::DG::VertexRange">VertexRange</a> <code class="descname">vertices</code><span class="sig-paren">(</span><span class="sig-paren">)</span> <em class="property">const</em><a class="headerlink" href="#_CPPv3NK3mod2dg2DG8verticesEv" title="Permalink to this definition">¶</a><br /></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">a range of all vertices in the derivation graph.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Throws:</th><td class="field-body"><a class="reference internal" href="../Error.html#_CPPv3N3mod10LogicErrorE" title="mod::LogicError"><code class="xref cpp cpp-class docutils literal notranslate"><span class="pre">LogicError</span></code></a> if the DG has not been calculated.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="_CPPv3NK3mod2dg2DG8numEdgesEv">
+<span id="_CPPv2NK3mod2dg2DG8numEdgesEv"></span><span id="mod::dg::DG::numEdgesC"></span>std::size_t <code class="descname">numEdges</code><span class="sig-paren">(</span><span class="sig-paren">)</span> <em class="property">const</em><a class="headerlink" href="#_CPPv3NK3mod2dg2DG8numEdgesEv" title="Permalink to this definition">¶</a><br /></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">the number of edges in the derivation graph.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Throws:</th><td class="field-body"><a class="reference internal" href="../Error.html#_CPPv3N3mod10LogicErrorE" title="mod::LogicError"><code class="xref cpp cpp-class docutils literal notranslate"><span class="pre">LogicError</span></code></a> if the DG has not been calculated.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="_CPPv3NK3mod2dg2DG5edgesEv">
+<span id="_CPPv2NK3mod2dg2DG5edgesEv"></span><span id="mod::dg::DG::edgesC"></span><a class="reference internal" href="GraphInterface.html#_CPPv3N3mod2dg2DG9EdgeRangeE" title="mod::dg::DG::EdgeRange">EdgeRange</a> <code class="descname">edges</code><span class="sig-paren">(</span><span class="sig-paren">)</span> <em class="property">const</em><a class="headerlink" href="#_CPPv3NK3mod2dg2DG5edgesEv" title="Permalink to this definition">¶</a><br /></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">a range of all edges in the derivation graph.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Throws:</th><td class="field-body"><a class="reference internal" href="../Error.html#_CPPv3N3mod10LogicErrorE" title="mod::LogicError"><code class="xref cpp cpp-class docutils literal notranslate"><span class="pre">LogicError</span></code></a> if the DG has not been calculated.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="_CPPv3NK3mod2dg2DG10findVertexENSt10shared_ptrIN5graph5GraphEEE">
+<span id="_CPPv2NK3mod2dg2DG10findVertexENSt10shared_ptrIN5graph5GraphEEE"></span><span id="mod::dg::DG::findVertex__std::shared_ptr:graph::Graph:C"></span><a class="reference internal" href="GraphInterface.html#_CPPv3N3mod2dg2DG6VertexE" title="mod::dg::DG::Vertex">Vertex</a> <code class="descname">findVertex</code><span class="sig-paren">(</span>std::shared_ptr&lt;graph::<a class="reference internal" href="../graph/Graph.html#_CPPv3N3mod5graph5GraphE" title="mod::graph::Graph">Graph</a>&gt; <em>g</em><span class="sig-paren">)</span> <em class="property">const</em><a class="headerlink" href="#_CPPv3NK3mod2dg2DG10findVertexENSt10shared_ptrIN5graph5GraphEEE" title="Permalink to this definition">¶</a><br /></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">a vertex descriptor for which the given graph is associated,
+or a null descriptor if no such vertex exists.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="_CPPv3NK3mod2dg2DG8findEdgeERKNSt6vectorI6VertexEERKNSt6vectorI6VertexEE">
+<span id="_CPPv2NK3mod2dg2DG8findEdgeERKNSt6vectorI6VertexEERKNSt6vectorI6VertexEE"></span><span id="mod::dg::DG::findEdge__std::vector:Vertex:CR.std::vector:Vertex:CRC"></span><a class="reference internal" href="GraphInterface.html#_CPPv3N3mod2dg2DG9HyperEdgeE" title="mod::dg::DG::HyperEdge">HyperEdge</a> <code class="descname">findEdge</code><span class="sig-paren">(</span><em class="property">const</em> std::vector&lt;<a class="reference internal" href="GraphInterface.html#_CPPv3N3mod2dg2DG6VertexE" title="mod::dg::DG::Vertex">Vertex</a>&gt; &amp;<em>sources</em>, <em class="property">const</em> std::vector&lt;<a class="reference internal" href="GraphInterface.html#_CPPv3N3mod2dg2DG6VertexE" title="mod::dg::DG::Vertex">Vertex</a>&gt; &amp;<em>targets</em><span class="sig-paren">)</span> <em class="property">const</em><a class="headerlink" href="#_CPPv3NK3mod2dg2DG8findEdgeERKNSt6vectorI6VertexEERKNSt6vectorI6VertexEE" title="Permalink to this definition">¶</a><br /></dt>
+<dt id="_CPPv3NK3mod2dg2DG8findEdgeERKNSt6vectorINSt10shared_ptrIN5graph5GraphEEEEERKNSt6vectorINSt10shared_ptrIN5graph5GraphEEEEE">
+<span id="_CPPv2NK3mod2dg2DG8findEdgeERKNSt6vectorINSt10shared_ptrIN5graph5GraphEEEEERKNSt6vectorINSt10shared_ptrIN5graph5GraphEEEEE"></span><span id="mod::dg::DG::findEdge__std::vector:std::shared_ptr:graph::Graph::CR.std::vector:std::shared_ptr:graph::Graph::CRC"></span><a class="reference internal" href="GraphInterface.html#_CPPv3N3mod2dg2DG9HyperEdgeE" title="mod::dg::DG::HyperEdge">HyperEdge</a> <code class="descname">findEdge</code><span class="sig-paren">(</span><em class="property">const</em> std::vector&lt;std::shared_ptr&lt;graph::<a class="reference internal" href="../graph/Graph.html#_CPPv3N3mod5graph5GraphE" title="mod::graph::Graph">Graph</a>&gt;&gt; &amp;<em>sources</em>, <em class="property">const</em> std::vector&lt;std::shared_ptr&lt;graph::<a class="reference internal" href="../graph/Graph.html#_CPPv3N3mod5graph5GraphE" title="mod::graph::Graph">Graph</a>&gt;&gt; &amp;<em>targets</em><span class="sig-paren">)</span> <em class="property">const</em><a class="headerlink" href="#_CPPv3NK3mod2dg2DG8findEdgeERKNSt6vectorINSt10shared_ptrIN5graph5GraphEEEEERKNSt6vectorINSt10shared_ptrIN5graph5GraphEEEEE" title="Permalink to this definition">¶</a><br /></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">a hyperedge with the given sources and targets.
+If no such hyperedge exists in the derivation graph then a null edge is returned.
+In the second version, the graphs are put through <a class="reference internal" href="#_CPPv3NK3mod2dg2DG10findVertexENSt10shared_ptrIN5graph5GraphEEE" title="mod::dg::DG::findVertex"><code class="xref cpp cpp-func docutils literal notranslate"><span class="pre">findVertex()</span></code></a> first.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Throws:</th><td class="field-body"><a class="reference internal" href="../Error.html#_CPPv3N3mod10LogicErrorE" title="mod::LogicError"><code class="xref cpp cpp-class docutils literal notranslate"><span class="pre">LogicError</span></code></a> if a vertex descriptor is null, or does not belong to the derivation graph.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="_CPPv3N3mod2dg2DG4calcEv">
+<span id="_CPPv2N3mod2dg2DG4calcEv"></span><span id="mod::dg::DG::calc"></span>void <code class="descname">calc</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv3N3mod2dg2DG4calcEv" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Compute the derivation graph.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Throws:</th><td class="field-body"><a class="reference internal" href="../Error.html#_CPPv3N3mod10LogicErrorE" title="mod::LogicError"><code class="xref cpp cpp-class docutils literal notranslate"><span class="pre">LogicError</span></code></a> if created from <a class="reference internal" href="#_CPPv3N3mod2dg2DG8ruleCompERKNSt6vectorINSt10shared_ptrIN5graph5GraphEEEEENSt10shared_ptrI8StrategyEE13LabelSettingsb" title="mod::dg::DG::ruleComp"><code class="xref cpp cpp-any docutils literal notranslate"><span class="pre">ruleComp()</span></code></a> and a dynamic add strategy adds a graph
+isomorphic to an already known graph, but represented by a different object.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="_CPPv3NK3mod2dg2DG16getGraphDatabaseEv">
+<span id="_CPPv2NK3mod2dg2DG16getGraphDatabaseEv"></span><span id="mod::dg::DG::getGraphDatabaseC"></span><em class="property">const</em> std::set&lt;std::shared_ptr&lt;graph::<a class="reference internal" href="../graph/Graph.html#_CPPv3N3mod5graph5GraphE" title="mod::graph::Graph">Graph</a>&gt;, graph::GraphLess&gt; &amp;<code class="descname">getGraphDatabase</code><span class="sig-paren">(</span><span class="sig-paren">)</span> <em class="property">const</em><a class="headerlink" href="#_CPPv3NK3mod2dg2DG16getGraphDatabaseEv" title="Permalink to this definition">¶</a><br /></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">the set of all graphs created by the derivation graph,
+and all graphs given when constructed.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="_CPPv3NK3mod2dg2DG11getProductsEv">
+<span id="_CPPv2NK3mod2dg2DG11getProductsEv"></span><span id="mod::dg::DG::getProductsC"></span><em class="property">const</em> std::vector&lt;std::shared_ptr&lt;graph::<a class="reference internal" href="../graph/Graph.html#_CPPv3N3mod5graph5GraphE" title="mod::graph::Graph">Graph</a>&gt;&gt; &amp;<code class="descname">getProducts</code><span class="sig-paren">(</span><span class="sig-paren">)</span> <em class="property">const</em><a class="headerlink" href="#_CPPv3NK3mod2dg2DG11getProductsEv" title="Permalink to this definition">¶</a><br /></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">the list of new graphs discovered by the derivation graph.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="_CPPv3NK3mod2dg2DG5printERK9PrintDataRK7Printer">
+<span id="_CPPv2NK3mod2dg2DG5printERK9PrintDataRK7Printer"></span><span id="mod::dg::DG::print__PrintDataCR.PrinterCRC"></span>std::string <code class="descname">print</code><span class="sig-paren">(</span><em class="property">const</em> <a class="reference internal" href="Printer.html#_CPPv3N3mod2dg9PrintDataE" title="mod::dg::PrintData">PrintData</a> &amp;<em>data</em>, <em class="property">const</em> <a class="reference internal" href="Printer.html#_CPPv3N3mod2dg7PrinterE" title="mod::dg::Printer">Printer</a> &amp;<em>printer</em><span class="sig-paren">)</span> <em class="property">const</em><a class="headerlink" href="#_CPPv3NK3mod2dg2DG5printERK9PrintDataRK7Printer" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Print the derivation graph in style of a hypergraph.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">the name of the PDF-file that will be compiled in post-processing.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Throws:</th><td class="field-body"><a class="reference internal" href="../Error.html#_CPPv3N3mod10LogicErrorE" title="mod::LogicError"><code class="xref cpp cpp-class docutils literal notranslate"><span class="pre">LogicError</span></code></a> if the print data is not for this DG.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="_CPPv3NK3mod2dg2DG4dumpEv">
+<span id="_CPPv2NK3mod2dg2DG4dumpEv"></span><span id="mod::dg::DG::dumpC"></span>std::string <code class="descname">dump</code><span class="sig-paren">(</span><span class="sig-paren">)</span> <em class="property">const</em><a class="headerlink" href="#_CPPv3NK3mod2dg2DG4dumpEv" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Exports the derivation graph to a text file, which can be importetet.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">the name of the file with the exported data.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Throws:</th><td class="field-body"><a class="reference internal" href="../Error.html#_CPPv3N3mod10LogicErrorE" title="mod::LogicError"><code class="xref cpp cpp-class docutils literal notranslate"><span class="pre">LogicError</span></code></a> if the DG has not been calculated.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="_CPPv3NK3mod2dg2DG4listEv">
+<span id="_CPPv2NK3mod2dg2DG4listEv"></span><span id="mod::dg::DG::listC"></span>void <code class="descname">list</code><span class="sig-paren">(</span><span class="sig-paren">)</span> <em class="property">const</em><a class="headerlink" href="#_CPPv3NK3mod2dg2DG4listEv" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Output information on the calculation of the derivation graph.
+For strategy-based calculations, this outputs the expression tree.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="_CPPv3NK3mod2dg2DG9listStatsEv">
+<span id="_CPPv2NK3mod2dg2DG9listStatsEv"></span><span id="mod::dg::DG::listStatsC"></span>void <code class="descname">listStats</code><span class="sig-paren">(</span><span class="sig-paren">)</span> <em class="property">const</em><a class="headerlink" href="#_CPPv3NK3mod2dg2DG9listStatsEv" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Output various stats of the derivation graph.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Throws:</th><td class="field-body"><a class="reference internal" href="../Error.html#_CPPv3N3mod10LogicErrorE" title="mod::LogicError"><code class="xref cpp cpp-class docutils literal notranslate"><span class="pre">LogicError</span></code></a> if the DG has not been calculated.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="_CPPv3N3mod2dg2DG11derivationsERKNSt6vectorI10DerivationEE">
+<span id="_CPPv2N3mod2dg2DG11derivationsERKNSt6vectorI10DerivationEE"></span><span id="mod::dg::DG::derivations__std::vector:Derivation:CR"></span><em class="property">static</em> std::shared_ptr&lt;<a class="reference internal" href="#_CPPv3N3mod2dg2DGE" title="mod::dg::DG">DG</a>&gt; <code class="descname">derivations</code><span class="sig-paren">(</span><em class="property">const</em> std::vector&lt;<a class="reference internal" href="../Derivation.html#_CPPv3N3mod10DerivationE" title="mod::Derivation">Derivation</a>&gt; &amp;<em>derivations</em><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv3N3mod2dg2DG11derivationsERKNSt6vectorI10DerivationEE" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Create a derivation graph from a list of <a class="reference internal" href="../Derivation.html#_CPPv3N3mod10DerivationE" title="mod::Derivation"><code class="xref cpp cpp-class docutils literal notranslate"><span class="pre">Derivation</span></code></a>.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="_CPPv3N3mod2dg2DG8abstractERKNSt6stringE">
+<span id="_CPPv2N3mod2dg2DG8abstractERKNSt6stringE"></span><span id="mod::dg::DG::abstract__ssCR"></span><em class="property">static</em> std::shared_ptr&lt;<a class="reference internal" href="#_CPPv3N3mod2dg2DGE" title="mod::dg::DG">DG</a>&gt; <code class="descname">abstract</code><span class="sig-paren">(</span><em class="property">const</em> std::string &amp;<em>specification</em><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv3N3mod2dg2DG8abstractERKNSt6stringE" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Create a derivation graph from an abstract description according to the following grammar.</p>
+<pre>
+<strong id="grammar-token-description">description</strong> ::=  <a class="reference internal" href="#grammar-token-derivation"><code class="xref docutils literal notranslate"><span class="pre">derivation</span></code></a> { <a class="reference internal" href="#grammar-token-derivation"><code class="xref docutils literal notranslate"><span class="pre">derivation</span></code></a> }
+<strong id="grammar-token-derivation">derivation </strong> ::=  <a class="reference internal" href="#grammar-token-side"><code class="xref docutils literal notranslate"><span class="pre">side</span></code></a> (&quot;-&gt;&quot; | &quot;&lt;=&gt;&quot;) <a class="reference internal" href="#grammar-token-side"><code class="xref docutils literal notranslate"><span class="pre">side</span></code></a>
+<strong id="grammar-token-side">side       </strong> ::=  <a class="reference internal" href="#grammar-token-term"><code class="xref docutils literal notranslate"><span class="pre">term</span></code></a> { &quot;+&quot; <a class="reference internal" href="#grammar-token-term"><code class="xref docutils literal notranslate"><span class="pre">term</span></code></a> }
+<strong id="grammar-token-term">term       </strong> ::=  [ <code class="xref docutils literal notranslate"><span class="pre">unsignedInt</span></code> ] <code class="xref docutils literal notranslate"><span class="pre">identifier</span></code>
+</pre>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Throws:</th><td class="field-body"><a class="reference internal" href="../Error.html#_CPPv3N3mod10InputErrorE" title="mod::InputError"><code class="xref cpp cpp-class docutils literal notranslate"><span class="pre">InputError</span></code></a> on bad input.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="_CPPv3N3mod2dg2DG8ruleCompERKNSt6vectorINSt10shared_ptrIN5graph5GraphEEEEENSt10shared_ptrI8StrategyEE13LabelSettingsb">
+<span id="_CPPv2N3mod2dg2DG8ruleCompERKNSt6vectorINSt10shared_ptrIN5graph5GraphEEEEENSt10shared_ptrI8StrategyEE13LabelSettingsb"></span><span id="mod::dg::DG::ruleComp__std::vector:std::shared_ptr:graph::Graph::CR.std::shared_ptr:Strategy:.LabelSettings.b"></span><em class="property">static</em> std::shared_ptr&lt;<a class="reference internal" href="#_CPPv3N3mod2dg2DGE" title="mod::dg::DG">DG</a>&gt; <code class="descname">ruleComp</code><span class="sig-paren">(</span><em class="property">const</em> std::vector&lt;std::shared_ptr&lt;graph::<a class="reference internal" href="../graph/Graph.html#_CPPv3N3mod5graph5GraphE" title="mod::graph::Graph">Graph</a>&gt;&gt; &amp;<em>graphs</em>, std::shared_ptr&lt;<a class="reference internal" href="Strategies.html#_CPPv3N3mod2dg8StrategyE" title="mod::dg::Strategy">Strategy</a>&gt; <em>strategy</em>, <a class="reference internal" href="../Config.html#_CPPv3N3mod13LabelSettingsE" title="mod::LabelSettings">LabelSettings</a> <em>labelSettings</em>, bool <em>ignoreRuleLabelTypes</em><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv3N3mod2dg2DG8ruleCompERKNSt6vectorINSt10shared_ptrIN5graph5GraphEEEEENSt10shared_ptrI8StrategyEE13LabelSettingsb" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Initialize a derivation graph with a <a class="reference internal" href="Strategies.html#_CPPv3N3mod2dg8StrategyE" title="mod::dg::Strategy"><code class="xref cpp cpp-class docutils literal notranslate"><span class="pre">Strategy</span></code></a> and an initial graph database.
+Any derived graph isomorphic to a given graph is replaced by the given graph.
+The given <a class="reference internal" href="../Config.html#_CPPv3N3mod13LabelSettingsE" title="mod::LabelSettings"><code class="xref cpp cpp-class docutils literal notranslate"><span class="pre">LabelSettings</span></code></a> is used for both monomorphism enumeration,
+and its <a class="reference internal" href="../Config.html#_CPPv3N3mod9LabelTypeE" title="mod::LabelType"><code class="xref cpp cpp-enum docutils literal notranslate"><span class="pre">LabelType</span></code></a> is used in isomorphism checks.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Throws:</th><td class="field-body"><a class="reference internal" href="../Error.html#_CPPv3N3mod10LogicErrorE" title="mod::LogicError"><code class="xref cpp cpp-class docutils literal notranslate"><span class="pre">LogicError</span></code></a> if two graphs in <a class="reference internal" href="#_CPPv3N3mod2dg2DG8ruleCompERKNSt6vectorINSt10shared_ptrIN5graph5GraphEEEEENSt10shared_ptrI8StrategyEE13LabelSettingsb" title="mod::dg::DG::ruleComp::graphs"><code class="xref cpp cpp-any docutils literal notranslate"><span class="pre">graphs</span></code></a> are different by isomorphic objects,
+or similarly if a static add strategy adds an isomorphic graph.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Throws:</th><td class="field-body"><a class="reference internal" href="../Error.html#_CPPv3N3mod10LogicErrorE" title="mod::LogicError"><code class="xref cpp cpp-class docutils literal notranslate"><span class="pre">LogicError</span></code></a> if <a class="reference internal" href="#_CPPv3N3mod2dg2DG8ruleCompERKNSt6vectorINSt10shared_ptrIN5graph5GraphEEEEENSt10shared_ptrI8StrategyEE13LabelSettingsb" title="mod::dg::DG::ruleComp::ignoreRuleLabelTypes"><code class="xref cpp cpp-any docutils literal notranslate"><span class="pre">ignoreRuleLabelTypes</span></code></a> is <cite>false</cite> and a rule in the given strategy
+has an intended label type different from the given type in <a class="reference internal" href="#_CPPv3N3mod2dg2DG8ruleCompERKNSt6vectorINSt10shared_ptrIN5graph5GraphEEEEENSt10shared_ptrI8StrategyEE13LabelSettingsb" title="mod::dg::DG::ruleComp::labelSettings"><code class="xref cpp cpp-any docutils literal notranslate"><span class="pre">labelSettings</span></code></a>.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="_CPPv3N3mod2dg2DG10dumpImportERKNSt6vectorINSt10shared_ptrIN5graph5GraphEEEEERKNSt6vectorINSt10shared_ptrIN4rule4RuleEEEEERKNSt6stringE">
+<span id="_CPPv2N3mod2dg2DG10dumpImportERKNSt6vectorINSt10shared_ptrIN5graph5GraphEEEEERKNSt6vectorINSt10shared_ptrIN4rule4RuleEEEEERKNSt6stringE"></span><span id="mod::dg::DG::dumpImport__std::vector:std::shared_ptr:graph::Graph::CR.std::vector:std::shared_ptr:rule::Rule::CR.ssCR"></span><em class="property">static</em> std::shared_ptr&lt;<a class="reference internal" href="#_CPPv3N3mod2dg2DGE" title="mod::dg::DG">DG</a>&gt; <code class="descname">dumpImport</code><span class="sig-paren">(</span><em class="property">const</em> std::vector&lt;std::shared_ptr&lt;graph::<a class="reference internal" href="../graph/Graph.html#_CPPv3N3mod5graph5GraphE" title="mod::graph::Graph">Graph</a>&gt;&gt; &amp;<em>graphs</em>, <em class="property">const</em> std::vector&lt;std::shared_ptr&lt;rule::<a class="reference internal" href="../rule/Rule.html#_CPPv3N3mod4rule4RuleE" title="mod::rule::Rule">Rule</a>&gt;&gt; &amp;<em>rules</em>, <em class="property">const</em> std::string &amp;<em>file</em><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv3N3mod2dg2DG10dumpImportERKNSt6vectorINSt10shared_ptrIN5graph5GraphEEEEERKNSt6vectorINSt10shared_ptrIN4rule4RuleEEEEERKNSt6stringE" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Load a derivation graph dump. Any graph in the dump which is isomorphic to a given graph is replaced by the given graph.
+The same procedure is done for the rules, however only using the name of the rule for comparison.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Throws:</th><td class="field-body"><a class="reference internal" href="../Error.html#_CPPv3N3mod10InputErrorE" title="mod::InputError"><code class="xref cpp cpp-class docutils literal notranslate"><span class="pre">InputError</span></code></a> on bad input.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="_CPPv3N3mod2dg2DG4diffENSt10shared_ptrI2DGEENSt10shared_ptrI2DGEE">
+<span id="_CPPv2N3mod2dg2DG4diffENSt10shared_ptrI2DGEENSt10shared_ptrI2DGEE"></span><span id="mod::dg::DG::diff__std::shared_ptr:DG:.std::shared_ptr:DG:"></span><em class="property">static</em> void <code class="descname">diff</code><span class="sig-paren">(</span>std::shared_ptr&lt;<a class="reference internal" href="#_CPPv3N3mod2dg2DGE" title="mod::dg::DG">DG</a>&gt; <em>dg1</em>, std::shared_ptr&lt;<a class="reference internal" href="#_CPPv3N3mod2dg2DGE" title="mod::dg::DG">DG</a>&gt; <em>dg2</em><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv3N3mod2dg2DG4diffENSt10shared_ptrI2DGEENSt10shared_ptrI2DGEE" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Compare two derivation graphs and lists the difference.
+This is not a general isomorphism check; two vertices are equal if they have
+the same graph attached. Edges are equal if the head and tail sets are equal
+and if the attached rule is the same.</p>
+</dd></dl>
+
+</div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="../../index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">2.2.8.1. dg/DG.h</a><ul>
+<li><a class="reference internal" href="#class-dg-dg">2.2.8.1.1. Class <code class="docutils literal notranslate"><span class="pre">dg::DG</span></code></a><ul>
+<li><a class="reference internal" href="#synopsis">2.2.8.1.1.1. Synopsis</a></li>
+<li><a class="reference internal" href="#details">2.2.8.1.1.2. Details</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="index.html"
+                        title="previous chapter">2.2.8. dg</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="ForwardDecl.html"
+                        title="next chapter">2.2.8.2. dg/ForwardDecl.h</a></p>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../../_sources/libmod/dg/DG.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="ForwardDecl.html" title="2.2.8.2. dg/ForwardDecl.h"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="index.html" title="2.2.8. dg"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">MØD v0.7.0 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../libmod.html" >2. libMØD</a> &#187;</li>
+          <li class="nav-item nav-item-2"><a href="../api.html" >2.2. API Reference</a> &#187;</li>
+          <li class="nav-item nav-item-3"><a href="index.html" >2.2.8. dg</a> &#187;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2013-2018, Jakob Lykke Andersen.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.8.0+.
+    </div>
+  </body>
+</html>

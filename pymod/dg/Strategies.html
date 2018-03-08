@@ -1,0 +1,444 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>3.1.7.4. dg/Strategies &#8212; MØD v0.7.0 documentation</title>
+    <link rel="stylesheet" href="../../_static/classic.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    <script type="text/javascript" src="../../_static/documentation_options.js"></script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="3.1.8. graph" href="../graph/index.html" />
+    <link rel="prev" title="3.1.7.3. dg/Printer" href="Printer.html" /> 
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="../graph/index.html" title="3.1.8. graph"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="Printer.html" title="3.1.7.3. dg/Printer"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">MØD v0.7.0 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../pymod.html" >3. PyMØD</a> &#187;</li>
+          <li class="nav-item nav-item-2"><a href="../api.html" >3.1. API Reference</a> &#187;</li>
+          <li class="nav-item nav-item-3"><a href="index.html" accesskey="U">3.1.7. dg</a> &#187;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="dg-strategies">
+<span id="py-dg-strategies"></span><h1>3.1.7.4. dg/Strategies<a class="headerlink" href="#dg-strategies" title="Permalink to this headline">¶</a></h1>
+<p>This section describes two interfaces for the derivation graph strategies; the basic API and an embedded language which is built on the basic API.
+Usually the embedded strategy language is easiest and sufficient for constructing strategies.</p>
+<p>The semantics of the individual strategies are described in <a class="reference internal" href="../../dgStrat/dgStrat.html#dgstrat"><span class="std std-ref">Derivation Graph Strategies</span></a>.
+Note that a <a class="reference internal" href="#mod.DGStrat" title="mod.DGStrat"><code class="xref py py-class docutils literal notranslate"><span class="pre">DGStrat</span></code></a> is a representation of a strategy and must be given to a derivation graph to be evaluated.</p>
+<div class="section" id="the-embedded-strategy-language">
+<h2>3.1.7.4.1. The Embedded Strategy Language<a class="headerlink" href="#the-embedded-strategy-language" title="Permalink to this headline">¶</a></h2>
+<p>The strategy language is really a collection of proxy classes with a lot of operator overloading, thus
+the normal syntax and semantics of Python applies.</p>
+<p>The following is the grammar for the strategies.</p>
+<pre>
+<strong id="grammar-token-strat">strat</strong> ::=  <code class="xref docutils literal notranslate"><span class="pre">strats</span></code>
+           <a class="reference internal" href="#grammar-token-strat"><code class="xref docutils literal notranslate"><span class="pre">strat</span></code></a> &quot;&gt;&gt;&quot; <a class="reference internal" href="#grammar-token-strat"><code class="xref docutils literal notranslate"><span class="pre">strat</span></code></a>
+           <code class="xref docutils literal notranslate"><span class="pre">rule</span></code>
+           &quot;addSubset(&quot; <code class="xref docutils literal notranslate"><span class="pre">graphs</span></code> &quot;)&quot;
+           &quot;addUniverse(&quot; <code class="xref docutils literal notranslate"><span class="pre">graphs</span></code> &quot;)&quot;
+           &quot;execute(&quot; <code class="xref docutils literal notranslate"><span class="pre">executeFunc</span></code> &quot;)&quot;
+           &quot;filterSubset(&quot; <code class="xref docutils literal notranslate"><span class="pre">filterPred</span></code> &quot;)&quot;
+           &quot;filterUniverse(&quot; <code class="xref docutils literal notranslate"><span class="pre">filterPred</span></code> &quot;)&quot;
+           &quot;leftPredicate[&quot; <code class="xref docutils literal notranslate"><span class="pre">derivationPred</span></code> &quot;](&quot; <a class="reference internal" href="#grammar-token-strat"><code class="xref docutils literal notranslate"><span class="pre">strat</span></code></a> &quot;)&quot;
+           &quot;rightPredicate[&quot; <code class="xref docutils literal notranslate"><span class="pre">derivationPred</span></code> &quot;](&quot; <a class="reference internal" href="#grammar-token-strat"><code class="xref docutils literal notranslate"><span class="pre">strat</span></code></a> &quot;)&quot;
+           &quot;repeat&quot; [ &quot;[&quot; <code class="xref docutils literal notranslate"><span class="pre">int</span></code> &quot;]&quot; ] &quot;(&quot; <a class="reference internal" href="#grammar-token-strat"><code class="xref docutils literal notranslate"><span class="pre">strat</span></code></a> &quot;)&quot;
+           &quot;revive(&quot; <a class="reference internal" href="#grammar-token-strat"><code class="xref docutils literal notranslate"><span class="pre">strat</span></code></a> &quot;)&quot;
+</pre>
+<p>A <code class="docutils literal notranslate"><span class="pre">strats</span></code> must be an iterable of <a class="reference internal" href="#grammar-token-strat"><code class="xref std std-token docutils literal notranslate"><span class="pre">strat</span></code></a>.
+A <code class="docutils literal notranslate"><span class="pre">graphs</span></code> can either be a single <a class="reference internal" href="../graph/Graph.html#mod.Graph" title="mod.Graph"><code class="xref py py-class docutils literal notranslate"><span class="pre">Graph</span></code></a>, an iterable of graphs, or a function taking no arguments and returning a list of graphs.</p>
+</div>
+<div class="section" id="the-basic-api">
+<h2>3.1.7.4.2. The Basic API<a class="headerlink" href="#the-basic-api" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="class-dgstratgraphstate">
+<h3>3.1.7.4.2.1. Class <code class="docutils literal notranslate"><span class="pre">DGStratGraphState</span></code><a class="headerlink" href="#class-dgstratgraphstate" title="Permalink to this headline">¶</a></h3>
+<dl class="class">
+<dt id="mod.DGStratGraphState">
+<em class="property">class </em><code class="descclassname">mod.</code><code class="descname">DGStratGraphState</code><a class="headerlink" href="#mod.DGStratGraphState" title="Permalink to this definition">¶</a></dt>
+<dd><p>This class represents a graph state with a subset <span class="math notranslate">\(S\)</span> and a universe <span class="math notranslate">\(U\)</span> fulfilling <span class="math notranslate">\(S\subseteq U\)</span>.</p>
+<dl class="attribute">
+<dt id="mod.DGStratGraphState.subset">
+<code class="descname">subset</code><a class="headerlink" href="#mod.DGStratGraphState.subset" title="Permalink to this definition">¶</a></dt>
+<dd><p>The subset <span class="math notranslate">\(\mathcal{S}\)</span>.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Type:</th><td class="field-body">list of </td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="mod.DGStratGraphState.universe">
+<code class="descname">universe</code><a class="headerlink" href="#mod.DGStratGraphState.universe" title="Permalink to this definition">¶</a></dt>
+<dd><p>The universe <span class="math notranslate">\(\mathcal{U}\)</span>.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Type:</th><td class="field-body">list of </td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="mod.DGStratGraphState.hyperEdges">
+<code class="descname">hyperEdges</code><a class="headerlink" href="#mod.DGStratGraphState.hyperEdges" title="Permalink to this definition">¶</a></dt>
+<dd><p>The references to all derivations in the underlying derivation graph.
+I.e., some derivations might involve graphs not in the universe.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Type:</th><td class="field-body">list of </td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="class-dgstrat">
+<h3>3.1.7.4.2.2. Class <code class="docutils literal notranslate"><span class="pre">DGStrat</span></code><a class="headerlink" href="#class-dgstrat" title="Permalink to this headline">¶</a></h3>
+<dl class="class">
+<dt id="mod.DGStrat">
+<em class="property">class </em><code class="descclassname">mod.</code><code class="descname">DGStrat</code><a class="headerlink" href="#mod.DGStrat" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="staticmethod">
+<dt id="mod.DGStrat.makeAddStatic">
+<em class="property">static </em><code class="descname">makeAddStatic</code><span class="sig-paren">(</span><em>onlyUniverse</em>, <em>graphs</em><span class="sig-paren">)</span><a class="headerlink" href="#mod.DGStrat.makeAddStatic" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>onlyUniverse</strong> (<em>bool</em>) – if the strategy is <a class="reference internal" href="../../dgStrat/dgStrat.html#strat-adduniverse"><span class="std std-ref">Add Universe</span></a> or <a class="reference internal" href="../../dgStrat/dgStrat.html#strat-addsubset"><span class="std std-ref">Add Subset</span></a>.</li>
+<li><strong>graphs</strong> (list of <a class="reference internal" href="../graph/Graph.html#mod.Graph" title="mod.Graph"><code class="xref py py-class docutils literal notranslate"><span class="pre">Graph</span></code></a>) – the graphs to be added by the strategy.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">an <a class="reference internal" href="../../dgStrat/dgStrat.html#strat-adduniverse"><span class="std std-ref">Add Universe</span></a> strategy if <code class="docutils literal notranslate"><span class="pre">onlyUniverse</span></code> is <code class="docutils literal notranslate"><span class="pre">True</span></code>, otherwise an <a class="reference internal" href="../../dgStrat/dgStrat.html#strat-addsubset"><span class="std std-ref">Add Subset</span></a> strategy.</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last"><a class="reference internal" href="#mod.DGStrat" title="mod.DGStrat"><code class="xref py py-class docutils literal notranslate"><span class="pre">DGStrat</span></code></a></p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="staticmethod">
+<dt id="mod.DGStrat.makeAddDynamic">
+<em class="property">static </em><code class="descname">makeAddDynamic</code><span class="sig-paren">(</span><em>onlyUniverse</em>, <em>graphsFunc</em><span class="sig-paren">)</span><a class="headerlink" href="#mod.DGStrat.makeAddDynamic" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>onlyUniverse</strong> (<em>bool</em>) – if the strategy is <a class="reference internal" href="../../dgStrat/dgStrat.html#strat-adduniverse"><span class="std std-ref">Add Universe</span></a> or <a class="reference internal" href="../../dgStrat/dgStrat.html#strat-addsubset"><span class="std std-ref">Add Subset</span></a>.</li>
+<li><strong>graphsFunc</strong> (list of <a class="reference internal" href="../graph/Graph.html#mod.Graph" title="mod.Graph"><code class="xref py py-class docutils literal notranslate"><span class="pre">Graph</span></code></a> ()) – a function returning the graphs to be added by the strategy.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">an <a class="reference internal" href="../../dgStrat/dgStrat.html#strat-adduniverse"><span class="std std-ref">Add Universe</span></a> strategy if <code class="docutils literal notranslate"><span class="pre">onlyUniverse</span></code> is <code class="docutils literal notranslate"><span class="pre">True</span></code>, otherwise an <a class="reference internal" href="../../dgStrat/dgStrat.html#strat-addsubset"><span class="std std-ref">Add Subset</span></a> strategy.</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last"><a class="reference internal" href="#mod.DGStrat" title="mod.DGStrat"><code class="xref py py-class docutils literal notranslate"><span class="pre">DGStrat</span></code></a></p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="staticmethod">
+<dt id="mod.DGStrat.makeExecute">
+<em class="property">static </em><code class="descname">makeExecute</code><span class="sig-paren">(</span><em>func</em><span class="sig-paren">)</span><a class="headerlink" href="#mod.DGStrat.makeExecute" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>func</strong> (void(<a class="reference internal" href="#mod.DGStratGraphState" title="mod.DGStratGraphState"><code class="xref py py-class docutils literal notranslate"><span class="pre">DGStratGraphState</span></code></a>)) – A function being executed when the strategy is evaluated.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">an <a class="reference internal" href="../../dgStrat/dgStrat.html#strat-execute"><span class="std std-ref">Execute</span></a> strategy.</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><a class="reference internal" href="#mod.DGStrat" title="mod.DGStrat"><code class="xref py py-class docutils literal notranslate"><span class="pre">DGStrat</span></code></a></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="staticmethod">
+<dt id="mod.DGStrat.makeFilter">
+<em class="property">static </em><code class="descname">makeFilter</code><span class="sig-paren">(</span><em>alsoUniverse</em>, <em>p</em><span class="sig-paren">)</span><a class="headerlink" href="#mod.DGStrat.makeFilter" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>alsoUniverse</strong> (<em>bool</em>) – if the strategy is <a class="reference internal" href="../../dgStrat/dgStrat.html#strat-filteruniverse"><span class="std std-ref">Filter Universe</span></a> or <a class="reference internal" href="../../dgStrat/dgStrat.html#strat-filtersubset"><span class="std std-ref">Filter Subset</span></a>.</li>
+<li><strong>p</strong> (bool(<a class="reference internal" href="../graph/Graph.html#mod.Graph" title="mod.Graph"><code class="xref py py-class docutils literal notranslate"><span class="pre">Graph</span></code></a>, <a class="reference internal" href="#mod.DGStratGraphState" title="mod.DGStratGraphState"><code class="xref py py-class docutils literal notranslate"><span class="pre">DGStratGraphState</span></code></a>, bool)) – the filtering predicate being called for each graph in either the subset or the universe.
+The predicate is called with the graph and the graph state as arguments, and a bool stating whether or not
+the call is the first in the filtering process.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">a <a class="reference internal" href="../../dgStrat/dgStrat.html#strat-filteruniverse"><span class="std std-ref">Filter Universe</span></a> strategy if <code class="docutils literal notranslate"><span class="pre">onlyUniverse</span></code> is <code class="docutils literal notranslate"><span class="pre">True</span></code>, otherwise a <a class="reference internal" href="../../dgStrat/dgStrat.html#strat-filtersubset"><span class="std std-ref">Filter Subset</span></a> strategy.</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last"><a class="reference internal" href="#mod.DGStrat" title="mod.DGStrat"><code class="xref py py-class docutils literal notranslate"><span class="pre">DGStrat</span></code></a></p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="staticmethod">
+<dt id="mod.DGStrat.makeLeftPredicate">
+<em class="property">static </em><code class="descname">makeLeftPredicate</code><span class="sig-paren">(</span><em>p</em>, <em>strat</em><span class="sig-paren">)</span><a class="headerlink" href="#mod.DGStrat.makeLeftPredicate" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>p</strong> (bool(<a class="reference internal" href="../Derivation.html#mod.Derivation" title="mod.Derivation"><code class="xref py py-class docutils literal notranslate"><span class="pre">Derivation</span></code></a>)) – the predicate to be called on each candidate derivation.
+Even though the predicate is called with a <a class="reference internal" href="../Derivation.html#mod.Derivation" title="mod.Derivation"><code class="xref py py-class docutils literal notranslate"><span class="pre">Derivation</span></code></a> object, only the left side and the rule of the object is valid.</li>
+<li><strong>strat</strong> (<a class="reference internal" href="#mod.DGStrat" title="mod.DGStrat"><code class="xref py py-class docutils literal notranslate"><span class="pre">DGStrat</span></code></a>) – the sub-strategy to be evaluated under the constraints of the left predicate.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">a <a class="reference internal" href="../../dgStrat/dgStrat.html#strat-leftpredicate"><span class="std std-ref">Derivation Predicates</span></a> strategy.</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last"><a class="reference internal" href="#mod.DGStrat" title="mod.DGStrat"><code class="xref py py-class docutils literal notranslate"><span class="pre">DGStrat</span></code></a></p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="staticmethod">
+<dt id="mod.DGStrat.makeParallel">
+<em class="property">static </em><code class="descname">makeParallel</code><span class="sig-paren">(</span><em>strats</em><span class="sig-paren">)</span><a class="headerlink" href="#mod.DGStrat.makeParallel" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>strats</strong> (list of <a class="reference internal" href="#mod.DGStrat" title="mod.DGStrat"><code class="xref py py-class docutils literal notranslate"><span class="pre">DGStrat</span></code></a>) – the sub-strategies to evaluate.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">a <a class="reference internal" href="../../dgStrat/dgStrat.html#strat-parallel"><span class="std std-ref">Parallel</span></a> strategy.</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><a class="reference internal" href="#mod.DGStrat" title="mod.DGStrat"><code class="xref py py-class docutils literal notranslate"><span class="pre">DGStrat</span></code></a></td>
+</tr>
+<tr class="field-even field"><th class="field-name">Raises:</th><td class="field-body"><a class="reference internal" href="../Error.html#mod.LogicError" title="mod.LogicError"><code class="xref py py-class docutils literal notranslate"><span class="pre">LogicError</span></code></a> if <cite>strats</cite> is empty.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="staticmethod">
+<dt id="mod.DGStrat.makeRepeat">
+<em class="property">static </em><code class="descname">makeRepeat</code><span class="sig-paren">(</span><em>limit</em>, <em>strat</em><span class="sig-paren">)</span><a class="headerlink" href="#mod.DGStrat.makeRepeat" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>limit</strong> (<em>unsigned int</em>) – the maximum number of iterations.</li>
+<li><strong>strat</strong> (<a class="reference internal" href="#mod.DGStrat" title="mod.DGStrat"><code class="xref py py-class docutils literal notranslate"><span class="pre">DGStrat</span></code></a>) – the strategy to be repeated.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">a <a class="reference internal" href="../../dgStrat/dgStrat.html#strat-repeat"><span class="std std-ref">Repeat</span></a> strategy.</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last"><a class="reference internal" href="#mod.DGStrat" title="mod.DGStrat"><code class="xref py py-class docutils literal notranslate"><span class="pre">DGStrat</span></code></a></p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="staticmethod">
+<dt id="mod.DGStrat.makeRevive">
+<em class="property">static </em><code class="descname">makeRevive</code><span class="sig-paren">(</span><em>strat</em><span class="sig-paren">)</span><a class="headerlink" href="#mod.DGStrat.makeRevive" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>strat</strong> (<a class="reference internal" href="#mod.DGStrat" title="mod.DGStrat"><code class="xref py py-class docutils literal notranslate"><span class="pre">DGStrat</span></code></a>) – the strategy to encapsulate.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">a <a class="reference internal" href="../../dgStrat/dgStrat.html#strat-revive"><span class="std std-ref">Revive</span></a> strategy.</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><a class="reference internal" href="#mod.DGStrat" title="mod.DGStrat"><code class="xref py py-class docutils literal notranslate"><span class="pre">DGStrat</span></code></a></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="staticmethod">
+<dt id="mod.DGStrat.makeRightPredicate">
+<em class="property">static </em><code class="descname">makeRightPredicate</code><span class="sig-paren">(</span><em>p</em>, <em>strat</em><span class="sig-paren">)</span><a class="headerlink" href="#mod.DGStrat.makeRightPredicate" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>p</strong> (bool(<a class="reference internal" href="../Derivation.html#mod.Derivation" title="mod.Derivation"><code class="xref py py-class docutils literal notranslate"><span class="pre">Derivation</span></code></a>)) – the predicate to be called on each candidate derivation.</li>
+<li><strong>strat</strong> (<a class="reference internal" href="#mod.DGStrat" title="mod.DGStrat"><code class="xref py py-class docutils literal notranslate"><span class="pre">DGStrat</span></code></a>) – the sub-strategy to be evaluated under the constraints of the right predicate.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">a <a class="reference internal" href="../../dgStrat/dgStrat.html#strat-rightpredicate"><span class="std std-ref">Derivation Predicates</span></a> strategy.</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last"><a class="reference internal" href="#mod.DGStrat" title="mod.DGStrat"><code class="xref py py-class docutils literal notranslate"><span class="pre">DGStrat</span></code></a></p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="staticmethod">
+<dt id="mod.DGStrat.makeRule">
+<em class="property">static </em><code class="descname">makeRule</code><span class="sig-paren">(</span><em>r</em><span class="sig-paren">)</span><a class="headerlink" href="#mod.DGStrat.makeRule" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>r</strong> (<a class="reference internal" href="../rule/Rule.html#mod.Rule" title="mod.Rule"><code class="xref py py-class docutils literal notranslate"><span class="pre">Rule</span></code></a>) – the rule to make into a strategy.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">a <a class="reference internal" href="../../dgStrat/dgStrat.html#strat-rule"><span class="std std-ref">Rule</span></a> strategy.</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><a class="reference internal" href="#mod.DGStrat" title="mod.DGStrat"><code class="xref py py-class docutils literal notranslate"><span class="pre">DGStrat</span></code></a></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="staticmethod">
+<dt id="mod.DGStrat.makeSequence">
+<em class="property">static </em><code class="descname">makeSequence</code><span class="sig-paren">(</span><em>strats</em><span class="sig-paren">)</span><a class="headerlink" href="#mod.DGStrat.makeSequence" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>strats</strong> (list of <a class="reference internal" href="#mod.DGStrat" title="mod.DGStrat"><code class="xref py py-class docutils literal notranslate"><span class="pre">DGStrat</span></code></a>) – the strategies to evaluate in sequence.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Retunrs:</th><td class="field-body">a <a class="reference internal" href="../../dgStrat/dgStrat.html#strat-sequence"><span class="std std-ref">Sequence</span></a> strategy.</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><a class="reference internal" href="#mod.DGStrat" title="mod.DGStrat"><code class="xref py py-class docutils literal notranslate"><span class="pre">DGStrat</span></code></a></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="../../index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">3.1.7.4. dg/Strategies</a><ul>
+<li><a class="reference internal" href="#the-embedded-strategy-language">3.1.7.4.1. The Embedded Strategy Language</a></li>
+<li><a class="reference internal" href="#the-basic-api">3.1.7.4.2. The Basic API</a><ul>
+<li><a class="reference internal" href="#class-dgstratgraphstate">3.1.7.4.2.1. Class <code class="docutils literal notranslate"><span class="pre">DGStratGraphState</span></code></a></li>
+<li><a class="reference internal" href="#class-dgstrat">3.1.7.4.2.2. Class <code class="docutils literal notranslate"><span class="pre">DGStrat</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="Printer.html"
+                        title="previous chapter">3.1.7.3. dg/Printer</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="../graph/index.html"
+                        title="next chapter">3.1.8. graph</a></p>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../../_sources/pymod/dg/Strategies.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="../graph/index.html" title="3.1.8. graph"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="Printer.html" title="3.1.7.3. dg/Printer"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">MØD v0.7.0 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../pymod.html" >3. PyMØD</a> &#187;</li>
+          <li class="nav-item nav-item-2"><a href="../api.html" >3.1. API Reference</a> &#187;</li>
+          <li class="nav-item nav-item-3"><a href="index.html" >3.1.7. dg</a> &#187;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2013-2018, Jakob Lykke Andersen.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.8.0+.
+    </div>
+  </body>
+</html>

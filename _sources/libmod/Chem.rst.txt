@@ -1,0 +1,194 @@
+.. _cpp-Chem:
+
+**********************************************************
+Chem.h
+**********************************************************
+.. default-domain:: cpp
+
+.. py:currentmodule:: mod
+.. cpp:namespace:: mod
+
+
+Class ``AtomId``
+--------------------------------------------------------------------------------------------------------------------------------
+
+.. class:: AtomId
+    
+
+    Representation of the chemical element of an atom.
+
+Synopsis
+^^^^^^^^
+
+.. code-block:: c++
+    
+    struct AtomId {
+        constexpr AtomId();
+        explicit constexpr AtomId(unsigned char id);
+        constexpr operator unsigned char() const;
+        friend std::ostream &operator<<(std::ostream &s, AtomId atomId);
+    private:
+        unsigned char id;
+    };
+
+Details
+^^^^^^^
+
+.. cpp:namespace:: mod
+
+.. cpp:namespace-push:: AtomId
+
+.. function:: constexpr AtomId()
+
+    Construct an :cpp:var:`AtomIds::Invalid` atom id.
+.. function:: explicit constexpr AtomId(unsigned int id)
+
+    Construct a specific atom id. Pre-condition: the id must be at most that of :cpp:var:`AtomIds::Max`.
+.. function:: constexpr operator unsigned char() const
+
+    Implicit conversion to an integer type.
+.. function:: friend std::ostream &operator<<(std::ostream &s, AtomId atomId)
+
+    Inserts the `int` value of the atom id into the stream.
+
+.. cpp:namespace:: mod
+
+
+Class ``Charge``
+--------------------------------------------------------------------------------------------------------------------------------
+
+.. class:: Charge
+    
+
+    Representation of the charge of an atom.
+
+Synopsis
+^^^^^^^^
+
+.. code-block:: c++
+    
+    struct Charge {
+        constexpr Charge();
+        explicit constexpr Charge(signed char c);
+        constexpr operator signed char() const;
+        friend std::ostream &operator<<(std::ostream &s, Charge charge);
+    private:
+        signed char c;
+    };
+
+Details
+^^^^^^^
+
+.. cpp:namespace:: mod
+
+.. cpp:namespace-push:: Charge
+
+.. function:: constexpr Charge()
+
+    Construct a neutral charge.
+.. function:: explicit constexpr Charge(signed char c)
+
+    Construct a specific charge. Pre-condition: the charge must be in the range :math:`[-9, 9]`.
+.. function:: constexpr operator signed char() const
+
+    Implicit conversion to an integer type.
+.. function:: friend std::ostream &operator<<(std::ostream &s, Charge charge)
+
+    Inserts the `int` value of the charge into the stream.
+
+.. cpp:namespace:: mod
+
+
+Class ``AtomData``
+--------------------------------------------------------------------------------------------------------------------------------
+
+.. class:: AtomData
+    
+
+    Representation of basic data of an atom.
+
+Synopsis
+^^^^^^^^
+
+.. code-block:: c++
+    
+    struct AtomData {
+        constexpr AtomData();
+        constexpr explicit AtomData(AtomId atomId);
+        constexpr AtomData(AtomId atomId, Charge charge, bool radical);
+        constexpr AtomId getAtomId() const;
+        constexpr Charge getCharge() const;
+        constexpr bool getRadical() const;
+        friend constexpr bool operator==(const AtomData &a1, const AtomData &a2);
+        friend std::ostream &operator<<(std::ostream &s, const AtomData &data);
+    private:
+        AtomId atomId;
+        Charge charge;
+        bool radical;
+    };
+
+Details
+^^^^^^^
+
+.. cpp:namespace:: mod
+
+.. cpp:namespace-push:: AtomData
+
+.. function:: constexpr AtomData()
+
+    Construct atom data with :cpp:var:`AtomIds::Invalid` atom id and neutral charge.
+.. function:: constexpr explicit AtomData(AtomId atomId)
+
+    Construct atom data with neutral charge, no radical, and the given atom id.
+.. function:: constexpr AtomData(AtomId atomId, Charge charge, bool radical)
+
+    Construct atom data with given atom id, charge, and radical.
+.. function:: constexpr AtomId getAtomId() const
+
+    Retrieve the atom id.
+.. function:: constexpr Charge getCharge() const
+
+    Retrieve the charge.
+.. function:: constexpr bool getRadical() const
+
+    Retrieve the radical status.
+.. function:: friend std::ostream &operator<<(std::ostream &s, const AtomData &data)
+
+    Format the atom data adhering to the string encoding of atoms (see :ref:`mol-enc`).
+
+    :throws: :class:`LogicError` if the atom id is :cpp:var:`AtomIds::Invalid`.
+
+.. cpp:namespace:: mod
+
+Enum ``BondType``
+-------------------
+
+.. enum-struct:: BondType
+
+    Representation of a bond type (see :ref:`mol-enc`).
+
+    .. enumerator:: Invalid
+    .. enumerator:: Single
+    .. enumerator:: Aromatic
+    .. enumerator:: Double
+    .. enumerator:: Triple
+.. function:: std::ostream &operator<<(std::ostream &s, BondType bt)
+
+    Format the bond type adhering to the string encoding of bonds (see :ref:`mol-enc`).
+
+    :throws: :class:`LogicError` if the bond type is :cpp:any:`BondType::Invalid`.
+
+Namespace ``AtomIds``
+----------------------
+
+This namespace contains constants for each chemical element, both as their abbreviations and their full names.
+Two additional constants are provided for convenience.
+
+.. var:: AtomId AtomIds::Invalid
+
+    Constant for the invalid atom id.
+
+.. var:: AtomId AtomIds::Max
+
+    An atom id equal to the atom id with the maximum valid id.
+

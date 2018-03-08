@@ -1,0 +1,1457 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>3.1.9.2. rule/GraphInterface &#8212; MØD v0.7.0 documentation</title>
+    <link rel="stylesheet" href="../../_static/classic.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    <script type="text/javascript" src="../../_static/documentation_options.js"></script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="3.1.9.3. rule/Rule" href="Rule.html" />
+    <link rel="prev" title="3.1.9.1. rule/Composition" href="Composition.html" /> 
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="Rule.html" title="3.1.9.3. rule/Rule"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="Composition.html" title="3.1.9.1. rule/Composition"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">MØD v0.7.0 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../pymod.html" >3. PyMØD</a> &#187;</li>
+          <li class="nav-item nav-item-2"><a href="../api.html" >3.1. API Reference</a> &#187;</li>
+          <li class="nav-item nav-item-3"><a href="index.html" accesskey="U">3.1.9. rule</a> &#187;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="rule-graphinterface">
+<span id="py-rule-graphinterface"></span><h1>3.1.9.2. rule/GraphInterface<a class="headerlink" href="#rule-graphinterface" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="class-ruleleftgraph">
+<h2>3.1.9.2.1. Class <code class="docutils literal notranslate"><span class="pre">RuleLeftGraph</span></code><a class="headerlink" href="#class-ruleleftgraph" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="mod.RuleLeftGraph">
+<em class="property">class </em><code class="descclassname">mod.</code><code class="descname">RuleLeftGraph</code><a class="headerlink" href="#mod.RuleLeftGraph" title="Permalink to this definition">¶</a></dt>
+<dd><p>A proxy object representing the left graph of the rule.</p>
+<dl class="attribute">
+<dt id="mod.RuleLeftGraph.rule">
+<code class="descname">rule</code><a class="headerlink" href="#mod.RuleLeftGraph.rule" title="Permalink to this definition">¶</a></dt>
+<dd><p>(Read-only) The rule the graph belongs to.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Type:</th><td class="field-body"><a class="reference internal" href="Rule.html#mod.Rule" title="mod.Rule">Rule</a></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="mod.RuleLeftGraph.numVertices">
+<code class="descname">numVertices</code><a class="headerlink" href="#mod.RuleLeftGraph.numVertices" title="Permalink to this definition">¶</a></dt>
+<dd><p>(Read-only) The number of vertices in the graph.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Type:</th><td class="field-body">int</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="mod.RuleLeftGraph.vertices">
+<code class="descname">vertices</code><a class="headerlink" href="#mod.RuleLeftGraph.vertices" title="Permalink to this definition">¶</a></dt>
+<dd><p>(Read-only) An iterable of all vertices in the graph.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Type:</th><td class="field-body">RuleLeftGraphVertexRange</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="mod.RuleLeftGraph.numEdges">
+<code class="descname">numEdges</code><a class="headerlink" href="#mod.RuleLeftGraph.numEdges" title="Permalink to this definition">¶</a></dt>
+<dd><p>(Read-only) The number of edges in the graph.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Type:</th><td class="field-body">int</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="mod.RuleLeftGraph.edges">
+<code class="descname">edges</code><a class="headerlink" href="#mod.RuleLeftGraph.edges" title="Permalink to this definition">¶</a></dt>
+<dd><p>(Read-only) An iterable of all edges in the graph.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Type:</th><td class="field-body">RuleLeftGraphEdgeRange</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="class-ruleleftgraphvertex">
+<h2>3.1.9.2.2. Class <code class="docutils literal notranslate"><span class="pre">RuleLeftGraphVertex</span></code><a class="headerlink" href="#class-ruleleftgraphvertex" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="mod.RuleLeftGraphVertex">
+<em class="property">class </em><code class="descclassname">mod.</code><code class="descname">RuleLeftGraphVertex</code><a class="headerlink" href="#mod.RuleLeftGraphVertex" title="Permalink to this definition">¶</a></dt>
+<dd><p>A descriptor of either a vertex in a left side, or a null vertex.</p>
+<dl class="function">
+<dt id="mod.RuleLeftGraphVertex.__init__">
+<code class="descname">__init__</code><span class="sig-paren">(</span><em>self</em><span class="sig-paren">)</span><a class="headerlink" href="#mod.RuleLeftGraphVertex.__init__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Constructs a null descriptor.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="mod.RuleLeftGraphVertex.isNull">
+<code class="descname">isNull</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#mod.RuleLeftGraphVertex.isNull" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">whether this is a null descriptor or not.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">bool</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="mod.RuleLeftGraphVertex.id">
+<code class="descname">id</code><a class="headerlink" href="#mod.RuleLeftGraphVertex.id" title="Permalink to this definition">¶</a></dt>
+<dd><p>(Read-only) The index of the vertex. It will be in the range <span class="math notranslate">\([0, numCoreVertices[\)</span>.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Type:</th><td class="field-body">int</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Raises:</th><td class="field-body"><a class="reference internal" href="../Error.html#mod.LogicError" title="mod.LogicError"><code class="xref py py-class docutils literal notranslate"><span class="pre">LogicError</span></code></a> if it is a null descriptor.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="mod.RuleLeftGraphVertex.rule">
+<code class="descname">rule</code><a class="headerlink" href="#mod.RuleLeftGraphVertex.rule" title="Permalink to this definition">¶</a></dt>
+<dd><p>(Read-only) The rule the vertex belongs to.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Type:</th><td class="field-body"><a class="reference internal" href="Rule.html#mod.Rule" title="mod.Rule">Rule</a></td>
+</tr>
+<tr class="field-even field"><th class="field-name">Raises:</th><td class="field-body"><a class="reference internal" href="../Error.html#mod.LogicError" title="mod.LogicError"><code class="xref py py-class docutils literal notranslate"><span class="pre">LogicError</span></code></a> if it is a null descriptor.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="mod.RuleLeftGraphVertex.core">
+<code class="descname">core</code><a class="headerlink" href="#mod.RuleLeftGraphVertex.core" title="Permalink to this definition">¶</a></dt>
+<dd><p>(Read-only) The descriptor for this vertex in the core graph.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Type:</th><td class="field-body"><a class="reference internal" href="#mod.RuleVertex" title="mod.RuleVertex">RuleVertex</a></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="mod.RuleLeftGraphVertex.degree">
+<code class="descname">degree</code><a class="headerlink" href="#mod.RuleLeftGraphVertex.degree" title="Permalink to this definition">¶</a></dt>
+<dd><p>(Read-only) The degree of the vertex.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Type:</th><td class="field-body">int</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Raises:</th><td class="field-body"><a class="reference internal" href="../Error.html#mod.LogicError" title="mod.LogicError"><code class="xref py py-class docutils literal notranslate"><span class="pre">LogicError</span></code></a> if it is a null descriptor.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="mod.RuleLeftGraphVertex.incidentEdges">
+<code class="descname">incidentEdges</code><a class="headerlink" href="#mod.RuleLeftGraphVertex.incidentEdges" title="Permalink to this definition">¶</a></dt>
+<dd><p>(Read-only) A range of incident edges to this vertex.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Type:</th><td class="field-body">RuleLeftGraphIncidentEdgeRange</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Raises:</th><td class="field-body"><a class="reference internal" href="../Error.html#mod.LogicError" title="mod.LogicError"><code class="xref py py-class docutils literal notranslate"><span class="pre">LogicError</span></code></a> if it is a null descriptor.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="mod.RuleLeftGraphVertex.stringLabel">
+<code class="descname">stringLabel</code><a class="headerlink" href="#mod.RuleLeftGraphVertex.stringLabel" title="Permalink to this definition">¶</a></dt>
+<dd><p>(Read-only) The string label of the vertex.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Type:</th><td class="field-body">string</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Raises:</th><td class="field-body"><a class="reference internal" href="../Error.html#mod.LogicError" title="mod.LogicError"><code class="xref py py-class docutils literal notranslate"><span class="pre">LogicError</span></code></a> if it is a null descriptor.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="mod.RuleLeftGraphVertex.atomId">
+<code class="descname">atomId</code><a class="headerlink" href="#mod.RuleLeftGraphVertex.atomId" title="Permalink to this definition">¶</a></dt>
+<dd><p>(Read-only) The atom id of the vertex.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Type:</th><td class="field-body"><a class="reference internal" href="../Chem.html#mod.AtomId" title="mod.AtomId">AtomId</a></td>
+</tr>
+<tr class="field-even field"><th class="field-name">Raises:</th><td class="field-body"><a class="reference internal" href="../Error.html#mod.LogicError" title="mod.LogicError"><code class="xref py py-class docutils literal notranslate"><span class="pre">LogicError</span></code></a> if it is a null descriptor.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="mod.RuleLeftGraphVertex.charge">
+<code class="descname">charge</code><a class="headerlink" href="#mod.RuleLeftGraphVertex.charge" title="Permalink to this definition">¶</a></dt>
+<dd><p>(Read-only) The charge of the vertex.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Type:</th><td class="field-body"><a class="reference internal" href="../Chem.html#mod.Charge" title="mod.Charge">Charge</a></td>
+</tr>
+<tr class="field-even field"><th class="field-name">Raises:</th><td class="field-body"><a class="reference internal" href="../Error.html#mod.LogicError" title="mod.LogicError"><code class="xref py py-class docutils literal notranslate"><span class="pre">LogicError</span></code></a> if it is a null descriptor.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="mod.RuleLeftGraphVertex.radical">
+<code class="descname">radical</code><a class="headerlink" href="#mod.RuleLeftGraphVertex.radical" title="Permalink to this definition">¶</a></dt>
+<dd><p>(Read-only) The radical status of the vertex.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Type:</th><td class="field-body">bool</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Raises:</th><td class="field-body"><a class="reference internal" href="../Error.html#mod.LogicError" title="mod.LogicError"><code class="xref py py-class docutils literal notranslate"><span class="pre">LogicError</span></code></a> if it is a null descriptor.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="mod.RuleLeftGraphVertex.printStereo">
+<code class="descname">printStereo</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#mod.RuleLeftGraphVertex.printStereo" title="Permalink to this definition">¶</a></dt>
+<dt>
+<code class="descname">printStereo</code><span class="sig-paren">(</span><em>p</em><span class="sig-paren">)</span></dt>
+<dd><p>Print the stereo configuration for the vertex.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>p</strong> (<a class="reference internal" href="../graph/Printer.html#mod.GraphPrinter" title="mod.GraphPrinter"><code class="xref py py-class docutils literal notranslate"><span class="pre">GraphPrinter</span></code></a>) – the printing options used for the depiction.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">the name of the PDF-file that will be compiled in post-processing.</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">string</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Raises:</th><td class="field-body"><a class="reference internal" href="../Error.html#mod.LogicError" title="mod.LogicError"><code class="xref py py-class docutils literal notranslate"><span class="pre">LogicError</span></code></a> if it is a null descriptor.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="class-ruleleftgraphedge">
+<h2>3.1.9.2.3. Class <code class="docutils literal notranslate"><span class="pre">RuleLeftGraphEdge</span></code><a class="headerlink" href="#class-ruleleftgraphedge" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="mod.RuleLeftGraphEdge">
+<em class="property">class </em><code class="descclassname">mod.</code><code class="descname">RuleLeftGraphEdge</code><a class="headerlink" href="#mod.RuleLeftGraphEdge" title="Permalink to this definition">¶</a></dt>
+<dd><p>A descriptor of either an edge in a left side, or a null edge.</p>
+<dl class="function">
+<dt id="mod.RuleLeftGraphEdge.__init__">
+<code class="descname">__init__</code><span class="sig-paren">(</span><em>self</em><span class="sig-paren">)</span><a class="headerlink" href="#mod.RuleLeftGraphEdge.__init__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Constructs a null descriptor.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="mod.RuleLeftGraphEdge.isNull">
+<code class="descname">isNull</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#mod.RuleLeftGraphEdge.isNull" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">whether this is a null descriptor or not.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">bool</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="mod.RuleLeftGraphEdge.graph">
+<code class="descname">graph</code><a class="headerlink" href="#mod.RuleLeftGraphEdge.graph" title="Permalink to this definition">¶</a></dt>
+<dd><p>(Read-only) The rule the edge belongs to.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Type:</th><td class="field-body"><a class="reference internal" href="Rule.html#mod.Rule" title="mod.Rule">Rule</a></td>
+</tr>
+<tr class="field-even field"><th class="field-name">Raises:</th><td class="field-body"><a class="reference internal" href="../Error.html#mod.LogicError" title="mod.LogicError"><code class="xref py py-class docutils literal notranslate"><span class="pre">LogicError</span></code></a> if it is a null descriptor.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="mod.RuleLeftGraphEdge.core">
+<code class="descname">core</code><a class="headerlink" href="#mod.RuleLeftGraphEdge.core" title="Permalink to this definition">¶</a></dt>
+<dd><p>(Read-only) The descriptor for this edge in the core graph.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Type:</th><td class="field-body"><a class="reference internal" href="#mod.RuleEdge" title="mod.RuleEdge">RuleEdge</a></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="mod.RuleLeftGraphEdge.source">
+<code class="descname">source</code><a class="headerlink" href="#mod.RuleLeftGraphEdge.source" title="Permalink to this definition">¶</a></dt>
+<dd><p>(Read-only) The source vertex of the edge.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Type:</th><td class="field-body"><a class="reference internal" href="#mod.RuleLeftGraphVertex" title="mod.RuleLeftGraphVertex">RuleLeftGraphVertex</a></td>
+</tr>
+<tr class="field-even field"><th class="field-name">Raises:</th><td class="field-body"><a class="reference internal" href="../Error.html#mod.LogicError" title="mod.LogicError"><code class="xref py py-class docutils literal notranslate"><span class="pre">LogicError</span></code></a> if it is a null descriptor.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="mod.RuleLeftGraphEdge.target">
+<code class="descname">target</code><a class="headerlink" href="#mod.RuleLeftGraphEdge.target" title="Permalink to this definition">¶</a></dt>
+<dd><p>(Read-only) The target vertex of the edge.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Type:</th><td class="field-body"><a class="reference internal" href="#mod.RuleLeftGraphVertex" title="mod.RuleLeftGraphVertex">RuleLeftGraphVertex</a></td>
+</tr>
+<tr class="field-even field"><th class="field-name">Raises:</th><td class="field-body"><a class="reference internal" href="../Error.html#mod.LogicError" title="mod.LogicError"><code class="xref py py-class docutils literal notranslate"><span class="pre">LogicError</span></code></a> if it is a null descriptor.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="mod.RuleLeftGraphEdge.stringLabel">
+<code class="descname">stringLabel</code><a class="headerlink" href="#mod.RuleLeftGraphEdge.stringLabel" title="Permalink to this definition">¶</a></dt>
+<dd><p>(Read-only) The string label of the edge.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Type:</th><td class="field-body">string</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Raises:</th><td class="field-body"><a class="reference internal" href="../Error.html#mod.LogicError" title="mod.LogicError"><code class="xref py py-class docutils literal notranslate"><span class="pre">LogicError</span></code></a> if it is a null descriptor.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="mod.RuleLeftGraphEdge.bondType">
+<code class="descname">bondType</code><a class="headerlink" href="#mod.RuleLeftGraphEdge.bondType" title="Permalink to this definition">¶</a></dt>
+<dd><p>(Read-only) The bond type of the edge.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Type:</th><td class="field-body"><a class="reference internal" href="../Chem.html#mod.BondType" title="mod.BondType">BondType</a></td>
+</tr>
+<tr class="field-even field"><th class="field-name">Raises:</th><td class="field-body"><a class="reference internal" href="../Error.html#mod.LogicError" title="mod.LogicError"><code class="xref py py-class docutils literal notranslate"><span class="pre">LogicError</span></code></a> if it is a null descriptor.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="class-rulecontextgraph">
+<h2>3.1.9.2.4. Class <code class="docutils literal notranslate"><span class="pre">RuleContextGraph</span></code><a class="headerlink" href="#class-rulecontextgraph" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="mod.RuleContextGraph">
+<em class="property">class </em><code class="descclassname">mod.</code><code class="descname">RuleContextGraph</code><a class="headerlink" href="#mod.RuleContextGraph" title="Permalink to this definition">¶</a></dt>
+<dd><p>A proxy object representing the context graph of the rule.</p>
+<dl class="attribute">
+<dt id="mod.RuleContextGraph.rule">
+<code class="descname">rule</code><a class="headerlink" href="#mod.RuleContextGraph.rule" title="Permalink to this definition">¶</a></dt>
+<dd><p>(Read-only) The rule the graph belongs to.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Type:</th><td class="field-body"><a class="reference internal" href="Rule.html#mod.Rule" title="mod.Rule">Rule</a></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="mod.RuleContextGraph.numVertices">
+<code class="descname">numVertices</code><a class="headerlink" href="#mod.RuleContextGraph.numVertices" title="Permalink to this definition">¶</a></dt>
+<dd><p>(Read-only) The number of vertices in the graph.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Type:</th><td class="field-body">int</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="mod.RuleContextGraph.vertices">
+<code class="descname">vertices</code><a class="headerlink" href="#mod.RuleContextGraph.vertices" title="Permalink to this definition">¶</a></dt>
+<dd><p>(Read-only) An iterable of all vertices in the graph.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Type:</th><td class="field-body">RuleContextGraphVertexRange</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="mod.RuleContextGraph.numEdges">
+<code class="descname">numEdges</code><a class="headerlink" href="#mod.RuleContextGraph.numEdges" title="Permalink to this definition">¶</a></dt>
+<dd><p>(Read-only) The number of edges in the graph.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Type:</th><td class="field-body">int</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="mod.RuleContextGraph.edges">
+<code class="descname">edges</code><a class="headerlink" href="#mod.RuleContextGraph.edges" title="Permalink to this definition">¶</a></dt>
+<dd><p>(Read-only) An iterable of all edges in the graph.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Type:</th><td class="field-body">RuleContextGraphEdgeRange</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="id1">
+<h2>3.1.9.2.5. Class <code class="docutils literal notranslate"><span class="pre">RuleLeftGraphVertex</span></code><a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt>
+<em class="property">class </em><code class="descclassname">mod.</code><code class="descname">RuleLeftGraphVertex</code></dt>
+<dd><p>A descriptor of either a vertex in a context, or a null vertex.</p>
+<dl class="function">
+<dt>
+<code class="descname">__init__</code><span class="sig-paren">(</span><em>self</em><span class="sig-paren">)</span></dt>
+<dd><p>Constructs a null descriptor.</p>
+</dd></dl>
+
+<dl class="method">
+<dt>
+<code class="descname">isNull</code><span class="sig-paren">(</span><span class="sig-paren">)</span></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">whether this is a null descriptor or not.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">bool</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt>
+<code class="descname">id</code></dt>
+<dd><p>(Read-only) The index of the vertex. It will be in the range <span class="math notranslate">\([0, numCoreVertices[\)</span>.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Type:</th><td class="field-body">int</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Raises:</th><td class="field-body"><a class="reference internal" href="../Error.html#mod.LogicError" title="mod.LogicError"><code class="xref py py-class docutils literal notranslate"><span class="pre">LogicError</span></code></a> if it is a null descriptor.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt>
+<code class="descname">rule</code></dt>
+<dd><p>(Read-only) The rule the vertex belongs to.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Type:</th><td class="field-body"><a class="reference internal" href="Rule.html#mod.Rule" title="mod.Rule">Rule</a></td>
+</tr>
+<tr class="field-even field"><th class="field-name">Raises:</th><td class="field-body"><a class="reference internal" href="../Error.html#mod.LogicError" title="mod.LogicError"><code class="xref py py-class docutils literal notranslate"><span class="pre">LogicError</span></code></a> if it is a null descriptor.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt>
+<code class="descname">core</code></dt>
+<dd><p>(Read-only) The descriptor for this vertex in the core graph.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Type:</th><td class="field-body"><a class="reference internal" href="#mod.RuleVertex" title="mod.RuleVertex">RuleVertex</a></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt>
+<code class="descname">degree</code></dt>
+<dd><p>(Read-only) The degree of the vertex.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Type:</th><td class="field-body">int</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Raises:</th><td class="field-body"><a class="reference internal" href="../Error.html#mod.LogicError" title="mod.LogicError"><code class="xref py py-class docutils literal notranslate"><span class="pre">LogicError</span></code></a> if it is a null descriptor.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt>
+<code class="descname">incidentEdges</code></dt>
+<dd><p>(Read-only) A range of incident edges to this vertex.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Type:</th><td class="field-body">RuleContextGraphIncidentEdgeRange</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Raises:</th><td class="field-body"><a class="reference internal" href="../Error.html#mod.LogicError" title="mod.LogicError"><code class="xref py py-class docutils literal notranslate"><span class="pre">LogicError</span></code></a> if it is a null descriptor.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="class-rulecontextgraphedge">
+<h2>3.1.9.2.6. Class <code class="docutils literal notranslate"><span class="pre">RuleContextGraphEdge</span></code><a class="headerlink" href="#class-rulecontextgraphedge" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="mod.RuleContextGraphEdge">
+<em class="property">class </em><code class="descclassname">mod.</code><code class="descname">RuleContextGraphEdge</code><a class="headerlink" href="#mod.RuleContextGraphEdge" title="Permalink to this definition">¶</a></dt>
+<dd><p>A descriptor of either an edge in a context, or a null edge.</p>
+<dl class="function">
+<dt id="mod.RuleContextGraphEdge.__init__">
+<code class="descname">__init__</code><span class="sig-paren">(</span><em>self</em><span class="sig-paren">)</span><a class="headerlink" href="#mod.RuleContextGraphEdge.__init__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Constructs a null descriptor.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="mod.RuleContextGraphEdge.isNull">
+<code class="descname">isNull</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#mod.RuleContextGraphEdge.isNull" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">whether this is a null descriptor or not.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">bool</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="mod.RuleContextGraphEdge.graph">
+<code class="descname">graph</code><a class="headerlink" href="#mod.RuleContextGraphEdge.graph" title="Permalink to this definition">¶</a></dt>
+<dd><p>(Read-only) The rule the edge belongs to.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Type:</th><td class="field-body"><a class="reference internal" href="Rule.html#mod.Rule" title="mod.Rule">Rule</a></td>
+</tr>
+<tr class="field-even field"><th class="field-name">Raises:</th><td class="field-body"><a class="reference internal" href="../Error.html#mod.LogicError" title="mod.LogicError"><code class="xref py py-class docutils literal notranslate"><span class="pre">LogicError</span></code></a> if it is a null descriptor.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="mod.RuleContextGraphEdge.core">
+<code class="descname">core</code><a class="headerlink" href="#mod.RuleContextGraphEdge.core" title="Permalink to this definition">¶</a></dt>
+<dd><p>(Read-only) The descriptor for this edge in the core graph.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Type:</th><td class="field-body"><a class="reference internal" href="#mod.RuleEdge" title="mod.RuleEdge">RuleEdge</a></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="mod.RuleContextGraphEdge.source">
+<code class="descname">source</code><a class="headerlink" href="#mod.RuleContextGraphEdge.source" title="Permalink to this definition">¶</a></dt>
+<dd><p>(Read-only) The source vertex of the edge.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Type:</th><td class="field-body">RuleContextGraphVertex</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Raises:</th><td class="field-body"><a class="reference internal" href="../Error.html#mod.LogicError" title="mod.LogicError"><code class="xref py py-class docutils literal notranslate"><span class="pre">LogicError</span></code></a> if it is a null descriptor.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="mod.RuleContextGraphEdge.target">
+<code class="descname">target</code><a class="headerlink" href="#mod.RuleContextGraphEdge.target" title="Permalink to this definition">¶</a></dt>
+<dd><p>(Read-only) The target vertex of the edge.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Type:</th><td class="field-body">RuleContextGraphVertex</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Raises:</th><td class="field-body"><a class="reference internal" href="../Error.html#mod.LogicError" title="mod.LogicError"><code class="xref py py-class docutils literal notranslate"><span class="pre">LogicError</span></code></a> if it is a null descriptor.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="class-rulerightgraph">
+<h2>3.1.9.2.7. Class <code class="docutils literal notranslate"><span class="pre">RuleRightGraph</span></code><a class="headerlink" href="#class-rulerightgraph" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="mod.RuleRightGraph">
+<em class="property">class </em><code class="descclassname">mod.</code><code class="descname">RuleRightGraph</code><a class="headerlink" href="#mod.RuleRightGraph" title="Permalink to this definition">¶</a></dt>
+<dd><p>A proxy object representing the right graph of the rule.</p>
+<dl class="attribute">
+<dt id="mod.RuleRightGraph.rule">
+<code class="descname">rule</code><a class="headerlink" href="#mod.RuleRightGraph.rule" title="Permalink to this definition">¶</a></dt>
+<dd><p>(Read-only) The rule the graph belongs to.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Type:</th><td class="field-body"><a class="reference internal" href="Rule.html#mod.Rule" title="mod.Rule">Rule</a></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="mod.RuleRightGraph.numVertices">
+<code class="descname">numVertices</code><a class="headerlink" href="#mod.RuleRightGraph.numVertices" title="Permalink to this definition">¶</a></dt>
+<dd><p>(Read-only) The number of vertices in the graph.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Type:</th><td class="field-body">int</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="mod.RuleRightGraph.vertices">
+<code class="descname">vertices</code><a class="headerlink" href="#mod.RuleRightGraph.vertices" title="Permalink to this definition">¶</a></dt>
+<dd><p>(Read-only) An iterable of all vertices in the graph.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Type:</th><td class="field-body">RuleRightGraphVertexRange</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="mod.RuleRightGraph.numEdges">
+<code class="descname">numEdges</code><a class="headerlink" href="#mod.RuleRightGraph.numEdges" title="Permalink to this definition">¶</a></dt>
+<dd><p>(Read-only) The number of edges in the graph.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Type:</th><td class="field-body">int</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="mod.RuleRightGraph.edges">
+<code class="descname">edges</code><a class="headerlink" href="#mod.RuleRightGraph.edges" title="Permalink to this definition">¶</a></dt>
+<dd><p>(Read-only) An iterable of all edges in the graph.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Type:</th><td class="field-body">RuleRightGraphEdgeRange</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="class-rulerightgraphvertex">
+<h2>3.1.9.2.8. Class <code class="docutils literal notranslate"><span class="pre">RuleRightGraphVertex</span></code><a class="headerlink" href="#class-rulerightgraphvertex" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="mod.RuleRightGraphVertex">
+<em class="property">class </em><code class="descclassname">mod.</code><code class="descname">RuleRightGraphVertex</code><a class="headerlink" href="#mod.RuleRightGraphVertex" title="Permalink to this definition">¶</a></dt>
+<dd><p>A descriptor of either a vertex in a right side, or a null vertex.</p>
+<dl class="function">
+<dt id="mod.RuleRightGraphVertex.__init__">
+<code class="descname">__init__</code><span class="sig-paren">(</span><em>self</em><span class="sig-paren">)</span><a class="headerlink" href="#mod.RuleRightGraphVertex.__init__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Constructs a null descriptor.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="mod.RuleRightGraphVertex.isNull">
+<code class="descname">isNull</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#mod.RuleRightGraphVertex.isNull" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">whether this is a null descriptor or not.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">bool</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="mod.RuleRightGraphVertex.id">
+<code class="descname">id</code><a class="headerlink" href="#mod.RuleRightGraphVertex.id" title="Permalink to this definition">¶</a></dt>
+<dd><p>(Read-only) The index of the vertex. It will be in the range <span class="math notranslate">\([0, numCoreVertices[\)</span>.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Type:</th><td class="field-body">int</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Raises:</th><td class="field-body"><a class="reference internal" href="../Error.html#mod.LogicError" title="mod.LogicError"><code class="xref py py-class docutils literal notranslate"><span class="pre">LogicError</span></code></a> if it is a null descriptor.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="mod.RuleRightGraphVertex.rule">
+<code class="descname">rule</code><a class="headerlink" href="#mod.RuleRightGraphVertex.rule" title="Permalink to this definition">¶</a></dt>
+<dd><p>(Read-only) The rule the vertex belongs to.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Type:</th><td class="field-body"><a class="reference internal" href="Rule.html#mod.Rule" title="mod.Rule">Rule</a></td>
+</tr>
+<tr class="field-even field"><th class="field-name">Raises:</th><td class="field-body"><a class="reference internal" href="../Error.html#mod.LogicError" title="mod.LogicError"><code class="xref py py-class docutils literal notranslate"><span class="pre">LogicError</span></code></a> if it is a null descriptor.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="mod.RuleRightGraphVertex.core">
+<code class="descname">core</code><a class="headerlink" href="#mod.RuleRightGraphVertex.core" title="Permalink to this definition">¶</a></dt>
+<dd><p>(Read-only) The descriptor for this vertex in the core graph.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Type:</th><td class="field-body"><a class="reference internal" href="#mod.RuleVertex" title="mod.RuleVertex">RuleVertex</a></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="mod.RuleRightGraphVertex.degree">
+<code class="descname">degree</code><a class="headerlink" href="#mod.RuleRightGraphVertex.degree" title="Permalink to this definition">¶</a></dt>
+<dd><p>(Read-only) The degree of the vertex.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Type:</th><td class="field-body">int</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Raises:</th><td class="field-body"><a class="reference internal" href="../Error.html#mod.LogicError" title="mod.LogicError"><code class="xref py py-class docutils literal notranslate"><span class="pre">LogicError</span></code></a> if it is a null descriptor.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="mod.RuleRightGraphVertex.incidentEdges">
+<code class="descname">incidentEdges</code><a class="headerlink" href="#mod.RuleRightGraphVertex.incidentEdges" title="Permalink to this definition">¶</a></dt>
+<dd><p>(Read-only) A range of incident edges to this vertex.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Type:</th><td class="field-body">RuleRightGraphIncidentEdgeRange</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Raises:</th><td class="field-body"><a class="reference internal" href="../Error.html#mod.LogicError" title="mod.LogicError"><code class="xref py py-class docutils literal notranslate"><span class="pre">LogicError</span></code></a> if it is a null descriptor.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="mod.RuleRightGraphVertex.stringLabel">
+<code class="descname">stringLabel</code><a class="headerlink" href="#mod.RuleRightGraphVertex.stringLabel" title="Permalink to this definition">¶</a></dt>
+<dd><p>(Read-only) The string label of the vertex.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Type:</th><td class="field-body">string</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Raises:</th><td class="field-body"><a class="reference internal" href="../Error.html#mod.LogicError" title="mod.LogicError"><code class="xref py py-class docutils literal notranslate"><span class="pre">LogicError</span></code></a> if it is a null descriptor.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="mod.RuleRightGraphVertex.atomId">
+<code class="descname">atomId</code><a class="headerlink" href="#mod.RuleRightGraphVertex.atomId" title="Permalink to this definition">¶</a></dt>
+<dd><p>(Read-only) The atom id of the vertex.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Type:</th><td class="field-body"><a class="reference internal" href="../Chem.html#mod.AtomId" title="mod.AtomId">AtomId</a></td>
+</tr>
+<tr class="field-even field"><th class="field-name">Raises:</th><td class="field-body"><a class="reference internal" href="../Error.html#mod.LogicError" title="mod.LogicError"><code class="xref py py-class docutils literal notranslate"><span class="pre">LogicError</span></code></a> if it is a null descriptor.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="mod.RuleRightGraphVertex.charge">
+<code class="descname">charge</code><a class="headerlink" href="#mod.RuleRightGraphVertex.charge" title="Permalink to this definition">¶</a></dt>
+<dd><p>(Read-only) The charge of the vertex.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Type:</th><td class="field-body"><a class="reference internal" href="../Chem.html#mod.Charge" title="mod.Charge">Charge</a></td>
+</tr>
+<tr class="field-even field"><th class="field-name">Raises:</th><td class="field-body"><a class="reference internal" href="../Error.html#mod.LogicError" title="mod.LogicError"><code class="xref py py-class docutils literal notranslate"><span class="pre">LogicError</span></code></a> if it is a null descriptor.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="mod.RuleRightGraphVertex.radical">
+<code class="descname">radical</code><a class="headerlink" href="#mod.RuleRightGraphVertex.radical" title="Permalink to this definition">¶</a></dt>
+<dd><p>(Read-only) The radical status of the vertex.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Type:</th><td class="field-body">bool</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Raises:</th><td class="field-body"><a class="reference internal" href="../Error.html#mod.LogicError" title="mod.LogicError"><code class="xref py py-class docutils literal notranslate"><span class="pre">LogicError</span></code></a> if it is a null descriptor.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="mod.RuleRightGraphVertex.printStereo">
+<code class="descname">printStereo</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#mod.RuleRightGraphVertex.printStereo" title="Permalink to this definition">¶</a></dt>
+<dt>
+<code class="descname">printStereo</code><span class="sig-paren">(</span><em>p</em><span class="sig-paren">)</span></dt>
+<dd><p>Print the stereo configuration for the vertex.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>p</strong> (<a class="reference internal" href="../graph/Printer.html#mod.GraphPrinter" title="mod.GraphPrinter"><code class="xref py py-class docutils literal notranslate"><span class="pre">GraphPrinter</span></code></a>) – the printing options used for the depiction.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">the name of the PDF-file that will be compiled in post-processing.</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">string</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Raises:</th><td class="field-body"><a class="reference internal" href="../Error.html#mod.LogicError" title="mod.LogicError"><code class="xref py py-class docutils literal notranslate"><span class="pre">LogicError</span></code></a> if it is a null descriptor.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="class-rulerightgraphedge">
+<h2>3.1.9.2.9. Class <code class="docutils literal notranslate"><span class="pre">RuleRightGraphEdge</span></code><a class="headerlink" href="#class-rulerightgraphedge" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="mod.RuleRightGraphEdge">
+<em class="property">class </em><code class="descclassname">mod.</code><code class="descname">RuleRightGraphEdge</code><a class="headerlink" href="#mod.RuleRightGraphEdge" title="Permalink to this definition">¶</a></dt>
+<dd><p>A descriptor of either an edge in a right side, or a null edge.</p>
+<dl class="function">
+<dt id="mod.RuleRightGraphEdge.__init__">
+<code class="descname">__init__</code><span class="sig-paren">(</span><em>self</em><span class="sig-paren">)</span><a class="headerlink" href="#mod.RuleRightGraphEdge.__init__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Constructs a null descriptor.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="mod.RuleRightGraphEdge.isNull">
+<code class="descname">isNull</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#mod.RuleRightGraphEdge.isNull" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">whether this is a null descriptor or not.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">bool</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="mod.RuleRightGraphEdge.graph">
+<code class="descname">graph</code><a class="headerlink" href="#mod.RuleRightGraphEdge.graph" title="Permalink to this definition">¶</a></dt>
+<dd><p>(Read-only) The rule the edge belongs to.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Type:</th><td class="field-body"><a class="reference internal" href="Rule.html#mod.Rule" title="mod.Rule">Rule</a></td>
+</tr>
+<tr class="field-even field"><th class="field-name">Raises:</th><td class="field-body"><a class="reference internal" href="../Error.html#mod.LogicError" title="mod.LogicError"><code class="xref py py-class docutils literal notranslate"><span class="pre">LogicError</span></code></a> if it is a null descriptor.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="mod.RuleRightGraphEdge.core">
+<code class="descname">core</code><a class="headerlink" href="#mod.RuleRightGraphEdge.core" title="Permalink to this definition">¶</a></dt>
+<dd><p>(Read-only) The descriptor for this edge in the core graph.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Type:</th><td class="field-body"><a class="reference internal" href="#mod.RuleEdge" title="mod.RuleEdge">RuleEdge</a></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="mod.RuleRightGraphEdge.source">
+<code class="descname">source</code><a class="headerlink" href="#mod.RuleRightGraphEdge.source" title="Permalink to this definition">¶</a></dt>
+<dd><p>(Read-only) The source vertex of the edge.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Type:</th><td class="field-body"><a class="reference internal" href="#mod.RuleRightGraphVertex" title="mod.RuleRightGraphVertex">RuleRightGraphVertex</a></td>
+</tr>
+<tr class="field-even field"><th class="field-name">Raises:</th><td class="field-body"><a class="reference internal" href="../Error.html#mod.LogicError" title="mod.LogicError"><code class="xref py py-class docutils literal notranslate"><span class="pre">LogicError</span></code></a> if it is a null descriptor.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="mod.RuleRightGraphEdge.target">
+<code class="descname">target</code><a class="headerlink" href="#mod.RuleRightGraphEdge.target" title="Permalink to this definition">¶</a></dt>
+<dd><p>(Read-only) The target vertex of the edge.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Type:</th><td class="field-body"><a class="reference internal" href="#mod.RuleRightGraphVertex" title="mod.RuleRightGraphVertex">RuleRightGraphVertex</a></td>
+</tr>
+<tr class="field-even field"><th class="field-name">Raises:</th><td class="field-body"><a class="reference internal" href="../Error.html#mod.LogicError" title="mod.LogicError"><code class="xref py py-class docutils literal notranslate"><span class="pre">LogicError</span></code></a> if it is a null descriptor.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="mod.RuleRightGraphEdge.stringLabel">
+<code class="descname">stringLabel</code><a class="headerlink" href="#mod.RuleRightGraphEdge.stringLabel" title="Permalink to this definition">¶</a></dt>
+<dd><p>(Read-only) The string label of the edge.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Type:</th><td class="field-body">string</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Raises:</th><td class="field-body"><a class="reference internal" href="../Error.html#mod.LogicError" title="mod.LogicError"><code class="xref py py-class docutils literal notranslate"><span class="pre">LogicError</span></code></a> if it is a null descriptor.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="mod.RuleRightGraphEdge.bondType">
+<code class="descname">bondType</code><a class="headerlink" href="#mod.RuleRightGraphEdge.bondType" title="Permalink to this definition">¶</a></dt>
+<dd><p>(Read-only) The bond type of the edge.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Type:</th><td class="field-body"><a class="reference internal" href="../Chem.html#mod.BondType" title="mod.BondType">BondType</a></td>
+</tr>
+<tr class="field-even field"><th class="field-name">Raises:</th><td class="field-body"><a class="reference internal" href="../Error.html#mod.LogicError" title="mod.LogicError"><code class="xref py py-class docutils literal notranslate"><span class="pre">LogicError</span></code></a> if it is a null descriptor.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="class-rulevertex">
+<h2>3.1.9.2.10. Class <code class="docutils literal notranslate"><span class="pre">RuleVertex</span></code><a class="headerlink" href="#class-rulevertex" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="mod.RuleVertex">
+<em class="property">class </em><code class="descclassname">mod.</code><code class="descname">RuleVertex</code><a class="headerlink" href="#mod.RuleVertex" title="Permalink to this definition">¶</a></dt>
+<dd><p>A descriptor of either a vertex in a rule, or a null vertex.</p>
+<dl class="function">
+<dt id="mod.RuleVertex.__init__">
+<code class="descname">__init__</code><span class="sig-paren">(</span><em>self</em><span class="sig-paren">)</span><a class="headerlink" href="#mod.RuleVertex.__init__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Constructs a null descriptor.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="mod.RuleVertex.isNull">
+<code class="descname">isNull</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#mod.RuleVertex.isNull" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">whether this is a null descriptor or not.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">bool</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="mod.RuleVertex.id">
+<code class="descname">id</code><a class="headerlink" href="#mod.RuleVertex.id" title="Permalink to this definition">¶</a></dt>
+<dd><p>(Read-only) The index of the vertex. It will be in the range <span class="math notranslate">\([0, numVertices[\)</span>.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Type:</th><td class="field-body">int</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Raises:</th><td class="field-body"><a class="reference internal" href="../Error.html#mod.LogicError" title="mod.LogicError"><code class="xref py py-class docutils literal notranslate"><span class="pre">LogicError</span></code></a> if it is a null descriptor.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="mod.RuleVertex.rule">
+<code class="descname">rule</code><a class="headerlink" href="#mod.RuleVertex.rule" title="Permalink to this definition">¶</a></dt>
+<dd><p>(Read-only) The rule the vertex belongs to.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Type:</th><td class="field-body"><a class="reference internal" href="Rule.html#mod.Rule" title="mod.Rule">Rule</a></td>
+</tr>
+<tr class="field-even field"><th class="field-name">Raises:</th><td class="field-body"><a class="reference internal" href="../Error.html#mod.LogicError" title="mod.LogicError"><code class="xref py py-class docutils literal notranslate"><span class="pre">LogicError</span></code></a> if it is a null descriptor.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="mod.RuleVertex.left">
+<code class="descname">left</code><a class="headerlink" href="#mod.RuleVertex.left" title="Permalink to this definition">¶</a></dt>
+<dd><p>(Read-only) A null descriptor if this vertex is not in the left graph,
+otherwise the descriptor of this vertex in the left graph.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="mod.RuleVertex.context">
+<code class="descname">context</code><a class="headerlink" href="#mod.RuleVertex.context" title="Permalink to this definition">¶</a></dt>
+<dd><p>(Read-only) A null descriptor if this vertex is not in the context graph,
+otherwise the descriptor of this vertex in the context graph.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt>
+<code class="descname">left</code></dt>
+<dd><p>(Read-only) A null descriptor if this vertex is not in the right graph,
+otherwise the descriptor of this vertex in the right graph.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="mod.RuleVertex.degree">
+<code class="descname">degree</code><a class="headerlink" href="#mod.RuleVertex.degree" title="Permalink to this definition">¶</a></dt>
+<dd><p>(Read-only) The degree of the vertex.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Type:</th><td class="field-body">int</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Raises:</th><td class="field-body"><a class="reference internal" href="../Error.html#mod.LogicError" title="mod.LogicError"><code class="xref py py-class docutils literal notranslate"><span class="pre">LogicError</span></code></a> if it is a null descriptor.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="mod.RuleVertex.incidentEdges">
+<code class="descname">incidentEdges</code><a class="headerlink" href="#mod.RuleVertex.incidentEdges" title="Permalink to this definition">¶</a></dt>
+<dd><p>(Read-only) A range of incident edges to this vertex.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Type:</th><td class="field-body">RuleIncidentEdgeRange</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Raises:</th><td class="field-body"><a class="reference internal" href="../Error.html#mod.LogicError" title="mod.LogicError"><code class="xref py py-class docutils literal notranslate"><span class="pre">LogicError</span></code></a> if it is a null descriptor.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="mod.RuleVertex.get2DX">
+<code class="descname">get2DX</code><span class="sig-paren">(</span><em>withHydrogens=True</em><span class="sig-paren">)</span><a class="headerlink" href="#mod.RuleVertex.get2DX" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">the x-coordinate in a 2D depiction of the rule.
+Different sets of coordinates exists for rendering with and wihout certain hydrogens.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">float</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Raises:</th><td class="field-body"><a class="reference internal" href="../Error.html#mod.LogicError" title="mod.LogicError"><code class="xref py py-class docutils literal notranslate"><span class="pre">LogicError</span></code></a> if it is a null descriptor, or
+if <code class="docutils literal notranslate"><span class="pre">withHydrogens</span></code> is <code class="docutils literal notranslate"><span class="pre">True</span></code> and the vertex is a “clean” hydrogen.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="mod.RuleVertex.get2DY">
+<code class="descname">get2DY</code><span class="sig-paren">(</span><em>withHydrogens=True</em><span class="sig-paren">)</span><a class="headerlink" href="#mod.RuleVertex.get2DY" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">the y-coordinate in a 2D depiction of the rule.
+Different sets of coordinates exists for rendering with and wihout certain hydrogens.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">float</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Raises:</th><td class="field-body"><a class="reference internal" href="../Error.html#mod.LogicError" title="mod.LogicError"><code class="xref py py-class docutils literal notranslate"><span class="pre">LogicError</span></code></a> if it is a null descriptor, or
+if <code class="docutils literal notranslate"><span class="pre">withHydrogens</span></code> is <code class="docutils literal notranslate"><span class="pre">True</span></code> and the vertex is a “clean” hydrogen.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="class-ruleedge">
+<h2>3.1.9.2.11. Class <code class="docutils literal notranslate"><span class="pre">RuleEdge</span></code><a class="headerlink" href="#class-ruleedge" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="mod.RuleEdge">
+<em class="property">class </em><code class="descclassname">mod.</code><code class="descname">RuleEdge</code><a class="headerlink" href="#mod.RuleEdge" title="Permalink to this definition">¶</a></dt>
+<dd><p>A descriptor of either an edge in a rule, or a null edge.</p>
+<dl class="function">
+<dt id="mod.RuleEdge.__init__">
+<code class="descname">__init__</code><span class="sig-paren">(</span><em>self</em><span class="sig-paren">)</span><a class="headerlink" href="#mod.RuleEdge.__init__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Constructs a null descriptor.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="mod.RuleEdge.isNull">
+<code class="descname">isNull</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#mod.RuleEdge.isNull" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">whether this is a null descriptor or not.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">bool</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="mod.RuleEdge.rule">
+<code class="descname">rule</code><a class="headerlink" href="#mod.RuleEdge.rule" title="Permalink to this definition">¶</a></dt>
+<dd><p>(Read-only) The rule the edge belongs to.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Type:</th><td class="field-body"><a class="reference internal" href="Rule.html#mod.Rule" title="mod.Rule">Rule</a></td>
+</tr>
+<tr class="field-even field"><th class="field-name">Raises:</th><td class="field-body"><a class="reference internal" href="../Error.html#mod.LogicError" title="mod.LogicError"><code class="xref py py-class docutils literal notranslate"><span class="pre">LogicError</span></code></a> if it is a null descriptor.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="mod.RuleEdge.left">
+<code class="descname">left</code><a class="headerlink" href="#mod.RuleEdge.left" title="Permalink to this definition">¶</a></dt>
+<dd><p>(Read-only) A null descriptor if this edge is not in the left graph,
+otherwise the descriptor of this edge in the left graph.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="mod.RuleEdge.context">
+<code class="descname">context</code><a class="headerlink" href="#mod.RuleEdge.context" title="Permalink to this definition">¶</a></dt>
+<dd><p>(Read-only) A null descriptor if this edge is not in the context graph,
+otherwise the descriptor of this edge in the context graph.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt>
+<code class="descname">left</code></dt>
+<dd><p>(Read-only) A null descriptor if this edge is not in the right graph,
+otherwise the descriptor of this edge in the right graph.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="mod.RuleEdge.source">
+<code class="descname">source</code><a class="headerlink" href="#mod.RuleEdge.source" title="Permalink to this definition">¶</a></dt>
+<dd><p>(Read-only) The source vertex of the edge.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Type:</th><td class="field-body"><a class="reference internal" href="#mod.RuleVertex" title="mod.RuleVertex">RuleVertex</a></td>
+</tr>
+<tr class="field-even field"><th class="field-name">Raises:</th><td class="field-body"><a class="reference internal" href="../Error.html#mod.LogicError" title="mod.LogicError"><code class="xref py py-class docutils literal notranslate"><span class="pre">LogicError</span></code></a> if it is a null descriptor.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="mod.RuleEdge.target">
+<code class="descname">target</code><a class="headerlink" href="#mod.RuleEdge.target" title="Permalink to this definition">¶</a></dt>
+<dd><p>(Read-only) The target vertex of the edge.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Type:</th><td class="field-body"><a class="reference internal" href="#mod.RuleVertex" title="mod.RuleVertex">RuleVertex</a></td>
+</tr>
+<tr class="field-even field"><th class="field-name">Raises:</th><td class="field-body"><a class="reference internal" href="../Error.html#mod.LogicError" title="mod.LogicError"><code class="xref py py-class docutils literal notranslate"><span class="pre">LogicError</span></code></a> if it is a null descriptor.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="../../index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">3.1.9.2. rule/GraphInterface</a><ul>
+<li><a class="reference internal" href="#class-ruleleftgraph">3.1.9.2.1. Class <code class="docutils literal notranslate"><span class="pre">RuleLeftGraph</span></code></a></li>
+<li><a class="reference internal" href="#class-ruleleftgraphvertex">3.1.9.2.2. Class <code class="docutils literal notranslate"><span class="pre">RuleLeftGraphVertex</span></code></a></li>
+<li><a class="reference internal" href="#class-ruleleftgraphedge">3.1.9.2.3. Class <code class="docutils literal notranslate"><span class="pre">RuleLeftGraphEdge</span></code></a></li>
+<li><a class="reference internal" href="#class-rulecontextgraph">3.1.9.2.4. Class <code class="docutils literal notranslate"><span class="pre">RuleContextGraph</span></code></a></li>
+<li><a class="reference internal" href="#id1">3.1.9.2.5. Class <code class="docutils literal notranslate"><span class="pre">RuleLeftGraphVertex</span></code></a></li>
+<li><a class="reference internal" href="#class-rulecontextgraphedge">3.1.9.2.6. Class <code class="docutils literal notranslate"><span class="pre">RuleContextGraphEdge</span></code></a></li>
+<li><a class="reference internal" href="#class-rulerightgraph">3.1.9.2.7. Class <code class="docutils literal notranslate"><span class="pre">RuleRightGraph</span></code></a></li>
+<li><a class="reference internal" href="#class-rulerightgraphvertex">3.1.9.2.8. Class <code class="docutils literal notranslate"><span class="pre">RuleRightGraphVertex</span></code></a></li>
+<li><a class="reference internal" href="#class-rulerightgraphedge">3.1.9.2.9. Class <code class="docutils literal notranslate"><span class="pre">RuleRightGraphEdge</span></code></a></li>
+<li><a class="reference internal" href="#class-rulevertex">3.1.9.2.10. Class <code class="docutils literal notranslate"><span class="pre">RuleVertex</span></code></a></li>
+<li><a class="reference internal" href="#class-ruleedge">3.1.9.2.11. Class <code class="docutils literal notranslate"><span class="pre">RuleEdge</span></code></a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="Composition.html"
+                        title="previous chapter">3.1.9.1. rule/Composition</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="Rule.html"
+                        title="next chapter">3.1.9.3. rule/Rule</a></p>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../../_sources/pymod/rule/GraphInterface.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="Rule.html" title="3.1.9.3. rule/Rule"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="Composition.html" title="3.1.9.1. rule/Composition"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">MØD v0.7.0 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../pymod.html" >3. PyMØD</a> &#187;</li>
+          <li class="nav-item nav-item-2"><a href="../api.html" >3.1. API Reference</a> &#187;</li>
+          <li class="nav-item nav-item-3"><a href="index.html" >3.1.9. rule</a> &#187;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2013-2018, Jakob Lykke Andersen.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.8.0+.
+    </div>
+  </body>
+</html>

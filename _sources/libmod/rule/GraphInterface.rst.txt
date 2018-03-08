@@ -1,0 +1,1720 @@
+.. _cpp-rule/GraphInterface:
+
+**********************************************************
+rule/GraphInterface.h
+**********************************************************
+.. default-domain:: cpp
+
+.. py:currentmodule:: mod
+.. cpp:namespace:: mod
+
+This header contains the definitions for the graph interface for :cpp:class:`rule::Rule`.
+
+========================================================================
+Left
+========================================================================
+
+
+Class ``rule::Rule::LeftGraph``
+--------------------------------------------------------------------------------------------------------------------------------
+
+.. class:: rule::Rule::LeftGraph
+    
+
+    A proxy object representing the left graph of the rule.
+
+Synopsis
+^^^^^^^^
+
+.. code-block:: c++
+    
+    struct Rule::LeftGraph {
+        class Vertex;
+        class Edge;
+        class VertexIterator;
+        class VertexRange;
+        class EdgeIterator;
+        class EdgeRange;
+        class IncidentEdgeIterator;
+        class IncidentEdgeRange;
+    private:
+        friend class Rule;
+        LeftGraph(std::shared_ptr<Rule> r);
+    public:
+        std::shared_ptr<Rule> getRule() const;
+        std::size_t numVertices() const;
+        VertexRange vertices() const;
+        std::size_t numEdges() const;
+        EdgeRange edges() const;
+    private:
+        std::shared_ptr<Rule> r;
+    };
+
+Details
+^^^^^^^
+
+.. cpp:namespace:: mod
+
+.. cpp:namespace-push:: rule::Rule::LeftGraph
+
+.. function:: std::shared_ptr<Rule> getRule() const
+
+    :returns: the rule where the graph belongs to.
+.. function:: std::size_t numVertices() const
+
+    :returns: the number of vertices in the graph.
+.. function:: VertexRange vertices() const
+
+    :returns: a range of all vertices in the graph.
+.. function:: std::size_t numEdges() const
+
+    :returns: the number of edges in the graph.
+.. function:: EdgeRange edges() const
+
+    :returns: a range of all edges in the graph.
+
+.. cpp:namespace:: mod
+
+
+Class ``rule::Rule::LeftGraph::Vertex``
+--------------------------------------------------------------------------------------------------------------------------------
+
+.. class:: rule::Rule::LeftGraph::Vertex
+    
+
+    A descriptor of either a vertex in a rule, or a null vertex.
+
+Synopsis
+^^^^^^^^
+
+.. code-block:: c++
+    
+    class Rule::LeftGraph::Vertex {
+        friend class Rule::Vertex;
+        friend class LeftGraph;
+        friend class Edge;
+        friend class VertexIterator;
+        friend class VertexRange;
+        Vertex(std::shared_ptr<Rule> r, std::size_t vId);
+    public:
+        Vertex();
+        friend std::ostream &operator<<(std::ostream &s, const Vertex &v);
+        friend bool operator==(const Vertex &v1, const Vertex &v2);
+        friend bool operator!=(const Vertex &v1, const Vertex &v2);
+        friend bool operator<(const Vertex &v1, const Vertex &v2);
+        bool isNull() const;
+        std::size_t getId() const;
+        std::shared_ptr<Rule> getRule() const;
+        Rule::Vertex getCore() const;
+        std::size_t getDegree() const;
+        IncidentEdgeRange incidentEdges() const;
+        const std::string &getStringLabel() const;
+        AtomId getAtomId() const;
+        Charge getCharge() const;
+        bool getRadical() const;
+        std::string printStereo() const;
+        std::string printStereo(const graph::Printer &p) const;
+    private:
+        std::shared_ptr<Rule> r;
+        std::size_t vId;
+    };
+
+Details
+^^^^^^^
+
+.. cpp:namespace:: mod
+
+.. cpp:namespace-push:: rule::Rule::LeftGraph::Vertex
+
+.. function:: Vertex()
+
+    Constructs a null descriptor.
+.. function:: bool isNull() const
+
+    :returns: whether this is a null descriptor or not.
+.. function:: std::size_t getId() const
+
+    :returns: the index of the vertex. It will be in the range :math:`[0, numVertices[`.
+    :throws: :cpp:class:`LogicError` if it is a null descriptor.
+.. function:: std::shared_ptr<Rule> getRule() const
+
+    :returns: the rule the vertex belongs to.
+    :throws: :cpp:class:`LogicError` if it is a null descriptor.
+.. function:: Rule::Vertex getCore() const
+
+    :returns: the descriptor for this vertex in the core graph.
+.. function:: std::size_t getDegree() const
+
+    :returns: the degree of the vertex.
+    :throws: :cpp:class:`LogicError` if it is a null descriptor.
+.. function:: IncidentEdgeRange incidentEdges() const
+
+    :returns: a range of incident edges to this vertex.
+    :throws: :cpp:class:`LogicError` if it is a null descriptor.
+.. function:: const std::string &getStringLabel() const
+
+    :returns: the string label of the vertex.
+    :throws: :cpp:class:`LogicError` if it is a null descriptor.
+.. function:: AtomId getAtomId() const
+
+    :returns: the atom id of the vertex.
+    :throws: :cpp:class:`LogicError` if it is a null descriptor.
+.. function:: Charge getCharge() const
+
+    :returns: the charge of the vertex.
+    :throws: :cpp:class:`LogicError` if it is a null descriptor.
+.. function:: bool getRadical() const
+
+    :returns: the radical status of the vertex.
+    :throws: :cpp:class:`LogicError` if it is a null descriptor.
+.. function:: std::string printStereo() const
+              std::string printStereo(const graph::Printer &p) const
+
+    Print the stereo configuration for the vertex.
+
+    :returns: the name of the PDF-file that will be compiled in post-processing.
+    :throws: :cpp:class:`LogicError` if it is a null descriptor.
+
+.. cpp:namespace:: mod
+
+
+Class ``rule::Rule::LeftGraph::Edge``
+--------------------------------------------------------------------------------------------------------------------------------
+
+.. class:: rule::Rule::LeftGraph::Edge
+    
+
+    A descriptor of either an edge in a rule, or a null edge.
+
+Synopsis
+^^^^^^^^
+
+.. code-block:: c++
+    
+    class Rule::LeftGraph::Edge {
+        friend class Rule::Edge;
+        friend class EdgeIterator;
+        friend class IncidentEdgeIterator;
+        Edge(std::shared_ptr<Rule> r, std::size_t vId, std::size_t eId);
+    public:
+        Edge();
+        friend std::ostream &operator<<(std::ostream &s, const Edge &e);
+        friend bool operator==(const Edge &e1, const Edge &e2);
+        friend bool operator!=(const Edge &e1, const Edge &e2);
+        friend bool operator<(const Edge &e1, const Edge &e2);
+        bool isNull() const;
+        std::shared_ptr<Rule> getRule() const;
+        Rule::Edge getCore() const;
+        Vertex source() const;
+        Vertex target() const;
+        const std::string &getStringLabel() const;
+        BondType getBondType() const;
+    private:
+        std::shared_ptr<Rule> r;
+        std::size_t vId, eId;
+    };
+
+Details
+^^^^^^^
+
+.. cpp:namespace:: mod
+
+.. cpp:namespace-push:: rule::Rule::LeftGraph::Edge
+
+.. function:: Edge()
+
+    Constructs a null descriptor.
+.. function:: bool isNull() const
+
+    :returns: whether this is a null descriptor or not.
+.. function:: std::shared_ptr<Rule> getRule() const
+
+    :returns: the rule the edge belongs to.
+    :throws: :cpp:class:`LogicError` if it is a null descriptor.
+.. function:: Rule::Edge getCore() const
+
+    :returns: the descriptor for this edge in the core graph.
+.. function:: Vertex source() const
+
+    :returns: the source vertex of the edge.
+    :throws: :cpp:class:`LogicError` if it is a null descriptor.
+.. function:: Vertex target() const
+
+    :returns: the target vertex of the edge.
+    :throws: :cpp:class:`LogicError` if it is a null descriptor.
+.. function:: const std::string &getStringLabel() const
+
+    :returns: the string label of the edge.
+    :throws: :cpp:class:`LogicError` if it is a null descriptor.
+.. function:: BondType getBondType() const
+
+    :returns: the bond type of the edge.
+    :throws: :cpp:class:`LogicError` if it is a null descriptor.
+
+.. cpp:namespace:: mod
+
+
+Class ``rule::Rule::LeftGraph::VertexIterator``
+--------------------------------------------------------------------------------------------------------------------------------
+
+.. class:: rule::Rule::LeftGraph::VertexIterator
+    
+
+    An iterator for traversing all vertices in a rule.
+    It models a forward iterator.
+
+Synopsis
+^^^^^^^^
+
+.. code-block:: c++
+    
+    class Rule::LeftGraph::VertexIterator : public boost::iterator_facade<VertexIterator, Vertex, std::forward_iterator_tag, Vertex> {
+        friend class Rule;
+        VertexIterator(std::shared_ptr<Rule> r);
+    public:
+        VertexIterator();
+    private:
+        friend class boost::iterator_core_access;
+        Vertex dereference() const;
+        bool equal(const VertexIterator &iter) const;
+        void increment();
+    private:
+        std::shared_ptr<Rule> r;
+        std::size_t vId;
+    };
+
+Details
+^^^^^^^
+
+.. cpp:namespace:: mod
+
+.. cpp:namespace-push:: rule::Rule::LeftGraph::VertexIterator
+
+.. function:: VertexIterator()
+
+    Construct a past-the-end iterator.
+
+.. cpp:namespace:: mod
+
+
+Class ``rule::Rule::LeftGraph::VertexRange``
+--------------------------------------------------------------------------------------------------------------------------------
+
+.. class:: rule::Rule::LeftGraph::VertexRange
+    
+
+    A range of all vertices in a rule.
+
+Synopsis
+^^^^^^^^
+
+.. code-block:: c++
+    
+    struct Rule::LeftGraph::VertexRange {
+        using iterator = VertexIterator;
+        using const_iterator = iterator;
+    private:
+        friend class Rule;
+        VertexRange(std::shared_ptr<Rule> r);
+    public:
+        VertexIterator begin() const;
+        VertexIterator end() const;
+    private:
+        std::shared_ptr<Rule> r;
+    };
+
+Class ``rule::Rule::LeftGraph::EdgeIterator``
+--------------------------------------------------------------------------------------------------------------------------------
+
+.. class:: rule::Rule::LeftGraph::EdgeIterator
+    
+
+    An iterator for traversing all edges in a rule.
+    It models a forward iterator.
+
+Synopsis
+^^^^^^^^
+
+.. code-block:: c++
+    
+    class Rule::LeftGraph::EdgeIterator : public boost::iterator_facade<EdgeIterator, Edge, std::forward_iterator_tag, Edge> {
+        friend class Rule;
+        EdgeIterator(std::shared_ptr<Rule> r);
+    public:
+        EdgeIterator();
+    private:
+        friend class boost::iterator_core_access;
+        Edge dereference() const;
+        bool equal(const EdgeIterator &iter) const;
+        void increment();
+        void advanceToValid();
+    private:
+        std::shared_ptr<Rule> r;
+        std::size_t vId, eId;
+    };
+
+Details
+^^^^^^^
+
+.. cpp:namespace:: mod
+
+.. cpp:namespace-push:: rule::Rule::LeftGraph::EdgeIterator
+
+.. function:: EdgeIterator()
+
+    Construct a past-the-end iterator.
+
+.. cpp:namespace:: mod
+
+
+Class ``rule::Rule::LeftGraph::EdgeRange``
+--------------------------------------------------------------------------------------------------------------------------------
+
+.. class:: rule::Rule::LeftGraph::EdgeRange
+    
+
+    A range of all edges in a rule.
+
+Synopsis
+^^^^^^^^
+
+.. code-block:: c++
+    
+    struct Rule::LeftGraph::EdgeRange {
+        using iterator = EdgeIterator;
+        using const_iterator = iterator;
+    private:
+        friend class Rule;
+        EdgeRange(std::shared_ptr<Rule> r);
+    public:
+        EdgeIterator begin() const;
+        EdgeIterator end() const;
+    private:
+        std::shared_ptr<Rule> r;
+    };
+
+Class ``rule::Rule::LeftGraph::IncidnetEdgeIterator``
+--------------------------------------------------------------------------------------------------------------------------------
+
+.. class:: rule::Rule::LeftGraph::IncidnetEdgeIterator
+    
+
+    An iterator for traversing all edges in a rule.
+    It models a forward iterator.
+
+Synopsis
+^^^^^^^^
+
+.. code-block:: c++
+    
+    class Rule::LeftGraph::IncidentEdgeIterator : public boost::iterator_facade<IncidentEdgeIterator, Edge, std::forward_iterator_tag, Edge> {
+        friend class Rule;
+        IncidentEdgeIterator(std::shared_ptr<Rule> r, std::size_t vId);
+    public:
+        IncidentEdgeIterator();
+    private:
+        friend class boost::iterator_core_access;
+        Edge dereference() const;
+        bool equal(const IncidentEdgeIterator &iter) const;
+        void increment();
+    private:
+        std::shared_ptr<Rule> r;
+        std::size_t vId, eId;
+    };
+
+Details
+^^^^^^^
+
+.. cpp:namespace:: mod
+
+.. cpp:namespace-push:: rule::Rule::LeftGraph::IncidnetEdgeIterator
+
+.. function:: IncidentEdgeIterator()
+
+    Construct a past-the-end iterator.
+
+.. cpp:namespace:: mod
+
+
+Class ``rule::Rule::LeftGraph::IncidentEdgeRange``
+--------------------------------------------------------------------------------------------------------------------------------
+
+.. class:: rule::Rule::LeftGraph::IncidentEdgeRange
+    
+
+    A range of all incident edges to a vertex in a rule.
+
+Synopsis
+^^^^^^^^
+
+.. code-block:: c++
+    
+    struct Rule::LeftGraph::IncidentEdgeRange {
+        using iterator = IncidentEdgeIterator;
+        using const_iterator = iterator;
+    private:
+        friend class Vertex;
+        IncidentEdgeRange(std::shared_ptr<Rule> r, std::size_t vId);
+    public:
+        IncidentEdgeIterator begin() const;
+        IncidentEdgeIterator end() const;
+    private:
+        std::shared_ptr<Rule> r;
+        std::size_t vId;
+    };
+
+========================================================================
+Context
+========================================================================
+
+
+Class ``rule::Rule::ContextGraph``
+--------------------------------------------------------------------------------------------------------------------------------
+
+.. class:: rule::Rule::ContextGraph
+    
+
+    A proxy object representing the context graph of the rule.
+
+Synopsis
+^^^^^^^^
+
+.. code-block:: c++
+    
+    struct Rule::ContextGraph {
+        class Vertex;
+        class Edge;
+        class VertexIterator;
+        class VertexRange;
+        class EdgeIterator;
+        class EdgeRange;
+        class IncidentEdgeIterator;
+        class IncidentEdgeRange;
+    private:
+        friend class Rule;
+        ContextGraph(std::shared_ptr<Rule> r);
+    public:
+        std::shared_ptr<Rule> getRule() const;
+        std::size_t numVertices() const;
+        VertexRange vertices() const;
+        std::size_t numEdges() const;
+        EdgeRange edges() const;
+    private:
+        std::shared_ptr<Rule> r;
+    };
+
+Details
+^^^^^^^
+
+.. cpp:namespace:: mod
+
+.. cpp:namespace-push:: rule::Rule::ContextGraph
+
+.. function:: std::shared_ptr<Rule> getRule() const
+
+    :returns: the rule where the graph belongs to.
+.. function:: std::size_t numVertices() const
+
+    :returns: the number of vertices in the graph.
+.. function:: VertexRange vertices() const
+
+    :returns: a range of all vertices in the graph.
+.. function:: std::size_t numEdges() const
+
+    :returns: the number of edges in the graph.
+.. function:: EdgeRange edges() const
+
+    :returns: a range of all edges in the graph.
+
+.. cpp:namespace:: mod
+
+
+Class ``rule::Rule::ContextGraph::Vertex``
+--------------------------------------------------------------------------------------------------------------------------------
+
+.. class:: rule::Rule::ContextGraph::Vertex
+    
+
+    A descriptor of either a vertex in a rule, or a null vertex.
+
+Synopsis
+^^^^^^^^
+
+.. code-block:: c++
+    
+    class Rule::ContextGraph::Vertex {
+        friend class Rule;
+        friend class Edge;
+        friend class VertexIterator;
+        friend class VertexRange;
+        Vertex(std::shared_ptr<Rule> r, std::size_t vId);
+    public:
+        Vertex();
+        friend std::ostream &operator<<(std::ostream &s, const Vertex &v);
+        friend bool operator==(const Vertex &v1, const Vertex &v2);
+        friend bool operator!=(const Vertex &v1, const Vertex &v2);
+        friend bool operator<(const Vertex &v1, const Vertex &v2);
+        bool isNull() const;
+        std::size_t getId() const;
+        std::shared_ptr<Rule> getRule() const;
+        Rule::Vertex getCore() const;
+        std::size_t getDegree() const;
+        IncidentEdgeRange incidentEdges() const;
+    private:
+        std::shared_ptr<Rule> r;
+        std::size_t vId;
+    };
+
+Details
+^^^^^^^
+
+.. cpp:namespace:: mod
+
+.. cpp:namespace-push:: rule::Rule::ContextGraph::Vertex
+
+.. function:: Vertex()
+
+    Constructs a null descriptor.
+.. function:: bool isNull() const
+
+    :returns: whether this is a null descriptor or not.
+.. function:: std::size_t getId() const
+
+    :returns: the index of the vertex. It will be in the range :math:`[0, numVertices[`.
+    :throws: :cpp:class:`LogicError` if it is a null descriptor.
+.. function:: std::shared_ptr<Rule> getRule() const
+
+    :returns: the rule the vertex belongs to.
+    :throws: :cpp:class:`LogicError` if it is a null descriptor.
+.. function:: Rule::Vertex getCore() const
+
+    :returns: the descriptor for this vertex in the core graph.
+.. function:: std::size_t getDegree() const
+
+    :returns: the degree of the vertex.
+    :throws: :cpp:class:`LogicError` if it is a null descriptor.
+.. function:: IncidentEdgeRange incidentEdges() const
+
+    :returns: a range of incident edges to this vertex.
+    :throws: :cpp:class:`LogicError` if it is a null descriptor.
+
+.. cpp:namespace:: mod
+
+
+Class ``rule::Rule::ContextGraph::Edge``
+--------------------------------------------------------------------------------------------------------------------------------
+
+.. class:: rule::Rule::ContextGraph::Edge
+    
+
+    A descriptor of either an edge in a rule, or a null edge.
+
+Synopsis
+^^^^^^^^
+
+.. code-block:: c++
+    
+    class Rule::ContextGraph::Edge {
+        friend class Rule::Edge;
+        friend class EdgeIterator;
+        friend class IncidentEdgeIterator;
+        Edge(std::shared_ptr<Rule> r, std::size_t vId, std::size_t eId);
+    public:
+        Edge();
+        friend std::ostream &operator<<(std::ostream &s, const Edge &e);
+        friend bool operator==(const Edge &e1, const Edge &e2);
+        friend bool operator!=(const Edge &e1, const Edge &e2);
+        friend bool operator<(const Edge &e1, const Edge &e2);
+        bool isNull() const;
+        std::shared_ptr<Rule> getRule() const;
+        Rule::Edge getCore() const;
+        Vertex source() const;
+        Vertex target() const;
+    private:
+        std::shared_ptr<Rule> r;
+        std::size_t vId, eId;
+    };
+
+Details
+^^^^^^^
+
+.. cpp:namespace:: mod
+
+.. cpp:namespace-push:: rule::Rule::ContextGraph::Edge
+
+.. function:: Edge()
+
+    Constructs a null descriptor.
+.. function:: bool isNull() const
+
+    :returns: whether this is a null descriptor or not.
+.. function:: std::shared_ptr<Rule> getRule() const
+
+    :returns: the rule the edge belongs to.
+    :throws: :cpp:class:`LogicError` if it is a null descriptor.
+.. function:: Rule::Edge getCore() const
+
+    :returns: the descriptor for this edge in the core graph.
+.. function:: Vertex source() const
+
+    :returns: the source vertex of the edge.
+    :throws: :cpp:class:`LogicError` if it is a null descriptor.
+.. function:: Vertex target() const
+
+    :returns: the target vertex of the edge.
+    :throws: :cpp:class:`LogicError` if it is a null descriptor.
+
+.. cpp:namespace:: mod
+
+
+Class ``rule::Rule::ContextGraph::VertexIterator``
+--------------------------------------------------------------------------------------------------------------------------------
+
+.. class:: rule::Rule::ContextGraph::VertexIterator
+    
+
+    An iterator for traversing all vertices in a rule.
+    It models a forward iterator.
+
+Synopsis
+^^^^^^^^
+
+.. code-block:: c++
+    
+    class Rule::ContextGraph::VertexIterator : public boost::iterator_facade<VertexIterator, Vertex, std::forward_iterator_tag, Vertex> {
+        friend class Rule;
+        VertexIterator(std::shared_ptr<Rule> r);
+    public:
+        VertexIterator();
+    private:
+        friend class boost::iterator_core_access;
+        Vertex dereference() const;
+        bool equal(const VertexIterator &iter) const;
+        void increment();
+    private:
+        std::shared_ptr<Rule> r;
+        std::size_t vId;
+    };
+
+Details
+^^^^^^^
+
+.. cpp:namespace:: mod
+
+.. cpp:namespace-push:: rule::Rule::ContextGraph::VertexIterator
+
+.. function:: VertexIterator()
+
+    Construct a past-the-end iterator.
+
+.. cpp:namespace:: mod
+
+
+Class ``rule::Rule::ContextGraph::VertexRange``
+--------------------------------------------------------------------------------------------------------------------------------
+
+.. class:: rule::Rule::ContextGraph::VertexRange
+    
+
+    A range of all vertices in a rule.
+
+Synopsis
+^^^^^^^^
+
+.. code-block:: c++
+    
+    struct Rule::ContextGraph::VertexRange {
+        using iterator = VertexIterator;
+        using const_iterator = iterator;
+    private:
+        friend class Rule;
+        VertexRange(std::shared_ptr<Rule> r);
+    public:
+        VertexIterator begin() const;
+        VertexIterator end() const;
+    private:
+        std::shared_ptr<Rule> r;
+    };
+
+Class ``rule::Rule::ContextGraph::EdgeIterator``
+--------------------------------------------------------------------------------------------------------------------------------
+
+.. class:: rule::Rule::ContextGraph::EdgeIterator
+    
+
+    An iterator for traversing all edges in a rule.
+    It models a forward iterator.
+
+Synopsis
+^^^^^^^^
+
+.. code-block:: c++
+    
+    class Rule::ContextGraph::EdgeIterator : public boost::iterator_facade<EdgeIterator, Edge, std::forward_iterator_tag, Edge> {
+        friend class Rule;
+        EdgeIterator(std::shared_ptr<Rule> r);
+    public:
+        EdgeIterator();
+    private:
+        friend class boost::iterator_core_access;
+        Edge dereference() const;
+        bool equal(const EdgeIterator &iter) const;
+        void increment();
+        void advanceToValid();
+    private:
+        std::shared_ptr<Rule> r;
+        std::size_t vId, eId;
+    };
+
+Details
+^^^^^^^
+
+.. cpp:namespace:: mod
+
+.. cpp:namespace-push:: rule::Rule::ContextGraph::EdgeIterator
+
+.. function:: EdgeIterator()
+
+    Construct a past-the-end iterator.
+
+.. cpp:namespace:: mod
+
+
+Class ``rule::Rule::ContextGraph::EdgeRange``
+--------------------------------------------------------------------------------------------------------------------------------
+
+.. class:: rule::Rule::ContextGraph::EdgeRange
+    
+
+    A range of all edges in a rule.
+
+Synopsis
+^^^^^^^^
+
+.. code-block:: c++
+    
+    struct Rule::ContextGraph::EdgeRange {
+        using iterator = EdgeIterator;
+        using const_iterator = iterator;
+    private:
+        friend class Rule;
+        EdgeRange(std::shared_ptr<Rule> r);
+    public:
+        EdgeIterator begin() const;
+        EdgeIterator end() const;
+    private:
+        std::shared_ptr<Rule> r;
+    };
+
+Class ``rule::Rule::ContextGraph::IncidnetEdgeIterator``
+--------------------------------------------------------------------------------------------------------------------------------
+
+.. class:: rule::Rule::ContextGraph::IncidnetEdgeIterator
+    
+
+    An iterator for traversing all edges in a rule.
+    It models a forward iterator.
+
+Synopsis
+^^^^^^^^
+
+.. code-block:: c++
+    
+    class Rule::ContextGraph::IncidentEdgeIterator : public boost::iterator_facade<IncidentEdgeIterator, Edge, std::forward_iterator_tag, Edge> {
+        friend class Rule;
+        IncidentEdgeIterator(std::shared_ptr<Rule> r, std::size_t vId);
+    public:
+        IncidentEdgeIterator();
+    private:
+        friend class boost::iterator_core_access;
+        Edge dereference() const;
+        bool equal(const IncidentEdgeIterator &iter) const;
+        void increment();
+    private:
+        std::shared_ptr<Rule> r;
+        std::size_t vId, eId;
+    };
+
+Details
+^^^^^^^
+
+.. cpp:namespace:: mod
+
+.. cpp:namespace-push:: rule::Rule::ContextGraph::IncidnetEdgeIterator
+
+.. function:: IncidentEdgeIterator()
+
+    Construct a past-the-end iterator.
+
+.. cpp:namespace:: mod
+
+
+Class ``rule::Rule::ContextGraph::IncidentEdgeRange``
+--------------------------------------------------------------------------------------------------------------------------------
+
+.. class:: rule::Rule::ContextGraph::IncidentEdgeRange
+    
+
+    A range of all incident edges to a vertex in a rule.
+
+Synopsis
+^^^^^^^^
+
+.. code-block:: c++
+    
+    struct Rule::ContextGraph::IncidentEdgeRange {
+        using iterator = IncidentEdgeIterator;
+        using const_iterator = iterator;
+    private:
+        friend class Vertex;
+        IncidentEdgeRange(std::shared_ptr<Rule> r, std::size_t vId);
+    public:
+        IncidentEdgeIterator begin() const;
+        IncidentEdgeIterator end() const;
+    private:
+        std::shared_ptr<Rule> r;
+        std::size_t vId;
+    };
+
+========================================================================
+Right
+========================================================================
+
+
+Class ``rule::Rule::RightGraph``
+--------------------------------------------------------------------------------------------------------------------------------
+
+.. class:: rule::Rule::RightGraph
+    
+
+    A proxy object representing the right graph of the rule.
+
+Synopsis
+^^^^^^^^
+
+.. code-block:: c++
+    
+    struct Rule::RightGraph {
+        class Vertex;
+        class Edge;
+        class VertexIterator;
+        class VertexRange;
+        class EdgeIterator;
+        class EdgeRange;
+        class IncidentEdgeIterator;
+        class IncidentEdgeRange;
+    private:
+        friend class Rule;
+        RightGraph(std::shared_ptr<Rule> r);
+    public:
+        std::shared_ptr<Rule> getRule() const;
+        std::size_t numVertices() const;
+        VertexRange vertices() const;
+        std::size_t numEdges() const;
+        EdgeRange edges() const;
+    private:
+        std::shared_ptr<Rule> r;
+    };
+
+Details
+^^^^^^^
+
+.. cpp:namespace:: mod
+
+.. cpp:namespace-push:: rule::Rule::RightGraph
+
+.. function:: std::shared_ptr<Rule> getRule() const
+
+    :returns: the rule where the graph belongs to.
+.. function:: std::size_t numVertices() const
+
+    :returns: the number of vertices in the graph.
+.. function:: VertexRange vertices() const
+
+    :returns: a range of all vertices in the graph.
+.. function:: std::size_t numEdges() const
+
+    :returns: the number of edges in the graph.
+.. function:: EdgeRange edges() const
+
+    :returns: a range of all edges in the graph.
+
+.. cpp:namespace:: mod
+
+
+Class ``rule::Rule::RightGraph::Vertex``
+--------------------------------------------------------------------------------------------------------------------------------
+
+.. class:: rule::Rule::RightGraph::Vertex
+    
+
+    A descriptor of either a vertex in a rule, or a null vertex.
+
+Synopsis
+^^^^^^^^
+
+.. code-block:: c++
+    
+    class Rule::RightGraph::Vertex {
+        friend class Rule;
+        friend class Edge;
+        friend class VertexIterator;
+        friend class VertexRange;
+        Vertex(std::shared_ptr<Rule> r, std::size_t vId);
+    public:
+        Vertex();
+        friend std::ostream &operator<<(std::ostream &s, const Vertex &v);
+        friend bool operator==(const Vertex &v1, const Vertex &v2);
+        friend bool operator!=(const Vertex &v1, const Vertex &v2);
+        friend bool operator<(const Vertex &v1, const Vertex &v2);
+        bool isNull() const;
+        std::size_t getId() const;
+        std::shared_ptr<Rule> getRule() const;
+        Rule::Vertex getCore() const;
+        std::size_t getDegree() const;
+        IncidentEdgeRange incidentEdges() const;
+        const std::string &getStringLabel() const;
+        AtomId getAtomId() const;
+        Charge getCharge() const;
+        bool getRadical() const;
+        std::string printStereo() const;
+        std::string printStereo(const graph::Printer &p) const;
+    private:
+        std::shared_ptr<Rule> r;
+        std::size_t vId;
+    };
+
+Details
+^^^^^^^
+
+.. cpp:namespace:: mod
+
+.. cpp:namespace-push:: rule::Rule::RightGraph::Vertex
+
+.. function:: Vertex()
+
+    Constructs a null descriptor.
+.. function:: bool isNull() const
+
+    :returns: whether this is a null descriptor or not.
+.. function:: std::size_t getId() const
+
+    :returns: the index of the vertex. It will be in the range :math:`[0, numVertices[`.
+    :throws: :cpp:class:`LogicError` if it is a null descriptor.
+.. function:: std::shared_ptr<Rule> getRule() const
+
+    :returns: the rule the vertex belongs to.
+    :throws: :cpp:class:`LogicError` if it is a null descriptor.
+.. function:: Rule::Vertex getCore() const
+
+    :returns: the descriptor for this vertex in the core graph.
+.. function:: std::size_t getDegree() const
+
+    :returns: the degree of the vertex.
+    :throws: :cpp:class:`LogicError` if it is a null descriptor.
+.. function:: IncidentEdgeRange incidentEdges() const
+
+    :returns: a range of incident edges to this vertex.
+    :throws: :cpp:class:`LogicError` if it is a null descriptor.
+.. function:: const std::string &getStringLabel() const
+
+    :returns: the string label of the vertex.
+    :throws: :cpp:class:`LogicError` if it is a null descriptor.
+.. function:: AtomId getAtomId() const
+
+    :returns: the atom id of the vertex.
+    :throws: :cpp:class:`LogicError` if it is a null descriptor.
+.. function:: Charge getCharge() const
+
+    :returns: the charge of the vertex.
+    :throws: :cpp:class:`LogicError` if it is a null descriptor.
+.. function:: bool getRadical() const
+
+    :returns: the radical status of the vertex.
+    :throws: :cpp:class:`LogicError` if it is a null descriptor.
+.. function:: std::string printStereo() const
+              std::string printStereo(const graph::Printer &p) const
+
+    Print the stereo configuration for the vertex.
+
+    :returns: the name of the PDF-file that will be compiled in post-processing.
+    :throws: :cpp:class:`LogicError` if it is a null descriptor.
+
+.. cpp:namespace:: mod
+
+
+Class ``rule::Rule::RightGraph::Edge``
+--------------------------------------------------------------------------------------------------------------------------------
+
+.. class:: rule::Rule::RightGraph::Edge
+    
+
+    A descriptor of either an edge in a rule, or a null edge.
+
+Synopsis
+^^^^^^^^
+
+.. code-block:: c++
+    
+    class Rule::RightGraph::Edge {
+        friend class Rule::Edge;
+        friend class EdgeIterator;
+        friend class IncidentEdgeIterator;
+        Edge(std::shared_ptr<Rule> r, std::size_t vId, std::size_t eId);
+    public:
+        Edge();
+        friend std::ostream &operator<<(std::ostream &s, const Edge &e);
+        friend bool operator==(const Edge &e1, const Edge &e2);
+        friend bool operator!=(const Edge &e1, const Edge &e2);
+        friend bool operator<(const Edge &e1, const Edge &e2);
+        bool isNull() const;
+        std::shared_ptr<Rule> getRule() const;
+        Rule::Edge getCore() const;
+        Vertex source() const;
+        Vertex target() const;
+        const std::string &getStringLabel() const;
+        BondType getBondType() const;
+    private:
+        std::shared_ptr<Rule> r;
+        std::size_t vId, eId;
+    };
+
+Details
+^^^^^^^
+
+.. cpp:namespace:: mod
+
+.. cpp:namespace-push:: rule::Rule::RightGraph::Edge
+
+.. function:: Edge()
+
+    Constructs a null descriptor.
+.. function:: bool isNull() const
+
+    :returns: whether this is a null descriptor or not.
+.. function:: std::shared_ptr<Rule> getRule() const
+
+    :returns: the rule the edge belongs to.
+    :throws: :cpp:class:`LogicError` if it is a null descriptor.
+.. function:: Rule::Edge getCore() const
+
+    :returns: the descriptor for this edge in the core graph.
+.. function:: Vertex source() const
+
+    :returns: the source vertex of the edge.
+    :throws: :cpp:class:`LogicError` if it is a null descriptor.
+.. function:: Vertex target() const
+
+    :returns: the target vertex of the edge.
+    :throws: :cpp:class:`LogicError` if it is a null descriptor.
+.. function:: const std::string &getStringLabel() const
+
+    :returns: the string label of the edge.
+    :throws: :cpp:class:`LogicError` if it is a null descriptor.
+.. function:: BondType getBondType() const
+
+    :returns: the bond type of the edge.
+    :throws: :cpp:class:`LogicError` if it is a null descriptor.
+
+.. cpp:namespace:: mod
+
+
+Class ``rule::Rule::RightGraph::VertexIterator``
+--------------------------------------------------------------------------------------------------------------------------------
+
+.. class:: rule::Rule::RightGraph::VertexIterator
+    
+
+    An iterator for traversing all vertices in a rule.
+    It models a forward iterator.
+
+Synopsis
+^^^^^^^^
+
+.. code-block:: c++
+    
+    class Rule::RightGraph::VertexIterator : public boost::iterator_facade<VertexIterator, Vertex, std::forward_iterator_tag, Vertex> {
+        friend class Rule;
+        VertexIterator(std::shared_ptr<Rule> r);
+    public:
+        VertexIterator();
+    private:
+        friend class boost::iterator_core_access;
+        Vertex dereference() const;
+        bool equal(const VertexIterator &iter) const;
+        void increment();
+    private:
+        std::shared_ptr<Rule> r;
+        std::size_t vId;
+    };
+
+Details
+^^^^^^^
+
+.. cpp:namespace:: mod
+
+.. cpp:namespace-push:: rule::Rule::RightGraph::VertexIterator
+
+.. function:: VertexIterator()
+
+    Construct a past-the-end iterator.
+
+.. cpp:namespace:: mod
+
+
+Class ``rule::Rule::RightGraph::VertexRange``
+--------------------------------------------------------------------------------------------------------------------------------
+
+.. class:: rule::Rule::RightGraph::VertexRange
+    
+
+    A range of all vertices in a rule.
+
+Synopsis
+^^^^^^^^
+
+.. code-block:: c++
+    
+    struct Rule::RightGraph::VertexRange {
+        using iterator = VertexIterator;
+        using const_iterator = iterator;
+    private:
+        friend class Rule;
+        VertexRange(std::shared_ptr<Rule> r);
+    public:
+        VertexIterator begin() const;
+        VertexIterator end() const;
+    private:
+        std::shared_ptr<Rule> r;
+    };
+
+Class ``rule::Rule::RightGraph::EdgeIterator``
+--------------------------------------------------------------------------------------------------------------------------------
+
+.. class:: rule::Rule::RightGraph::EdgeIterator
+    
+
+    An iterator for traversing all edges in a rule.
+    It models a forward iterator.
+
+Synopsis
+^^^^^^^^
+
+.. code-block:: c++
+    
+    class Rule::RightGraph::EdgeIterator : public boost::iterator_facade<EdgeIterator, Edge, std::forward_iterator_tag, Edge> {
+        friend class Rule;
+        EdgeIterator(std::shared_ptr<Rule> r);
+    public:
+        EdgeIterator();
+    private:
+        friend class boost::iterator_core_access;
+        Edge dereference() const;
+        bool equal(const EdgeIterator &iter) const;
+        void increment();
+        void advanceToValid();
+    private:
+        std::shared_ptr<Rule> r;
+        std::size_t vId, eId;
+    };
+
+Details
+^^^^^^^
+
+.. cpp:namespace:: mod
+
+.. cpp:namespace-push:: rule::Rule::RightGraph::EdgeIterator
+
+.. function:: EdgeIterator()
+
+    Construct a past-the-end iterator.
+
+.. cpp:namespace:: mod
+
+
+Class ``rule::Rule::RightGraph::EdgeRange``
+--------------------------------------------------------------------------------------------------------------------------------
+
+.. class:: rule::Rule::RightGraph::EdgeRange
+    
+
+    A range of all edges in a rule.
+
+Synopsis
+^^^^^^^^
+
+.. code-block:: c++
+    
+    struct Rule::RightGraph::EdgeRange {
+        using iterator = EdgeIterator;
+        using const_iterator = iterator;
+    private:
+        friend class Rule;
+        EdgeRange(std::shared_ptr<Rule> r);
+    public:
+        EdgeIterator begin() const;
+        EdgeIterator end() const;
+    private:
+        std::shared_ptr<Rule> r;
+    };
+
+Class ``rule::Rule::RightGraph::IncidnetEdgeIterator``
+--------------------------------------------------------------------------------------------------------------------------------
+
+.. class:: rule::Rule::RightGraph::IncidnetEdgeIterator
+    
+
+    An iterator for traversing all edges in a rule.
+    It models a forward iterator.
+
+Synopsis
+^^^^^^^^
+
+.. code-block:: c++
+    
+    class Rule::RightGraph::IncidentEdgeIterator : public boost::iterator_facade<IncidentEdgeIterator, Edge, std::forward_iterator_tag, Edge> {
+        friend class Rule;
+        IncidentEdgeIterator(std::shared_ptr<Rule> r, std::size_t vId);
+    public:
+        IncidentEdgeIterator();
+    private:
+        friend class boost::iterator_core_access;
+        Edge dereference() const;
+        bool equal(const IncidentEdgeIterator &iter) const;
+        void increment();
+    private:
+        std::shared_ptr<Rule> r;
+        std::size_t vId, eId;
+    };
+
+Details
+^^^^^^^
+
+.. cpp:namespace:: mod
+
+.. cpp:namespace-push:: rule::Rule::RightGraph::IncidnetEdgeIterator
+
+.. function:: IncidentEdgeIterator()
+
+    Construct a past-the-end iterator.
+
+.. cpp:namespace:: mod
+
+
+Class ``rule::Rule::RightGraph::IncidentEdgeRange``
+--------------------------------------------------------------------------------------------------------------------------------
+
+.. class:: rule::Rule::RightGraph::IncidentEdgeRange
+    
+
+    A range of all incident edges to a vertex in a rule.
+
+Synopsis
+^^^^^^^^
+
+.. code-block:: c++
+    
+    struct Rule::RightGraph::IncidentEdgeRange {
+        using iterator = IncidentEdgeIterator;
+        using const_iterator = iterator;
+    private:
+        friend class Vertex;
+        IncidentEdgeRange(std::shared_ptr<Rule> r, std::size_t vId);
+    public:
+        IncidentEdgeIterator begin() const;
+        IncidentEdgeIterator end() const;
+    private:
+        std::shared_ptr<Rule> r;
+        std::size_t vId;
+    };
+
+========================================================================
+Core
+========================================================================
+
+
+Class ``rule::Rule::Vertex``
+--------------------------------------------------------------------------------------------------------------------------------
+
+.. class:: rule::Rule::Vertex
+    
+
+    A descriptor of either a vertex in a rule, or a null vertex.
+
+Synopsis
+^^^^^^^^
+
+.. code-block:: c++
+    
+    class Rule::Vertex {
+        friend class Rule;
+        friend class Edge;
+        friend class VertexIterator;
+        friend class VertexRange;
+        Vertex(std::shared_ptr<Rule> r, std::size_t vId);
+    public:
+        Vertex();
+        friend std::ostream &operator<<(std::ostream &s, const Vertex &v);
+        friend bool operator==(const Vertex &v1, const Vertex &v2);
+        friend bool operator!=(const Vertex &v1, const Vertex &v2);
+        friend bool operator<(const Vertex &v1, const Vertex &v2);
+        bool isNull() const;
+        std::size_t getId() const;
+        std::shared_ptr<Rule> getRule() const;
+        LeftGraph::Vertex getLeft() const;
+        ContextGraph::Vertex getContext() const;
+        RightGraph::Vertex getRight() const;
+        std::size_t getDegree() const;
+        IncidentEdgeRange incidentEdges() const;
+        double get2DX(bool withHydrogens = true);
+        double get2DY(bool withHydrogens = true);
+    private:
+        std::shared_ptr<Rule> r;
+        std::size_t vId;
+    };
+
+Details
+^^^^^^^
+
+.. cpp:namespace:: mod
+
+.. cpp:namespace-push:: rule::Rule::Vertex
+
+.. function:: Vertex()
+
+    Constructs a null descriptor.
+.. function:: bool isNull() const
+
+    :returns: whether this is a null descriptor or not.
+.. function:: std::size_t getId() const
+
+    :returns: the index of the vertex. It will be in the range :math:`[0, numVertices[`.
+    :throws: :cpp:class:`LogicError` if it is a null descriptor.
+.. function:: std::shared_ptr<Rule> getRule() const
+
+    :returns: the rule the vertex belongs to.
+    :throws: :cpp:class:`LogicError` if it is a null descriptor.
+.. function:: LeftGraph::Vertex getLeft() const
+
+    :returns: a null descriptor if this vertex is not in the left graph,
+        otherwise the descriptor of this vertex in the left graph.
+.. function:: ContextGraph::Vertex getContext() const
+
+    :returns: a null descriptor if this vertex is not in the context graph,
+        otherwise the descriptor of this vertex in the context graph.
+.. function:: RightGraph::Vertex getRight() const
+
+    :returns: a null descriptor if this vertex is not in the right graph,
+        otherwise the descriptor of this vertex in the right graph.
+.. function:: std::size_t getDegree() const
+
+    :returns: the degree of the vertex.
+    :throws: :cpp:class:`LogicError` if it is a null descriptor.
+.. function:: IncidentEdgeRange incidentEdges() const
+
+    :returns: a range of incident edges to this vertex.
+    :throws: :cpp:class:`LogicError` if it is a null descriptor.
+.. function:: double get2DX(bool withHydrogens=true)
+
+    :returns: the x-coordinate in a 2D depiction of the rule.
+        Different sets of coordinates exists for rendering with and wihout certain hydrogens.
+    :throws: :cpp:class:`LogicError` if it is a null descriptor, or
+            if ``withHydrogens`` is ``true`` and the vertex is a "clean" hydrogen.
+.. function:: double get2DY(bool withHydrogens=true)
+
+    :returns: the y-coordinate in a 2D depiction of the rule.
+        Different sets of coordinates exists for rendering with and wihout certain hydrogens.
+    :throws: :cpp:class:`LogicError` if it is a null descriptor, or
+            if ``withHydrogens`` is ``true`` and the vertex is a "clean" hydrogen.
+
+.. cpp:namespace:: mod
+
+
+Class ``rule::Rule::Edge``
+--------------------------------------------------------------------------------------------------------------------------------
+
+.. class:: rule::Rule::Edge
+    
+
+    A descriptor of either an edge in a rule, or a null edge.
+
+Synopsis
+^^^^^^^^
+
+.. code-block:: c++
+    
+    class Rule::Edge {
+        friend class Rule::LeftGraph::Edge;
+        friend class Rule::ContextGraph::Edge;
+        friend class Rule::RightGraph::Edge;
+        friend class EdgeIterator;
+        friend class IncidentEdgeIterator;
+        Edge(std::shared_ptr<Rule> r, std::size_t vId, std::size_t eId);
+    public:
+        Edge();
+        friend std::ostream &operator<<(std::ostream &s, const Edge &e);
+        friend bool operator==(const Edge &e1, const Edge &e2);
+        friend bool operator!=(const Edge &e1, const Edge &e2);
+        friend bool operator<(const Edge &e1, const Edge &e2);
+        bool isNull() const;
+        std::shared_ptr<Rule> getRule() const;
+        LeftGraph::Edge getLeft() const;
+        ContextGraph::Edge getContext() const;
+        RightGraph::Edge getRight() const;
+        Vertex source() const;
+        Vertex target() const;
+    private:
+        std::shared_ptr<Rule> r;
+        std::size_t vId, eId;
+    };
+
+Details
+^^^^^^^
+
+.. cpp:namespace:: mod
+
+.. cpp:namespace-push:: rule::Rule::Edge
+
+.. function:: Edge()
+
+    Constructs a null descriptor.
+.. function:: bool isNull() const
+
+    :returns: whether this is a null descriptor or not.
+.. function:: std::shared_ptr<Rule> getRule() const
+
+    :returns: the rule the edge belongs to.
+    :throws: :cpp:class:`LogicError` if it is a null descriptor.
+.. function:: LeftGraph::Edge getLeft() const
+
+    :returns: a null descriptor if this edge is not in the left graph,
+        otherwise the descriptor of this edge in the left graph.
+.. function:: ContextGraph::Edge getContext() const
+
+    :returns: a null descriptor if this edge is not in the context graph,
+        otherwise the descriptor of this edge in the context graph.
+.. function:: RightGraph::Edge getRight() const
+
+    :returns: a null descriptor if this edge is not in the right graph,
+        otherwise the descriptor of this edge in the right graph.
+.. function:: Vertex source() const
+
+    :returns: the source vertex of the edge.
+    :throws: :cpp:class:`LogicError` if it is a null descriptor.
+.. function:: Vertex target() const
+
+    :returns: the target vertex of the edge.
+    :throws: :cpp:class:`LogicError` if it is a null descriptor.
+
+.. cpp:namespace:: mod
+
+
+Class ``rule::Rule::VertexIterator``
+--------------------------------------------------------------------------------------------------------------------------------
+
+.. class:: rule::Rule::VertexIterator
+    
+
+    An iterator for traversing all vertices in a rule.
+    It models a forward iterator.
+
+Synopsis
+^^^^^^^^
+
+.. code-block:: c++
+    
+    class Rule::VertexIterator : public boost::iterator_facade<VertexIterator, Vertex, std::forward_iterator_tag, Vertex> {
+        friend class Rule;
+        VertexIterator(std::shared_ptr<Rule> r);
+    public:
+        VertexIterator();
+    private:
+        friend class boost::iterator_core_access;
+        Vertex dereference() const;
+        bool equal(const VertexIterator &iter) const;
+        void increment();
+    private:
+        std::shared_ptr<Rule> r;
+        std::size_t vId;
+    };
+
+Details
+^^^^^^^
+
+.. cpp:namespace:: mod
+
+.. cpp:namespace-push:: rule::Rule::VertexIterator
+
+.. function:: VertexIterator()
+
+    Construct a past-the-end iterator.
+
+.. cpp:namespace:: mod
+
+
+Class ``rule::Rule::VertexRange``
+--------------------------------------------------------------------------------------------------------------------------------
+
+.. class:: rule::Rule::VertexRange
+    
+
+    A range of all vertices in a rule.
+
+Synopsis
+^^^^^^^^
+
+.. code-block:: c++
+    
+    struct Rule::VertexRange {
+        using iterator = VertexIterator;
+        using const_iterator = iterator;
+    private:
+        friend class Rule;
+        VertexRange(std::shared_ptr<Rule> r);
+    public:
+        VertexIterator begin() const;
+        VertexIterator end() const;
+        Vertex operator[](std::size_t i) const;
+    private:
+        std::shared_ptr<Rule> r;
+    };
+
+Class ``rule::Rule::EdgeIterator``
+--------------------------------------------------------------------------------------------------------------------------------
+
+.. class:: rule::Rule::EdgeIterator
+    
+
+    An iterator for traversing all edges in a rule.
+    It models a forward iterator.
+
+Synopsis
+^^^^^^^^
+
+.. code-block:: c++
+    
+    class Rule::EdgeIterator : public boost::iterator_facade<EdgeIterator, Edge, std::forward_iterator_tag, Edge> {
+        friend class Rule;
+        EdgeIterator(std::shared_ptr<Rule> r);
+    public:
+        EdgeIterator();
+    private:
+        friend class boost::iterator_core_access;
+        Edge dereference() const;
+        bool equal(const EdgeIterator &iter) const;
+        void increment();
+        void advanceToValid();
+    private:
+        std::shared_ptr<Rule> r;
+        std::size_t vId, eId;
+    };
+
+Details
+^^^^^^^
+
+.. cpp:namespace:: mod
+
+.. cpp:namespace-push:: rule::Rule::EdgeIterator
+
+.. function:: EdgeIterator()
+
+    Construct a past-the-end iterator.
+
+.. cpp:namespace:: mod
+
+
+Class ``rule::Rule::EdgeRange``
+--------------------------------------------------------------------------------------------------------------------------------
+
+.. class:: rule::Rule::EdgeRange
+    
+
+    A range of all edges in a rule.
+
+Synopsis
+^^^^^^^^
+
+.. code-block:: c++
+    
+    struct Rule::EdgeRange {
+        using iterator = EdgeIterator;
+        using const_iterator = iterator;
+    private:
+        friend class Rule;
+        EdgeRange(std::shared_ptr<Rule> r);
+    public:
+        EdgeIterator begin() const;
+        EdgeIterator end() const;
+    private:
+        std::shared_ptr<Rule> r;
+    };
+
+Class ``rule::Rule::IncidnetEdgeIterator``
+--------------------------------------------------------------------------------------------------------------------------------
+
+.. class:: rule::Rule::IncidnetEdgeIterator
+    
+
+    An iterator for traversing all edges in a rule.
+    It models a forward iterator.
+
+Synopsis
+^^^^^^^^
+
+.. code-block:: c++
+    
+    class Rule::IncidentEdgeIterator : public boost::iterator_facade<IncidentEdgeIterator, Edge, std::forward_iterator_tag, Edge> {
+        friend class Rule;
+        IncidentEdgeIterator(std::shared_ptr<Rule> r, std::size_t vId);
+    public:
+        IncidentEdgeIterator();
+    private:
+        friend class boost::iterator_core_access;
+        Edge dereference() const;
+        bool equal(const IncidentEdgeIterator &iter) const;
+        void increment();
+    private:
+        std::shared_ptr<Rule> r;
+        std::size_t vId, eId;
+    };
+
+Details
+^^^^^^^
+
+.. cpp:namespace:: mod
+
+.. cpp:namespace-push:: rule::Rule::IncidnetEdgeIterator
+
+.. function:: IncidentEdgeIterator()
+
+    Construct a past-the-end iterator.
+
+.. cpp:namespace:: mod
+
+
+Class ``rule::Rule::IncidentEdgeRange``
+--------------------------------------------------------------------------------------------------------------------------------
+
+.. class:: rule::Rule::IncidentEdgeRange
+    
+
+    A range of all incident edges to a vertex in a rule.
+
+Synopsis
+^^^^^^^^
+
+.. code-block:: c++
+    
+    struct Rule::IncidentEdgeRange {
+        using iterator = IncidentEdgeIterator;
+        using const_iterator = iterator;
+    private:
+        friend class Vertex;
+        IncidentEdgeRange(std::shared_ptr<Rule> r, std::size_t vId);
+    public:
+        IncidentEdgeIterator begin() const;
+        IncidentEdgeIterator end() const;
+    private:
+        std::shared_ptr<Rule> r;
+        std::size_t vId;
+    };

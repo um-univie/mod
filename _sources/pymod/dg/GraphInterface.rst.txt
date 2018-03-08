@@ -1,0 +1,148 @@
+.. _py-dg/GraphInterface:
+
+**********************************************************
+dg/GraphInterface
+**********************************************************
+.. default-domain:: py
+
+.. py:currentmodule:: mod
+.. cpp:namespace:: mod
+
+
+Class ``DGVertex``
+--------------------------------------------------------------------------------------------------------------------------------
+
+.. py:class:: DGVertex
+
+    A descriptor of either a vertex in a derivation graph, or a null vertex.
+
+    .. py:function:: __init__(self)
+
+        Constructs a null descriptor.
+    .. py:method:: isNull()
+
+        :returns: whether this is a null descriptor or not.
+        :rtype: bool
+    .. py:attribute:: id
+
+        (Read-only) The index of the vertex. It will be in the range :math:`[0, numVertices + numEdges[`.
+
+        :type: int
+        :raises: :py:class:`LogicError` if it is a null descriptor.
+    .. py:attribute:: dg
+
+        (Read-only) The derivation graph the vertex belongs to.
+
+        :type: :py:class:`DG`
+        :raises: :py:class:`LogicError` if it is a null descriptor.
+    .. py:attribute: inDegree
+
+        (Read-only) The in-degree of the vertex, including multiplicity of target multisets.
+
+        :type: int
+        :raises: :py:class:`LogicError` if it is a null descriptor.
+    .. py:attribute:: inEdges
+
+        (Read-only) A range of in-hyperedges for this vertex.
+
+        :type: :py:class:`DGInEdgeRange`
+        :raises: :py:class:`LogicError` if it is a null descriptor.
+    .. py:attribute: outDegree
+
+        (Read-only) The out-degree of the vertex, including multiplicity of source multisets.
+
+        :type: int
+        :raises: :py:class:`LogicError` if it is a null descriptor.
+    .. py:attribute:: outEdges
+
+        (Read-only) A range of out-hyperedges for this vertex.
+
+        :type: :py:class:`DGOutEdgeRange`
+        :raises: :py:class:`LogicError` if it is a null descriptor.
+    .. py:attribute:: graph
+
+        (Read-only) The graph label of the vertex.
+
+        :type: :py:class:`Graph`
+        :raises: :py:class:`LogicError` if it is a null descriptor.
+
+Class ``DGHyperEdge``
+--------------------------------------------------------------------------------------------------------------------------------
+
+.. py:class:: DGHyperEdge
+
+    A descriptor of either a hyperedge in a derivation graph, or a null edge.
+
+    .. py:function:: __init__(self)
+
+        Constructs a null descriptor.
+    .. py:method:: isNull()
+
+        :returns: whether this is a null descriptor or not.
+        :rtype: bool
+    .. py:attribute:: id
+
+        (Read-only) The index of the hyperedge. It will be in the range :math:`[0, numVertices + numEdges[`.
+
+        :type: int
+        :raises: :py:class:`LogicError` if it is a null descriptor.
+    .. py:attribute:: dg
+
+        (Read-only) The derivation graph the edge belongs to.
+
+        :type: :py:class:`DG`
+        :raises: :py:class:`LogicError` if it is a null descriptor.
+    .. py:attribute:: numSources
+
+        (Read-only) The number of sources of the hyperedge.
+
+        :type: int
+    .. py:attribute:: sources
+
+        (Read-only) The sources of the hyperedge.
+
+        :type: :py:class:`DGSourceRange`
+        :raises: :py:class:`LogicError` if it is a null descriptor.
+    .. py:attribute:: numTargets
+
+        (Read-only) The number of targerts of the hyperedge.
+
+        :type: int
+    .. attribute:: targets
+
+        (Read-only) The targets of the hyperedge.
+
+        :type: :py:class:`DGTargetRange`
+        :raises: :py:class:`LogicError` if it is a null descriptor.
+    .. py:attribute:: rules
+
+        (Read-only) The rules associated with the hyperedge.
+
+        :type: :py:class:`DGRuleRange`
+        :raises: :py:class:`LogicError` if it is a null descriptor.
+    .. py::attribute:: inverse
+
+        (Read-only) A descriptor for the inverse hyperedge of this one, if it exists.
+        Otherwise a null descriptor is returned.
+
+        :type: :py:class:`DGHyperEdge`
+        :raises: :py:class:`LogicError` if it is a null descriptor.
+    .. py:method:: print(printer=GraphPrinter(), nomatchColour="gray", matchColour="")
+
+        Print the derivations represented by the hyperedge.
+        All possible Double-Pushout diagrams are printed.
+
+        :param printer: the printer to use for the figures.
+        :type printer: :class:`GraphPrinter`
+        :param matchColour: the TikZ colour to use for the rule and its image in the bottom span.
+        :type matchColour: string
+        :raises: :py:class:`LogicError` if it is a null descriptor.
+    .. py:method:: printTransitionState()
+                 printTransitionState(printer)
+
+        Print the derivations represented by the hyperedge in style of a chemical transition state.
+        For all possible Double-Pushout diagrams a figure printed.
+
+        :param printer: the printer to use for the figures.
+        :type printer: :class:`GraphPrinter`
+        :raises: :py:class:`LogicError` if it is a null descriptor.
