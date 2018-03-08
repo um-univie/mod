@@ -6,7 +6,7 @@ Tikz (Graph)
 Graphs are visualised using generated `Tikz`_ code.
 The coordinates for the layout is either generated using `Open Babel`_ or `Graphviz`_.
 The visualisation style is controlled by passing instances of the classes
-:cpp:class:`mod::GraphPrinter` (C++) and :py:class:`mod.GraphPrinter` (Python)
+:cpp:class:`mod::graph::Printer` (C++) and :py:class:`mod.GraphPrinter` (Python)
 to the printing functions.
 The drawing style is inspired by `ChemFig`_ and `Open Babel`_.
 See also :doc:`/postmod/postmod`.
@@ -47,11 +47,6 @@ MØD can load most SMILES strings, and converts them internally to labelled grap
 For graphs that are sufficiently molecule-like, a SMILES string can be generated.
 The generated strings are canonical in the sense that the same version of MØD will print
 the same SMILES string for isomorphic molecules.
-
-.. warning:: The SMILES canonicalisation algorithm is the original CANGEN algorithm that does not work in general,
-   and some molecules with specific symmetries thus have multiple "canonical" forms.
-   This problem will be fixed at some point. To properly check for isomorphism, load the graphs and call the
-   appropriate method.
 
 The reading of SMILES strings is based on the `OpenSMILES <http://www.opensmiles.org/>`_
 specification, but with the following notes/changes.

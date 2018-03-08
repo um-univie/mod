@@ -4,6 +4,7 @@
 #include <mod/Error.h>
 #include <mod/lib/Chem/MoleculeUtil.h>
 #include <mod/lib/Chem/OBabel.h>
+#include <mod/lib/IO/Graph.h>
 #include <mod/lib/IO/IO.h>
 #include <mod/lib/Rules/Properties/String.h>
 #include <mod/lib/Rules/Properties/Molecule.h>
@@ -25,15 +26,15 @@ DepictionDataCore::DepictionData<membership>::DepictionData(const DepictionDataC
 
 template<Membership membership>
 AtomId DepictionDataCore::DepictionData<membership>::getAtomId(Vertex v) const {
-	const auto &molState = depict.moleculeState;
+	const auto &pMol = get_molecule(depict.lr);
 	switch(membership) {
 	case Membership::Left:
-		return molState.getLeft()[v].getAtomId();
+		return pMol.getLeft()[v].getAtomId();
 	case Membership::Right:
-		return molState.getRight()[v].getAtomId();
+		return pMol.getRight()[v].getAtomId();
 	case Membership::Context:
-		auto leftId = molState.getLeft()[v].getAtomId();
-		auto rightId = molState.getRight()[v].getAtomId();
+		auto leftId = pMol.getLeft()[v].getAtomId();
+		auto rightId = pMol.getRight()[v].getAtomId();
 		if(leftId == rightId) return leftId;
 		else return AtomIds::Invalid;
 	}
@@ -41,15 +42,15 @@ AtomId DepictionDataCore::DepictionData<membership>::getAtomId(Vertex v) const {
 
 template<Membership membership>
 Charge DepictionDataCore::DepictionData<membership>::getCharge(Vertex v) const {
-	const auto &molState = depict.moleculeState;
+	const auto &pMol = get_molecule(depict.lr);
 	switch(membership) {
 	case Membership::Left:
-		return molState.getLeft()[v].getCharge();
+		return pMol.getLeft()[v].getCharge();
 	case Membership::Right:
-		return molState.getRight()[v].getCharge();
+		return pMol.getRight()[v].getCharge();
 	case Membership::Context:
-		auto leftCharge = molState.getLeft()[v].getCharge();
-		auto rightCharge = molState.getRight()[v].getCharge();
+		auto leftCharge = pMol.getLeft()[v].getCharge();
+		auto rightCharge = pMol.getRight()[v].getCharge();
 		if(leftCharge == rightCharge) return leftCharge;
 		else return Charge(0);
 	}
@@ -57,15 +58,15 @@ Charge DepictionDataCore::DepictionData<membership>::getCharge(Vertex v) const {
 
 template<Membership membership>
 bool DepictionDataCore::DepictionData<membership>::getRadical(Vertex v) const {
-	const auto &molState = depict.moleculeState;
+	const auto &pMol = get_molecule(depict.lr);
 	switch(membership) {
 	case Membership::Left:
-		return molState.getLeft()[v].getRadical();
+		return pMol.getLeft()[v].getRadical();
 	case Membership::Right:
-		return molState.getRight()[v].getRadical();
+		return pMol.getRight()[v].getRadical();
 	case Membership::Context:
-		auto leftRadical = molState.getLeft()[v].getRadical();
-		auto rightRadical = molState.getRight()[v].getRadical();
+		auto leftRadical = pMol.getLeft()[v].getRadical();
+		auto rightRadical = pMol.getRight()[v].getRadical();
 		if(leftRadical == rightRadical) return leftRadical;
 		else return false;
 	}
@@ -73,15 +74,15 @@ bool DepictionDataCore::DepictionData<membership>::getRadical(Vertex v) const {
 
 template<Membership membership>
 BondType DepictionDataCore::DepictionData<membership>::getBondData(Edge e) const {
-	const auto &molState = depict.moleculeState;
+	const auto &pMol = get_molecule(depict.lr);
 	switch(membership) {
 	case Membership::Left:
-		return molState.getLeft()[e];
+		return pMol.getLeft()[e];
 	case Membership::Right:
-		return molState.getRight()[e];
+		return pMol.getRight()[e];
 	case Membership::Context:
-		auto btLeft = molState.getLeft()[e];
-		auto btRight = molState.getRight()[e];
+		auto btLeft = pMol.getLeft()[e];
+		auto btRight = pMol.getRight()[e];
 		if(btLeft == btRight) return btLeft;
 		else return BondType::Invalid;
 	}
@@ -105,11 +106,12 @@ std::string DepictionDataCore::DepictionData<membership>::getVertexLabelNoCharge
 	}
 	case Membership::Context:
 	{
+		const auto &pMol = get_molecule(depict.lr);
 		auto nonAtomIterLeft = depict.nonAtomToPhonyAtomLeft.find(v);
 		auto nonAtomIterRight = depict.nonAtomToPhonyAtomRight.find(v);
 		std::string left, right;
 		if(nonAtomIterLeft == end(depict.nonAtomToPhonyAtomLeft)) {
-			auto atomId = depict.moleculeState.getLeft()[v].getAtomId();
+			auto atomId = pMol.getLeft()[v].getAtomId();
 			left = Chem::symbolFromAtomId(atomId);
 		} else {
 			auto labelIterLeft = depict.phonyAtomToString.find(nonAtomIterLeft->second.getAtomId());
@@ -117,7 +119,7 @@ std::string DepictionDataCore::DepictionData<membership>::getVertexLabelNoCharge
 			left = labelIterLeft->second;
 		}
 		if(nonAtomIterRight == end(depict.nonAtomToPhonyAtomRight)) {
-			auto atomId = depict.moleculeState.getRight()[v].getAtomId();
+			auto atomId = pMol.getRight()[v].getAtomId();
 			right = Chem::symbolFromAtomId(atomId);
 		} else {
 			auto labelIterRight = depict.phonyAtomToString.find(nonAtomIterRight->second.getAtomId());
@@ -141,6 +143,7 @@ std::string DepictionDataCore::DepictionData<membership>::getEdgeLabel(Edge e) c
 	{
 		const auto &nonBondEdges = membership == Membership::Left ? depict.nonBondEdgesLeft : depict.nonBondEdgesRight;
 		auto iter = nonBondEdges.find(e);
+		if(iter == end(nonBondEdges)) IO::log() << "WTF: " << e << std::endl;
 		assert(iter != end(nonBondEdges));
 		return iter->second;
 	}
@@ -149,10 +152,11 @@ std::string DepictionDataCore::DepictionData<membership>::getEdgeLabel(Edge e) c
 		std::string left, right;
 		auto iterLeft = depict.nonBondEdgesLeft.find(e);
 		auto iterRight = depict.nonBondEdgesRight.find(e);
+		const auto &pMol = get_molecule(depict.lr);
 		if(iterLeft != end(depict.nonBondEdgesLeft)) left = iterLeft->second;
-		else left = std::string(1, Chem::bondToChar(depict.moleculeState.getLeft()[e]));
+		else left = std::string(1, Chem::bondToChar(pMol.getLeft()[e]));
 		if(iterRight != end(depict.nonBondEdgesRight)) right = iterRight->second;
-		else right = std::string(1, Chem::bondToChar(depict.moleculeState.getRight()[e]));
+		else right = std::string(1, Chem::bondToChar(pMol.getRight()[e]));
 		if(left == right) return left;
 		else return "$\\langle$" + left + ", " + right + "$\\rangle$";
 	}
@@ -163,14 +167,14 @@ template<Membership membership>
 const AtomData &DepictionDataCore::DepictionData<membership>::operator()(Vertex v) const {
 	switch(membership) {
 	case Membership::Left:
-		if(getAtomId(v) != AtomIds::Invalid) return depict.moleculeState.getLeft()[v];
+		if(getAtomId(v) != AtomIds::Invalid) return get_molecule(depict.lr).getLeft()[v];
 		else {
 			auto iter = depict.nonAtomToPhonyAtomLeft.find(v);
 			assert(iter != end(depict.nonAtomToPhonyAtomLeft));
 			return iter->second;
 		}
 	case Membership::Right:
-		if(getAtomId(v) != AtomIds::Invalid) return depict.moleculeState.getRight()[v];
+		if(getAtomId(v) != AtomIds::Invalid) return get_molecule(depict.lr).getRight()[v];
 		else {
 			auto iter = depict.nonAtomToPhonyAtomRight.find(v);
 			assert(iter != end(depict.nonAtomToPhonyAtomLeft));
@@ -189,18 +193,67 @@ BondType DepictionDataCore::DepictionData<membership>::operator()(Edge e) const 
 }
 
 template<Membership membership>
+bool DepictionDataCore::DepictionData<membership>::hasImportantStereo(Vertex v) const {
+	const auto &lr = depict.lr;
+	switch(membership) {
+	case Membership::Left:
+	{
+		const auto &lg = get_labelled_left(lr);
+		if(!has_stereo(lg)) return false;
+		return !get_stereo(lg)[v]->morphismDynamicOk();
+	}
+	case Membership::Right:
+	{
+		const auto &lg = get_labelled_right(lr);
+		if(!has_stereo(lg)) return false;
+		return !get_stereo(lg)[v]->morphismDynamicOk();
+	}
+	case Membership::Context:
+		return get_stereo(lr).inContext(v) && depict.hasImportantStereo(v);
+	}
+	MOD_ABORT;
+}
+
+template<Membership membership>
 bool DepictionDataCore::DepictionData<membership>::getHasCoordinates() const {
 	return depict.getHasCoordinates();
 }
 
 template<Membership membership>
 double DepictionDataCore::DepictionData<membership>::getX(Vertex v, bool withHydrogen) const {
-	return depict.getX(v);
+	return depict.getX(v, withHydrogen);
 }
 
 template<Membership membership>
 double DepictionDataCore::DepictionData<membership>::getY(Vertex v, bool withHydrogen) const {
-	return depict.getY(v);
+	return depict.getY(v, withHydrogen);
+}
+
+template<Membership membership>
+lib::IO::Graph::Write::EdgeFake3DType DepictionDataCore::DepictionData<membership>::getEdgeFake3DType(Edge e, bool withHydrogen) const {
+#ifndef MOD_HAVE_OPENBABEL
+	MOD_NO_OPENBABEL_ERROR
+#else
+	assert(depict.hasMoleculeEncoding);
+	const auto &g = get_graph(depict.lr);
+	const auto vSrc = source(e, g);
+	const auto vTar = target(e, g);
+	const auto idSrc = get(boost::vertex_index_t(), g, vSrc);
+	const auto idTar = get(boost::vertex_index_t(), g, vTar);
+	const CoordData &cData = withHydrogen ? depict.cDataAll : depict.cDataNoHydrogen;
+	switch(membership) {
+	case Membership::Left:
+		return cData.obMolLeft.getBondFake3D(idSrc, idTar);
+	case Membership::Right:
+		return cData.obMolRight.getBondFake3D(idSrc, idTar);
+	case Membership::Context:
+		if(get_stereo(depict.lr).inContext(vSrc) && get_stereo(depict.lr).inContext(vTar))
+			return cData.obMolLeft.getBondFake3D(idSrc, idTar);
+		else
+			return lib::IO::Graph::Write::EdgeFake3DType::None;
+	}
+#endif
+	MOD_ABORT;
 }
 
 //template<Membership membership>
@@ -227,8 +280,10 @@ double DepictionDataCore::DepictionData<membership>::getY(Vertex v, bool withHyd
 // DepictionDataCore
 //------------------------------------------------------------------------------
 
-DepictionDataCore::DepictionDataCore(const GraphType &g, const PropStringCore &labelState, const PropMoleculeCore &pMol)
-: g(g), moleculeState(pMol), hasMoleculeEncoding(true), hasCoordinates(false) {
+DepictionDataCore::DepictionDataCore(const LabelledRule &lr) : lr(lr), hasMoleculeEncoding(true), hasCoordinates(false) {
+	const auto &g = get_graph(lr);
+	const auto &pString = get_string(lr);
+	const auto &pMol = get_molecule(lr);
 	{ // vertexData
 		std::vector<bool> atomUsed(AtomIds::Max + 1, false);
 		Chem::markSpecialAtomsUsed(atomUsed);
@@ -252,7 +307,7 @@ DepictionDataCore::DepictionDataCore(const GraphType &g, const PropStringCore &l
 			Vertex v = p.first;
 			Membership m = p.second;
 			assert(m != Membership::Context);
-			auto label = std::get<0>(Chem::extractChargeRadical(m == Membership::Left ? labelState.getLeft()[v] : labelState.getRight()[v]));
+			auto label = std::get<0>(Chem::extractChargeRadical(m == Membership::Left ? pString.getLeft()[v] : pString.getRight()[v]));
 			auto iter = labelToAtomId.find(label);
 			if(iter == end(labelToAtomId)) {
 				unsigned char atomId = 1;
@@ -285,44 +340,57 @@ DepictionDataCore::DepictionDataCore(const GraphType &g, const PropStringCore &l
 			auto m = g[e].membership;
 			if(m != Membership::Right) {
 				auto bt = pMol.getLeft()[e];
-				if(bt == BondType::Invalid) nonBondEdgesLeft[e] = labelState.getLeft()[e];
+				if(bt == BondType::Invalid) nonBondEdgesLeft[e] = pString.getLeft()[e];
 			}
 			if(m != Membership::Left) {
 				auto bt = pMol.getRight()[e];
-				if(bt == BondType::Invalid) nonBondEdgesRight[e] = labelState.getRight()[e];
+				if(bt == BondType::Invalid) nonBondEdgesRight[e] = pString.getRight()[e];
 			}
 		}
 	}
 
 	if(hasMoleculeEncoding) {
 #ifdef MOD_HAVE_OPENBABEL
-		obMol = Chem::makeOBMol(g, std::cref(*this), std::cref(*this));
-		x.resize(num_vertices(g));
-		y.resize(num_vertices(g));
-		for(Vertex v : asRange(vertices(g))) {
-			unsigned int vId = get(boost::vertex_index_t(), g, v);
-			x[vId] = lib::Chem::getOBAtomX(*obMol, vId);
-			y[vId] = lib::Chem::getOBAtomY(*obMol, vId);
-		}
+		const auto doIt = [&](CoordData & cData, const bool withHydrogen) {
+			std::tie(cData.obMol, cData.obMolLeft, cData.obMolRight)
+					= Chem::makeOBMol(lr, std::cref(*this), std::cref(*this), getLeft(), getLeft(), getRight(), getRight(), withHydrogen);
+			cData.x.resize(num_vertices(g));
+			cData.y.resize(num_vertices(g));
+			for(const auto v : asRange(vertices(g))) {
+				const auto vId = get(boost::vertex_index_t(), g, v);
+				if(cData.obMol.hasAtom(vId)) {
+					cData.x[vId] = cData.obMol.getAtomX(vId);
+					cData.y[vId] = cData.obMol.getAtomY(vId);
+				} else {
+					assert(!withHydrogen);
+					cData.x[vId] = std::numeric_limits<double>::quiet_NaN();
+					cData.y[vId] = std::numeric_limits<double>::quiet_NaN();
+				}
+			}
+		};
+		doIt(cDataAll, true);
+		doIt(cDataNoHydrogen, false);
 		hasCoordinates = true;
 #endif
 	}
 }
 
 const AtomData &DepictionDataCore::operator()(Vertex v) const {
+	const auto &g = get_graph(lr);
+	const auto &pMol = get_molecule(lr);
 	// return whatever we find
 	auto m = g[v].membership;
 	if(m != Membership::Right) {
-		auto atomId = moleculeState.getLeft()[v].getAtomId();
-		if(atomId != AtomIds::Invalid) return moleculeState.getLeft()[v];
+		auto atomId = pMol.getLeft()[v].getAtomId();
+		if(atomId != AtomIds::Invalid) return pMol.getLeft()[v];
 		else {
 			auto iter = nonAtomToPhonyAtomLeft.find(v);
 			assert(iter != end(nonAtomToPhonyAtomLeft));
 			return iter->second;
 		}
 	} else {
-		auto atomId = moleculeState.getRight()[v].getAtomId();
-		if(atomId != AtomIds::Invalid) return moleculeState.getRight()[v];
+		auto atomId = pMol.getRight()[v].getAtomId();
+		if(atomId != AtomIds::Invalid) return pMol.getRight()[v];
 		else {
 			auto iter = nonAtomToPhonyAtomRight.find(v);
 			assert(iter != end(nonAtomToPhonyAtomRight));
@@ -332,15 +400,30 @@ const AtomData &DepictionDataCore::operator()(Vertex v) const {
 }
 
 BondType DepictionDataCore::operator()(Edge e) const {
-	// return whatever we find
-	auto m = g[e].membership;
+	const auto &g = get_graph(lr);
+	const auto &pMol = get_molecule(lr);
+	// if there is agreement, return that, otherwise prefer single bonds
+	// this should give a bit more freedom in bond angles
+	const auto m = g[e].membership;
+	BondType l = BondType::Single, r = BondType::Single;
 	if(m != Membership::Right) {
-		auto bt = moleculeState.getLeft()[e];
-		return bt == BondType::Invalid ? BondType::Single : bt;
+		const auto bt = pMol.getLeft()[e];
+		l = bt == BondType::Invalid ? BondType::Single : bt;
 	} else {
-		auto bt = moleculeState.getRight()[e];
-		return bt == BondType::Invalid ? BondType::Single : bt;
+		const auto bt = pMol.getRight()[e];
+		r = bt == BondType::Invalid ? BondType::Single : bt;
 	}
+	if(l == r) return l;
+	else return BondType::Single;
+}
+
+bool DepictionDataCore::hasImportantStereo(Vertex v) const {
+	if(!has_stereo(lr)) return false;
+	const auto &g = get_graph(lr);
+	const auto m = g[v].membership;
+	if(m != Membership::Right && !get_stereo(get_labelled_left(lr))[v]->morphismDynamicOk()) return true;
+	if(m != Membership::Left && !get_stereo(get_labelled_right(lr))[v]->morphismDynamicOk()) return true;
+	return false;
 }
 
 bool DepictionDataCore::getHasCoordinates() const {
@@ -353,18 +436,22 @@ bool DepictionDataCore::getHasCoordinates() const {
 #endif 
 }
 
-double DepictionDataCore::getX(Vertex v) const {
+double DepictionDataCore::getX(Vertex v, bool withHydrogen) const {
 	if(!getHasCoordinates()) MOD_ABORT;
+	const auto &g = get_graph(lr);
 	unsigned int vId = get(boost::vertex_index_t(), g, v);
-	assert(vId < x.size());
-	return x[vId];
+	const CoordData &cData = withHydrogen ? cDataAll : cDataNoHydrogen;
+	assert(vId < cData.x.size());
+	return cData.x[vId];
 }
 
-double DepictionDataCore::getY(Vertex v) const {
+double DepictionDataCore::getY(Vertex v, bool withHydrogen) const {
 	if(!getHasCoordinates()) MOD_ABORT;
+	const auto &g = get_graph(lr);
 	unsigned int vId = get(boost::vertex_index_t(), g, v);
-	assert(vId < y.size());
-	return y[vId];
+	const CoordData &cData = withHydrogen ? cDataAll : cDataNoHydrogen;
+	assert(vId < cData.y.size());
+	return cData.y[vId];
 }
 
 void DepictionDataCore::copyCoords(const DepictionDataCore &other, const std::map<Vertex, Vertex> &vMap) {
@@ -372,23 +459,35 @@ void DepictionDataCore::copyCoords(const DepictionDataCore &other, const std::ma
 		IO::log() << "Can not copy coordinates from depiction without coordinates." << std::endl;
 		MOD_ABORT;
 	}
-	x.resize(num_vertices(g));
-	y.resize(num_vertices(g));
-	for(Vertex v : asRange(vertices(g))) {
-		auto iter = vMap.find(v);
-		if(iter == end(vMap)) {
-			IO::log() << "Vertex " << v << " (id=" << get(boost::vertex_index_t(), g, v) << ") not mapped." << std::endl;
-			IO::log() << "Map:" << std::endl;
-			for(auto p : vMap) IO::log() << "\t" << p.first << " => " << p.second << std::endl;
-			IO::log() << "num_vertices: " << num_vertices(g) << std::endl;
-			IO::log() << "other.num_vertices: " << num_vertices(other.g) << std::endl;
-			MOD_ABORT;
+	const auto &g = get_graph(lr);
+	const auto doIt = [&](CoordData &cData, const bool withHydrogen) {
+		cData.x.resize(num_vertices(g));
+		cData.y.resize(num_vertices(g));
+		for(const Vertex v : asRange(vertices(g))) {
+			const auto iter = vMap.find(v);
+			if(iter == end(vMap)) {
+				IO::log() << "Vertex " << v << " (id=" << get(boost::vertex_index_t(), g, v) << ") not mapped." << std::endl;
+				IO::log() << "Map:" << std::endl;
+				for(auto p : vMap) IO::log() << "\t" << p.first << " => " << p.second << std::endl;
+				IO::log() << "num_vertices: " << num_vertices(g) << std::endl;
+				IO::log() << "other.num_vertices: " << num_vertices(get_graph(other.lr)) << std::endl;
+				MOD_ABORT;
+			}
+			const Vertex vOther = iter->second;
+			const auto vId = get(boost::vertex_index_t(), g, v);
+			cData.x[vId] = other.getX(vOther, withHydrogen);
+			cData.y[vId] = other.getY(vOther, withHydrogen);
 		}
-		Vertex vOther = iter->second;
-		unsigned int vId = get(boost::vertex_index_t(), g, v);
-		x[vId] = other.getX(vOther);
-		y[vId] = other.getY(vOther);
-	}
+		if(hasMoleculeEncoding) {
+#ifdef MOD_HAVE_OPENBABEL
+			cData.obMol.setCoordinates(cData.x, cData.y);
+			cData.obMolLeft.setCoordinates(cData.x, cData.y);
+			cData.obMolRight.setCoordinates(cData.x, cData.y);
+#endif
+		}
+	};
+	doIt(cDataAll, true);
+	doIt(cDataNoHydrogen, false);
 	hasCoordinates = true;
 }
 

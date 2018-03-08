@@ -125,8 +125,8 @@ Derivation.__hash__ = _Derivation__hash__
 
 def dgDerivations(ders):
 	return mod_.dgDerivations(_wrap(VecDerivation, ders))
-def dgRuleComp(graphs, strat):
-	return mod_.dgRuleComp(_wrap(VecGraph, graphs), dgStrat(strat))
+def dgRuleComp(graphs, strat, labelSettings=LabelSettings(LabelType.String, LabelRelation.Isomorphism), ignoreRuleLabelTypes=False):
+	return mod_.dgRuleComp(_wrap(VecGraph, graphs), dgStrat(strat), labelSettings, ignoreRuleLabelTypes)
 def dgDump(graphs, rules, f):
 	return mod_.dgDump(_wrap(VecGraph, graphs), _wrap(VecRule, rules), f)
 
@@ -134,7 +134,7 @@ _DG_print_orig = DG.print
 def _DG_print(self, printer=None, data=None):
 	if printer is None: printer = DGPrinter()
 	if data is None: data = DGPrintData(self)
-	_DG_print_orig(self, data, printer)
+	return _DG_print_orig(self, data, printer)
 DG.print = _DG_print
 
 _DG_findEdge_orig = DG.findEdge
@@ -159,20 +159,9 @@ DG.findEdge = _DG_findEdge
 
 DG.__repr__ = DG.__str__
 
-def _DG_vertexGraphs(self):
-	print("Warning: DG.vertexGraphs is deprecated, use the graph property on DGVertex with DG.vertices instead.")
-	for v in self.vertices:
-		yield v.graph
-
 def _DG__getattribute__(self, name):
-	if name == "derivations":
-		print("Warning: DG.derivations is deprecated, use DG.edges instead.")
-		print("Note: Returning DG.edges.")
-		return self.edges
-	elif name == "graphDatabase":
+	if name == "graphDatabase":
 		return _unwrap(self._graphDatabase)
-	elif name == "vertexGraphs":
-		return _DG_vertexGraphs(self)
 	elif name == "products":
 		return _unwrap(self._products)
 	elif name == "printOptions":
@@ -201,9 +190,6 @@ DG.__hash__ = lambda self: self.id
 # DGHyperEdge
 #----------------------------------------------------------
 
-_DGHyperEdge_print_orig = DGHyperEdge.print
-DGHyperEdge.print = lambda self, printer=GraphPrinter(), matchColour="Melon": _DGHyperEdge_print_orig(self, printer, matchColour)
-
 def _DGHyperEdge__getattribute__(self, name):
 	if name == "derivation":
 		print("Warning: DGHyperEdge.derivation is deprecated")
@@ -222,20 +208,6 @@ DGHyperEdge.__getattribute__ = _DGHyperEdge__getattribute__
 
 
 #----------------------------------------------------------
-# DerivationRef
-#----------------------------------------------------------
-
-_DerivationRef_print_orig = DerivationRef.print
-DerivationRef.print = lambda self, printer=GraphPrinter(), matchColour="ForestGreen": _DerivationRef_print_orig(self, printer, matchColour)
-
-DerivationRef.__repr__ = DerivationRef.__str__
-def _DerivationRef__hash__(self):
-	if not self.isValid(): return hash((0, -1))
-	else: return hash((self.id, self.dg.id))
-DerivationRef.__hash__ = _DerivationRef__hash__
-
-
-#----------------------------------------------------------
 # DGPrinter
 #----------------------------------------------------------
 
@@ -248,7 +220,7 @@ DGPrinter.pushVertexVisible = _DGPrinter_pushVertexVisible
 
 _DGPrinter_pushEdgeVisible_orig = DGPrinter.pushEdgeVisible
 def _DGPrinter_pushEdgeVisible(self, f):
-	_DGPrinter_pushEdgeVisible_orig(self, _funcWrap(Func_BoolDerivationRef, f))
+	_DGPrinter_pushEdgeVisible_orig(self, _funcWrap(Func_BoolDGHyperEdge, f))
 DGPrinter.pushEdgeVisible = _DGPrinter_pushEdgeVisible
 
 _DGPrinter_pushVertexLabel_orig = DGPrinter.pushVertexLabel
@@ -258,7 +230,7 @@ DGPrinter.pushVertexLabel = _DGPrinter_pushVertexLabel
 
 _DGPrinter_pushEdgeLabel_orig = DGPrinter.pushEdgeLabel
 def _DGPrinter_pushEdgeLabel(self, f):
-	_DGPrinter_pushEdgeLabel_orig(self, _funcWrap(Func_StringDerivationRef, f))
+	_DGPrinter_pushEdgeLabel_orig(self, _funcWrap(Func_StringDGHyperEdge, f))
 DGPrinter.pushEdgeLabel = _DGPrinter_pushEdgeLabel
 
 _DGPrinter_pushVertexColour_orig = DGPrinter.pushVertexColour
@@ -268,7 +240,7 @@ DGPrinter.pushVertexColour = _DGPrinter_pushVertexColour
 
 _DGPrinter_pushEdgeColour_orig = DGPrinter.pushEdgeColour
 def _DGPrinter_pushEdgeColour(self, f):
-	_DGPrinter_pushEdgeColour_orig(self, _funcWrap(Func_StringDerivationRef, f))
+	_DGPrinter_pushEdgeColour_orig(self, _funcWrap(Func_StringDGHyperEdge, f))
 DGPrinter.pushEdgeColour = _DGPrinter_pushEdgeColour
 
 #----------------------------------------------------------
@@ -280,8 +252,8 @@ def _DGStratGraphState__getattribute__(self, name):
 		return _unwrap(self._subset)
 	elif name == "universe":
 		return _unwrap(self._universe)
-	elif name == "derivationRefs":
-		return _unwrap(self._derivationRefs)
+	elif name == "hyperEdges":
+		return _unwrap(self._hyperEdges)
 	else:
 		return object.__getattribute__(self, name)
 DGStratGraphState.__getattribute__ = _DGStratGraphState__getattribute__
@@ -349,10 +321,13 @@ def _Graph_print(self, first=None, second=None):
 	return _Graph_print_orig(self, first, second)
 Graph.print = _Graph_print
 
+_Graph_aut = Graph.aut
+Graph.aut = lambda self, labelSettings=LabelSettings(LabelType.String, LabelRelation.Isomorphism): _Graph_aut(self, labelSettings)
+
 _Graph_isomorphism = Graph.isomorphism
-Graph.isomorphism = lambda self, g, maxNumMatches=1: _Graph_isomorphism(self, g, maxNumMatches)
+Graph.isomorphism = lambda self, g, maxNumMatches=1, labelSettings=LabelSettings(LabelType.String, LabelRelation.Isomorphism): _Graph_isomorphism(self, g, maxNumMatches, labelSettings)
 _Graph_monomorphism = Graph.monomorphism
-Graph.monomorphism = lambda self, g, maxNumMatches=1: _Graph_monomorphism(self, g, maxNumMatches)
+Graph.monomorphism = lambda self, g, maxNumMatches=1, labelSettings=LabelSettings(LabelType.String, LabelRelation.Isomorphism): _Graph_monomorphism(self, g, maxNumMatches, labelSettings)
 
 _Graph_getGMLString = Graph.getGMLString
 Graph.getGMLString = lambda self, withCoords=False: _Graph_getGMLString(self, withCoords)
@@ -423,8 +398,8 @@ RCEvaluator.__setattr__ = _NoNew__setattr__
 _RCEvaluator_eval = RCEvaluator.eval
 RCEvaluator.eval = lambda self, e: _unwrap(_RCEvaluator_eval(self, e))
 
-def rcEvaluator(rules):
-	return mod_.rcEvaluator(_wrap(VecRule, rules))
+def rcEvaluator(rules, labelSettings=LabelSettings(LabelType.String, LabelRelation.Isomorphism)):
+	return mod_.rcEvaluator(_wrap(VecRule, rules), labelSettings)
 
 #----------------------------------------------------------
 # Rule
@@ -442,9 +417,9 @@ def _Rule_print(self, first=None, second=None):
 Rule.print = _Rule_print
 
 _Rule_isomorphism = Rule.isomorphism
-Rule.isomorphism = lambda self, r, maxNumMatches=1: _Rule_isomorphism(self, r, maxNumMatches)
+Rule.isomorphism = lambda self, r, maxNumMatches=1, labelSettings=LabelSettings(LabelType.String, LabelRelation.Isomorphism): _Rule_isomorphism(self, r, maxNumMatches, labelSettings)
 _Rule_monomorphism = Rule.monomorphism
-Rule.monomorphism = lambda self, r, maxNumMatches=1: _Rule_monomorphism(self, r, maxNumMatches)
+Rule.monomorphism = lambda self, r, maxNumMatches=1, labelSettings=LabelSettings(LabelType.String, LabelRelation.Isomorphism): _Rule_monomorphism(self, r, maxNumMatches, labelSettings)
 
 _Rule_getGMLString = Rule.getGMLString
 Rule.getGMLString = lambda self, withCoords=False: _Rule_getGMLString(self, withCoords)

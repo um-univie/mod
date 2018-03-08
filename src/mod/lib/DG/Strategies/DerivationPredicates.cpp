@@ -20,6 +20,14 @@ DerivationPredicate::~DerivationPredicate() {
 	delete strat;
 }
 
+void DerivationPredicate::preAddGraphs(std::function<void(std::shared_ptr<graph::Graph>) > add) const {
+	strat->preAddGraphs(add);
+}
+
+void DerivationPredicate::forEachRule(std::function<void(const lib::Rules::Real&)> f) const {
+	strat->forEachRule(f);
+}
+
 void DerivationPredicate::printInfo(std::ostream &s) const {
 	s << indent;
 	printName(s);

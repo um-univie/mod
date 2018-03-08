@@ -1,7 +1,7 @@
 #ifndef JLA_BOOST_GRAPH_MORPHISM_MCGREGORCOMMONFINDER_HPP
 #define JLA_BOOST_GRAPH_MORPHISM_MCGREGORCOMMONFINDER_HPP
 
-#include <jla_boost/graph/morphism/MatchAsVertexMap.hpp>
+#include <jla_boost/graph/morphism/models/PropertyMap.hpp>
 
 #include <boost/graph/mcgregor_common_subgraphs.hpp>
 
@@ -42,6 +42,9 @@ struct McGregorCommonFinder {
 		auto idxDomain = get(boost::vertex_index_t(), gDomain);
 		auto idxCodomain = get(boost::vertex_index_t(), gCodomain);
 		if(maximum) {
+			// TOOD: this does actually not really work when part of the morphism definition is implemented in the MR.
+			// e.g., see the rc test 'A -> AAA' with 'ABA -> A' in term mode.
+			// Make a test with terms that include variables that actually doesn't unify, so we get a wrong maximum.
 			boost::mcgregor_common_subgraphs_maximum(
 					gDomain, gCodomain, idxDomain, idxCodomain,
 					edgePred, vertexPred, connected, boostMr);

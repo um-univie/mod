@@ -29,7 +29,7 @@ boost::optional<Result> compose(const RuleFirst &rFirst, const RuleSecond &rSeco
 	BOOST_CONCEPT_ASSERT((jla_boost::GraphDPO::PushoutRuleConcept<RuleSecond>));
 	BOOST_CONCEPT_ASSERT((jla_boost::GraphMorphism::InvertibleVertexMapConcept<InvertibleVertexMap>));
 	return detail::CompositionHelper<Verbose, Result, RuleFirst, RuleSecond,
-			InvertibleVertexMap, WrappedVisitor>(rFirst, rSecond, match, Visitor::makeVisitor(visitor))();
+			InvertibleVertexMap, WrappedVisitor>(rFirst, rSecond, match, Visitor::makeVisitor(std::move(visitor)))();
 }
 
 } // namespace RC

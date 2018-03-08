@@ -22,6 +22,14 @@ Strategy *Sequence::clone() const {
 	return new Sequence(subStrats);
 }
 
+void Sequence::preAddGraphs(std::function<void(std::shared_ptr<graph::Graph>) > add) const {
+	for(const auto *s : strats) s->preAddGraphs(add);
+}
+
+void Sequence::forEachRule(std::function<void(const lib::Rules::Real&)> f) const {
+	for(const auto *s : strats) s->forEachRule(f);
+}
+
 void Sequence::printInfo(std::ostream& s) const {
 	s << indent << "Sequence: " << strats.size() << " substrats" << std::endl;
 	indentLevel++;

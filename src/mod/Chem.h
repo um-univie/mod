@@ -136,7 +136,7 @@ std::ostream &operator<<(std::ostream &s, BondType bt);
 //------------------------------------------------------------------------------
 
 // BOOST_PP_SEQ(BOOST_PP_TUPLE(atomId, symbol, name))
-#define MOD_CHEM_ATOM_DATA()   \
+#define MOD_CHEM_ATOM_DATA()     \
 		((1, H, Hydrogen))         \
 		((2, He, Helium))          \
 		((3, Li, Lithium))         \

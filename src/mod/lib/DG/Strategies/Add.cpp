@@ -1,7 +1,7 @@
 #include "Add.h"
 
 #include <mod/Function.h>
-#include <mod/Graph.h>
+#include <mod/graph/Graph.h>
 #include <mod/lib/DG/NonHyperRuleComp.h>
 #include <mod/lib/DG/Strategies/GraphState.h>
 
@@ -10,10 +10,10 @@ namespace lib {
 namespace DG {
 namespace Strategies {
 
-Add::Add(const std::vector<std::shared_ptr<mod::Graph> > graphs, bool onlyUniverse)
+Add::Add(const std::vector<std::shared_ptr<graph::Graph> > graphs, bool onlyUniverse)
 : Strategy::Strategy(0), graphs(graphs), generator(nullptr), onlyUniverse(onlyUniverse) { }
 
-Add::Add(const std::shared_ptr<mod::Function<std::vector<std::shared_ptr<mod::Graph> >() > > generator, bool onlyUniverse)
+Add::Add(const std::shared_ptr<mod::Function<std::vector<std::shared_ptr<graph::Graph> >() > > generator, bool onlyUniverse)
 : Strategy::Strategy(0), graphs(), generator(generator), onlyUniverse(onlyUniverse) { }
 
 Add::~Add() { }
@@ -21,6 +21,10 @@ Add::~Add() { }
 Strategy *Add::clone() const {
 	if(!generator) return new Add(graphs, onlyUniverse);
 	else return new Add(generator, onlyUniverse);
+}
+
+void Add::preAddGraphs(std::function<void(std::shared_ptr<graph::Graph>) > add) const {
+	for(const auto &g : graphs) add(g);
 }
 
 void Add::printInfo(std::ostream &s) const {
@@ -33,7 +37,7 @@ void Add::printInfo(std::ostream &s) const {
 		generator->print(s);
 		indentLevel--;
 	} else {
-		for(const std::shared_ptr<mod::Graph> g : graphs) s << " " << g->getName();
+		for(const std::shared_ptr<graph::Graph> g : graphs) s << " " << g->getName();
 	}
 	s << std::endl;
 	indentLevel++;
@@ -46,12 +50,20 @@ bool Add::isConsumed(const lib::Graph::Single *g) const {
 }
 
 void Add::executeImpl(std::ostream &s, const GraphState &input) {
-	std::vector<std::shared_ptr<mod::Graph> > graphsToAdd = generator ? (*generator)() : graphs;
-	for(const std::shared_ptr<mod::Graph> g : graphsToAdd) getExecutionEnv().addGraphAsVertex(g);
+	std::vector<std::shared_ptr<graph::Graph> > graphsToAdd;
+	if(generator) {
+		graphsToAdd = (*generator)();
+		if(!getConfig().dg.skipInitialGraphIsomorphismCheck.get())
+			for(const auto &gCand : graphsToAdd)
+				getExecutionEnv().tryAddGraph(gCand);
+	} else {
+		graphsToAdd = graphs;
+	}
+	for(const std::shared_ptr<graph::Graph> g : graphsToAdd) getExecutionEnv().addGraphAsVertex(g);
 	output = new GraphState(input);
-	if(onlyUniverse) for(const std::shared_ptr<mod::Graph> g : graphsToAdd) output->addToUniverse(&g->getGraph());
+	if(onlyUniverse) for(const std::shared_ptr<graph::Graph> g : graphsToAdd) output->addToUniverse(&g->getGraph());
 	else {
-		for(const std::shared_ptr<mod::Graph> g : graphsToAdd) output->addToSubset(0, &g->getGraph());
+		for(const std::shared_ptr<graph::Graph> g : graphsToAdd) output->addToSubset(0, &g->getGraph());
 	}
 }
 

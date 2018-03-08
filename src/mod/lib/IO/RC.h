@@ -26,12 +26,15 @@ using CoreCoreMap = boost::bimap<lib::Rules::Vertex, lib::Rules::Vertex>;
 void test(const lib::Rules::Real &rFirst, const lib::Rules::Real &rSecond, const CoreCoreMap &match, const lib::Rules::Real &rNew);
 
 template<typename VertexMap>
-void test(const lib::Rules::Real &rFirst, const lib::Rules::Real &rSecond, const VertexMap &map, const lib::Rules::Real &rNew) {
+void test(const lib::Rules::Real &rFirst, const lib::Rules::Real &rSecond, const VertexMap &m, const lib::Rules::Real &rNew) {
+	using GraphDom = lib::Rules::LabelledRule::LeftGraphType;
+	const auto &gDom = get_graph(get_labelled_left(rSecond.getDPORule()));
+	const auto &gCodom = get_graph(get_labelled_right(rFirst.getDPORule()));
 	CoreCoreMap match;
-	for(auto vFirst : asRange(vertices(rFirst.getGraph()))) {
-		auto vSecond = get_inverse(map, rSecond.getGraph(), rFirst.getGraph(), vFirst);
-		if(vSecond == boost::graph_traits<lib::Rules::GraphType>::null_vertex()) continue;
-		match.insert(CoreCoreMap::relation(vFirst, vSecond));
+	for(const auto vCodom : asRange(vertices(gCodom))) {
+		const auto vDom = get_inverse(m, gDom, gCodom, vCodom);
+		if(vDom == boost::graph_traits<GraphDom>::null_vertex()) continue;
+		match.insert(CoreCoreMap::relation(vCodom, vDom));
 	}
 	test(rFirst, rSecond, match, rNew);
 }

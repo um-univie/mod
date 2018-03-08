@@ -22,10 +22,11 @@ std::ostream &operator<<(std::ostream &s, Charge charge) {
 std::ostream &operator<<(std::ostream &s, const AtomData &data) {
 	if(data.atomId == AtomIds::Invalid) throw LogicError("Can not print atom data with atom id AtomIds::Invalid.");
 	s << lib::Chem::symbolFromAtomId(data.atomId);
-	if(data.charge == 0) return s;
-	if(data.charge > 1 || data.charge < -1) s << std::abs(data.charge);
-	if(data.charge < 0) s << '-';
-	else s << '+';
+	if(data.charge != 0) {
+		if(data.charge > 1 || data.charge < -1) s << std::abs(data.charge);
+		if(data.charge < 0) s << '-';
+		else s << '+';
+	}
 	if(data.radical) s << '.';
 	return s;
 }

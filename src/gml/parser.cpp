@@ -1,146 +1,109 @@
 #include "parser.hpp"
 
-#include <boost/spirit/include/qi_action.hpp>
-#include <boost/spirit/include/qi_alternative.hpp>
-#include <boost/spirit/include/qi_attr.hpp>
-#include <boost/spirit/include/qi_char_.hpp>
-#include <boost/spirit/include/qi_char_class.hpp>
-#include <boost/spirit/include/qi_difference.hpp>
-#include <boost/spirit/include/qi_eol.hpp>
-#include <boost/spirit/include/qi_expect.hpp>
-#include <boost/spirit/include/qi_grammar.hpp>
-#include <boost/spirit/include/qi_int.hpp>
-#include <boost/spirit/include/qi_kleene.hpp>
-#include <boost/spirit/include/qi_lit.hpp>
-#include <boost/spirit/include/qi_nonterminal.hpp>
-#include <boost/spirit/include/qi_parse.hpp>
-#include <boost/spirit/include/qi_real.hpp>
-#include <boost/spirit/include/qi_rule.hpp>
-#include <boost/spirit/include/qi_sequence.hpp>
-#include <boost/spirit/include/support_multi_pass.hpp>
+#include <boost/spirit/home/x3/auxiliary/attr.hpp>
+#include <boost/spirit/home/x3/auxiliary/eol.hpp>
+#include <boost/spirit/home/x3/char.hpp>
+#include <boost/spirit/home/x3/core/parse.hpp>
+#include <boost/spirit/home/x3/directive/lexeme.hpp>
+#include <boost/spirit/home/x3/nonterminal.hpp>
+#include <boost/spirit/home/x3/numeric/int.hpp>
+#include <boost/spirit/home/x3/numeric/real.hpp>
+#include <boost/spirit/home/x3/operator/alternative.hpp>
+#include <boost/spirit/home/x3/operator/difference.hpp>
+#include <boost/spirit/home/x3/operator/kleene.hpp>
+#include <boost/spirit/home/x3/operator/sequence.hpp>
 #include <boost/spirit/include/classic_position_iterator.hpp>
+#include <boost/spirit/include/support_multi_pass.hpp>
+
+namespace spirit = boost::spirit;
+namespace x3 = boost::spirit::x3;
 
 namespace gml {
 namespace parser {
 
-namespace spirit = boost::spirit;
-namespace qi = boost::spirit::qi;
-namespace phx = boost::phoenix;
-namespace classic = boost::spirit::classic;
-
-template<typename Iter, bool Explicit = false >
-struct ErrorHandler {
-
-	ErrorHandler(std::ostream &s) : s(s) { }
-
-	template<typename What>
-	void operator()(Iter iterStart, Iter iterEnd, Iter iterError, const What &what) const {
-		const auto &pos = iterError.get_position();
-		s << "Parsing error. ";
-		if(Explicit) s << what;
-		else s << "Expected " << what;
-		s << " at " << pos.line << ":" << pos.column << ". " << std::endl;
-		std::size_t column = pos.column;
-		const std::string line = iterError.get_currentline();
-		for(std::size_t i = 0; i < line.size(); ++i) {
-			if(line[i] == '\t') {
-				s << std::string(4, ' '); // Spirit hardcodes tabsize to 4, right?
-			} else {
-				s << line[i];
-			}
-		}
-		assert(column > 0);
-		s << std::endl << std::string(column - 1, '-') << "^" << std::endl;
-		s << "(please report if the location is inaccurate)" << std::endl;
-	}
-private:
-	std::ostream &s;
-};
-
-template<typename Iter>
 struct LocationHandler {
 
-	void operator()(ast::LocationInfo &locInfo, Iter iterStart) const {
-		const auto &pos = iterStart.get_position();
+	template<typename Iterator, typename Context>
+	void on_success(const Iterator &first, const Iterator &last, ast::LocationInfo &locInfo, const Context&) {
+		const auto &pos = first.get_position();
 		locInfo.line = pos.line;
 		locInfo.column = pos.column;
 	}
 };
 
-template<typename Iter, template<typename> class Skipper>
-struct Grammar : public qi::grammar<Iter, ast::List(), Skipper<Iter> > {
-	using Skip = Skipper<Iter>;
-
-	Grammar(std::ostream &err) : Grammar::base_type(start, "gml"), errorHandler(err) {
-		start %= list.alias();
-		list %= listInner;
-		listInner %= *keyValue;
-		keyValue %= key > value;
-		keyValue.name("keyValue");
-		key %= qi::char_("a-zA-Z") >> *qi::char_("a-zA-Z0-9");
-		key.name("key");
-		value %= valueInner;
-		value.name("value");
-		valueInner %= qi::real_parser<double, qi::strict_real_policies<double> >() | qi::int_ | string | listOuter;
-		valueInner.name("value");
-		listOuter = qi::lit('[') > list > ']';
-		listOuter.name("listValue");
-		string %= qi::lit('"') > *(escaped | plain) >> qi::lit('"');
-		string.name("string");
-		escaped %= '\\' >> (qi::char_('"') | tab | explicitBackslash | implicitBackslash);
-		plain %= (qi::char_ - qi::char_('"') - qi::char_('\n'));
-		tab %= 't' >> qi::attr('\t');
-		explicitBackslash %= '\\' >> qi::attr('\\');
-		implicitBackslash %= qi::attr('\\');
-
-		qi::on_error<qi::fail>(start, errorHandler(qi::_1, qi::_2, qi::_3, qi::_4));
-		// http://stackoverflow.com/questions/19612657/boostspirit-access-position-iterator-from-semantic-actions
-		qi::on_success(keyValue, locationHandler(qi::_val, qi::_1));
-		qi::on_success(value, locationHandler(qi::_val, qi::_1));
-	}
-private:
-	qi::rule<Iter, ast::List(), Skip > start;
-	qi::rule<Iter, ast::List(), Skip> list;
-	qi::rule<Iter, std::vector<ast::KeyValue>(), Skip> listInner;
-	qi::rule<Iter, ast::KeyValue(), Skip> keyValue;
-	qi::rule<Iter, std::string() > key;
-	qi::rule<Iter, ast::Value(), Skip> value;
-	qi::rule<Iter, ast::ValueStore(), Skip> valueInner;
-	qi::rule<Iter, ast::List(), Skip> listOuter;
-private:
-	qi::rule<Iter, std::string() > string;
-	qi::rule<Iter, char() > escaped, plain, tab, explicitBackslash, implicitBackslash;
-private:
-	phx::function<ErrorHandler<Iter> > errorHandler;
-	phx::function<LocationHandler<Iter> > locationHandler;
+struct keyValue_class : LocationHandler {
 };
 
-template<typename Iter>
-struct Skipper : public qi::grammar<Iter> {
-
-	Skipper() : Skipper::base_type(start) {
-		start %= qi::space | (qi::lit('#') >> *(qi::char_ - qi::eol) >> qi::eol);
-	}
-private:
-	qi::rule<Iter> start;
+struct value_class : LocationHandler {
 };
 
-template<typename Iter>
-bool parse(Iter &iterBegin, const Iter &iterEnd, ast::List &ast, std::ostream &err) {
-	Iter start = iterBegin;
-	Grammar<Iter, Skipper> grammar(err);
-	bool res = qi::phrase_parse(iterBegin, iterEnd, grammar, Skipper<Iter>(), ast);
-	if(res && iterBegin == iterEnd) return true;
-	if(!res) return false; // most often expectation failure
-	(ErrorHandler<Iter, true>(err))(start, iterEnd, iterBegin, "Did not expect any more input.");
-	return false;
+const x3::rule<struct skipper> skipper = "skipper";
+const x3::rule<struct gml, ast::List> gml = "gml";
+const x3::rule<struct list, ast::List> list = "list";
+const x3::rule<struct listInner, std::vector<ast::KeyValue> > listInner = "listInner";
+const x3::rule<struct keyValue_class, ast::KeyValue> keyValue = "keyValue";
+const x3::rule<struct key, std::string> key = "key";
+const x3::rule<struct value_class, ast::Value> value = "value";
+const x3::rule<struct valueInner, ast::Value> valueInner = "valueInner";
+const x3::rule<struct listOuter, ast::List> listOuter = "listOuter";
+const x3::rule<struct string, std::string> string = "string";
+#define GML_PARSER_CHAR_DEF(name) const x3::rule<struct name, char> name = #name;
+GML_PARSER_CHAR_DEF(escaped);
+GML_PARSER_CHAR_DEF(plain);
+GML_PARSER_CHAR_DEF(tab);
+GML_PARSER_CHAR_DEF(explicitBackslash);
+GML_PARSER_CHAR_DEF(implicitBackslash);
+#undef GML_PARSER_CHAR_DEF
+
+const auto skipper_def = x3::space | (x3::lit('#') >> *(x3::char_ - x3::eol) >> x3::eol);
+const auto gml_def = list;
+const auto list_def = listInner;
+const auto listInner_def = *keyValue;
+const auto keyValue_def = key > value;
+const auto key_def = x3::lexeme[x3::char_("a-zA-Z") >> *x3::char_("a-zA-Z0-9")];
+const auto value_def = valueInner;
+const auto valueInner_def = x3::real_parser<double, x3::strict_real_policies<double> >() | x3::int_ | string | listOuter;
+const auto listOuter_def = x3::lit('[') > (list >> ']'); // TODO: remove parens when the move_to mess in X3 has been fixed
+const auto string_def = x3::lexeme[x3::lit('"') > *(escaped | plain) > x3::lit('"')];
+const auto escaped_def = '\\' >> (x3::char_('"') | tab | explicitBackslash | implicitBackslash);
+const auto plain_def = (x3::char_ - x3::char_('"') - x3::char_('\n'));
+const auto tab_def = 't' >> x3::attr('\t');
+const auto explicitBackslash_def = '\\' >> x3::attr('\\');
+const auto implicitBackslash_def = x3::attr('\\');
+
+BOOST_SPIRIT_DEFINE(skipper, gml, list, listInner, keyValue, key, value, valueInner, listOuter, string, escaped, plain, tab, explicitBackslash, implicitBackslash);
+
+template<typename TextIter>
+bool parse(TextIter &textIter, const TextIter &textIterEnd, ast::List &ast, std::ostream &err) {
+	using Iter = spirit::classic::position_iterator2<TextIter>;
+	Iter iter(textIter, textIterEnd), iterEnd;
+	auto doError = [&]() {
+		const auto &pos = iter.get_position();
+		auto lineNumber = pos.line;
+		auto column = pos.column;
+		std::string line = iter.get_currentline();
+		err << "Parsing failed at " << lineNumber << ":" << column << ":\n";
+		err << line << "\n";
+		err << std::string(column - 1, '-') << "^\n";
+	};
+	try {
+		bool res = x3::phrase_parse(iter, iterEnd, gml, skipper, ast);
+		if(!res || iter != iterEnd) {
+			doError();
+			err << "End of x3 error.\n";
+			return false;
+		}
+	} catch(const x3::expectation_failure<Iter> &e) {
+		iter = e.where();
+		doError();
+		err << "Expected " << e.which() << ".\n";
+		err << "End of x3 error.\n";
+		return false;
+	}
+	return true;
 }
 
 bool parse(std::istream &s, ast::List &ast, std::ostream &err) {
-	using ForwardIter = spirit::multi_pass<std::istream_iterator<char> >;
-	ForwardIter iterForwardBegin(s), iterForwardEnd;
-	using Iter = classic::position_iterator2<ForwardIter>;
-	Iter iterBegin(iterForwardBegin, iterForwardEnd), iterEnd;
 
 	struct FlagsHolder {
 
@@ -154,6 +117,9 @@ bool parse(std::istream &s, ast::List &ast, std::ostream &err) {
 		std::ios::fmtflags flags;
 	} flagsHolder(s);
 	s.unsetf(std::ios::skipws);
+
+	using Iter = spirit::multi_pass<std::istream_iterator<char> >;
+	Iter iterBegin(s), iterEnd;
 	return parse(iterBegin, iterEnd, ast, err);
 }
 

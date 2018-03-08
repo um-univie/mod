@@ -1,12 +1,13 @@
 #ifndef MOD_LIB_DG_GRAPHDECL_H
 #define MOD_LIB_DG_GRAPHDECL_H
 
+#include <mod/lib/Graph/Multiset.h>
+
 #include <boost/graph/adjacency_list.hpp>
 
 namespace mod {
 namespace lib {
 namespace Graph {
-struct Base;
 struct Single;
 } // namespace Graph
 namespace Rules {
@@ -19,11 +20,12 @@ struct NonHyperEProp;
 using NonHyperGraphType = boost::adjacency_list<boost::vecS, boost::vecS, boost::bidirectionalS, NonHyperVProp, NonHyperEProp>;
 using NonHyperVertex = boost::graph_traits<NonHyperGraphType>::vertex_descriptor;
 using NonHyperEdge = boost::graph_traits<NonHyperGraphType>::edge_descriptor;
+using GraphMultiset = lib::Graph::Multiset<const lib::Graph::Single>;
 
 struct NonHyperVProp {
-
-	NonHyperVProp() : graph(nullptr) { }
-	const lib::Graph::Base *graph;
+	NonHyperVProp() = default;
+public:
+	GraphMultiset graphs;
 };
 
 struct NonHyperEProp {

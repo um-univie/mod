@@ -1,4 +1,6 @@
 SUBDIRS = src doc
+EXTRA_DIST =			\
+	ChangeLog.rst
 
 dist_pkgdata_DATA = \
 	VERSION

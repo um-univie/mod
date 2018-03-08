@@ -38,6 +38,14 @@ Strategy *Parallel::clone() const {
 	return new Parallel(subStrats);
 }
 
+void Parallel::preAddGraphs(std::function<void(std::shared_ptr<graph::Graph>) > add) const {
+	for(const auto *s : strats) s->preAddGraphs(add);
+}
+
+void Parallel::forEachRule(std::function<void(const lib::Rules::Real&)> f) const {
+	for(const auto *s : strats) s->forEachRule(f);
+}
+
 void Parallel::printInfo(std::ostream& s) const {
 	s << indent << "Parallel: " << strats.size() << " substrats" << std::endl;
 	indentLevel++;

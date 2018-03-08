@@ -1,9 +1,9 @@
 #include "Hyper.h"
 
-#include <mod/DG.h>
 #include <mod/Config.h>
 #include <mod/Error.h>
-#include <mod/Graph.h>
+#include <mod/dg/DG.h>
+#include <mod/graph/Graph.h>
 #include <mod/lib/DG/NonHyper.h>
 #include <mod/lib/Graph/Single.h>
 #include <mod/lib/IO/DG.h>
@@ -56,18 +56,26 @@ void HyperCreator::addEdge(NonHyper::Edge eNon) {
 	pimpl->edgeToHyper[eNon] = v;
 
 	{ // source edges
-		for(const lib::Graph::Single *g : dg[vSrcNon].graph->getSingles()) {
+		for(const lib::Graph::Single *g : dg[vSrcNon].graphs) {
 			Hyper::Vertex vSrc = owner.getVertexFromGraph(g);
 			add_edge(vSrc, v, hyper);
 		}
 	}
-
 	{ // target edges
-		for(const lib::Graph::Single *g : dg[vTarNon].graph->getSingles()) {
+		for(const lib::Graph::Single *g : dg[vTarNon].graphs) {
 			Hyper::Vertex vTar = owner.getVertexFromGraph(g);
 			add_edge(v, vTar, hyper);
 		}
 	}
+}
+
+void HyperCreator::addRuleToEdge(NonHyper::Edge eNon, const lib::Rules::Real *r) {
+	assert(r);
+	auto &hyper = owner.hyper;
+	const auto iter = pimpl->edgeToHyper.find(eNon);
+	assert(iter != end(pimpl->edgeToHyper));
+	const auto v = iter->second;
+	hyper[v].rules.push_back(r);
 }
 
 void HyperCreator::setReverse(NonHyper::Edge e, NonHyper::Edge eBack) {
@@ -95,10 +103,73 @@ std::pair<std::unique_ptr<Hyper>, HyperCreator> Hyper::makeHyper(const NonHyper 
 	return std::make_pair(std::move(hyper), HyperCreator(hyperRef));
 }
 
+//Hyper::Hyper(const NonHyper &dgClass, int dummy)
+//: hasCalculated(true), nonHyper(dgClass), vpGraph(nullptr) {
+//	const NonHyperGraphType &dg = dgClass.getGraph();
+//
+//	// first go through each vertex in dg, and create the needed vertices in dgHyper representing graphs
+//
+//	for(Vertex v : asRange(vertices(dg))) {
+//		const lib::Graph::Base *g = dg[v].graph;
+//		assert(g);
+//		for(const lib::Graph::Single *gSingle : g->getSingles()) addVertex(gSingle);
+//	}
+//
+//	// then go through all edge and add vertices for them, and edges
+//	std::map<NonHyperEdge, Vertex> edgeToHyper;
+//
+//	for(NonHyperEdge e : asRange(edges(dg))) {
+//		const lib::Rules::Base *r = dg[e].rule;
+//		Vertex from = source(e, dg);
+//		const lib::Graph::Base *gFrom = dg[from].graph;
+//		Vertex to = target(e, dg);
+//		const lib::Graph::Base *gTo = dg[to].graph;
+//		// it's a hyper edge, so first add the vertex implemening the edge
+//		Hyper::Vertex v = add_vertex(hyper);
+//		hyper[v].kind = VertexKind::Edge;
+//		hyper[v].graph = nullptr;
+//		hyper[v].rule = r;
+//		hyper[v].reverse = hyper.null_vertex();
+//		hyper[v].inVertex = from;
+//		hyper[v].outVertex = to;
+//		// insert to map
+//		edgeToHyper[e] = v;
+//		// fix reverse
+//		boost::optional<NonHyperEdge> reverse = dg[e].reverse;
+//		if(reverse) {
+//			auto iter = edgeToHyper.find(reverse.get());
+//			if(iter != end(edgeToHyper)) {
+//				// if both edge have been added, then fix it
+//				Vertex ourReverse = iter->second;
+//				hyper[v].reverse = ourReverse;
+//				hyper[ourReverse].reverse = v;
+//			}
+//		}
+//
+//		// add in edges to the rule
+//		{ // from
+//			for(const lib::Graph::Single *g : gFrom->getSingles()) {
+//				// get the vertex descriptor representing this graph
+//				Hyper::Vertex vFrom = getVertexFromGraph(g);
+//				add_edge(vFrom, v, hyper);
+//			}
+//		}
+//
+//		// add out edges from the rule
+//		{ // to
+//			for(const lib::Graph::Single *g : gTo->getSingles()) {
+//				// get the vertex descriptor representing this graph
+//				Hyper::Vertex vTo = getVertexFromGraph(g);
+//				add_edge(v, vTo, hyper);
+//			}
+//		}
+//	}
+//}
+
 void Hyper::addVertex(const lib::Graph::Single *g) {
 	{ // sanity check
 #ifndef NDEBUG
-		std::shared_ptr<mod::Graph> gAPI = g->getAPIReference();
+		std::shared_ptr<graph::Graph> gAPI = g->getAPIReference();
 		NonHyper::StdGraphSet::const_iterator iter = nonHyper.getGraphDatabase().find(gAPI);
 		assert(iter != nonHyper.getGraphDatabase().end());
 #endif
@@ -239,37 +310,33 @@ void Hyper::printStats(std::ostream &s) const {
 	s << "------------------------------------------------------------------" << std::endl;
 }
 
-Hyper::Vertex Hyper::getVertexFromDerivationRef(mod::DerivationRef dRef) const {
-	assert(dRef.isValid());
-	auto vIterPair = vertices(getGraph());
-	auto vIter = vIterPair.first;
-	assert(vIterPair.second - vIterPair.first > dRef.getId());
-	auto v = *(vIter + dRef.getId());
-	assert(hyper[v].kind == VertexKind::Edge);
-	return v;
+bool Hyper::isVertexGraph(const lib::Graph::Single *g) const {
+	const auto iter = graphToHyperVertex.find(g);
+	return iter != graphToHyperVertex.end();
+}
+
+Hyper::Vertex Hyper::getVertexOrNullFromGraph(const lib::Graph::Single *g) const {
+	const auto iter = graphToHyperVertex.find(g);
+	if(iter == graphToHyperVertex.end()) return getGraph().null_vertex();
+	else return iter->second;
 }
 
 Hyper::Vertex Hyper::getVertexFromGraph(const lib::Graph::Single *g) const {
-	std::map<const lib::Graph::Single*, Hyper::Vertex>::const_iterator iter = graphToHyperVertex.find(g);
+	const auto iter = graphToHyperVertex.find(g);
 	assert(iter != graphToHyperVertex.end());
 	return iter->second;
 }
 
-bool Hyper::isVertexGraph(std::shared_ptr<mod::Graph> g) const {
-	std::map<const Graph::Single*, Vertex>::const_iterator iter = graphToHyperVertex.find(&g->getGraph());
-	return iter != graphToHyperVertex.end();
+dg::DG::Vertex Hyper::getInterfaceVertex(Vertex v) const {
+	if(v == hyper.null_vertex()) return dg::DG::Vertex();
+	assert(hyper[v].kind == VertexKind::Vertex);
+	return dg::DG::Vertex(getNonHyper().getAPIReference(), get(boost::vertex_index_t(), getGraph(), v));
 }
 
-mod::DerivationRef Hyper::getDerivationRef(Vertex v) const {
-	if(v == hyper.null_vertex()) return DerivationRef();
-	if(hyper[v].kind != VertexKind::Edge) return DerivationRef();
-	return DerivationRef(get(boost::vertex_index_t(), hyper, v), getNonHyper().getAPIReference());
-}
-
-mod::DerivationRef Hyper::getDerivationRefValid(Vertex v) const {
-	auto dRef = getDerivationRef(v);
-	if(dRef.isValid()) return dRef;
-	else MOD_ABORT;
+dg::DG::HyperEdge Hyper::getInterfaceEdge(Vertex e) const {
+	if(e == hyper.null_vertex()) return dg::DG::HyperEdge();
+	assert(hyper[e].kind == VertexKind::Edge);
+	return dg::DG::HyperEdge(getNonHyper().getAPIReference(), get(boost::vertex_index_t(), getGraph(), e));
 }
 
 mod::Derivation Hyper::getDerivation(Vertex v) const {
@@ -279,7 +346,7 @@ mod::Derivation Hyper::getDerivation(Vertex v) const {
 	for(Vertex vIn : asRange(inv_adjacent_vertices(v, hyper)))
 		d.left.push_back(hyper[vIn].graph->getAPIReference());
 	if(!hyper[v].rules.empty()) {
-		d.rule = hyper[v].rules.front()->getAPIReference();
+		d.r = hyper[v].rules.front()->getAPIReference();
 	}
 	for(Vertex vOut : asRange(adjacent_vertices(v, hyper)))
 		d.right.push_back(hyper[vOut].graph->getAPIReference());

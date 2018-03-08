@@ -21,7 +21,7 @@ patterns, then the resulting derivation graph can be seen as a chemical
 reaction network.
 Here we describe the semantics of the strategy language,
 while the API is described seperately for the
-:ref:`C++ <cpp-DGStrat>` and :ref:`Python <py-DGStrat>` interface.
+:ref:`C++ <cpp-dg/Strategies>` and :ref:`Python <py-dg/Strategies>` interface.
 
 
 ---------------------
@@ -111,7 +111,7 @@ with :math:`\mathcal{S}' = \{g\in \mathcal{S}\mid p(g)\}`.
 Rule
 ####
 
-A rule (:cpp:class:`C++ <Rule>`/:py:class:`Python <Rule>`) can be used directly as a strategy.
+A rule (:cpp:class:`C++ <rule::Rule>`/:py:class:`Python <Rule>`) can be used directly as a strategy.
 It will search for proper derivations using a multiset of graphhs drawn from the input unvierse.
 However, each candidate multiset will have at least one graph from the active subset.
 Newly discovered graphs will be the active subset of the output.

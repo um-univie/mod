@@ -13,7 +13,7 @@
 namespace {
 namespace Loc {
 static constexpr unsigned int
-		/*                      */T = 16,
+/*                      */T = 16,
 		/*        */T_left = 32, /*     */T_right = 8,
 		//
 		/*   */TL = 64, /*                     */TR = 4,
@@ -32,14 +32,18 @@ static constexpr unsigned int
 		/*                      */B = 4096
 		;
 static constexpr unsigned int
-		R_all = Loc::R | Loc::R_up | Loc::R_down,
-		L_all = Loc::L | Loc::L_up | Loc::L_down,
-		T_all = Loc::T | Loc::T_left | Loc::T_right,
-		B_all = Loc::B | Loc::B_left | Loc::B_right,
-		R_side = R_all | TR | T_right | BR | B_right,
-		L_side = L_all | TL | T_left | BL | B_left,
-		T_side = T_all | TR | R_up | TL | L_up,
-		B_side = B_all | BR | R_down | BL | L_down
+R_narrow = Loc::R | Loc::R_up | Loc::R_down,
+		L_narrow = Loc::L | Loc::L_up | Loc::L_down,
+		T_narrow = Loc::T | Loc::T_left | Loc::T_right,
+		B_narrow = Loc::B | Loc::B_left | Loc::B_right,
+		R_medium = R_narrow | TR | BR,
+		L_medium = L_narrow | TL | BL,
+		T_medium = T_narrow | TR | TL,
+		B_medium = B_narrow | BR | BL,
+		R_wide = R_medium | T_right | B_right,
+		L_wide = L_medium | T_left | B_left,
+		T_wide = T_medium | R_up | L_up,
+		B_wide = B_medium | R_down | L_down
 		;
 } // namespace Loc
 } // namespace
@@ -59,18 +63,37 @@ inline std::pair<double, double> pointRotation(double xRaw, double yRaw, int rot
 	return std::make_pair(x, y);
 }
 
+inline std::pair<double, double> pointTransform(double xRaw, double yRaw, int rotation, bool mirror) {
+	if(mirror) xRaw *= -1;
+	return pointRotation(xRaw, yRaw, rotation);
+}
+
 namespace Graph {
 namespace Write {
 
-template<typename Graph, typename Depict, typename AdvOptions>
-void tikz(std::ostream &s, const Options &options, const Graph &g, const Depict &depict, const std::string &fileCoords, const AdvOptions &advOptions) {
+template<typename Graph, typename Depict, typename AdvOptions, typename BonusWriter>
+void tikz(std::ostream &s, const Options &options, const Graph &g, const Depict &depict,
+		const std::string &fileCoords, const AdvOptions &advOptions, BonusWriter bonusWriter, const std::string &idPrefix) {
 	typedef typename boost::graph_traits<Graph>::vertex_descriptor Vertex;
 	typedef typename boost::graph_traits<Graph>::edge_descriptor Edge;
+
+	[[maybe_unused]] const auto printBlocked = [&s](auto b) {
+		auto at = [&b](int i) {
+			return bool((b & (1 << i)) != 0);
+		};
+		s << "% " << at(6) << " " << at(5) << at(4) << at(3) << " " << at(2) << "\n";
+		s << "% " << at(7) << "     " << at(1) << "\n";
+		s << "% " << at(8) << "     " << at(0) << "\n";
+		s << "% " << at(9) << "     " << at(15) << "\n";
+		s << "% " << at(10) << " " << at(11) << at(12) << at(13) << " " << at(14) << "\n";
+	};
 
 	// set up data
 	std::vector<bool> isVisible(num_vertices(g), true);
 	std::vector<bool> isSimpleCarbon(num_vertices(g), false);
 	std::vector<unsigned int> implicitHydrogenCount(num_vertices(g), 0);
+	std::vector<bool> hasBondBlockingAtChargeRight(num_vertices(g), false);
+	std::vector<bool> hasBondBlockingAtChargeLeft(num_vertices(g), false);
 	{ // visibility from adv
 		for(Vertex v : asRange(vertices(g))) {
 			unsigned int vId = get(boost::vertex_index_t(), g, v);
@@ -104,7 +127,10 @@ void tikz(std::ostream &s, const Options &options, const Graph &g, const Depict 
 			for(Vertex v : asRange(vertices(g))) {
 				unsigned int vId = get(boost::vertex_index_t(), g, v);
 				if(!isVisible[vId]) continue;
-				if(Chem::isCollapsible(v, g, depict, depict)) {
+				const auto hasImportantStereo = [&depict](const auto v) {
+					return depict.hasImportantStereo(v);
+				};
+				if(Chem::isCollapsible(v, g, depict, depict, hasImportantStereo)) {
 					assert(out_degree(v, g) == 1);
 					Edge e = *out_edges(v, g).first;
 					Vertex vAdj = target(e, g); // TODO: just use adjacent_vertices, we don't need the edge
@@ -118,7 +144,7 @@ void tikz(std::ostream &s, const Options &options, const Graph &g, const Depict 
 		}
 	}
 
-	auto areAllBlocked = [](unsigned int b) {
+	const auto areAllBlocked = [](unsigned int b) {
 		return (b & (Loc::R_down * 2 - 1)) == (Loc::R_down * 2 - 1);
 	};
 	std::vector<unsigned int> auxLabelBlocked(num_vertices(g), 0);
@@ -128,24 +154,56 @@ void tikz(std::ostream &s, const Options &options, const Graph &g, const Depict 
 			unsigned int vId = get(boost::vertex_index_t(), g, v);
 			if(!isVisible[vId]) continue;
 			double x, y;
-			std::tie(x, y) = pointRotation(
+			std::tie(x, y) = pointTransform(
 					depict.getX(v, !options.collapseHydrogens),
 					depict.getY(v, !options.collapseHydrogens),
-					options.rotation);
-			for(Vertex vAdj : asRange(adjacent_vertices(v, g))) {
-				unsigned int vAdjId = get(boost::vertex_index_t(), g, vAdj);
+					options.rotation, options.mirror);
+			for(const Edge eOut : asRange(out_edges(v, g))) {
+				const Vertex vAdj = target(eOut, g);
+				const unsigned int vAdjId = get(boost::vertex_index_t(), g, vAdj);
 				if(!isVisible[vAdjId]) continue;
 				double xAdj, yAdj;
-				std::tie(xAdj, yAdj) = pointRotation(
+				std::tie(xAdj, yAdj) = pointTransform(
 						depict.getX(vAdj, !options.collapseHydrogens),
 						depict.getY(vAdj, !options.collapseHydrogens),
-						options.rotation);
+						options.rotation, options.mirror);
 				auto &blocked = auxLabelBlocked[vId];
 				constexpr double eps = 0.000001;
-				double xDiff = xAdj - x;
-				double yDiff = yAdj - y;
-				double angle = std::atan2(yDiff, xDiff); // [-pi; pi]
-				auto check = [&](std::size_t i, double lower, double upper) {
+				const double xDiff = xAdj - x;
+				const double yDiff = yAdj - y;
+				double angle = std::atan2(yDiff, xDiff); // [-pi; pi], later shifted to [0; 2*pi]
+
+				const BondType bType = depict.getBondData(eOut);
+				// a single bond blocks less than a double/aromatic and they less than a triple
+				const double f = [&]() {
+					switch(bType) {
+					case BondType::Single: return 8;
+					case BondType::Aromatic:
+					case BondType::Double: return 5;
+					case BondType::Invalid:
+					case BondType::Triple: return 3;
+					}
+					std::abort();
+				}();
+				// check if a bond blocks a charge, using angle in [-pi/2; 3/2*pi]
+				{ // right
+					const double shifted_angle = angle < -pi / 2 ? angle + 2 * pi : angle;
+					constexpr double a = pi / 16;
+					const double lower = a - pi / f + eps;
+					const double upper = a + pi / f - eps;
+					if(shifted_angle >= lower && shifted_angle <= upper)
+						hasBondBlockingAtChargeRight[vId] = true;
+				}
+				{ // left
+					const double shifted_angle = angle < -pi / 2 ? angle + 2 * pi : angle;
+					constexpr double a = pi - pi / 16;
+					const double lower = a - pi / f + eps;
+					const double upper = a + pi / f - eps;
+					if(shifted_angle >= lower && shifted_angle <= upper)
+						hasBondBlockingAtChargeLeft[vId] = true;
+				}
+				// now check block where the bond is
+				const auto check = [&](int i, double lower, double upper) {
 					//					s << "% " << vId << "(" << x << ", " << y << "): " << vAdjId << "(" << xAdj << ", " << yAdj << "), "
 					//							<< " a=" << angle << ", a d=" << (angle * 180 / pi)
 					//							<< " l=" << lower << ", l d=" << (lower * 180 / pi)
@@ -155,14 +213,23 @@ void tikz(std::ostream &s, const Options &options, const Graph &g, const Depict 
 						//						s << "%     blocked=" << i << "\n";
 					}
 				};
-				// take the first and last explicitly
-				check(0, -pi / 8 - eps, pi / 8 + eps);
-				check(15, -2 * pi / 8 - eps, eps);
-				// now shift to get contiguous in the rest of the range
-				if(angle < 0) angle += 2 * pi; // [0; 2*pi]
-				for(std::size_t i = 1; i <= 14; ++i) {
-					check(i, (i - 1) * pi / 8 - eps, (i + 1) * pi / 8 + eps);
+				const auto posToAngle = [](int i) {
+					return 2 * pi * i / 16;
+				};
+				// take the 1st and 4th quadrant first
+				for(int i = -4; i < 4; ++i) {
+					const int pos = i < 0 ? i + 16 : i;
+					check(pos, posToAngle(i) - pi / f + eps, posToAngle(i) + pi / f - eps);
 				}
+				//				s << "% " << v << ": " << vAdj << ", angle=" << angle << std::endl;
+				//				printBlocked(blocked);
+				// now shift to get contiguous in the 2nd and 3rd quadrants
+				if(angle < 0) angle += 2 * pi; // [0; 2*pi]
+				for(int i = 4; i < 12; ++i) {
+					check(i, posToAngle(i) - pi / f + eps, posToAngle(i) + pi / f - eps);
+				}
+				//				s << "% " << v << ": " << vAdj << ", angle=" << angle << std::endl;
+				//				printBlocked(blocked);
 			}
 		}
 	} else { // we don't have coordinates, block all
@@ -184,17 +251,19 @@ void tikz(std::ostream &s, const Options &options, const Graph &g, const Depict 
 	s << R"XXX(, baseline={([yshift={-0.5ex}]current bounding box)})XXX";
 	if(options.thick) s << ", thick";
 	s << ", solid"; // circumvent the strange inherited 'dashed' http://tex.stackexchange.com/questions/115887/pattern-in-addplot-inherits-dashed-option-from-previous-draw
-	s << "]" << std::endl;
-	s << "\\input{\\modInputPrefix/" << fileCoords << "}" << std::endl;
+	s << "]\n";
+	if(!idPrefix.empty())
+		s << "\\renewcommand\\modIdPrefix{" << idPrefix << "}\n";
+	s << "\\input{\\modInputPrefix/" << fileCoords << "}\n";
 
 	for(Vertex v : asRange(vertices(g))) {
-		unsigned int vId = get(boost::vertex_index_t(), g, v);
+		const auto vId = get(boost::vertex_index_t(), g, v);
 		if(!isVisible[vId]) continue;
-		unsigned char atomId = depict.getAtomId(v);
+		const auto atomId = depict.getAtomId(v);
 
-		auto createDummy = [&s, vId, &advOptions, &textModifiersBegin, &textModifiersEnd](std::string suffix, bool subscript) {
+		const auto createDummy = [&s, vId, &advOptions, &textModifiersBegin, &textModifiersEnd](std::string suffix, bool subscript) {
 			// create dummy vertex to make sure the bounding box is large enough
-			s << "\\node[modStyleGraphVertex, at=(v-" << (vId + advOptions.idOffset) << suffix << ")";
+			s << "\\node[modStyleGraphVertex, at=(\\modIdPrefix v-" << (vId + advOptions.idOffset) << suffix << ")";
 			if(subscript) s << ", text depth=.25ex";
 			s << "] {\\phantom{" << textModifiersBegin << "H";
 			if(subscript) s << "$_2$";
@@ -224,8 +293,8 @@ void tikz(std::ostream &s, const Options &options, const Graph &g, const Depict 
 		if(!colourString.empty()) colourString = ", text=" + colourString;
 
 		std::string indexString;
-		if(options.withIndex) {
-			indexString = "{\\tiny $\\langle " + boost::lexical_cast<std::string>(get(boost::vertex_index_t(), g, v)) + "\\rangle$}";
+		if(options.withIndex && !advOptions.overwriteWithIndex(v)) {
+			indexString = "{\\tiny $\\langle " + advOptions.getShownId(v) + "\\rangle$}";
 		}
 
 		s << "\\node[modStyleGraphVertex";
@@ -234,189 +303,255 @@ void tikz(std::ostream &s, const Options &options, const Graph &g, const Depict 
 			if(indexString.empty()) s << ", modStyleCarbon";
 			else s << ", modStyleCarbonIndex";
 		}
-		s << ", at=(v-coord-" << (vId + advOptions.idOffset) << ")] (v-" << (vId + advOptions.idOffset) << ") ";
+		s << ", at=(\\modIdPrefix v-coord-" << (vId + advOptions.idOffset) << ")";
+		std::string userOpts = advOptions.getOpts(v);
+		if(!userOpts.empty())
+			s << ", " << userOpts;
+		s << "] (\\modIdPrefix v-" << (vId + advOptions.idOffset) << ") ";
+		auto auxBlocked = auxLabelBlocked[vId];
 		if(isSimpleCarbon[vId]) { // Simple Cs
 			s << "{" << textModifiersBegin << indexString << textModifiersEnd << "};\n";
 			if(!indexString.empty()) createDummy("", false);
-			continue;
-		}
-		char charge = depict.getCharge(v);
-		auto auxBlocked = auxLabelBlocked[vId];
-		unsigned int hCount = implicitHydrogenCount[vId];
-		bool allAuxBlocked = areAllBlocked(auxBlocked);
-		bool hInLabel = (!options.collapseHydrogens
-				|| allAuxBlocked);
-		bool auxRightFree = (auxBlocked & Loc::R_all) == 0;
-		bool chargeInAux = auxRightFree && !hInLabel && hCount > 0;
+		} else { // not simple carbon
+			const char charge = depict.getCharge(v);
+			const unsigned int hCount = implicitHydrogenCount[vId];
+			const bool allAuxBlocked = areAllBlocked(auxBlocked);
+			const bool hInLabel = !options.collapseHydrogens || allAuxBlocked;
+			const bool chargeOnLeft = hasBondBlockingAtChargeRight[vId] && !hasBondBlockingAtChargeLeft[vId];
 
-		std::string labelNoAux = escapeForLatex(depict.getVertexLabelNoChargeRadical(v));
-		std::string chargeString;
-		if(charge != 0) {
-			if(options.raiseCharges) chargeString += "$^{";
-			if(charge != 1 && charge != -1) chargeString += boost::lexical_cast<std::string>(std::abs(charge));
-			if(charge < 0) chargeString += '-';
-			else chargeString += '+';
-			if(options.raiseCharges) chargeString += "}$";
-		}
-		std::string hString;
-		if(hCount > 0) {
-			hString += "H";
-			if(hCount > 1) hString += "$_{" + boost::lexical_cast<std::string>(hCount) + "}$";
-		}
-
-		// handle H_2 special
-		if(hCount == 1 && charge == 0 && atomId == 1) {
-			s << "{" << textModifiersBegin;
-			s << indexString << "H$_2$";
-			s << textModifiersEnd << "};\n";
-			createDummy("", true);
-			continue;
-		}
-		// handle water special
-		if(hCount == 2 && charge == 0 && atomId == 8) {
-			s << "{" << textModifiersBegin;
-			s << "H$_2$O" << indexString;
-			s << textModifiersEnd << "};\n";
-			createDummy("", true);
-			continue;
-		}
-
-		s << "{" << textModifiersBegin;
-		s << labelNoAux;
-		if(hInLabel) s << hString;
-		s << textModifiersEnd << "};\n";
-		if(!chargeInAux && charge != 0) {
-			s << "\\node[modStyleGraphVertex" << colourString << ", at=(v-" << (vId + advOptions.idOffset) << ".east), anchor=west] {";
-			s << textModifiersBegin;
-			s << chargeString;
-			s << textModifiersEnd << "};\n";
-		}
-		if(hInLabel && hCount > 1) createDummy("", true);
-		else if(!indexString.empty()) createDummy("", false);
-		bool hasAuxHydrogen = !hInLabel && hCount != 0;
-
-		bool isAuxVertical = (auxBlocked & Loc::R_all) != 0 && (auxBlocked & Loc::L_all) != 0;
-
-		decltype(auxBlocked) auxHPosition = -1;
-		/**/ if((auxBlocked & Loc::R_all) == 0) auxHPosition = Loc::R_all;
-		else if((auxBlocked & Loc::L_all) == 0) auxHPosition = Loc::L_all;
-		else if((auxBlocked & Loc::T_all) == 0) auxHPosition = Loc::T_all;
-		else if((auxBlocked & Loc::B_all) == 0) auxHPosition = Loc::B_all;
-		// if we have something like:
-		//              y
-		//             /
-		//            xH
-		// then make it
-		//              y
-		//             /
-		//           Hx
-		//
-		if(/**/ auxHPosition == Loc::R_all
-				&& (auxBlocked & Loc::R_side) != 0
-				&& (auxBlocked & Loc::L_side) == 0
-				) {
-			auxHPosition = Loc::L_all;
-		}
-		// if we have something like:
-		//      Y_
-		//        \_H
-		//          x
-		// then make it
-		//      Y_
-		//        \_
-		//          x
-		//          H
-		if(/**/ auxHPosition == Loc::T_all
-				&& (auxBlocked & Loc::T_side) != 0
-				&& (auxBlocked & Loc::B_side) == 0
-				) {
-			auxHPosition = Loc::B_all;
-		}
-		if(!hasAuxHydrogen) auxHPosition = -1;
-		//		auto printBlocked = [&s](unsigned int b) {
-		//			auto at = [&b](int i) {
-		//				return bool((b & (1 << i)) != 0);
-		//			};
-		//			s << "% " << at(6) << " " << at(5) << at(4) << at(3) << " " << at(2) << "\n";
-		//			s << "% " << at(7) << "     " << at(1) << "\n";
-		//			s << "% " << at(8) << "     " << at(0) << "\n";
-		//			s << "% " << at(9) << "     " << at(15) << "\n";
-		//			s << "% " << at(10) << " " << at(11) << at(12) << at(13) << " " << at(14) << "\n";
-		//		};
-
-		//		printBlocked(auxBlocked);
-		//		printBlocked(auxHPosition);
-		if(auxHPosition != -1) auxBlocked |= auxHPosition;
-		//		printBlocked(auxBlocked);
-
-		if(auxHPosition != -1) {
-			s << "\\node[modStyleGraphVertex" << colourString << ", at=(v-" << (vId + advOptions.idOffset) << ".";
-			/**/ if(auxHPosition == Loc::R_all) s << "east), anchor=west";
-			else if(auxHPosition == Loc::L_all) s << "west), anchor=east";
-			else if(auxHPosition == Loc::T_all) s << "north), anchor=south, yshift=1pt";
-			else if(auxHPosition == Loc::B_all) s << "south), anchor=north, yshift=-1pt";
-			else MOD_ABORT;
-			s << "] (v-" << (vId + advOptions.idOffset) << "-aux) {";
-			s << textModifiersBegin;
-			if(!isAuxVertical) s << hString;
-			else s << "H";
-			if(chargeInAux) s << chargeString;
-			s << textModifiersEnd << "};\n";
-			createDummy("-aux", hCount > 1);
-			if(isAuxVertical && hCount > 1) {
-				s << "\\node[modStyleGraphVertex" << colourString << ", at=(v-" << (vId + advOptions.idOffset) << "-aux.east), anchor=west] {";
-				s << textModifiersBegin;
-				s << "$_{" << hCount << "}$";
-				s << textModifiersEnd << "};\n";
+			std::string labelNoAux = escapeForLatex(depict.getVertexLabelNoChargeRadical(v));
+			std::string chargeString;
+			if(charge != 0) {
+				if(options.raiseCharges) chargeString += "$^{";
+				if(charge != 1 && charge != -1) chargeString += boost::lexical_cast<std::string>(std::abs(charge));
+				if(charge < 0) chargeString += '-';
+				else chargeString += '+';
+				if(options.raiseCharges) chargeString += "}$";
 			}
-		}
-		if(depict.getRadical(v)) {
-			std::size_t auxRadicalPosition;
-			// first try the x/y axis
-			/**/ if((auxBlocked & Loc::R) == 0 && charge == 0) auxRadicalPosition = 0;
-			else if((auxBlocked & Loc::T) == 0) auxRadicalPosition = 4;
-			else if((auxBlocked & Loc::L) == 0) auxRadicalPosition = 8;
-			else if((auxBlocked & Loc::B) == 0) auxRadicalPosition = 12;
-			else {
-				// If there is a charge, then don't put it on R, R_up, or TR.
-				auxRadicalPosition = charge == 0 ? 0 : 3;
-				for(; auxRadicalPosition < 16; ++auxRadicalPosition) {
-					if((auxBlocked & (1 << auxRadicalPosition)) == 0) break;
+			std::string hString;
+			if(hCount > 0) {
+				hString += "H";
+				if(hCount > 1) hString += "$_{" + boost::lexical_cast<std::string>(hCount) + "}$";
+			}
+
+			// handle H_2 special
+			if(hCount == 1 && charge == 0 && atomId == 1) {
+				s << "{" << textModifiersBegin;
+				s << indexString << "H$_2$";
+				s << textModifiersEnd << "};\n";
+				createDummy("", true);
+				continue;
+			}
+			// handle water special
+			if(hCount == 2 && charge == 0 && atomId == 8) {
+				s << "{" << textModifiersBegin;
+				s << "H$_2$O" << indexString;
+				s << textModifiersEnd << "};\n";
+				createDummy("", true);
+				continue;
+			}
+
+			s << "{" << textModifiersBegin;
+			s << labelNoAux;
+			if(hInLabel) s << hString;
+			s << textModifiersEnd << "};\n";
+
+			if(hInLabel && hCount > 1) createDummy("", true);
+			else if(!indexString.empty()) createDummy("", false);
+			const bool hasAuxHydrogen = !hInLabel && hCount != 0;
+
+			decltype(auxBlocked) auxHPosition = -1;
+			if(hCount < 2) {
+				/**/ if((auxBlocked & Loc::R_narrow) == 0) auxHPosition = Loc::R_narrow;
+				else if((auxBlocked & Loc::L_narrow) == 0) auxHPosition = Loc::L_narrow;
+				else if((auxBlocked & Loc::T_narrow) == 0) auxHPosition = Loc::T_narrow;
+				else if((auxBlocked & Loc::B_narrow) == 0) auxHPosition = Loc::B_narrow;
+			} else { // the subscript takes extra space
+				/**/ if((auxBlocked & Loc::R_narrow) == 0) auxHPosition = Loc::R_narrow;
+				else if((auxBlocked & (Loc::L_narrow | Loc::BL)) == 0) auxHPosition = Loc::L_narrow;
+				else if((auxBlocked & (Loc::T_narrow | Loc::TR)) == 0) auxHPosition = Loc::T_narrow;
+				else if((auxBlocked & Loc::B_narrow) == 0) auxHPosition = Loc::B_narrow;
+			}
+			const bool isAuxVertical = auxHPosition == Loc::T_narrow || auxHPosition == Loc::B_narrow;
+			// if we have something like:
+			//              y
+			//             /
+			//            xH
+			// then make it
+			//              y
+			//             /
+			//           Hx
+			//
+			if(auxHPosition == Loc::R_narrow &&
+					(auxBlocked & Loc::R_wide) != 0 &&
+					(auxBlocked & Loc::L_wide) == 0
+					) {
+				auxHPosition = Loc::L_narrow;
+			}
+			// if we have something like:
+			//      Y_
+			//        \_H
+			//          x
+			// then make it
+			//      Y_
+			//        \_
+			//          x
+			//          H
+			if(/**/ auxHPosition == Loc::T_narrow
+					&& (auxBlocked & Loc::T_wide) != 0
+					&& (auxBlocked & Loc::B_wide) == 0
+					) {
+				auxHPosition = Loc::B_narrow;
+			}
+			// forget about all this placement stuff if we don't have any hydrogens
+			if(!hasAuxHydrogen) auxHPosition = -1;
+			// reserve the aux space
+			if(auxHPosition != -1) auxBlocked |= auxHPosition;
+			// see if aux should have the charge as well
+			const bool chargeInAux = [&]() {
+				if(auxHPosition == -1) return false;
+				if(hInLabel) return false;
+				if(hCount == 0) return false;
+				if(chargeOnLeft && auxHPosition == Loc::L_narrow) return true;
+				if(!chargeOnLeft && auxHPosition == Loc::R_narrow) return true;
+				return false;
+			}();
+
+			if(!chargeInAux && charge != 0) {
+				s << "\\node[modStyleGraphVertex" << colourString << ", at=(\\modIdPrefix v-" << (vId + advOptions.idOffset);
+				if(chargeOnLeft) s << ".west), anchor=east";
+				else s << ".east), anchor=west";
+				s << "] {";
+				s << textModifiersBegin;
+				s << chargeString;
+				s << textModifiersEnd << "};\n";
+				if(chargeOnLeft) auxBlocked |= Loc::L & Loc::L_up & Loc::TL;
+				else auxBlocked |= Loc::R & Loc::R_up & Loc::TR;
+			}
+
+			if(auxHPosition != -1) {
+				s << "\\node[modStyleGraphVertex" << colourString << ", at=(\\modIdPrefix v-" << (vId + advOptions.idOffset) << ".";
+				/**/ if(auxHPosition == Loc::R_narrow) s << "east), anchor=west";
+				else if(auxHPosition == Loc::L_narrow) s << "west), anchor=east";
+				else if(auxHPosition == Loc::T_narrow) s << "north), anchor=south, yshift=1pt";
+				else if(auxHPosition == Loc::B_narrow) s << "south), anchor=north, yshift=-1pt";
+				else MOD_ABORT;
+				s << "] (\\modIdPrefix v-" << (vId + advOptions.idOffset) << "-aux) {";
+				s << textModifiersBegin;
+				if(chargeInAux && chargeOnLeft) s << chargeString;
+				std::string output;
+				if(!isAuxVertical) output += hString;
+				else output += "H";
+				if(chargeInAux && !chargeOnLeft) {
+					assert(!output.empty());
+					// hString may end in $ and chargeString may start with $. Shortcut that.
+					if(!chargeString.empty() && chargeString[0] == '$' && output[output.size() - 1] == '$') {
+						output.resize(output.size() - 1);
+						output += std::string(chargeString.begin() + 1, chargeString.end());
+					} else {
+						output += chargeString;
+					}
+				}
+				s << output;
+				s << textModifiersEnd << "};\n";
+				createDummy("-aux", hCount > 1);
+				if(isAuxVertical && hCount > 1) {
+					s << "\\node[modStyleGraphVertex" << colourString << ", at=(\\modIdPrefix v-" << (vId + advOptions.idOffset) << "-aux.east), anchor=west] {";
+					s << textModifiersBegin;
+					s << "$_{" << hCount << "}$";
+					s << textModifiersEnd << "};\n";
 				}
 			}
-			if(auxRadicalPosition == 16) auxRadicalPosition = 12;
-			auxBlocked |= (1 << auxRadicalPosition);
-			double atAngle = auxRadicalPosition * 22.5;
-			s << "\\node[outer sep=0, inner sep=1, minimum size=0, fill=black, circle, "
-					<< "at=(v-" << (vId + advOptions.idOffset) << "." << atAngle << "), "
-					<< "shift=(" << atAngle << ":3pt)] {};\n";
-		}
-		if(options.withIndex) {
+			if(depict.getRadical(v)) {
+				std::size_t auxRadicalPosition;
+				// first try the x/y axis
+				/**/ if((auxBlocked & Loc::R) == 0 && charge == 0) auxRadicalPosition = 0;
+				else if((auxBlocked & Loc::T) == 0) auxRadicalPosition = 4;
+				else if((auxBlocked & Loc::L) == 0) auxRadicalPosition = 8;
+				else if((auxBlocked & Loc::B) == 0) auxRadicalPosition = 12;
+				else {
+					for(auxRadicalPosition = 0; auxRadicalPosition < 16; ++auxRadicalPosition) {
+						if((auxBlocked & (1 << auxRadicalPosition)) == 0) break;
+					}
+				}
+				// fallback
+				if(auxRadicalPosition == 16) auxRadicalPosition = 12;
+				// and now process it
+				auxBlocked |= (1 << auxRadicalPosition);
+				const double atAngle = auxRadicalPosition * 22.5;
+				s << "\\node[outer sep=0, inner sep=1, minimum size=0, fill=black, circle, "
+						<< "at=(\\modIdPrefix v-" << (vId + advOptions.idOffset) << "." << atAngle << "), "
+						<< "shift=(" << atAngle << ":3pt)] {};\n";
+			} // end if has radical
+		} // end if simpleCarbon
+		if(options.withRawStereo || options.withPrettyStereo) {
+			const std::string strStereo =
+					(options.withRawStereo ? advOptions.getRawStereoString(v) : std::string())
+					+ (options.withPrettyStereo ? advOptions.getPrettyStereoString(v) : std::string());
+			if(!strStereo.empty()) {
+				const auto stereoPosition = [&]() {
+					for(const unsigned int loc :{0, 8, 4, 12, 1, 15, 7, 9}) {
+						if((auxBlocked & (1 << loc)) == 0) return loc;
+					}
+					for(unsigned int loc = 16; loc > 0; --loc) {
+						if((auxBlocked & (1 << (loc - 1))) == 0) return loc - 1;
+					}
+					return 10u;
+				}();
+				auxBlocked |= (1u << stereoPosition);
+				double atAngle = stereoPosition * 22.5;
+				s << "\\node[outer sep=0, inner sep=1, at=(\\modIdPrefix v-" << (vId + advOptions.idOffset)
+						<< "." << atAngle << "), anchor=";
+				[&s, stereoPosition]() -> std::ostream& {
+					switch(stereoPosition) {
+					case 0: return s << "west";
+					case 8: return s << "east";
+					}
+					if(stereoPosition < 8) s << "south";
+					else s << "north";
+					switch(stereoPosition) {
+					case 4:
+					case 12: return s;
+					}
+					if(stereoPosition > 4 && stereoPosition < 12) return s << " east";
+					else return s << " west";
+				}();
+				s << "] (\\modIdPrefix v-" << (vId + advOptions.idOffset) << "-stereoId) ";
+				s << "{\\tiny " << textModifiersBegin << strStereo << textModifiersEnd << "};\n";
+			}
+		} // end if with any kind of stereo
+
+		// index, which were not already handled due to simple carbon
+		if(!isSimpleCarbon[vId] && options.withIndex) {
 			std::size_t auxIndexPosition;
 			// first try the x/y axis
-			/**/ if((auxBlocked & Loc::R) == 0 && charge == 0) auxIndexPosition = 0;
-			else if((auxBlocked & Loc::T) == 0) auxIndexPosition = 4;
-			else if((auxBlocked & Loc::L) == 0) auxIndexPosition = 8;
-			else if((auxBlocked & Loc::B) == 0) auxIndexPosition = 12;
+			/**/ if((auxBlocked & Loc::R_narrow) == 0) auxIndexPosition = 0;
+			else if((auxBlocked & Loc::T_narrow) == 0) auxIndexPosition = 4;
+			else if((auxBlocked & Loc::L_narrow) == 0) auxIndexPosition = 8;
+			else if((auxBlocked & Loc::B_narrow) == 0) auxIndexPosition = 12;
 			else {
-				// If there is a charge, then don't put it on R, R_up, or TR.
-				auxIndexPosition = charge == 0 ? 0 : 3;
-				for(; auxIndexPosition < 16; ++auxIndexPosition) {
-					if((auxBlocked & (1 << auxIndexPosition)) == 0) break;
+				if((auxBlocked & ((1 << 15) | 1 | 2)) == 0) auxIndexPosition = 0;
+				else if((auxBlocked & ((3 << 14) | 1)) == 0) auxIndexPosition = 0;
+				else {
+					for(auxIndexPosition = 1; auxIndexPosition < 15; ++auxIndexPosition) {
+						if((auxBlocked & (7 << (auxIndexPosition - 1))) == 0) break;
+					}
 				}
 			}
+			// fallback
 			if(auxIndexPosition == 16) auxIndexPosition = 10;
+			// and then process it
 			auxBlocked |= (1 << auxIndexPosition);
-			double atAngle = auxIndexPosition * 22.5;
+			const double atAngle = auxIndexPosition * 22.5;
 			s << "\\node[outer sep=0, inner sep=1" << colourString
-					<< ", at=(v-" << (vId + advOptions.idOffset)
+					<< ", at=(\\modIdPrefix v-" << (vId + advOptions.idOffset)
 					<< "." << atAngle << "), anchor=" << (atAngle + 180)
-					<< "] (v-" << (vId + advOptions.idOffset) << "-auxId) {";
+					<< "] (\\modIdPrefix v-" << (vId + advOptions.idOffset) << "-auxId) {";
 			s << textModifiersBegin;
 			s << indexString;
 			s << textModifiersEnd << "};\n";
 			createDummy("-auxId", true);
-		}
+		} // end if withIndex
 	} // foreach vertex
 
 	for(Edge e : asRange(edges(g))) {
@@ -427,39 +562,80 @@ void tikz(std::ostream &s, const Options &options, const Graph &g, const Depict 
 		std::string colourString = advOptions.getColour(e);
 		if(!colourString.empty()) colourString += ", text=" + colourString;
 		BondType bType = depict.getBondData(e);
-		if(!options.edgesAsBonds || bType == BondType::Invalid) s << "\\modDrawGraphEdge";
-		else {
+		std::string drawCommand = "\\modDraw";
+		if(options.edgesAsBonds) {
 			switch(bType) {
 			case BondType::Invalid:
-				MOD_ABORT;
+				drawCommand += "GraphEdge";
 				break;
 			case BondType::Single:
-				s << "\\modDrawSingleBond";
+				drawCommand += "SingleBond";
 				break;
 			case BondType::Aromatic:
-				s << "\\modDrawAromaticBond";
+				drawCommand += "AromaticBond";
 				break;
 			case BondType::Double:
-				s << "\\modDrawDoubleBond";
+				drawCommand += "DoubleBond";
 				break;
 			case BondType::Triple:
-				s << "\\modDrawTripleBond";
+				drawCommand += "TripleBond";
 				break;
 			}
+		} else { // !edgesAsBonds
+			drawCommand += "GraphEdge";
+		}
+		EdgeFake3DType fake3Dtype = advOptions.getEdgeFake3DType(e, !options.collapseHydrogens);
+		switch(fake3Dtype) {
+		case EdgeFake3DType::None: break;
+		case EdgeFake3DType::WedgeSL:
+			drawCommand += "WedgeSL";
+			break;
+		case EdgeFake3DType::WedgeLS:
+			drawCommand += "WedgeLS";
+			break;
+		case EdgeFake3DType::HashSL:
+			drawCommand += "HashSL";
+			break;
+		case EdgeFake3DType::HashLS:
+			drawCommand += "HashLS";
+			break;
 		}
 		unsigned int fromOffset = 1, toOffset = 1;
-		if(isSimpleCarbon[fromId]) fromOffset = 0;
-		if(isSimpleCarbon[toId]) toOffset = 0;
-		s << "{" << (fromId + advOptions.idOffset) << "}{" << (toId + advOptions.idOffset) << "}{" << fromOffset << "}{" << toOffset << "}";
-		if(!options.edgesAsBonds || bType == BondType::Invalid)
-			s << "{" << textModifiersBegin << escapeForLatex(depict.getEdgeLabel(e)) << textModifiersEnd << "}";
+		if(!options.withIndex) {
+			if(isSimpleCarbon[fromId]) fromOffset = 0;
+			if(isSimpleCarbon[toId]) toOffset = 0;
+		}
+		s << drawCommand << "{" << (fromId + advOptions.idOffset) << "}{" << (toId + advOptions.idOffset) << "}{" << fromOffset << "}{" << toOffset << "}";
 		s << "{" << colourString << "}";
-		s << "" << std::endl;
-	} // foreach edge
-	s << "\\end{tikzpicture}" << std::endl;
+		// find the label text
+		const std::string label = (!options.edgesAsBonds || bType == BondType::Invalid)
+				? escapeForLatex(depict.getEdgeLabel(e)) : std::string();
+		const std::string rawStereo = options.withRawStereo
+				? "{\\tiny " + advOptions.getStereoString(e) + "}" : std::string();
+		const std::string extraAnnotation = advOptions.getEdgeAnnotation(e);
+		s << "{";
+		if(!label.empty() || !rawStereo.empty()) {
+			s << "node[auto]{" << textModifiersBegin << label;
+			if(!label.empty() && !rawStereo.empty())
+				s << ", ";
+			s << rawStereo << textModifiersEnd << "}";
+		}
+		if((!label.empty() || !rawStereo.empty()) && !extraAnnotation.empty())
+			s << " ";
+		s << extraAnnotation;
+		s << "}";
+		s << "\n";
+	}
+	bonusWriter(s);
+	s << "\\end{tikzpicture}\n";
 }
 
+template<typename Graph, typename Depict>
 struct DefaultAdvancedOptions {
+	using Vertex = typename boost::graph_traits<Graph>::vertex_descriptor;
+	using Edge = typename boost::graph_traits<Graph>::edge_descriptor;
+
+	DefaultAdvancedOptions(const Graph &g, const Depict &depict) : g(g), depict(depict) { }
 
 	template<typename T>
 	std::string getColour(T) const {
@@ -471,18 +647,59 @@ struct DefaultAdvancedOptions {
 		return true;
 	}
 
+	std::string getShownId(Vertex v) const {
+		return boost::lexical_cast<std::string>(get(boost::vertex_index_t(), g, v));
+	}
+
+	bool overwriteWithIndex(Vertex) const {
+		return false;
+	}
+
+	EdgeFake3DType getEdgeFake3DType(Edge e, bool withHydrogen) const {
+		return depict.getEdgeFake3DType(e, withHydrogen);
+	}
+
+	std::string getEdgeAnnotation(Edge) const {
+		return "";
+	}
+
+	template<typename VE>
+	std::string getRawStereoString(VE ve) const {
+		return depict.getRawStereoString(ve);
+	}
+
+	template<typename VE>
+	std::string getPrettyStereoString(VE ve) const {
+		return depict.getPrettyStereoString(ve);
+	}
+
+	template<typename VE>
+	std::string getStereoString(VE ve) const {
+		return depict.getStereoString(ve);
+	}
+
+	std::string getOpts(Vertex v) const {
+		return std::string();
+	}
+public:
+
 	template<typename T>
 	bool disallowCollapse(T) const {
 		return false;
 	}
 
 	unsigned int idOffset = 0;
+private:
+	const Graph &g;
+	const Depict &depict;
 };
 
 template<typename Graph, typename Depict>
-void tikz(std::ostream &s, const Options &options, const Graph &g, const Depict &depict, const std::string & fileCoords) {
-	DefaultAdvancedOptions adv;
-	tikz(s, options, g, depict, fileCoords, adv);
+void tikz(std::ostream &s, const Options &options, const Graph &g, const Depict &depict, const std::string & fileCoords,
+		bool asInline, const std::string &idPrefix) {
+	DefaultAdvancedOptions<Graph, Depict> adv(g, depict);
+	tikz(s, options, g, depict, fileCoords, adv, [](std::ostream & s) {
+	}, idPrefix);
 }
 
 } // namespace Write

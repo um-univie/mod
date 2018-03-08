@@ -8,6 +8,9 @@
 #include <mod/lib/IO/IO.h>
 #include <mod/lib/IO/Rule.h>
 #include <mod/lib/RC/MatchMaker/ComponentWiseUtil.h>
+#include <mod/lib/RC/MatchMaker/LabelledMatch.h>
+#include <mod/lib/Rules/Properties/Term.h>
+#include <mod/lib/Term/WAM.h>
 
 #include <jla_boost/graph/dpo/FilteredGraphProjection.hpp>
 
@@ -18,34 +21,37 @@ namespace lib {
 namespace RC {
 
 struct Sub {
-	using VertexMapType = jla_boost::GraphMorphism::InvertibleVectorVertexMap<lib::Rules::GraphType, lib::Rules::GraphType>;
+	using GraphDom = lib::Rules::LabelledRule::LeftGraphType;
+	using GraphCodom = lib::Rules::LabelledRule::RightGraphType;
+	using VertexMapType = jla_boost::GraphMorphism::InvertibleVectorVertexMap<GraphDom, GraphCodom>;
 public:
 
 	explicit Sub(bool allowPartial) : allowPartial(allowPartial) { }
 
 	template<typename MR>
-	void makeMatches(const lib::Rules::Real &rFirst, const lib::Rules::Real &rSecond, MR mr) const {
+	void makeMatches(const lib::Rules::Real &rFirst, const lib::Rules::Real &rSecond, MR mr, LabelSettings labelSettings) const {
 		if(allowPartial)
-			makeMatchesInternal<true>(rFirst, rSecond, mr);
+			makeMatchesInternal<true>(rFirst, rSecond, mr, labelSettings);
 		else
-			makeMatchesInternal<false>(rFirst, rSecond, mr);
+			makeMatchesInternal<false>(rFirst, rSecond, mr, labelSettings);
 	}
 
 private:
 
 	template<bool AllowPartial, typename MR>
-	void makeMatchesInternal(const lib::Rules::Real &rFirst, const lib::Rules::Real &rSecond, MR mr) const {
-		const auto &rFirstRight = get_labelled_right(rFirst.getDPORule());
-		const auto &rSecondLeft = get_labelled_left(rSecond.getDPORule());
-		auto mp = makeRuleRuleComponentMonomorphism(rFirstRight, rSecondLeft, false);
+	void makeMatchesInternal(const lib::Rules::Real &rFirst, const lib::Rules::Real &rSecond, MR mr, LabelSettings labelSettings) const {
+		initByLabelSettings(rFirst, rSecond, labelSettings);
+		const auto &lgCodomPatterns = get_labelled_right(rFirst.getDPORule());
+		const auto &lgDomHosts = get_labelled_left(rSecond.getDPORule());
+		auto mp = makeRuleRuleComponentMonomorphism(lgCodomPatterns, lgDomHosts, false, labelSettings);
 		auto mm = makeMultiDimSelector<AllowPartial>(
-				get_num_connected_components(rFirstRight),
-				get_num_connected_components(rSecondLeft), mp);
+				get_num_connected_components(lgCodomPatterns),
+				get_num_connected_components(lgDomHosts), mp);
 		for(const auto &position : mm) {
 			auto maybeMap = matchFromPosition(rFirst, rSecond, position);
 			if(!maybeMap) continue;
 			auto map = *std::move(maybeMap);
-			bool continue_ = mr(rFirst, rSecond, std::move(map));
+			bool continue_ = handleMapByLabelSettings(rFirst, rSecond, std::move(map), mr, labelSettings);
 			if(!continue_) break;
 		}
 	}
@@ -59,44 +65,34 @@ private:
 template<typename Position>
 inline boost::optional<Sub::VertexMapType>
 Sub::matchFromPosition(const lib::Rules::Real &rFirst, const lib::Rules::Real &rSecond, const std::vector<Position> &position) const {
-	const auto &coreFirst = rFirst.getGraph();
-	const auto &coreSecond = rSecond.getGraph();
-	auto nullFirst = boost::graph_traits<lib::Rules::GraphType>::null_vertex();
-	auto nullSecond = boost::graph_traits<lib::Rules::GraphType>::null_vertex();
-	VertexMapType map(coreSecond, coreFirst);
+	const auto &gDom = get_graph(get_labelled_left(rSecond.getDPORule()));
+	const auto &lgCodom = get_labelled_right(rFirst.getDPORule());
+	const auto &gCodom = get_graph(lgCodom);
+	const auto vNullDom = boost::graph_traits<Sub::GraphDom>::null_vertex();
+	const auto vNullCodom = boost::graph_traits<Sub::GraphCodom>::null_vertex();
+	auto map = VertexMapType(gDom, gCodom);
 	for(std::size_t pId = 0; pId < position.size(); pId++) {
 		if(position[pId].disabled) continue;
 		if(position[pId].host == rSecond.getDPORule().numLeftComponents) {
 			if(!allowPartial) MOD_ABORT; // we should have gotten this
 			continue;
 		}
-		const auto &pattern = get_component_graph(pId, get_labelled_right(rFirst.getDPORule()));
+		const auto &gCodomPattern = get_component_graph(pId, lgCodom);
 		assert(position[pId].iterMorphism != position[pId].iterMorphismEnd);
 		auto &&morphism = *position[pId].iterMorphism;
-		assert(morphism.size() == num_vertices(pattern));
-		//	{ // TODO: this is not adapted from the Super version
-		//		IO::log() << "from:";
-		//		for(unsigned int i = 0; i < subMatch.size(); i++) IO::log() << "\t" << i;
-		//		IO::log() << std::endl;
-		//		IO::log() << "to:  ";
-		//		for(unsigned int i = 0; i < subMatch.size(); i++) {
-		//			IO::log() << "\t";
-		//			if(subMatch[i] == boost::graph_traits<Rule::Real::ComponentGraph>::null_vertex()) IO::log() << "-";
-		//			else IO::log() << get(boost::vertex_index_t(), patterns[pattern], subMatch[i]);
-		//		}
-		//		IO::log() << std::endl;
-		//	}
-		for(auto vFirst : asRange(vertices(pattern))) {
-			assert(get_inverse(map, coreSecond, coreFirst, vFirst) == nullSecond);
-			auto vSecond = get(morphism, coreFirst, coreSecond, vFirst);
-			assert(vSecond != nullSecond);
-			if(get(map, coreSecond, coreFirst, vSecond) != nullFirst)
+		assert(morphism.size() == num_vertices(gCodomPattern));
+		for(const auto vCodomPattern : asRange(vertices(gCodomPattern))) {
+			assert(get_inverse(map, gDom, gCodom, vCodomPattern) == vNullDom);
+			const auto vDomHost = get(morphism, gCodom, gDom, vCodomPattern);
+			assert(vDomHost != vNullDom);
+			if(get(map, gDom, gCodom, vDomHost) != vNullCodom)
 				return boost::none; // the combined match is not injective
-			put(map, coreSecond, coreFirst, vSecond, vFirst);
+			put(map, gDom, gCodom, vDomHost, vCodomPattern);
 		}
 	}
 	return map;
 }
+
 
 } // namespace RC
 } // namespace lib

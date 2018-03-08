@@ -1,5 +1,5 @@
 #ifndef MOD_LIB_IO_DG_H
-#define	MOD_LIB_IO_DG_H
+#define MOD_LIB_IO_DG_H
 
 #include <mod/lib/DG/Hyper.h>
 #include <mod/lib/IO/FileHandle.h>
@@ -11,8 +11,6 @@
 #include <unordered_map>
 
 namespace mod {
-class Graph;
-class Rule;
 namespace lib {
 namespace DG {
 class Hyper;
@@ -21,8 +19,8 @@ class NonHyper;
 namespace IO {
 namespace DG {
 namespace Read {
-lib::DG::NonHyper *dump(const std::vector<std::shared_ptr<mod::Graph> > &graphs, const std::vector<std::shared_ptr<mod::Rule> > &rules, const std::string &file, std::ostream &err);
-lib::DG::NonHyper *abstract(std::istream &s, std::ostream &err);
+lib::DG::NonHyper *dump(const std::vector<std::shared_ptr<graph::Graph> > &graphs, const std::vector<std::shared_ptr<rule::Rule> > &rules, const std::string &file, std::ostream &err);
+lib::DG::NonHyper *abstract(const std::string &s, std::ostream &err);
 } // namespace Read
 namespace Write {
 using Vertex = lib::DG::HyperVertex;
@@ -49,7 +47,7 @@ struct SyntaxPrinter {
 	virtual void tailConnector(const std::string &idVertex, const std::string &idHyperEdge, const std::string &colour, unsigned int num, unsigned int maxNum) = 0;
 	virtual void headConnector(const std::string &idHyperEdge, const std::string &idVertex, const std::string &colour, unsigned int num, unsigned int maxNum) = 0;
 	virtual void shortcutEdge(const std::string &idTail, const std::string &idHead, const std::string &label, const std::string &colour, bool hasReverse) = 0;
-	virtual std::function<std::string(const lib::Graph::Single&) > getImageCreator() = 0;
+	virtual std::function<std::string(const lib::DG::Hyper&, lib::DG::HyperVertex, const std::string&) > getImageCreator() = 0;
 };
 
 struct TikzPrinter : SyntaxPrinter {
@@ -68,7 +66,7 @@ struct TikzPrinter : SyntaxPrinter {
 	void headConnector(const std::string &idHyperEdge, const std::string &idVertex, const std::string &colour, unsigned int num, unsigned int maxNum);
 	void shortcutEdge(const std::string &idTail, const std::string &idHead, const std::string &label, const std::string &colour, bool hasReverse);
 	void transitEdge(const std::string &idTail, const std::string &idHead, const std::string &label, const std::string &colour);
-	std::function<std::string(const lib::Graph::Single&) > getImageCreator();
+	std::function<std::string(const lib::DG::Hyper&, lib::DG::HyperVertex, const std::string&) > getImageCreator();
 public:
 	FileHandle s;
 	std::string coords;
@@ -87,7 +85,8 @@ struct Options {
 	using DupEdge = boost::graph_traits<DupGraphType>::edge_descriptor;
 public:
 
-	Options() : withShortcutEdges(true), withGraphImages(true), labelsAsLatexMath(true), withShortcutEdgesAfterVisibility(false) { }
+	Options() : withShortcutEdges(true), withGraphImages(true), labelsAsLatexMath(true),
+	withShortcutEdgesAfterVisibility(false), withInlineGraphs(false) { }
 
 	Options &Non() {
 		return WithShortcutEdges(false).WithGraphImages(false).LabelsAsLatexMath(false);
@@ -117,6 +116,11 @@ public:
 		return *this;
 	}
 
+	Options &WithInlineGraphs(bool v) {
+		withInlineGraphs = v;
+		return *this;
+	}
+
 	Options &Suffix(std::string s) {
 		suffix = s;
 		return *this;
@@ -131,6 +135,7 @@ public:
 		res += toChar(withGraphImages);
 		res += toChar(labelsAsLatexMath);
 		res += toChar(withShortcutEdgesAfterVisibility);
+		res += toChar(withInlineGraphs);
 		if(!suffix.empty()) res += "_" + suffix;
 		return res;
 	}
@@ -184,6 +189,7 @@ public:
 	bool withGraphImages;
 	bool labelsAsLatexMath;
 	bool withShortcutEdgesAfterVisibility;
+	bool withInlineGraphs;
 	std::string suffix;
 	// appearance (not giving state)
 	std::function<bool(Vertex, const lib::DG::Hyper&) > vertexVisible;
@@ -221,6 +227,7 @@ public:
 	void removeDuplicate(Vertex e, unsigned int eDup);
 	void reconnectTail(Vertex e, unsigned int eDup, Vertex tail, unsigned int vDupTar, unsigned int vDupSrc);
 	void reconnectHead(Vertex e, unsigned int eDup, Vertex head, unsigned int vDupTar, unsigned int vDupSrc);
+	void removeVertexIfDegreeZero(Vertex v);
 
 	const lib::DG::Hyper &getDG() const {
 		return dg;
@@ -228,6 +235,7 @@ public:
 private:
 	const lib::DG::Hyper &dg;
 	ConnectionsStore connections; // hyper-edge -> dupNum -> Connections
+	std::set<Vertex> removedIfDegreeZero;
 public:
 	std::function<std::string(Vertex, unsigned int dupNum, const lib::DG::Hyper&) > dupVertexLabel;
 };
@@ -274,7 +282,7 @@ std::string coords(const lib::DG::Hyper &dg, const Options &options, const IO::G
 std::pair<std::string, std::string> tikz(const lib::DG::Hyper &dg, const Options &options, const IO::Graph::Write::Options &graphOptions);
 std::string pdfFromDot(const lib::DG::Hyper &dg, const Options &options, const IO::Graph::Write::Options &graphOptions);
 std::string pdf(const lib::DG::Hyper &dg, const Options &options, const IO::Graph::Write::Options &graphOptions);
-void summary(const Data &data, Printer &printer, const IO::Graph::Write::Options &graphOptions);
+std::string summary(const Data &data, Printer &printer, const IO::Graph::Write::Options &graphOptions);
 
 } // namespace Write
 } // namespace DG
@@ -282,5 +290,5 @@ void summary(const Data &data, Printer &printer, const IO::Graph::Write::Options
 } // namespace lib
 } // namespace mod
 
-#endif	/* MOD_LIB_IO_DG_H */
+#endif /* MOD_LIB_IO_DG_H */
 

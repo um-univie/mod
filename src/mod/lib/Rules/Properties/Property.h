@@ -2,6 +2,7 @@
 #define MOD_LIB_RULES_PROP_H
 
 #include <mod/Error.h>
+#include <mod/lib/LabelledGraph.h>
 #include <mod/lib/IO/IO.h>
 
 #include <jla_boost/graph/PairToRangeAdaptor.hpp>
@@ -34,9 +35,13 @@ struct RightState;
 
 } // namespace detail
 
-template<typename Derived, typename Graph, typename LeftVertexType, typename LeftEdgeType,
-typename RightVertexType = LeftVertexType, typename RightEdgeType = LeftEdgeType>
+template<typename Derived, typename Graph, typename LeftVertexTypeT, typename LeftEdgeTypeT,
+typename RightVertexTypeT = LeftVertexTypeT, typename RightEdgeTypeT = LeftEdgeTypeT>
 struct PropCore {
+	using LeftVertexType = LeftVertexTypeT;
+	using LeftEdgeType = LeftEdgeTypeT;
+	using RightVertexType = RightVertexTypeT;
+	using RightEdgeType = RightEdgeTypeT;
 	using This = PropCore<MOD_RULE_STATE_TEMPLATE_ARGS>;
 	using Vertex = typename boost::graph_traits<Graph>::vertex_descriptor;
 	using Edge = typename boost::graph_traits<Graph>::edge_descriptor;
@@ -58,6 +63,7 @@ public:
 	ValueTypeEdge operator[](Edge e) const;
 	LeftType getLeft() const;
 	RightType getRight() const;
+	void invert();
 	void add(Vertex v, const LeftVertexType &valueLeft, const RightVertexType &valueRight);
 	void add(Edge e, const LeftEdgeType &valueLeft, const RightEdgeType &valueRight);
 	// does not modify the other side
@@ -72,11 +78,15 @@ public:
 	const Derived &getDerived() const;
 protected:
 	const Graph &g;
+protected:
 
 	struct VertexStore {
 		VertexStore() = default;
 
 		VertexStore(const LeftVertexType &left, const RightVertexType &right) : left(left), right(right) { }
+
+		VertexStore(LeftVertexType &&left, RightVertexType &&right) : left(std::move(left)), right(std::move(right)) { }
+	public:
 		LeftVertexType left;
 		RightVertexType right;
 	};
@@ -85,6 +95,7 @@ protected:
 		EdgeStore() = default;
 
 		EdgeStore(const LeftEdgeType &left, const RightEdgeType &right) : left(left), right(right) { }
+	public:
 		LeftEdgeType left;
 		RightEdgeType right;
 	};
@@ -95,15 +106,25 @@ public:
 
 	struct Handler {
 
-		template<typename F, typename ...Args>
-		bool operator()(F &&f, const ValueTypeVertex &l, const ValueTypeVertex &r, Args&&... args) const {
+		template<typename VEProp, typename LabGraphDom, typename LabGraphCodom, typename F, typename ...Args>
+		static auto fmap2(const VEProp &l, const VEProp &r, const LabGraphDom &gDom, const LabGraphCodom &gCodom, F &&f, Args&&... args) {
 			assert(l.first.is_initialized() == r.first.is_initialized());
 			assert(l.second.is_initialized() == r.second.is_initialized());
-			if(l.first.is_initialized() && !f(*l.first, *r.first, args...))
-				return false;
-			if(l.second.is_initialized())
-				return f(*l.second, *r.second, args...);
-			return true;
+			using First = decltype(f(*l.first, *r.first, get_labelled_left(gDom), get_labelled_left(gCodom), args...));
+			using Second = decltype(f(*l.second, *r.second, get_labelled_left(gDom), get_labelled_left(gCodom), args...));
+			return std::pair < boost::optional<First>, boost::optional<Second> >(
+					l.first.is_initialized() ? f(*l.first, *r.first, get_labelled_left(gDom), get_labelled_left(gCodom), args...) : boost::optional<First>(),
+					l.second.is_initialized() ? f(*l.second, *r.second, get_labelled_left(gDom), get_labelled_left(gCodom), args...) : boost::optional<Second>()
+					)
+					;
+		}
+
+		template<typename Op, typename Val>
+		static auto reduce(Op &&op, Val &&val) {
+			assert(val.first.is_initialized() || val.second.is_initialized());
+			if(!val.first.is_initialized()) return *val.second;
+			if(!val.second.is_initialized()) return *val.first;
+			return op(*val.first, *val.second);
 		}
 	};
 };
@@ -137,14 +158,7 @@ struct LeftState {
 public:
 	const PropCore<MOD_RULE_STATE_TEMPLATE_ARGS> &state;
 public:
-
-	struct Handler {
-
-		template<typename F, typename ...Args>
-		bool operator()(F &&f, const LeftVertexType &l, const LeftVertexType &r, Args&&... args) const {
-			return std::forward<F>(f) (l, r, std::forward<Args>(args)...);
-		}
-	};
+	using Handler = IdentityPropertyHandler;
 };
 
 MOD_RULE_STATE_TEMPLATE_PARAMS
@@ -168,25 +182,18 @@ struct RightState {
 public:
 	const PropCore<MOD_RULE_STATE_TEMPLATE_ARGS> &state;
 public:
-
-	struct Handler {
-
-		template<typename F, typename ...Args>
-		bool operator()(F &&f, const RightVertexType &l, const RightVertexType &r, Args&&... args) const {
-			return std::forward<F>(f) (l, r, std::forward<Args>(args)...);
-		}
-	};
+	using Handler = IdentityPropertyHandler;
 };
 
 template<typename Derived, typename Graph, typename LeftVertexType, typename LeftEdgeType, typename RightVertexType, typename RightEdgeType,
 typename VertexOrEdge>
-auto get(const LeftState<MOD_RULE_STATE_TEMPLATE_ARGS> &p, VertexOrEdge ve) -> decltype(p[ve]) {
+auto get(const LeftState<MOD_RULE_STATE_TEMPLATE_ARGS> &p, const VertexOrEdge &ve) -> decltype(p[ve]) {
 	return p[ve];
 }
 
 template<typename Derived, typename Graph, typename LeftVertexType, typename LeftEdgeType, typename RightVertexType, typename RightEdgeType,
 typename VertexOrEdge>
-auto get(const RightState<MOD_RULE_STATE_TEMPLATE_ARGS> &p, VertexOrEdge ve) -> decltype(p[ve]) {
+auto get(const RightState<MOD_RULE_STATE_TEMPLATE_ARGS> &p, const VertexOrEdge &ve) -> decltype(p[ve]) {
 	return p[ve];
 }
 
@@ -199,15 +206,15 @@ auto get(const RightState<MOD_RULE_STATE_TEMPLATE_ARGS> &p, VertexOrEdge ve) -> 
 MOD_RULE_STATE_TEMPLATE_PARAMS
 void PropCore<MOD_RULE_STATE_TEMPLATE_ARGS>::verify(const Graph *g) const {
 	if(g != &this->g) {
-		IO::log() << "Different graphs: g = " << static_cast<const void*> (g) << ", &this->g = " << static_cast<const void*> (&this->g) << std::endl;
+		IO::log() << "Different graphs (" << reinterpret_cast<std::intptr_t> (this) << "): g = " << static_cast<const void*> (g) << ", &this->g = " << static_cast<const void*> (&this->g) << std::endl;
 		MOD_ABORT;
 	}
 	if(num_vertices(this->g) != vertexState.size()) {
-		IO::log() << "Different sizes: num_vertices(this->g) = " << num_vertices(this->g) << ", vertexLabels.size() = " << vertexState.size() << std::endl;
+		IO::log() << "Different sizes (" << reinterpret_cast<std::uintptr_t> (this) << "): num_vertices(this->g) = " << num_vertices(this->g) << ", vertexState.size() = " << vertexState.size() << std::endl;
 		MOD_ABORT;
 	}
 	if(num_edges(this->g) != edgeState.size()) {
-		IO::log() << "Different sizes: num_edges(this->g) = " << num_edges(this->g) << ", edgeLabels.size() = " << edgeState.size() << std::endl;
+		IO::log() << "Different sizes (" << reinterpret_cast<std::uintptr_t> (this) << "): num_edges(this->g) = " << num_edges(this->g) << ", edgeState.size() = " << edgeState.size() << std::endl;
 		MOD_ABORT;
 	}
 }
@@ -229,8 +236,8 @@ PropCore<MOD_RULE_STATE_TEMPLATE_ARGS>::operator[](typename boost::graph_traits<
 MOD_RULE_STATE_TEMPLATE_PARAMS
 std::pair<boost::optional<const LeftEdgeType&>, boost::optional<const RightEdgeType&> >
 PropCore<MOD_RULE_STATE_TEMPLATE_ARGS>::operator[](typename boost::graph_traits<Graph>::edge_descriptor e) const {
-	boost::optional<const LeftVertexType&> l;
-	boost::optional<const RightVertexType&> r;
+	boost::optional<const LeftEdgeType&> l;
+	boost::optional<const RightEdgeType&> r;
 	if(g[e].membership != Membership::Right) l = getLeft()[e];
 	if(g[e].membership != Membership::Left) r = getRight()[e];
 	return std::make_pair(l, r);
@@ -246,6 +253,13 @@ MOD_RULE_STATE_TEMPLATE_PARAMS
 typename detail::RightState<MOD_RULE_STATE_TEMPLATE_ARGS>
 PropCore<MOD_RULE_STATE_TEMPLATE_ARGS>::getRight() const {
 	return detail::RightState<MOD_RULE_STATE_TEMPLATE_ARGS>(*this);
+}
+
+MOD_RULE_STATE_TEMPLATE_PARAMS
+void PropCore<MOD_RULE_STATE_TEMPLATE_ARGS>::invert() {
+	using std::swap;
+	for(auto &vs : vertexState) swap(vs.left, vs.right);
+	for(auto &es : edgeState) swap(es.left, es.right);
 }
 
 MOD_RULE_STATE_TEMPLATE_PARAMS

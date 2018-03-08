@@ -13,6 +13,7 @@ namespace lib {
 namespace Graph {
 struct DepictionData;
 struct LabelledGraph;
+struct PropStereo;
 struct PropString;
 struct Single;
 } // namespace Graph
@@ -25,10 +26,10 @@ struct Data {
 	Data(std::unique_ptr<lib::Graph::GraphType> graph, std::unique_ptr<lib::Graph::PropString> label);
 	Data(Data &&other);
 	~Data();
-	void clear();
 public:
-	std::unique_ptr<lib::Graph::GraphType> graph;
-	std::unique_ptr<lib::Graph::PropString> label;
+	std::unique_ptr<lib::Graph::GraphType> g;
+	std::unique_ptr<lib::Graph::PropString> pString;
+	std::unique_ptr<lib::Graph::PropStereo> pStereo;
 	std::map<int, std::size_t> externalToInternalIds;
 };
 
@@ -37,6 +38,12 @@ Data dfs(const std::string &dfs, std::ostream &err);
 Data smiles(const std::string &smiles, std::ostream &err);
 } // namespace Read
 namespace Write {
+
+enum class EdgeFake3DType {
+	None, WedgeSL, WedgeLS, HashSL, HashLS
+};
+
+EdgeFake3DType invertEdgeFake3DType(EdgeFake3DType t);
 
 struct Options {
 	Options() = default;
@@ -89,12 +96,27 @@ struct Options {
 		return *this;
 	}
 
+	Options &WithRawStereo(bool v) {
+		withRawStereo = v;
+		return *this;
+	}
+
+	Options &WithPrettyStereo(bool v) {
+		withPrettyStereo = v;
+		return *this;
+	}
+
 	Options &Rotation(int degrees) {
 		rotation = degrees;
 		return *this;
 	}
 
-	operator std::string() const {
+	Options &Mirror(bool v) {
+		mirror = v;
+		return *this;
+	}
+
+	std::string getStringEncoding() const {
 		auto toChar = [](bool b) {
 			return b ? '1' : '0';
 		};
@@ -107,15 +129,23 @@ struct Options {
 		res += toChar(withColour);
 		res += toChar(withIndex);
 		res += toChar(withTexttt);
-		if(rotation != 0) {
+		char stereo = 0;
+		if(withRawStereo) stereo += 1;
+		if(withPrettyStereo) stereo += 2;
+		if(stereo != 0) res += '0' + stereo;
+		if(rotation != 0 || mirror) {
 			res += "_";
 			res += std::to_string(rotation);
+			if(mirror) {
+				res += "_";
+				res += toChar(mirror);
+			}
 		}
 		return res;
 	}
 
 	friend bool operator==(const Options &a, const Options &b) {
-		return std::string(a) == std::string(b);
+		return a.getStringEncoding() == b.getStringEncoding();
 	}
 public:
 	bool edgesAsBonds = false;
@@ -126,27 +156,31 @@ public:
 	bool withColour = false;
 	bool withIndex = false;
 	bool withTexttt = false;
+	bool withRawStereo = false;
+	bool withPrettyStereo = false;
 	int rotation = 0;
+	bool mirror = false;
 };
 
 // all return the filename _with_ extension
 void gml(const lib::Graph::LabelledGraph &gLabelled, const lib::Graph::DepictionData &depict, const std::size_t gId, bool withCoords, std::ostream &s);
 std::string gml(const lib::Graph::Single &g, bool withCoords);
 std::string dot(const lib::Graph::LabelledGraph &gLabelled, const std::size_t gId);
-std::string coords(const lib::Graph::LabelledGraph &gLabelled, const lib::Graph::DepictionData &depict, const std::size_t gId, bool collapseHydrogens, int rotation);
+std::string coords(const lib::Graph::LabelledGraph &gLabelled, const lib::Graph::DepictionData &depict, const std::size_t gId, const Options &options, bool asInline);
 std::pair<std::string, std::string>
-tikz(const lib::Graph::LabelledGraph &gLabelled, const lib::Graph::DepictionData &depict, const std::size_t gId, const Options &options);
+tikz(const lib::Graph::LabelledGraph &gLabelled, const lib::Graph::DepictionData &depict, const std::size_t gId, const Options &options,
+		bool asInline, const std::string &idPrefix);
 std::string pdf(const lib::Graph::LabelledGraph &gLabelled, const lib::Graph::DepictionData &depict, const std::size_t gId, const Options &options);
 std::string svg(const lib::Graph::LabelledGraph &gLabelled, const lib::Graph::DepictionData &depict, const std::size_t gId, const Options &options);
 std::pair<std::string, std::string> summary(const lib::Graph::Single &g, const Options &first, const Options &second);
+void termState(const lib::Graph::Single &g);
 
 // simplified interface for lib::Graph::Single
 void gml(const lib::Graph::Single &g, bool withCoords, std::ostream &s);
-std::string dot(const lib::Graph::Single &g);
-std::string coords(const lib::Graph::Single &g, bool collapseHydrogens, int rotation);
-std::pair<std::string, std::string> tikz(const lib::Graph::Single &g, const Options &options);
+std::string tikz(const lib::Graph::Single &g, const Options &options, bool asInline, const std::string &idPrefix);
 std::string pdf(const lib::Graph::Single &g, const Options &options);
 std::string svg(const lib::Graph::Single &g, const Options &options);
+
 } // namespace Write
 } // namespace Graph
 } // namespace IO

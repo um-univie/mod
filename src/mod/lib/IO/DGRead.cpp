@@ -1,34 +1,32 @@
 #include "DG.h"
 
-#include <mod/Graph.h>
-#include <mod/Rule.h>
+#include <mod/graph/Graph.h>
+#include <mod/rule/Rule.h>
 #include <mod/lib/DG/Dump.h>
 #include <mod/lib/DG/NonHyper.h>
-#include <mod/lib/Graph/Merge.h>
 #include <mod/lib/Graph/Single.h>
+#include <mod/lib/Graph/Properties/Stereo.h>
 #include <mod/lib/Graph/Properties/String.h>
 #include <mod/lib/IO/IO.h>
-#include <mod/lib/IO/ParserCommon.h>
+#include <mod/lib/IO/ParsingUtil.h>
 
 #include <boost/fusion/adapted/std_pair.hpp>
-#include <boost/spirit/include/qi_alternative.hpp>
-#include <boost/spirit/include/qi_and_predicate.hpp>
-#include <boost/spirit/include/qi_attr.hpp>
-#include <boost/spirit/include/qi_char_.hpp>
-#include <boost/spirit/include/qi_difference.hpp>
-#include <boost/spirit/include/qi_eps.hpp>
-#include <boost/spirit/include/qi_kleene.hpp>
-#include <boost/spirit/include/qi_lexeme.hpp>
-#include <boost/spirit/include/qi_list.hpp>
-#include <boost/spirit/include/qi_lit.hpp>
-#include <boost/spirit/include/qi_plus.hpp>
-#include <boost/spirit/include/qi_sequence.hpp>
-#include <boost/spirit/include/qi_uint.hpp>
+#include <boost/spirit/home/x3/auxiliary/attr.hpp>
+#include <boost/spirit/home/x3/auxiliary/eps.hpp>
+#include <boost/spirit/home/x3/char/char.hpp>
+#include <boost/spirit/home/x3/char/char_class.hpp>
+#include <boost/spirit/home/x3/directive/lexeme.hpp>
+#include <boost/spirit/home/x3/numeric/uint.hpp>
+#include <boost/spirit/home/x3/operator/alternative.hpp>
+#include <boost/spirit/home/x3/operator/and_predicate.hpp>
+#include <boost/spirit/home/x3/operator/difference.hpp>
+#include <boost/spirit/home/x3/operator/kleene.hpp>
+#include <boost/spirit/home/x3/operator/list.hpp>
+#include <boost/spirit/home/x3/operator/plus.hpp>
+#include <boost/spirit/home/x3/string/literal_string.hpp>
 
 #include <string>
 #include <unordered_map>
-
-using namespace mod::lib::IO::Parser;
 
 namespace mod {
 namespace lib {
@@ -41,12 +39,21 @@ struct Derivation {
 	List left;
 	bool reverse;
 	List right;
+public:
+
+	friend bool operator==(const Derivation &l, const Derivation &r) {
+		return std::tie(l.left, l.reverse, l.right) == std::tie(r.left, r.reverse, r.right);
+	}
 };
+
 namespace {
 
 struct NonHyperAbstract : public lib::DG::NonHyper {
 	NonHyperAbstract(const std::vector<Derivation> &derivations)
-	: NonHyper({}), derivationsForConstruction(&derivations) {
+	: NonHyper({},
+	{
+LabelType::String, LabelRelation::Isomorphism, false, LabelRelation::Isomorphism
+	}), derivationsForConstruction(&derivations) {
 		calculate();
 	}
 private:
@@ -57,16 +64,16 @@ private:
 
 	void calculateImpl() {
 		const auto &derivations = *derivationsForConstruction;
-		std::unordered_map<std::string, std::shared_ptr<mod::Graph> > strToGraph;
+		std::unordered_map<std::string, std::shared_ptr<graph::Graph> > strToGraph;
 		for(const auto &der : derivations) {
-			auto handleSide = [this, &strToGraph] (const Derivation::List & side) {
+			const auto handleSide = [this, &strToGraph] (const Derivation::List & side) {
 				for(const auto &e : side) {
-					auto iter = strToGraph.find(e.second);
+					const auto iter = strToGraph.find(e.second);
 					if(iter == end(strToGraph)) {
 						auto gBoost = std::make_unique<lib::Graph::GraphType>();
 						auto pString = std::make_unique<lib::Graph::PropString>(*gBoost);
-						auto gLib = std::make_unique<lib::Graph::Single>(std::move(gBoost), std::move(pString));
-						auto g = mod::Graph::makeGraph(std::move(gLib));
+						auto gLib = std::make_unique<lib::Graph::Single>(std::move(gBoost), std::move(pString), nullptr);
+						auto g = graph::Graph::makeGraph(std::move(gLib));
 						addProduct(g); // this renames it
 						g->setName(e.second);
 						strToGraph[e.second] = g;
@@ -77,11 +84,11 @@ private:
 			handleSide(der.right);
 		}
 		for(const auto &der : derivations) {
-			typedef std::unordered_map<std::shared_ptr<mod::Graph>, unsigned int> Side;
-			auto makeSide = [&strToGraph] (const Derivation::List & side) {
+			using Side = std::unordered_map<std::shared_ptr<graph::Graph>, unsigned int>;
+			const auto makeSide = [&strToGraph] (const Derivation::List & side) {
 				Side result;
 				for(const auto &e : side) {
-					auto g = strToGraph[e.second];
+					const auto g = strToGraph[e.second];
 					assert(g);
 					auto iter = result.find(g);
 					if(iter == end(result)) iter = result.insert(std::make_pair(g, 0)).first;
@@ -89,35 +96,21 @@ private:
 				}
 				return result;
 			};
-			Side left = makeSide(der.left);
-			Side right = makeSide(der.right);
-			auto *leftMerge = new lib::Graph::Merge();
-			auto *rightMerge = new lib::Graph::Merge();
+			const Side left = makeSide(der.left);
+			const Side right = makeSide(der.right);
+			std::vector<const lib::Graph::Single*> leftGraphs, rightGraphs;
 			for(const auto &e : left) {
-				for(unsigned int i = 0; i < e.second; i++) leftMerge->mergeWith(e.first->getGraph());
+				for(unsigned int i = 0; i < e.second; i++)
+					leftGraphs.push_back(&e.first->getGraph());
 			}
 			for(const auto &e : right) {
-				for(unsigned int i = 0; i < e.second; i++) rightMerge->mergeWith(e.first->getGraph());
+				for(unsigned int i = 0; i < e.second; i++)
+					rightGraphs.push_back(&e.first->getGraph());
 			}
-			leftMerge->lock();
-			rightMerge->lock();
-			const lib::Graph::Base *leftLinked = leftMerge;
-			if(leftMerge->getSingles().size() == 1) {
-				leftLinked = *begin(leftMerge->getSingles());
-				delete leftMerge;
-			} else {
-				leftLinked = addToMergeStore(leftMerge);
-			}
-			const lib::Graph::Base *rightLinked = rightMerge;
-			if(rightMerge->getSingles().size() == 1) {
-				rightLinked = *begin(rightMerge->getSingles());
-				delete rightMerge;
-			} else {
-				rightLinked = addToMergeStore(rightMerge);
-			}
-			suggestDerivation(leftLinked, rightLinked, nullptr);
+			lib::DG::GraphMultiset gmsLeft(std::move(leftGraphs)), gmsRight(std::move(rightGraphs));
+			suggestDerivation(gmsLeft, gmsRight, nullptr);
 			if(der.reverse) {
-				suggestDerivation(rightLinked, leftLinked, nullptr);
+				suggestDerivation(gmsRight, gmsLeft, nullptr);
 			}
 		}
 		derivationsForConstruction = nullptr;
@@ -125,31 +118,11 @@ private:
 
 	void listImpl(std::ostream &s) const { }
 private:
-	std::vector<std::shared_ptr<mod::Rule> > rules;
+	std::vector<std::shared_ptr<rule::Rule> > rules;
 	const std::vector<Derivation> *derivationsForConstruction;
 };
 
 } // namespace 
-namespace {
-
-template<typename Parser, typename Attr>
-bool parse(IteratorType &iterStart, IteratorType iterEnd, Parser &parser, Attr &attr, std::ostream &err) {
-	bool res = qi::phrase_parse(iterStart, iterEnd, parser, qi::space, attr);
-	if(!res || iterStart != iterEnd) {
-		err << "Error while parsing abstract DG specification at:" << std::endl;
-		IteratorType iterCheck = iterStart;
-		unsigned int numNewLine = 0;
-		for(iterCheck++; numNewLine < 2 && iterCheck != iterEnd; iterCheck++)
-			if(*iterCheck == '\n') numNewLine++;
-		err << (std::string(iterStart, iterCheck)) << std::endl << "(end of code snippet)" << std::endl;
-		if(!res) err << "Parsing explicitly failed." << std::endl;
-		else if(iterStart != iterEnd) err << "Could not parse all input." << std::endl;
-		return false;
-	}
-	return res;
-}
-
-} // namespace
 } // namespace Read
 } // namespace DG
 } // namespace IO
@@ -167,8 +140,23 @@ namespace lib {
 namespace IO {
 namespace DG {
 namespace Read {
+namespace {
+namespace parser {
 
-lib::DG::NonHyper *dump(const std::vector<std::shared_ptr<mod::Graph> > &graphs, const std::vector<std::shared_ptr<mod::Rule> > &rules, const std::string &file, std::ostream &err) {
+const auto identifier = x3::lexeme[*(x3::char_ - x3::space)];
+const auto coef = x3::lexeme[x3::uint_ >> &x3::space] | (x3::eps >> x3::attr(1u));
+const auto element = x3::rule<struct element, std::pair<unsigned int, std::string> >("element")
+/*              */ = coef >> identifier;
+const auto side = element % '+';
+const auto arrow = ("->" >> x3::attr(false)) | ("<=>" >> x3::attr(true));
+const auto derivation = x3::rule<struct arrow, Derivation>("derivation")
+/*                 */ = side >> arrow >> side;
+const auto derivations = +derivation;
+
+} // namespace parser
+} // namespace
+
+lib::DG::NonHyper *dump(const std::vector<std::shared_ptr<graph::Graph> > &graphs, const std::vector<std::shared_ptr<rule::Rule> > &rules, const std::string &file, std::ostream &err) {
 	std::ifstream fileInStream(file.c_str());
 	if(!fileInStream.is_open()) {
 		err << "DG file not found, '" << file << "'" << std::endl;
@@ -177,24 +165,10 @@ lib::DG::NonHyper *dump(const std::vector<std::shared_ptr<mod::Graph> > &graphs,
 	return lib::DG::Dump::load(graphs, rules, fileInStream, err);
 }
 
-lib::DG::NonHyper *abstract(std::istream &s, std::ostream &err) {
-	std::ios::fmtflags oldFlags = s.flags();
-	s.unsetf(std::ios::skipws);
-	IteratorType iterStart = spirit::make_default_multi_pass(BaseIteratorType(s));
-	IteratorType iterRealStart = iterStart;
-	IteratorType iterEnd;
-
+lib::DG::NonHyper *abstract(const std::string &s, std::ostream &err) {
+	auto iterStart = s.begin(), iterEnd = s.end();
 	std::vector<Derivation> derivations;
-
-	QiRule < std::string()>::type grIdentifier = qi::lexeme[*(qi::char_ - qi::space)];
-	QiRule<unsigned int()>::type grCoef = qi::lexeme[qi::uint_ >> &qi::space] | (qi::eps >> qi::attr(1));
-	QiRule < std::pair<unsigned int, std::string>()>::type element = grCoef >> grIdentifier;
-	QiRule < Derivation::List()>::type grSide = element % '+';
-	QiRule<bool()>::type grArrow = ("->" >> qi::attr(false)) | ("<=>" >> qi::attr(true));
-	QiRule < Derivation()>::type grDerivation = grSide >> grArrow >> grSide;
-	QiRule < std::vector<Derivation>()>::type grammar = +grDerivation;
-	bool res = parse(iterStart, iterEnd, grammar, derivations, err);
-	s.flags(oldFlags);
+	bool res = lib::IO::parse(iterStart, iterEnd, parser::derivations, derivations, err, x3::space);
 	if(!res) return nullptr;
 	return new NonHyperAbstract(derivations);
 }

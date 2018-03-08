@@ -2,11 +2,9 @@
 #define MOD_LIB_RULES_STATE_DEPICTION_H
 
 #include <mod/BuildConfig.h>
+#include <mod/lib/Chem/OBabel.h>
 #include <mod/lib/Rules/GraphDecl.h>
-
-#ifdef MOD_HAVE_OPENBABEL
-#include <openbabel/mol.h>
-#endif
+#include <mod/lib/Rules/LabelledRule.h>
 
 #include <map>
 #include <vector>
@@ -34,39 +32,46 @@ struct DepictionDataCore {
 		std::string getEdgeLabel(Edge e) const;
 		const AtomData &operator()(Vertex v) const; // fake data
 		BondType operator()(Edge e) const; // fake data
+		bool hasImportantStereo(Vertex v) const;
 		bool getHasCoordinates() const;
 		double getX(Vertex v, bool withHydrogen) const;
 		double getY(Vertex v, bool withHydrogen) const;
+		lib::IO::Graph::Write::EdgeFake3DType getEdgeFake3DType(Edge e, bool withHydrogen) const;
 		//	private:
 		//		bool isAtomIdInvalidContext(Vertex v) const;
 	private:
 		const DepictionDataCore &depict;
 	};
 public:
-	DepictionDataCore(const GraphType &g, const PropStringCore &labelState, const PropMoleculeCore &moleculeState);
+	DepictionDataCore(const LabelledRule &lr);
 	DepictionDataCore(const DepictionDataCore&) = delete;
 	DepictionDataCore &operator=(const DepictionDataCore&) = delete;
 	const AtomData &operator()(Vertex v) const; // fake data, for creating OBMol
 	BondType operator()(Edge e) const; // fake data, for creating OBMol
+	bool hasImportantStereo(Vertex v) const;
 	bool getHasCoordinates() const;
-	double getX(Vertex v) const;
-	double getY(Vertex v) const;
+	double getX(Vertex v, bool withHydrogen) const;
+	double getY(Vertex v, bool withHydrogen) const;
+	// vMap: this -> other
 	void copyCoords(const DepictionDataCore &other, const std::map<Vertex, Vertex> &vMap);
 public: // projections
 	DepictionData<Membership::Left> getLeft() const;
 	DepictionData<Membership::Context> getContext() const;
 	DepictionData<Membership::Right> getRight() const;
 private:
-	const GraphType &g;
-	const PropMoleculeCore &moleculeState;
+	const LabelledRule &lr;
 	bool hasMoleculeEncoding, hasCoordinates;
 	std::map<Vertex, AtomData> nonAtomToPhonyAtomLeft, nonAtomToPhonyAtomRight;
 	std::map<AtomId, std::string> phonyAtomToString;
 	std::map<Edge, std::string> nonBondEdgesLeft, nonBondEdgesRight;
-	std::vector<double> x, y;
+
+	struct CoordData {
+		std::vector<double> x, y;
 #ifdef MOD_HAVE_OPENBABEL
-	std::unique_ptr<OpenBabel::OBMol> obMol;
+		lib::Chem::OBMolHandle obMol; // the pushout, for generating coords
+		lib::Chem::OBMolHandle obMolLeft, obMolRight; // each side, with copied coords, for stereo
 #endif
+	} cDataAll, cDataNoHydrogen;
 };
 
 } // namespace Rules

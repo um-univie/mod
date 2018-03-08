@@ -3,7 +3,7 @@
 
 #include <mod/lib/GraphMorphism/Finder.hpp>
 
-#include <jla_boost/graph/morphism/vf2.hpp>
+#include <jla_boost/graph/morphism/finders/vf2.hpp>
 
 namespace mod {
 namespace lib {

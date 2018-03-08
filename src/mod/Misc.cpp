@@ -1,10 +1,12 @@
 #include "Misc.h"
 
 #include <mod/BuildConfig.h>
-#include <mod/DG.h>
-#include <mod/Graph.h>
+#include <mod/dg/DG.h>
+#include <mod/graph/Graph.h>
 #include <mod/lib/DG/Hyper.h>
 #include <mod/lib/IO/IO.h>
+#include <mod/lib/IO/Stereo.h>
+#include <mod/lib/Stereo/GeometryGraph.h>
 
 #include <boost/lexical_cast.hpp>
 
@@ -50,6 +52,10 @@ void postChapter(const std::string &chapterTitle) {
 
 void postSection(const std::string &sectionTitle) {
 	lib::IO::post() << "summarySection \"" << sectionTitle << "\"" << std::endl;
+}
+
+void printGeometryGraph() {
+	lib::IO::Stereo::Write::summary(lib::Stereo::getGeometryGraph());
 }
 
 std::string version() {

@@ -33,6 +33,7 @@ PropMoleculeCore::PropMoleculeCore(const GraphType &g, const PropStringCore &lab
 			break;
 		}
 	}
+
 	edgeState.resize(num_edges(g));
 	for(Edge e : asRange(edges(g))) {
 		auto decodeLabel = [this](const std::string & label) {

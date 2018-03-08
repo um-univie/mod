@@ -24,20 +24,24 @@ when `Open Babel`_ can not be used.
 GML (Rule)
 ##########
 
-A rule :math:`(L\leftarrow K\rightarrow R)` in :ref:`GML` format is specified as three graphs;
-:math:`L\backslash K`, :math:`K`, and :math:`R\backslash K`.
-Each graph is specified a a list of vertices and edges, similar to a graph in GML format.
+A rule :math:`(L\leftarrow K\rightarrow R)` in :ref:`GML` format is specified as three graph fragments;
+``left``, ``context``, and ``right``.
+From those :math:`L` is constructed as ``left`` :math:`\cup` ``context``,
+:math:`R` as ``right`` :math:`\cup` ``context``, and
+:math:`K` as ``context`` :math:`\cup` (``left`` :math:`\cap` ``right``).
+Each graph fragment is specified as a list of vertices and edges, similar to a graph in GML format.
 The key-value structure is exemplified by the following grammar.
 
 .. productionlist:: RuleGMLGrammar
    ruleGML: 'rule [' 
-          :    [ `ruleId` ]
+          :    [ 'ruleID' `quoteEscapedString` ]
+          :    [ 'labelType' `labelType` ]
           :    [ `leftSide` ]
           :    [ `context` ]
           :    [ `rightSide` ]
           :    `matchConstraint`*
           : ']'
-   ruleId: 'ruleID' `quoteEscapedString`
+   labelType: 'string' | 'term'
    leftSide: 'left [' (`node` | `edge`)* ']'
    context: 'context [' (`node` | `edge`)* ']'
    rightSide: 'right [' (`node` | `edge`)* ']'

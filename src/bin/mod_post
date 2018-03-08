@@ -22,7 +22,8 @@ function latexEsc {
 		| sed 's/{/\\{/g' \
 		| sed 's/}/\\}/g' \
 		| sed 's/</\\textless{}/g' \
-		| sed 's/>/\\textgreater{}/g'
+		| sed 's/>/\\textgreater{}/g' \
+		| sed 's/#/\\#/g'
 }
 
 function printHelp {
@@ -201,7 +202,7 @@ else # $1 == --mode
 				echo "	echo '\summarySection{$(latexEsc "$1")}' >> $texFile" >> $makefile
 			}
 			function summarySectionNoEscape {
-				echo "	echo '\summarySection{$1)}' >> $texFile" >> $makefile
+				echo "	echo '\summarySection{$1}' >> $texFile" >> $makefile
 			}
 			function summarySubsection {
 				echo "	echo '\summarySubsection{$(latexEsc "$1")}' >> $texFile" >> $makefile
@@ -345,17 +346,16 @@ else # $1 == --mode
 				echo -n " $fileNoExt.plain ${fileNoExt}_coord.tex" >> $makefileDep
 			}
 
-			# fileNoExt [fileCoordsNoExt]
+			# fileNoExt fileCoordsNoExt [compilation repetitions]
 			function compileTikz {
 				local fileNoExt=$1
 				local fileCoordNoExt=$2
+				local repeats=${3:-1}
 				echo -n " $fileNoExt.{pdf,out,aux,log}" >> $makefileClean
 				echo -n "$fileNoExt.pdf:" >> $makefileImpl
-				if test "x$fileCoordNoExt" != "x"; then
-					echo -n  " $fileCoordNoExt.tex" >> $makefileImpl
-				fi
+				echo -n  " $fileCoordNoExt.tex" >> $makefileImpl
 				echo "" >> $makefileImpl
-				echo "	$this --mode compileTikz \"$fileNoExt\" \"$fileCoordNoExt\"" >> $makefileImpl
+				echo "	$this --mode compileTikz \"$fileNoExt\" \"$fileCoordNoExt\" $repeats" >> $makefileImpl
 				echo -n " $fileNoExt.pdf" >> $makefileDep
 			}
 
@@ -368,6 +368,7 @@ else # $1 == --mode
 				echo "	$this --mode pdfToSvg \"$1\" \"$2\"" >> $makefileImpl
 				echo -n " $fileSvg" >> $makefileDep
 			}
+
 
 			. $MOD_PREFIX/bin/mod_genSummaryMakefile
 			#---------------------------------------------------------------------
@@ -415,11 +416,12 @@ else # $1 == --mode
 
 	dimensionTooLargeString="\\dontUseTooLargeCoords"
 
-	# fileNoExt [fileCoordsNoExt]
+	# fileNoExt fileCoordsNoExt [compilation repetitions]
 	function compileTikz {
 		printStatus "$FUNCNAME"
 		local fileNoExt=$1
 		local fileCoordsNoExt=$2
+		local repeats=${3:-1}
 		# check if we need to fall back on Graphviz
 		if test "x$fileCoordsNoExt" != "x"; then
 			cat $fileCoordsNoExt.tex | grep "$dimensionTooLargeString" &> /dev/null
@@ -432,12 +434,15 @@ else # $1 == --mode
 		local latexArgs="-interaction=nonstopmode -halt-on-error"
 		latexArgs="$latexArgs -jobname $fileNoExt -fmt $MOD_PREFIX/share/mod/commonPreamble.fmt \"\\newcommand{\modPrefix}{$MOD_PREFIX}\\newcommand{\modFigureInput}{$fileNoExt.tex}\input{\modPrefix/share/mod/$texFigureTemplateFile}\""
 		local latexCmd="pdflatex $latexArgs"
-		$latexCmd &> /dev/null
-		local res=$?
-		if test $res -ne 0; then
-			$latexCmd
-			echo "Error compiling $fileNoExt.tex, see $fileNoExt.log"
-		fi
+		for i in $(seq $repeats); do
+			$latexCmd &> /dev/null
+			local res=$?
+			if test $res -ne 0; then
+				$latexCmd
+				echo "Error compiling $fileNoExt.tex, see $fileNoExt.log"
+				break
+			fi
+		done
 		# hax to prevent files from changing
 		sed -i "s!/ID .*!/ID [<0> <0>]!" ${fileNoExt}.pdf
 		return $res

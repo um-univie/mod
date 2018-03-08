@@ -11,8 +11,8 @@ namespace lib {
 namespace RC {
 
 #define MOD_RC_COMPOSE_BY_MATCH_MAKER(MM)                                       \
-	void composeRuleRealByMatchMaker(const lib::Rules::Real &rFirst, const lib::Rules::Real &rSecond, const MM &mm, std::function<void(std::unique_ptr<lib::Rules::Real>) > rr) { \
-		composeRuleRealByMatchMakerGeneric(rFirst, rSecond, mm, rr); \
+	void composeRuleRealByMatchMaker(const lib::Rules::Real &rFirst, const lib::Rules::Real &rSecond, const MM &mm, std::function<void(std::unique_ptr<lib::Rules::Real>) > rr, LabelSettings labelSettings) { \
+		composeRuleRealByMatchMakerGeneric(rFirst, rSecond, mm, rr, labelSettings); \
 	}
 MOD_RC_COMPOSE_BY_MATCH_MAKER(Common);
 MOD_RC_COMPOSE_BY_MATCH_MAKER(Parallel);

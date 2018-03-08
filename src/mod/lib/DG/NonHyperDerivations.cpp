@@ -1,7 +1,7 @@
 #include "NonHyperDerivations.h"
 
 #include <mod/Derivation.h>
-#include <mod/Rule.h>
+#include <mod/rule/Rule.h>
 #include <mod/lib/Graph/Single.h>
 #include <mod/lib/Rules/Real.h>
 
@@ -10,7 +10,10 @@ namespace lib {
 namespace DG {
 
 NonHyperDerivations::NonHyperDerivations(std::vector<Derivation> derivations)
-: NonHyper({}), derivations(new std::vector<Derivation>(std::move(derivations))) {
+: NonHyper({},
+{
+LabelType::String, LabelRelation::Isomorphism, false, LabelRelation::Isomorphism
+}), derivations(new std::vector<Derivation>(std::move(derivations))) {
 	calculate();
 }
 
@@ -27,18 +30,17 @@ void NonHyperDerivations::calculateImpl() {
 	}
 	// add derivations
 	for(const auto &der : *derivations) {
-		auto makeSide = [this](const mod::Derivation::GraphList & graphs) -> const lib::Graph::Base* {
-			if(graphs.size() == 1) return &graphs.front()->getGraph();
-			auto *merge = new lib::Graph::Merge();
-			for(auto g : graphs) merge->mergeWith(g->getGraph());
-			merge->lock();
-			return this->addToMergeStore(merge);
+		const auto makeSide = [this](const mod::Derivation::GraphList & graphs) -> GraphMultiset {
+			std::vector<const lib::Graph::Single*> gPtrs;
+			gPtrs.reserve(graphs.size());
+			for(const auto &g : graphs) gPtrs.push_back(&g->getGraph());
+			return GraphMultiset(std::move(gPtrs));
 		};
-		auto *left = makeSide(der.left);
-		auto *right = makeSide(der.right);
+		auto gmsLeft = makeSide(der.left);
+		auto gmsRight = makeSide(der.right);
 		const lib::Rules::Real *rule = nullptr;
-		if(der.rule) rule = &der.rule->getRule();
-		this->suggestDerivation(left, right, rule);
+		if(der.r) rule = &der.r->getRule();
+		this->suggestDerivation(std::move(gmsLeft), std::move(gmsRight), rule);
 	}
 	derivations.release();
 }

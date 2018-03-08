@@ -21,6 +21,14 @@ Strategy *Revive::clone() const {
 	return new Revive(strat->clone());
 }
 
+void Revive::preAddGraphs(std::function<void(std::shared_ptr<graph::Graph>) > add) const {
+	strat->preAddGraphs(add);
+}
+
+void Revive::forEachRule(std::function<void(const lib::Rules::Real&)> f) const {
+	strat->forEachRule(f);
+}
+
 void Revive::printInfo(std::ostream &s) const {
 	s << indent << "Revive:" << std::endl;
 	indentLevel++;

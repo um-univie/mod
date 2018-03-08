@@ -96,6 +96,7 @@ void addImplicitHydrogens(lib::Graph::GraphType &g, lib::Graph::PropString &pStr
 			if(numBonds == BondVector(1, 0, 0, 2)) return 0;
 			if(numBonds == BondVector(2, 1, 0, 0)) return 0;
 			if(numBonds == BondVector(0, 0, 0, 3)) return 0;
+			[[fallthrough]];
 		case Phosphorus:
 			if(valence <= 3) return 3 - valence;
 			else if(valence <= 5) return 5 - valence;

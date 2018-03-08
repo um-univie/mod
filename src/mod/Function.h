@@ -6,6 +6,7 @@
 
 #include <boost/type_traits/function_traits.hpp>
 
+#include <functional>
 #include <iosfwd>
 #include <memory>
 #include <string>

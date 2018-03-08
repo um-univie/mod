@@ -3,8 +3,12 @@
 #include <mod/lib/Chem/Smiles.h>
 #include <mod/lib/Graph/DFSEncoding.h>
 #include <mod/lib/Graph/Properties/String.h>
+#include <mod/lib/Graph/Properties/Molecule.h>
+#include <mod/lib/Graph/Properties/Stereo.h>
 #include <mod/lib/IO/GMLUtils.h>
 #include <mod/lib/IO/IO.h>
+#include <mod/lib/Stereo/GeometryGraph.h>
+#include <mod/lib/Stereo/Inference.h>
 
 #include <jla_boost/graph/PairToRangeAdaptor.hpp>
 
@@ -22,47 +26,34 @@ namespace Read {
 
 Data::Data() { }
 
-Data::Data(std::unique_ptr<lib::Graph::GraphType> graph, std::unique_ptr<lib::Graph::PropString> label) : graph(std::move(graph)), label(std::move(label)) {
-	assert(this->graph);
-	assert(this->label);
-}
-
-Data::Data(Data &&other) : graph(std::move(other.graph)), label(std::move(other.label)),
+Data::Data(Data &&other) : g(std::move(other.g)), pString(std::move(other.pString)), pStereo(std::move(other.pStereo)),
 externalToInternalIds(std::move(other.externalToInternalIds)) { }
 
 Data::~Data() {
-	if(graph) MOD_ABORT;
-	if(label) MOD_ABORT;
-}
-
-void Data::clear() {
-	graph.reset();
-	label.reset();
+	if(std::uncaught_exception()) return; // TODO: update to the plural version when C++17 is required
+	if(g) MOD_ABORT;
+	if(pString) MOD_ABORT;
+	if(pStereo) MOD_ABORT;
 }
 
 namespace {
 
 Data parseGML(std::istream &s, std::ostream &err) {
-	GML::Graph graph;
+	GML::Graph gGML;
 	{
 		gml::ast::List ast;
 		bool res = gml::parser::parse(s, ast, err);
 		if(!res) return Data();
 		using namespace gml::converter::edsl;
-		auto cVertex = list<GML::Vertex>("node", &GML::Graph::vertices)
-				(int_("id", &GML::Vertex::id), 1, 1)
-				(string("label", &GML::Vertex::label), 1, 1);
-		auto cEdge = list<GML::Edge>("edge", &GML::Graph::edges)
-				(int_("source", &GML::Edge::source), 1, 1)
-				(int_("target", &GML::Edge::target), 1, 1)
-				(string("label", &GML::Edge::label), 1, 1);
+		auto cVertex = GML::makeVertexConverter(1);
+		auto cEdge = GML::makeEdgeConverter(1);
 		auto cGraph = list<Parent>("graph") (cVertex) (cEdge);
 		auto iterBegin = ast.list.begin();
-		res = gml::converter::convert(iterBegin, ast.list.end(), cGraph, err, graph);
+		res = gml::converter::convert(iterBegin, ast.list.end(), cGraph, err, gGML);
 		if(!res) return Data();
 	}
 
-	std::sort(begin(graph.vertices), end(graph.vertices), [](const GML::Vertex &v1, const GML::Vertex & v2) -> bool {
+	std::sort(begin(gGML.vertices), end(gGML.vertices), [](const GML::Vertex &v1, const GML::Vertex & v2) -> bool {
 		return v1.id < v2.id;
 	});
 	auto gPtr = std::make_unique<lib::Graph::GraphType>();
@@ -70,8 +61,10 @@ Data parseGML(std::istream &s, std::ostream &err) {
 	auto &g = *gPtr;
 	auto &pString = *pStringPtr;
 	using Vertex = lib::Graph::Vertex;
+	using Edge = lib::Graph::Edge;
 	std::unordered_map<int, Vertex> vMap;
-	for(const auto &vGML : graph.vertices) {
+	std::unordered_map<Vertex, int> idMap;
+	for(const auto &vGML : gGML.vertices) {
 		Vertex v = add_vertex(g);
 		assert(vGML.label);
 		pString.addVertex(v, *vGML.label);
@@ -80,8 +73,18 @@ Data parseGML(std::istream &s, std::ostream &err) {
 			return Data();
 		}
 		vMap[vGML.id] = v;
+		idMap[v] = vGML.id;
 	}
-	for(const auto &eGML : graph.edges) {
+	auto vFromVertexId = [&vMap](int id) {
+		auto iter = vMap.find(id);
+		assert(iter != end(vMap));
+		return iter->second;
+	};
+	for(const auto &eGML : gGML.edges) {
+		if(eGML.source == eGML.target) {
+			err << "Error in graph GML. Loop edge (on " << eGML.source << ") is not allowed." << std::endl;
+			return Data();
+		}
 		if(vMap.find(eGML.source) == end(vMap)) {
 			err << "Error in graph GML. Source " << eGML.source << " does not exist in '" << eGML << "'" << std::endl;
 			return Data();
@@ -90,8 +93,8 @@ Data parseGML(std::istream &s, std::ostream &err) {
 			err << "Error in graph GML. Target " << eGML.target << " does not exist in '" << eGML << "'" << std::endl;
 			return Data();
 		}
-		Vertex src = vMap[eGML.source];
-		Vertex tar = vMap[eGML.target];
+		Vertex src = vFromVertexId(eGML.source);
+		Vertex tar = vFromVertexId(eGML.target);
 		auto e = edge(src, tar, g);
 		if(e.second) {
 			err << "Error in graph GML. Duplicate edge with source " << eGML.source << " and target " << eGML.target << "." << std::endl;
@@ -101,10 +104,147 @@ Data parseGML(std::istream &s, std::ostream &err) {
 		assert(eGML.label);
 		pString.addEdge(e.first, *eGML.label);
 	}
-	auto data = Data(std::move(gPtr), std::move(pStringPtr));
+
+	// Prepare data for the standard core part.
+	Data data;
+	data.g = std::move(gPtr);
+	data.pString = std::move(pStringPtr);
 	for(auto &&vp : vMap) {
 		data.externalToInternalIds[vp.first] = get(boost::vertex_index_t(), g, vp.second);
 	}
+
+	auto atError = [&data]() {
+		data.g.reset();
+		data.pString.reset();
+		data.pStereo.reset();
+		return Data();
+	};
+
+	bool doStereo = false;
+	for(const auto &vGML : gGML.vertices) doStereo = doStereo || vGML.stereo;
+	for(const auto &eGML : gGML.edges) doStereo = doStereo || eGML.stereo;
+	if(!doStereo) return data;
+	// Stereo
+	//============================================================================
+	lib::Graph::PropMolecule molState(g, pString);
+	auto stereoInference = lib::Stereo::makeInference(g, molState, false);
+	std::stringstream ssErr;
+	const auto &gGeometry = lib::Stereo::getGeometryGraph();
+	// Set the explicitly defined edge categories.
+	//----------------------------------------------------------------------------
+	for(const auto &eGML : gGML.edges) {
+		Vertex vSrc = vFromVertexId(eGML.source),
+				vTar = vFromVertexId(eGML.target);
+		auto ePair = edge(vSrc, vTar, g);
+		assert(ePair.second);
+		if(!eGML.stereo) continue;
+		const std::string &s = *eGML.stereo;
+		if(s.size() != 1) {
+			err << "Error in stereo data for edge (" << eGML.source << ", " << eGML.target << "). ";
+			err << "Parsing error in stereo data '" << s << "'.";
+			return atError();
+		}
+		lib::Stereo::EdgeCategory cat;
+		switch(s.front()) {
+		case '*': cat = lib::Stereo::EdgeCategory::Any;
+			break;
+		default:
+			err << "Error in stereo data for edge (" << eGML.source << ", " << eGML.target << "). ";
+			err << "Parsing error in stereo data '" << s << "'.";
+			return atError();
+		}
+		bool res = stereoInference.assignEdgeCategory(ePair.first, cat, ssErr);
+		if(!res) {
+			err << "Error in stereo data for edge (" << eGML.source << ", " << eGML.target << "). ";
+			err << ssErr.str();
+			return atError();
+		}
+	}
+	// Set the explicitly stereo data.
+	//----------------------------------------------------------------------------
+	for(auto &vGML : gGML.vertices) {
+		if(!vGML.stereo) continue;
+		auto v = vFromVertexId(vGML.id);
+		vGML.parsedEmbedding = lib::IO::Stereo::Read::parseEmbedding(vGML.stereo.get(), ssErr);
+		if(!vGML.parsedEmbedding) {
+			err << "Error in stereo data for vertex " << vGML.id << ". ";
+			err << ssErr.str();
+			return atError();
+		}
+		// Geometry
+		//..........................................................................
+		const auto &embGML = *vGML.parsedEmbedding;
+		if(embGML.geometry) {
+			auto vGeo = gGeometry.findGeometry(*embGML.geometry);
+			if(vGeo == gGeometry.nullGeometry()) {
+				err << "Error in stereo data for vertex " << vGML.id << ". Invalid gGeometry '" << *embGML.geometry << "'." << std::endl;
+				return atError();
+			}
+			bool res = stereoInference.assignGeometry(v, vGeo, ssErr);
+			if(!res) {
+				err << "Error in stereo data for vertex " << vGML.id << ". " << ssErr.str();
+				return atError();
+			}
+		}
+		// Edges
+		//..........................................................................
+		if(embGML.edges) {
+			stereoInference.initEmbedding(v);
+			for(const auto &e : *embGML.edges) {
+				if(const int *idPtr = boost::get<int>(&e)) {
+					int idNeighbour = *idPtr;
+					if(vMap.find(idNeighbour) == end(vMap)) {
+						err << "Error in graph GML. Neighbour vertex " << idNeighbour << " in stereo embedding for vertex " << vGML.id << " does not exist." << std::endl;
+						return atError();
+					}
+					auto ePair = edge(v, vFromVertexId(idNeighbour), g);
+					if(!ePair.second) {
+						err << "Error in graph GML. Vertex " << idNeighbour << " in stereo embedding for vertex " << vGML.id << " is not a neighbour." << std::endl;
+						return atError();
+					}
+					stereoInference.addEdge(v, ePair.first);
+				} else if(const char *virtPtr = boost::get<char>(&e)) {
+					switch(*virtPtr) {
+					case 'e':
+						stereoInference.addLonePair(v);
+						break;
+					case 'r':
+						stereoInference.addRadical(v);
+						break;
+					default:
+						MOD_ABORT; // the parser should know what is allowed
+					}
+				} else {
+					MOD_ABORT; // the parser should know what is allowed
+				}
+			}
+		}
+		// Fixation
+		//..........................................................................
+		if(embGML.fixation) {
+			// TODO: expand this when more complicated geometries are implemented
+			bool isFixed = embGML.fixation.get();
+			if(isFixed) stereoInference.fixSimpleGeometry(v);
+		}
+	} // end of explicit stereo data
+
+	auto stereoResult = stereoInference.finalize(ssErr, [&idMap](Vertex v) {
+		auto iter = idMap.find(v);
+		assert(iter != idMap.end());
+		return iter->second;
+	});
+	switch(stereoResult) {
+	case lib::Stereo::DeductionResult::Success: break;
+	case lib::Stereo::DeductionResult::Warning:
+		if(!getConfig().stereo.silenceDeductionWarnings.get())
+			IO::log() << ssErr.str();
+		break;
+	case lib::Stereo::DeductionResult::Error:
+		err << ssErr.str();
+		return atError();
+	}
+
+	data.pStereo = std::make_unique<lib::Graph::PropStereo>(*data.g, std::move(stereoInference));
 	return data;
 }
 

@@ -14,6 +14,8 @@ struct Sequence : Strategy {
 	Sequence(const std::vector<Strategy*> &strats);
 	~Sequence();
 	Strategy *clone() const;
+	void preAddGraphs(std::function<void(std::shared_ptr<graph::Graph>) > add) const;
+	void forEachRule(std::function<void(const lib::Rules::Real&)> f) const;
 	void printInfo(std::ostream &s) const;
 	const GraphState &getOutput() const;
 	bool isConsumed(const lib::Graph::Single *g) const;

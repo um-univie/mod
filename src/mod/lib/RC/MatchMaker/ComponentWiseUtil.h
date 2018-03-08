@@ -4,12 +4,16 @@
 #include <mod/Error.h>
 #include <mod/lib/GraphMorphism/LabelledMorphism.h>
 #include <mod/lib/GraphMorphism/VF2Finder.hpp>
+#include <mod/lib/GraphMorphism/Constraints/CheckVisitor.h>
 #include <mod/lib/Rules/Real.h>
 
 #include <jla_boost/graph/FilteredWrapper.hpp>
 #include <jla_boost/graph/morphism/Predicates.hpp>
-#include <jla_boost/graph/morphism/UnwrapperCallback.hpp>
-#include <jla_boost/graph/morphism/VectorVertexMap.hpp>
+#include <jla_boost/graph/morphism/callbacks/SliceProps.hpp>
+#include <jla_boost/graph/morphism/callbacks/Store.hpp>
+#include <jla_boost/graph/morphism/callbacks/Transform.hpp>
+#include <jla_boost/graph/morphism/callbacks/Unwrapper.hpp>
+#include <jla_boost/graph/morphism/models/Vector.hpp>
 
 namespace mod {
 namespace lib {
@@ -18,13 +22,13 @@ namespace RC {
 namespace GM = jla_boost::GraphMorphism;
 namespace GM_MOD = lib::GraphMorphism;
 
-template<typename RuleDomain, typename RuleCodomain>
+template<typename RuleSideDom, typename RuleSideCodom>
 struct FilteredWrapperReinterpretMRWrapper {
 
 	template<typename OuterDomain, typename OuterCodomain, typename MR>
 	auto operator()(const OuterDomain &gDomain, const OuterCodomain &gCodomain, MR mr) const {
-		return GM::makeUnwrapperLeft < jla_boost::FilteredWrapper<typename RuleDomain::ComponentGraph> >(
-				GM::makeUnwrapperRight < jla_boost::FilteredWrapper<typename RuleCodomain::ComponentGraph> >(mr));
+		return GM::makeUnwrapperDom < jla_boost::FilteredWrapper<typename RuleSideDom::ComponentGraph> >(
+				GM::makeUnwrapperCodom < jla_boost::FilteredWrapper<typename RuleSideCodom::ComponentGraph> >(mr));
 	}
 };
 
@@ -33,6 +37,8 @@ struct WrappedComponentGraph {
 	using ComponentGraph = typename Rule::ComponentGraph;
 	using GraphType = jla_boost::FilteredWrapper<ComponentGraph>;
 	using PropStringType = typename Rule::PropStringType;
+	using PropTermType = typename Rule::PropTermType;
+	using PropStereoType = typename Rule::PropStereoType;
 public:
 
 	WrappedComponentGraph(const ComponentGraph &g, std::size_t i, const Rule &r)
@@ -44,6 +50,18 @@ public:
 
 	friend PropStringType get_string(const WrappedComponentGraph<Rule> &g) {
 		return get_string(g.r);
+	}
+
+	friend PropTermType get_term(const WrappedComponentGraph<Rule> &g) {
+		return get_term(g.r);
+	}
+
+	friend bool has_stereo(const WrappedComponentGraph<Rule> &g) {
+		return has_stereo(g.r);
+	}
+
+	friend PropStereoType get_stereo(const WrappedComponentGraph<Rule> &g) {
+		return get_stereo(g.r);
 	}
 
 	friend const std::vector<typename boost::graph_traits<GraphType>::vertex_descriptor>&
@@ -61,69 +79,68 @@ WrappedComponentGraph<Rule> makeWrappedComponentGraph(const typename Rule::Compo
 	return WrappedComponentGraph<Rule>(g, i, r);
 }
 
-template<typename RuleDomain, typename RuleCodomain>
+template<typename RuleSideDom, typename RuleSideCodom>
 struct RuleRuleComponentMonomorphism {
-	using Morphism = GM::VectorVertexMap<
-			typename RuleDomain::LabelledRule::GraphType,
-			typename RuleCodomain::LabelledRule::GraphType>;
+	using Morphism = GM::VectorVertexMap<typename RuleSideDom::GraphType, typename RuleSideCodom::GraphType>;
 public:
 
-	RuleRuleComponentMonomorphism(const RuleDomain &rDomain, const RuleCodomain &rCodomain, bool enforceConstraints)
-	: rDomain(rDomain), rCodomain(rCodomain), enforceConstraints(enforceConstraints) { }
+	RuleRuleComponentMonomorphism(const RuleSideDom &rsDom, const RuleSideCodom &rsCodom, bool enforceConstraints, LabelSettings labelSettings)
+	: rsDom(rsDom), rsCodom(rsCodom), enforceConstraints(enforceConstraints), labelSettings(labelSettings) { }
 
-	std::vector<Morphism> operator()(std::size_t idPattern, std::size_t idHost) const {
+	std::vector<Morphism> operator()(const std::size_t idDom, const std::size_t idCodom) const {
 		std::vector<Morphism> morphisms;
 		auto mrStore = GM::makeStore(std::back_inserter(morphisms));
-		const auto &pattern = get_component_graph(idPattern, rDomain);
-		const auto &host = get_component_graph(idHost, rCodomain);
-		auto patternWrapped = makeWrappedComponentGraph(pattern, idPattern, rDomain);
-		auto hostWrapped = makeWrappedComponentGraph(host, idHost, rCodomain);
+		const auto &gDom = get_component_graph(idDom, rsDom);
+		const auto &gCodom = get_component_graph(idCodom, rsCodom);
+		auto wgDom = makeWrappedComponentGraph(gDom, idDom, rsDom);
+		auto wgCodom = makeWrappedComponentGraph(gCodom, idCodom, rsCodom);
 
 		auto makeCheckConstraints = [&](auto &&mrNext) {
-			const auto &constraints = get_match_constraints(rDomain);
-			auto labelHost = get_string(rCodomain);
+			const auto &constraints = get_match_constraints(rsDom);
 			auto constraintsIterEnd = enforceConstraints ? constraints.end() : constraints.begin();
-			return GraphMorphism::makeCheckConstraints(
+			return GraphMorphism::Constraints::makeChecker(
 					asRange(std::make_pair(constraints.begin(), constraintsIterEnd)),
-					labelHost, mrNext);
+					rsCodom, labelSettings, mrNext);
 		};
 		// First reinterpret the vertex descriptors from the reindexed graphs to their parent graphs.
-		auto mrWrapper = FilteredWrapperReinterpretMRWrapper<RuleDomain, RuleCodomain>();
+		auto mrWrapper = FilteredWrapperReinterpretMRWrapper<RuleSideDom, RuleSideCodom>();
 		// Then do whatever checked is needed by the labelled morphisms (morphismSelectByLabelSettings injects those).
 		// And now process the final morphisms:
 		auto mr =
 				// The next two unwrappings will increase the domain and codomain,
 				// so we first need to capture the mapping:
 				// Store them in a vector (which runs through the domain graph):
-				GM::makeToVectorVertexMap(
+				GM::makeTransform(GM::ToVectorVertexMap(),
 				// Unwrap the filtering by connected component, so we get side graphs:
-				GM::makeUnwrapperLeft<typename RuleDomain::ComponentGraph > (
-				GM::makeUnwrapperRight<typename RuleCodomain::ComponentGraph > (
+				GM::makeUnwrapperDom<typename RuleSideDom::ComponentGraph > (
+				GM::makeUnwrapperCodom<typename RuleSideCodom::ComponentGraph > (
 				// Check constraints using the side graphs:
 				makeCheckConstraints(
-				// Unwrap the filtering by rule side, so we get to core graphs:
-				GM::makeUnwrapperLeft<typename RuleDomain::GraphType > (
-				GM::makeUnwrapperRight<typename RuleCodomain::GraphType > (
+				//				// Unwrap the filtering by rule side, so we get to core graphs:
+				//				GM::makeUnwrapperLeft<typename RuleSideDom::GraphType > (
+				//				GM::makeUnwrapperRight<typename RuleSideCodom::GraphType > (
+				// Slice away the properties, the user must recreate that.
+				GM::makeSliceProps(
 				// And finally push it into our storage:
 				mrStore
-				))))))
+				)))))//))
 				;
 		auto predWrapper = lib::GraphMorphism::IdentityWrapper();
 
 		//				auto mrPrinter = GraphMorphism::Callback::makePrint(IO::log(), patternWrapped, targetWrapped, mrCheckConstraints);
-		lib::GraphMorphism::morphismSelectByLabelSettings(patternWrapped, hostWrapped, GM_MOD::VF2Monomorphism(), mr, predWrapper, mrWrapper);
+		lib::GraphMorphism::morphismSelectByLabelSettings(wgDom, wgCodom, labelSettings, GM_MOD::VF2Monomorphism(), mr, predWrapper, mrWrapper);
 		return morphisms;
 	}
 private:
-	const RuleDomain &rDomain;
-	const RuleCodomain &rCodomain;
+	const RuleSideDom &rsDom;
+	const RuleSideCodom &rsCodom;
 	const bool enforceConstraints;
+	const LabelSettings labelSettings;
 };
 
-template<typename RuleDomain, typename RuleCodomain>
-inline RuleRuleComponentMonomorphism<RuleDomain, RuleCodomain>
-makeRuleRuleComponentMonomorphism(const RuleDomain &rDomain, const RuleCodomain &rCodomain, bool enforceConstraints) {
-	return RuleRuleComponentMonomorphism<RuleDomain, RuleCodomain>(rDomain, rCodomain, enforceConstraints);
+template<typename RuleSideDom, typename RuleSideCodom>
+auto makeRuleRuleComponentMonomorphism(const RuleSideDom &rsDom, const RuleSideCodom &rsCodom, bool enforceConstraints, LabelSettings labelSettings) {
+	return RuleRuleComponentMonomorphism<RuleSideDom, RuleSideCodom>(rsDom, rsCodom, enforceConstraints, labelSettings);
 }
 
 } // namespace RC

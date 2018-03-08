@@ -66,7 +66,7 @@ void Chem_doExport() {
 	py::class_<mod::AtomData>("AtomData", py::no_init)
 			// rst:		.. py:method:: __init__(self)
 			// rst:
-			// rst: 		Construct atom data with :py:const:`AtomIds::Invalid` atom id and neutral charge.
+			// rst: 		Construct atom data with :py:const:`AtomIds.Invalid` atom id and neutral charge.
 			.def(py::init<>())
 			// rst:		.. py:method:: __init__(self, atomId)
 			// rst:

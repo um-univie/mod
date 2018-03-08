@@ -41,7 +41,7 @@ protected:
 	}
 
 	bool checkAndErrorOnType(const ast::Value &value, std::ostream &err, ValueType expected) const {
-		ValueType vt = boost::apply_visitor(ValueTypeVisitor(), value.value);
+		ValueType vt = boost::apply_visitor(ValueTypeVisitor(), value);
 		if(vt != expected) {
 			err << "Error at " << value.line << ":" << value.column << ".";
 			err << " Expected " << expected << " value, got " << vt << " value.";
@@ -72,7 +72,7 @@ protected:
 			bool res = Base::checkAndErrorOnKey(kv, err)                                           \
 			           && Base::checkAndErrorOnType(kv.value, err, ValueType::Name);               \
 			if(!res) return res;                                                                   \
-			Base::attrHandler(parentAttr, boost::get<Type>(kv.value.value));                       \
+			Base::attrHandler(parentAttr, boost::get<Type>(kv.value));                             \
 			return true;                                                                           \
 		}                                                                                        \
 		                                                                                         \
@@ -238,7 +238,7 @@ struct List : Expression<AttrHandler> {
 		bool res = Base::checkAndErrorOnKey(kv, err)
 				&& Base::checkAndErrorOnType(kv.value, err, ValueType::List);
 		if(!res) return res;
-		const ast::List &value = boost::get<ast::List>(kv.value.value);
+		const ast::List &value = boost::get<x3::forward_ast<ast::List> >(kv.value);
 		std::array < std::size_t, sizeof...(Expr) > count;
 		count.fill(0);
 		ListAttrHandler<Type, AttrHandler, ParentAttr> ourAttr(this->attrHandler, parentAttr);

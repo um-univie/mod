@@ -1,6 +1,7 @@
 #ifndef MOD_LIB_RULES_PROP_MOLECULE_H
 #define	MOD_LIB_RULES_PROP_MOLECULE_H
 
+#include <mod/lib/Chem/MoleculeUtil.h>
 #include <mod/lib/Rules/GraphDecl.h>
 #include <mod/lib/Rules/Properties/Property.h>
 
@@ -15,7 +16,11 @@ class PropMoleculeCore : private PropCore<PropMoleculeCore, GraphType, AtomData,
 	// read-only of data
 	using Base = PropCore<PropMoleculeCore, GraphType, AtomData, BondType>;
 public:
+	using Base::LeftType;
+	using Base::RightType;
+public:
 	PropMoleculeCore(const GraphType &g, const PropStringCore &labelState);
+	using Base::invert;
 	using Base::getLeft;
 	using Base::getRight;
 private:
@@ -26,4 +31,4 @@ private:
 } // namespace lib
 } // namespace mod
 
-#endif	/* MOD_LIB_RULES_STATE_MOLECULE_H */
+#endif /* MOD_LIB_RULES_STATE_MOLECULE_H */

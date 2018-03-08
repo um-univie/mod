@@ -1,8 +1,9 @@
 #include "Real.h"
 
-#include <mod/Rule.h>
+#include <mod/rule/Rule.h>
 #include <mod/lib/Chem/MoleculeUtil.h>
 #include <mod/lib/Graph/Single.h>
+#include <mod/lib/Graph/Properties/Stereo.h>
 #include <mod/lib/Graph/Properties/String.h>
 #include <mod/lib/GraphMorphism/LabelledMorphism.h>
 #include <mod/lib/GraphMorphism/VF2Finder.hpp>
@@ -10,8 +11,13 @@
 #include <mod/lib/IO/IO.h>
 #include <mod/lib/IO/Rule.h>
 #include <mod/lib/Rules/Properties/Depiction.h>
-#include <mod/lib/Rules/Properties/String.h>
 #include <mod/lib/Rules/Properties/Molecule.h>
+#include <mod/lib/Rules/Properties/Stereo.h>
+#include <mod/lib/Rules/Properties/String.h>
+#include <mod/lib/Rules/Properties/Term.h>
+#include <mod/lib/Stereo/Inference.h>
+
+#include <jla_boost/graph/morphism/callbacks/Limit.hpp>
 
 #include <boost/lexical_cast.hpp>
 
@@ -71,15 +77,17 @@ namespace {
 std::size_t nextRuleNum = 0;
 } // namespace 
 
-Real::Real(LabelledRule &&rule) : id(nextRuleNum++), name("r_{" + boost::lexical_cast<std::string>(id) + "}"),
+Real::Real(LabelledRule &&rule, boost::optional<LabelType> labelType)
+: id(nextRuleNum++), name("r_{" + boost::lexical_cast<std::string>(id) + "}"), labelType(labelType),
 dpoRule(std::move(rule)) {
 	if(dpoRule.numLeftComponents == std::numeric_limits<std::size_t>::max()) dpoRule.initComponents();
-	assert(this->dpoRule.pString);
+	// only one of propString and propTerm should be defined
+	assert(this->dpoRule.pString || this->dpoRule.pTerm);
+	assert(!this->dpoRule.pString || !this->dpoRule.pTerm);
 	if(!sanityChecks(getGraph(), getStringState(), IO::log())) {
 		IO::log() << "Rule::sanityCheck\tfailed in rule '" << getName() << "'" << std::endl;
 		MOD_ABORT;
 	}
-	getStringState().verify(&get_graph(this->dpoRule));
 }
 
 Real::~Real() { }
@@ -88,14 +96,12 @@ std::size_t Real::getId() const {
 	return id;
 }
 
-std::shared_ptr<mod::Rule> Real::getAPIReference() const {
-	if(apiReference.use_count() > 0) return std::shared_ptr<mod::Rule > (apiReference);
-	else {
-		MOD_ABORT;
-	}
+std::shared_ptr<rule::Rule> Real::getAPIReference() const {
+	if(apiReference.use_count() > 0) return std::shared_ptr<rule::Rule > (apiReference);
+	else std::abort();
 }
 
-void Real::setAPIReference(std::shared_ptr<mod::Rule> r) {
+void Real::setAPIReference(std::shared_ptr<rule::Rule> r) {
 	assert(apiReference.use_count() == 0);
 	apiReference = r;
 #ifndef NDEBUG
@@ -111,6 +117,10 @@ void Real::setName(std::string name) {
 	this->name = name;
 }
 
+boost::optional<LabelType> Real::getLabelType() const {
+	return labelType;
+}
+
 const LabelledRule &Real::getDPORule() const {
 	return dpoRule;
 }
@@ -119,25 +129,13 @@ const lib::Rules::GraphType &Real::getGraph() const {
 	return get_graph(dpoRule);
 }
 
-const PropStringCore &Real::getStringState() const {
-	assert(dpoRule.pString);
-	return *dpoRule.pString;
-}
-
-const PropMoleculeCore &Real::getMoleculeState() const {
-	if(!moleculeState) {
-		moleculeState.reset(new PropMoleculeCore(getGraph(), getStringState()));
-	}
-	return *moleculeState;
-}
-
 DepictionDataCore &Real::getDepictionData() {
-	if(!depictionData) depictionData.reset(new DepictionDataCore(getGraph(), getStringState(), getMoleculeState()));
+	if(!depictionData) depictionData.reset(new DepictionDataCore(getDPORule()));
 	return *depictionData;
 }
 
 const DepictionDataCore &Real::getDepictionData() const {
-	if(!depictionData) depictionData.reset(new DepictionDataCore(getGraph(), getStringState(), getMoleculeState()));
+	if(!depictionData) depictionData.reset(new DepictionDataCore(getDPORule()));
 	return *depictionData;
 }
 
@@ -159,89 +157,47 @@ bool Real::isOnlyRightSide() const {
 	return isOnlySide(Membership::Right);
 }
 
+const PropStringCore &Real::getStringState() const {
+	assert(dpoRule.pString || dpoRule.pTerm);
+	if(!dpoRule.pString) {
+		dpoRule.pString.reset(new PropStringCore(get_graph(dpoRule),
+				dpoRule.leftMatchConstraints, dpoRule.rightMatchConstraints,
+				getTermState(), lib::Term::getStrings()));
+	}
+	return *dpoRule.pString;
+}
+
+const PropTermCore &Real::getTermState() const {
+	assert(dpoRule.pString || dpoRule.pTerm);
+	if(!dpoRule.pTerm) {
+		dpoRule.pTerm.reset(new PropTermCore(get_graph(dpoRule),
+				dpoRule.leftMatchConstraints, dpoRule.rightMatchConstraints,
+				getStringState(), lib::Term::getStrings()));
+	}
+	return *dpoRule.pTerm;
+}
+
+const PropMoleculeCore &Real::getMoleculeState() const {
+	return get_molecule(getDPORule());
+}
+
 namespace {
 
 template<typename Finder>
-std::size_t morphism(const Real &gDomain, const Real &gCodomain, std::size_t maxNumMatches, Finder finder) {
+std::size_t morphism(const Real &gDomain, const Real &gCodomain, std::size_t maxNumMatches, LabelSettings labelSettings, Finder finder) {
 	auto mr = jla_boost::GraphMorphism::makeLimit(maxNumMatches);
-	lib::GraphMorphism::morphismSelectByLabelSettings(gDomain.getDPORule(), gCodomain.getDPORule(), finder, std::ref(mr), MembershipPredWrapper());
+	lib::GraphMorphism::morphismSelectByLabelSettings(gDomain.getDPORule(), gCodomain.getDPORule(), labelSettings, finder, std::ref(mr), MembershipPredWrapper());
 	return mr.getNumHits();
 }
 
 } // namespace
 
-std::size_t Real::isomorphism(const Real &rDom, const Real &rCodom, std::size_t maxNumMatches) {
-	return morphism(rDom, rCodom, maxNumMatches, lib::GraphMorphism::VF2Isomorphism());
+std::size_t Real::isomorphism(const Real &rDom, const Real &rCodom, std::size_t maxNumMatches, LabelSettings labelSettings) {
+	return morphism(rDom, rCodom, maxNumMatches, labelSettings, lib::GraphMorphism::VF2Isomorphism());
 }
 
-std::size_t Real::monomorphism(const Real &rDom, const Real &rCodom, std::size_t maxNumMatches) {
-	return morphism(rDom, rCodom, maxNumMatches, lib::GraphMorphism::VF2Monomorphism());
-}
-
-std::shared_ptr<mod::Rule> Real::createSide(const lib::Graph::GraphType &g, const lib::Graph::PropString &pStringGraph, Membership membership, const std::string &name) {
-	assert(membership == Membership::Left || membership == Membership::Context || membership == Membership::Right);
-	lib::Rules::LabelledRule rule;
-	auto &core = get_graph(rule);
-	rule.pString = std::make_unique<PropStringCore>(core);
-	auto &pString = *rule.pString;
-	std::map<Vertex, lib::Graph::Vertex> gToR;
-
-	for(lib::Graph::Vertex v : asRange(vertices(g))) {
-		Vertex vCore = add_vertex(core);
-		gToR[v] = vCore;
-		core[vCore].membership = membership;
-		const auto &label = pStringGraph[v];
-		switch(membership) {
-		case Membership::Left:
-			pString.add(vCore, label, "");
-			break;
-		case Membership::Right:
-			pString.add(vCore, "", label);
-			break;
-		case Membership::Context:
-			pString.add(vCore, label, label);
-			break;
-		}
-	}
-
-	for(lib::Graph::Edge e : asRange(edges(g))) {
-		Edge eCore = add_edge(gToR[source(e, g)], gToR[target(e, g)], core).first;
-		core[eCore].membership = membership;
-		const auto &label = pStringGraph[e];
-		switch(membership) {
-		case Membership::Left:
-			pString.add(eCore, label, "");
-			break;
-		case Membership::Right:
-			pString.add(eCore, "", label);
-			break;
-		case Membership::Context:
-			pString.add(eCore, label, label);
-			break;
-		}
-	}
-	rule.initComponents();
-	std::string completeName;
-	switch(membership) {
-	case Membership::Left:
-		completeName += "unbind";
-		break;
-	case Membership::Context:
-		completeName += "id";
-		break;
-	case Membership::Right:
-		completeName += "bind";
-		break;
-	default:
-		MOD_ABORT;
-		break;
-	}
-	completeName += "<";
-	completeName += name;
-	completeName += ">";
-	auto ret = mod::Rule::makeRule(std::make_unique<Real>(std::move(rule)));
-	ret->setName(completeName);
-	return ret;
+std::size_t Real::monomorphism(const Real &rDom, const Real &rCodom, std::size_t maxNumMatches, LabelSettings labelSettings) {
+	return morphism(rDom, rCodom, maxNumMatches, labelSettings, lib::GraphMorphism::VF2Monomorphism());
 }
 
 } // namespace Rules

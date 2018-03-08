@@ -1,6 +1,9 @@
 #include "LabelledRule.h"
 
+#include <mod/Config.h>
 #include <mod/lib/GraphMorphism/Finder.hpp>
+#include <mod/lib/Stereo/CloneUtil.h>
+#include <mod/lib/Stereo/Inference.h>
 
 #include <boost/graph/connected_components.hpp>
 
@@ -19,8 +22,8 @@ LabelledRule::LabelledRule(const LabelledRule &other, bool withConstraints) : La
 	this->pString = std::make_unique<PropStringType>(g);
 	auto &pString = *this->pString;
 	auto &pStringOther = get_string(other);
-	for(Vertex vOther : asRange(vertices(gOther))) {
-		Vertex v = add_vertex(g);
+	for(const auto vOther : asRange(vertices(gOther))) {
+		const auto v = add_vertex(g);
 		g[v].membership = membership(other, vOther);
 		switch(g[v].membership) {
 		case Membership::Left:
@@ -30,12 +33,12 @@ LabelledRule::LabelledRule(const LabelledRule &other, bool withConstraints) : La
 			pString.add(v, "", pStringOther.getRight()[vOther]);
 			break;
 		case Membership::Context:
-			pString.add(v, pStringOther.getRight()[vOther], pStringOther.getLeft()[vOther]);
+			pString.add(v, pStringOther.getLeft()[vOther], pStringOther.getRight()[vOther]);
 			break;
 		}
 	}
-	for(Edge eOther : asRange(edges(gOther))) {
-		Edge e = add_edge(source(eOther, gOther), target(eOther, gOther), g).first;
+	for(const auto eOther : asRange(edges(gOther))) {
+		const auto e = add_edge(source(eOther, gOther), target(eOther, gOther), g).first;
 		g[e].membership = membership(other, eOther);
 		switch(g[e].membership) {
 		case Membership::Left:
@@ -49,13 +52,23 @@ LabelledRule::LabelledRule(const LabelledRule &other, bool withConstraints) : La
 			break;
 		}
 	}
+	if(other.pStereo) {
+		const auto &lgLeft = get_labelled_left(other);
+		const auto &lgRight = get_labelled_right(other);
+		const auto infLeft = Stereo::makeCloner(lgLeft, get_left(*this), jla_boost::Identity(), jla_boost::Identity());
+		const auto infRight = Stereo::makeCloner(lgRight, get_right(*this), jla_boost::Identity(), jla_boost::Identity());
+		const auto inContext = [&](const auto &ve) {
+			return get_stereo(other).inContext(ve);
+		};
+		this->pStereo.reset(new PropStereoCore(g, infLeft, infRight, inContext, inContext));
+	}
 	if(withConstraints) {
-		leftComponentMatchConstraints.reserve(other.leftComponentMatchConstraints.size());
-		rightComponentMatchConstraints.reserve(other.rightComponentMatchConstraints.size());
-		for(auto &&c : other.leftComponentMatchConstraints)
-			leftComponentMatchConstraints.push_back(c->clone());
-		for(auto &&c : other.rightComponentMatchConstraints)
-			rightComponentMatchConstraints.push_back(c->clone());
+		leftMatchConstraints.reserve(other.leftMatchConstraints.size());
+		rightMatchConstraints.reserve(other.rightMatchConstraints.size());
+		for(auto &&c : other.leftMatchConstraints)
+			leftMatchConstraints.push_back(c->clone());
+		for(auto &&c : other.rightMatchConstraints)
+			rightMatchConstraints.push_back(c->clone());
 	}
 }
 
@@ -68,71 +81,28 @@ void LabelledRule::initComponents() { // TODO: structure this better
 }
 
 void LabelledRule::invert() {
-	// clear cached stuff
-	this->projs.reset();
+	// invert the underlying graph
 	// and not the actual inversion
 	auto &g = *this->g;
-	auto &pString = *this->pString;
-	for(Vertex v : asRange(vertices(g))) {
-		auto membership = g[v].membership;
-		switch(membership) {
-		case Membership::Left:
-		{
-			auto label = pString.getLeft()[v];
-			g[v].membership = Membership::Right;
-			pString.setRight(v, label);
-		}
-			break;
-		case Membership::Right:
-		{
-			auto label = pString.getRight()[v];
-			g[v].membership = Membership::Left;
-			pString.setLeft(v, label);
-		}
-			break;
-		case Membership::Context:
-		{
-			auto left = pString.getLeft()[v];
-			auto right = pString.getRight()[v];
-			pString.setLeft(v, right);
-			pString.setRight(v, left);
-		}
-			break;
-		}
-	}
-
-	for(Edge e : asRange(edges(g))) {
-		auto membership = g[e].membership;
-		switch(membership) {
-		case Membership::Left:
-		{
-			auto label = pString.getLeft()[e];
-			g[e].membership = Membership::Right;
-			pString.setRight(e, label);
-		}
-			break;
-		case Membership::Right:
-		{
-			auto label = pString.getRight()[e];
-			g[e].membership = Membership::Left;
-			pString.setLeft(e, label);
-		}
-			break;
-		case Membership::Context:
-		{
-			auto left = pString.getLeft()[e];
-			auto right = pString.getRight()[e];
-			pString.setLeft(e, right);
-			pString.setRight(e, left);
-		}
-			break;
-		}
+	for(const auto v : asRange(vertices(g)))
+		g[v].membership = jla_boost::GraphDPO::invert(g[v].membership);
+	for(const auto e : asRange(edges(g)))
+		g[e].membership = jla_boost::GraphDPO::invert(g[e].membership);
+	// invert props
+	if(pString) pString->invert();
+	if(pTerm) pTerm->invert();
+	if(pMolecule) pMolecule->invert();
+	if(pStereo) {
+		// TODO: this requires change all the offsets are recalculated
+		throw FatalError("Missing implementation of rule inversion with stereo info.");
 	}
 	// also invert the component stuff
 	using std::swap;
 	swap(this->numLeftComponents, this->numRightComponents);
 	swap(this->leftComponents, this->rightComponents);
-	swap(this->leftComponentMatchConstraints, this->rightComponentMatchConstraints);
+	swap(this->leftMatchConstraints, this->rightMatchConstraints);
+	// clear cached stuff
+	this->projs.reset();
 }
 
 GraphType &get_graph(LabelledRule &r) {
@@ -144,8 +114,70 @@ const GraphType &get_graph(const LabelledRule &r) {
 }
 
 const LabelledRule::PropStringType &get_string(const LabelledRule &r) {
-	assert(r.pString);
+	assert(r.pString || r.pTerm);
 	return *r.pString;
+}
+
+const LabelledRule::PropTermType &get_term(const LabelledRule &r) {
+	assert(r.pString || r.pTerm);
+	if(!r.pTerm) {
+		r.pTerm.reset(new LabelledRule::PropTermType(
+				get_graph(r), r.leftMatchConstraints, r.rightMatchConstraints,
+				get_string(r), lib::Term::getStrings()
+				));
+	}
+	return *r.pTerm;
+}
+
+bool has_stereo(const LabelledRule &r) {
+	return bool(r.pStereo);
+}
+
+const LabelledRule::PropStereoType &get_stereo(const LabelledRule &r) {
+	if(!has_stereo(r)) {
+		auto gLeft = get_labelled_left(r);
+		auto gRight = get_labelled_right(r);
+		auto pMoleculeLeft = get_molecule(gLeft);
+		auto pMoleculeRight = get_molecule(gRight);
+		auto leftInference = lib::Stereo::makeInference(get_graph(gLeft), pMoleculeLeft, true);
+		auto rightInference = lib::Stereo::makeInference(get_graph(gRight), pMoleculeRight, true);
+		std::stringstream ssErr;
+		auto leftResult = leftInference.finalize(ssErr, [&r](LabelledRule::Vertex v) {
+			return std::to_string(get(boost::vertex_index_t(), get_graph(r), v)) + " left";
+		});
+		switch(leftResult) {
+		case Stereo::DeductionResult::Success: break;
+		case Stereo::DeductionResult::Warning:
+			if(!getConfig().stereo.silenceDeductionWarnings.get())
+				IO::log() << ssErr.str();
+			break;
+		case Stereo::DeductionResult::Error:
+			throw StereoDeductionError(ssErr.str());
+			break;
+		}
+		auto rightResult = rightInference.finalize(ssErr, [&r](LabelledRule::Vertex v) {
+			return std::to_string(get(boost::vertex_index_t(), get_graph(r), v)) + " right";
+		});
+		switch(rightResult) {
+		case Stereo::DeductionResult::Success: break;
+		case Stereo::DeductionResult::Warning:
+			if(!getConfig().stereo.silenceDeductionWarnings.get())
+				IO::log() << ssErr.str();
+			break;
+		case Stereo::DeductionResult::Error:
+			throw StereoDeductionError(ssErr.str());
+		}
+		r.pStereo.reset(new PropStereoCore(get_graph(r),
+				std::move(leftInference), std::move(rightInference), jla_boost::AlwaysTrue(), jla_boost::AlwaysTrue()));
+	}
+	return *r.pStereo;
+}
+
+const LabelledRule::PropMoleculeType &get_molecule(const LabelledRule &r) {
+	if(!r.pMolecule) {
+		r.pMolecule.reset(new LabelledRule::PropMoleculeType(get_graph(r), get_string(r)));
+	}
+	return *r.pMolecule;
 }
 
 const LabelledRule::LeftGraphType &get_left(const LabelledRule &r) {
@@ -192,6 +224,7 @@ LabelledRule::Projections::Projections(const LabelledRule &r)
 context(get_graph(r), Membership::Context),
 right(get_graph(r), Membership::Right) { }
 
+
 // LabelledSideGraph
 //------------------------------------------------------------------------------
 
@@ -216,13 +249,29 @@ LabelledLeftGraph::PropStringType get_string(const LabelledLeftGraph &g) {
 	return get_string(g.r).getLeft();
 }
 
+LabelledLeftGraph::PropTermType get_term(const LabelledLeftGraph &g) {
+	return get_term(g.r).getLeft();
+}
+
+bool has_stereo(const LabelledLeftGraph &g) {
+	return has_stereo(g.r);
+}
+
+LabelledLeftGraph::PropStereoType get_stereo(const LabelledLeftGraph &g) {
+	return get_stereo(g.r).getLeft();
+}
+
 const std::vector<std::unique_ptr<LabelledRule::LeftMatchConstraint> > &
 get_match_constraints(const LabelledLeftGraph &g) {
-	return g.r.leftComponentMatchConstraints;
+	return g.r.leftMatchConstraints;
 }
 
 std::size_t get_num_connected_components(const LabelledLeftGraph &g) {
 	return g.r.numLeftComponents;
+}
+
+LabelledLeftGraph::PropMoleculeType get_molecule(const LabelledLeftGraph &g) {
+	return get_molecule(g.r).getLeft();
 }
 
 LabelledLeftGraph::Base::ComponentGraph
@@ -257,9 +306,21 @@ LabelledRightGraph::PropStringType get_string(const LabelledRightGraph &g) {
 	return get_string(g.r).getRight();
 }
 
+LabelledRightGraph::PropTermType get_term(const LabelledRightGraph &g) {
+	return get_term(g.r).getRight();
+}
+
+bool has_stereo(const LabelledRightGraph &g) {
+	return has_stereo(g.r);
+}
+
+LabelledRightGraph::PropStereoType get_stereo(const LabelledRightGraph &g) {
+	return get_stereo(g.r).getRight();
+}
+
 const std::vector<std::unique_ptr<LabelledRule::RightMatchConstraint> > &
 get_match_constraints(const LabelledRightGraph &g) {
-	return g.r.rightComponentMatchConstraints;
+	return g.r.rightMatchConstraints;
 }
 
 std::size_t get_num_connected_components(const LabelledRightGraph &g) {
@@ -271,6 +332,10 @@ get_component_graph(std::size_t i, const LabelledRightGraph &g) {
 	assert(i < get_num_connected_components(g));
 	LabelledRightGraph::Base::ComponentFilter filter(&get_graph(g), &g.r.rightComponents, i);
 	return LabelledRightGraph::Base::ComponentGraph(get_graph(g), filter, filter);
+}
+
+LabelledRightGraph::PropMoleculeType get_molecule(const LabelledRightGraph &g) {
+	return get_molecule(g.r).getRight();
 }
 
 const std::vector<boost::graph_traits<GraphType>::vertex_descriptor>&

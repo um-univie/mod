@@ -19,6 +19,8 @@ Strategy *Take::clone() const {
 	return new Take(limit, doUniverse);
 }
 
+void Take::preAddGraphs(std::function<void(std::shared_ptr<graph::Graph>) > add) const { }
+
 void Take::printInfo(std::ostream &s) const {
 	s << indent << "Take";
 	if(doUniverse) s << " of universe";

@@ -10,6 +10,14 @@ enum class Membership {
 	Left, Right, Context
 };
 
+inline Membership invert(Membership m) {
+	switch(m) {
+	case Membership::Left: return Membership::Right;
+	case Membership::Right: return Membership::Left;
+	default: return Membership::Context;
+	}
+}
+
 template<typename R>
 struct PushoutRuleTraits;
 

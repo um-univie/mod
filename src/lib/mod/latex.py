@@ -6,6 +6,7 @@ _texFile = None
 _figFolder = None
 _graphs = []
 _rules = []
+_ls = mod.LabelSettings(mod.LabelType.String, mod.LabelRelation.Isomorphism, mod.LabelRelation.Isomorphism)
 
 def setTexFile(fName):
 	global _texFile
@@ -26,13 +27,14 @@ def _checkSettings():
 		print("Error: no figure folder set, or empty name")
 		sys.exit(1)
 
-def outputFile(f):
+def outputFile(f, inline=False):
 	_checkSettings()
+	assert f.endswith(".pdf")
+	f = f[:-4]
+	f += ".tex" if inline else ".pdf"
 	mod.post("post \"cp '%s' '%s/'\"" % (f, _figFolder))
 	res = _figFolder + "/" +  os.path.basename(f)
-	if res.endswith(".pdf"):
-		res = res[0:-4]
-	return res
+	return res[:-4]
 
 def texDefine(id, value):
 	_checkSettings()
@@ -44,27 +46,27 @@ def texDefine(id, value):
 # Grpahs
 #------------------------------------------------------------------------------
 
-def graph(id, g, p):
+def graph(id, g, p, inline):
 	_checkSettings()
 	for a in _graphs:
-		if a.isomorphism(g, 1) == 1:
+		if a.isomorphism(g, 1, labelSettings=_ls) == 1:
 			g = a
 			break
 	else:
 		_graphs.append(g)
 	f = g.print(p, p)	
 	f = f[0]
-	f = outputFile(f)
+	f = outputFile(f, inline)
 	texDefine("graph-" + str(id), f)
 
-def graphGML(id, data, printer):
-	graph(id, mod.graphGML(data), printer)
+def graphGML(id, data, printer, inline=False):
+	graph(id, mod.graphGML(data), printer, inline)
 
-def smiles(id, data, printer):
-	graph(id, mod.smiles(data.replace('##', '#')), printer)
+def smiles(id, data, printer, inline=False):
+	graph(id, mod.smiles(data.replace('##', '#')), printer, inline)
 
-def graphDFS(id, data, printer):
-	graph(id, mod.graphDFS(data.replace('##', '#')), printer)
+def graphDFS(id, data, printer, inline=False):
+	graph(id, mod.graphDFS(data.replace('##', '#')), printer, inline)
 
 #------------------------------------------------------------------------------
 # Rules
@@ -73,7 +75,7 @@ def graphDFS(id, data, printer):
 def rule(id, r, p):
 	_checkSettings()
 	for a in _rules:
-		if a.isomorphism(r, 1) == 1:
+		if a.isomorphism(r, 1, labelSettings=_ls) == 1:
 			r = a
 			break
 	else:

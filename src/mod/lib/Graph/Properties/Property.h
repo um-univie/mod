@@ -3,6 +3,7 @@
 
 #include <mod/Error.h>
 #include <mod/lib/Graph/GraphDecl.h>
+#include <mod/lib/LabelledGraph.h>
 #include <mod/lib/IO/IO.h>
 
 #include <vector>
@@ -36,14 +37,7 @@ protected:
 	std::vector<VertexType> vertexState;
 	std::vector<EdgeType> edgeState;
 public:
-
-	struct Handler {
-
-		template<typename F, typename ...Args>
-		bool operator()(F &&f, const VertexType &l, const VertexType &r, Args&&... args) const {
-			return std::forward<F>(f) (l, r, std::forward<Args>(args)...);
-		}
-	};
+	using Handler = IdentityPropertyHandler;
 };
 
 template<typename Derived, typename VertexType, typename EdgeType, typename VertexOrEdge>
@@ -96,13 +90,11 @@ void Prop<Derived, VertexType, EdgeType>::addEdge(Edge e, const EdgeType &value)
 
 template<typename Derived, typename VertexType, typename EdgeType>
 const VertexType &Prop<Derived, VertexType, EdgeType>::operator[](Vertex v) const {
-	verify(&g);
 	return vertexState[get(boost::vertex_index_t(), g, v)];
 }
 
 template<typename Derived, typename VertexType, typename EdgeType>
 const EdgeType &Prop<Derived, VertexType, EdgeType>::operator[](Edge e) const {
-	verify(&g);
 	assert(get(boost::edge_index_t(), g, e) < edgeState.size());
 	return edgeState[get(boost::edge_index_t(), g, e)];
 }

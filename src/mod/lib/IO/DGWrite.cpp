@@ -2,11 +2,12 @@
 
 #include <mod/Config.h>
 #include <mod/Function.h>
-#include <mod/Graph.h>
-#include <mod/Rule.h>
+#include <mod/graph/Graph.h>
+#include <mod/rule/Rule.h>
 #include <mod/lib/Algorithm.h>
 #include <mod/lib/DG/Dump.h>
 #include <mod/lib/DG/Hyper.h>
+#include <mod/lib/Graph/MultisetIO.h>
 #include <mod/lib/Graph/Single.h>
 #include <mod/lib/GraphMorphism/VF2Finder.hpp>
 #include <mod/lib/IO/DGWriteDetail.h>
@@ -41,27 +42,24 @@ std::string dotNonHyper(const lib::DG::NonHyper &nonHyper) {
 		const lib::DG::NonHyperGraphType &g = nonHyper.getGraph();
 		s << "digraph g {" << std::endl;
 
-		for(Vertex v : asRange(vertices(g))) {
-			unsigned int id = get(boost::vertex_index_t(), g, v);
-			const lib::Graph::Base *graph = g[v].graph;
-			s << id << " [ label=\"";
-			graph->printName(s);
-			s << "\" ];" << std::endl;
+		for(const auto v : asRange(vertices(g))) {
+			const auto id = get(boost::vertex_index_t(), g, v);
+			s << id << " [ label=\"" << g[v].graphs << "\" ];\n";
 		}
 
-		for(Edge e : asRange(edges(g))) {
-			unsigned int fromId = get(boost::vertex_index_t(), g, source(e, g));
-			unsigned int toId = get(boost::vertex_index_t(), g, target(e, g));
-			s << fromId << " -> " << toId << " [ label=\"";
+		for(const auto e : asRange(edges(g))) {
+			const auto srcId = get(boost::vertex_index_t(), g, source(e, g));
+			const auto tarId = get(boost::vertex_index_t(), g, target(e, g));
+			s << srcId << " -> " << tarId << " [ label=\"";
 			bool first = true;
 			for(auto *r : g[e].rules) {
 				if(!first) s << ", ";
 				first = false;
 				s << "r_" << r->getId();
 			}
-			s << "\" ];" << std::endl;
+			s << "\" ];\n";
 		}
-		s << "}" << std::endl;
+		s << "}\n";
 	}
 	std::string fileNoExt = s;
 	fileNoExt.erase(fileNoExt.end() - 4, fileNoExt.end());
@@ -83,16 +81,16 @@ std::string pdfNonHyper(const lib::DG::NonHyper &nonHyper) {
 //------------------------------------------------------------------------------
 
 void TikzPrinter::begin() {
-	s << "\\begin{tikzpicture}[" << getConfig().dg.tikzPictureOption.get() << "]\n";
-	s << "\\input{\\modInputPrefix/" << coords << "}" << std::endl;
+	s << "\\begin{tikzpicture}[remember picture, " << getConfig().dg.tikzPictureOption.get() << "]\n";
+	s << "\\input{\\modInputPrefix/" << coords << "}\n";
 }
 
 void TikzPrinter::end() {
-	s << "\\end{tikzpicture}" << std::endl;
+	s << "\\end{tikzpicture}\n";
 }
 
 void TikzPrinter::comment(const std::string &str) {
-	s << "% " << str << std::endl;
+	s << "% " << str << "\n";
 }
 
 void TikzPrinter::vertex(const std::string &id, const std::string &label, const std::string &image, const std::string &colour) {
@@ -101,7 +99,13 @@ void TikzPrinter::vertex(const std::string &id, const std::string &label, const 
 	s << "\\node[modStyleDGHyperVertex, at=(v-coord-" << id << ")";
 	if(!colour.empty()) s << ", draw=" << colour;
 	s << "] (v-" << id << ") {";
-	if(haveImage) s << "\\includegraphics[scale=\\modDGHyperImageScale] {\\modInputPrefix/" << image << "}";
+	if(haveImage) {
+		if(options.withInlineGraphs) {
+			s << "{\\input{\\modInputPrefix/" << image << "}}";
+		} else {
+			s << "\\includegraphics[scale=\\modDGHyperImageScale] {\\modInputPrefix/" << image << "}";
+		}
+	}
 	if(haveImage && haveLabel) s << "\\\\";
 	if(haveLabel) {
 		s << "{";
@@ -183,9 +187,14 @@ void TikzPrinter::transitEdge(const std::string &idTail, const std::string &idHe
 	s << "} (v-" << idHead << ");" << std::endl;
 }
 
-std::function<std::string(const lib::Graph::Single&) > TikzPrinter::getImageCreator() {
-	return [this](const lib::Graph::Single & g) -> std::string {
-		return IO::Graph::Write::pdf(g, graphOptions);
+std::function<std::string(const lib::DG::Hyper&, lib::DG::HyperVertex, const std::string&) > TikzPrinter::getImageCreator() {
+	return [this](const lib::DG::Hyper &dg, lib::DG::HyperVertex v, const std::string & id) -> std::string {
+		const auto &g = *dg.getGraph()[v].graph;
+		if(this->options.withInlineGraphs) {
+			return IO::Graph::Write::tikz(g, graphOptions, true, "v-" + id + "-");
+		} else {
+			return IO::Graph::Write::pdf(g, graphOptions);
+		}
 	};
 }
 
@@ -229,9 +238,9 @@ bool Options::isShortcutEdge(DupVertex e, const lib::DG::Hyper &dg, unsigned int
 }
 
 std::string Options::vDupToId(DupVertex vDup, const lib::DG::Hyper &dg) const {
-	unsigned int dupNum = dupGraph[vDup].dupNum;
-	Vertex v = dupGraph[vDup].v;
-	unsigned int vId = get(boost::vertex_index_t(), dg.getGraph(), v);
+	const auto dupNum = dupGraph[vDup].dupNum;
+	const auto v = dupGraph[vDup].v;
+	const auto vId = get(boost::vertex_index_t(), dg.getGraph(), v);
 	return toStr(vId) + '-' + toStr(dupNum);
 }
 
@@ -329,6 +338,11 @@ void Data::reconnectHead(Vertex v, unsigned int eDup, Vertex head, unsigned int 
 	reconnectCommon(getDG(), connections, v, eDup, head, vDupTar, vDupSrc, false);
 }
 
+void Data::removeVertexIfDegreeZero(Vertex v) {
+	assert(getDG().getGraph()[v].kind == lib::DG::Hyper::VertexKind::Vertex);
+	removedIfDegreeZero.insert(v);
+}
+
 void Data::compile(Options &options) const {
 	using DupVertex = Options::DupVertex;
 	const auto &dg = this->dg.getGraph();
@@ -357,11 +371,18 @@ void Data::compile(Options &options) const {
 	for(Vertex v : asRange(vertices(dg))) {
 		if(dg[v].kind != lib::DG::HyperVertexKind::Vertex) continue;
 		unsigned int vId = idx[v];
-		for(auto &pDup : duplicates[vId]) {
+		const auto &dups = duplicates[vId];
+		if(dups.empty() && removedIfDegreeZero.find(v) == removedIfDegreeZero.end()) { // happens when a vertex has degree 0
 			DupVertex vDup = add_vertex(dupGraph);
-			pDup.second = vDup;
 			dupGraph[vDup].v = v;
-			dupGraph[vDup].dupNum = pDup.first;
+			dupGraph[vDup].dupNum = 0;
+		} else {
+			for(auto &pDup : duplicates[vId]) {
+				DupVertex vDup = add_vertex(dupGraph);
+				pDup.second = vDup;
+				dupGraph[vDup].v = v;
+				dupGraph[vDup].dupNum = pDup.first;
+			}
 		}
 	}
 	// create edges
@@ -402,7 +423,8 @@ void Data::compile(Options &options) const {
 // Printer
 //------------------------------------------------------------------------------
 
-Printer::Printer() : vertexLabelSep(", "), edgeLabelSep(", "), withGraphName(true), withRuleName(false), withRuleId(true) { }
+Printer::Printer() : vertexLabelSep(", "), edgeLabelSep(", "),
+withGraphName(true), withRuleName(false), withRuleId(true) { }
 
 std::string Printer::printHyper(const Data &data, const IO::Graph::Write::Options &graphOptions) {
 	Options options = prePrint(data);
@@ -643,17 +665,17 @@ void Printer::setup(Options &options) {
 void generic(const lib::DG::Hyper &dg, const Options &options, SyntaxPrinter &print) {
 	using DupVertex = Options::DupVertex;
 	using DupEdge = Options::DupEdge;
-	auto imageCreator = print.getImageCreator();
+	const auto imageCreator = print.getImageCreator();
 	print.begin();
 
 	// vertices
 	detail::forEachVertex(dg, options, print, true, [&dg, &options, &print, imageCreator](DupVertex vDup) {
 		Vertex v = options.dupGraph[vDup].v;
+		std::string id = options.vDupToId(vDup, dg);
 		std::string label = options.getVertexLabel(dg, vDup);
 		std::string image;
-		if(options.withGraphImages) image = imageCreator(*dg.getGraph()[v].graph);
+		if(options.withGraphImages) image = imageCreator(dg, v, id);
 				std::string colour = options.getVertexColour(v, dg);
-				std::string id = options.vDupToId(vDup, dg);
 				print.vertex(id, label, image, colour);
 		});
 
@@ -757,8 +779,9 @@ std::string dot(const lib::DG::Hyper &dg, const Options &options, const IO::Grap
 			s << " ];" << std::endl;
 		}
 
-		std::function<std::string(const lib::Graph::Single&) > getImageCreator() {
-			return [this](const lib::Graph::Single & g) -> std::string {
+		std::function<std::string(const lib::DG::Hyper&, lib::DG::HyperVertex, const std::string&) > getImageCreator() {
+			return [this](const lib::DG::Hyper &dg, lib::DG::HyperVertex v, const std::string & id) -> std::string {
+				const auto &g = *dg.getGraph()[v].graph;
 				return IO::Graph::Write::svg(g, graphOptions);
 			};
 		}
@@ -806,12 +829,15 @@ std::string pdf(const lib::DG::Hyper &dg, const Options &options, const IO::Grap
 	auto tikzFiles = tikz(dg, options, graphOptions);
 	std::string fileNoExt = tikzFiles.first.substr(0, tikzFiles.first.length() - 4);
 	std::string fileCoordsNoExt = tikzFiles.second.substr(0, tikzFiles.second.length() - 4);
-	IO::post() << "compileTikz \"" << fileNoExt << "\" \"" << fileCoordsNoExt << "\"" << std::endl;
+	IO::post() << "compileTikz \"" << fileNoExt << "\" \"" << fileCoordsNoExt << "\"";
+	if(options.withInlineGraphs) IO::post() << " 3";
+	IO::post() << std::endl;
 	return fileNoExt + ".pdf";
 }
 
-void summary(const Data &data, Printer &printer, const IO::Graph::Write::Options &graphOptions) {
-	std::string fileNoExt = printer.printHyper(data, graphOptions);
+std::string summary(const Data &data, Printer &printer, const IO::Graph::Write::Options &graphOptions) {
+	const std::string file = printer.printHyper(data, graphOptions);
+	std::string fileNoExt = file;
 	const auto &dg = data.getDG();
 	fileNoExt.erase(end(fileNoExt) - 4, end(fileNoExt));
 	IO::post() << "summaryDGHyper \"dg_" << dg.getNonHyper().getId() << "\" \"" << fileNoExt << "\"\n";
@@ -819,6 +845,7 @@ void summary(const Data &data, Printer &printer, const IO::Graph::Write::Options
 		std::string fileNoExtNonHyper = pdfNonHyper(dg.getNonHyper());
 		IO::post() << "summaryDGNonHyper \"dg_" << dg.getNonHyper().getId() << "\" \"" << fileNoExtNonHyper << "\"\n";
 	}
+	return file;
 }
 
 } // namespace Write

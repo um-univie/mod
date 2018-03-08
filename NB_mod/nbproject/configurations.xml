@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<configurationDescriptor version="97">
+<configurationDescriptor version="100">
   <logicalFolder name="root" displayName="root" projectFiles="true" kind="ROOT">
     <logicalFolder name="gml" displayName="gml" projectFiles="true">
       <itemPath>../src/gml/ast.hpp</itemPath>
@@ -20,64 +20,99 @@
           <itemPath>../src/jla_boost/graph/dpo/Rule.hpp</itemPath>
         </logicalFolder>
         <logicalFolder name="morphism" displayName="morphism" projectFiles="true">
-          <itemPath>../src/jla_boost/graph/morphism/Callbacks.hpp</itemPath>
-          <itemPath>../src/jla_boost/graph/morphism/CommonSubgraph.hpp</itemPath>
-          <itemPath>../src/jla_boost/graph/morphism/InjectiveEnumeration.hpp</itemPath>
-          <itemPath>../src/jla_boost/graph/morphism/InvertibleVertexMapAdaptor.hpp</itemPath>
-          <itemPath>../src/jla_boost/graph/morphism/MatchAsVertexMap.hpp</itemPath>
+          <logicalFolder name="callbacks" displayName="callbacks" projectFiles="true">
+            <itemPath>../src/jla_boost/graph/morphism/callbacks/Filter.hpp</itemPath>
+            <itemPath>../src/jla_boost/graph/morphism/callbacks/Limit.hpp</itemPath>
+            <itemPath>../src/jla_boost/graph/morphism/callbacks/Print.hpp</itemPath>
+            <itemPath>../src/jla_boost/graph/morphism/callbacks/SliceProps.hpp</itemPath>
+            <itemPath>../src/jla_boost/graph/morphism/callbacks/Store.hpp</itemPath>
+            <itemPath>../src/jla_boost/graph/morphism/callbacks/Transform.hpp</itemPath>
+            <itemPath>../src/jla_boost/graph/morphism/callbacks/Unwrapper.hpp</itemPath>
+          </logicalFolder>
+          <logicalFolder name="finders" displayName="finders" projectFiles="true">
+            <itemPath>../src/jla_boost/graph/morphism/finders/CommonSubgraph.hpp</itemPath>
+            <itemPath>../src/jla_boost/graph/morphism/finders/InjectiveEnumeration.hpp</itemPath>
+            <itemPath>../src/jla_boost/graph/morphism/finders/vf2.hpp</itemPath>
+          </logicalFolder>
+          <logicalFolder name="models" displayName="models" projectFiles="true">
+            <itemPath>../src/jla_boost/graph/morphism/models/Inverted.hpp</itemPath>
+            <itemPath>../src/jla_boost/graph/morphism/models/InvertibleAdaptor.hpp</itemPath>
+            <itemPath>../src/jla_boost/graph/morphism/models/PropertyMap.hpp</itemPath>
+            <itemPath>../src/jla_boost/graph/morphism/models/PropertyVertexMap.hpp</itemPath>
+            <itemPath>../src/jla_boost/graph/morphism/models/Reinterpreted.hpp</itemPath>
+            <itemPath>../src/jla_boost/graph/morphism/models/Vector.hpp</itemPath>
+          </logicalFolder>
+          <itemPath>../src/jla_boost/graph/morphism/AsPropertyMap.hpp</itemPath>
           <itemPath>../src/jla_boost/graph/morphism/Predicates.hpp</itemPath>
-          <itemPath>../src/jla_boost/graph/morphism/PreimageSizedVertexMap.hpp</itemPath>
-          <itemPath>../src/jla_boost/graph/morphism/PrintCallback.hpp</itemPath>
-          <itemPath>../src/jla_boost/graph/morphism/UnwrapperCallback.hpp</itemPath>
-          <itemPath>../src/jla_boost/graph/morphism/VectorVertexMap.hpp</itemPath>
+          <itemPath>../src/jla_boost/graph/morphism/PropertyTags.hpp</itemPath>
+          <itemPath>../src/jla_boost/graph/morphism/Traits.hpp</itemPath>
           <itemPath>../src/jla_boost/graph/morphism/VertexMap.hpp</itemPath>
           <itemPath>../src/jla_boost/graph/morphism/VertexOrderByMult.hpp</itemPath>
-          <itemPath>../src/jla_boost/graph/morphism/vf2.hpp</itemPath>
         </logicalFolder>
         <itemPath>../src/jla_boost/graph/AdaptorTraits.hpp</itemPath>
         <itemPath>../src/jla_boost/graph/Concepts.hpp</itemPath>
         <itemPath>../src/jla_boost/graph/EdgeIndexedAdjacencyList.hpp</itemPath>
         <itemPath>../src/jla_boost/graph/FilteredWrapper.hpp</itemPath>
         <itemPath>../src/jla_boost/graph/PairToRangeAdaptor.hpp</itemPath>
+        <itemPath>../src/jla_boost/graph/UnionGraph.hpp</itemPath>
+      </logicalFolder>
+      <logicalFolder name="f1" displayName="test" projectFiles="true">
+        <itemPath>../src/jla_boost/test/vf2.cpp</itemPath>
+        <itemPath>../src/jla_boost/test/vf2.hpp</itemPath>
       </logicalFolder>
       <itemPath>../src/jla_boost/Functional.hpp</itemPath>
       <itemPath>../src/jla_boost/TaggedList.hpp</itemPath>
     </logicalFolder>
     <logicalFolder name="mod" displayName="mod" projectFiles="true">
       <logicalFolder name="f1" displayName="interface" projectFiles="true">
+        <logicalFolder name="dg" displayName="dg" projectFiles="true">
+          <itemPath>../src/mod/dg/DG.cpp</itemPath>
+          <itemPath>../src/mod/dg/DG.h</itemPath>
+          <itemPath>../src/mod/dg/ForwardDecl.h</itemPath>
+          <itemPath>../src/mod/dg/GraphInterface.cpp</itemPath>
+          <itemPath>../src/mod/dg/GraphInterface.h</itemPath>
+          <itemPath>../src/mod/dg/Printer.cpp</itemPath>
+          <itemPath>../src/mod/dg/Printer.h</itemPath>
+          <itemPath>../src/mod/dg/Strategies.cpp</itemPath>
+          <itemPath>../src/mod/dg/Strategies.h</itemPath>
+        </logicalFolder>
+        <logicalFolder name="graph" displayName="graph" projectFiles="true">
+          <itemPath>../src/mod/graph/Automorphism.cpp</itemPath>
+          <itemPath>../src/mod/graph/Automorphism.h</itemPath>
+          <itemPath>../src/mod/graph/ForwardDecl.h</itemPath>
+          <itemPath>../src/mod/graph/Graph.cpp</itemPath>
+          <itemPath>../src/mod/graph/Graph.h</itemPath>
+          <itemPath>../src/mod/graph/GraphInterface.cpp</itemPath>
+          <itemPath>../src/mod/graph/GraphInterface.h</itemPath>
+          <itemPath>../src/mod/graph/Printer.cpp</itemPath>
+          <itemPath>../src/mod/graph/Printer.h</itemPath>
+        </logicalFolder>
+        <logicalFolder name="rule" displayName="rule" projectFiles="true">
+          <itemPath>../src/mod/rule/Composer.cpp</itemPath>
+          <itemPath>../src/mod/rule/Composer.h</itemPath>
+          <itemPath>../src/mod/rule/CompositionExpr.cpp</itemPath>
+          <itemPath>../src/mod/rule/CompositionExpr.h</itemPath>
+          <itemPath>../src/mod/rule/ForwardDecl.h</itemPath>
+          <itemPath>../src/mod/rule/GraphInterface.cpp</itemPath>
+          <itemPath>../src/mod/rule/GraphInterface.h</itemPath>
+          <itemPath>../src/mod/rule/Rule.cpp</itemPath>
+          <itemPath>../src/mod/rule/Rule.h</itemPath>
+        </logicalFolder>
         <itemPath>srcExtra/mod/BuildConfig.h</itemPath>
         <itemPath>../src/mod/Chem.cpp</itemPath>
         <itemPath>../src/mod/Chem.h</itemPath>
         <itemPath>../src/mod/Config.cpp</itemPath>
         <itemPath>../src/mod/Config.h</itemPath>
-        <itemPath>../src/mod/DG.cpp</itemPath>
-        <itemPath>../src/mod/DG.h</itemPath>
-        <itemPath>../src/mod/DGGraphInterface.cpp</itemPath>
-        <itemPath>../src/mod/DGGraphInterface.h</itemPath>
-        <itemPath>../src/mod/DGPrinter.cpp</itemPath>
-        <itemPath>../src/mod/DGPrinter.h</itemPath>
-        <itemPath>../src/mod/DGStrat.cpp</itemPath>
-        <itemPath>../src/mod/DGStrat.h</itemPath>
         <itemPath>../src/mod/Derivation.cpp</itemPath>
         <itemPath>../src/mod/Derivation.h</itemPath>
         <itemPath>../src/mod/Error.cpp</itemPath>
         <itemPath>../src/mod/Error.h</itemPath>
         <itemPath>../src/mod/Function.cpp</itemPath>
         <itemPath>../src/mod/Function.h</itemPath>
-        <itemPath>../src/mod/Graph.cpp</itemPath>
-        <itemPath>../src/mod/Graph.h</itemPath>
-        <itemPath>../src/mod/GraphGraphInterface.cpp</itemPath>
-        <itemPath>../src/mod/GraphGraphInterface.h</itemPath>
-        <itemPath>../src/mod/GraphPrinter.cpp</itemPath>
-        <itemPath>../src/mod/GraphPrinter.h</itemPath>
         <itemPath>../src/mod/Misc.cpp</itemPath>
         <itemPath>../src/mod/Misc.h</itemPath>
-        <itemPath>../src/mod/RC.cpp</itemPath>
-        <itemPath>../src/mod/RC.h</itemPath>
-        <itemPath>../src/mod/Rule.cpp</itemPath>
-        <itemPath>../src/mod/Rule.h</itemPath>
-        <itemPath>../src/mod/RuleGraphInterface.cpp</itemPath>
-        <itemPath>../src/mod/RuleGraphInterface.h</itemPath>
+        <itemPath>../src/mod/Term.cpp</itemPath>
+        <itemPath>../src/mod/Term.h</itemPath>
       </logicalFolder>
       <logicalFolder name="lib" displayName="lib" projectFiles="true">
         <logicalFolder name="Chem" displayName="Chem" projectFiles="true">
@@ -138,24 +173,37 @@
             <itemPath>../src/mod/lib/Graph/Properties/Molecule.cpp</itemPath>
             <itemPath>../src/mod/lib/Graph/Properties/Molecule.h</itemPath>
             <itemPath>../src/mod/lib/Graph/Properties/Property.h</itemPath>
+            <itemPath>../src/mod/lib/Graph/Properties/Stereo.h</itemPath>
             <itemPath>../src/mod/lib/Graph/Properties/String.h</itemPath>
+            <itemPath>../src/mod/lib/Graph/Properties/Term.cpp</itemPath>
+            <itemPath>../src/mod/lib/Graph/Properties/Term.h</itemPath>
           </logicalFolder>
-          <itemPath>../src/mod/lib/Graph/Base.h</itemPath>
+          <itemPath>../src/mod/lib/Graph/Canonicalisation.cpp</itemPath>
+          <itemPath>../src/mod/lib/Graph/Canonicalisation.h</itemPath>
           <itemPath>../src/mod/lib/Graph/DFSEncoding.cpp</itemPath>
           <itemPath>../src/mod/lib/Graph/DFSEncoding.h</itemPath>
           <itemPath>../src/mod/lib/Graph/GraphDecl.h</itemPath>
           <itemPath>../src/mod/lib/Graph/LabelledGraph.cpp</itemPath>
           <itemPath>../src/mod/lib/Graph/LabelledGraph.h</itemPath>
-          <itemPath>../src/mod/lib/Graph/Merge.cpp</itemPath>
-          <itemPath>../src/mod/lib/Graph/Merge.h</itemPath>
+          <itemPath>../src/mod/lib/Graph/Multiset.h</itemPath>
+          <itemPath>../src/mod/lib/Graph/MultisetIO.h</itemPath>
           <itemPath>../src/mod/lib/Graph/Single.cpp</itemPath>
           <itemPath>../src/mod/lib/Graph/Single.h</itemPath>
         </logicalFolder>
         <logicalFolder name="f1" displayName="GraphMorphism" projectFiles="true">
+          <logicalFolder name="Constraints" displayName="Constraints" projectFiles="true">
+            <itemPath>../src/mod/lib/GraphMorphism/Constraints/AllVisitor.h</itemPath>
+            <itemPath>../src/mod/lib/GraphMorphism/Constraints/CheckVisitor.h</itemPath>
+            <itemPath>../src/mod/lib/GraphMorphism/Constraints/Constraint.h</itemPath>
+            <itemPath>../src/mod/lib/GraphMorphism/Constraints/ShortestPath.h</itemPath>
+            <itemPath>../src/mod/lib/GraphMorphism/Constraints/VertexAdjacency.h</itemPath>
+            <itemPath>../src/mod/lib/GraphMorphism/Constraints/Visitor.h</itemPath>
+          </logicalFolder>
           <itemPath>../src/mod/lib/GraphMorphism/Finder.hpp</itemPath>
           <itemPath>../src/mod/lib/GraphMorphism/LabelledMorphism.h</itemPath>
-          <itemPath>../src/mod/lib/GraphMorphism/MatchConstraint.h</itemPath>
           <itemPath>../src/mod/lib/GraphMorphism/McGregorCommonFinder.hpp</itemPath>
+          <itemPath>../src/mod/lib/GraphMorphism/StereoVertexMap.h</itemPath>
+          <itemPath>../src/mod/lib/GraphMorphism/TermVertexMap.h</itemPath>
           <itemPath>../src/mod/lib/GraphMorphism/VF2Finder.hpp</itemPath>
         </logicalFolder>
         <logicalFolder name="IO" displayName="IO" projectFiles="true">
@@ -175,14 +223,18 @@
           <itemPath>../src/mod/lib/IO/GraphWriteDetail.h</itemPath>
           <itemPath>../src/mod/lib/IO/IO.cpp</itemPath>
           <itemPath>../src/mod/lib/IO/IO.h</itemPath>
-          <itemPath>../src/mod/lib/IO/MatchConstraint.h</itemPath>
-          <itemPath>../src/mod/lib/IO/ParserCommon.cpp</itemPath>
-          <itemPath>../src/mod/lib/IO/ParserCommon.h</itemPath>
+          <itemPath>../src/mod/lib/IO/MorphismConstraints.h</itemPath>
+          <itemPath>../src/mod/lib/IO/ParsingUtil.h</itemPath>
           <itemPath>../src/mod/lib/IO/RC.cpp</itemPath>
           <itemPath>../src/mod/lib/IO/RC.h</itemPath>
           <itemPath>../src/mod/lib/IO/Rule.h</itemPath>
           <itemPath>../src/mod/lib/IO/RuleRead.cpp</itemPath>
           <itemPath>../src/mod/lib/IO/RuleWrite.cpp</itemPath>
+          <itemPath>../src/mod/lib/IO/Stereo.h</itemPath>
+          <itemPath>../src/mod/lib/IO/StereoRead.cpp</itemPath>
+          <itemPath>../src/mod/lib/IO/StereoWrite.cpp</itemPath>
+          <itemPath>../src/mod/lib/IO/Term.cpp</itemPath>
+          <itemPath>../src/mod/lib/IO/Term.h</itemPath>
         </logicalFolder>
         <logicalFolder name="RuleComp" displayName="RC" projectFiles="true">
           <logicalFolder name="f1" displayName="detail" projectFiles="true">
@@ -191,6 +243,7 @@
           <logicalFolder name="MatchMaker" displayName="MatchMaker" projectFiles="true">
             <itemPath>../src/mod/lib/RC/MatchMaker/Common.h</itemPath>
             <itemPath>../src/mod/lib/RC/MatchMaker/ComponentWiseUtil.h</itemPath>
+            <itemPath>../src/mod/lib/RC/MatchMaker/LabelledMatch.h</itemPath>
             <itemPath>../src/mod/lib/RC/MatchMaker/Parallel.h</itemPath>
             <itemPath>../src/mod/lib/RC/MatchMaker/Sub.h</itemPath>
             <itemPath>../src/mod/lib/RC/MatchMaker/Super.h</itemPath>
@@ -198,7 +251,9 @@
           <logicalFolder name="Visitor" displayName="Visitor" projectFiles="true">
             <itemPath>../src/mod/lib/RC/Visitor/Compound.h</itemPath>
             <itemPath>../src/mod/lib/RC/Visitor/MatchConstraints.h</itemPath>
+            <itemPath>../src/mod/lib/RC/Visitor/Stereo.h</itemPath>
             <itemPath>../src/mod/lib/RC/Visitor/String.h</itemPath>
+            <itemPath>../src/mod/lib/RC/Visitor/Term.h</itemPath>
           </logicalFolder>
           <itemPath>../src/mod/lib/RC/Compose.h</itemPath>
           <itemPath>../src/mod/lib/RC/ComposeRuleReal.cpp</itemPath>
@@ -216,20 +271,57 @@
             <itemPath>../src/mod/lib/Rules/Properties/Molecule.cpp</itemPath>
             <itemPath>../src/mod/lib/Rules/Properties/Molecule.h</itemPath>
             <itemPath>../src/mod/lib/Rules/Properties/Property.h</itemPath>
+            <itemPath>../src/mod/lib/Rules/Properties/Stereo.h</itemPath>
+            <itemPath>../src/mod/lib/Rules/Properties/String.cpp</itemPath>
             <itemPath>../src/mod/lib/Rules/Properties/String.h</itemPath>
+            <itemPath>../src/mod/lib/Rules/Properties/Term.cpp</itemPath>
+            <itemPath>../src/mod/lib/Rules/Properties/Term.h</itemPath>
           </logicalFolder>
           <itemPath>../src/mod/lib/Rules/ConnectedComponent.h</itemPath>
           <itemPath>../src/mod/lib/Rules/GraphDecl.h</itemPath>
+          <itemPath>../src/mod/lib/Rules/GraphToRule.h</itemPath>
           <itemPath>../src/mod/lib/Rules/LabelledRule.cpp</itemPath>
           <itemPath>../src/mod/lib/Rules/LabelledRule.h</itemPath>
           <itemPath>../src/mod/lib/Rules/Real.cpp</itemPath>
           <itemPath>../src/mod/lib/Rules/Real.h</itemPath>
         </logicalFolder>
+        <logicalFolder name="Stereo" displayName="Stereo" projectFiles="true">
+          <logicalFolder name="f1" displayName="Configuration" projectFiles="true">
+            <itemPath>../src/mod/lib/Stereo/Configuration/Any.cpp</itemPath>
+            <itemPath>../src/mod/lib/Stereo/Configuration/Any.h</itemPath>
+            <itemPath>../src/mod/lib/Stereo/CloneUtil.h</itemPath>
+            <itemPath>../src/mod/lib/Stereo/Configuration/Configuration.cpp</itemPath>
+            <itemPath>../src/mod/lib/Stereo/Configuration/Configuration.h</itemPath>
+            <itemPath>../src/mod/lib/Stereo/Configuration/Linear.cpp</itemPath>
+            <itemPath>../src/mod/lib/Stereo/Configuration/Linear.h</itemPath>
+            <itemPath>../src/mod/lib/Stereo/Configuration/Tetrahedral.cpp</itemPath>
+            <itemPath>../src/mod/lib/Stereo/Configuration/Tetrahedral.h</itemPath>
+            <itemPath>../src/mod/lib/Stereo/Configuration/TrigonalPlanar.cpp</itemPath>
+            <itemPath>../src/mod/lib/Stereo/Configuration/TrigonalPlanar.h</itemPath>
+          </logicalFolder>
+          <itemPath>../src/mod/lib/Stereo/EdgeCategory.cpp</itemPath>
+          <itemPath>../src/mod/lib/Stereo/EdgeCategory.h</itemPath>
+          <itemPath>../src/mod/lib/Stereo/EmbeddingEdge.cpp</itemPath>
+          <itemPath>../src/mod/lib/Stereo/EmbeddingEdge.h</itemPath>
+          <itemPath>../src/mod/lib/Stereo/GeometryGraph.cpp</itemPath>
+          <itemPath>../src/mod/lib/Stereo/GeometryGraph.h</itemPath>
+          <itemPath>../src/mod/lib/Stereo/Inference.cpp</itemPath>
+          <itemPath>../src/mod/lib/Stereo/Inference.h</itemPath>
+        </logicalFolder>
+        <logicalFolder name="Term" displayName="Term" projectFiles="true">
+          <itemPath>../src/mod/lib/Term/RawTerm.cpp</itemPath>
+          <itemPath>../src/mod/lib/Term/RawTerm.h</itemPath>
+          <itemPath>../src/mod/lib/Term/WAM.cpp</itemPath>
+          <itemPath>../src/mod/lib/Term/WAM.h</itemPath>
+        </logicalFolder>
         <itemPath>../src/mod/lib/Algorithm.h</itemPath>
         <itemPath>../src/mod/lib/GraphPimpl.h</itemPath>
         <itemPath>../src/mod/lib/LabelledGraph.h</itemPath>
+        <itemPath>../src/mod/lib/LabelledUnionGraph.h</itemPath>
         <itemPath>../src/mod/lib/Random.cpp</itemPath>
         <itemPath>../src/mod/lib/Random.h</itemPath>
+        <itemPath>../src/mod/lib/StringStore.cpp</itemPath>
+        <itemPath>../src/mod/lib/StringStore.h</itemPath>
       </logicalFolder>
     </logicalFolder>
     <logicalFolder name="TestFiles"
@@ -249,9 +341,6 @@
     <Elem>../src/mod</Elem>
     <Elem>../src/jla_boost</Elem>
     <Elem>../src/gml</Elem>
-    <Elem>../src/mod</Elem>
-    <Elem>../src/jla_boost</Elem>
-    <Elem>../src/gml</Elem>
   </sourceRootList>
   <projectmakefile>Makefile</projectmakefile>
   <confs>
@@ -266,14 +355,15 @@
           <standard>11</standard>
           <commandlineTool>time g++</commandlineTool>
           <incDir>
-            <pElem>${CND_BASEDIR}/../src/graph_canon/include</pElem>
+            <pElem>${CND_BASEDIR}/../../perm_group/include</pElem>
+            <pElem>${CND_BASEDIR}/../../graph_canon/include</pElem>
             <pElem>${CND_BASEDIR}/../src/mod/lib/boost/include</pElem>
             <pElem>${CND_BASEDIR}/../src</pElem>
             <pElem>${CND_BASEDIR}/srcExtra</pElem>
             <pElem>/usr/include/openbabel-2.0</pElem>
             <pElem>${HOME}/programs/include</pElem>
           </incDir>
-          <commandLine>-O3 -fno-strict-aliasing -fPIC -pthread -Wall -Wextra -Wno-unused-local-typedefs -Wno-unused-parameter -Wno-comment -Wno-maybe-uninitialized -Wno-deprecated-declarations -Wno-sign-compare</commandLine>
+          <commandLine>-O3 -fno-strict-aliasing -fPIC -pthread -Wall -Wextra -Wno-unused-local-typedefs -Wno-unused-parameter -Wno-comment -Wno-maybe-uninitialized -Wno-deprecated-declarations -Wno-sign-compare -Wno-ignored-attributes -ftemplate-backtrace-limit=0</commandLine>
           <preprocessorList>
             <Elem>BOOST_RESULT_OF_USE_DECLTYPE</Elem>
             <Elem>BOOST_SPIRIT_USE_PHOENIX_V3</Elem>
@@ -347,6 +437,11 @@
             tool="3"
             flavor2="0">
       </item>
+      <item path="../src/jla_boost/graph/UnionGraph.hpp"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
       <item path="../src/jla_boost/graph/dpo/FilteredGraphProjection.hpp"
             ex="false"
             tool="3"
@@ -361,27 +456,7 @@
             tool="3"
             flavor2="0">
       </item>
-      <item path="../src/jla_boost/graph/morphism/Callbacks.hpp"
-            ex="false"
-            tool="3"
-            flavor2="0">
-      </item>
-      <item path="../src/jla_boost/graph/morphism/CommonSubgraph.hpp"
-            ex="false"
-            tool="3"
-            flavor2="0">
-      </item>
-      <item path="../src/jla_boost/graph/morphism/InjectiveEnumeration.hpp"
-            ex="false"
-            tool="3"
-            flavor2="0">
-      </item>
-      <item path="../src/jla_boost/graph/morphism/InvertibleVertexMapAdaptor.hpp"
-            ex="false"
-            tool="3"
-            flavor2="0">
-      </item>
-      <item path="../src/jla_boost/graph/morphism/MatchAsVertexMap.hpp"
+      <item path="../src/jla_boost/graph/morphism/AsPropertyMap.hpp"
             ex="false"
             tool="3"
             flavor2="0">
@@ -391,22 +466,12 @@
             tool="3"
             flavor2="0">
       </item>
-      <item path="../src/jla_boost/graph/morphism/PreimageSizedVertexMap.hpp"
+      <item path="../src/jla_boost/graph/morphism/PropertyTags.hpp"
             ex="false"
             tool="3"
             flavor2="0">
       </item>
-      <item path="../src/jla_boost/graph/morphism/PrintCallback.hpp"
-            ex="false"
-            tool="3"
-            flavor2="0">
-      </item>
-      <item path="../src/jla_boost/graph/morphism/UnwrapperCallback.hpp"
-            ex="false"
-            tool="3"
-            flavor2="0">
-      </item>
-      <item path="../src/jla_boost/graph/morphism/VectorVertexMap.hpp"
+      <item path="../src/jla_boost/graph/morphism/Traits.hpp"
             ex="false"
             tool="3"
             flavor2="0">
@@ -421,10 +486,89 @@
             tool="3"
             flavor2="0">
       </item>
-      <item path="../src/jla_boost/graph/morphism/vf2.hpp"
+      <item path="../src/jla_boost/graph/morphism/callbacks/Filter.hpp"
             ex="false"
             tool="3"
             flavor2="0">
+      </item>
+      <item path="../src/jla_boost/graph/morphism/callbacks/Limit.hpp"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../src/jla_boost/graph/morphism/callbacks/Print.hpp"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../src/jla_boost/graph/morphism/callbacks/SliceProps.hpp"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../src/jla_boost/graph/morphism/callbacks/Store.hpp"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../src/jla_boost/graph/morphism/callbacks/Transform.hpp"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../src/jla_boost/graph/morphism/callbacks/Unwrapper.hpp"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../src/jla_boost/graph/morphism/finders/CommonSubgraph.hpp"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../src/jla_boost/graph/morphism/finders/InjectiveEnumeration.hpp"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../src/jla_boost/graph/morphism/finders/vf2.hpp"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../src/jla_boost/graph/morphism/models/Inverted.hpp"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../src/jla_boost/graph/morphism/models/InvertibleAdaptor.hpp"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../src/jla_boost/graph/morphism/models/PropertyMap.hpp"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../src/jla_boost/graph/morphism/models/PropertyVertexMap.hpp"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../src/jla_boost/graph/morphism/models/Reinterpreted.hpp"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../src/jla_boost/graph/morphism/models/Vector.hpp"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../src/jla_boost/test/vf2.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../src/jla_boost/test/vf2.hpp" ex="false" tool="3" flavor2="0">
       </item>
       <item path="../src/mod/Chem.cpp" ex="false" tool="1" flavor2="0">
       </item>
@@ -433,22 +577,6 @@
       <item path="../src/mod/Config.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="../src/mod/Config.h" ex="false" tool="3" flavor2="0">
-      </item>
-      <item path="../src/mod/DG.cpp" ex="false" tool="1" flavor2="0">
-      </item>
-      <item path="../src/mod/DG.h" ex="false" tool="3" flavor2="0">
-      </item>
-      <item path="../src/mod/DGGraphInterface.cpp" ex="false" tool="1" flavor2="0">
-      </item>
-      <item path="../src/mod/DGGraphInterface.h" ex="false" tool="3" flavor2="0">
-      </item>
-      <item path="../src/mod/DGPrinter.cpp" ex="false" tool="1" flavor2="0">
-      </item>
-      <item path="../src/mod/DGPrinter.h" ex="false" tool="3" flavor2="0">
-      </item>
-      <item path="../src/mod/DGStrat.cpp" ex="false" tool="1" flavor2="0">
-      </item>
-      <item path="../src/mod/DGStrat.h" ex="false" tool="3" flavor2="0">
       </item>
       <item path="../src/mod/Derivation.cpp" ex="false" tool="1" flavor2="0">
       </item>
@@ -462,33 +590,52 @@
       </item>
       <item path="../src/mod/Function.h" ex="false" tool="3" flavor2="0">
       </item>
-      <item path="../src/mod/Graph.cpp" ex="false" tool="1" flavor2="0">
-      </item>
-      <item path="../src/mod/Graph.h" ex="false" tool="3" flavor2="0">
-      </item>
-      <item path="../src/mod/GraphGraphInterface.cpp" ex="false" tool="1" flavor2="0">
-      </item>
-      <item path="../src/mod/GraphGraphInterface.h" ex="false" tool="3" flavor2="0">
-      </item>
-      <item path="../src/mod/GraphPrinter.cpp" ex="false" tool="1" flavor2="0">
-      </item>
-      <item path="../src/mod/GraphPrinter.h" ex="false" tool="3" flavor2="0">
-      </item>
       <item path="../src/mod/Misc.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="../src/mod/Misc.h" ex="false" tool="3" flavor2="0">
       </item>
-      <item path="../src/mod/RC.cpp" ex="false" tool="1" flavor2="0">
+      <item path="../src/mod/Term.cpp" ex="false" tool="1" flavor2="0">
       </item>
-      <item path="../src/mod/RC.h" ex="false" tool="3" flavor2="0">
+      <item path="../src/mod/Term.h" ex="false" tool="3" flavor2="0">
       </item>
-      <item path="../src/mod/Rule.cpp" ex="false" tool="1" flavor2="0">
+      <item path="../src/mod/dg/DG.cpp" ex="false" tool="1" flavor2="0">
       </item>
-      <item path="../src/mod/Rule.h" ex="false" tool="3" flavor2="0">
+      <item path="../src/mod/dg/DG.h" ex="false" tool="3" flavor2="0">
       </item>
-      <item path="../src/mod/RuleGraphInterface.cpp" ex="false" tool="1" flavor2="0">
+      <item path="../src/mod/dg/ForwardDecl.h" ex="false" tool="3" flavor2="0">
       </item>
-      <item path="../src/mod/RuleGraphInterface.h" ex="false" tool="3" flavor2="0">
+      <item path="../src/mod/dg/GraphInterface.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../src/mod/dg/GraphInterface.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../src/mod/dg/Printer.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../src/mod/dg/Printer.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../src/mod/dg/Strategies.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../src/mod/dg/Strategies.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../src/mod/graph/Automorphism.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../src/mod/graph/Automorphism.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../src/mod/graph/ForwardDecl.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../src/mod/graph/Graph.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../src/mod/graph/Graph.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../src/mod/graph/GraphInterface.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../src/mod/graph/GraphInterface.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../src/mod/graph/Printer.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../src/mod/graph/Printer.h" ex="false" tool="3" flavor2="0">
       </item>
       <item path="../src/mod/lib/Algorithm.h" ex="false" tool="3" flavor2="0">
       </item>
@@ -675,7 +822,15 @@
             tool="3"
             flavor2="0">
       </item>
-      <item path="../src/mod/lib/Graph/Base.h" ex="false" tool="3" flavor2="0">
+      <item path="../src/mod/lib/Graph/Canonicalisation.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../src/mod/lib/Graph/Canonicalisation.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
       </item>
       <item path="../src/mod/lib/Graph/DFSEncoding.cpp"
             ex="false"
@@ -696,9 +851,9 @@
             tool="3"
             flavor2="0">
       </item>
-      <item path="../src/mod/lib/Graph/Merge.cpp" ex="false" tool="1" flavor2="0">
+      <item path="../src/mod/lib/Graph/Multiset.h" ex="false" tool="3" flavor2="0">
       </item>
-      <item path="../src/mod/lib/Graph/Merge.h" ex="false" tool="3" flavor2="0">
+      <item path="../src/mod/lib/Graph/MultisetIO.h" ex="false" tool="3" flavor2="0">
       </item>
       <item path="../src/mod/lib/Graph/Properties/Depiction.cpp"
             ex="false"
@@ -725,7 +880,22 @@
             tool="3"
             flavor2="0">
       </item>
+      <item path="../src/mod/lib/Graph/Properties/Stereo.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
       <item path="../src/mod/lib/Graph/Properties/String.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../src/mod/lib/Graph/Properties/Term.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../src/mod/lib/Graph/Properties/Term.h"
             ex="false"
             tool="3"
             flavor2="0">
@@ -733,6 +903,36 @@
       <item path="../src/mod/lib/Graph/Single.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="../src/mod/lib/Graph/Single.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../src/mod/lib/GraphMorphism/Constraints/AllVisitor.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../src/mod/lib/GraphMorphism/Constraints/CheckVisitor.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../src/mod/lib/GraphMorphism/Constraints/Constraint.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../src/mod/lib/GraphMorphism/Constraints/ShortestPath.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../src/mod/lib/GraphMorphism/Constraints/VertexAdjacency.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../src/mod/lib/GraphMorphism/Constraints/Visitor.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
       </item>
       <item path="../src/mod/lib/GraphMorphism/Finder.hpp"
             ex="false"
@@ -744,12 +944,17 @@
             tool="3"
             flavor2="0">
       </item>
-      <item path="../src/mod/lib/GraphMorphism/MatchConstraint.h"
+      <item path="../src/mod/lib/GraphMorphism/McGregorCommonFinder.hpp"
             ex="false"
             tool="3"
             flavor2="0">
       </item>
-      <item path="../src/mod/lib/GraphMorphism/McGregorCommonFinder.hpp"
+      <item path="../src/mod/lib/GraphMorphism/StereoVertexMap.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../src/mod/lib/GraphMorphism/TermVertexMap.h"
             ex="false"
             tool="3"
             flavor2="0">
@@ -799,14 +1004,12 @@
       </item>
       <item path="../src/mod/lib/IO/IO.h" ex="false" tool="3" flavor2="0">
       </item>
-      <item path="../src/mod/lib/IO/MatchConstraint.h"
+      <item path="../src/mod/lib/IO/MorphismConstraints.h"
             ex="false"
             tool="3"
             flavor2="0">
       </item>
-      <item path="../src/mod/lib/IO/ParserCommon.cpp" ex="false" tool="1" flavor2="0">
-      </item>
-      <item path="../src/mod/lib/IO/ParserCommon.h" ex="false" tool="3" flavor2="0">
+      <item path="../src/mod/lib/IO/ParsingUtil.h" ex="false" tool="3" flavor2="0">
       </item>
       <item path="../src/mod/lib/IO/RC.cpp" ex="false" tool="1" flavor2="0">
       </item>
@@ -818,7 +1021,22 @@
       </item>
       <item path="../src/mod/lib/IO/RuleWrite.cpp" ex="false" tool="1" flavor2="0">
       </item>
+      <item path="../src/mod/lib/IO/Stereo.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../src/mod/lib/IO/StereoRead.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../src/mod/lib/IO/StereoWrite.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../src/mod/lib/IO/Term.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../src/mod/lib/IO/Term.h" ex="false" tool="3" flavor2="0">
+      </item>
       <item path="../src/mod/lib/LabelledGraph.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../src/mod/lib/LabelledUnionGraph.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
       </item>
       <item path="../src/mod/lib/RC/Compose.h" ex="false" tool="3" flavor2="0">
       </item>
@@ -856,6 +1074,11 @@
             tool="3"
             flavor2="0">
       </item>
+      <item path="../src/mod/lib/RC/MatchMaker/LabelledMatch.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
       <item path="../src/mod/lib/RC/MatchMaker/Parallel.h"
             ex="false"
             tool="3"
@@ -880,7 +1103,11 @@
             tool="3"
             flavor2="0">
       </item>
+      <item path="../src/mod/lib/RC/Visitor/Stereo.h" ex="false" tool="3" flavor2="0">
+      </item>
       <item path="../src/mod/lib/RC/Visitor/String.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../src/mod/lib/RC/Visitor/Term.h" ex="false" tool="3" flavor2="0">
       </item>
       <item path="../src/mod/lib/RC/detail/CompositionHelper.h"
             ex="false"
@@ -897,6 +1124,8 @@
             flavor2="0">
       </item>
       <item path="../src/mod/lib/Rules/GraphDecl.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../src/mod/lib/Rules/GraphToRule.h" ex="false" tool="3" flavor2="0">
       </item>
       <item path="../src/mod/lib/Rules/LabelledRule.cpp"
             ex="false"
@@ -933,7 +1162,27 @@
             tool="3"
             flavor2="0">
       </item>
+      <item path="../src/mod/lib/Rules/Properties/Stereo.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../src/mod/lib/Rules/Properties/String.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
       <item path="../src/mod/lib/Rules/Properties/String.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../src/mod/lib/Rules/Properties/Term.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../src/mod/lib/Rules/Properties/Term.h"
             ex="false"
             tool="3"
             flavor2="0">
@@ -941,6 +1190,128 @@
       <item path="../src/mod/lib/Rules/Real.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="../src/mod/lib/Rules/Real.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../src/mod/lib/Stereo/CloneUtil.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../src/mod/lib/Stereo/Configuration/Any.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../src/mod/lib/Stereo/Configuration/Any.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../src/mod/lib/Stereo/Configuration/Configuration.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../src/mod/lib/Stereo/Configuration/Configuration.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../src/mod/lib/Stereo/Configuration/Linear.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../src/mod/lib/Stereo/Configuration/Linear.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../src/mod/lib/Stereo/Configuration/Tetrahedral.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../src/mod/lib/Stereo/Configuration/Tetrahedral.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../src/mod/lib/Stereo/Configuration/TrigonalPlanar.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../src/mod/lib/Stereo/Configuration/TrigonalPlanar.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../src/mod/lib/Stereo/EdgeCategory.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../src/mod/lib/Stereo/EdgeCategory.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../src/mod/lib/Stereo/EmbeddingEdge.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../src/mod/lib/Stereo/EmbeddingEdge.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../src/mod/lib/Stereo/GeometryGraph.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../src/mod/lib/Stereo/GeometryGraph.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../src/mod/lib/Stereo/Inference.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../src/mod/lib/Stereo/Inference.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../src/mod/lib/StringStore.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../src/mod/lib/StringStore.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../src/mod/lib/Term/RawTerm.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../src/mod/lib/Term/RawTerm.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../src/mod/lib/Term/WAM.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../src/mod/lib/Term/WAM.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../src/mod/rule/Composer.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../src/mod/rule/Composer.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../src/mod/rule/CompositionExpr.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../src/mod/rule/CompositionExpr.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../src/mod/rule/ForwardDecl.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../src/mod/rule/GraphInterface.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../src/mod/rule/GraphInterface.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../src/mod/rule/Rule.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../src/mod/rule/Rule.h" ex="false" tool="3" flavor2="0">
       </item>
       <item path="srcExtra/mod/BuildConfig.h" ex="false" tool="3" flavor2="0">
       </item>

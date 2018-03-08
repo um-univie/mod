@@ -1,5 +1,5 @@
 #ifndef MOD_ERROR_H
-#define	MOD_ERROR_H
+#define MOD_ERROR_H
 
 #include <iosfwd>
 #include <string>
@@ -65,6 +65,10 @@ public:
 	// rst:
 	// rst:		Print the stacktrace captured when the exception was constructed. See :func:`Stacktrace::print`.
 	void printStacktrace(unsigned int frameLimit, std::ostream &s) const;
+	// rst: .. function:: void append(const std::string &text)
+	// rst:
+	// rst:		Append text to the exception message.
+	void append(const std::string &text);
 protected:
 	std::string text;
 	Stacktrace stacktrace;
@@ -125,9 +129,45 @@ struct LogicError : public Exception {
 };
 // rst-class-end:
 
+// rst-class: TermParsingError : public Exception
+// rst:
+// rst:		When thrown there is at least basic exception safety.
+// rst:		This exception is thrown if :cpp:any:`LabelType::Term` is used and
+// rst:		parsing of a string into a first-order term fails.
+// rst:
+// rst-class-start:
+
+struct TermParsingError : public Exception {
+
+	TermParsingError(std::string &&text) : Exception(std::move(text)) { }
+
+	std::string getName() const {
+		return "MØD TermParsingError";
+	}
+};
+// rst-class-end:
+
+// rst-class: StereoDeductionError : public Exception
+// rst:
+// rst:		When thrown there is at least basic exception safety.
+// rst:		This exception is thrown if stereo data is requested and
+// rst:		deduction failed.
+// rst:
+// rst-class-start:
+
+struct StereoDeductionError : public Exception {
+
+	StereoDeductionError(std::string &&text) : Exception(std::move(text)) { }
+
+	std::string getName() const {
+		return "MØD StereoDeductionError";
+	}
+};
+// rst-class-end:
+
 void fatal(std::string function, std::string file, std::size_t line) __attribute__((__noreturn__)); // TODO: change to C++11 syntax at some point
 #define MOD_ABORT mod::fatal(__func__, __FILE__, __LINE__)
 
 } // namespace mod
 
-#endif	/* MOD_ERROR_H */
+#endif /* MOD_ERROR_H */
