@@ -47,8 +47,8 @@ struct HyperVProp {
 	HyperVertexKind kind;
 	const lib::Graph::Single *graph; // != nullptr <=> the vertex is a hyper vertex
 	std::vector<const lib::Rules::Real*> rules; // not empty => the vertex is a hyper edge, but it may be empty otherwise
-	NonHyperVertex inVertex, outVertex; // only defined for kind == RuleKind
-	HyperVertex reverse; // == null_vertex() <=> no reverse, only defined for kind == RuleKind
+	NonHyperVertex inVertex, outVertex; // only defined for kind == Edge
+	HyperVertex reverse; // == null_vertex() <=> no reverse, only defined for kind == Edge
 };
 
 } // namespace DG

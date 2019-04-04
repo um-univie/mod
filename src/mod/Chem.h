@@ -28,12 +28,48 @@ struct AtomId {
 	// rst:
 	// rst:		Implicit conversion to an integer type.
 	constexpr operator unsigned char() const;
+	// rst: .. function:: std::string symbol() const
+	// rst:
+	// rst:		:returns: the symbol represented by the atom id.
+	// rst:		:raises: :cpp:class:`LogicError` if the id is invalid.
+	std::string symbol() const;
 	// rst: .. function:: friend std::ostream &operator<<(std::ostream &s, AtomId atomId)
 	// rst:
 	// rst:		Inserts the `int` value of the atom id into the stream.
 	friend std::ostream &operator<<(std::ostream &s, AtomId atomId);
 private:
 	unsigned char id;
+};
+// rst-class-end:
+
+// rst-class: Isotope
+// rst:
+// rst:		Representation of the isotope of an atom.
+// rst:
+// rst-class-start:
+
+struct Isotope {
+	// rst: .. function:: constexpr Isotope()
+	// rst:
+	// rst:		Construct a representation of the most abundant isotope.
+	// rst:		
+	// rst:		.. note:: This is different from explicitly specifying the isotope that is the most abundant one.
+	constexpr Isotope();
+	// rst: .. function:: explicit constexpr Isotope(int i)
+	// rst:
+	// rst:		Construct a specific isotope. Pre-condition: the isotope must either be at least 1 or be -1.
+	// rst:		Passing -1 is equivalent to default-construction.
+	explicit constexpr Isotope(int i);
+	// rst: .. function:: constexpr operator int() const
+	// rst:
+	// rst:		Implicit conversion to an integer type.
+	constexpr operator int() const;
+	// rst: .. function:: friend std::ostream &operator<<(std::ostream &s, Isotope iso)
+	// rst:
+	// rst:		Inserts the integer value of the isotope into the stream.
+	friend std::ostream &operator<<(std::ostream &s, Isotope iso);
+private:
+	int i;
 };
 // rst-class-end:
 
@@ -72,20 +108,33 @@ private:
 struct AtomData {
 	// rst: .. function:: constexpr AtomData()
 	// rst:
-	// rst:		Construct atom data with :cpp:var:`AtomIds::Invalid` atom id and neutral charge.
-	constexpr AtomData();
+	// rst:		Construct atom data with default values:
+	// rst:
+	// rst:		- :cpp:var:`AtomIds::Invalid` atom id,
+	// rst:		- :cpp:expr:`Isotope()` as isotope,
+	// rst:		- neutral charge, and
+	// rst:		- no radical.
+	constexpr AtomData() = default;
 	// rst: .. function:: constexpr explicit AtomData(AtomId atomId)
 	// rst:
-	// rst:		Construct atom data with neutral charge, no radical, and the given atom id.
+	// rst:		Construct atom data the given atom id, and otherwise default values (see above).
 	constexpr explicit AtomData(AtomId atomId);
 	// rst: .. function:: constexpr AtomData(AtomId atomId, Charge charge, bool radical)
 	// rst:
-	// rst:		Construct atom data with given atom id, charge, and radical.
+	// rst:		Construct atom data with given atom id, charge, and radical, but with default isotope.
 	constexpr AtomData(AtomId atomId, Charge charge, bool radical);
+	// rst: .. function:: constexpr AtomData(AtomId atomId, Isotope isotope, Charge charge, bool radical)
+	// rst:
+	// rst:		Construct atom data with given atom id, isotope, charge, and radical.
+	constexpr AtomData(AtomId atomId, Isotope isotope, Charge charge, bool radical);
 	// rst: .. function:: constexpr AtomId getAtomId() const
 	// rst:
 	// rst:		Retrieve the atom id.
 	constexpr AtomId getAtomId() const;
+	// rst: .. function:: constexpr Isotope getIsotope() const
+	// rst:
+	// rst:		Retrieve the isotope.
+	constexpr Isotope getIsotope() const;
 	// rst: .. function:: constexpr Charge getCharge() const
 	// rst:
 	// rst:		Retrieve the charge.
@@ -103,8 +152,9 @@ struct AtomData {
 	friend std::ostream &operator<<(std::ostream &s, const AtomData &data);
 private:
 	AtomId atomId;
+	Isotope isotope;
 	Charge charge;
-	bool radical;
+	bool radical = false;
 };
 // rst-class-end:
 
@@ -316,18 +366,34 @@ inline constexpr Charge::operator signed char() const {
 	return c;
 }
 
+// Isotope
+//------------------------------------------------------------------------------
+
+inline constexpr Isotope::Isotope() : i(-1) { }
+
+inline constexpr Isotope::Isotope(int i) : i(i) { }
+
+inline constexpr Isotope::operator int() const {
+	return i;
+}
+
 // AtomData
 //------------------------------------------------------------------------------
 
-inline constexpr AtomData::AtomData() : AtomData(AtomIds::Invalid) { }
-
-inline constexpr AtomData::AtomData(AtomId atomId) : AtomData(atomId, Charge(), false) { }
+inline constexpr AtomData::AtomData(AtomId atomId) : atomId(atomId) { }
 
 inline constexpr AtomData::AtomData(AtomId atomId, Charge charge, bool radical)
 : atomId(atomId), charge(charge), radical(radical) { }
 
+inline constexpr AtomData::AtomData(AtomId atomId, Isotope isotope, Charge charge, bool radical)
+: atomId(atomId), isotope(isotope), charge(charge), radical(radical) { }
+
 inline constexpr AtomId AtomData::getAtomId() const {
 	return atomId;
+}
+
+inline constexpr Isotope AtomData::getIsotope() const {
+	return isotope;
 }
 
 inline constexpr Charge AtomData::getCharge() const {
@@ -340,6 +406,7 @@ inline constexpr bool AtomData::getRadical() const {
 
 inline constexpr bool operator==(const AtomData &a1, const AtomData &a2) {
 	return a1.getAtomId() == a2.getAtomId()
+			&& a1.getIsotope() == a2.getIsotope()
 			&& a1.getCharge() == a2.getCharge()
 			&& a1.getRadical() == a2.getRadical()
 			;

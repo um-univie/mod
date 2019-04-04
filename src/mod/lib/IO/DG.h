@@ -38,6 +38,9 @@ std::string pdfNonHyper(const lib::DG::NonHyper &nonHyper);
 struct Options;
 
 struct SyntaxPrinter {
+
+	SyntaxPrinter(std::string file) : s(file) { }
+	virtual std::string getName() const = 0;
 	virtual void begin() = 0;
 	virtual void end() = 0;
 	virtual void comment(const std::string &str) = 0;
@@ -48,12 +51,18 @@ struct SyntaxPrinter {
 	virtual void headConnector(const std::string &idHyperEdge, const std::string &idVertex, const std::string &colour, unsigned int num, unsigned int maxNum) = 0;
 	virtual void shortcutEdge(const std::string &idTail, const std::string &idHead, const std::string &label, const std::string &colour, bool hasReverse) = 0;
 	virtual std::function<std::string(const lib::DG::Hyper&, lib::DG::HyperVertex, const std::string&) > getImageCreator() = 0;
+public:
+	FileHandle s;
 };
 
 struct TikzPrinter : SyntaxPrinter {
 
 	TikzPrinter(std::string file, std::string coords, const Options &options, const IO::Graph::Write::Options &graphOptions)
-	: s(file), coords(coords), options(options), graphOptions(graphOptions) { }
+	: SyntaxPrinter(file), coords(coords), options(options), graphOptions(graphOptions) { }
+
+	std::string getName() const override {
+		return "tikz";
+	}
 	void begin();
 	void end();
 	void comment(const std::string &str);
@@ -68,7 +77,6 @@ struct TikzPrinter : SyntaxPrinter {
 	void transitEdge(const std::string &idTail, const std::string &idHead, const std::string &label, const std::string &colour);
 	std::function<std::string(const lib::DG::Hyper&, lib::DG::HyperVertex, const std::string&) > getImageCreator();
 public:
-	FileHandle s;
 	std::string coords;
 	const Options &options;
 	const IO::Graph::Write::Options &graphOptions;
@@ -201,6 +209,9 @@ public:
 	std::function<std::string(Vertex, const lib::DG::Hyper&) > hyperedgeColour;
 	std::function<std::string(Vertex, Vertex, const lib::DG::Hyper&) > tailColour, headColour;
 	std::function<void(const lib::DG::Hyper&, const Options&, SyntaxPrinter&) > auxPrinter;
+	//
+	std::function<int(std::shared_ptr<graph::Graph>) > rotationOverwrite;
+	std::function<bool(std::shared_ptr<graph::Graph>) > mirrorOverwrite;
 	// duplication (not giving state)
 	// all vertices must be first and then all edges
 	// all incarnations must be contiguous and in increasing order
@@ -242,7 +253,7 @@ public:
 
 struct Printer {
 	Printer();
-	std::string printHyper(const Data &data, const IO::Graph::Write::Options &graphOptions);
+	std::pair<std::string, std::string> printHyper(const Data &data, const IO::Graph::Write::Options &graphOptions);
 	void pushSuffix(const std::string suffix);
 	void popSuffix();
 	void pushVertexVisible(std::function<bool(Vertex, const lib::DG::Hyper&) > f); // visible(v) <=> all of pushed f(v))
@@ -257,6 +268,9 @@ struct Printer {
 	void popVertexColour();
 	void pushEdgeColour(std::function<std::string(Vertex, const lib::DG::Hyper&) > f); // colour(v) == first f(v) != ""
 	void popEdgeColour();
+public:
+	void setRotationOverwrite(std::function<int(std::shared_ptr<graph::Graph>) > f);
+	void setMirrorOverwrite(std::function<bool(std::shared_ptr<graph::Graph>) > f);
 public:
 	Options prePrint(const Data &data);
 	void postPrint();
@@ -281,8 +295,8 @@ std::string dot(const lib::DG::Hyper &dg, const Options &options, const IO::Grap
 std::string coords(const lib::DG::Hyper &dg, const Options &options, const IO::Graph::Write::Options &graphOptions);
 std::pair<std::string, std::string> tikz(const lib::DG::Hyper &dg, const Options &options, const IO::Graph::Write::Options &graphOptions);
 std::string pdfFromDot(const lib::DG::Hyper &dg, const Options &options, const IO::Graph::Write::Options &graphOptions);
-std::string pdf(const lib::DG::Hyper &dg, const Options &options, const IO::Graph::Write::Options &graphOptions);
-std::string summary(const Data &data, Printer &printer, const IO::Graph::Write::Options &graphOptions);
+std::pair<std::string, std::string> pdf(const lib::DG::Hyper &dg, const Options &options, const IO::Graph::Write::Options &graphOptions);
+std::pair<std::string, std::string> summary(const Data &data, Printer &printer, const IO::Graph::Write::Options &graphOptions);
 
 } // namespace Write
 } // namespace DG

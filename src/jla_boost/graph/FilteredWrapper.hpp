@@ -5,6 +5,7 @@
 #include <jla_boost/graph/PairToRangeAdaptor.hpp>
 
 #include <utility>
+#include <vector>
 
 namespace jla_boost {
 
@@ -90,21 +91,7 @@ struct FilteredWrapperIndexMap {
 	explicit FilteredWrapperIndexMap(const FilteredWrapper<Graph> &g) : g(&g) { }
 
 	VSizeType operator[](typename boost::graph_traits<Graph>::vertex_descriptor v) const {
-		assert(g);
 		VSizeType vId = get(boost::vertex_index_t(), g->g, v);
-		if(g->map[vId] == std::numeric_limits<VSizeType>::max()) {
-			//			std::cout << "FilteredWrapperIndexMap; request for " << v << "(" << vId << ") is not defined" << std::endl;
-			//			std::cout << "Map is:" << std::endl << "from:";
-			//			for(unsigned int i = 0; i < g->map.size(); i++) std::cout << "\t" << i;
-			//			std::cout << std::endl << "to:  ";
-			//			for(const auto &p : g->map) {
-			//				std::cout << "\t";
-			//				if(p == g->g.null_vertex()) std::cout << "-(-)";
-			//				else std::cout << p << "(" << get(boost::vertex_index_t(), g->g, p) << ")";
-			//			}
-			//			std::cout << std::endl;
-		}
-		assert(g->map[vId] != std::numeric_limits<VSizeType>::max());
 		return g->map[vId];
 	}
 private:
@@ -188,7 +175,7 @@ vertices(const jla_boost::FilteredWrapper<Graph> &g) {
 template<typename Graph>
 typename boost::graph_traits<jla_boost::FilteredWrapper<Graph> >::vertices_size_type
 num_vertices(const jla_boost::FilteredWrapper<Graph> &g) {
-	return std::distance(vertices(g.g).first, vertices(g.g).second);
+	return g.reverseMap.size();
 }
 
 // EdgeListGraph

@@ -25,6 +25,7 @@
 #include <boost/spirit/home/x3/numeric/uint.hpp>
 #include <boost/spirit/home/x3/operator/alternative.hpp>
 #include <boost/spirit/home/x3/operator/kleene.hpp>
+#include <boost/spirit/home/x3/operator/not_predicate.hpp>
 #include <boost/spirit/home/x3/operator/optional.hpp>
 #include <boost/spirit/home/x3/string/literal_string.hpp>
 #include <boost/spirit/home/x3/string/symbols.hpp>
@@ -262,6 +263,8 @@ struct ChiralSymbl : x3::symbols<Chiral> {
 } chiralSymbol;
 
 // no recursion
+const x3::rule<struct isotope, int> isotope = "isotope (not 0)";
+
 const auto singleDigit = x3::uint_parser<int, 10, 1, 1>();
 const auto doubleDigit = x3::uint_parser<int, 10, 1, 2>();
 const auto class_ = (x3::lit(':') > x3::uint_) | x3::attr(-1);
@@ -273,7 +276,7 @@ const auto hcount = (x3::lit('H') > (singleDigit | x3::attr(1))) // singleDigit 
 /*             */ | x3::attr(0);
 const auto chiral = chiralSymbol | x3::attr(Chiral());
 const auto symbol = elementSymbol | aromaticSymbol | x3::string("*");
-const auto isotope = x3::uint_ | x3::attr(0);
+const auto isotope_def = !x3::lit('0') >> (x3::uint_ | x3::attr(0));
 const auto bracketAtom = x3::rule<struct bracketAtom, Atom>{"bracketAtom"}
 /*                  */ = x3::lit('[') > isotope > symbol > chiral > hcount > charge > radical > class_ > ']';
 const auto atom = bracketAtom | shorthandSymbol;
@@ -293,7 +296,7 @@ const auto branchedAtom = x3::rule<struct branchedAtom, BranchedAtom>{"branchedA
 const auto bondBranchedAtomPair = x3::rule<struct bondBranchedAtomPair, BondBranchedAtomPair>{"bondBranchedAtomPair"}
 /*                           */ = bond >> branchedAtom;
 const auto chainTail_def = *bondBranchedAtomPair >> x3::attr(0); // dummy attr(0) because of a quirk in the attribute collapsing
-BOOST_SPIRIT_DEFINE(chainTail);
+BOOST_SPIRIT_DEFINE(chainTail, isotope);
 
 // no recursion
 const auto smiles = x3::rule<struct smiles, SmilesChain>{"smiles"}
@@ -412,16 +415,14 @@ struct Converter {
 	}
 
 	bool operator()(Atom &a) {
-		if(a.isotope > 0) {
-			if(getConfig().graph.printSmilesParsingWarnings.get())
-				IO::log() << "WARNING: isotope information in SMILES string ignored." << std::endl;
-		}
 		std::string label;
+		if(a.isotope > 0)
+			label += boost::lexical_cast<std::string>(a.isotope);
 		if(a.symbol == "*") {
 			a.isAromatic = false;
 			a.atomId = AtomIds::Invalid;
 			a.vertex = add_vertex(g);
-			label = "*";
+			label = "*"; // overwrite on purpose
 		} else {
 			a.isAromatic = false;
 			a.atomId = atomIdFromSymbol(a.symbol);
@@ -447,7 +448,7 @@ struct Converter {
 				}
 			}
 			a.vertex = add_vertex(g);
-			label = symbolFromAtomId(a.atomId);
+			label += symbolFromAtomId(a.atomId);
 			if(!a.isImplicit) {
 				(*this)(a.chiral);
 				{ // charge

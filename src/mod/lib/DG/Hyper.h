@@ -19,19 +19,18 @@ class HyperCreator {
 public:
 	friend class Hyper;
 private:
-	HyperCreator(Hyper &hyper);
+	HyperCreator() = default;
+	explicit HyperCreator(Hyper &hyper);
 public:
 	HyperCreator(HyperCreator &&other);
+	HyperCreator &operator=(HyperCreator &&other);
 	~HyperCreator();
 	void addVertex(const lib::Graph::Single *g);
-	void addEdge(NonHyper::Edge eNon);
+	HyperVertex addEdge(NonHyper::Edge eNon);
 	void addRuleToEdge(NonHyper::Edge eNon, const lib::Rules::Real *r);
 	void setReverse(NonHyper::Edge e, NonHyper::Edge eBack);
 private:
-	Hyper &owner;
-	bool valid;
-	struct Pimpl;
-	std::unique_ptr<Pimpl> pimpl;
+	Hyper *owner = nullptr;
 };
 
 class Hyper {

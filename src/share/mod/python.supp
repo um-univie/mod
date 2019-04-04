@@ -18,6 +18,72 @@
 # These first suppressions are manually added, and may be wrong
 {
    <insert_a_suppression_name_here>
+   Memcheck:Addr4
+   ...
+   fun:code_dealloc.*
+}
+
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Addr4
+   ...
+   fun:unicode_dealloc.*
+}
+
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Addr4
+   ...
+   fun:freechildren.*
+}
+
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Cond
+   ...
+   fun:PyMem_Free
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Value8
+   ...
+   fun:PyMem_Free
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Addr4
+   ...
+   fun:PyMem_Free
+}
+
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Addr4
+   ...
+   fun:list_dealloc.*
+}
+
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Cond
+   ...
+   fun:PyObject_Free
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Value8
+   ...
+   fun:PyObject_Free
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Addr4
+   ...
+   fun:PyObject_Free
+}
+
+{
+   <insert_a_suppression_name_here>
    Memcheck:Cond
    fun:address_in_range
    fun:_PyObject_Free
@@ -33,6 +99,44 @@
    Memcheck:Addr4
    fun:address_in_range
    fun:_PyObject_Free
+}
+
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Addr4
+   ...
+   fun:_PyObject_Realloc.*
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Cond
+   ...
+   fun:_PyObject_Realloc.*
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Value8
+   ...
+   fun:_PyObject_Realloc.*
+}
+
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Addr4
+   ...
+   fun:_PyObject_Free.*
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Cond
+   ...
+   fun:_PyObject_Free.*
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Value8
+   ...
+   fun:_PyObject_Free.*
 }
 
 {
@@ -71,16 +175,19 @@
 {
    <insert_a_suppression_name_here>
    Memcheck:Value8
+   ...
    fun:PyObject_GC_Del
 }
 {
    <insert_a_suppression_name_here>
    Memcheck:Cond
+   ...
    fun:PyObject_GC_Del
 }
 {
    <insert_a_suppression_name_here>
    Memcheck:Addr4
+   ...
    fun:PyObject_GC_Del
 }
 {

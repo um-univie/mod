@@ -42,15 +42,15 @@ struct NonHyperDump : public NonHyper {
 	NonHyperDump(const std::vector<std::shared_ptr<graph::Graph> > &graphs,
 			ConstructionData &&constructionData)
 	: NonHyper(graphs,{LabelType::String, LabelRelation::Isomorphism}), constructionData(&constructionData) {
-		calculate();
+		calculate(true);
 	}
 private:
 
-	std::string getType() const {
+	virtual std::string getType() const override {
 		return "DGDump";
 	}
 
-	void calculateImpl() {
+	virtual void calculateImpl(bool printInfo) override {
 		const std::vector<std::shared_ptr<rule::Rule> > &rules = constructionData->rules;
 		auto &vertices = constructionData->vertices;
 		const auto &rulesParsed = constructionData->rulesParsed;
@@ -63,9 +63,13 @@ private:
 			});
 			if(iter != end(rules)) {
 				std::shared_ptr<rule::Rule> r = *iter;
-				IO::log() << "Rule linked: " << r->getName() << std::endl;
+				if(printInfo)
+					IO::log() << "Rule linked: " << r->getName() << std::endl;
 				this->rules.push_back(r);
 				ruleMap[get<0>(t)] = r;
+			} else {
+				std::string msg = "Can not load DG dump. Rule not found: '" + get<1>(t) + "'";
+				throw InputError(std::move(msg));
 			}
 		}
 
@@ -79,7 +83,7 @@ private:
 				auto p = checkIfNew(std::move(gCand));
 				bool wasNew = addGraphAsVertex(p.first);
 				graphMap[id] = p.first;
-				if(!p.second) IO::log() << "Graph linked: " << get<1>(v) << " -> " << p.first->getName() << std::endl;
+				if(!p.second && printInfo) IO::log() << "Graph linked: " << get<1>(v) << " -> " << p.first->getName() << std::endl;
 				if(wasNew) giveProductStatus(p.first);
 				iVertices++;
 			} else if(iEdges < edges.size() && get<0>(edges[iEdges]) == id) {
@@ -98,7 +102,6 @@ private:
 				suggestDerivation(gmsSrc, gmsTar, nullptr);
 				for(const auto rId : ruleIds) {
 					auto rIter = ruleMap.find(rId);
-					if(rIter == end(ruleMap)) MOD_ABORT; // TODO: what should we do when the user haven't given us all the rules?
 					assert(rIter != end(ruleMap));
 					const auto *r = &rIter->second->getRule();
 					suggestDerivation(gmsSrc, gmsTar, r);
@@ -111,7 +114,7 @@ private:
 		constructionData = nullptr;
 	}
 
-	void listImpl(std::ostream &s) const { }
+	virtual void listImpl(std::ostream &s) const override { }
 private:
 	std::vector<std::shared_ptr<rule::Rule> > rules;
 	ConstructionData *constructionData;

@@ -42,6 +42,15 @@ bool operator<(const Graph::Vertex &v1, const Graph::Vertex &v2) {              
 	return std::tie(v1.g, v1.vId) < std::tie(v2.g, v2.vId);                       \
 }                                                                               \
 																																								\
+std::size_t Graph::Vertex::hash() const {                                       \
+	if(g) return getId();                                                         \
+  else return -1;                                                               \
+}                                                                               \
+                                                                                \
+Graph::Vertex::operator bool() const {                                          \
+	return !isNull();                                                             \
+}                                                                               \
+                                                                                \
 bool Graph::Vertex::isNull() const {                                            \
 	return *this == Graph::Vertex();                                              \
 }                                                                               \
@@ -140,6 +149,10 @@ bool operator<(const Graph::Edge &e1, const Graph::Edge &e2) {                  
 	return std::tie(e1.g, e1.vId, e1.eId) < std::tie(e2.g, e2.vId, e2.eId);       \
 }                                                                               \
 																																								\
+Graph::Edge::operator bool() const {                                            \
+	return !isNull();                                                             \
+}                                                                               \
+                                                                                \
 bool Graph::Edge::isNull() const {                                              \
 	return *this == Graph::Edge();                                                \
 }                                                                               \

@@ -18,16 +18,19 @@ inline bool isCleanHydrogen(const AtomData &ad) {
 namespace lib {
 namespace Chem {
 
-std::tuple<std::string, Charge, bool> extractChargeRadical(std::string label);
-std::tuple<std::size_t, Charge, bool> extractChargeRadicalLen(const std::string &label);
+std::tuple<std::string, Isotope, Charge, bool> extractIsotopeChargeRadical(const std::string &label);
+std::tuple<std::string::const_iterator, std::string::const_iterator, Isotope, Charge, bool>
+/*   */ extractIsotopeChargeRadicalLen(const std::string &label);
 AtomId atomIdFromSymbol(const std::string &label);
-AtomId atomIdFromSymbol(const std::string &label, std::size_t len);
-std::tuple<AtomId, Charge, bool> decodeVertexLabel(const std::string &label); // we don't return an AtomData, because a label explicitly can only hold atomId and charge
+AtomId atomIdFromSymbol(const std::string::const_iterator first, const std::string::const_iterator last);
+std::tuple<AtomId, Isotope, Charge, bool> decodeVertexLabel(const std::string &label); // we don't return an AtomData, because it could potentially have extra stuff that we don't decode
 BondType decodeEdgeLabel(const std::string &label);
 void markSpecialAtomsUsed(std::vector<bool> &used);
 std::string symbolFromAtomId(AtomId atomId);
 void appendSymbolFromAtomId(std::string &s, AtomId atomId);
 char bondToChar(BondType bt);
+double exactMass(AtomId a, Isotope i); // implemented in Mass.cpp
+constexpr double electronMass = 0.000548580;
 
 template<typename Graph, typename AtomDataT, typename EdgeDataT, typename HasImportantStereo>
 bool isCollapsible(const auto v, const Graph &g, const AtomDataT &atomData, const EdgeDataT &edgeData, const HasImportantStereo &hasImportantStereo) {

@@ -183,8 +183,8 @@ void Rule_doExport() {
 			// rst:		            The descriptor is null if the external id was not used.
 			// rst:			:rtype: :py:class:`RuleVertex`
 			.def("getVertexFromExternalId", &Rule::getVertexFromExternalId)
-			// rst:		.. py::attribute:: minExternalId
-			// rst:		                   maxExternalId
+			// rst:		.. py:attribute:: minExternalId
+			// rst:		                  maxExternalId
 			// rst:
 			// rst:			If the rule was not loaded from an external data format, then these attributes
 			// rst:			are always return 0. Otherwise, they are the minimum/maximum external id from which
@@ -196,28 +196,37 @@ void Rule_doExport() {
 			.add_property("maxExternalId", &Rule::getMaxExternalId)
 			;
 
-	// rst: .. py:method:: ruleGMLString(s, invert=False)
+	// rst: .. py:data:: inputRules
 	// rst:
-	// rst:		Load a rule from a :ref:`GML <rule-gml>` string, and store either that rule or its inverse.
+	// rst:		A list of rules to which explicitly loaded rules as default are appended.
+	// rst:
+	// rst:		:type: list of :class:`Rule`
+	// rst:
+	
+	// rst: .. py:method:: ruleGMLString(s, invert=False, add=True)
+	// rst:
+	// rst:		Load a rule from a :ref:`GML <rule-gml>` string, and maybe store it in a global list.
 	// rst:		The name of the rule is the one specified in the GML string, though when ``invert=True``
 	// rst:		the string ", inverse" is appended to the name.
 	// rst:
 	// rst:		.. note::
 	// rst:
-	// rst:			If the GML string specifies matching constraints it is not possible to invert the rule.
+	// rst:			If the GML string specifies matching constraints it is currently not possible to invert the rule.
 	// rst:			There is however a configuration option to ignore matching constraints when inverting rules.
 	// rst:
 	// rst:		:param string s: the GML string to load a rule from.
 	// rst:		:param bool invert: whether or not to invert the loaded rule.
+	// rst:		:param bool add: whether to append the rule to :data:`inputRules` or not.
 	// rst:		:returns: the rule in the GML string, possibly inverted.
 	// rst:		:rtype: :class:`Rule`
 	py::def("ruleGMLString", &Rule::ruleGMLString);
-	// rst: .. py:method:: ruleGML(s, invert=False)
+	// rst: .. py:method:: ruleGML(f, invert=False, add=True)
 	// rst:		
 	// rst:		Read ``file`` and pass the contents to :py:func:`ruleGMLString`.
 	// rst:
-	// rst:		:param string s: name of the GML file to be loaded.
+	// rst:		:param string f: name of the GML file to be loaded.
 	// rst:		:param bool invert: whether or not to invert the loaded rule.
+	// rst:		:param bool add: whether to append the rule to :data:`inputRules` or not.
 	// rst:		:returns: the rule in the GML file, possibly inverted.
 	// rst:		:rtype: :class:`Rule`
 	py::def("ruleGML", &Rule::ruleGML);

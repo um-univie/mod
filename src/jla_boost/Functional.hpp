@@ -9,7 +9,7 @@ template<typename Ret = void>
 struct Nop {
 
 	template<typename ...Args>
-	Ret operator()(Args&&...) const {
+	Ret operator()(Args&&... args) const {
 		return Ret();
 	}
 };
@@ -25,7 +25,7 @@ struct Identity {
 struct AlwaysTrue {
 
 	template<typename ...Args>
-	bool operator()(Args&&...) const {
+	bool operator()(Args&&... args) const {
 		return true;
 	}
 };
@@ -33,7 +33,7 @@ struct AlwaysTrue {
 struct AlwaysFalse {
 
 	template<typename ...Args>
-	bool operator()(Args&&...) const {
+	bool operator()(Args&&... args) const {
 		return false;
 	}
 };

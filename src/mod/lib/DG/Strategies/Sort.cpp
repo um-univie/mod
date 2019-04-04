@@ -50,9 +50,6 @@ void Sort::executeImpl(std::ostream &s, const GraphState &input) {
 			},
 	[&input](std::vector<std::shared_ptr<graph::Graph> > &universe) {
 		for(const lib::Graph::Single *g : input.getUniverse()) universe.push_back(g->getAPIReference());
-	},
-	[this](std::vector<dg::DG::HyperEdge> &edges) {
-		getExecutionEnv().fillHyperEdges(edges);
 	});
 	auto comp = [&gs, this](const lib::Graph::Single *g1, const lib::Graph::Single * g2) -> bool {
 		return (*less)(g1->getAPIReference(), g2->getAPIReference(), gs);

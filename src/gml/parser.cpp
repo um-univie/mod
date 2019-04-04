@@ -2,6 +2,7 @@
 
 #include <boost/spirit/home/x3/auxiliary/attr.hpp>
 #include <boost/spirit/home/x3/auxiliary/eol.hpp>
+#include <boost/spirit/home/x3/auxiliary/eps.hpp>
 #include <boost/spirit/home/x3/char.hpp>
 #include <boost/spirit/home/x3/core/parse.hpp>
 #include <boost/spirit/home/x3/directive/lexeme.hpp>
@@ -38,14 +39,13 @@ struct value_class : LocationHandler {
 };
 
 const x3::rule<struct skipper> skipper = "skipper";
-const x3::rule<struct gml, ast::List> gml = "gml";
+const x3::rule<struct gml, ast::KeyValue> gml = "gml";
 const x3::rule<struct list, ast::List> list = "list";
-const x3::rule<struct listInner, std::vector<ast::KeyValue> > listInner = "listInner";
+const x3::rule<struct listInner, std::vector<ast::KeyValue> > listInner = "key or ']'";
 const x3::rule<struct keyValue_class, ast::KeyValue> keyValue = "keyValue";
 const x3::rule<struct key, std::string> key = "key";
 const x3::rule<struct value_class, ast::Value> value = "value";
 const x3::rule<struct valueInner, ast::Value> valueInner = "valueInner";
-const x3::rule<struct listOuter, ast::List> listOuter = "listOuter";
 const x3::rule<struct string, std::string> string = "string";
 #define GML_PARSER_CHAR_DEF(name) const x3::rule<struct name, char> name = #name;
 GML_PARSER_CHAR_DEF(escaped);
@@ -56,14 +56,13 @@ GML_PARSER_CHAR_DEF(implicitBackslash);
 #undef GML_PARSER_CHAR_DEF
 
 const auto skipper_def = x3::space | (x3::lit('#') >> *(x3::char_ - x3::eol) >> x3::eol);
-const auto gml_def = list;
-const auto list_def = listInner;
-const auto listInner_def = *keyValue;
+const auto gml_def = keyValue;
+const auto list_def = x3::lit('[') > listInner;
+const auto listInner_def = (keyValue > listInner) | x3::lit(']');
 const auto keyValue_def = key > value;
 const auto key_def = x3::lexeme[x3::char_("a-zA-Z") >> *x3::char_("a-zA-Z0-9")];
 const auto value_def = valueInner;
-const auto valueInner_def = x3::real_parser<double, x3::strict_real_policies<double> >() | x3::int_ | string | listOuter;
-const auto listOuter_def = x3::lit('[') > (list >> ']'); // TODO: remove parens when the move_to mess in X3 has been fixed
+const auto valueInner_def = x3::real_parser<double, x3::strict_real_policies<double> >() | x3::int_ | string | list;
 const auto string_def = x3::lexeme[x3::lit('"') > *(escaped | plain) > x3::lit('"')];
 const auto escaped_def = '\\' >> (x3::char_('"') | tab | explicitBackslash | implicitBackslash);
 const auto plain_def = (x3::char_ - x3::char_('"') - x3::char_('\n'));
@@ -71,10 +70,10 @@ const auto tab_def = 't' >> x3::attr('\t');
 const auto explicitBackslash_def = '\\' >> x3::attr('\\');
 const auto implicitBackslash_def = x3::attr('\\');
 
-BOOST_SPIRIT_DEFINE(skipper, gml, list, listInner, keyValue, key, value, valueInner, listOuter, string, escaped, plain, tab, explicitBackslash, implicitBackslash);
+BOOST_SPIRIT_DEFINE(skipper, gml, list, listInner, keyValue, key, value, valueInner, string, escaped, plain, tab, explicitBackslash, implicitBackslash);
 
 template<typename TextIter>
-bool parse(TextIter &textIter, const TextIter &textIterEnd, ast::List &ast, std::ostream &err) {
+bool parse(TextIter &textIter, const TextIter &textIterEnd, ast::KeyValue &ast, std::ostream &err) {
 	using Iter = spirit::classic::position_iterator2<TextIter>;
 	Iter iter(textIter, textIterEnd), iterEnd;
 	auto doError = [&]() {
@@ -83,7 +82,12 @@ bool parse(TextIter &textIter, const TextIter &textIterEnd, ast::List &ast, std:
 		auto column = pos.column;
 		std::string line = iter.get_currentline();
 		err << "Parsing failed at " << lineNumber << ":" << column << ":\n";
-		err << line << "\n";
+		// each tab is 4 in the position iterator
+		for(const char c : line) {
+			if(c == '\t') err << "    ";
+			else err << c;
+		}
+		err << "\n";
 		err << std::string(column - 1, '-') << "^\n";
 	};
 	try {
@@ -103,7 +107,7 @@ bool parse(TextIter &textIter, const TextIter &textIterEnd, ast::List &ast, std:
 	return true;
 }
 
-bool parse(std::istream &s, ast::List &ast, std::ostream &err) {
+bool parse(std::istream &s, ast::KeyValue &ast, std::ostream &err) {
 
 	struct FlagsHolder {
 

@@ -6,8 +6,11 @@
 #include <mod/lib/Graph/Single.h>
 #include <mod/lib/Random.h>
 
+#include <mod/Py/Function.h>
+
 #include <jla_boost/test/vf2.hpp>
 
+#include <boost/core/noncopyable.hpp>
 #include <boost/python/suite/indexing/vector_indexing_suite.hpp>
 
 namespace mod {
@@ -15,7 +18,7 @@ namespace Py {
 namespace {
 
 std::uintptr_t magicLibraryValue() {
-	return reinterpret_cast<std::uintptr_t>(&mod::getConfig());
+	return reinterpret_cast<std::uintptr_t> (&mod::getConfig());
 }
 
 void reseed(unsigned int seed) {

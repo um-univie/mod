@@ -1,6 +1,7 @@
 #ifndef MOD_MISC_H
 #define MOD_MISC_H
 
+#include <mod/graph/ForwardDecl.h>
 #include <mod/dg/ForwardDecl.h>
 
 #include <memory>
@@ -17,6 +18,7 @@ void postChapter(const std::string &chapterTitle);
 void postSection(const std::string &sectionTitle);
 
 void printGeometryGraph();
+
 // rst: .. function:: std::string version()
 // rst:
 // rst:		:returns: the version of MØD.

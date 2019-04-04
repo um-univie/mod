@@ -125,6 +125,10 @@ const std::string &Graph::getGraphDFS() const {
 	return p->g->getGraphDFS().first;
 }
 
+const std::string &Graph::getGraphDFSWithIds() const {
+	return p->g->getGraphDFSWithIds();
+}
+
 const std::string &Graph::getLinearEncoding() const {
 	if(p->g->getMoleculeState().getIsMolecule()) return p->g->getSmiles();
 	else return p->g->getGraphDFS().first;
@@ -144,9 +148,9 @@ void Graph::cacheEnergy(double value) const {
 	else throw LogicError("Graph::cacheEnergy: Caching of energy failed. '" + getName() + "' is not a molecule.\n");
 }
 
-double Graph::getMolarMass() const {
-	if(getIsMolecule()) return p->g->getMoleculeState().getMolarMass();
-	else return std::numeric_limits<double>::quiet_NaN();
+double Graph::getExactMass() const {
+	if(!getIsMolecule()) throw LogicError("Can not get exact mass of a non-molecule.");
+	return p->g->getMoleculeState().getExactMass();
 }
 
 unsigned int Graph::vLabelCount(const std::string &label) const {
@@ -237,7 +241,7 @@ std::shared_ptr<Graph> handleLoadedGraph(lib::IO::Graph::Read::Data data, const 
 		auto numComponents = boost::connected_components(*data.g, cMap.data());
 		if(numComponents > 1) {
 			throw InputError("Error in graph loading from " + source
-					+ ".\nThe graph is not connected (" + std::to_string(numComponents) + " components).");
+							+ ".\nThe graph is not connected (" + std::to_string(numComponents) + " components).");
 		}
 	}
 	auto gInternal = std::make_unique<lib::Graph::Single>(std::move(data.g), std::move(data.pString), std::move(data.pStereo));

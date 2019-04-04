@@ -35,14 +35,12 @@ PropTerm::PropTerm(const GraphType &g, const PropString &pString, const StringSt
 	};
 	this->vertexState.resize(num_vertices(g));
 	for(Vertex v : asRange(vertices(g))) {
-		if(!isValid(*this)) break;
 		std::size_t vId = get(boost::vertex_index_t(), this->g, v);
 		assert(vId < this->vertexState.size());
 		this->vertexState[vId] = handleLabel(pString[v]);
 	}
 	this->edgeState.reserve(num_edges(g));
 	for(Edge e : asRange(edges(g))) {
-		if(!isValid(*this)) break;
 		assert(get(boost::edge_index_t(), g, e) == this->edgeState.size());
 		this->edgeState.push_back(handleLabel(pString[e]));
 	}

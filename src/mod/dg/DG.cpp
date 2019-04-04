@@ -55,7 +55,6 @@ const lib::DG::Hyper &DG::getHyper() const {
 //------------------------------------------------------------------------------
 
 std::size_t DG::numVertices() const {
-	if(!p->dg->getHasCalculated()) throw LogicError("Can not get number of vertices before the derivation graph it has been calculated.\n");
 	using boost::vertices;
 	auto vs = vertices(getHyper().getGraph());
 	return std::count_if(vs.first, vs.second, [this](lib::DG::HyperVertex v) {
@@ -64,12 +63,10 @@ std::size_t DG::numVertices() const {
 }
 
 DG::VertexRange DG::vertices() const {
-	if(!p->dg->getHasCalculated()) throw LogicError("Can not get vertices before the derivation graph it has been calculated.\n");
-	return VertexRange(p->dg->getAPIReference());
+	return VertexRange(getNonHyper().getAPIReference());
 }
 
 std::size_t DG::numEdges() const {
-	if(!p->dg->getHasCalculated()) throw LogicError("Can not get number of edges before the derivation graph it has been calculated.\n");
 	using boost::vertices;
 	auto vs = vertices(getHyper().getGraph());
 	return std::count_if(vs.first, vs.second, [this](lib::DG::HyperVertex v) {
@@ -78,38 +75,37 @@ std::size_t DG::numEdges() const {
 }
 
 DG::EdgeRange DG::edges() const {
-	if(!p->dg->getHasCalculated()) throw LogicError("Can not get edges before the derivation graph it has been calculated.\n");
 	return EdgeRange(getNonHyper().getAPIReference());
 }
 
 //------------------------------------------------------------------------------
 
 DG::Vertex DG::findVertex(std::shared_ptr<graph::Graph> g) const {
-	const auto &dg = p->dg->getHyper();
+	const auto &dg = getHyper();
 	const auto v = dg.getVertexOrNullFromGraph(&g->getGraph());
 	return dg.getInterfaceVertex(v);
 }
 
 DG::HyperEdge DG::findEdge(const std::vector<Vertex> &sources, const std::vector<Vertex> &targets) const {
 	using boost::vertices;
-	const auto &dg = p->dg->getHyper().getGraph();
+	const auto &dg = getHyper().getGraph();
 	auto vs = vertices(dg).first;
 	std::vector<lib::DG::Hyper::Vertex> vSources, vTargets;
 	for(auto v : sources) {
 		if(v.isNull()) throw LogicError("Source vertex descriptor is null.");
-		if(v.getDG() != p->dg->getAPIReference()) throw LogicError("Source vertex descriptor does not belong to this derivation graph: "
+		if(v.getDG() != getNonHyper().getAPIReference()) throw LogicError("Source vertex descriptor does not belong to this derivation graph: "
 				+ boost::lexical_cast<std::string>(v));
 		vSources.push_back(vs[v.getId()]);
 	}
 	for(auto v : targets) {
 		if(v.isNull()) throw LogicError("Target vertex descriptor is null.");
-		if(v.getDG() != p->dg->getAPIReference()) throw LogicError("Target vertex descriptor does not belong to this derivation graph: "
+		if(v.getDG() != getNonHyper().getAPIReference()) throw LogicError("Target vertex descriptor does not belong to this derivation graph: "
 				+ boost::lexical_cast<std::string>(v));
 		vTargets.push_back(vs[v.getId()]);
 	}
-	const auto vInner = p->dg->findHyperEdge(vSources, vTargets);
+	const auto vInner = getNonHyper().findHyperEdge(vSources, vTargets);
 	if(vInner == boost::graph_traits<lib::DG::HyperGraphType>::null_vertex()) return HyperEdge();
-	return p->dg->getHyper().getInterfaceEdge(vInner);
+	return getHyper().getInterfaceEdge(vInner);
 }
 
 DG::HyperEdge DG::findEdge(const std::vector<std::shared_ptr<graph::Graph> > &sources, const std::vector<std::shared_ptr<graph::Graph> > &targets) const {
@@ -121,16 +117,16 @@ DG::HyperEdge DG::findEdge(const std::vector<std::shared_ptr<graph::Graph> > &so
 
 //------------------------------------------------------------------------------
 
-void DG::calc() {
+void DG::calc(bool printInfo) {
 	if(p->dg->getHasCalculated()) {
 		lib::IO::log() << "Notice: no effect of calculation for derivation graph. Already done." << std::endl;
 		return;
 	}
-	p->dg->calculate();
+	p->dg->calculate(printInfo);
 }
 
-const std::set<std::shared_ptr<graph::Graph>, graph::GraphLess> &DG::getGraphDatabase() const {
-	return p->dg->getGraphDatabase();
+const std::unordered_set<std::shared_ptr<graph::Graph> > &DG::getGraphDatabase() const {
+	return getNonHyper().getGraphDatabase();
 }
 
 const std::vector<std::shared_ptr<graph::Graph> > &DG::getProducts() const {
@@ -142,7 +138,7 @@ const std::vector<std::shared_ptr<graph::Graph> > &DG::getProducts() const {
 	return getNonHyper().getProducts();
 }
 
-std::string DG::print(const PrintData &data, const Printer &printer) const {
+std::pair<std::string, std::string> DG::print(const PrintData &data, const Printer &printer) const {
 	if(data.getDG() != getNonHyper().getAPIReference()) {
 		std::ostringstream err;
 		err << "PrintData is for another derivation graph (id=" << data.getDG()->getId()

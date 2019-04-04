@@ -25,6 +25,12 @@ void GraphInterface_doExport() {
 			.def(py::self == py::self)
 			.def(py::self != py::self)
 			.def(py::self < py::self)
+			.def("__hash__", &Graph::Vertex::hash)
+			// rst:		.. py::method:: __bool__(self)
+			// rst:
+			// rst:			:returns: ``not isNull()``
+			// rst:			:rtype: bool
+			.def("__bool__", &Graph::Vertex::operator bool)
 			// rst:		.. py:method:: isNull()
 			// rst:
 			// rst:			:returns: whether this is a null descriptor or not.
@@ -72,6 +78,13 @@ void GraphInterface_doExport() {
 			// rst:			:type: :py:class:`AtomId`
 			// rst:			:raises: :py:class:`LogicError` if it is a null descriptor.
 			.add_property("atomId", &Graph::Vertex::getAtomId)
+			// rst:		.. py:attribute:: isotope
+			// rst:
+			// rst:			(Read-only) The isotope of the vertex.
+			// rst:
+			// rst:			:type: :py:class:`Isotope`
+			// rst:			:raises: :py:class:`LogicError` if it is a null descriptor.
+			.add_property("isotope", &Graph::Vertex::getIsotope)
 			// rst:		.. py:attribute:: charge
 			// rst:
 			// rst:			(Read-only) The charge of the vertex.
@@ -113,6 +126,11 @@ void GraphInterface_doExport() {
 			.def(py::self == py::self)
 			.def(py::self != py::self)
 			.def(py::self < py::self)
+			// rst:		.. py::method:: __bool__(self)
+			// rst:
+			// rst:			:returns: ``not isNull()``
+			// rst:			:rtype: bool
+			.def("__bool__", &Graph::Vertex::operator bool)
 			// rst:		.. py:method:: isNull()
 			// rst:
 			// rst:			:returns: whether this is a null descriptor or not.

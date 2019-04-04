@@ -23,28 +23,31 @@ namespace DG {
 // HyperCreator
 //------------------------------------------------------------------------------
 
-struct HyperCreator::Pimpl {
-	std::map<NonHyper::Edge, Hyper::Vertex> edgeToHyper;
-};
+HyperCreator::HyperCreator(Hyper &hyper) : owner(&hyper) { }
 
-HyperCreator::HyperCreator(Hyper &hyper) : owner(hyper), valid(true), pimpl(new Pimpl()) { }
+HyperCreator::HyperCreator(HyperCreator &&other) : owner(other.owner) {
+	other.owner = nullptr;
+}
 
-HyperCreator::HyperCreator(HyperCreator &&other)
-: owner(other.owner), valid(other.valid), pimpl(std::move(other.pimpl)) {
-	other.valid = false;
+HyperCreator &HyperCreator::operator=(HyperCreator &&other) {
+	if(&other == this) return *this;
+	std::swap(owner, other.owner);
+	return *this;
 }
 
 HyperCreator::~HyperCreator() {
-	if(valid) owner.hasCalculated = true;
+	if(owner) owner->hasCalculated = true;
 }
 
 void HyperCreator::addVertex(const lib::Graph::Single *g) {
-	owner.addVertex(g);
+	assert(owner);
+	owner->addVertex(g);
 }
 
-void HyperCreator::addEdge(NonHyper::Edge eNon) {
-	const auto &dg = owner.nonHyper.getGraphDuringCalculation();
-	auto &hyper = owner.hyper;
+HyperVertex HyperCreator::addEdge(NonHyper::Edge eNon) {
+	assert(owner);
+	const auto &dg = owner->nonHyper.getGraphDuringCalculation();
+	auto &hyper = owner->hyper;
 	NonHyper::Vertex vSrcNon = source(eNon, dg), vTarNon = target(eNon, dg);
 	Hyper::Vertex v = add_vertex(hyper);
 	hyper[v].kind = HyperVertexKind::Edge;
@@ -53,41 +56,42 @@ void HyperCreator::addEdge(NonHyper::Edge eNon) {
 	hyper[v].inVertex = vSrcNon;
 	hyper[v].outVertex = vTarNon;
 	hyper[v].reverse = hyper.null_vertex();
-	pimpl->edgeToHyper[eNon] = v;
 
 	{ // source edges
 		for(const lib::Graph::Single *g : dg[vSrcNon].graphs) {
-			Hyper::Vertex vSrc = owner.getVertexFromGraph(g);
+			Hyper::Vertex vSrc = owner->getVertexFromGraph(g);
 			add_edge(vSrc, v, hyper);
 		}
 	}
 	{ // target edges
 		for(const lib::Graph::Single *g : dg[vTarNon].graphs) {
-			Hyper::Vertex vTar = owner.getVertexFromGraph(g);
+			Hyper::Vertex vTar = owner->getVertexFromGraph(g);
 			add_edge(v, vTar, hyper);
 		}
 	}
+
+	return v;
 }
 
 void HyperCreator::addRuleToEdge(NonHyper::Edge eNon, const lib::Rules::Real *r) {
+	assert(owner);
 	assert(r);
-	auto &hyper = owner.hyper;
-	const auto iter = pimpl->edgeToHyper.find(eNon);
-	assert(iter != end(pimpl->edgeToHyper));
-	const auto v = iter->second;
+	auto &hyper = owner->hyper;
+	const auto v = owner->getNonHyper().findHyperEdge(eNon);
+	assert(v != hyper.null_vertex());
 	hyper[v].rules.push_back(r);
 }
 
 void HyperCreator::setReverse(NonHyper::Edge e, NonHyper::Edge eBack) {
-	const auto &dg = owner.nonHyper.getGraphDuringCalculation();
-	auto &hyper = owner.hyper;
+	assert(owner);
+	const auto &dg = owner->nonHyper.getGraphDuringCalculation();
+	auto &hyper = owner->hyper;
 	assert(dg[e].reverse);
-	const auto &edgeToHyper = pimpl->edgeToHyper;
-	auto eIter = edgeToHyper.find(e);
-	auto eBackIter = edgeToHyper.find(eBack);
-	assert(eIter != end(edgeToHyper));
-	assert(eBackIter != end(edgeToHyper));
-	hyper[eIter->second].reverse = eBackIter->second;
+	const auto eHyper = owner->nonHyper.findHyperEdge(e);
+	const auto eBackHyper = owner->nonHyper.findHyperEdge(eBack);
+	assert(eHyper != hyper.null_vertex());
+	assert(eBackHyper != hyper.null_vertex());
+	hyper[eHyper].reverse = eBackHyper;
 }
 
 //------------------------------------------------------------------------------
@@ -170,7 +174,7 @@ void Hyper::addVertex(const lib::Graph::Single *g) {
 	{ // sanity check
 #ifndef NDEBUG
 		std::shared_ptr<graph::Graph> gAPI = g->getAPIReference();
-		NonHyper::StdGraphSet::const_iterator iter = nonHyper.getGraphDatabase().find(gAPI);
+		const auto iter = nonHyper.getGraphDatabase().find(gAPI);
 		assert(iter != nonHyper.getGraphDatabase().end());
 #endif
 	}

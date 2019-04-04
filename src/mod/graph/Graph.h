@@ -121,7 +121,7 @@ public:
 	// rst:		:returns: the canonical :ref:`SMILES string <graph-smiles>` of the graph, if it's a molecule.
 	// rst:		:throws: :any:`LogicError` if the graph is not a molecule.
 	const std::string &getSmiles() const;
-// rst: .. function:: const std::string &getSmilesWithIds() const
+	// rst: .. function:: const std::string &getSmilesWithIds() const
 	// rst:
 	// rst:		:returns: the canonical :ref:`SMILES string <graph-smiles>` of the graph,
 	// rst:			that includes the internal vertex id as a class label on each atom, if it's a molecule.
@@ -129,8 +129,13 @@ public:
 	const std::string &getSmilesWithIds() const;
 	// rst: .. function:: const std::string &getGraphDFS() const
 	// rst:
-	// rst:		:returns: the :ref:`GraphDFS <graph-graphDFS>` string of the graph.
+	// rst:		:returns: a :ref:`GraphDFS <graph-graphDFS>` string of the graph.
 	const std::string &getGraphDFS() const;
+	// rst: .. function:: const std::string &getGraphDFSWithIds() const
+	// rst:
+	// rst:		:returns: a :ref:`GraphDFS <graph-graphDFS>` string of the graph, where each vertices have an explicit id,
+	// rst:			corresponding to its internal vertex id.
+	const std::string &getGraphDFSWithIds() const;
 	// rst: .. function:: const std::string &getLinearEncoding() const
 	// rst:
 	// rst:		:returns: the :ref:`SMILES <graph-smiles>` string if the graph is a molecule, otherwise the :ref:`GraphDFS <graph-graphDFS>` string.
@@ -150,11 +155,14 @@ public:
 	// rst:
 	// rst:		:throws: :class:`LogicError` if the graph is not a molecule.
 	void cacheEnergy(double value) const;
-	// rst: .. function:: double getMolarMass() const
+	// rst: .. function:: double getExactMass() const
 	// rst:
-	// rst:		:returns: the molar mass of the graph, if it is a molecule.
-	// rst:			The molar mass is calculated by Open Babel.
-	double getMolarMass() const;
+	// rst:		:returns: the exact mass of the graph, if it is a molecule.
+	// rst:			It is the sum of the exact mass of each atom, with the mass of electrons subtracted corresponding to the integer charge.
+	// rst:			That is, the mass is :math:`\sum_a (mass(a) - mass(e)\cdot charge(a))`.
+	// rst:			If an atom has no specified isotope, then the most abundant is used.
+	// rst:		:throws: :class:`LogicError` if it is not a molecule, including if some isotope has not been tabulated.
+	double getExactMass() const;
 	// rst: .. function:: unsigned int vLabelCount(const std::string &label) const
 	// rst:
 	// rst:		:returns: the number of vertices in the graph with the given label.

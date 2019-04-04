@@ -54,8 +54,8 @@ private:
 
 template<typename ConstraintRange, typename LabelledGraphCodom, typename Next = jla_boost::AlwaysTrue>
 Checker<ConstraintRange, LabelledGraphCodom, Next>
-makeChecker(ConstraintRange constraints, const LabelledGraphCodom &lgCodom, LabelSettings ls, Next &&next = jla_boost::AlwaysTrue()) {
-	return Checker<ConstraintRange, LabelledGraphCodom, Next>(constraints, lgCodom, ls, std::forward<Next>(next));
+makeChecker(ConstraintRange constraints, const LabelledGraphCodom &lgCodom, LabelSettings ls, Next next = jla_boost::AlwaysTrue()) {
+	return Checker<ConstraintRange, LabelledGraphCodom, Next>(constraints, lgCodom, ls, next);
 }
 
 } // namespace Constraints

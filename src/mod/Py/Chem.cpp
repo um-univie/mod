@@ -30,7 +30,38 @@ void Chem_doExport() {
 			// rst:
 			// rst:			Construct a specific atom id. Pre-condition: the id must be at most that of :py:const:`AtomIds.Max`.
 			.def(py::init<unsigned char>())
-			// rst:		.. py:method:: __int__(self)
+			// rst:		.. py:attribute:: symbol
+			// rst:
+			// rst:		    (Read-only) The symbol represented by the atom id.
+			// rst:
+			// rst:			:type: string
+			// rst:			:raises: :py:class:`LogicError` if the id is invalid.
+			.add_property("symbol", &mod::AtomId::symbol)
+			// rst: 	.. py:method:: __int__(self)
+			// rst:
+			// rst: 		Implicit conversion to an integer type.
+			.def(int_(py::self))
+			.def(str(py::self))
+			.def(py::self == py::self)
+			;
+
+	// rst: .. py:class:: Isotope
+	// rst:
+	// rst:		Representation of the isotope of an atom.
+	// rst:
+	py::class_<mod::Isotope>("Isotope", py::no_init)
+			// rst:		.. py:method:: __init__(self)
+			// rst:
+			// rst:			Construct a representation of the most abundant isotope.
+			// rst:		
+			// rst:			.. note:: This is different from explicitly specifying the isotope that is the most abundant one.
+			.def(py::init<>())
+			// rst:		.. py:method:: __init__(self, i)
+			// rst:
+			// rst:			Construct a specific isotope. Pre-condition: the isotope must either be at least 1 or be -1.
+			// rst:			Passing -1 is equivalent to default-construction.
+			.def(py::init<int>())
+			// rst:		.. py:method:: __init__(self)
 			// rst:
 			// rst:			Implicit conversion to an integer type.
 			.def(int_(py::self))
@@ -66,22 +97,37 @@ void Chem_doExport() {
 	py::class_<mod::AtomData>("AtomData", py::no_init)
 			// rst:		.. py:method:: __init__(self)
 			// rst:
-			// rst: 		Construct atom data with :py:const:`AtomIds.Invalid` atom id and neutral charge.
+			// rst:			Construct atom data with default values:
+			// rst:
+			// rst:			- :cpp:var:`AtomIds::Invalid` atom id,
+			// rst:			- :cpp:expr:`Isotope()` as isotope,
+			// rst:			- neutral charge, and
+			// rst:			- no radical.
 			.def(py::init<>())
 			// rst:		.. py:method:: __init__(self, atomId)
 			// rst:
-			// rst:			Construct atom data with neutral charge, no radical, and the given atom id.
+			// rst:			Construct atom data the given atom id, and otherwise default values (see above).
 			.def(py::init<AtomId>())
 			// rst:		.. py:method:: __init__(self, atomId, charge)
 			// rst:
-			// rst:			Construct atom data with given atom id and charge.
+			// rst:			Construct atom data with given atom id, charge, and radical, but with default isotope.
 			.def(py::init<AtomId, Charge, bool>())
+			// rst:		.. py:method:: __init__(self, atomId, charge)
+			// rst:
+			// rst:			Construct atom data with given atom id, isotope, charge, and radical.
+			.def(py::init<AtomId, Isotope, Charge, bool>())
 			// rst:		.. py:attribute: atomId
 			// rst:
 			// rst:			(Read-only) The atom id.
 			// rst:
 			// rst:			:type: :py:class:`AtomId`
 			.add_property("atomId", &mod::AtomData::getAtomId)
+			// rst:		.. py:attribute: isotope
+			// rst:
+			// rst:			(Read-only) The isotope.
+			// rst:
+			// rst:			:type: :py:class:`Isotope`
+			.add_property("isotope", &mod::AtomData::getIsotope)
 			// rst:		.. py:attribute:: charge
 			// rst:
 			// rst:			(Read-only) The charge.
@@ -122,6 +168,7 @@ void Chem_doExport() {
 			// rst:			:returns: A string representation of the bond type adhering to the string encoding of bonds (see :ref:`mol-enc`).
 			// rst:			:raises: :py:class:`LogicError` if the bond type is :py:const:`Invalid`.
 			;
+	// TOOD: py::enum_ does not support overriding of methods, so we set __str__ on the Python side.
 	py::def("_bondTypeToString", &bondTypeToString);
 
 

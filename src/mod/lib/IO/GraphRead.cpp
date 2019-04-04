@@ -41,15 +41,16 @@ namespace {
 Data parseGML(std::istream &s, std::ostream &err) {
 	GML::Graph gGML;
 	{
-		gml::ast::List ast;
+		gml::ast::KeyValue ast;
 		bool res = gml::parser::parse(s, ast, err);
 		if(!res) return Data();
 		using namespace gml::converter::edsl;
 		auto cVertex = GML::makeVertexConverter(1);
 		auto cEdge = GML::makeEdgeConverter(1);
 		auto cGraph = list<Parent>("graph") (cVertex) (cEdge);
-		auto iterBegin = ast.list.begin();
-		res = gml::converter::convert(iterBegin, ast.list.end(), cGraph, err, gGML);
+		auto iterBegin = &ast;
+		auto iterEnd = iterBegin + 1;
+		res = gml::converter::convert(iterBegin, iterEnd, cGraph, err, gGML);
 		if(!res) return Data();
 	}
 
@@ -134,7 +135,7 @@ Data parseGML(std::istream &s, std::ostream &err) {
 	//----------------------------------------------------------------------------
 	for(const auto &eGML : gGML.edges) {
 		Vertex vSrc = vFromVertexId(eGML.source),
-				vTar = vFromVertexId(eGML.target);
+						vTar = vFromVertexId(eGML.target);
 		auto ePair = edge(vSrc, vTar, g);
 		assert(ePair.second);
 		if(!eGML.stereo) continue;

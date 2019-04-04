@@ -332,7 +332,7 @@ struct ImplicitHydrogenAdder : public boost::static_visitor<void> {
 			}
 			auto atomId = lib::Chem::atomIdFromSymbol(vertex.label);
 			if(std::find(begin(lib::Chem::getSmilesOrganicSubset()), end(lib::Chem::getSmilesOrganicSubset()), atomId)
-					== end(lib::Chem::getSmilesOrganicSubset())) MOD_ABORT;
+							== end(lib::Chem::getSmilesOrganicSubset())) MOD_ABORT;
 			auto hydrogenAdder = [](lib::Graph::GraphType &g, lib::Graph::PropString &pString, lib::Graph::Vertex p) {
 				GVertex v = add_vertex(g);
 				pString.addVertex(v, "H");
@@ -362,7 +362,7 @@ lib::IO::Graph::Read::Data parse(const std::string &dfs, std::ostream &s) {
 	if(conv.convert(chain)) {
 		detail::ImplicitHydrogenAdder adder(*g, *pString);
 		adder(chain);
-		write(*g, *pString);
+		//		write(*g, *pString);
 		lib::IO::Graph::Read::Data data;
 		data.g = std::move(g);
 		data.pString = std::move(pString);
@@ -381,21 +381,21 @@ lib::IO::Graph::Read::Data parse(const std::string &dfs, std::ostream &s) {
 } // namespace mod
 
 BOOST_FUSION_ADAPT_STRUCT(mod::lib::Graph::DFSEncoding::detail::LabelVertex,
-		(std::string, label)
-		(bool, implicit)
-		(boost::optional<unsigned int>, id))
+				(std::string, label)
+				(bool, implicit)
+				(boost::optional<unsigned int>, id))
 BOOST_FUSION_ADAPT_STRUCT(mod::lib::Graph::DFSEncoding::detail::RingClosure,
-		(unsigned int, id))
+				(unsigned int, id))
 BOOST_FUSION_ADAPT_STRUCT(mod::lib::Graph::DFSEncoding::detail::Vertex,
-		(mod::lib::Graph::DFSEncoding::detail::BaseVertex, vertex)
-		(std::vector<mod::lib::Graph::DFSEncoding::detail::Branch>, branches))
+				(mod::lib::Graph::DFSEncoding::detail::BaseVertex, vertex)
+				(std::vector<mod::lib::Graph::DFSEncoding::detail::Branch>, branches))
 BOOST_FUSION_ADAPT_STRUCT(mod::lib::Graph::DFSEncoding::detail::Edge,
-		(std::string, label))
+				(std::string, label))
 BOOST_FUSION_ADAPT_STRUCT(mod::lib::Graph::DFSEncoding::detail::Chain,
-		(mod::lib::Graph::DFSEncoding::detail::Vertex, head)
-		(std::vector<mod::lib::Graph::DFSEncoding::detail::EVPair>, tail))
+				(mod::lib::Graph::DFSEncoding::detail::Vertex, head)
+				(std::vector<mod::lib::Graph::DFSEncoding::detail::EVPair>, tail))
 BOOST_FUSION_ADAPT_STRUCT(mod::lib::Graph::DFSEncoding::detail::Branch,
-		(std::vector<mod::lib::Graph::DFSEncoding::detail::EVPair>, tail))
+				(std::vector<mod::lib::Graph::DFSEncoding::detail::EVPair>, tail))
 
 #include <mod/lib/Chem/MoleculeUtil.h>
 #include <mod/lib/IO/IO.h>
@@ -436,7 +436,8 @@ struct Printer : public boost::static_visitor<void> {
 		s << "[";
 		escapeLabel(s, v.label, ']');
 		s << "]";
-		if(v.id && idMap.find(v.id.get()) != idMap.end()) s << idMap[v.id.get()];
+		if(v.id && idMap.find(v.id.get()) != idMap.end())
+			s << idMap[v.id.get()];
 	}
 
 	void operator()(const RingClosure &v) {
@@ -520,7 +521,7 @@ private:
 	const std::vector<bool> targetForRing;
 };
 
-std::pair<Chain, std::map<unsigned int, unsigned int> > write(const lib::Graph::GraphType &g, const PropString &pString) {
+std::pair<Chain, std::map<unsigned int, unsigned int> > write(const lib::Graph::GraphType &g, const PropString &pString, bool withIds) {
 	using namespace detail;
 	using GEdgeIter = lib::Graph::GraphType::out_edge_iterator;
 	typedef std::pair<GVertex, std::pair<GEdgeIter, GEdgeIter> > VertexInfo;
@@ -529,7 +530,8 @@ std::pair<Chain, std::map<unsigned int, unsigned int> > write(const lib::Graph::
 	chain.hasNonSmilesRingClosure = false;
 
 	std::vector<Colour> colour(num_vertices(g), Colour::White);
-	std::vector<bool> targetForRing(num_vertices(g), false);
+	// note: if withIds, pretend *all* vertices are targets for ring closures
+	std::vector<bool> targetForRing(num_vertices(g), withIds);
 	std::map<GEdge, Colour> edgeColour;
 	for(GEdge e : asRange(edges(g))) edgeColour[e] = Colour::White;
 	std::stack<VertexInfo> stack;
@@ -613,7 +615,9 @@ std::pair<Chain, std::map<unsigned int, unsigned int> > write(const lib::Graph::
 
 	std::map<unsigned int, unsigned int> idMap;
 	unsigned int nextMappedId = 1;
-	for(unsigned int id = 0; id < targetForRing.size(); id++) if(targetForRing[id]) idMap[id] = nextMappedId++;
+	for(unsigned int id = 0; id < targetForRing.size(); id++)
+		if(targetForRing[id])
+			idMap[id] = nextMappedId++;
 	Prettyfier pretty(targetForRing);
 	pretty(chain);
 	return std::make_pair(chain, idMap);
@@ -621,10 +625,10 @@ std::pair<Chain, std::map<unsigned int, unsigned int> > write(const lib::Graph::
 
 } // namespace detail
 
-std::pair<std::string, bool> write(const lib::Graph::GraphType &g, const PropString &pString) {
+std::pair<std::string, bool> write(const lib::Graph::GraphType &g, const PropString &pString, bool withIds) {
 	if(num_vertices(g) == 0) return std::make_pair("", false);
 	using namespace detail;
-	std::pair<Chain, std::map<unsigned int, unsigned int> > res = detail::write(g, pString);
+	std::pair<Chain, std::map<unsigned int, unsigned int> > res = detail::write(g, pString, withIds);
 	Chain &chain = res.first;
 	std::map<unsigned int, unsigned int> &idMap = res.second;
 

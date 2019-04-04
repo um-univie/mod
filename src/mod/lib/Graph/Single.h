@@ -9,6 +9,7 @@
 
 #include <graph_canon/ordered_graph.hpp>
 
+#include <perm_group/allocator/raw_ptr.hpp>
 #include <perm_group/group/generated.hpp>
 #include <perm_group/permutation/built_in.hpp>
 
@@ -25,9 +26,9 @@ struct DepictionData;
 
 struct Single {
 	using CanonIdxMap = boost::iterator_property_map<std::vector<int>::const_iterator,
-			decltype(get(boost::vertex_index_t(), GraphType()))>;
+					decltype(get(boost::vertex_index_t(), GraphType()))>;
 	using CanonForm = graph_canon::ordered_graph<GraphType, CanonIdxMap>;
-	using AutGroup = perm_group::generated_group<std::vector<int> >;
+	using AutGroup = perm_group::generated_group<perm_group::raw_ptr_allocator<std::vector<int> > >;
 public:
 	// requires g != nullptr, pString != nullptr
 	// pStereo may be null
@@ -42,6 +43,7 @@ public:
 	const std::string &getName() const;
 	void setName(std::string name);
 	const std::pair<const std::string&, bool> getGraphDFS() const;
+	const std::string &getGraphDFSWithIds() const;
 	const std::string &getSmiles() const;
 	const std::string &getSmilesWithIds() const;
 	std::shared_ptr<rule::Rule> getBindRule() const;
@@ -63,7 +65,7 @@ private:
 	const std::size_t id;
 	std::weak_ptr<graph::Graph> apiReference;
 	std::string name;
-	mutable boost::optional<std::string> dfs;
+	mutable boost::optional<std::string> dfs, dfsWithIds;
 	mutable bool dfsHasNonSmilesRingClosure;
 	mutable boost::optional<std::string> smiles, smilesWithIds;
 	mutable std::shared_ptr<rule::Rule> bindRule, idRule, unbindRule;
@@ -74,7 +76,7 @@ private:
 	mutable std::unique_ptr<DepictionData> depictionData;
 public:
 	static std::size_t isomorphismVF2(const Single &gDom, const Single &gCodom, std::size_t maxNumMatches, LabelSettings labelSettings);
-	static bool isomorphismBrokenSmilesAndVF2(const Single &gDom, const Single &gCodom, LabelSettings labelSettings);
+	static bool isomorphic(const Single &gDom, const Single &gCodom, LabelSettings labelSettings);
 	static std::size_t isomorphism(const Single &gDom, const Single &gCodom, std::size_t maxNumMatches, LabelSettings labelSettings);
 	static std::size_t monomorphism(const Single &gDom, const Single &gCodom, std::size_t maxNumMatches, LabelSettings labelSettings);
 	static bool nameLess(const Single *g1, const Single *g2);
@@ -99,7 +101,7 @@ struct IsomorphismPredicate {
 	: settings(labelType, LabelRelation::Isomorphism, withStereo, LabelRelation::Isomorphism) { }
 
 	bool operator()(const Single *gDom, const Single *gCodom) const {
-		return 1 == Single::isomorphism(*gDom, *gCodom, 1, settings);
+		return Single::isomorphic(*gDom, *gCodom, settings);
 	}
 private:
 	LabelSettings settings;

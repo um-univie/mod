@@ -61,6 +61,14 @@ AtomId Rule::LeftGraph::Vertex::getAtomId() const {
 	return r->getRule().getMoleculeState().getLeft()[v].getAtomId();
 }
 
+Isotope Rule::LeftGraph::Vertex::getIsotope() const {
+	if(!r) throw LogicError("Can not get isotope on a null vertex.");
+	const auto &graph = get_left(r->getRule().getDPORule());
+	using boost::vertices;
+	auto v = *std::next(vertices(graph).first, vId);
+	return r->getRule().getMoleculeState().getLeft()[v].getIsotope();
+}
+
 Charge Rule::LeftGraph::Vertex::getCharge() const {
 	if(!r) throw LogicError("Can not get charge on a null vertex.");
 	const auto &graph = get_left(r->getRule().getDPORule());
@@ -241,6 +249,14 @@ AtomId Rule::RightGraph::Vertex::getAtomId() const {
 	using boost::vertices;
 	auto v = *std::next(vertices(graph).first, vId);
 	return r->getRule().getMoleculeState().getRight()[v].getAtomId();
+}
+
+Isotope Rule::RightGraph::Vertex::getIsotope() const {
+	if(!r) throw LogicError("Can not get isotope on a null vertex.");
+	const auto &graph = get_right(r->getRule().getDPORule());
+	using boost::vertices;
+	auto v = *std::next(vertices(graph).first, vId);
+	return r->getRule().getMoleculeState().getRight()[v].getIsotope();
 }
 
 Charge Rule::RightGraph::Vertex::getCharge() const {

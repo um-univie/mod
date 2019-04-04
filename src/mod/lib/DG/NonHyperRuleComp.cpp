@@ -25,23 +25,7 @@ struct NonHyperRuleComp::ExecutionEnv : public Strategies::ExecutionEnv {
 	: Strategies::ExecutionEnv(labelSettings), owner(owner) { }
 
 	bool tryAddGraph(std::shared_ptr<graph::Graph> gCand) override {
-		const auto ls = LabelSettings{owner.getLabelSettings().type, LabelRelation::Isomorphism, owner.getLabelSettings().withStereo, LabelRelation::Isomorphism};
-		for(const auto &g : owner.getGraphDatabase()) {
-			if(g == gCand) break;
-			const bool equal = gCand->isomorphism(g, 1, ls);
-			if(equal) {
-				std::string msg = "Isomorphic graphs '" + g->getName() + "' and '" + gCand->getName() + "' in initial graph database and/or add strategies.";
-				throw LogicError(std::move(msg));
-			}
-		}
-		if(ls.type == LabelType::Term) {
-			const auto &term = get_term(gCand->getGraph().getLabelledGraph());
-			if(!isValid(term)) {
-				std::string msg = "Parsing failed for graph '" + gCand->getName() + "' in dynamic add strategy. " + term.getParsingError();
-				throw TermParsingError(std::move(msg));
-			}
-		}
-		return addGraph(gCand);
+		return owner.tryAddGraph(gCand);
 	}
 
 	bool addGraph(std::shared_ptr<graph::Graph> g) override {
@@ -53,12 +37,12 @@ struct NonHyperRuleComp::ExecutionEnv : public Strategies::ExecutionEnv {
 	}
 
 	bool doExit() const override {
-		return owner.doExit;
+		return doExit_;
 	}
 
 	bool checkLeftPredicate(const mod::Derivation &d) const override {
 
-		BOOST_REVERSE_FOREACH(std::shared_ptr < mod::Function<bool(const mod::Derivation&)> > pred, owner.leftPredicates) {
+		BOOST_REVERSE_FOREACH(std::shared_ptr < mod::Function<bool(const mod::Derivation&)> > pred, leftPredicates) {
 			bool result = (*pred)(d);
 			if(!result) return false;
 		}
@@ -67,7 +51,7 @@ struct NonHyperRuleComp::ExecutionEnv : public Strategies::ExecutionEnv {
 
 	bool checkRightPredicate(const mod::Derivation &d) const override {
 
-		BOOST_REVERSE_FOREACH(std::shared_ptr < mod::Function<bool(const mod::Derivation&)> > pred, owner.rightPredicates) {
+		BOOST_REVERSE_FOREACH(std::shared_ptr < mod::Function<bool(const mod::Derivation&)> > pred, rightPredicates) {
 			bool result = (*pred)(d);
 			if(!result) return false;
 		}
@@ -87,7 +71,7 @@ struct NonHyperRuleComp::ExecutionEnv : public Strategies::ExecutionEnv {
 		if(owner.getProducts().size() >= getConfig().dg.productLimit.get()) {
 			IO::log() << "DG::RuleComp:\tproduct limit reached, aborting rest of rule application" << std::endl
 					<< "\t(further rule application in the strategy is skipped)" << std::endl;
-			owner.doExit = true;
+			doExit_ = true;
 		}
 		return isProduct;
 	}
@@ -101,32 +85,31 @@ struct NonHyperRuleComp::ExecutionEnv : public Strategies::ExecutionEnv {
 	}
 
 	void pushLeftPredicate(std::shared_ptr<mod::Function<bool(const mod::Derivation&)> > pred) override {
-		owner.leftPredicates.push_back(pred);
+		leftPredicates.push_back(pred);
 	}
 
 	void pushRightPredicate(std::shared_ptr<mod::Function<bool(const mod::Derivation&)> > pred) override {
-		owner.rightPredicates.push_back(pred);
+		rightPredicates.push_back(pred);
 	}
 
 	void popLeftPredicate() override {
-		owner.leftPredicates.pop_back();
+		leftPredicates.pop_back();
 	}
 
 	void popRightPredicate() override {
-		owner.rightPredicates.pop_back();
-	}
-public:
-
-	void fillHyperEdges(std::vector<dg::DG::HyperEdge> &edges) const override {
-		edges = owner.getAllHyperEdges();
+		rightPredicates.pop_back();
 	}
 public:
 	NonHyperRuleComp &owner;
+private: // state for computation
+	std::vector<std::shared_ptr<mod::Function<bool(const mod::Derivation&)> > > leftPredicates;
+	std::vector<std::shared_ptr<mod::Function<bool(const mod::Derivation&)> > > rightPredicates;
+	bool doExit_ = false;
 };
 
 NonHyperRuleComp::NonHyperRuleComp(const std::vector<std::shared_ptr<graph::Graph> > &graphDatabase,
 		Strategies::Strategy *strategy, LabelSettings labelSettings, bool ignoreRuleLabelTypes)
-: NonHyper(graphDatabase, labelSettings), strategy(strategy), input(new Strategies::GraphState()), doExit(false) {
+: NonHyper(graphDatabase, labelSettings), strategy(strategy), input(new Strategies::GraphState()) {
 	env.reset(new ExecutionEnv(*this, labelSettings));
 	strategy->setExecutionEnv(*env);
 	const auto ls = LabelSettings{getLabelSettings().type, LabelRelation::Isomorphism, getLabelSettings().withStereo, LabelRelation::Isomorphism};
@@ -151,7 +134,7 @@ NonHyperRuleComp::NonHyperRuleComp(const std::vector<std::shared_ptr<graph::Grap
 		addGraph(gCand);
 	});
 	if(!ignoreRuleLabelTypes) {
-		strategy->forEachRule([&](const lib::Rules::Real &r) {
+		strategy->forEachRule([&](const lib::Rules::Real & r) {
 			if(!r.getLabelType()) return;
 			if(*r.getLabelType() != labelSettings.type) {
 				std::string msg = "Rule '" + r.getName() + "' has intended label type " + boost::lexical_cast<std::string>(*r.getLabelType());
@@ -169,9 +152,9 @@ std::string NonHyperRuleComp::getType() const {
 	return "DGRuleComp";
 }
 
-void NonHyperRuleComp::calculateImpl() {
+void NonHyperRuleComp::calculateImpl(bool printInfo) {
 	if(getHasCalculated()) return;
-	strategy->execute(IO::log(), *input);
+	strategy->execute(printInfo ? IO::log() : IO::nullStream(), *input);
 }
 
 void NonHyperRuleComp::listImpl(std::ostream &s) const {

@@ -96,7 +96,7 @@ Usage
 
 .. option:: -q
 
-  Use quite mode. Certain messages are not printed.
+  Use quiet mode. Certain messages are not printed.
 
 
 

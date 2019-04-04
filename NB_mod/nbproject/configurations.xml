@@ -116,6 +116,7 @@
       </logicalFolder>
       <logicalFolder name="lib" displayName="lib" projectFiles="true">
         <logicalFolder name="Chem" displayName="Chem" projectFiles="true">
+          <itemPath>../src/mod/lib/Chem/Mass.cpp</itemPath>
           <itemPath>../src/mod/lib/Chem/MoleculeUtil.cpp</itemPath>
           <itemPath>../src/mod/lib/Chem/MoleculeUtil.h</itemPath>
           <itemPath>../src/mod/lib/Chem/OBabel.cpp</itemPath>
@@ -363,7 +364,7 @@
             <pElem>/usr/include/openbabel-2.0</pElem>
             <pElem>${HOME}/programs/include</pElem>
           </incDir>
-          <commandLine>-O3 -fno-strict-aliasing -fPIC -pthread -Wall -Wextra -Wno-unused-local-typedefs -Wno-unused-parameter -Wno-comment -Wno-maybe-uninitialized -Wno-deprecated-declarations -Wno-sign-compare -Wno-ignored-attributes -ftemplate-backtrace-limit=0</commandLine>
+          <commandLine>-O3 -fno-strict-aliasing -fPIC -pthread -Wall -Wextra -Wno-unused-local-typedefs -Wno-unused-parameter -Wno-comment -Wno-maybe-uninitialized -Wno-deprecated-declarations -Wno-sign-compare -Wno-ignored-attributes -ftemplate-backtrace-limit=0 -fno-stack-protector</commandLine>
           <preprocessorList>
             <Elem>BOOST_RESULT_OF_USE_DECLTYPE</Elem>
             <Elem>BOOST_SPIRIT_USE_PHOENIX_V3</Elem>
@@ -385,6 +386,7 @@
             <linkerLibLibItem>openbabel</linkerLibLibItem>
             <linkerOptionItem>-pthread</linkerOptionItem>
             <linkerOptionItem>-Wl,-Bdynamic</linkerOptionItem>
+            <linkerLibLibItem>dl</linkerLibLibItem>
           </linkerLibItems>
           <commandLine>-rdynamic -Wl,--no-undefined</commandLine>
         </linkerTool>
@@ -639,6 +641,8 @@
       </item>
       <item path="../src/mod/lib/Algorithm.h" ex="false" tool="3" flavor2="0">
       </item>
+      <item path="../src/mod/lib/Chem/Mass.cpp" ex="false" tool="1" flavor2="0">
+      </item>
       <item path="../src/mod/lib/Chem/MoleculeUtil.cpp"
             ex="false"
             tool="1"
@@ -691,6 +695,11 @@
             flavor2="0">
       </item>
       <item path="../src/mod/lib/DG/NonHyperRuleComp.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../src/mod/lib/DG/RuleApplicationUtils.h"
             ex="false"
             tool="3"
             flavor2="0">

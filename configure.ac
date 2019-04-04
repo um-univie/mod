@@ -23,7 +23,7 @@ AX_PREFIX_CONFIG_H([src/mod/BuildConfig.h], [MOD], [src/mod/BuildConfig.h_])
 # search build-generated sources, distributed source, and our Boost files
 AM_CPPFLAGS="-I\$(top_builddir)/src -I\$(top_srcdir)/src"
 AM_CPPFLAGS="$AM_CPPFLAGS -DBOOST_SPIRIT_USE_PHOENIX_V3 -DBOOST_RESULT_OF_USE_DECLTYPE $BOOST_CPPFLAGS -DBOOST_SYSTEM_NO_DEPRECATED"
-AM_CXXFLAGS="-std=c++14 -Wno-unused-local-typedefs -Wno-unused-parameter -Wno-comment -Wno-maybe-uninitialized -Wno-deprecated-declarations"
+AM_CXXFLAGS="-std=c++14 -Wno-unused-local-typedefs -Wno-unused-parameter -Wno-comment -Wno-maybe-uninitialized -Wno-deprecated-declarations -fno-stack-protector"
 AM_LDFLAGS="-no-undefined"
 AM_LDLIBS=""
 # so we can restore before each test
@@ -54,9 +54,9 @@ default_enable_pymod="yes"
 # Boost ------------------------------------------------------------------
 boostReqVersion="1.64.0"
 # perm_group -------------------------------------------------------------
-permGroupReqVersion="v0.2"
+permGroupReqVersion="v0.3"
 # graph_canon ------------------------------------------------------------
-graphCanonReqVersion="v0.2"
+graphCanonReqVersion="v0.3"
 # Graphviz --------------------------------------------------------------
 # if PostMØD checks
 # Open Babel -------------------------------------------------------------
@@ -414,7 +414,7 @@ if test "$enable_pymod" = "yes"; then
 	# Ubuntu thinks it's great to only have the -py3X names.
 	# PYTHON_VERSION was set when we checked for python3
 	BOOST_PYTHON_LIB_NAME=""
-	for libName in boost_python{3,-py3$PYTHON_VERSION}; do
+	for libName in boost_python{3,3$PYTHON_VERSION,-py3$PYTHON_VERSION}; do
 		restoreFlags
 		LIBS+=" -l$libName $PYTHON_LDLIBS"
 		AC_MSG_CHECKING([for Boost.Python library, using Python 3 (lib name=$libName)])

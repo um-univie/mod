@@ -17,10 +17,12 @@ PropMolecule::PropMolecule(const GraphType &g, const PropString &pString) : Base
 	this->vertexState.resize(num_vertices(g));
 	for(Vertex v : asRange(vertices(g))) {
 		AtomId atomId;
+		Isotope isotope;
 		Charge charge;
 		bool radical;
-		std::tie(atomId, charge, radical) = Chem::decodeVertexLabel(pString[v]);
-		this->vertexState[get(boost::vertex_index_t(), g, v)] = AtomData(atomId, charge, radical);
+		std::tie(atomId, isotope, charge, radical) = Chem::decodeVertexLabel(pString[v]);
+		//		IO::log() << "Decode(" << pString[v] << "): " << atomId << ", " << isotope << ", " << charge << ", " << radical << std::endl;
+		this->vertexState[get(boost::vertex_index_t(), g, v)] = AtomData(atomId, isotope, charge, radical);
 		if(atomId == AtomIds::Invalid) isMolecule = false;
 	}
 
@@ -60,18 +62,16 @@ const lib::Chem::OBMolHandle &PropMolecule::getOBMol() const {
 
 #endif
 
-double PropMolecule::getMolarMass() const {
-	if(!getIsMolecule()) {
-		IO::log() << "MoleculeState: Trying to get molar mass of non-molecule." << std::endl;
-		MOD_ABORT;
-	} else {
-#ifndef MOD_HAVE_OPENBABEL
-		MOD_NO_OPENBABEL_ERROR
-		std::exit(1);
-#else
-		return getOBMol().getMolarMass();
-#endif
+double PropMolecule::getExactMass() const {
+	if(!getIsMolecule()) MOD_ABORT;
+	if(!exactMass) {
+		const auto vs = vertices(g);
+		exactMass = std::accumulate(vs.first, vs.second, 0.0, [&](double val, const auto v) {
+			const auto &ad = (*this)[v];
+			return val + lib::Chem::exactMass(ad.getAtomId(), ad.getIsotope()) - lib::Chem::electronMass * ad.getCharge();
+		});
 	}
+	return *exactMass;
 }
 
 double PropMolecule::getEnergy() const {

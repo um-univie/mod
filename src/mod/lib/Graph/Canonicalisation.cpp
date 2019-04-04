@@ -540,8 +540,8 @@ auto getCanonForm(const Single &g, EdgeHandler eHandler, LabelType labelType, bo
 	Single::CanonIdxMap ordIdx(perm.begin(), idx);
 	auto form = std::make_unique<Single::CanonForm>(graph, ordIdx, eLess);
 	auto autPtr = std::move(get(graph_canon::aut_pruner_basic::result_t(), res.second));
-	auto autPtrRes = std::make_unique<Single::AutGroup>(degree(*autPtr));
-	auto gens = generators(*autPtr); // skip the first, it should be the identity
+	auto autPtrRes = std::make_unique<Single::AutGroup>(autPtr->degree());
+	auto gens = autPtr->generators(); // skip the first, it should be the identity
 	for(const auto &p : asRange(++begin(gens), end(gens)))
 		autPtrRes->add_generator(p);
 	return std::make_tuple(std::move(perm), std::move(form), std::move(autPtrRes));
@@ -555,10 +555,14 @@ getCanonForm(const Single &g, LabelType labelType, bool withStereo) {
 		throw LogicError("Can only canonicalise with label type string.");
 	if(withStereo)
 		throw LogicError("Can not canonicalise stereo.");
-	if(get_molecule(g.getLabelledGraph()).getIsMolecule()) {
+	const auto &mol = get_molecule(g.getLabelledGraph());
+	const auto es = edges(g.getGraph());
+	const bool isMol = std::all_of(es.first, es.second, [&](const auto &e) {
+		return mol[e] != BondType::Invalid;
+	});
+	if(isMol) {
 		return getCanonForm(g, edge_handler_bond(g), labelType, withStereo);
 	} else {
-
 		std::string msg = "Can not canonicalise arbitrary edge labels.\n";
 		msg += "Graph is '" + g.getName() + "', with graphDFS: " + g.getGraphDFS().first;
 		throw LogicError(std::move(msg));

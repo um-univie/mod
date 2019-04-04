@@ -10,7 +10,7 @@ namespace graph {
 //------------------------------------------------------------------------------
 
 Printer::Printer() : options(new lib::IO::Graph::Write::Options()) {
-	options->EdgesAsBonds(true).RaiseCharges(true);
+	options->EdgesAsBonds(true).RaiseCharges(true).RaiseIsotopes(true);
 }
 
 Printer::Printer(const Printer &that)

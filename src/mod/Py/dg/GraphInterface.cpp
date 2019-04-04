@@ -25,6 +25,12 @@ void GraphInterface_doExport() {
 			.def(py::self == py::self)
 			.def(py::self != py::self)
 			.def(py::self < py::self)
+			.def("__hash__", &DG::Vertex::hash)
+			// rst:		.. py::method:: __bool__(self)
+			// rst:
+			// rst:			:returns: ``not isNull()``
+			// rst:			:rtype: bool
+			.def("__bool__", &DG::Vertex::operator bool)
 			// rst:		.. py:method:: isNull()
 			// rst:
 			// rst:			:returns: whether this is a null descriptor or not.
@@ -98,6 +104,12 @@ void GraphInterface_doExport() {
 			.def(py::self == py::self)
 			.def(py::self != py::self)
 			.def(py::self < py::self)
+			.def("__hash__", &DG::HyperEdge::hash)
+			// rst:		.. py::method:: __bool__(self)
+			// rst:
+			// rst:			:returns: ``not isNull()``
+			// rst:			:rtype: bool
+			.def("__bool__", &DG::HyperEdge::operator bool)
 			// rst:		.. py:method:: isNull()
 			// rst:
 			// rst:			:returns: whether this is a null descriptor or not.
@@ -167,6 +179,9 @@ void GraphInterface_doExport() {
 			// rst: 		:type printer: :class:`GraphPrinter`
 			// rst:			:param matchColour: the TikZ colour to use for the rule and its image in the bottom span.
 			// rst:			:type matchColour: string
+			// rst:			:returns: A list with file data for each DPO diagram printed.
+			// rst:				Each element is a pair of filename prefixes, where the first entry is completed by appending ``_derL``, ``_derK``, or ``_derR``.
+			// rst:				The second entry is completed similarly by appending ``_derG``, ``_derD``, or ``_derH``.
 			// rst:			:raises: :py:class:`LogicError` if it is a null descriptor.
 			.def("print", &DG::HyperEdge::print,
 			/*         */ (py::arg("printer") = graph::Printer(), py::arg("nomatchColour") = "gray", py::arg("matchColour") = ""))

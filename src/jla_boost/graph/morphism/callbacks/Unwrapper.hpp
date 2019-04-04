@@ -36,8 +36,8 @@ private:
 };
 
 template<typename Graph, typename Next>
-UnwrapperBoth<Graph, Next> makeUnwrapperBoth(Next &&next) {
-	return UnwrapperBoth<Graph, Next>(std::forward<Next>(next));
+UnwrapperBoth<Graph, Next> makeUnwrapperBoth(Next next) {
+	return UnwrapperBoth<Graph, Next>(next);
 }
 
 template<typename Graph, typename Next>
@@ -64,8 +64,8 @@ private:
 };
 
 template<typename Graph, typename Next>
-UnwrapperDom<Graph, Next> makeUnwrapperDom(Next &&next) {
-	return UnwrapperDom<Graph, Next>(std::forward<Next>(next));
+UnwrapperDom<Graph, Next> makeUnwrapperDom(Next next) {
+	return UnwrapperDom<Graph, Next>(next);
 }
 
 template<typename Graph, typename Next>
@@ -92,8 +92,8 @@ private:
 };
 
 template<typename Graph, typename Next>
-UnwrapperCodom<Graph, Next> makeUnwrapperCodom(Next &&next) {
-	return UnwrapperCodom<Graph, Next>(std::forward<Next>(next));
+UnwrapperCodom<Graph, Next> makeUnwrapperCodom(Next next) {
+	return UnwrapperCodom<Graph, Next>(next);
 }
 
 } // namespace GraphMorphism

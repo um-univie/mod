@@ -64,6 +64,12 @@ void exportLeft() {
 			.def(py::self == py::self)
 			.def(py::self != py::self)
 			.def(py::self < py::self)
+			.def("__hash__", &Rule::LeftGraph::Vertex::hash)
+			// rst:		.. py::method:: __bool__(self)
+			// rst:
+			// rst:			:returns: ``not isNull()``
+			// rst:			:rtype: bool
+			.def("__bool__", &Rule::LeftGraph::Vertex::operator bool)
 			// rst:		.. py:method:: isNull()
 			// rst:
 			// rst:			:returns: whether this is a null descriptor or not.
@@ -117,6 +123,13 @@ void exportLeft() {
 			// rst:			:type: :py:class:`AtomId`
 			// rst:			:raises: :py:class:`LogicError` if it is a null descriptor.
 			.add_property("atomId", &Rule::LeftGraph::Vertex::getAtomId)
+			// rst:		.. py:attribute:: isotope
+			// rst:
+			// rst:			(Read-only) The isotope of the vertex.
+			// rst:
+			// rst:			:type: :py:class:`Isotope`
+			// rst:			:raises: :py:class:`LogicError` if it is a null descriptor.
+			.add_property("isotope", &Rule::LeftGraph::Vertex::getIsotope)
 			// rst:		.. py:attribute:: charge
 			// rst:
 			// rst:			(Read-only) The charge of the vertex.
@@ -158,6 +171,11 @@ void exportLeft() {
 			.def(py::self == py::self)
 			.def(py::self != py::self)
 			.def(py::self < py::self)
+			// rst:		.. py::method:: __bool__(self)
+			// rst:
+			// rst:			:returns: ``not isNull()``
+			// rst:			:rtype: bool
+			.def("__bool__", &Rule::LeftGraph::Edge::operator bool)
 			// rst:		.. py:method:: isNull()
 			// rst:
 			// rst:			:returns: whether this is a null descriptor or not.
@@ -269,6 +287,12 @@ void exportContext() {
 			.def(py::self == py::self)
 			.def(py::self != py::self)
 			.def(py::self < py::self)
+			.def("__hash__", &Rule::ContextGraph::Vertex::hash)
+			// rst:		.. py::method:: __bool__(self)
+			// rst:
+			// rst:			:returns: ``not isNull()``
+			// rst:			:rtype: bool
+			.def("__bool__", &Rule::ContextGraph::Vertex::operator bool)
 			// rst:		.. py:method:: isNull()
 			// rst:
 			// rst:			:returns: whether this is a null descriptor or not.
@@ -323,6 +347,11 @@ void exportContext() {
 			.def(py::self == py::self)
 			.def(py::self != py::self)
 			.def(py::self < py::self)
+			// rst:		.. py::method:: __bool__(self)
+			// rst:
+			// rst:			:returns: ``not isNull()``
+			// rst:			:rtype: bool
+			.def("__bool__", &Rule::ContextGraph::Edge::operator bool)
 			// rst:		.. py:method:: isNull()
 			// rst:
 			// rst:			:returns: whether this is a null descriptor or not.
@@ -423,6 +452,12 @@ void exportRight() {
 			.def(py::self == py::self)
 			.def(py::self != py::self)
 			.def(py::self < py::self)
+			.def("__hash__", &Rule::RightGraph::Vertex::hash)
+			// rst:		.. py::method:: __bool__(self)
+			// rst:
+			// rst:			:returns: ``not isNull()``
+			// rst:			:rtype: bool
+			.def("__bool__", &Rule::RightGraph::Vertex::operator bool)
 			// rst:		.. py:method:: isNull()
 			// rst:
 			// rst:			:returns: whether this is a null descriptor or not.
@@ -476,6 +511,13 @@ void exportRight() {
 			// rst:			:type: :py:class:`AtomId`
 			// rst:			:raises: :py:class:`LogicError` if it is a null descriptor.
 			.add_property("atomId", &Rule::RightGraph::Vertex::getAtomId)
+			// rst:		.. py:attribute:: isotope
+			// rst:
+			// rst:			(Read-only) The isotope of the vertex.
+			// rst:
+			// rst:			:type: :py:class:`Isotope`
+			// rst:			:raises: :py:class:`LogicError` if it is a null descriptor.
+			.add_property("isotope", &Rule::RightGraph::Vertex::getIsotope)
 			// rst:		.. py:attribute:: charge
 			// rst:
 			// rst:			(Read-only) The charge of the vertex.
@@ -517,6 +559,11 @@ void exportRight() {
 			.def(py::self == py::self)
 			.def(py::self != py::self)
 			.def(py::self < py::self)
+			// rst:		.. py::method:: __bool__(self)
+			// rst:
+			// rst:			:returns: ``not isNull()``
+			// rst:			:rtype: bool
+			.def("__bool__", &Rule::RightGraph::Edge::operator bool)
 			// rst:		.. py:method:: isNull()
 			// rst:
 			// rst:			:returns: whether this is a null descriptor or not.
@@ -591,6 +638,12 @@ void exportCore() {
 			.def(py::self == py::self)
 			.def(py::self != py::self)
 			.def(py::self < py::self)
+			.def("__hash__", &Rule::Vertex::hash)
+			// rst:		.. py::method:: __bool__(self)
+			// rst:
+			// rst:			:returns: ``not isNull()``
+			// rst:			:rtype: bool
+			.def("__bool__", &Rule::Vertex::operator bool)
 			// rst:		.. py:method:: isNull()
 			// rst:
 			// rst:			:returns: whether this is a null descriptor or not.
@@ -670,6 +723,11 @@ void exportCore() {
 			.def(py::self == py::self)
 			.def(py::self != py::self)
 			.def(py::self < py::self)
+			// rst:		.. py::method:: __bool__(self)
+			// rst:
+			// rst:			:returns: ``not isNull()``
+			// rst:			:rtype: bool
+			.def("__bool__", &Rule::Edge::operator bool)
 			// rst:		.. py:method:: isNull()
 			// rst:
 			// rst:			:returns: whether this is a null descriptor or not.

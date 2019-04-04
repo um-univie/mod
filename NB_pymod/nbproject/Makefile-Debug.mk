@@ -71,7 +71,7 @@ FFLAGS=
 ASFLAGS=
 
 # Link Libraries and Options
-LDLIBSOPTIONS=-L${HOME}/programs/lib -Wl,-rpath,'${HOME}/stuff/code/mod/NB_mod/dist/lib' -Wl,-rpath,'${HOME}/programs/lib' -Wl,-Bdynamic -Wl,-rpath,'../NB_mod/dist/lib' -L../NB_mod/dist/lib -lmod -lboost_python3 `pkg-config --libs python3`  
+LDLIBSOPTIONS=-L${HOME}/programs/lib -Wl,-rpath,'${HOME}/stuff/code/mod/NB_mod/dist/lib' -Wl,-rpath,'${HOME}/programs/lib' -Wl,-Bdynamic -Wl,-rpath,'../NB_mod/dist/lib' -L../NB_mod/dist/lib -lmod -lboost_python36 `pkg-config --libs python3`  
 
 # Build Targets
 .build-conf: ${BUILD_SUBPROJECTS}

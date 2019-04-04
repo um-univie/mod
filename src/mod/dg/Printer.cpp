@@ -273,5 +273,13 @@ void Printer::popEdgeColour() {
 	printer->popEdgeColour();
 }
 
+void Printer::setRotationOverwrite(std::function<int(std::shared_ptr<graph::Graph>) > f) {
+	printer->setRotationOverwrite(f);
+}
+
+void Printer::setMirrorOverwrite(std::function<bool(std::shared_ptr<graph::Graph>) > f) {
+	printer->setMirrorOverwrite(f);
+}
+
 } // namespace dg
 } // namespace mod

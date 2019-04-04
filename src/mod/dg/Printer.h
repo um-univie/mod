@@ -189,6 +189,17 @@ struct Printer {
 	// rst:
 	// rst:		Remove the last pushed hyperedge colouring function.
 	void popEdgeColour();
+public:
+	// rst: .. function:: void setRotationOverwrite(std::function<int(std::shared_ptr<graph::Graph>)> f)
+	// rst:
+	// rst:		Overwrite the rotation set in the nested :cpp:class:`graph::Printer`. The given function will be used
+	// rst:		to set the rotation of each printed graph.
+	void setRotationOverwrite(std::function<int(std::shared_ptr<graph::Graph>) > f);
+	// rst: .. function:: void setMirrorOverwrite(std::function<bool(std::shared_ptr<graph::Graph>) > f)
+	// rst:
+	// rst:		Overwrite the mirror set in the nested :cpp:class:`graph::Printer`. The given function will be used
+	// rst:		to set the mirror of each printed graph.
+	void setMirrorOverwrite(std::function<bool(std::shared_ptr<graph::Graph>) > f);
 private:
 	std::unique_ptr<graph::Printer> graphPrinter;
 	std::unique_ptr<lib::IO::DG::Write::Printer> printer;

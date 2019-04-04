@@ -98,6 +98,8 @@ public:
 		auto makeCheckConstraints = [&](auto &&mrNext) {
 			const auto &constraints = get_match_constraints(rsDom);
 			auto constraintsIterEnd = enforceConstraints ? constraints.end() : constraints.begin();
+			if(getConfig().componentSG.verbose.get())
+				IO::log() << "RuleRuleComponentMonomorphism(" << idDom << ", " << idCodom << ")::makeCheckConstraints: " << std::distance(constraints.begin(), constraintsIterEnd) << std::endl;
 			return GraphMorphism::Constraints::makeChecker(
 					asRange(std::make_pair(constraints.begin(), constraintsIterEnd)),
 					rsCodom, labelSettings, mrNext);
@@ -129,6 +131,8 @@ public:
 
 		//				auto mrPrinter = GraphMorphism::Callback::makePrint(IO::log(), patternWrapped, targetWrapped, mrCheckConstraints);
 		lib::GraphMorphism::morphismSelectByLabelSettings(wgDom, wgCodom, labelSettings, GM_MOD::VF2Monomorphism(), mr, predWrapper, mrWrapper);
+		if(getConfig().componentSG.verbose.get())
+			IO::log() << "RuleRuleComponentMonomorphism(" << idDom << ", " << idCodom << "): got " << morphisms.size() << std::endl;
 		return morphisms;
 	}
 private:

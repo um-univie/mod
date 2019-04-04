@@ -49,11 +49,11 @@ struct Options {
 	Options() = default;
 
 	Options &Non() {
-		return EdgesAsBonds(false).CollapseHydrogens(false).RaiseCharges(false).SimpleCarbons(false).Thick(false).WithColour(false).WithIndex(false);
+		return EdgesAsBonds(false).CollapseHydrogens(false).RaiseIsotopes(false).RaiseCharges(false).SimpleCarbons(false).Thick(false).WithColour(false).WithIndex(false);
 	}
 
 	Options &All() {
-		return EdgesAsBonds(true).CollapseHydrogens(true).RaiseCharges(true).SimpleCarbons(true).Thick(true).WithColour(true).WithIndex(true);
+		return EdgesAsBonds(true).CollapseHydrogens(true).RaiseIsotopes(true).RaiseCharges(true).SimpleCarbons(true).Thick(true).WithColour(true).WithIndex(true);
 	}
 
 	Options &EdgesAsBonds(bool v) {
@@ -63,6 +63,11 @@ struct Options {
 
 	Options &CollapseHydrogens(bool v) {
 		collapseHydrogens = v;
+		return *this;
+	}
+
+	Options &RaiseIsotopes(bool v) {
+		raiseIsotopes = v;
 		return *this;
 	}
 
@@ -123,7 +128,10 @@ struct Options {
 		std::string res;
 		res += toChar(edgesAsBonds);
 		res += toChar(collapseHydrogens);
-		res += toChar(raiseCharges);
+		char raise = 0;
+		if(raiseCharges) raise += 1;
+		if(raiseIsotopes) raise += 2;
+		res += '0' + raise;
 		res += toChar(simpleCarbons);
 		res += toChar(thick);
 		res += toChar(withColour);
@@ -151,6 +159,7 @@ public:
 	bool edgesAsBonds = false;
 	bool collapseHydrogens = false;
 	bool raiseCharges = false;
+	bool raiseIsotopes = false;
 	bool simpleCarbons = false;
 	bool thick = false;
 	bool withColour = false;

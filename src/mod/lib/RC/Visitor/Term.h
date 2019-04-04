@@ -62,6 +62,10 @@ public:
 			pResult.add(vResult, pFirst.getLeft()[vFirst], pFirst.getRight()[vFirst]);
 			break;
 		}
+		if(Verbose) {
+			lib::IO::log() << "Cur machine:\n";
+			lib::IO::Term::Write::wam(getMachine(*result.rResult.pTerm), lib::Term::getStrings(), lib::IO::log());
+		}
 	}
 
 	template<bool Verbose, typename RuleFirst, typename RuleSecond, typename InvertibleVertexMap, typename Result,
@@ -86,6 +90,10 @@ public:
 			pResult.add(vResult, deref(pSecond.getLeft()[vSecond], result), deref(pSecond.getRight()[vSecond], result));
 			break;
 		}
+		if(Verbose) {
+			lib::IO::log() << "Cur machine:\n";
+			lib::IO::Term::Write::wam(getMachine(*result.rResult.pTerm), lib::Term::getStrings(), lib::IO::log());
+		}
 	}
 
 	template<bool Verbose, typename RuleFirst, typename RuleSecond, typename InvertibleVertexMap, typename Result,
@@ -107,6 +115,10 @@ public:
 		case Membership::Context:
 			pResult.add(eResult, pFirst.getLeft()[eFirst], pFirst.getRight()[eFirst]);
 			break;
+		}
+		if(Verbose) {
+			lib::IO::log() << "Cur machine:\n";
+			lib::IO::Term::Write::wam(getMachine(*result.rResult.pTerm), lib::Term::getStrings(), lib::IO::log());
 		}
 	}
 
@@ -131,6 +143,10 @@ public:
 		case Membership::Context:
 			pResult.add(eResult, deref(pSecond.getLeft()[eSecond], result), deref(pSecond.getRight()[eSecond], result));
 			break;
+		}
+		if(Verbose) {
+			lib::IO::log() << "Cur machine:\n";
+			lib::IO::Term::Write::wam(getMachine(*result.rResult.pTerm), lib::Term::getStrings(), lib::IO::log());
 		}
 	}
 public:
@@ -219,9 +235,11 @@ private:
 	void fixSecondTerm(std::size_t addr, Result &result) {
 		auto &m = getMachine(*result.rResult.pTerm);
 		m.verify();
-		//			lib::IO::Term::Write::wam(m, lib::Term::getStrings(), lib::IO::log() << "Copy " << addr << "\n");
+		if(Verbose)
+			lib::IO::Term::Write::wam(m, lib::Term::getStrings(), lib::IO::log() << "Copy " << addr << "\n");
 		m.copyFromTemp(addr);
-		//			lib::IO::Term::Write::wam(m, lib::Term::getStrings(), lib::IO::log() << "After copy " << addr << "\n");
+		if(Verbose)
+			lib::IO::Term::Write::wam(m, lib::Term::getStrings(), lib::IO::log() << "After copy " << addr << "\n");
 		m.verify();
 	}
 

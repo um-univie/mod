@@ -67,7 +67,7 @@ std::ostream &operator<<(std::ostream &s, const DG::HyperEdge &e) {
 		s << " }, {";
 		for(auto tar : e.targets())
 			s << " " << tar.getId();
-		s << "}";
+		s << " }";
 	}
 	return s << ")";
 }
@@ -82,6 +82,14 @@ bool operator!=(const DG::HyperEdge &e1, const DG::HyperEdge &e2) {
 
 bool operator<(const DG::HyperEdge &e1, const DG::HyperEdge &e2) {
 	return std::tie(e1.g, e1.eId) < std::tie(e2.g, e2.eId);
+}
+
+std::size_t DG::HyperEdge::hash() const {
+	return g ? getId() : -1;
+}
+
+DG::HyperEdge::operator bool() const {
+	return !isNull();
 }
 
 bool DG::HyperEdge::isNull() const {
@@ -144,14 +152,15 @@ DG::HyperEdge DG::HyperEdge::getInverse() const {
 	return HyperEdge(g, get(boost::vertex_index_t(), dg, vInverse));
 }
 
-void DG::HyperEdge::print(const graph::Printer &printer, const std::string &nomatchColour, const std::string &matchColour) const {
+std::vector<std::pair<std::string, std::string> >
+DG::HyperEdge::print(const graph::Printer &printer, const std::string &nomatchColour, const std::string &matchColour) const {
 	if(isNull()) throw LogicError("Can not print null edge.");
 	const auto &dgHyper = g->getHyper();
 	const auto &dg = dgHyper.getGraph();
 	using boost::vertices;
 	auto v = *(vertices(dg).first + eId);
 	assert(dg[v].kind == lib::DG::HyperVertexKind::Edge);
-	lib::IO::Derivation::Write::summary(g->getNonHyper(), v, printer.getOptions(), nomatchColour, matchColour);
+	return lib::IO::Derivation::Write::summary(g->getNonHyper(), v, printer.getOptions(), nomatchColour, matchColour);
 }
 
 void DG::HyperEdge::printTransitionState() const {

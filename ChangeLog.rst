@@ -4,6 +4,100 @@
 Changes
 #######
 
+Release 0.8.0 (2019-04-04)
+==========================
+
+Incompatible Changes
+--------------------
+
+- ``graph::Graph::getMolarMass``/``Graph.molarMass`` has been removed.
+- Python interface: remove auto-generated hash-functions from all classes.
+  Note, most code broken by this was already silemtly broken.
+- Python interface: consistently disable all custom attributes on all classes.
+- Removed ``dg::Strategy::GraphState::getHyperEdges``/``DGStratGraphState.hyperEdges``.
+  Use the graph interface of :cpp:any:`dg::DG`/:py:obj:`DG` instead.
+- All atoms, including hydrogens, are now present with ids in strings from
+  :cpp:any:`graph::Graph::getSmilesWithIds`/:py:obj:`Graph.smilesWithIds`.
+- :cpp:any:`dg::DG::print`/:py:obj:`DG.print` now returns a pair of strings,
+  instead of just one string. The first entry is the old return value.
+  The second entry is the tex-file to depend on for layout coordinates.
+- SMILES parsing: disallow isotope 0 as it is equivalent to not specifying an isotope.
+- All classes in the Python interface without a custom hash function has their
+  hash function removed. This is to prevent inconsistencies between hash and equality.
+
+
+New Features
+------------
+
+- Added support for isotopes (see :ref:`mol-enc`).
+- Added :cpp:any:`graph::Graph::getExactMass`/:py:obj:`Graph.exactMass`.
+- Added optional ``printInfo`` parameter to
+  :cpp:any:`dg::DG::calc`/:py:obj:`DG.calc`
+  to allow disabling of messages to stdout during calculation.
+- The graph interface on :cpp:any:`dg::DG`/:py:obj:`DG` can now be used before and during
+  calculation.
+- Added include of the PGFPlots package in the summary preable.
+- Added :cpp:any:`AtomId::symbol`/:py:obj:`AtomId.symbol`.
+- Adeed an ``add`` parameter to :py:obj:`graphGMLString`, :py:obj:`graphGML`,
+  :py:obj:`graphDFS`, :py:obj:`smiles`, :py:obj:`ruleGMLString`, and :py:obj:`ruleGML`.
+  It controls whether the graph/rule is appended to :py:obj:`inputGraphs`/:py:obj:`inputRules`
+  or not. It defaults to ``True``.
+- Add :cpp:any:`graph::Graph::getGraphDFSWithIds`/:py:obj:`Graph.graphDFSWithIds`
+  for getting a string annotated with the internal vertex ids in form of the class labels.
+  This mirrors the previously added :cpp:any:`graph::Graph::getSmilesWithIds`/:py:obj:`Graph.smilesWithIds`.
+- Improve error messages from GML parsing of lists.
+- Changed the return type of :cpp:func:`dg::DG::getGraphDatabase` from a `std::set` to a `std::unordered_set`.
+- :cpp:func:`dg::DG::HyperEdge::print`/:py:func:`DGHyperEdge.print` now returns a list of file data.
+- The vertices and edges of all graph interfaces now have a conversion to bool:
+
+  - :cpp:class:`graph::Graph::Vertex`/:py:class:`GraphVertex`,
+    :cpp:class:`graph::Graph::Edge`/:py:class:`GraphEdge`
+  - :cpp:class:`rule::Rule::Vertex`/:py:class:`RuleVertex`,
+    :cpp:class:`rule::Rule::Edge`/:py:class:`RuleEdge`
+  - :cpp:class:`rule::Rule::LeftGraph::Vertex`/:py:class:`RuleLeftGraphVertex`,
+    :cpp:class:`rule::Rule::LeftGraph::Edge`/:py:class:`RuleLeftGraphEdge`
+  - :cpp:class:`rule::Rule::ContextGraph::Vertex`/:py:class:`RuleContextGraphVertex`,
+    :cpp:class:`rule::Rule::ContextGraph::Edge`/:py:class:`RuleContextGraphEdge`
+  - :cpp:class:`rule::Rule::RightGraph::Vertex`/:py:class:`RuleRightGraphVertex`,
+    :cpp:class:`rule::Rule::RightGraph::Edge`/:py:class:`RuleRightGraphEdge`
+  - :cpp:class:`dg::DG::Vertex`/:py:class:`DGVertex`,
+    :cpp:class:`dg::DG::HyperEdge`/:py:class:`DGHyperEdge`
+
+- The vertices of all graph interfaces now have a proper hash support.
+- Added :cpp:func:`dg::Printer::setRotationOverwrite`/:py:func:`DGPrinter.setRotationOverwrite`
+  and :cpp:func:`dg::Printer::setMirrorOverwrite`/:py:func:`DGPrinter.setMirrorOverwrite`.
+
+
+Bugs Fixed
+----------
+
+- Throw :cpp:any:`InputError`/:py:obj:`InputError` when loading a DG dump
+  when a rule in the dump can not be linked to a rule from the user.
+- Fix molecule decoding of atoms with negative charge and a radical.
+- Fix dangling reference bug in first-order term handling.
+- Fix inifiinite loop bug in first-order term handling.
+- Remove extraneous template parameter lists to make it compile on GCC 8.
+- Fix the documentation of
+  :py:obj:`Graph.minExternalId`, :py:obj:`Graph.maxExternalId`,
+  :py:obj:`Rule.minExternalId`, and :py:obj:`Rule.maxExternalId`.
+  It was not being rendered.
+- Fixed documentation of the constructor for :cpp:class:`AtomData`.
+- Fix dangling references in morphism callbacks.
+- Make sure Open Babel is not called in some cases where it is not needed.
+- Find the library file for Boost.Python for Boost >= 1.67.
+- Fix ambiguity between variadic arguments and function parameter packs,
+  making term morphisms and stereo morphisms slow.
+- Removed sanity check from GraphDFS loading which dominated the run time.
+- Document :py:obj:`inputGraphs` and :py:obj:`inputRules`.
+
+
+Other
+-----
+
+- Now compiles with ``-fno-stack-protector`` (some OS distributions messes with default flags).
+- The Makefile from ``mod --get-latex`` now cleans ``.vrb``, ``.snm``, and ``.nav`` files as well.
+
+
 Release 0.7.0 (2018-03-08)
 ==========================
 

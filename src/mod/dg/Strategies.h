@@ -34,8 +34,7 @@ public:
 
 	struct GraphState {
 		GraphState(std::function<void(std::vector<std::shared_ptr<graph::Graph> >&) > fSubset,
-				std::function<void(std::vector<std::shared_ptr<graph::Graph> >&) > fUniverse,
-				std::function<void(std::vector<DG::HyperEdge>&) > fEdges);
+				std::function<void(std::vector<std::shared_ptr<graph::Graph> >&) > fUniverse);
 		// rst:		.. function:: const std::vector<std::shared_ptr<graph::Graph> > &getSubset() const
 		// rst:
 		// rst:			:returns: the subset :math:`\mathcal{S}`.
@@ -46,18 +45,10 @@ public:
 		// rst:			:returns: the universe :math:`\mathcal{U}`
 		// rst:
 		const std::vector<std::shared_ptr<graph::Graph> > &getUniverse() const;
-		// rst:		.. function:: const std::vector<DG::HyperEdge> &getHyperEdges() const
-		// rst:
-		// rst:			:returns: all edges in the underlying derivation graph.
-		// rst:				I.e., some derivations might involve graphs not in the universe.
-		// rst:
-		const std::vector<DG::HyperEdge> &getHyperEdges() const;
 	private:
-		mutable bool subsetInit, universeInit, edgesInit;
+		mutable bool subsetInit, universeInit;
 		mutable std::vector<std::shared_ptr<graph::Graph> > subset, universe;
-		mutable std::vector<DG::HyperEdge> edges;
 		std::function<void(std::vector<std::shared_ptr<graph::Graph> >&) > fSubset, fUniverse;
-		std::function<void(std::vector<DG::HyperEdge>&) > fEdges;
 	};
 	// rst-nested-end:
 private:

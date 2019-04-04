@@ -53,6 +53,7 @@ OBJECTFILES= \
 	${OBJECTDIR}/_ext/5108d387/Graph.o \
 	${OBJECTDIR}/_ext/5108d387/GraphInterface.o \
 	${OBJECTDIR}/_ext/5108d387/Printer.o \
+	${OBJECTDIR}/_ext/3b7f185e/Mass.o \
 	${OBJECTDIR}/_ext/3b7f185e/MoleculeUtil.o \
 	${OBJECTDIR}/_ext/3b7f185e/OBabel.o \
 	${OBJECTDIR}/_ext/3b7f185e/Smiles.o \
@@ -128,8 +129,8 @@ OBJECTFILES= \
 CFLAGS=
 
 # CC Compiler Flags
-CCFLAGS=-O3 -fno-strict-aliasing -fPIC -pthread -Wall -Wextra -Wno-unused-local-typedefs -Wno-unused-parameter -Wno-comment -Wno-maybe-uninitialized -Wno-deprecated-declarations -Wno-sign-compare -Wno-ignored-attributes -ftemplate-backtrace-limit=0
-CXXFLAGS=-O3 -fno-strict-aliasing -fPIC -pthread -Wall -Wextra -Wno-unused-local-typedefs -Wno-unused-parameter -Wno-comment -Wno-maybe-uninitialized -Wno-deprecated-declarations -Wno-sign-compare -Wno-ignored-attributes -ftemplate-backtrace-limit=0
+CCFLAGS=-O3 -fno-strict-aliasing -fPIC -pthread -Wall -Wextra -Wno-unused-local-typedefs -Wno-unused-parameter -Wno-comment -Wno-maybe-uninitialized -Wno-deprecated-declarations -Wno-sign-compare -Wno-ignored-attributes -ftemplate-backtrace-limit=0 -fno-stack-protector
+CXXFLAGS=-O3 -fno-strict-aliasing -fPIC -pthread -Wall -Wextra -Wno-unused-local-typedefs -Wno-unused-parameter -Wno-comment -Wno-maybe-uninitialized -Wno-deprecated-declarations -Wno-sign-compare -Wno-ignored-attributes -ftemplate-backtrace-limit=0 -fno-stack-protector
 
 # Fortran Compiler Flags
 FFLAGS=
@@ -138,7 +139,7 @@ FFLAGS=
 ASFLAGS=
 
 # Link Libraries and Options
-LDLIBSOPTIONS=-L${HOME}/programs/lib -Wl,-rpath,'${HOME}/programs/lib' -Wl,-Bdynamic -lboost_regex -lboost_system -lopenbabel -pthread -Wl,-Bdynamic
+LDLIBSOPTIONS=-L${HOME}/programs/lib -Wl,-rpath,'${HOME}/programs/lib' -Wl,-Bdynamic -lboost_regex -lboost_system -lopenbabel -pthread -Wl,-Bdynamic -ldl
 
 # Build Targets
 .build-conf: ${BUILD_SUBPROJECTS}
@@ -237,6 +238,11 @@ ${OBJECTDIR}/_ext/5108d387/Printer.o: ../src/mod/graph/Printer.cpp
 	${MKDIR} -p ${OBJECTDIR}/_ext/5108d387
 	${RM} "$@.d"
 	$(COMPILE.cc) -g -DBOOST_RESULT_OF_USE_DECLTYPE -DBOOST_SPIRIT_USE_PHOENIX_V3 -DBOOST_SYSTEM_NO_DEPRECATED -I${CND_BASEDIR}/../../perm_group/include -I${CND_BASEDIR}/../../graph_canon/include -I${CND_BASEDIR}/../src/mod/lib/boost/include -I${CND_BASEDIR}/../src -I${CND_BASEDIR}/srcExtra -I/usr/include/openbabel-2.0 -I${HOME}/programs/include -std=c++14 -fPIC  -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/_ext/5108d387/Printer.o ../src/mod/graph/Printer.cpp
+
+${OBJECTDIR}/_ext/3b7f185e/Mass.o: ../src/mod/lib/Chem/Mass.cpp
+	${MKDIR} -p ${OBJECTDIR}/_ext/3b7f185e
+	${RM} "$@.d"
+	$(COMPILE.cc) -g -DBOOST_RESULT_OF_USE_DECLTYPE -DBOOST_SPIRIT_USE_PHOENIX_V3 -DBOOST_SYSTEM_NO_DEPRECATED -I${CND_BASEDIR}/../../perm_group/include -I${CND_BASEDIR}/../../graph_canon/include -I${CND_BASEDIR}/../src/mod/lib/boost/include -I${CND_BASEDIR}/../src -I${CND_BASEDIR}/srcExtra -I/usr/include/openbabel-2.0 -I${HOME}/programs/include -std=c++14 -fPIC  -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/_ext/3b7f185e/Mass.o ../src/mod/lib/Chem/Mass.cpp
 
 ${OBJECTDIR}/_ext/3b7f185e/MoleculeUtil.o: ../src/mod/lib/Chem/MoleculeUtil.cpp
 	${MKDIR} -p ${OBJECTDIR}/_ext/3b7f185e

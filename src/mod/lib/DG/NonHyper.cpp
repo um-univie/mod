@@ -36,8 +36,7 @@ std::size_t nextDGNum = 0;
 }// namespace 
 
 NonHyper::NonHyper(const std::vector<std::shared_ptr<graph::Graph> > &graphDatabase, LabelSettings labelSettings)
-: id(nextDGNum++), labelSettings(labelSettings), hyperCreator(nullptr), hasCalculated(false),
-productNum(0) {
+: id(nextDGNum++), labelSettings(labelSettings) {
 	if(getConfig().dg.skipInitialGraphIsomorphismCheck.get()) {
 		for(std::shared_ptr<graph::Graph> gCand : graphDatabase) this->graphDatabase.insert(gCand);
 	} else {
@@ -84,16 +83,20 @@ LabelSettings NonHyper::getLabelSettings() const {
 	return labelSettings;
 }
 
-void NonHyper::calculate() {
-	if(getHasCalculated()) MOD_ABORT;
+void NonHyper::calculatePrologue() {
+	if(getHasStartedCalculation()) MOD_ABORT;
+	if(hyperCreator) MOD_ABORT;
+	hasStartedCalculation = true;
 	auto p = Hyper::makeHyper(*this);
-	assert(!hyperCreator);
 	hyper = std::move(p.first);
-	hyperCreator = &p.second;
-	calculateImpl();
+	hyperCreator.reset(new HyperCreator(std::move(p.second)));
+}
+
+void NonHyper::calculateEpilogue() {
+	assert(getHasStartedCalculation());
 	// annotate the graph with reversible pairs
 	findReversiblePairs();
-	hyperCreator = nullptr;
+	hyperCreator.reset();
 	hasCalculated = true;
 	// make a nicer hyper graph
 	//	p.first = std::move(hyper);
@@ -102,8 +105,39 @@ void NonHyper::calculate() {
 	//	Hyper::temp_compare(*p.first, *hyper);
 }
 
+void NonHyper::calculate(bool printInfo) {
+	calculatePrologue();
+	calculateImpl(printInfo);
+	calculateEpilogue();
+}
+
+bool NonHyper::getHasStartedCalculation() const {
+	return hasStartedCalculation;
+}
+
 bool NonHyper::getHasCalculated() const {
 	return hasCalculated;
+}
+
+bool NonHyper::tryAddGraph(std::shared_ptr<graph::Graph> gCand) {
+	if(getHasCalculated()) std::abort();
+	const auto ls = LabelSettings{getLabelSettings().type, LabelRelation::Isomorphism, getLabelSettings().withStereo, LabelRelation::Isomorphism};
+	for(const auto &g : getGraphDatabase()) {
+		if(g == gCand) break;
+		const bool equal = gCand->isomorphism(g, 1, ls);
+		if(equal) {
+			std::string msg = "Isomorphic graphs '" + g->getName() + "' and '" + gCand->getName() + "' in initial graph database and/or add strategies.";
+			throw LogicError(std::move(msg));
+		}
+	}
+	if(ls.type == LabelType::Term) {
+		const auto &term = get_term(gCand->getGraph().getLabelledGraph());
+		if(!isValid(term)) {
+			std::string msg = "Parsing failed for graph '" + gCand->getName() + "' in dynamic add strategy. " + term.getParsingError();
+			throw TermParsingError(std::move(msg));
+		}
+	}
+	return addGraph(gCand);
 }
 
 bool NonHyper::addGraph(std::shared_ptr<graph::Graph> g) {
@@ -121,9 +155,9 @@ bool NonHyper::addGraphAsVertex(std::shared_ptr<graph::Graph> g) {
 std::pair<std::shared_ptr<graph::Graph>, bool> NonHyper::checkIfNew(std::unique_ptr<lib::Graph::Single> gCand) const {
 	assert(gCand);
 	const auto labelSettings = LabelSettings{this->labelSettings.type, LabelRelation::Isomorphism, this->labelSettings.withStereo, LabelRelation::Isomorphism};
-	for(std::shared_ptr<graph::Graph> g : graphDatabase) {
-		bool isEqual = 1 == lib::Graph::Single::isomorphism(*gCand, g->getGraph(), 1, labelSettings);
-		if(isEqual) {
+	for(const std::shared_ptr<graph::Graph> &g : graphDatabase) {
+		const bool iso = lib::Graph::Single::isomorphic(*gCand, g->getGraph(), labelSettings);
+		if(iso) {
 			//			if(getConfig().dg.calculateDetailsVerbose.get()) {
 			//				IO::log() << "Discarding product " << gCand->getName() << ", isomorphic to " << g->getName() << std::endl;
 			//				IO::log() << "\tLabelSettings: withStereo=" << std::boolalpha << this->labelSettings.withStereo << std::endl;
@@ -189,7 +223,10 @@ std::pair<NonHyper::Edge, bool> NonHyper::suggestDerivation(const GraphMultiset 
 	if(!e.second) {
 		e = add_edge(vSrc, vTar, dg);
 		if(r) dg[e.first].rules.push_back(r);
-		hyperCreator->addEdge(e.first);
+		const auto vHyper = hyperCreator->addEdge(e.first);
+		const auto inserted = edgeToHyper.emplace(e.first, vHyper);
+		assert(inserted.second);
+		(void) inserted;
 	} else {
 		e.second = false;
 		if(r) {
@@ -237,14 +274,8 @@ void NonHyper::list(std::ostream &s) const {
 }
 
 const NonHyper::GraphType &NonHyper::getGraph() const {
-	if(!getHasCalculated()) MOD_ABORT;
+	if(!hyper) MOD_ABORT;
 	return dg;
-}
-
-Hyper &NonHyper::getHyper() {
-	if(!getHasCalculated()) MOD_ABORT;
-	assert(hyper);
-	return *hyper;
 }
 
 const Hyper &NonHyper::getHyper() const {
@@ -252,7 +283,7 @@ const Hyper &NonHyper::getHyper() const {
 	return *hyper;
 }
 
-const NonHyper::StdGraphSet &NonHyper::getGraphDatabase() const {
+const NonHyper::GraphDatabase &NonHyper::getGraphDatabase() const {
 	return graphDatabase;
 }
 
@@ -266,9 +297,13 @@ void NonHyper::print() const {
 	IO::post() << "summaryDGNonHyper \"dg_" << getId() << "\" \"" << fileNoExt << "\"" << std::endl;
 }
 
+HyperVertex NonHyper::findHyperEdge(Edge e) const {
+	const auto iter = edgeToHyper.find(e);
+	return iter == end(edgeToHyper) ? HyperGraphType::null_vertex() : iter->second;
+}
+
 HyperVertex NonHyper::findHyperEdge(const std::vector<Hyper::Vertex> &sources, const std::vector<Hyper::Vertex> &targets) const {
 	const auto &dg = getHyper().getGraph();
-	if(!getHasCalculated()) std::abort();
 	for(auto v : sources) assert(dg[v].kind == HyperVertexKind::Vertex);
 	for(auto v : targets) assert(dg[v].kind == HyperVertexKind::Vertex);
 
@@ -295,18 +330,6 @@ HyperVertex NonHyper::findHyperEdge(const std::vector<Hyper::Vertex> &sources, c
 	}
 	// the edge must be there by now
 	MOD_ABORT;
-}
-
-std::vector<dg::DG::HyperEdge> NonHyper::getAllHyperEdges() const {
-	std::vector<dg::DG::HyperEdge> result;
-	const HyperGraphType &dgHyper = getHyper().getGraph();
-
-	for(HyperVertex v : asRange(vertices(dgHyper))) {
-		if(dgHyper[v].kind != HyperVertexKind::Edge) continue;
-		result.push_back(getHyper().getInterfaceEdge(v));
-		assert(!result.back().isNull());
-	}
-	return result;
 }
 
 void NonHyper::diff(const NonHyper &dg1, const NonHyper &dg2) {

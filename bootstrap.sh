@@ -108,8 +108,8 @@ cat <<-EOF
 	find . -name "*.cpp" | grep mod/Py/ | indentAndSlash
 
 	echo "haxdir = \$(pkglibdir)" # because automake doesn't like data in lib
-	echo "dist_hax_DATA = lib/mod/__init__.py"
-	echo "dist_hax_DATA += lib/mod/latex.py"
+	echo "dist_hax_DATA = \\"
+	find lib/mod -name "*.py" | indentAndSlash
 	echo ""
 	echo "endif"
 }

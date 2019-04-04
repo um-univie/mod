@@ -7,6 +7,7 @@
 #include <mod/lib/Graph/Properties/Molecule.h>
 #include <mod/lib/Graph/Properties/Stereo.h>
 #include <mod/lib/Graph/Properties/String.h>
+#include <mod/lib/IO/Graph.h>
 
 #include <jla_boost/graph/PairToRangeAdaptor.hpp>
 
@@ -30,17 +31,17 @@ DepictionData::DepictionData(const LabelledGraph &lg) : lg(lg), hasMoleculeEncod
 			else verticesToProcess.push_back(v);
 		}
 		// map non-atom labels to atoms
-		std::map<std::string, AtomId> labelNoChargeToAtomId;
+		std::map<std::string, AtomId> labelNoStuff;
 		for(Vertex v : verticesToProcess) {
-			std::string label = std::get<0>(Chem::extractChargeRadical(pString[v]));
-			auto iter = labelNoChargeToAtomId.find(label);
-			if(iter == end(labelNoChargeToAtomId)) {
+			std::string label = std::get<0>(Chem::extractIsotopeChargeRadical(pString[v]));
+			auto iter = labelNoStuff.find(label);
+			if(iter == end(labelNoStuff)) {
 				unsigned char atomId = 1;
 				for(; atomId <= AtomIds::Max; atomId++) {
 					if(atomUsed[atomId]) continue;
 					atomUsed[atomId] = true;
-					iter = labelNoChargeToAtomId.insert(std::make_pair(label, AtomId(atomId))).first;
-					phonyAtomToStringNoCharge[AtomId(atomId)] = label;
+					iter = labelNoStuff.insert(std::make_pair(label, AtomId(atomId))).first;
+					phonyAtomToStringNoStuff[AtomId(atomId)] = label;
 					break;
 				}
 				if(atomId > AtomIds::Max) {
@@ -57,22 +58,14 @@ DepictionData::DepictionData(const LabelledGraph &lg) : lg(lg), hasMoleculeEncod
 			if(pMol[e] == BondType::Invalid) nonBondEdges[e] = pString[e];
 		}
 	}
-
-	if(hasMoleculeEncoding) {
-#ifdef MOD_HAVE_OPENBABEL
-		const auto *pStereo = has_stereo(lg) ? &get_stereo(lg) : nullptr;
-		const auto hasImportantStereo = [pStereo](const auto v) {
-			if(!pStereo) return false;
-			return !(*pStereo)[v]->morphismDynamicOk();
-		};
-		obMolAll = Chem::makeOBMol(g, std::cref(*this), std::cref(*this), hasImportantStereo, true, pStereo);
-		obMolNoHydrogen = Chem::makeOBMol(g, std::cref(*this), std::cref(*this), hasImportantStereo, false, pStereo);
-#endif
-	}
 }
 
 AtomId DepictionData::getAtomId(Vertex v) const {
 	return get_molecule(lg)[v].getAtomId();
+}
+
+Isotope DepictionData::getIsotope(Vertex v) const {
+	return get_molecule(lg)[v].getIsotope();
 }
 
 Charge DepictionData::getCharge(Vertex v) const {
@@ -83,15 +76,15 @@ bool DepictionData::getRadical(Vertex v) const {
 	return get_molecule(lg)[v].getRadical();
 }
 
-std::string DepictionData::getVertexLabelNoChargeRadical(Vertex v) const {
+std::string DepictionData::getVertexLabelNoIsotopeChargeRadical(Vertex v) const {
 	if(!hasMoleculeEncoding) MOD_ABORT;
 	auto atomId = getAtomId(v);
 	if(atomId != AtomIds::Invalid) return Chem::symbolFromAtomId(atomId);
 	else {
 		auto nonAtomIter = nonAtomToPhonyAtom.find(v);
 		assert(nonAtomIter != end(nonAtomToPhonyAtom));
-		auto labelIter = phonyAtomToStringNoCharge.find(nonAtomIter->second.getAtomId());
-		assert(labelIter != end(phonyAtomToStringNoCharge));
+		auto labelIter = phonyAtomToStringNoStuff.find(nonAtomIter->second.getAtomId());
+		assert(labelIter != end(phonyAtomToStringNoStuff));
 		return labelIter->second;
 	}
 }
@@ -142,7 +135,7 @@ double DepictionData::getX(Vertex v, bool withHydrogen) const {
 	if(!getHasCoordinates()) MOD_ABORT;
 #ifdef MOD_HAVE_OPENBABEL
 	unsigned int vId = get(boost::vertex_index_t(), get_graph(lg), v);
-	auto &mol = withHydrogen ? obMolAll : obMolNoHydrogen;
+	const auto &mol = getOB(withHydrogen);
 	return mol.getAtomX(vId);
 #else
 	MOD_ABORT;
@@ -153,7 +146,7 @@ double DepictionData::getY(Vertex v, bool withHydrogen) const {
 	if(!getHasCoordinates()) MOD_ABORT;
 #ifdef MOD_HAVE_OPENBABEL
 	unsigned int vId = get(boost::vertex_index_t(), get_graph(lg), v);
-	auto &mol = withHydrogen ? obMolAll : obMolNoHydrogen;
+	const auto &mol = getOB(withHydrogen);
 	return mol.getAtomY(vId);
 #else
 	MOD_ABORT;
@@ -161,10 +154,12 @@ double DepictionData::getY(Vertex v, bool withHydrogen) const {
 }
 
 lib::IO::Graph::Write::EdgeFake3DType DepictionData::getEdgeFake3DType(Edge e, bool withHydrogen) const {
+	if(!has_stereo(lg)) 
+		return lib::IO::Graph::Write::EdgeFake3DType::None;
 #ifdef MOD_HAVE_OPENBABEL
 	auto idSrc = get(boost::vertex_index_t(), get_graph(lg), source(e, get_graph(lg)));
 	auto idTar = get(boost::vertex_index_t(), get_graph(lg), target(e, get_graph(lg)));
-	auto &mol = withHydrogen ? obMolAll : obMolNoHydrogen;
+	const auto &mol = getOB(withHydrogen);
 	return mol.getBondFake3D(idSrc, idTar);
 #else
 	MOD_ABORT;
@@ -208,6 +203,23 @@ void DepictionData::setImageCommand(std::string cmd) {
 
 std::string DepictionData::getImageCommand() const {
 	return imageCmd;
+}
+
+const lib::Chem::OBMolHandle &DepictionData::getOB(bool withHydrogen) const {
+	if(!hasMoleculeEncoding) MOD_ABORT;
+#ifdef MOD_HAVE_OPENBABEL
+	if(!obMolAll) {
+		const auto &g = get_graph(lg);
+		const auto *pStereo = has_stereo(lg) ? &get_stereo(lg) : nullptr;
+		const auto hasImportantStereo = [pStereo](const auto v) {
+			if(!pStereo) return false;
+			return !(*pStereo)[v]->morphismDynamicOk();
+		};
+		obMolAll = Chem::makeOBMol(g, std::cref(*this), std::cref(*this), hasImportantStereo, true, pStereo);
+		obMolNoHydrogen = Chem::makeOBMol(g, std::cref(*this), std::cref(*this), hasImportantStereo, false, pStereo);
+	}
+	return withHydrogen ? obMolAll : obMolNoHydrogen;
+#endif
 }
 
 } // namespace Graph

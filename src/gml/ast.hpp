@@ -21,10 +21,6 @@ struct LocationInfo {
 struct List;
 
 struct Value : x3::variant<int, double, std::string, x3::forward_ast<List> >, LocationInfo {
-	Value() = default; // TODO: Boost 1.66 needs this, but 1.64 needs the two next.
-	// Fix this mess when Boost 1.65 or 1.66 is the minimum requirement.
-	Value(const Value&) = default; // TODO: maybe newer x3 versions fixes so this is not needed
-	Value &operator=(Value&&) = default; // TODO: maybe newer x3 versions fixes so this is not needed
 	using base_type::base_type;
 	using base_type::operator=;
 };

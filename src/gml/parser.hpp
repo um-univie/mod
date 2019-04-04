@@ -6,7 +6,7 @@
 namespace gml {
 namespace parser {
 
-bool parse(std::istream &s, ast::List &ast, std::ostream &err);
+bool parse(std::istream &s, ast::KeyValue &ast, std::ostream &err);
 
 } // namespace parser
 } // namespace gml

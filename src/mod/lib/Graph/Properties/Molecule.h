@@ -21,11 +21,12 @@ public:
 #ifdef MOD_HAVE_OPENBABEL
 	const lib::Chem::OBMolHandle &getOBMol() const;
 #endif
-	double getMolarMass() const;
+	double getExactMass() const;
 	double getEnergy() const;
 	void cacheEnergy(double value) const;
 private:
 	bool isMolecule;
+	mutable boost::optional<double> exactMass;
 #ifdef MOD_HAVE_OPENBABEL
 	mutable lib::Chem::OBMolHandle obMol;
 #endif

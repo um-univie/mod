@@ -10,10 +10,10 @@ namespace DG {
 
 struct NonHyperDerivations : NonHyper {
 	NonHyperDerivations(std::vector<Derivation> derivations);
-	std::string getType() const;
+	virtual std::string getType() const override;
 private:
-	void calculateImpl();
-	void listImpl(std::ostream &s) const;
+	virtual void calculateImpl(bool printInfo) override;
+	virtual void listImpl(std::ostream &s) const override;
 private:
 	std::unique_ptr<const std::vector<Derivation> > derivations;
 };

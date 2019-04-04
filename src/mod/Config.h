@@ -141,6 +141,15 @@ struct ConfigSetting {
 		return value;
 	}
 
+	// rst: .. function: T &operator()()
+	// rst:
+	// rst:		Access the value.
+	// rst:
+
+	T &operator()() {
+		return value;
+	}
+
 	const std::string &getName() const {
 		return name;
 	}
@@ -159,7 +168,7 @@ private:
 struct Config {
 
 	enum class IsomorphismAlg {
-		VF2, Canon, Smiles
+		VF2, Canon, SmilesCanonVF2
 	};
 
 	Config() = default;
@@ -184,7 +193,7 @@ struct Config {
 		((bool, printStats, false))                                                 \
 	))                                                                            \
 	((Common, common,                                                             \
-		((bool, quite, false))                                                      \
+		((bool, quiet, false))                                                      \
 		((unsigned int, numThreads, 1))                                             \
 	))                                                                            \
 	((ComponentSG, componentSG,                                                   \
@@ -193,6 +202,7 @@ struct Config {
 	((DG, dg,                                                                     \
 		((bool, skipInitialGraphIsomorphismCheck, false))                           \
 		((bool, calculateVerbose, false))                                           \
+		((bool, calculateVerbosePrint, false))                                      \
 		((bool, calculateDetailsVerbose, false))                                    \
 		((bool, calculatePredicatesVerbose, false))                                 \
 		((bool, listUniverse, false))                                               \
@@ -202,6 +212,7 @@ struct Config {
 		((bool, putAllProductsInSubset, false))                                     \
 		((bool, printVerticesAsPoints, false))                                      \
 		((bool, dryDerivationPrinting, false))                                      \
+		((bool, derivationDebugOutput, false))                                      \
 		((bool, ignoreSubset, false))                                               \
 		((bool, disableRepeatFixedPointCheck, false))                               \
 		((bool, useDotCoords, false))                                               \
@@ -218,6 +229,7 @@ struct Config {
 		((bool, appendSmilesClass, false))                                          \
 		((mod::Config::IsomorphismAlg, isomorphismAlg, mod::Config::IsomorphismAlg::VF2)) \
 		((bool, useWrongSmilesCanonAlg, false))                                     \
+		((unsigned long, numIsomorphismCalls, 0))                                   \
 	))                                                                            \
 	((IO, io,                                                                     \
 		((std::string, dotCoordOptions, ""))                                        \

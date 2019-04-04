@@ -8,8 +8,11 @@
 
 #include <boost/iterator/iterator_facade.hpp>
 
+#include <functional>
+
 namespace mod {
 struct AtomId;
+struct Isotope;
 struct Charge;
 enum class BondType;
 namespace rule {
@@ -87,6 +90,11 @@ public:
 	friend bool operator==(const Vertex &v1, const Vertex &v2);
 	friend bool operator!=(const Vertex &v1, const Vertex &v2);
 	friend bool operator<(const Vertex &v1, const Vertex &v2);
+	std::size_t hash() const;
+	// rst: .. function:: explicit operator bool() const
+	// rst:
+	// rst:		:returns: :cpp:expr:`!isNull()`
+	explicit operator bool() const;
 	// rst:	.. function:: bool isNull() const
 	// rst:
 	// rst:		:returns: whether this is a null descriptor or not.
@@ -125,6 +133,11 @@ public:
 	// rst:		:returns: the atom id of the vertex.
 	// rst: 	:throws: :cpp:class:`LogicError` if it is a null descriptor.
 	AtomId getAtomId() const;
+	// rst:	.. function:: Isotope getIsotope() const
+	// rst:
+	// rst:		:returns: the isotope of the vertex.
+	// rst: 	:throws: :cpp:class:`LogicError` if it is a null descriptor.
+	Isotope getIsotope() const;
 	// rst:	.. function:: Charge getCharge() const
 	// rst:
 	// rst:		:returns: the charge of the vertex.
@@ -169,6 +182,10 @@ public:
 	friend bool operator==(const Edge &e1, const Edge &e2);
 	friend bool operator!=(const Edge &e1, const Edge &e2);
 	friend bool operator<(const Edge &e1, const Edge &e2);
+	// rst: .. function:: explicit operator bool() const
+	// rst:
+	// rst:		:returns: :cpp:expr:`!isNull()`
+	explicit operator bool() const;
 	// rst:	.. function:: bool isNull() const
 	// rst:
 	// rst:		:returns: whether this is a null descriptor or not.
@@ -427,6 +444,11 @@ public:
 	friend bool operator==(const Vertex &v1, const Vertex &v2);
 	friend bool operator!=(const Vertex &v1, const Vertex &v2);
 	friend bool operator<(const Vertex &v1, const Vertex &v2);
+	std::size_t hash() const;
+	// rst: .. function:: explicit operator bool() const
+	// rst:
+	// rst:		:returns: :cpp:expr:`!isNull()`
+	explicit operator bool() const;
 	// rst:	.. function:: bool isNull() const
 	// rst:
 	// rst:		:returns: whether this is a null descriptor or not.
@@ -480,6 +502,10 @@ public:
 	friend bool operator==(const Edge &e1, const Edge &e2);
 	friend bool operator!=(const Edge &e1, const Edge &e2);
 	friend bool operator<(const Edge &e1, const Edge &e2);
+	// rst: .. function:: explicit operator bool() const
+	// rst:
+	// rst:		:returns: :cpp:expr:`!isNull()`
+	explicit operator bool() const;
 	// rst:	.. function:: bool isNull() const
 	// rst:
 	// rst:		:returns: whether this is a null descriptor or not.
@@ -728,6 +754,11 @@ public:
 	friend bool operator==(const Vertex &v1, const Vertex &v2);
 	friend bool operator!=(const Vertex &v1, const Vertex &v2);
 	friend bool operator<(const Vertex &v1, const Vertex &v2);
+	std::size_t hash() const;
+	// rst: .. function:: explicit operator bool() const
+	// rst:
+	// rst:		:returns: :cpp:expr:`!isNull()`
+	explicit operator bool() const;
 	// rst:	.. function:: bool isNull() const
 	// rst:
 	// rst:		:returns: whether this is a null descriptor or not.
@@ -766,6 +797,11 @@ public:
 	// rst:		:returns: the atom id of the vertex.
 	// rst: 	:throws: :cpp:class:`LogicError` if it is a null descriptor.
 	AtomId getAtomId() const;
+	// rst:	.. function:: Isotope getIsotope() const
+	// rst:
+	// rst:		:returns: the isotope of the vertex.
+	// rst: 	:throws: :cpp:class:`LogicError` if it is a null descriptor.
+	Isotope getIsotope() const;
 	// rst:	.. function:: Charge getCharge() const
 	// rst:
 	// rst:		:returns: the charge of the vertex.
@@ -810,6 +846,10 @@ public:
 	friend bool operator==(const Edge &e1, const Edge &e2);
 	friend bool operator!=(const Edge &e1, const Edge &e2);
 	friend bool operator<(const Edge &e1, const Edge &e2);
+	// rst: .. function:: explicit operator bool() const
+	// rst:
+	// rst:		:returns: :cpp:expr:`!isNull()`
+	explicit operator bool() const;
 	// rst:	.. function:: bool isNull() const
 	// rst:
 	// rst:		:returns: whether this is a null descriptor or not.
@@ -1025,6 +1065,11 @@ public:
 	friend bool operator==(const Vertex &v1, const Vertex &v2);
 	friend bool operator!=(const Vertex &v1, const Vertex &v2);
 	friend bool operator<(const Vertex &v1, const Vertex &v2);
+	std::size_t hash() const;
+	// rst: .. function:: explicit operator bool() const
+	// rst:
+	// rst:		:returns: :cpp:expr:`!isNull()`
+	explicit operator bool() const;
 	// rst:	.. function:: bool isNull() const
 	// rst:
 	// rst:		:returns: whether this is a null descriptor or not.
@@ -1105,6 +1150,10 @@ public:
 	friend bool operator==(const Edge &e1, const Edge &e2);
 	friend bool operator!=(const Edge &e1, const Edge &e2);
 	friend bool operator<(const Edge &e1, const Edge &e2);
+	// rst: .. function:: explicit operator bool() const
+	// rst:
+	// rst:		:returns: :cpp:expr:`!isNull()`
+	explicit operator bool() const;
 	// rst:	.. function:: bool isNull() const
 	// rst:
 	// rst:		:returns: whether this is a null descriptor or not.
@@ -1519,5 +1568,40 @@ inline Rule::IncidentEdgeIterator Rule::IncidentEdgeRange::end() const {
 
 } // namespace rule
 } // namespace mod
+namespace std {
+
+template<>
+struct hash<mod::rule::Rule::LeftGraph::Vertex> {
+
+	std::size_t operator()(const mod::rule::Rule::Vertex &v) const {
+		return v.hash();
+	}
+};
+
+template<>
+struct hash<mod::rule::Rule::ContextGraph::Vertex> {
+
+	std::size_t operator()(const mod::rule::Rule::Vertex &v) const {
+		return v.hash();
+	}
+};
+
+template<>
+struct hash<mod::rule::Rule::RightGraph::Vertex> {
+
+	std::size_t operator()(const mod::rule::Rule::Vertex &v) const {
+		return v.hash();
+	}
+};
+
+template<>
+struct hash<mod::rule::Rule::Vertex> {
+
+	std::size_t operator()(const mod::rule::Rule::Vertex &v) const {
+		return v.hash();
+	}
+};
+
+} // namespace std
 
 #endif /* MOD_RULE_GRAPHINTERFACE_H */

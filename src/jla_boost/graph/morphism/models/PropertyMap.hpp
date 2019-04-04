@@ -56,8 +56,8 @@ private:
 };
 
 template<typename GraphDom, typename GraphCodom, typename Next>
-MatchAsVertexMapWrapper<GraphDom, GraphCodom, Next> makeMatchAsVertexMapWrapper(const GraphDom &gDom, const GraphCodom &gCodom, Next &&next) {
-	return MatchAsVertexMapWrapper<GraphDom, GraphCodom, Next>(gDom, gCodom, std::forward<Next>(next));
+MatchAsVertexMapWrapper<GraphDom, GraphCodom, Next> makeMatchAsVertexMapWrapper(const GraphDom &gDom, const GraphCodom &gCodom, Next next) {
+	return MatchAsVertexMapWrapper<GraphDom, GraphCodom, Next>(gDom, gCodom, next);
 }
 
 } // namespace GraphMorphism

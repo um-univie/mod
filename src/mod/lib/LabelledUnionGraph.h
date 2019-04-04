@@ -20,7 +20,7 @@ public:
 
 	UnionPropBase(const std::vector<const LGraph*> &lgs) : lgs(lgs) { }
 protected:
-	std::vector<const LGraph*> lgs;
+	const std::vector<const LGraph*> &lgs;
 };
 
 #define MOD_MAKE_UNION_PROP(Name, Func)                                         \

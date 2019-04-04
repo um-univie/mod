@@ -13,7 +13,7 @@ struct PropString;
 namespace DFSEncoding {
 
 lib::IO::Graph::Read::Data parse(const std::string &dfs, std::ostream &s);
-std::pair<std::string, bool> write(const GraphType &g, const PropString &pString);
+std::pair<std::string, bool> write(const GraphType &g, const PropString &pString, bool withIds);
 
 } // namespace DFSEncoding
 } // namespace Graph

@@ -53,11 +53,9 @@ specification, but with the following notes/changes.
 
 - Only single SMILES strings are accepted, i.e., not multiple strings separated by white-space.
 - The specical dot "bond" (``.``) is not allowed.
-- Isotope information is ignored.
-- Chirality information is ignored.
 - Up and down bonds are regarded as implicit bonds, i.e., they might represent either a sngle bond
   or an aromatic bond. The stereo information is ignored.
-- Atom classes are ignored.
+- Atom classes are (mostly) ignored. They can be used to specify unique IDs to atoms.
 - Wildcard atoms (specified with ``*``) are converted to vertices with label ``*``.
   Any other information on the vertex is ignored (e.g., the charge in ``[*-]``).
 - Only charges from :math:`-9` to :math:`9` are allowed.

@@ -34,8 +34,8 @@ private:
 };
 
 template<typename Next = AlwaysTrue>
-PrintCallback<Next> makePrintCallback(Next &&next = AlwaysTrue()) {
-	return PrintCallback<Next>(std::forward<Next>(next));
+PrintCallback<Next> makePrintCallback(Next next = AlwaysTrue()) {
+	return PrintCallback<Next>(next);
 }
 
 } // namespace GraphMorphism
