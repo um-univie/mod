@@ -36,9 +36,9 @@ New Features
   to allow disabling of messages to stdout during calculation.
 - The graph interface on :cpp:any:`dg::DG`/:py:obj:`DG` can now be used before and during
   calculation.
-- Added include of the PGFPlots package in the summary preable.
+- Added include of the PGFPlots package in the summary preamble.
 - Added :cpp:any:`AtomId::symbol`/:py:obj:`AtomId.symbol`.
-- Adeed an ``add`` parameter to :py:obj:`graphGMLString`, :py:obj:`graphGML`,
+- Added an ``add`` parameter to :py:obj:`graphGMLString`, :py:obj:`graphGML`,
   :py:obj:`graphDFS`, :py:obj:`smiles`, :py:obj:`ruleGMLString`, and :py:obj:`ruleGML`.
   It controls whether the graph/rule is appended to :py:obj:`inputGraphs`/:py:obj:`inputRules`
   or not. It defaults to ``True``.
