@@ -1,0 +1,140 @@
+.. _cpp-dg/Strategies:
+
+**********************************************************
+dg/Strategies.h
+**********************************************************
+.. default-domain:: cpp
+
+.. py:currentmodule:: mod
+.. cpp:namespace:: mod
+
+
+Class ``dg::Strategy``
+--------------------------------------------------------------------------------------------------------------------------------
+
+.. class:: dg::Strategy
+    
+
+    Derivation graph strategies are used in :cpp:func:`DG::ruleComp`.
+
+
+Synopsis
+^^^^^^^^
+
+.. code-block:: c++
+    
+    struct Strategy {
+        Strategy(const Strategy&) = delete;
+        Strategy &operator=(const Strategy&) = delete;
+    public:
+        struct GraphState {
+            GraphState(std::function<void(std::vector<std::shared_ptr<graph::Graph> >&) > fSubset,
+                    std::function<void(std::vector<std::shared_ptr<graph::Graph> >&) > fUniverse);
+            const std::vector<std::shared_ptr<graph::Graph> > &getSubset() const;
+            const std::vector<std::shared_ptr<graph::Graph> > &getUniverse() const;
+        private:
+            mutable bool subsetInit, universeInit;
+            mutable std::vector<std::shared_ptr<graph::Graph> > subset, universe;
+            std::function<void(std::vector<std::shared_ptr<graph::Graph> >&) > fSubset, fUniverse;
+        };
+    private:
+        Strategy(std::unique_ptr<lib::DG::Strategies::Strategy> strategy);
+    public:
+        ~Strategy();
+        std::unique_ptr<Strategy> clone() const;
+        friend std::ostream &operator<<(std::ostream &s, const Strategy &strat);
+        lib::DG::Strategies::Strategy &getStrategy();
+    private:
+        struct Pimpl;
+        std::unique_ptr<Pimpl> p;
+    public:
+        static std::shared_ptr<Strategy> makeAdd(bool onlyUniverse, const std::vector<std::shared_ptr<graph::Graph> > &graphs);
+        static std::shared_ptr<Strategy> makeAdd(bool onlyUniverse, const std::shared_ptr<Function<std::vector<std::shared_ptr<graph::Graph> >() > > generator);
+        static std::shared_ptr<Strategy> makeExecute(std::shared_ptr<Function<void(const Strategy::GraphState&)> > func);
+        static std::shared_ptr<Strategy> makeFilter(bool alsoUniverse,
+                std::shared_ptr<Function<bool(std::shared_ptr<graph::Graph>, const Strategy::GraphState&, bool)> > filterFunc);
+        static std::shared_ptr<Strategy> makeLeftPredicate(std::shared_ptr<Function<bool(const Derivation&) > > predicate, std::shared_ptr<Strategy> strat);
+        static std::shared_ptr<Strategy> makeParallel(const std::vector<std::shared_ptr<Strategy> > &strategies);
+        static std::shared_ptr<Strategy> makeRepeat(std::size_t limit, std::shared_ptr<Strategy> strategy);
+        static std::shared_ptr<Strategy> makeRevive(std::shared_ptr<Strategy> strategy);
+        static std::shared_ptr<Strategy> makeRightPredicate(std::shared_ptr<Function<bool(const Derivation&) > > predicate,
+                std::shared_ptr<Strategy> strat);
+        static std::shared_ptr<Strategy> makeRule(std::shared_ptr<rule::Rule> r);
+        static std::shared_ptr<Strategy> makeSequence(const std::vector<std::shared_ptr<Strategy> > &strategies);
+        // TODO: remove
+        static std::shared_ptr<Strategy> makeSort(bool doUniverse,
+                std::shared_ptr<Function<bool(std::shared_ptr<graph::Graph>, std::shared_ptr<graph::Graph>, const Strategy::GraphState&)> > less);
+        // TODO: remove
+        static std::shared_ptr<Strategy> makeTake(bool doUniverse, unsigned int limit);
+    };
+
+Details
+^^^^^^^
+
+.. cpp:namespace:: mod
+
+.. cpp:namespace-push:: dg::Strategy
+
+.. function:: static std::shared_ptr<Strategy> makeAdd(bool onlyUniverse, const std::vector<std::shared_ptr<graph::Graph> > &graphs)
+
+    :returns: an :ref:`strat-addUniverse` strategy if ``onlyUniverse`` is ``True``, otherwise an :ref:`strat-addSubset` strategy.
+.. function:: static std::shared_ptr<Strategy> makeAdd(bool onlyUniverse, const std::shared_ptr<Function<std::vector<std::shared_ptr<graph::Graph> >() > > generator)
+
+    :returns: an :ref:`strat-addUniverse` strategy if ``onlyUniverse`` is ``True``, otherwise an :ref:`strat-addSubset` strategy.
+.. function:: static std::shared_ptr<Strategy> makeExecute(std::shared_ptr<Function<void(const Strategy::GraphState&)> > func)
+
+    :returns: an :ref:`strat-execute` strategy.
+.. function:: static std::shared_ptr<Strategy> makeFilter(bool alsoUniverse,    std::shared_ptr<Function<bool(std::shared_ptr<graph::Graph>, const Strategy::GraphState&, bool)> > filterFunc)
+
+    The filtering predicate will be called for each graph in either the subset or the universe.
+    The predicate is called with the graph and the graph state as arguments, and a bool stating whether or not
+    the call is the first in the filtering process.
+
+    :returns: a :ref:`strat-filterUniverse` strategy if ``onlyUniverse`` is ``True``, otherwise a :ref:`strat-filterSubset` strategy.
+.. function:: static std::shared_ptr<Strategy> makeLeftPredicate(std::shared_ptr<Function<bool(const Derivation&) > > predicate, std::shared_ptr<Strategy> strat)
+
+    Even though the predicate is called with a :class:`Derivation` object, only the left side and the rule of the object is valid.
+
+    :returns: a :ref:`strat-leftPredicate` strategy.
+.. function:: static std::shared_ptr<Strategy> makeParallel(const std::vector<std::shared_ptr<Strategy> > &strategies)
+
+    :returns: a :ref:`strat-parallel` strategy.
+    :throws: :class:`LogicError` if `strategies` is empty.
+.. function:: static std::shared_ptr<Strategy> makeRepeat(unsigned int limit, std::shared_ptr<Strategy> strategy)
+
+    :returns: a :ref:`strat-repeat` strategy.
+.. function:: static std::shared_ptr<Strategy> makeRevive(std::shared_ptr<Strategy> strategy)
+
+    :returns: a :ref:`strat-revive` strategy.
+.. function:: static std::shared_ptr<Strategy> makeRightPredicate(std::shared_ptr<Function<bool(const Derivation&) > > predicate, std::shared_ptr<Strategy> strat)
+
+    :returns: a :ref:`strat-rightPredicate` strategy.
+.. function:: static std::shared_ptr<Strategy> makeRule(std::shared_ptr<rule::Rule> r)
+
+    :returns: a :ref:`strat-rule` strategy.
+.. function:: static std::shared_ptr<Strategy> makeSequence(const std::vector<std::shared_ptr<Strategy> > &strategies)
+
+    :retunrs: a :ref:`strat-sequence` strategy.
+
+.. cpp:namespace:: mod
+
+
+Class ``dg::Strategy::GraphState``
+---------------------------------------------------------------
+
+.. class:: dg::Strategy::GraphState
+
+
+    This class represents a graph state with a subset :math:`S` and a universe :math:`U` fulfilling :math:`S\subseteq U`.
+
+
+    .. function:: const std::vector<std::shared_ptr<graph::Graph> > &getSubset() const
+
+        :returns: the subset :math:`\mathcal{S}`.
+
+    .. function:: const std::vector<std::shared_ptr<graph::Graph> > &getUniverse() const
+
+        :returns: the universe :math:`\mathcal{U}`
+
+
+

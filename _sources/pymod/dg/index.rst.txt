@@ -1,0 +1,10 @@
+dg
+==============================================================================
+
+.. toctree::
+   :maxdepth: 1
+
+   DG
+   GraphInterface
+   Printer
+   Strategies

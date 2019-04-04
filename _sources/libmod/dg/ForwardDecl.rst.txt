@@ -1,0 +1,10 @@
+.. _cpp-dg/ForwardDecl:
+
+**********************************************************
+dg/ForwardDecl.h
+**********************************************************
+.. default-domain:: cpp
+
+.. py:currentmodule:: mod
+.. cpp:namespace:: mod
+

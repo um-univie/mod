@@ -1,0 +1,140 @@
+.. _cpp-graph/Printer:
+
+**********************************************************
+graph/Printer.h
+**********************************************************
+.. default-domain:: cpp
+
+.. py:currentmodule:: mod
+.. cpp:namespace:: mod
+
+
+Class ``graph::Printer``
+--------------------------------------------------------------------------------------------------------------------------------
+
+.. class:: graph::Printer
+    
+
+    This class is used to configure how graphs are visualised.
+
+    .. warning:: Some of these options greatly alter how graphs are depicted
+        and the result may not accurately represent the underlying graph,
+        and may make non-molecules look like molecules.
+
+
+Synopsis
+^^^^^^^^
+
+.. code-block:: c++
+    
+    struct Printer {
+        Printer();
+        Printer(const Printer &that);
+        Printer &operator=(const Printer &that);
+        ~Printer();
+        const lib::IO::Graph::Write::Options &getOptions() const;
+        void setMolDefault();
+        void setReactionDefault();
+        void disableAll();
+        void enableAll();
+        void setEdgesAsBonds(bool value);
+        bool getEdgesAsBonds() const;
+        void setCollapseHydrogens(bool value);
+        bool getCollapseHydrogens() const;
+        void setRaiseCharges(bool value);
+        bool getRaiseCharges() const;
+        void setSimpleCarbons(bool value);
+        bool getSimpleCarbons() const;
+        void setThick(bool value);
+        bool getThick() const;
+        void setWithColour(bool value);
+        bool getWithColour() const;
+        void setWithIndex(bool value);
+        bool getWithIndex() const;
+        void setWithTexttt(bool value);
+        bool getWithTexttt() const;
+        void setWithRawStereo(bool value);
+        bool getWithRawStereo() const;
+        void setWithPrettyStereo(bool value);
+        bool getWithPrettyStereo() const;
+        void setRotation(int degrees);
+        int getRotation() const;
+        void setMirror(bool value);
+        bool getMirror() const;
+    private:
+        std::unique_ptr<lib::IO::Graph::Write::Options> options;
+    };
+
+Details
+^^^^^^^
+
+.. cpp:namespace:: mod
+
+.. cpp:namespace-push:: graph::Printer
+
+.. function Printer()
+
+    The default constructor enables edges as bonds, raised charges, and raised isotopes.
+.. function:: void setMolDefault()
+
+    Shortcut for enabling all but thickening and index printing.
+.. function:: void setReactionDefault()
+
+    Shortcut for enabling all but thickening, index printing and simplification of carbon atoms.
+.. function:: void disableAll()
+
+    Disable all special printing features.
+.. function:: void enableAll()
+
+    Enable all special printing features, except typewriter font.
+.. function:: void setEdgesAsBonds(bool value)
+              bool getEdgesAsBonds() const
+
+    Control whether edges with special labels are drawn as chemical bonds.
+.. function:: void setCollapseHydrogens(bool value)
+              bool getCollapseHydrogens() const
+
+    Control whether vertices representing hydrogen atoms are collapsed into their neighbours labels.
+.. function:: void setRaiseCharges(bool value)
+              bool getRaiseCharges() const
+
+    Control whether a vertex label suffix encoding a charge is written as a superscript to the rest of the label.
+.. function:: void setSimpleCarbons(bool value)
+              bool getSimpleCarbons() const
+
+    Control whether some vertices encoding carbon atoms are depicted without any label.
+.. function:: void setThick(bool value)
+              bool getThick() const
+
+    Control whether all edges are drawn thicker than normal and all labels are written in bold.
+.. function:: void setWithColour(bool value)
+              bool getWithColour() const
+
+    Control whether colour is applied to certain elements of the graph which are molecule-like.
+.. function:: void setWithIndex(bool value)
+              bool getWithIndex() const
+
+    Control whether the underlying indices of the vertices are printed.
+.. function:: void setWithTexttt(bool value)
+              bool getWithTexttt() const
+
+    Control whether the vertex and edge labels are written with typewriter font.
+.. function:: void setWithRawStereo(bool value)
+              bool getWithRawStereo() const
+
+    Control whether the vertices and edges are annotated with the raw stereo properties.
+.. function:: void setWithPrettyStereo(bool value)
+              bool getWithPrettyStereo() const
+
+    Control whether the vertices and edges are annotated with stylized stereo properties.
+.. function:: void setRotation(int degrees)
+              int getRotation() const
+
+    Rotation of internally computed coordinates.
+.. function:: void setMirror(bool value)
+              bool getMirror() const
+
+    Mirror internally computed coordinates in the y-axis.
+
+.. cpp:namespace:: mod
+

@@ -1,0 +1,478 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>2.2.1. Chem.h &#8212; MØD v0.8.0 documentation</title>
+    <link rel="stylesheet" href="../_static/classic.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="2.2.2. Config.h" href="Config.html" />
+    <link rel="prev" title="2.2. API Reference" href="api.html" /> 
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="Config.html" title="2.2.2. Config.h"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="api.html" title="2.2. API Reference"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">MØD v0.8.0 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="libmod.html" >2. libMØD</a> &#187;</li>
+          <li class="nav-item nav-item-2"><a href="api.html" accesskey="U">2.2. API Reference</a> &#187;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="chem-h">
+<span id="cpp-chem"></span><h1>2.2.1. Chem.h<a class="headerlink" href="#chem-h" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="class-atomid">
+<h2>2.2.1.1. Class <code class="docutils literal notranslate"><span class="pre">AtomId</span></code><a class="headerlink" href="#class-atomid" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="_CPPv3N3mod6AtomIdE">
+<span id="_CPPv2N3mod6AtomIdE"></span><span id="mod::AtomId"></span><em class="property">class </em><code class="descname">AtomId</code><a class="headerlink" href="#_CPPv3N3mod6AtomIdE" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Representation of the chemical element of an atom.</p>
+</dd></dl>
+
+<div class="section" id="synopsis">
+<h3>2.2.1.1.1. Synopsis<a class="headerlink" href="#synopsis" title="Permalink to this headline">¶</a></h3>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="k">struct</span> <span class="n">AtomId</span> <span class="p">{</span>
+    <span class="k">constexpr</span> <span class="n">AtomId</span><span class="p">();</span>
+    <span class="k">explicit</span> <span class="k">constexpr</span> <span class="nf">AtomId</span><span class="p">(</span><span class="kt">unsigned</span> <span class="kt">char</span> <span class="n">id</span><span class="p">);</span>
+    <span class="k">constexpr</span> <span class="k">operator</span> <span class="kt">unsigned</span> <span class="nf">char</span><span class="p">()</span> <span class="k">const</span><span class="p">;</span>
+    <span class="n">std</span><span class="o">::</span><span class="n">string</span> <span class="n">symbol</span><span class="p">()</span> <span class="k">const</span><span class="p">;</span>
+    <span class="k">friend</span> <span class="n">std</span><span class="o">::</span><span class="n">ostream</span> <span class="o">&amp;</span><span class="k">operator</span><span class="o">&lt;&lt;</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">ostream</span> <span class="o">&amp;</span><span class="n">s</span><span class="p">,</span> <span class="n">AtomId</span> <span class="n">atomId</span><span class="p">);</span>
+<span class="k">private</span><span class="o">:</span>
+    <span class="kt">unsigned</span> <span class="kt">char</span> <span class="n">id</span><span class="p">;</span>
+<span class="p">};</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="details">
+<h3>2.2.1.1.2. Details<a class="headerlink" href="#details" title="Permalink to this headline">¶</a></h3>
+<dl class="function">
+<dt id="_CPPv3N3mod6AtomId6AtomIdEv">
+<span id="_CPPv2N3mod6AtomId6AtomIdEv"></span><span id="mod::AtomId::AtomIdCE"></span><em class="property">constexpr</em> <code class="descname">AtomId</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv3N3mod6AtomId6AtomIdEv" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Construct an <a class="reference internal" href="#_CPPv3N3mod7AtomIds7InvalidE" title="mod::AtomIds::Invalid"><code class="xref cpp cpp-var docutils literal notranslate"><span class="pre">AtomIds::Invalid</span></code></a> atom id.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="_CPPv3N3mod6AtomId6AtomIdEj">
+<span id="_CPPv2N3mod6AtomId6AtomIdEj"></span><span id="mod::AtomId::AtomId__unsigned-iCE"></span><em class="property">explicit</em> <em class="property">constexpr</em> <code class="descname">AtomId</code><span class="sig-paren">(</span>unsigned int <em>id</em><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv3N3mod6AtomId6AtomIdEj" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Construct a specific atom id. Pre-condition: the id must be at most that of <a class="reference internal" href="#_CPPv3N3mod7AtomIds3MaxE" title="mod::AtomIds::Max"><code class="xref cpp cpp-var docutils literal notranslate"><span class="pre">AtomIds::Max</span></code></a>.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="_CPPv3NK3mod6AtomIdcvhEv">
+<span id="_CPPv2NK3mod6AtomIdcvhEv"></span><span id="mod::AtomId::castto-unsigned-c-operatorCCE"></span><em class="property">constexpr</em> <code class="descname">operator unsigned char</code><span class="sig-paren">(</span><span class="sig-paren">)</span> <em class="property">const</em><a class="headerlink" href="#_CPPv3NK3mod6AtomIdcvhEv" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Implicit conversion to an integer type.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="_CPPv3NK3mod6AtomId6symbolEv">
+<span id="_CPPv2NK3mod6AtomId6symbolEv"></span><span id="mod::AtomId::symbolC"></span>std::string <code class="descname">symbol</code><span class="sig-paren">(</span><span class="sig-paren">)</span> <em class="property">const</em><a class="headerlink" href="#_CPPv3NK3mod6AtomId6symbolEv" title="Permalink to this definition">¶</a><br /></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">the symbol represented by the atom id.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Raises:</th><td class="field-body"><a class="reference internal" href="Error.html#_CPPv3N3mod10LogicErrorE" title="mod::LogicError"><code class="xref cpp cpp-class docutils literal notranslate"><span class="pre">LogicError</span></code></a> if the id is invalid.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="_CPPv3N3mod6AtomIdlsERNSt7ostreamE6AtomId">
+<span id="_CPPv2N3mod6AtomIdlsERNSt7ostreamE6AtomId"></span><span id="mod::AtomId::lshift-operator__osR.AtomId"></span><em class="property">friend</em> std::ostream &amp;<code class="descname">operator&lt;&lt;</code><span class="sig-paren">(</span>std::ostream &amp;<em>s</em>, <a class="reference internal" href="#_CPPv3N3mod6AtomIdE" title="mod::AtomId">AtomId</a> <em>atomId</em><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv3N3mod6AtomIdlsERNSt7ostreamE6AtomId" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Inserts the <cite>int</cite> value of the atom id into the stream.</p>
+</dd></dl>
+
+</div>
+</div>
+<div class="section" id="class-isotope">
+<h2>2.2.1.2. Class <code class="docutils literal notranslate"><span class="pre">Isotope</span></code><a class="headerlink" href="#class-isotope" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="_CPPv3N3mod7IsotopeE">
+<span id="_CPPv2N3mod7IsotopeE"></span><span id="mod::Isotope"></span><em class="property">class </em><code class="descname">Isotope</code><a class="headerlink" href="#_CPPv3N3mod7IsotopeE" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Representation of the isotope of an atom.</p>
+</dd></dl>
+
+<div class="section" id="id1">
+<h3>2.2.1.2.1. Synopsis<a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h3>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="k">struct</span> <span class="n">Isotope</span> <span class="p">{</span>
+    <span class="k">constexpr</span> <span class="n">Isotope</span><span class="p">();</span>
+    <span class="k">explicit</span> <span class="k">constexpr</span> <span class="nf">Isotope</span><span class="p">(</span><span class="kt">int</span> <span class="n">i</span><span class="p">);</span>
+    <span class="k">constexpr</span> <span class="k">operator</span> <span class="nf">int</span><span class="p">()</span> <span class="k">const</span><span class="p">;</span>
+    <span class="k">friend</span> <span class="n">std</span><span class="o">::</span><span class="n">ostream</span> <span class="o">&amp;</span><span class="k">operator</span><span class="o">&lt;&lt;</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">ostream</span> <span class="o">&amp;</span><span class="n">s</span><span class="p">,</span> <span class="n">Isotope</span> <span class="n">iso</span><span class="p">);</span>
+<span class="k">private</span><span class="o">:</span>
+    <span class="kt">int</span> <span class="n">i</span><span class="p">;</span>
+<span class="p">};</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="id2">
+<h3>2.2.1.2.2. Details<a class="headerlink" href="#id2" title="Permalink to this headline">¶</a></h3>
+<dl class="function">
+<dt id="_CPPv3N3mod7Isotope7IsotopeEv">
+<span id="_CPPv2N3mod7Isotope7IsotopeEv"></span><span id="mod::Isotope::IsotopeCE"></span><em class="property">constexpr</em> <code class="descname">Isotope</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv3N3mod7Isotope7IsotopeEv" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Construct a representation of the most abundant isotope.</p>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">This is different from explicitly specifying the isotope that is the most abundant one.</p>
+</div>
+</dd></dl>
+
+<dl class="function">
+<dt id="_CPPv3N3mod7Isotope7IsotopeEi">
+<span id="_CPPv2N3mod7Isotope7IsotopeEi"></span><span id="mod::Isotope::Isotope__iCE"></span><em class="property">explicit</em> <em class="property">constexpr</em> <code class="descname">Isotope</code><span class="sig-paren">(</span>int <em>i</em><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv3N3mod7Isotope7IsotopeEi" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Construct a specific isotope. Pre-condition: the isotope must either be at least 1 or be -1.
+Passing -1 is equivalent to default-construction.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="_CPPv3NK3mod7IsotopecviEv">
+<span id="_CPPv2NK3mod7IsotopecviEv"></span><span id="mod::Isotope::castto-i-operatorCCE"></span><em class="property">constexpr</em> <code class="descname">operator int</code><span class="sig-paren">(</span><span class="sig-paren">)</span> <em class="property">const</em><a class="headerlink" href="#_CPPv3NK3mod7IsotopecviEv" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Implicit conversion to an integer type.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="_CPPv3N3mod7IsotopelsERNSt7ostreamE7Isotope">
+<span id="_CPPv2N3mod7IsotopelsERNSt7ostreamE7Isotope"></span><span id="mod::Isotope::lshift-operator__osR.Isotope"></span><em class="property">friend</em> std::ostream &amp;<code class="descname">operator&lt;&lt;</code><span class="sig-paren">(</span>std::ostream &amp;<em>s</em>, <a class="reference internal" href="#_CPPv3N3mod7IsotopeE" title="mod::Isotope">Isotope</a> <em>iso</em><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv3N3mod7IsotopelsERNSt7ostreamE7Isotope" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Inserts the integer value of the isotope into the stream.</p>
+</dd></dl>
+
+</div>
+</div>
+<div class="section" id="class-charge">
+<h2>2.2.1.3. Class <code class="docutils literal notranslate"><span class="pre">Charge</span></code><a class="headerlink" href="#class-charge" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="_CPPv3N3mod6ChargeE">
+<span id="_CPPv2N3mod6ChargeE"></span><span id="mod::Charge"></span><em class="property">class </em><code class="descname">Charge</code><a class="headerlink" href="#_CPPv3N3mod6ChargeE" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Representation of the charge of an atom.</p>
+</dd></dl>
+
+<div class="section" id="id3">
+<h3>2.2.1.3.1. Synopsis<a class="headerlink" href="#id3" title="Permalink to this headline">¶</a></h3>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="k">struct</span> <span class="n">Charge</span> <span class="p">{</span>
+    <span class="k">constexpr</span> <span class="n">Charge</span><span class="p">();</span>
+    <span class="k">explicit</span> <span class="k">constexpr</span> <span class="nf">Charge</span><span class="p">(</span><span class="kt">signed</span> <span class="kt">char</span> <span class="n">c</span><span class="p">);</span>
+    <span class="k">constexpr</span> <span class="k">operator</span> <span class="kt">signed</span> <span class="nf">char</span><span class="p">()</span> <span class="k">const</span><span class="p">;</span>
+    <span class="k">friend</span> <span class="n">std</span><span class="o">::</span><span class="n">ostream</span> <span class="o">&amp;</span><span class="k">operator</span><span class="o">&lt;&lt;</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">ostream</span> <span class="o">&amp;</span><span class="n">s</span><span class="p">,</span> <span class="n">Charge</span> <span class="n">charge</span><span class="p">);</span>
+<span class="k">private</span><span class="o">:</span>
+    <span class="kt">signed</span> <span class="kt">char</span> <span class="n">c</span><span class="p">;</span>
+<span class="p">};</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="id4">
+<h3>2.2.1.3.2. Details<a class="headerlink" href="#id4" title="Permalink to this headline">¶</a></h3>
+<dl class="function">
+<dt id="_CPPv3N3mod6Charge6ChargeEv">
+<span id="_CPPv2N3mod6Charge6ChargeEv"></span><span id="mod::Charge::ChargeCE"></span><em class="property">constexpr</em> <code class="descname">Charge</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv3N3mod6Charge6ChargeEv" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Construct a neutral charge.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="_CPPv3N3mod6Charge6ChargeEa">
+<span id="_CPPv2N3mod6Charge6ChargeEa"></span><span id="mod::Charge::Charge__signed-cCE"></span><em class="property">explicit</em> <em class="property">constexpr</em> <code class="descname">Charge</code><span class="sig-paren">(</span>signed char <em>c</em><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv3N3mod6Charge6ChargeEa" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Construct a specific charge. Pre-condition: the charge must be in the range <span class="math notranslate nohighlight">\([-9, 9]\)</span>.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="_CPPv3NK3mod6ChargecvaEv">
+<span id="_CPPv2NK3mod6ChargecvaEv"></span><span id="mod::Charge::castto-signed-c-operatorCCE"></span><em class="property">constexpr</em> <code class="descname">operator signed char</code><span class="sig-paren">(</span><span class="sig-paren">)</span> <em class="property">const</em><a class="headerlink" href="#_CPPv3NK3mod6ChargecvaEv" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Implicit conversion to an integer type.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="_CPPv3N3mod6ChargelsERNSt7ostreamE6Charge">
+<span id="_CPPv2N3mod6ChargelsERNSt7ostreamE6Charge"></span><span id="mod::Charge::lshift-operator__osR.Charge"></span><em class="property">friend</em> std::ostream &amp;<code class="descname">operator&lt;&lt;</code><span class="sig-paren">(</span>std::ostream &amp;<em>s</em>, <a class="reference internal" href="#_CPPv3N3mod6ChargeE" title="mod::Charge">Charge</a> <em>charge</em><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv3N3mod6ChargelsERNSt7ostreamE6Charge" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Inserts the <cite>int</cite> value of the charge into the stream.</p>
+</dd></dl>
+
+</div>
+</div>
+<div class="section" id="class-atomdata">
+<h2>2.2.1.4. Class <code class="docutils literal notranslate"><span class="pre">AtomData</span></code><a class="headerlink" href="#class-atomdata" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="_CPPv3N3mod8AtomDataE">
+<span id="_CPPv2N3mod8AtomDataE"></span><span id="mod::AtomData"></span><em class="property">class </em><code class="descname">AtomData</code><a class="headerlink" href="#_CPPv3N3mod8AtomDataE" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Representation of basic data of an atom.</p>
+</dd></dl>
+
+<div class="section" id="id5">
+<h3>2.2.1.4.1. Synopsis<a class="headerlink" href="#id5" title="Permalink to this headline">¶</a></h3>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="k">struct</span> <span class="n">AtomData</span> <span class="p">{</span>
+    <span class="k">constexpr</span> <span class="n">AtomData</span><span class="p">()</span> <span class="o">=</span> <span class="k">default</span><span class="p">;</span>
+    <span class="k">constexpr</span> <span class="k">explicit</span> <span class="nf">AtomData</span><span class="p">(</span><span class="n">AtomId</span> <span class="n">atomId</span><span class="p">);</span>
+    <span class="k">constexpr</span> <span class="nf">AtomData</span><span class="p">(</span><span class="n">AtomId</span> <span class="n">atomId</span><span class="p">,</span> <span class="n">Charge</span> <span class="n">charge</span><span class="p">,</span> <span class="kt">bool</span> <span class="n">radical</span><span class="p">);</span>
+    <span class="k">constexpr</span> <span class="nf">AtomData</span><span class="p">(</span><span class="n">AtomId</span> <span class="n">atomId</span><span class="p">,</span> <span class="n">Isotope</span> <span class="n">isotope</span><span class="p">,</span> <span class="n">Charge</span> <span class="n">charge</span><span class="p">,</span> <span class="kt">bool</span> <span class="n">radical</span><span class="p">);</span>
+    <span class="k">constexpr</span> <span class="n">AtomId</span> <span class="nf">getAtomId</span><span class="p">()</span> <span class="k">const</span><span class="p">;</span>
+    <span class="k">constexpr</span> <span class="n">Isotope</span> <span class="nf">getIsotope</span><span class="p">()</span> <span class="k">const</span><span class="p">;</span>
+    <span class="k">constexpr</span> <span class="n">Charge</span> <span class="nf">getCharge</span><span class="p">()</span> <span class="k">const</span><span class="p">;</span>
+    <span class="k">constexpr</span> <span class="kt">bool</span> <span class="nf">getRadical</span><span class="p">()</span> <span class="k">const</span><span class="p">;</span>
+    <span class="k">friend</span> <span class="k">constexpr</span> <span class="kt">bool</span> <span class="k">operator</span><span class="o">==</span><span class="p">(</span><span class="k">const</span> <span class="n">AtomData</span> <span class="o">&amp;</span><span class="n">a1</span><span class="p">,</span> <span class="k">const</span> <span class="n">AtomData</span> <span class="o">&amp;</span><span class="n">a2</span><span class="p">);</span>
+    <span class="k">friend</span> <span class="n">std</span><span class="o">::</span><span class="n">ostream</span> <span class="o">&amp;</span><span class="k">operator</span><span class="o">&lt;&lt;</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">ostream</span> <span class="o">&amp;</span><span class="n">s</span><span class="p">,</span> <span class="k">const</span> <span class="n">AtomData</span> <span class="o">&amp;</span><span class="n">data</span><span class="p">);</span>
+<span class="k">private</span><span class="o">:</span>
+    <span class="n">AtomId</span> <span class="n">atomId</span><span class="p">;</span>
+    <span class="n">Isotope</span> <span class="n">isotope</span><span class="p">;</span>
+    <span class="n">Charge</span> <span class="n">charge</span><span class="p">;</span>
+    <span class="kt">bool</span> <span class="n">radical</span> <span class="o">=</span> <span class="nb">false</span><span class="p">;</span>
+<span class="p">};</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="id6">
+<h3>2.2.1.4.2. Details<a class="headerlink" href="#id6" title="Permalink to this headline">¶</a></h3>
+<dl class="function">
+<dt id="_CPPv3N3mod8AtomData8AtomDataEv">
+<span id="_CPPv2N3mod8AtomData8AtomDataEv"></span><span id="mod::AtomData::AtomDataCE"></span><em class="property">constexpr</em> <code class="descname">AtomData</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv3N3mod8AtomData8AtomDataEv" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Construct atom data with default values:</p>
+<ul class="simple">
+<li><a class="reference internal" href="#_CPPv3N3mod7AtomIds7InvalidE" title="mod::AtomIds::Invalid"><code class="xref cpp cpp-var docutils literal notranslate"><span class="pre">AtomIds::Invalid</span></code></a> atom id,</li>
+<li><code class="xref cpp cpp-expr docutils literal notranslate"><a class="reference internal" href="#_CPPv3N3mod7IsotopeE" title="mod::Isotope"><span class="pre">Isotope</span></a><span class="pre">(</span><span class="pre">)</span></code> as isotope,</li>
+<li>neutral charge, and</li>
+<li>no radical.</li>
+</ul>
+</dd></dl>
+
+<dl class="function">
+<dt id="_CPPv3N3mod8AtomData8AtomDataE6AtomId">
+<span id="_CPPv2N3mod8AtomData8AtomDataE6AtomId"></span><span id="mod::AtomData::AtomData__AtomIdCE"></span><em class="property">explicit</em> <em class="property">constexpr</em> <code class="descname">AtomData</code><span class="sig-paren">(</span><a class="reference internal" href="#_CPPv3N3mod6AtomIdE" title="mod::AtomId">AtomId</a> <em>atomId</em><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv3N3mod8AtomData8AtomDataE6AtomId" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Construct atom data the given atom id, and otherwise default values (see above).</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="_CPPv3N3mod8AtomData8AtomDataE6AtomId6Chargeb">
+<span id="_CPPv2N3mod8AtomData8AtomDataE6AtomId6Chargeb"></span><span id="mod::AtomData::AtomData__AtomId.Charge.bCE"></span><em class="property">constexpr</em> <code class="descname">AtomData</code><span class="sig-paren">(</span><a class="reference internal" href="#_CPPv3N3mod6AtomIdE" title="mod::AtomId">AtomId</a> <em>atomId</em>, <a class="reference internal" href="#_CPPv3N3mod6ChargeE" title="mod::Charge">Charge</a> <em>charge</em>, bool <em>radical</em><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv3N3mod8AtomData8AtomDataE6AtomId6Chargeb" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Construct atom data with given atom id, charge, and radical, but with default isotope.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="_CPPv3N3mod8AtomData8AtomDataE6AtomId7Isotope6Chargeb">
+<span id="_CPPv2N3mod8AtomData8AtomDataE6AtomId7Isotope6Chargeb"></span><span id="mod::AtomData::AtomData__AtomId.Isotope.Charge.bCE"></span><em class="property">constexpr</em> <code class="descname">AtomData</code><span class="sig-paren">(</span><a class="reference internal" href="#_CPPv3N3mod6AtomIdE" title="mod::AtomId">AtomId</a> <em>atomId</em>, <a class="reference internal" href="#_CPPv3N3mod7IsotopeE" title="mod::Isotope">Isotope</a> <em>isotope</em>, <a class="reference internal" href="#_CPPv3N3mod6ChargeE" title="mod::Charge">Charge</a> <em>charge</em>, bool <em>radical</em><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv3N3mod8AtomData8AtomDataE6AtomId7Isotope6Chargeb" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Construct atom data with given atom id, isotope, charge, and radical.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="_CPPv3NK3mod8AtomData9getAtomIdEv">
+<span id="_CPPv2NK3mod8AtomData9getAtomIdEv"></span><span id="mod::AtomData::getAtomIdCCE"></span><em class="property">constexpr</em> <a class="reference internal" href="#_CPPv3N3mod6AtomIdE" title="mod::AtomId">AtomId</a> <code class="descname">getAtomId</code><span class="sig-paren">(</span><span class="sig-paren">)</span> <em class="property">const</em><a class="headerlink" href="#_CPPv3NK3mod8AtomData9getAtomIdEv" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Retrieve the atom id.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="_CPPv3NK3mod8AtomData10getIsotopeEv">
+<span id="_CPPv2NK3mod8AtomData10getIsotopeEv"></span><span id="mod::AtomData::getIsotopeCCE"></span><em class="property">constexpr</em> <a class="reference internal" href="#_CPPv3N3mod7IsotopeE" title="mod::Isotope">Isotope</a> <code class="descname">getIsotope</code><span class="sig-paren">(</span><span class="sig-paren">)</span> <em class="property">const</em><a class="headerlink" href="#_CPPv3NK3mod8AtomData10getIsotopeEv" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Retrieve the isotope.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="_CPPv3NK3mod8AtomData9getChargeEv">
+<span id="_CPPv2NK3mod8AtomData9getChargeEv"></span><span id="mod::AtomData::getChargeCCE"></span><em class="property">constexpr</em> <a class="reference internal" href="#_CPPv3N3mod6ChargeE" title="mod::Charge">Charge</a> <code class="descname">getCharge</code><span class="sig-paren">(</span><span class="sig-paren">)</span> <em class="property">const</em><a class="headerlink" href="#_CPPv3NK3mod8AtomData9getChargeEv" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Retrieve the charge.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="_CPPv3NK3mod8AtomData10getRadicalEv">
+<span id="_CPPv2NK3mod8AtomData10getRadicalEv"></span><span id="mod::AtomData::getRadicalCCE"></span><em class="property">constexpr</em> bool <code class="descname">getRadical</code><span class="sig-paren">(</span><span class="sig-paren">)</span> <em class="property">const</em><a class="headerlink" href="#_CPPv3NK3mod8AtomData10getRadicalEv" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Retrieve the radical status.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="_CPPv3N3mod8AtomDatalsERNSt7ostreamERK8AtomData">
+<span id="_CPPv2N3mod8AtomDatalsERNSt7ostreamERK8AtomData"></span><span id="mod::AtomData::lshift-operator__osR.AtomDataCR"></span><em class="property">friend</em> std::ostream &amp;<code class="descname">operator&lt;&lt;</code><span class="sig-paren">(</span>std::ostream &amp;<em>s</em>, <em class="property">const</em> <a class="reference internal" href="#_CPPv3N3mod8AtomDataE" title="mod::AtomData">AtomData</a> &amp;<em>data</em><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv3N3mod8AtomDatalsERNSt7ostreamERK8AtomData" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Format the atom data adhering to the string encoding of atoms (see <a class="reference internal" href="../dataDesc/dataDesc.html#mol-enc"><span class="std std-ref">Molecule Encoding</span></a>).</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Throws:</th><td class="field-body"><a class="reference internal" href="Error.html#_CPPv3N3mod10LogicErrorE" title="mod::LogicError"><code class="xref cpp cpp-class docutils literal notranslate"><span class="pre">LogicError</span></code></a> if the atom id is <a class="reference internal" href="#_CPPv3N3mod7AtomIds7InvalidE" title="mod::AtomIds::Invalid"><code class="xref cpp cpp-var docutils literal notranslate"><span class="pre">AtomIds::Invalid</span></code></a>.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+</div>
+<div class="section" id="enum-bondtype">
+<h2>2.2.1.5. Enum <code class="docutils literal notranslate"><span class="pre">BondType</span></code><a class="headerlink" href="#enum-bondtype" title="Permalink to this headline">¶</a></h2>
+<dl class="enum-struct">
+<dt id="_CPPv3N3mod8BondTypeE">
+<span id="_CPPv2N3mod8BondTypeE"></span><em class="property">enum struct </em><code class="descname">BondType</code><a class="headerlink" href="#_CPPv3N3mod8BondTypeE" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Representation of a bond type (see <a class="reference internal" href="../dataDesc/dataDesc.html#mol-enc"><span class="std std-ref">Molecule Encoding</span></a>).</p>
+<dl class="enumerator">
+<dt id="_CPPv3N3mod8BondType7InvalidE">
+<span id="_CPPv2N3mod8BondType7InvalidE"></span><em class="property">enumerator </em><code class="descname">Invalid</code><a class="headerlink" href="#_CPPv3N3mod8BondType7InvalidE" title="Permalink to this definition">¶</a><br /></dt>
+<dd></dd></dl>
+
+<dl class="enumerator">
+<dt id="_CPPv3N3mod8BondType6SingleE">
+<span id="_CPPv2N3mod8BondType6SingleE"></span><em class="property">enumerator </em><code class="descname">Single</code><a class="headerlink" href="#_CPPv3N3mod8BondType6SingleE" title="Permalink to this definition">¶</a><br /></dt>
+<dd></dd></dl>
+
+<dl class="enumerator">
+<dt id="_CPPv3N3mod8BondType8AromaticE">
+<span id="_CPPv2N3mod8BondType8AromaticE"></span><em class="property">enumerator </em><code class="descname">Aromatic</code><a class="headerlink" href="#_CPPv3N3mod8BondType8AromaticE" title="Permalink to this definition">¶</a><br /></dt>
+<dd></dd></dl>
+
+<dl class="enumerator">
+<dt id="_CPPv3N3mod8BondType6DoubleE">
+<span id="_CPPv2N3mod8BondType6DoubleE"></span><em class="property">enumerator </em><code class="descname">Double</code><a class="headerlink" href="#_CPPv3N3mod8BondType6DoubleE" title="Permalink to this definition">¶</a><br /></dt>
+<dd></dd></dl>
+
+<dl class="enumerator">
+<dt id="_CPPv3N3mod8BondType6TripleE">
+<span id="_CPPv2N3mod8BondType6TripleE"></span><em class="property">enumerator </em><code class="descname">Triple</code><a class="headerlink" href="#_CPPv3N3mod8BondType6TripleE" title="Permalink to this definition">¶</a><br /></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="function">
+<dt id="_CPPv3N3modlsERNSt7ostreamE8BondType">
+<span id="_CPPv2N3modlsERNSt7ostreamE8BondType"></span><span id="mod::lshift-operator__osR.BondType"></span>std::ostream &amp;<code class="descname">operator&lt;&lt;</code><span class="sig-paren">(</span>std::ostream &amp;<em>s</em>, <a class="reference internal" href="#_CPPv3N3mod8BondTypeE" title="mod::BondType">BondType</a> <em>bt</em><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv3N3modlsERNSt7ostreamE8BondType" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Format the bond type adhering to the string encoding of bonds (see <a class="reference internal" href="../dataDesc/dataDesc.html#mol-enc"><span class="std std-ref">Molecule Encoding</span></a>).</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Throws:</th><td class="field-body"><a class="reference internal" href="Error.html#_CPPv3N3mod10LogicErrorE" title="mod::LogicError"><code class="xref cpp cpp-class docutils literal notranslate"><span class="pre">LogicError</span></code></a> if the bond type is <a class="reference internal" href="#_CPPv3N3mod8BondType7InvalidE" title="mod::BondType::Invalid"><code class="xref cpp cpp-any docutils literal notranslate"><span class="pre">BondType::Invalid</span></code></a>.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="namespace-atomids">
+<h2>2.2.1.6. Namespace <code class="docutils literal notranslate"><span class="pre">AtomIds</span></code><a class="headerlink" href="#namespace-atomids" title="Permalink to this headline">¶</a></h2>
+<p>This namespace contains constants for each chemical element, both as their abbreviations and their full names.
+Two additional constants are provided for convenience.</p>
+<dl class="var">
+<dt id="_CPPv3N3mod7AtomIds7InvalidE">
+<span id="_CPPv2N3mod7AtomIds7InvalidE"></span><span id="mod::AtomIds::Invalid__AtomId"></span><a class="reference internal" href="#_CPPv3N3mod6AtomIdE" title="mod::AtomId">AtomId</a> <code class="descclassname">AtomIds<code class="descclassname">::</code></code><code class="descname">Invalid</code><a class="headerlink" href="#_CPPv3N3mod7AtomIds7InvalidE" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Constant for the invalid atom id.</p>
+</dd></dl>
+
+<dl class="var">
+<dt id="_CPPv3N3mod7AtomIds3MaxE">
+<span id="_CPPv2N3mod7AtomIds3MaxE"></span><span id="mod::AtomIds::Max__AtomId"></span><a class="reference internal" href="#_CPPv3N3mod6AtomIdE" title="mod::AtomId">AtomId</a> <code class="descclassname">AtomIds<code class="descclassname">::</code></code><code class="descname">Max</code><a class="headerlink" href="#_CPPv3N3mod7AtomIds3MaxE" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>An atom id equal to the atom id with the maximum valid id.</p>
+</dd></dl>
+
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="../index.html">Table of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">2.2.1. Chem.h</a><ul>
+<li><a class="reference internal" href="#class-atomid">2.2.1.1. Class <code class="docutils literal notranslate"><span class="pre">AtomId</span></code></a><ul>
+<li><a class="reference internal" href="#synopsis">2.2.1.1.1. Synopsis</a></li>
+<li><a class="reference internal" href="#details">2.2.1.1.2. Details</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#class-isotope">2.2.1.2. Class <code class="docutils literal notranslate"><span class="pre">Isotope</span></code></a><ul>
+<li><a class="reference internal" href="#id1">2.2.1.2.1. Synopsis</a></li>
+<li><a class="reference internal" href="#id2">2.2.1.2.2. Details</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#class-charge">2.2.1.3. Class <code class="docutils literal notranslate"><span class="pre">Charge</span></code></a><ul>
+<li><a class="reference internal" href="#id3">2.2.1.3.1. Synopsis</a></li>
+<li><a class="reference internal" href="#id4">2.2.1.3.2. Details</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#class-atomdata">2.2.1.4. Class <code class="docutils literal notranslate"><span class="pre">AtomData</span></code></a><ul>
+<li><a class="reference internal" href="#id5">2.2.1.4.1. Synopsis</a></li>
+<li><a class="reference internal" href="#id6">2.2.1.4.2. Details</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#enum-bondtype">2.2.1.5. Enum <code class="docutils literal notranslate"><span class="pre">BondType</span></code></a></li>
+<li><a class="reference internal" href="#namespace-atomids">2.2.1.6. Namespace <code class="docutils literal notranslate"><span class="pre">AtomIds</span></code></a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="api.html"
+                        title="previous chapter">2.2. API Reference</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="Config.html"
+                        title="next chapter">2.2.2. Config.h</a></p>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../_sources/libmod/Chem.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="Config.html" title="2.2.2. Config.h"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="api.html" title="2.2. API Reference"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">MØD v0.8.0 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="libmod.html" >2. libMØD</a> &#187;</li>
+          <li class="nav-item nav-item-2"><a href="api.html" >2.2. API Reference</a> &#187;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2013-2018, Jakob Lykke Andersen.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 2.0.0+/2aa1fab0.
+    </div>
+  </body>
+</html>

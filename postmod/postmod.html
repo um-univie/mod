@@ -1,0 +1,173 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>4. PostMØD (mod_post) &#8212; MØD v0.8.0 documentation</title>
+    <link rel="stylesheet" href="../_static/classic.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="5. The Wrapper Script (mod)" href="../modWrapper/modWrapper.html" />
+    <link rel="prev" title="3.2. Creating a Python Extension" href="../pymod/extensions.html" /> 
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="../modWrapper/modWrapper.html" title="5. The Wrapper Script (mod)"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="../pymod/extensions.html" title="3.2. Creating a Python Extension"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">MØD v0.8.0 documentation</a> &#187;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="postmod-mod-post">
+<h1>4. PostMØD (<code class="docutils literal notranslate"><span class="pre">mod_post</span></code>)<a class="headerlink" href="#postmod-mod-post" title="Permalink to this headline">¶</a></h1>
+<p>The post processor, <code class="docutils literal notranslate"><span class="pre">mod_post</span></code>, is used for compiling figures and a summary document
+of the data in the <code class="docutils literal notranslate"><span class="pre">out/</span></code> folder. As default it is automatically invoked by the
+wrapper script.</p>
+<p>The script does the following:</p>
+<ol class="arabic simple">
+<li>Clear the folder <code class="docutils literal notranslate"><span class="pre">summary</span></code>. If it does not exist, it is created.</li>
+<li>Source the file <code class="docutils literal notranslate"><span class="pre">out/post.sh</span></code> and create <code class="docutils literal notranslate"><span class="pre">summary/Makefile</span></code>.</li>
+<li>Run <code class="docutils literal notranslate"><span class="pre">make</span> <span class="pre">-f</span> <span class="pre">summary/Makefile</span> <span class="pre">all</span></code> (with a few more arguments).
+The Makefile will compile figures and generate a Latex file.
+A master Latex docuemnt is compiled to <code class="docutils literal notranslate"><span class="pre">summary/summary.pdf</span></code>.
+The master document includes the generated Latex file.</li>
+</ol>
+<div class="section" id="usage">
+<h2>4.1. Usage<a class="headerlink" href="#usage" title="Permalink to this headline">¶</a></h2>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>mod_post <span class="o">[</span>options<span class="o">]</span>
+</pre></div>
+</div>
+<div class="section" id="options">
+<h3>4.1.1. Options<a class="headerlink" href="#options" title="Permalink to this headline">¶</a></h3>
+<dl class="option">
+<dt id="cmdoption-mod-post-help">
+<code class="descname">--help</code><code class="descclassname"></code><code class="descclassname">, </code><code class="descname">-h</code><code class="descclassname"></code><a class="headerlink" href="#cmdoption-mod-post-help" title="Permalink to this definition">¶</a></dt>
+<dd><p>Shows the help output of the script.</p>
+</dd></dl>
+
+<dl class="option">
+<dt id="cmdoption-mod-post-j">
+<code class="descname">-j</code><code class="descclassname"> &lt;N&gt;</code><a class="headerlink" href="#cmdoption-mod-post-j" title="Permalink to this definition">¶</a></dt>
+<dd><p>When running <code class="docutils literal notranslate"><span class="pre">make</span></code>, use <code class="docutils literal notranslate"><span class="pre">-j</span> <span class="pre">&lt;N&gt;</span></code> as additional arguments.
+This parameter defaults to 2.</p>
+</dd></dl>
+
+</div>
+<div class="section" id="environtment-variables">
+<h3>4.1.2. Environtment Variables<a class="headerlink" href="#environtment-variables" title="Permalink to this headline">¶</a></h3>
+<dl class="envvar">
+<dt id="envvar-MOD_NUM_POST_THREADS">
+<code class="descname">MOD_NUM_POST_THREADS</code><a class="headerlink" href="#envvar-MOD_NUM_POST_THREADS" title="Permalink to this definition">¶</a></dt>
+<dd><p>If defined, the value of this variable is used for <code class="docutils literal notranslate"><span class="pre">-j</span></code> when invoking <code class="docutils literal notranslate"><span class="pre">make</span></code>.
+When <code class="docutils literal notranslate"><span class="pre">-j</span> <span class="pre">&lt;N&gt;</span></code> is given to the script, this variable is ignored.</p>
+</dd></dl>
+
+</div>
+</div>
+<div class="section" id="useful-api-references">
+<h2>4.2. Useful API References<a class="headerlink" href="#useful-api-references" title="Permalink to this headline">¶</a></h2>
+<p>The API of libMØD and PyMØD includes functionality for injecting code and modifying the
+behaviour of PostMØD and generated summaries. See <a class="reference internal" href="../libmod/Misc.html"><span class="doc">libMØD (Misc.h)</span></a>
+and <a class="reference internal" href="../pymod/Misc.html"><span class="doc">PyMØD (Misc)</span></a> for the documentation of these functions.</p>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="../index.html">Table of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">4. PostMØD (<code class="docutils literal notranslate"><span class="pre">mod_post</span></code>)</a><ul>
+<li><a class="reference internal" href="#usage">4.1. Usage</a><ul>
+<li><a class="reference internal" href="#options">4.1.1. Options</a></li>
+<li><a class="reference internal" href="#environtment-variables">4.1.2. Environtment Variables</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#useful-api-references">4.2. Useful API References</a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="../pymod/extensions.html"
+                        title="previous chapter">3.2. Creating a Python Extension</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="../modWrapper/modWrapper.html"
+                        title="next chapter">5. The Wrapper Script (<code class="docutils literal notranslate"><span class="pre">mod</span></code>)</a></p>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../_sources/postmod/postmod.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="../modWrapper/modWrapper.html" title="5. The Wrapper Script (mod)"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="../pymod/extensions.html" title="3.2. Creating a Python Extension"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">MØD v0.8.0 documentation</a> &#187;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2013-2018, Jakob Lykke Andersen.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 2.0.0+/2aa1fab0.
+    </div>
+  </body>
+</html>

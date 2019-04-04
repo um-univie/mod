@@ -1,0 +1,222 @@
+.. _cpp-Error:
+
+**********************************************************
+Error.h
+**********************************************************
+.. default-domain:: cpp
+
+.. py:currentmodule:: mod
+.. cpp:namespace:: mod
+
+This file contains the functionality used for reporting errors.
+In the description of the exceptions we use the standard terminology (see e.g., `Exception Safety <http://en.wikipedia.org/wiki/Exception_safety>`_).
+If nothing else is specified a thrown exception from MØD provides no exception safety.
+Any exception thrown from MØD or any dependencies are intented to derive from ``std::exception``,
+and any exception from MØD derives from :class:`Exception`.
+The exceptions are in general only thrown from the outer-most interface, and not from within the ``mod::lib`` namespace.
+
+Class ``Stacktrace``
+--------------------------------------------------------------------------------------------------------------------------------
+
+.. class:: Stacktrace
+    
+
+    A class encapsulating the current stacktrace at construction time.
+    Stacktraces may not be supported on all platforms.
+
+Synopsis
+^^^^^^^^
+
+.. code-block:: c++
+    
+    struct Stacktrace {
+        Stacktrace(unsigned int frameLimit, unsigned int numSkip);
+        void print(unsigned int frameLimit, std::ostream &s) const;
+    private:
+        std::vector<std::string> raw;
+        std::vector<std::string> demangled;
+    };
+
+Details
+^^^^^^^
+
+.. cpp:namespace:: mod
+
+.. cpp:namespace-push:: Stacktrace
+
+.. function:: Stacktrace(unsigned int frameLimit, unsigned int numSkip)
+
+    Capture a stacktrace with at most ``frameLimit`` frames and without the first ``numSkip`` frames.
+    The frame from the constructor it self is always skipped.
+.. function:: void print(unsigned int frameLimit, std::ostream &s) const
+
+    Print at most the first ``frameLimit`` frames from the capture stacktrace. Use 0 to print all available frames.
+    Symbol names will be demangled if possible.
+
+.. cpp:namespace:: mod
+
+
+Class ``Exception``
+--------------------------------------------------------------------------------------------------------------------------------
+
+.. class:: Exception : public std::exception
+    
+
+    The base class of all MØD exceptions.
+
+Synopsis
+^^^^^^^^
+
+.. code-block:: c++
+    
+    struct Exception : public std::exception {
+    protected:
+        Exception(std::string &&text, unsigned int numSkip, unsigned int frameLimit) : text(text), stacktrace(frameLimit, numSkip) { }
+        Exception(std::string &&text, unsigned int numSkip) : Exception(std::move(text), numSkip, 20) { }
+        Exception(std::string &&text) : Exception(std::move(text), 0) { }
+    public:
+        virtual std::string getName() const = 0;
+        virtual const char *what() const noexcept;
+        void printStacktrace(unsigned int frameLimit, std::ostream &s) const;
+        void append(const std::string &text);
+    protected:
+        std::string text;
+        Stacktrace stacktrace;
+        mutable std::string whatString; // is set by the what function
+    };
+
+Details
+^^^^^^^
+
+.. cpp:namespace:: mod
+
+.. cpp:namespace-push:: Exception
+
+.. function:: virtual std::string getName() const = 0
+
+    :returns: the name of the exception.
+.. function:: virtual const char *what() const noexcept
+
+    :returns: the description for the exception.
+.. function:: void printStacktrace(unsigned int frameLimit, std::ostream &s) const
+
+    Print the stacktrace captured when the exception was constructed. See :func:`Stacktrace::print`.
+.. function:: void append(const std::string &text)
+
+    Append text to the exception message.
+
+.. cpp:namespace:: mod
+
+
+Class ``FatalError``
+--------------------------------------------------------------------------------------------------------------------------------
+
+.. class:: FatalError : public Exception
+    
+
+    When thrown there is no exception safety. It is not safe to continue after catching it.
+
+
+Synopsis
+^^^^^^^^
+
+.. code-block:: c++
+    
+    struct FatalError : public Exception {
+        FatalError(std::string &&text, unsigned int numSkip) : Exception(std::move(text), numSkip) { }
+        FatalError(std::string &&text) : Exception(std::move(text)) { }
+        std::string getName() const {
+            return "MØD FatalError";
+        }
+        const char *what() const noexcept;
+    };
+
+Class ``InputError``
+--------------------------------------------------------------------------------------------------------------------------------
+
+.. class:: InputError : public Exception
+    
+
+    When thrown there is strong exception safety.
+    This exception is thrown when bad data has been provided to a loading function.
+
+
+Synopsis
+^^^^^^^^
+
+.. code-block:: c++
+    
+    struct InputError : public Exception {
+        InputError(std::string &&text) : Exception(std::move(text)) { }
+        std::string getName() const {
+            return "MØD InputError";
+        }
+    };
+
+Class ``LogicError``
+--------------------------------------------------------------------------------------------------------------------------------
+
+.. class:: LogicError : public Exception
+    
+
+    When thrown there is strong exception safety.
+    This exception is thrown when a pre-condition of a function is violated.
+
+
+Synopsis
+^^^^^^^^
+
+.. code-block:: c++
+    
+    struct LogicError : public Exception {
+        LogicError(std::string &&text) : Exception(std::move(text)) { }
+        std::string getName() const {
+            return "MØD LogicError";
+        }
+    };
+
+Class ``TermParsingError``
+--------------------------------------------------------------------------------------------------------------------------------
+
+.. class:: TermParsingError : public Exception
+    
+
+    When thrown there is at least basic exception safety.
+    This exception is thrown if :cpp:any:`LabelType::Term` is used and
+    parsing of a string into a first-order term fails.
+
+
+Synopsis
+^^^^^^^^
+
+.. code-block:: c++
+    
+    struct TermParsingError : public Exception {
+        TermParsingError(std::string &&text) : Exception(std::move(text)) { }
+        std::string getName() const {
+            return "MØD TermParsingError";
+        }
+    };
+
+Class ``StereoDeductionError``
+--------------------------------------------------------------------------------------------------------------------------------
+
+.. class:: StereoDeductionError : public Exception
+    
+
+    When thrown there is at least basic exception safety.
+    This exception is thrown if stereo data is requested and
+    deduction failed.
+
+
+Synopsis
+^^^^^^^^
+
+.. code-block:: c++
+    
+    struct StereoDeductionError : public Exception {
+        StereoDeductionError(std::string &&text) : Exception(std::move(text)) { }
+        std::string getName() const {
+            return "MØD StereoDeductionError";
+        }
+    };
