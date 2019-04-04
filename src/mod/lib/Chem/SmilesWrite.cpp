@@ -309,8 +309,10 @@ struct SmilesWriter {
 		}
 
 		// ignore pure hydrogens as explicit vertices, i.e., set them to already visited
-		for(Vertex v : asRange(vertices(g))) {
-			if(isCleanHydrogen(molState[v])) visited[get(boost::vertex_index_t(), g, v)] = true;
+		if(!withIds) {
+			for(Vertex v : asRange(vertices(g))) {
+				if(isCleanHydrogen(molState[v])) visited[get(boost::vertex_index_t(), g, v)] = true;
+			}
 		}
 
 		auto idx = get(boost::vertex_index_t(), g);
@@ -500,7 +502,7 @@ struct SmilesWriter {
 		std::vector<Edge> edgesNotVisited, edgesVisited;
 
 		for(Edge e : asRange(out_edges(v, g))) {
-			if(isCleanHydrogen(molState[target(e, g)])) continue;
+			if(!withIds && isCleanHydrogen(molState[target(e, g)])) continue;
 			if(!preBuildVisited[target(e, g)]) edgesNotVisited.push_back(e);
 			else edgesVisited.push_back(e);
 		}
@@ -627,7 +629,7 @@ struct SmilesWriter {
 
 	void getLabel(Vertex v) {
 		bool hasBrackets = true;
-		if(molState[v].getCharge() == 0 && !molState[v].getRadical()
+		if(molState[v].getCharge() == 0 && !molState[v].getRadical() && molState[v].getIsotope() == Isotope()
 				&& isInSmilesOrganicSubset(molState[v].getAtomId())
 				&& isValenceForOrganicSubsetNormal(v)) {
 			// if the hydrogen count is such that it can be deduced, then remove brackets
@@ -636,10 +638,12 @@ struct SmilesWriter {
 		if(withIds) hasBrackets = true;
 		if(hasBrackets) output += '[';
 		assert(molState[v].getAtomId() != AtomIds::Invalid);
+		if(molState[v].getIsotope() != Isotope())
+			output += boost::lexical_cast<std::string>(molState[v].getIsotope());
 		appendSymbolFromAtomId(output, molState[v].getAtomId());
 		if(hasBrackets) {
 			unsigned char numH = auxData.getNumHydrogen(v);
-			if(numH > 0) {
+			if(numH > 0 && !withIds) {
 				output += 'H';
 				if(numH > 1) {
 					if(numH >= 10) MOD_ABORT;

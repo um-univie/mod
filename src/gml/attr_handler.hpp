@@ -30,7 +30,7 @@ struct AttrHandler<Unused> {
 	}
 };
 
-template<> // member object pointer
+// member object pointer
 template<typename C, typename T>
 struct AttrHandler<T C::*> {
 

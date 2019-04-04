@@ -19,44 +19,61 @@ namespace Chem {
 // Other
 //------------------------------------------------------------------------------
 
-std::tuple<std::string, Charge, bool> extractChargeRadical(std::string label) {
-	auto lenRes = extractChargeRadicalLen(label);
-	label.erase(std::get<0>(lenRes));
-	return std::make_tuple(std::move(label), std::get<1>(lenRes), std::get<2>(lenRes));
+std::tuple<std::string, Isotope, Charge, bool> extractIsotopeChargeRadical(const std::string &label) {
+	auto res = extractIsotopeChargeRadicalLen(label);
+	std::string newLlabel(std::get<0>(res), std::get<1>(res));
+	return std::make_tuple(std::move(newLlabel), std::get<2>(res), std::get<3>(res), std::get<4>(res));
 }
 
-std::tuple<std::size_t, Charge, bool> extractChargeRadicalLen(const std::string &label) {
+std::tuple<std::string::const_iterator, std::string::const_iterator, Isotope, Charge, bool>
+/*   */ extractIsotopeChargeRadicalLen(const std::string &label) {
 	assert(!label.empty());
-	long int lastPos = label.size() - 1;
-	signed char charge = 0;
+	auto first = label.begin();
+	// note: the range is inclusive, i.e., [first, end], _not_ [first, last[
+	auto end = label.end() - 1;
+	// radical
 	bool radical = false;
-	if(lastPos >= 0 && label[lastPos] == '.') {
+	if(first != end && *end == '.') {
 		radical = true;
-		--lastPos;
+		--end;
 	}
-	if(lastPos >= 1 // "+" and "-" as labels do not have charge
-			&& (label[lastPos] == '+' || label.back() == '-')) {
-		charge = label[lastPos] == '+' ? 1 : -1;
-		--lastPos;
-		if(lastPos >= 1) { // "4+" have charge +1, and label "4"
-			char maybeNum = label[lastPos];
-			if(maybeNum >= '0' && maybeNum <= '9') {
-				charge *= maybeNum - '0';
-				--lastPos;
+	// charge
+	signed char charge = 0;
+	if(end != first // "+" and "-" as labels do not have charge
+			&& (*end == '+' || *end == '-')) {
+		charge = *end == '+' ? 1 : -1;
+		--end;
+		if(first != end) { // "4+" have charge +1, and label "4"
+			if(*end >= '0' && *end <= '9') {
+				charge *= *end - '0';
+				--end;
 			}
 		}
 	}
-	return std::make_tuple(lastPos + 1, Charge(charge), radical);
+	// isotope
+	int isotope = 0;
+	if(first != end) { // still inclusive range, leave at least 1 char (in the end) for the label
+		// leave at least 1 char for the atom type
+		if(*first != '0') {
+			for(; first != end && *first >= '0' && *first <= '9'; ++first) {
+				isotope *= 10;
+				isotope += *first - '0';
+			}
+		}
+	}
+	if(isotope == 0) isotope = -1;
+	return std::make_tuple(first, end + 1, Isotope(isotope), Charge(charge), radical);
 }
 
 AtomId atomIdFromSymbol(const std::string &label) {
-	return atomIdFromSymbol(label, label.size());
+	return atomIdFromSymbol(label.begin(), label.end());
 }
 
-AtomId atomIdFromSymbol(const std::string &label, std::size_t len) {
+AtomId atomIdFromSymbol(const std::string::const_iterator first, const std::string::const_iterator last) {
 	using namespace AtomIds;
+	const auto len = last - first;
 	if(len == 1) {
-		switch(label[0]) {
+		switch(first[0]) {
 		case 'B': return B;
 		case 'C': return C;
 		case 'F': return F;
@@ -74,7 +91,7 @@ AtomId atomIdFromSymbol(const std::string &label, std::size_t len) {
 		default: return Invalid;
 		}
 	} else if(len == 2) {
-		char c1 = label[0], c2 = label[1];
+		char c1 = first[0], c2 = first[1];
 		switch(c1) {
 		case 'Z':
 			switch(c2) {
@@ -263,7 +280,7 @@ AtomId atomIdFromSymbol(const std::string &label, std::size_t len) {
 		default: return Invalid;
 		}
 	} else if(len == 3) {
-		char c1 = label[0], c2 = label[1], c3 = label[2];
+		char c1 = first[0], c2 = first[1], c3 = first[2];
 		switch(c1) {
 		case 'U':
 			switch(c2) {
@@ -282,10 +299,14 @@ AtomId atomIdFromSymbol(const std::string &label, std::size_t len) {
 	} else return Invalid;
 }
 
-std::tuple<AtomId, Charge, bool> decodeVertexLabel(const std::string &label) {
-	auto lenChargeRadical = extractChargeRadicalLen(label);
-	auto atomId = atomIdFromSymbol(label, std::get<0>(lenChargeRadical));
-	return std::make_tuple(atomId, std::get<1>(lenChargeRadical), std::get<2>(lenChargeRadical));
+std::tuple<AtomId, Isotope, Charge, bool> decodeVertexLabel(const std::string &label) {
+	// This is a kind of "best effort", meaning that 42Lol4+. is decoded to isotope=42, charge=4, radical=.
+	const auto ex = extractIsotopeChargeRadicalLen(label);
+	const Isotope isotope = std::get<2>(ex);
+	const Charge charge = std::get<3>(ex);
+	const bool radical = std::get<4>(ex);
+	auto atomId = atomIdFromSymbol(std::get<0>(ex), std::get<1>(ex));
+	return std::make_tuple(atomId, isotope, charge, radical);
 }
 
 BondType decodeEdgeLabel(const std::string &label) {

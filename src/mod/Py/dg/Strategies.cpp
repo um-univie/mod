@@ -63,14 +63,6 @@ void Strategy_doExport() {
 			// rst:			:type: list of :py:class:`Graph`
 			// rst:
 			.add_property("_universe", py::make_function(&Strategy::GraphState::getUniverse, py::return_internal_reference<1>()))
-			// rst:		.. py:attribute:: hyperEdges
-			// rst: 
-			// rst:			The references to all derivations in the underlying derivation graph.
-			// rst:			I.e., some derivations might involve graphs not in the universe.
-			// rst:
-			// rst:			:type: list of :py:class:`DGHyperEdge`
-			// rst:
-			.add_property("_hyperEdges", py::make_function(&Strategy::GraphState::getHyperEdges, py::return_internal_reference<1>()))
 			;
 
 

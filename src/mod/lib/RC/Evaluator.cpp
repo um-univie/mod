@@ -70,6 +70,7 @@ struct EvalVisitor : public boost::static_visitor<std::unordered_set<std::shared
 				std::vector<lib::Rules::Real*> resultVec;
 				auto reporter = [&resultVec] (std::unique_ptr<lib::Rules::Real> r) {
 					resultVec.push_back(r.release());
+					return true;
 				};
 				composer(rFirst->getRule(), rSecond->getRule(), reporter);
 				for(auto *r : resultVec) {
@@ -90,7 +91,7 @@ struct EvalVisitor : public boost::static_visitor<std::unordered_set<std::shared
 
 	std::unordered_set<std::shared_ptr<rule::Rule> > operator()(const rule::RCExp::ComposeCommon &common) {
 		auto composer = [&common, this](const lib::Rules::Real &rFirst, const lib::Rules::Real &rSecond,
-				std::function<void(std::unique_ptr<lib::Rules::Real>) > reporter) {
+				std::function<bool(std::unique_ptr<lib::Rules::Real>) > reporter) {
 			RC::Common mm(common.getMaxmimum(), common.getConnected());
 			lib::RC::composeRuleRealByMatchMaker(rFirst, rSecond, mm, reporter, evaluator.labelSettings);
 		};
@@ -99,7 +100,7 @@ struct EvalVisitor : public boost::static_visitor<std::unordered_set<std::shared
 
 	std::unordered_set<std::shared_ptr<rule::Rule> > operator()(const rule::RCExp::ComposeParallel &common) {
 		auto composer = [&common, this](const lib::Rules::Real &rFirst, const lib::Rules::Real & rSecond,
-				std::function<void(std::unique_ptr<lib::Rules::Real>) > reporter) {
+				std::function<bool(std::unique_ptr<lib::Rules::Real>) > reporter) {
 			lib::RC::composeRuleRealByMatchMaker(rFirst, rSecond, lib::RC::Parallel(), reporter, evaluator.labelSettings);
 		};
 		return composeTemplate(common, composer);
@@ -107,7 +108,7 @@ struct EvalVisitor : public boost::static_visitor<std::unordered_set<std::shared
 
 	std::unordered_set<std::shared_ptr<rule::Rule> > operator()(const rule::RCExp::ComposeSub &sub) {
 		auto composer = [&sub, this](const lib::Rules::Real &rFirst, const lib::Rules::Real & rSecond,
-				std::function<void(std::unique_ptr<lib::Rules::Real>) > reporter) {
+				std::function<bool(std::unique_ptr<lib::Rules::Real>) > reporter) {
 			RC::Sub mm(sub.getAllowPartial());
 			lib::RC::composeRuleRealByMatchMaker(rFirst, rSecond, mm, reporter, evaluator.labelSettings);
 		};
@@ -116,7 +117,7 @@ struct EvalVisitor : public boost::static_visitor<std::unordered_set<std::shared
 
 	std::unordered_set<std::shared_ptr<rule::Rule> > operator()(const rule::RCExp::ComposeSuper &super) {
 		auto composer = [&super, this](const lib::Rules::Real &rFirst, const lib::Rules::Real & rSecond,
-				std::function<void(std::unique_ptr<lib::Rules::Real>) > reporter) {
+				std::function<bool(std::unique_ptr<lib::Rules::Real>) > reporter) {
 			RC::Super mm(super.getAllowPartial(), super.getEnforceConstraints());
 			lib::RC::composeRuleRealByMatchMaker(rFirst, rSecond, mm, reporter, evaluator.labelSettings);
 		};

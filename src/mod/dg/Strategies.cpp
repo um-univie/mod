@@ -26,10 +26,8 @@ namespace dg {
 //------------------------------------------------------------------------------
 
 Strategy::GraphState::GraphState(std::function<void(std::vector<std::shared_ptr<graph::Graph> >&) > fSubset,
-		std::function<void(std::vector<std::shared_ptr<graph::Graph> >&) > fUniverse,
-		std::function<void(std::vector<DG::HyperEdge>&) > fEdges)
-: subsetInit(false), universeInit(false), edgesInit(false),
-fSubset(fSubset), fUniverse(fUniverse), fEdges(fEdges) { }
+		std::function<void(std::vector<std::shared_ptr<graph::Graph> >&) > fUniverse)
+: subsetInit(false), universeInit(false), fSubset(fSubset), fUniverse(fUniverse) { }
 
 const std::vector<std::shared_ptr<graph::Graph> > &Strategy::GraphState::getSubset() const {
 	if(!subsetInit) {
@@ -45,14 +43,6 @@ const std::vector<std::shared_ptr<graph::Graph> > &Strategy::GraphState::getUniv
 		universeInit = true;
 	}
 	return universe;
-}
-
-const std::vector<DG::HyperEdge> &Strategy::GraphState::getHyperEdges() const {
-	if(!edgesInit) {
-		fEdges(edges);
-		edgesInit = true;
-	}
-	return edges;
 }
 
 //------------------------------------------------------------------------------

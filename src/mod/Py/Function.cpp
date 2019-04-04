@@ -23,6 +23,7 @@ void Function_doExport() {
 	exportFunc < std::string(dg::DG::HyperEdge)>("Func_StringDGHyperEdge");
 	// Graph -> X
 	exportFunc<bool(std::shared_ptr<graph::Graph>)>("Func_BoolGraph");
+	exportFunc<int(std::shared_ptr<graph::Graph>)>("Func_IntGraph");
 	exportFunc < std::string(std::shared_ptr<graph::Graph>)>("Func_StringGraph");
 	// Graph x DG -> X
 	exportFunc < bool(std::shared_ptr<graph::Graph>, std::shared_ptr<dg::DG>)>("Func_BoolGraphDG");

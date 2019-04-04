@@ -733,7 +733,7 @@ void termState(const lib::Rules::Real &r) {
 			}
 
 			virtual void operator()(const lib::GraphMorphism::Constraints::ShortestPath<lib::Rules::SideGraphType> &c) override { }
-		private :
+		private:
 			int counter = 0;
 		public:
 			std::unordered_map<Address, std::set<std::string> > &addrMap;

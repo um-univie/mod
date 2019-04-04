@@ -29,7 +29,7 @@ struct Label {
 Data parseGML(std::istream &s, std::ostream &err) {
 	GML::Rule rule;
 	{
-		gml::ast::List ast;
+		gml::ast::KeyValue ast;
 		bool res = gml::parser::parse(s, ast, err);
 		if(!res) return Data();
 		using namespace gml::converter::edsl;
@@ -64,8 +64,9 @@ Data parseGML(std::istream &s, std::ostream &err) {
 				(makeSide("right", &GML::Rule::right), 0, 1)
 				(constrainAdj) (constrainShortestPath)
 				;
-		auto iterBegin = ast.list.begin();
-		res = gml::converter::convert(iterBegin, ast.list.end(), cRule, err, rule);
+		auto iterBegin = &ast;
+		auto iterEnd = iterBegin + 1;
+		res = gml::converter::convert(iterBegin, iterEnd, cRule, err, rule);
 		if(!res) return Data();
 	}
 

@@ -19,7 +19,7 @@ struct Super;
 
 // For explicitly instantiating the generic function separately.
 #define MOD_RC_COMPOSE_BY_MATCH_MAKER(MM)                                       \
-	void composeRuleRealByMatchMaker(const lib::Rules::Real &rFirst, const lib::Rules::Real &rSecond, const MM &mm, std::function<void(std::unique_ptr<lib::Rules::Real>) > rr, LabelSettings labelSettings);
+	void composeRuleRealByMatchMaker(const lib::Rules::Real &rFirst, const lib::Rules::Real &rSecond, const MM &mm, std::function<bool(std::unique_ptr<lib::Rules::Real>) > rr, LabelSettings labelSettings);
 MOD_RC_COMPOSE_BY_MATCH_MAKER(Common);
 MOD_RC_COMPOSE_BY_MATCH_MAKER(Parallel);
 MOD_RC_COMPOSE_BY_MATCH_MAKER(Sub);

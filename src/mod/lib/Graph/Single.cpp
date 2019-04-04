@@ -55,7 +55,7 @@ bool sanityCheck(const GraphType &g, const PropString &pString, std::ostream &s)
 		// check loop
 		if(e.first == e.second) {
 			s << "Graph::sanityCheck:\tloop edge found on vertex "
-					<< get(boost::vertex_index_t(), g, e.first) << "('" << pString[e.first] << "')" << std::endl;
+							<< get(boost::vertex_index_t(), g, e.first) << "('" << pString[e.first] << "')" << std::endl;
 			return false;
 		}
 		// check parallelness
@@ -63,8 +63,8 @@ bool sanityCheck(const GraphType &g, const PropString &pString, std::ostream &s)
 			auto ep = edgesSorted[i - 1];
 			if(e == ep) {
 				s << "Graph::sanityCheck:\tparallel edges found between "
-						<< get(boost::vertex_index_t(), g, e.first) << "('" << pString[e.first]
-						<< "') and " << get(boost::vertex_index_t(), g, e.second) << " ('" << pString[e.second] << "')" << std::endl;
+								<< get(boost::vertex_index_t(), g, e.first) << "('" << pString[e.first]
+								<< "') and " << get(boost::vertex_index_t(), g, e.second) << " ('" << pString[e.second] << "')" << std::endl;
 				return false;
 			}
 		}
@@ -120,8 +120,13 @@ void Single::setName(std::string name) {
 }
 
 const std::pair<const std::string&, bool> Single::getGraphDFS() const {
-	if(!dfs) std::tie(dfs, dfsHasNonSmilesRingClosure) = DFSEncoding::write(getGraph(), getStringState());
+	if(!dfs) std::tie(dfs, dfsHasNonSmilesRingClosure) = DFSEncoding::write(getGraph(), getStringState(), false);
 	return std::pair<const std::string&, bool>(*dfs, dfsHasNonSmilesRingClosure);
+}
+
+const std::string &Single::getGraphDFSWithIds() const {
+	if(!dfsWithIds) dfsWithIds = DFSEncoding::write(getGraph(), getStringState(), true).first;
+	return *dfsWithIds;
 }
 
 const std::string &Single::getSmiles() const {
@@ -258,36 +263,41 @@ std::size_t morphism(const Single &gDomain, const Single &gCodomain, std::size_t
 	return mr.getNumHits();
 }
 
+std::size_t isomorphismSmilesOrCanonOrVF2(const Single &gDom, const Single &gCodom, LabelSettings labelSettings) {
+	const auto &ggDom = gDom.getLabelledGraph();
+	const auto &ggCodom = gCodom.getLabelledGraph();
+	// first try if we can compare canonical SMILES strings
+	if(get_molecule(ggDom).getIsMolecule() && get_molecule(ggCodom).getIsMolecule() && !getConfig().graph.useWrongSmilesCanonAlg.get())
+		return gDom.getSmiles() == gCodom.getSmiles() ? 1 : 0;
+
+	// otherwise maybe we can still do canonical form comparison
+	if(labelSettings.type == LabelType::String && !labelSettings.withStereo) {
+		return canonicalCompare(gDom, gCodom, labelSettings.type, labelSettings.withStereo) ? 1 : 0;
+	}
+
+	// otherwise, we have no choice but to use VF2
+	return Single::isomorphismVF2(gDom, gCodom, 1, labelSettings);
+}
+
 } // namespace
 
 std::size_t Single::isomorphismVF2(const Single &gDom, const Single &gCodom, std::size_t maxNumMatches, LabelSettings labelSettings) {
 	return morphism(gDom, gCodom, maxNumMatches, labelSettings, GM_MOD::VF2Isomorphism());
 }
 
-bool Single::isomorphismBrokenSmilesAndVF2(const Single &gDom, const Single &gCodom, LabelSettings labelSettings) {
-	const auto &g1 = gDom.getGraph();
-	const auto &g2 = gCodom.getGraph();
-	if(num_vertices(g1) != num_vertices(g2)) return false;
-	if(num_edges(g1) != num_edges(g2)) return false;
-	if(labelSettings.type == LabelType::String && !labelSettings.withStereo &&
-			gDom.getMoleculeState().getIsMolecule() && gCodom.getMoleculeState().getIsMolecule()) {
-		return gDom.getSmiles() == gCodom.getSmiles();
-	}
-	return 1 == isomorphismVF2(gDom, gCodom, 1, labelSettings);
-}
-
-std::size_t Single::isomorphism(const Single &gDom, const Single &gCodom, std::size_t maxNumMatches, LabelSettings labelSettings) {
+bool Single::isomorphic(const Single &gDom, const Single &gCodom, LabelSettings labelSettings) {
+	++getConfig().graph.numIsomorphismCalls();
+	const auto nDom = num_vertices(gDom.getGraph());
+	const auto nCodom = num_vertices(gCodom.getGraph());
+	if(nDom != nCodom) return false; // early bail-out
 	// this hax with name comparing is basically to make abstract derivation graphs
 	// TODO: remove it, so the name truly doesn't matter
-	if(num_vertices(gDom.getGraph()) == 0 && num_vertices(gCodom.getGraph()) == 0)
-		return gDom.getName() == gCodom.getName() ? 1 : 0;
-	// we only have VF2 for doing multiple morphisms
-	if(maxNumMatches > 1)
-		return isomorphismVF2(gDom, gCodom, maxNumMatches, labelSettings);
-	// so now it's just the decision question
-	if(&gDom == &gCodom)
-		return 1;
+	if(nDom == 0)
+		return gDom.getName() == gCodom.getName();
+	if(&gDom == &gCodom) return true;
 	switch(getConfig().graph.isomorphismAlg.get()) {
+	case Config::IsomorphismAlg::SmilesCanonVF2:
+		return isomorphismSmilesOrCanonOrVF2(gDom, gCodom, labelSettings);
 	case Config::IsomorphismAlg::VF2:
 		return isomorphismVF2(gDom, gCodom, 1, labelSettings);
 	case Config::IsomorphismAlg::Canon:
@@ -295,12 +305,23 @@ std::size_t Single::isomorphism(const Single &gDom, const Single &gCodom, std::s
 			throw LogicError("Can only do isomorphism via canonicalisation with the isomorphism relation.");
 		if(labelSettings.withStereo && labelSettings.stereoRelation != LabelRelation::Isomorphism)
 			throw LogicError("Can only do isomorphism via canonicalisation with the isomorphism stereo relation.");
-		return canonicalCompare(gDom, gCodom, labelSettings.type, labelSettings.withStereo) ? 1 : 0;
-	case Config::IsomorphismAlg::Smiles:
-		throw LogicError("You currently shouldn't use SMILES for isomorphism.");
-		//		return isomorphismBrokenSmilesAndVF2(gDom, gCodom, labelSettings) ? 1 : 0;
+		return canonicalCompare(gDom, gCodom, labelSettings.type, labelSettings.withStereo);
 	}
 	MOD_ABORT;
+}
+
+std::size_t Single::isomorphism(const Single &gDom, const Single &gCodom, std::size_t maxNumMatches, LabelSettings labelSettings) {
+	++getConfig().graph.numIsomorphismCalls();
+	if(maxNumMatches == 1)
+		return isomorphic(gDom, gCodom, labelSettings) ? 1 : 0;
+	// this hax with name comparing is basically to make abstract derivation graphs
+	// TODO: remove it, so the name truly doesn't matter
+	const auto nDom = num_vertices(gDom.getGraph());
+	const auto nCodom = num_vertices(gCodom.getGraph());
+	if(nDom == 0 && nCodom == 0)
+		return gDom.getName() == gCodom.getName() ? 1 : 0;
+	// we only have VF2 for doing multiple morphisms
+	return isomorphismVF2(gDom, gCodom, maxNumMatches, labelSettings);
 }
 
 std::size_t Single::monomorphism(const Single &gDom, const Single &gCodom, std::size_t maxNumMatches, LabelSettings labelSettings) {
@@ -324,9 +345,9 @@ Single makePermutation(const Single &g) {
 	}
 	std::unique_ptr<PropString> pString;
 	auto gBoost = lib::makePermutedGraph(g.getGraph(),
-			[&pString](GraphType & gNew) {
-				pString.reset(new PropString(gNew));
-			},
+					[&pString](GraphType & gNew) {
+						pString.reset(new PropString(gNew));
+					},
 	[&g, &pString](Vertex vOld, const GraphType &gOld, Vertex vNew, GraphType & gNew) {
 		pString->addVertex(vNew, g.getStringState()[vOld]);
 	},

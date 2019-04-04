@@ -7,8 +7,17 @@
 
 namespace mod {
 
+std::string AtomId::symbol() const {
+	if(*this == AtomIds::Invalid) throw LogicError("AtomId::Invalid has no symbol.");
+	return lib::Chem::symbolFromAtomId(*this);
+}
+
 std::ostream &operator<<(std::ostream &s, AtomId atomId) {
 	return s << static_cast<unsigned int> (atomId);
+}
+
+std::ostream &operator<<(std::ostream &s, Isotope iso) {
+	return s << static_cast<int> (iso);
 }
 
 std::ostream &operator<<(std::ostream &s, Charge charge) {
@@ -21,6 +30,7 @@ std::ostream &operator<<(std::ostream &s, Charge charge) {
 
 std::ostream &operator<<(std::ostream &s, const AtomData &data) {
 	if(data.atomId == AtomIds::Invalid) throw LogicError("Can not print atom data with atom id AtomIds::Invalid.");
+	if(data.isotope != Isotope()) s << data.isotope;
 	s << lib::Chem::symbolFromAtomId(data.atomId);
 	if(data.charge != 0) {
 		if(data.charge > 1 || data.charge < -1) s << std::abs(data.charge);

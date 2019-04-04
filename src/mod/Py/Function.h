@@ -49,7 +49,6 @@ template<typename F>
 struct FunctionWrapper {
 };
 
-template<>
 template<typename R, typename ...Args>
 struct FunctionWrapper<R(Args...)> : mod::Function<R(Args...)>, py::wrapper<FunctionWrapper<R(Args...)> > {
 

@@ -49,7 +49,7 @@ clean: clean-aux
 
 .PHONY: clean-aux
 clean-aux: clean-mod-aux
-	rm -f *.log *.out *.bbl *.blg *.synctex.gz *.lof *.lot *.toc *.tdo *.fmt
+	rm -f *.log *.out *.bbl *.blg *.synctex.gz *.lof *.lot *.toc *.tdo *.fmt *.vrb *.snm *.nav
 	find . -iname "*.aux" | xargs rm -f
 
 .PHONY: clean-mod-aux

@@ -122,7 +122,7 @@ void Config_doExport() {
 		py::enum_<mod::Config::IsomorphismAlg>("IsomorphismAlg")
 				.value("VF2", mod::Config::IsomorphismAlg::VF2)
 				.value("Canon", mod::Config::IsomorphismAlg::Canon)
-				.value("Smiles", mod::Config::IsomorphismAlg::Smiles)
+				.value("SmilesCanonVF2", mod::Config::IsomorphismAlg::SmilesCanonVF2)
 				;
 
 #define NSIter(rNS, dataNS, tNS)                                                                        \

@@ -198,6 +198,12 @@ std::pair<std::string, std::string> tikz(const GraphPrint &g, typename boost::gr
 			else return depict.getAtomId(vOuter);
 		}
 
+		Isotope getIsotope(SVertex vInner) const {
+			GVertex vOuter = getOuterVertexFromInnerVertex(vInner);
+			if(vOuter == nullVertexOuter) return Isotope();
+			else return depict.getIsotope(vOuter);
+		}
+
 		char getCharge(SVertex vInner) const {
 			GVertex vOuter = getOuterVertexFromInnerVertex(vInner);
 			if(vOuter == nullVertexOuter) return 0;
@@ -230,9 +236,9 @@ std::pair<std::string, std::string> tikz(const GraphPrint &g, typename boost::gr
 			else return depict(getOuterEdgeFromInnerEdge(eInner));
 		}
 
-		std::string getVertexLabelNoChargeRadical(SVertex vInner) const {
+		std::string getVertexLabelNoIsotopeChargeRadical(SVertex vInner) const {
 			GVertex vOuter = getOuterVertexFromInnerVertex(vInner);
-			if(vOuter != nullVertexOuter)return depict.getVertexLabelNoChargeRadical(vOuter);
+			if(vOuter != nullVertexOuter)return depict.getVertexLabelNoIsotopeChargeRadical(vOuter);
 			auto iter = vMap.find(vInner);
 			assert(iter != end(vMap));
 			assert(iter->second != -1);

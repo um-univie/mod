@@ -7,7 +7,7 @@
 #include <mod/rule/ForwardDecl.h>
 
 #include <memory>
-#include <set>
+#include <unordered_set>
 #include <vector>
 
 namespace mod {
@@ -62,22 +62,18 @@ public: // hypergraph interface
 	// rst: .. function:: std::size_t numVertices() const
 	// rst:
 	// rst:		:returns: the number of vertices in the derivation graph.
-	// rst:		:throws: :class:`LogicError` if the DG has not been calculated.
 	std::size_t numVertices() const;
 	// rst: .. function:: VertexRange vertices() const
 	// rst:
 	// rst:		:returns: a range of all vertices in the derivation graph.
-	// rst:		:throws: :class:`LogicError` if the DG has not been calculated.
 	VertexRange vertices() const;
 	// rst: .. function:: std::size_t numEdges() const
 	// rst:
 	// rst:		:returns: the number of edges in the derivation graph.
-	// rst:		:throws: :class:`LogicError` if the DG has not been calculated.
 	std::size_t numEdges() const;
 	// rst: .. function:: EdgeRange edges() const
 	// rst:
 	// rst:		:returns: a range of all edges in the derivation graph.
-	// rst:		:throws: :class:`LogicError` if the DG has not been calculated.
 	EdgeRange edges() const;
 public: // searching for vertices and hyperedges
 	// rst: .. function:: Vertex findVertex(std::shared_ptr<graph::Graph> g) const
@@ -95,29 +91,28 @@ public: // searching for vertices and hyperedges
 	HyperEdge findEdge(const std::vector<Vertex> &sources, const std::vector<Vertex> &targets) const;
 	HyperEdge findEdge(const std::vector<std::shared_ptr<graph::Graph> > &sources, const std::vector<std::shared_ptr<graph::Graph> > &targets) const;
 public:
-	// rst: .. function:: void calc()
+	// rst: .. function:: void calc(bool printInfo = true)
 	// rst:
 	// rst:		Compute the derivation graph.
 	// rst:
 	// rst:		:throws: :class:`LogicError` if created from :cpp:any:`ruleComp` and a dynamic add strategy adds a graph
 	// rst:			isomorphic to an already known graph, but represented by a different object.
-	void calc();
-	// rst: .. function:: const std::set<std::shared_ptr<graph::Graph>, graph::GraphLess> &getGraphDatabase() const
+	void calc(bool printInfo = true);
+	// rst: .. function:: const std::unordered_set<std::shared_ptr<graph::Graph>, graph::GraphLess> &getGraphDatabase() const
 	// rst:
 	// rst: 	:returns: the set of all graphs created by the derivation graph,
 	// rst: 		and all graphs given when constructed.
-	const std::set<std::shared_ptr<graph::Graph>, graph::GraphLess> &getGraphDatabase() const;
+	const std::unordered_set<std::shared_ptr<graph::Graph> > &getGraphDatabase() const;
 	// rst: .. function:: const std::vector<std::shared_ptr<graph::Graph> > &getProducts() const
 	// rst:
 	// rst: 	:returns: the list of new graphs discovered by the derivation graph.
 	const std::vector<std::shared_ptr<graph::Graph> > &getProducts() const;
-	// rst: .. function:: std::string print(const PrintData &data, const Printer &printer) const
+	// rst: .. function:: std::pair<std::string, std::string> print(const PrintData &data, const Printer &printer) const
 	// rst:
 	// rst: 	Print the derivation graph in style of a hypergraph.
-	// rst:
-	// rst: 	:returns: the name of the PDF-file that will be compiled in post-processing.
+	// rst: 	:returns: the name of the PDF-file that will be compiled in post-processing and the name of the coordinate tex-file used.
 	// rst: 	:throws: :class:`LogicError` if the print data is not for this DG.
-	std::string print(const PrintData &data, const Printer &printer) const;
+	std::pair<std::string, std::string> print(const PrintData &data, const Printer &printer) const;
 	// rst: .. function:: std::string dump() const
 	// rst:
 	// rst: 	Exports the derivation graph to a text file, which can be importetet.

@@ -84,7 +84,6 @@ void union_graph<Graph>::push_back(const Graph *g) {
 
 template<typename Graph>
 const Graph &union_graph<Graph>::operator[](std::size_t gIdx) const {
-	assert(gIdx < graphs.size());
 	return *graphs[gIdx];
 }
 
@@ -110,7 +109,6 @@ typename union_graph<Graph>::vertices_size_type union_graph<Graph>::get_num_vert
 
 template<typename Graph>
 typename union_graph<Graph>::vertices_size_type union_graph<Graph>::get_vertex_idx_offset(std::size_t gIdx) const {
-	assert(gIdx <= size());
 	return vertexIdxOffset[gIdx];
 }
 
@@ -121,7 +119,6 @@ typename union_graph<Graph>::edges_size_type union_graph<Graph>::get_num_edges()
 
 template<typename Graph>
 typename union_graph<Graph>::edges_size_type union_graph<Graph>::get_edge_idx_offset(std::size_t gIdx) const {
-	assert(gIdx < size());
 	return edgeIdxOffset[gIdx];
 }
 
@@ -514,6 +511,12 @@ template<typename G, typename Property>
 struct property_map<jla_boost::union_graph<G>, Property> {
 	using type = jla_boost::detail::union_graph_property_map<G, Property>;
 	using const_type = jla_boost::detail::union_graph_property_map<jla_boost::detail::const_wrapper<G>, Property>;
+};
+
+template<typename G, typename Property>
+struct property_map<const jla_boost::union_graph<G>, Property> {
+	using type = jla_boost::detail::union_graph_property_map<jla_boost::detail::const_wrapper<G>, Property>;
+	using const_type = type;
 };
 
 } // namespace boost

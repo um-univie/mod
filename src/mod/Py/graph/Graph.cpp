@@ -126,10 +126,17 @@ void Graph_doExport() {
 			.add_property("smilesWithIds", py::make_function(&Graph::getSmilesWithIds, py::return_value_policy<py::copy_const_reference>()))
 			// rst:		.. py:attribute:: graphDFS
 			// rst:
-			// rst:			(Read-only) This is the :ref:`GraphDFS <graph-graphDFS>` of the graph.
+			// rst:			(Read-only) This is a :ref:`GraphDFS <graph-graphDFS>` of the graph.
 			// rst:
 			// rst:			:type: string
 			.add_property("graphDFS", py::make_function(&Graph::getGraphDFS, py::return_value_policy<py::copy_const_reference>()))
+			// rst:		.. py:attribute:: graphDFSWithIds
+			// rst:
+			// rst:			(Read-only) This is a :ref:`GraphDFS <graph-graphDFS>` of the graph, where each vertices have an explicit id,
+			// rst:			corresponding to its internal vertex id.
+			// rst:
+			// rst:			:type: string
+			.add_property("graphDFSWithIds", py::make_function(&Graph::getGraphDFSWithIds, py::return_value_policy<py::copy_const_reference>()))
 			// rst:		.. py:attribute:: linearEncoding
 			// rst:
 			// rst:			(Read-only) If the graph models a molecule this is the :ref:`SMILES string <graph-smiles>` string, otherwise it is the :ref:`GraphDFS <graph-graphDFS>` string.
@@ -155,12 +162,16 @@ void Graph_doExport() {
 			// rst:
 			// rst:			:param double e: the value for the energy to be set.
 			.def("cacheEnergy", &Graph::cacheEnergy)
-			// rst:		.. py:attribute:: molarMass
+			// rst:		.. py:attribute:: exactMass
 			// rst:
-			// rst:			(Read-only) If the graph models a molecule, this is the molar mass of the molecule as calculated by Open Babel.
+			// rst:			(Read-only) The exact mass of the graph, if it is a molecule.
+			// rst:			It is the sum of the exact mass of each atom, with the mass of electrons subtracted corresponding to the integer charge.
+			// rst:			That is, the mass is :math:`\sum_a (mass(a) - mass(e)\cdot charge(a))`.
+			// rst:			If an atom has no specified isotope, then the most abundant is used.
 			// rst:
 			// rst:			:type: double
-			.add_property("molarMass", &Graph::getMolarMass)
+			// rst:			:raises: :class:`LogicError` if it is not a molecule, including if some isotope has not been tabulated.
+			.add_property("exactMass", &Graph::getExactMass)
 			// rst:		.. py:method:: vLabelCount(label)
 			// rst:
 			// rst:			:param string label: some label for querying.
@@ -230,8 +241,8 @@ void Graph_doExport() {
 			// rst:		            The descriptor is null if the external id was not used.
 			// rst:			:rtype: :py:class:`GraphVertex`
 			.def("getVertexFromExternalId", &Graph::getVertexFromExternalId)
-			// rst:		.. py::attribute:: minExternalId
-			// rst:		                   maxExternalId
+			// rst:		.. py:attribute:: minExternalId
+			// rst:		                  maxExternalId
 			// rst:
 			// rst:			If the graph was not loaded from an external data format, then these attributes
 			// rst:			are always return 0. Otherwise, they are the minimum/maximum external id from which
@@ -243,42 +254,53 @@ void Graph_doExport() {
 			.add_property("maxExternalId", &Graph::getMaxExternalId)
 			;
 
-	// rst: .. py:method:: graphGMLString(s, name=None)
+	// rst: .. py:data:: inputGraphs
+	// rst:
+	// rst:		A list of graphs to which explicitly loaded graphs as default are appended.
+	// rst:
+	// rst:		:type: list of :class:`Graph`
+	// rst:
+	
+	// rst: .. py:method:: graphGMLString(s, name=None, add=True)
 	// rst:
 	// rst:		Load a graph in :ref:`GML <graph-gml>` format from a given string.
 	// rst:
-	// rst:		:param string d: the string with the :ref:`GML <graph-gml>` data to load from.
+	// rst:		:param string s: the string with the :ref:`GML <graph-gml>` data to load from.
 	// rst:		:param string name: the name of the graph. If none is given the default name is used.
+	// rst:		:param bool add: whether to append the graph to :data:`inputGraphs` or not.
 	// rst:		:returns: the loaded graph.
 	// rst:		:rtype: :class:`Graph`
 	// rst:		:raises: :class:`InputError` on bad input.
 	py::def("graphGMLString", &Graph::graphGMLString);
-	// rst: .. py:method:: graphGML(f, name=None)
+	// rst: .. py:method:: graphGML(f, name=None, add=True)
 	// rst:
 	// rst:		Load a graph in :ref:`GML <graph-gml>` format from a given file.
 	// rst:
 	// rst:		:param string f: name of the :ref:`GML <graph-gml>` file to be loaded.
 	// rst:		:param string name: the name of the graph. If none is given the default name is used.
+	// rst:		:param bool add: whether to append the graph to :data:`inputGraphs` or not.
 	// rst:		:returns: the loaded graph.
 	// rst:		:rtype: :class:`Graph`
 	// rst:		:raises: :class:`InputError` on bad input.
 	py::def("graphGML", &Graph::graphGML);
-	// rst: .. py:method:: graphDFS(s, name=None)
+	// rst: .. py:method:: graphDFS(s, name=None, add=True)
 	// rst:
 	// rst:		Load a graph from a :ref:`GraphDFS <graph-graphDFS>` string.
 	// rst:
 	// rst:		:param string s: the :ref:`GraphDFS <graph-graphDFS>` string to parse.
 	// rst:		:param string name: the name of the graph. If none is given the default name is used.
+	// rst:		:param bool add: whether to append the graph to :data:`inputGraphs` or not.
 	// rst:		:returns: the loaded graph.
 	// rst:		:rtype: :class:`Graph`
 	// rst:		:raises: :class:`InputError` on bad input.
 	py::def("graphDFS", &Graph::graphDFS);
-	// rst: .. py:method:: smiles(s, name=None)
+	// rst: .. py:method:: smiles(s, name=None, add=True)
 	// rst:
 	// rst:		Load a molecule from a :ref:`SMILES <graph-smiles>` string.
 	// rst:
 	// rst:		:param string s: the :ref:`SMILES <graph-smiles>` string to parse.
 	// rst:		:param string name: the name of the graph. If none is given the default name is used.
+	// rst:		:param bool add: whether to append the graph to :data:`inputGraphs` or not.
 	// rst:		:returns: the loaded molecule.
 	// rst:		:rtype: :class:`Graph`
 	// rst:		:raises: :class:`InputError` on bad input.

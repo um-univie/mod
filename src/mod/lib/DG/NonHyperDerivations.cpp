@@ -14,14 +14,14 @@ NonHyperDerivations::NonHyperDerivations(std::vector<Derivation> derivations)
 {
 LabelType::String, LabelRelation::Isomorphism, false, LabelRelation::Isomorphism
 }), derivations(new std::vector<Derivation>(std::move(derivations))) {
-	calculate();
+	calculate(true);
 }
 
 std::string NonHyperDerivations::getType() const {
 	return "DGDerivations";
 }
 
-void NonHyperDerivations::calculateImpl() {
+void NonHyperDerivations::calculateImpl(bool printInfo) {
 	assert(derivations);
 	// add all graphs
 	for(const auto &der : *derivations) {

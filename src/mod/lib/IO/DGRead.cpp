@@ -52,17 +52,18 @@ struct NonHyperAbstract : public lib::DG::NonHyper {
 	NonHyperAbstract(const std::vector<Derivation> &derivations)
 	: NonHyper({},
 	{
-LabelType::String, LabelRelation::Isomorphism, false, LabelRelation::Isomorphism
+
+		LabelType::String, LabelRelation::Isomorphism, false, LabelRelation::Isomorphism
 	}), derivationsForConstruction(&derivations) {
-		calculate();
+		calculate(true);
 	}
 private:
 
-	std::string getType() const {
+	virtual std::string getType() const override {
 		return "DGAbstract";
 	}
 
-	void calculateImpl() {
+	virtual void calculateImpl(bool printInfo) override {
 		const auto &derivations = *derivationsForConstruction;
 		std::unordered_map<std::string, std::shared_ptr<graph::Graph> > strToGraph;
 		for(const auto &der : derivations) {
@@ -116,7 +117,7 @@ private:
 		derivationsForConstruction = nullptr;
 	}
 
-	void listImpl(std::ostream &s) const { }
+	virtual void listImpl(std::ostream &s) const override { }
 private:
 	std::vector<std::shared_ptr<rule::Rule> > rules;
 	const std::vector<Derivation> *derivationsForConstruction;

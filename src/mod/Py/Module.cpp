@@ -17,7 +17,7 @@
 #define MOD_FILES()                                                             \
 	((graph, (Printer))) /* this must be before DGGraphInterface due to default arg */ \
 	((Chem)) ((Collections)) ((Config)) ((Derivation))                            \
-	((dg, (DG) (GraphInterface) (Printer) (Strategy)))                            \
+	((dg, (DG) (GraphInterface) (Printer) (Strategy)))                  \
 	((Error)) ((Function))                                                        \
 	((graph, (Automorphism) (Graph) (GraphInterface)))                            \
 	((rule, (RC) (Rule) (GraphInterface)))                                        \

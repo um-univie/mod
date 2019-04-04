@@ -205,7 +205,7 @@ public:
 struct ToInvertibleVectorVertexMap {
 
 	template<typename VertexMap>
-	bool operator()(VertexMap &&m,
+	auto operator()(VertexMap &&m,
 			const typename VertexMapTraits<VertexMap>::GraphDom &gDom,
 			const typename VertexMapTraits<VertexMap>::GraphCodom &gCodom) const {
 		using Map = InvertibleVectorVertexMap<typename VertexMapTraits<VertexMap>::GraphDom, typename VertexMapTraits<VertexMap>::GraphCodom >;

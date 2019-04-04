@@ -32,7 +32,7 @@ using EmbeddingEdge = lib::Stereo::EmbeddingEdge;
 struct LocalIso {
 
 	template<typename ...Args>
-	bool operator()(const ConfPtr &cDom, const ConfPtr &cCodom, Args&&...) const {
+	bool operator()(const ConfPtr &cDom, const ConfPtr &cCodom, Args&&... args) const {
 		if(cDom->getGeometryVertex() != cCodom->getGeometryVertex()) return false;
 		if(cDom->getNumLonePairs() != cCodom->getNumLonePairs()) return false;
 		if(cDom->getHasRadical() != cCodom->getHasRadical()) return false;
@@ -40,12 +40,12 @@ struct LocalIso {
 	}
 
 	template<typename ...Args>
-	bool operator()(const EdgeCategory catDom, const EdgeCategory catCodom, Args&&...) const {
+	bool operator()(const EdgeCategory catDom, const EdgeCategory catCodom, Args&&... args) const {
 		return catDom == catCodom;
 	}
 
 	template<typename ...Args>
-	bool operator()(const bool inContextDom, const bool inContextCodom, Args&&...) const {
+	bool operator()(const bool inContextDom, const bool inContextCodom, Args&&... args) const {
 		return inContextDom == inContextCodom;
 	}
 };
@@ -53,7 +53,7 @@ struct LocalIso {
 struct LocalSpec {
 
 	template<typename ...Args>
-	bool operator()(const ConfPtr &cDom, const ConfPtr &cCodom, Args&&...) const {
+	bool operator()(const ConfPtr &cDom, const ConfPtr &cCodom, Args&&... args) const {
 		bool isAncestor = lib::Stereo::getGeometryGraph().isAncestorOf(cDom->getGeometryVertex(), cCodom->getGeometryVertex());
 		if(!isAncestor) return false;
 		// TODO: check #lone pairs and #radicals
@@ -63,12 +63,12 @@ struct LocalSpec {
 	}
 
 	template<typename ...Args>
-	bool operator()(const EdgeCategory catDom, const EdgeCategory catCodom, Args&&...) const {
+	bool operator()(const EdgeCategory catDom, const EdgeCategory catCodom, Args&&... args) const {
 		return catDom == catCodom || catDom == EdgeCategory::Any;
 	}
 
 	template<typename ...Args>
-	bool operator()(const bool inContextDom, const bool inContextCodom, Args&&...) const {
+	bool operator()(const bool inContextDom, const bool inContextCodom, Args&&... args) const {
 		return inContextCodom || !inContextDom;
 	}
 };

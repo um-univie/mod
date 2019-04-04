@@ -37,7 +37,10 @@ struct TermPredConstants {
 		using Handler = typename LabGraphDom::PropTermType::Handler;
 		const bool res = Handler::reduce(std::logical_and<>(),
 				Handler::fmap2(aDom, aCodom, gDom, gCodom,
-				[this, &pDom, &pCodom](std::size_t l, std::size_t r, auto&&...) {
+				[this, &pDom, &pCodom](std::size_t l, std::size_t r, auto&&... args) {
+					// note: the parameter pack _must_ be named because of fucked up rules with varargs
+					// http://lbrandy.com/blog/2013/02/c11s-six-dots/
+					// http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2016/p0281r0.html
 					return this->compare(l, r, getMachine(pDom), getMachine(pCodom));
 				}));
 		return res && next(veDom, veCodom, gDom, gCodom);
@@ -120,7 +123,25 @@ struct TermAssociationHandlerUnify {
 
 	template<typename OuterGraphDom, typename OuterGraphCodom>
 	bool operator()(std::size_t l, std::size_t r, const OuterGraphDom &gDom, const OuterGraphCodom &gCodom, lib::Term::Wam &res, lib::Term::MGU &mgu) const {
+		constexpr bool DEBUG = false;
+		if(DEBUG) {
+			auto &s = lib::IO::log();
+			s << "TermAssociationHandlerUnify:\n";
+			lib::IO::Term::Write::wam(res, lib::Term::getStrings(), s);
+		}
 		res.unifyHeapTemp(r, l, mgu);
+		if(DEBUG) {
+			auto &s = lib::IO::log();
+			s << "\tunifyHeapTemp(" << r << ", " << l << ")\n";
+			switch(mgu.status) {
+			case lib::Term::MGU::Status::Exists:
+				s << "\tExists\n";
+				break;
+			case lib::Term::MGU::Status::Fail:
+				s << "\tFail\n";
+				break;
+			}
+		}
 		if(mgu.status != lib::Term::MGU::Status::Exists) return false;
 		else {
 			res.verify();

@@ -21,7 +21,7 @@ namespace graph {
 struct Printer {
 	// rst: .. function Printer()
 	// rst:
-	// rst:		The default constructor enables edges as bonds and raised charges.
+	// rst:		The default constructor enables edges as bonds, raised charges, and raised isotopes.
 	Printer();
 	Printer(const Printer &that);
 	Printer &operator=(const Printer &that);

@@ -94,7 +94,7 @@ std::shared_ptr<Rule> Rule::makeInverse() const {
 	if(ignore) dpoRule.rightMatchConstraints.clear();
 	auto rInner = std::make_unique<lib::Rules::Real>(std::move(dpoRule), getLabelType());
 	rInner->setName(this->getName() + ", inverse");
-	return makeRule(std::move(rInner));
+	return makeRule(std::move(rInner), *p->externalToInternalIds);
 }
 
 std::pair<std::string, std::string> Rule::print() const {

@@ -25,10 +25,11 @@ struct DepictionDataCore {
 	struct DepictionData { // instantiated in the cpp file
 		DepictionData(const DepictionDataCore &depict);
 		AtomId getAtomId(Vertex v) const; // shortcut to moleculeState
+		Isotope getIsotope(Vertex v) const; // shortcut to moleculeState
 		Charge getCharge(Vertex v) const; // shortcut to moleculeState
 		bool getRadical(Vertex v) const; // shortcut to moleculeState
 		BondType getBondData(Edge e) const; // shortcut to moleculeState
-		std::string getVertexLabelNoChargeRadical(Vertex v) const;
+		std::string getVertexLabelNoIsotopeChargeRadical(Vertex v) const;
 		std::string getEdgeLabel(Edge e) const;
 		const AtomData &operator()(Vertex v) const; // fake data
 		BondType operator()(Edge e) const; // fake data

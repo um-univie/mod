@@ -26,7 +26,8 @@ struct Super {
 	using VertexMapType = jla_boost::GraphMorphism::InvertibleVectorVertexMap<GraphDom, GraphCodom>;
 public:
 
-	Super(bool allowPartial, bool enforceConstraints) : allowPartial(allowPartial), enforceConstraints(enforceConstraints) { }
+	Super(bool allowPartial, bool enforceConstraints)
+	: allowPartial(allowPartial), enforceConstraints(enforceConstraints) { }
 
 	void makeMatches(const auto &rFirst, const auto &rSecond, auto &&mr, LabelSettings labelSettings) const {
 		if(allowPartial)
@@ -38,7 +39,10 @@ private:
 
 	template<bool AllowPartial>
 	void makeMatchesInternal(const auto &rFirst, const auto &rSecond, auto &&mr, LabelSettings labelSettings) const {
-		if(getConfig().componentSG.verbose.get()) IO::log() << rFirst.getName() << " -> " << rSecond.getName() << std::endl;
+		if(getConfig().componentSG.verbose.get()) {
+			IO::log() << "ComponentSG: " << rFirst.getName() << " -> " << rSecond.getName() << std::endl;
+			IO::log() << "ComponentSG: " << "labelSettings = " << labelSettings << std::endl;
+		}
 		initByLabelSettings(rFirst, rSecond, labelSettings);
 		const auto &lgDomPatterns = get_labelled_left(rSecond.getDPORule());
 		const auto &lgCodomHosts = get_labelled_right(rFirst.getDPORule());
@@ -70,9 +74,25 @@ private:
 		auto mm = makeMultiDimSelector<AllowPartial>(
 				get_num_connected_components(lgDomPatterns),
 				get_num_connected_components(lgCodomHosts), mp);
+		if(getConfig().componentSG.verbose.get()) {
+			IO::log() << "ComponentSG: " << "Match matrix, " << mm.morphisms.size() << " x " << mm.morphisms.front().size() << std::endl;
+			for(int i = 0; i != mm.morphisms.size(); ++i) {
+				IO::log() << "ComponentSG: ";
+				if(mm.preDisabled[i]) IO::log() << "x:";
+				else IO::log() << " :";
+				const auto &m = mm.morphisms[i];
+				for(int j = 0; j != m.size(); ++j)
+					IO::log() << " " << std::setw(2) << m[j].size();
+				IO::log() << std::endl;
+			}
+		}
 		for(const auto &position : mm) {
 			auto maybeMap = matchFromPosition(rFirst, rSecond, position);
-			if(!maybeMap) continue;
+			if(!maybeMap) {
+				if(getConfig().componentSG.verbose.get())
+					IO::log() << "ComponentSG: matchFromPosition returned none." << std::endl;
+				continue;
+			}
 			auto map = *std::move(maybeMap);
 			bool continue_ = handleMapByLabelSettings(rFirst, rSecond, std::move(map), mr, labelSettings);
 			if(!continue_) break;

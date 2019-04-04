@@ -88,7 +88,10 @@ const LabelledGraph::PropStereoType &get_stereo(const LabelledGraph &g) {
 }
 
 const LabelledGraph::PropMoleculeType &get_molecule(const LabelledGraph &g) {
-	if(!g.pMolecule) g.pMolecule.reset(new LabelledGraph::PropMoleculeType(get_graph(g), get_string(g)));
+	// this makes some GCC versions generate better code than having the unlikely branch in the if
+	if(g.pMolecule)
+		return *g.pMolecule;
+	g.pMolecule.reset(new LabelledGraph::PropMoleculeType(get_graph(g), get_string(g)));
 	return *g.pMolecule;
 }
 

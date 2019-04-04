@@ -50,12 +50,15 @@ void Collections_doExport() {
 	py::class_<VecGraph>("VecGraph").def(py::vector_indexing_suite<VecGraph, true>());
 	using VecRule = std::vector<std::shared_ptr<rule::Rule> >;
 	py::class_<VecRule>("VecRule").def(py::vector_indexing_suite<VecRule, true>());
+	using VecPairString = std::vector<std::pair<std::string, std::string> >;
+	py::class_<VecPairString>("VecPairString").def(py::vector_indexing_suite<VecPairString, true>());
 
 	using VecRCExpExp = std::vector<rule::RCExp::Expression>;
 	py::class_<VecRCExpExp>("VecRCExpExp").def(py::vector_indexing_suite<VecRCExpExp, true>());
 
 	// Pair
 	py::to_python_converter<std::pair<std::string, std::string>, PairToTupleConverter<std::string, std::string> >();
+	py::to_python_converter<std::pair<int, int>, PairToTupleConverter<int, int> >();
 }
 
 } // namespace Py

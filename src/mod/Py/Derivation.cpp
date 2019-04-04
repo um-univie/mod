@@ -29,7 +29,7 @@ void Derivation_doExport() {
 			// rst:			Represents the multi-set of left graphs :math:`G` in a derivation :math:`G\Rightarrow^p H`.
 			// rst:
 			// rst:			:type: list of :class:`Graph`
-			.def_readwrite("_left", &mod::Derivation::left)
+			.def_readwrite("left", &mod::Derivation::left)
 			// rst:		.. py:attribute:: rule
 			// rst:
 			// rst:			Represents the transformation rule :math:`p` in a derivation :math:`G\Rightarrow^p H`.
@@ -41,7 +41,7 @@ void Derivation_doExport() {
 			// rst:			Represents the multi-set of right graphs :math:`G` in a derivation :math:`G\Rightarrow^p H`.
 			// rst:
 			// rst:			:type: list of :class:`Graph`
-			.def_readwrite("_right", &mod::Derivation::right)
+			.def_readwrite("right", &mod::Derivation::right)
 			;
 }
 

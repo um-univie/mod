@@ -24,8 +24,8 @@ private:
 };
 
 template<typename Next>
-CommonSubgraphWrapper<Next> makeCommonSubgraphWrapper(Next &&next) {
-	return CommonSubgraphWrapper<Next>(std::forward<Next>(next));
+CommonSubgraphWrapper<Next> makeCommonSubgraphWrapper(Next next) {
+	return CommonSubgraphWrapper<Next>(next);
 }
 
 } // namespace detail

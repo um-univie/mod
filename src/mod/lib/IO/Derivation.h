@@ -16,7 +16,8 @@ struct Options;
 } // namespace Graph
 namespace Derivation {
 namespace Write {
-void summary(const lib::DG::NonHyper &dg, lib::DG::HyperVertex v, const IO::Graph::Write::Options &options, const std::string &nomatchColour, const std::string &matchColour);
+std::vector<std::pair<std::string, std::string> >
+summary(const lib::DG::NonHyper &dg, lib::DG::HyperVertex v, const IO::Graph::Write::Options &options, const std::string &nomatchColour, const std::string &matchColour);
 void summaryTransitionState(const lib::DG::NonHyper &dg, lib::DG::HyperVertex v, const IO::Graph::Write::Options &options);
 } // namespace Write
 } // namespace Derivation

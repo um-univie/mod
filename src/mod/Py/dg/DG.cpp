@@ -42,28 +42,24 @@ void DG_doExport() {
 			// rst:			(Read-only) The number of vertices in the derivation graph.
 			// rst:
 			// rst:			:type: int
-			// rst:			:raises: :py:class:`LogicError` if the DG has not been calculated.
 			.add_property("numVertices", &DG::numVertices)
 			// rst:		.. py:attribute:: vertices
 			// rst:
 			// rst:			(Read-only) An iterable of all vertices in the derivation graph.
 			// rst:
 			// rst:			:type: :py:class:`DGVertexRange`
-			// rst:			:raises: :py:class:`LogicError` if the DG has not been calculated.
 			.add_property("vertices", &DG::vertices)
 			// rst:		.. py:attribute:: numEdges
 			// rst:
 			// rst:			(Read-only) The number of hyperedges in the derivation graph.
 			// rst:
 			// rst:			:type: int
-			// rst:			:raises: :py:class:`LogicError` if the DG has not been calculated.
 			.add_property("numEdges", &DG::numEdges)
 			// rst:		.. py:attribute:: edges
 			// rst:
 			// rst:			(Read-only) An iterable of all hyperedges in the derivation graph.
 			// rst:
 			// rst:			:type: :py:class:`DGEdgeRange`
-			// rst:			:raises: :py:class:`LogicError` if the DG has not been calculated.
 			.add_property("edges", &DG::edges)
 			//------------------------------------------------------------------
 			// rst:		.. py:method:: findVertex(g)
@@ -92,13 +88,13 @@ void DG_doExport() {
 			.def("findEdge", findEdgeVertices)
 			.def("findEdge", findEdgeGraphs)
 			//------------------------------------------------------------------
-			// rst:		.. py:method:: calc()
+			// rst:		.. py:method:: calc(printInfo=True)
 			// rst:
 			// rst:			Create the actual derivation graph.
 			// rst:
 			// rst:			:raises: :class:`LogicError` if created from :any:`dgRuleComp` and a dynamic add strategy adds a graph
 			// rst:				isomorphic to an already known graph, but represented by a different object.
-			.def("calc", &DG::calc)
+			.def("calc", &DG::calc, py::arg("printInfo") = true)
 			// rst:		.. py:attribute:: graphDatabase
 			// rst:
 			// rst:			All graphs known to the derivation graph.
@@ -120,8 +116,8 @@ void DG_doExport() {
 			// rst:			:type printer: :class:`DGPrinter`
 			// rst:			:param data: the extra data to use encoding the structure of the graph.
 			// rst:			:type data: :class:`DGPrintData`
-			// rst:			:returns: the name of the PDF-file that will be compiled in post-processing.
-			// rst:			:rtype: string
+			// rst:			:returns: the name of the PDF-file that will be compiled in post-processing and the name of the coordinate tex-file used.
+			// rst:			:rtype: (string, string)
 			.def("print", &DG::print)
 			// rst:		.. py:method:: dump()
 			// rst:

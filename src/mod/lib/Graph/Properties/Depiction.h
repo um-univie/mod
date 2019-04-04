@@ -31,9 +31,10 @@ class DepictionData {
 public:
 	DepictionData(const LabelledGraph &lg);
 	AtomId getAtomId(Vertex v) const; // shortcut to moleculeState
+	Isotope getIsotope(Vertex v) const; // shortcut to moleculeState
 	Charge getCharge(Vertex v) const; // shortcut to moleculeState
 	bool getRadical(Vertex v) const; // shortcut to moleculeState
-	std::string getVertexLabelNoChargeRadical(Vertex v) const;
+	std::string getVertexLabelNoIsotopeChargeRadical(Vertex v) const;
 	BondType getBondData(Edge e) const; // shortcut to moleculeState
 	bool hasImportantStereo(Vertex v) const;
 	std::string getEdgeLabel(Edge e) const;
@@ -52,13 +53,17 @@ public: // custom depiction
 	void setImageCommand(std::string cmd);
 	std::string getImageCommand() const;
 private:
+#ifdef MOD_HAVE_OPENBABEL
+	const lib::Chem::OBMolHandle &getOB(bool withHydrogen) const;
+#endif
+private:
 	const LabelledGraph &lg;
 	bool hasMoleculeEncoding;
 	std::map<Vertex, AtomData> nonAtomToPhonyAtom;
-	std::map<AtomId, std::string> phonyAtomToStringNoCharge;
+	std::map<AtomId, std::string> phonyAtomToStringNoStuff;
 	std::map<Edge, std::string> nonBondEdges;
 #ifdef MOD_HAVE_OPENBABEL
-	lib::Chem::OBMolHandle obMolAll, obMolNoHydrogen;
+	mutable lib::Chem::OBMolHandle obMolAll, obMolNoHydrogen;
 #endif
 	std::shared_ptr<mod::Function<std::string()> > image;
 	std::string imageCmd;

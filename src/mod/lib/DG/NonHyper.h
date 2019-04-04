@@ -28,13 +28,12 @@ class HyperCreator;
 
 class NonHyper {
 	friend class HyperCreator;
-protected:
+public:
 	using GraphType = NonHyperGraphType;
 	using Vertex = NonHyperVertex;
 	using Edge = NonHyperEdge;
 public:
-	// TODO: change to unordered set, when Boost >= 1.51 is installed
-	typedef std::set<std::shared_ptr<graph::Graph>, graph::GraphLess> StdGraphSet;
+	using GraphDatabase = std::unordered_set<std::shared_ptr<graph::Graph> >;
 protected:
 	NonHyper(const std::vector<std::shared_ptr<graph::Graph> > &graphDatabase, LabelSettings labelSettings);
 public: // general
@@ -45,10 +44,17 @@ public: // general
 	LabelSettings getLabelSettings() const;
 	virtual std::string getType() const = 0;
 public: // calculation
-	void calculate();
+	void calculatePrologue();
+	void calculateEpilogue();
+	void calculate(bool printInfo); // uses the two above and the calculateImpl
+	bool getHasStartedCalculation() const;
 	bool getHasCalculated() const;
 protected: // calculation
-	virtual void calculateImpl() = 0;
+	virtual void calculateImpl(bool printInfo) = 0;
+	// Uses addGraph, but uses isomorphism to check if it was already there.
+	// If so, it throws LogicError.
+	// If we are using terms it may throw TermParsingError as well.
+	bool tryAddGraph(std::shared_ptr<graph::Graph> g);
 	// adds the graph to the graph database
 	// returns true iff it was a new graph
 	bool addGraph(std::shared_ptr<graph::Graph> g);
@@ -82,27 +88,32 @@ private: // calculation
 public: // post calculation
 	void list(std::ostream &s) const;
 	const GraphType &getGraph() const;
-	Hyper &getHyper();
 	const Hyper &getHyper() const;
-	const StdGraphSet &getGraphDatabase() const;
+	const GraphDatabase &getGraphDatabase() const;
 	const std::vector<std::shared_ptr<graph::Graph> > &getProducts() const;
 	void print() const;
+	HyperVertex findHyperEdge(Edge e) const;
 	HyperVertex findHyperEdge(const std::vector<HyperVertex> &sources, const std::vector<HyperVertex> &targets) const;
-	std::vector<dg::DG::HyperEdge> getAllHyperEdges() const;
 protected:
 	virtual void listImpl(std::ostream &s) const = 0;
 private: // general
 	std::size_t id;
 	std::weak_ptr<dg::DG> apiReference;
 	const LabelSettings labelSettings;
-	StdGraphSet graphDatabase;
+	GraphDatabase graphDatabase;
 	GraphType dg;
+public: // TODO: make private again
 	std::map<GraphMultiset, Vertex> multisetToVertex;
+private:
 	std::unique_ptr<Hyper> hyper;
-	HyperCreator *hyperCreator; // only valid during calculation
+public: // TODO: make private again
+	std::map<Edge, HyperVertex> edgeToHyper;
+private:
+	std::unique_ptr<HyperCreator> hyperCreator; // only valid during calculation
 private: // calculation
-	bool hasCalculated;
-	unsigned int productNum;
+	bool hasStartedCalculation = false;
+	bool hasCalculated = false;
+	unsigned int productNum = 0;
 	std::vector<std::shared_ptr<graph::Graph> > products;
 public:
 	static void diff(const NonHyper &dg1, const NonHyper &dg2);

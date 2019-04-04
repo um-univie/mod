@@ -41,6 +41,22 @@ AtomId DepictionDataCore::DepictionData<membership>::getAtomId(Vertex v) const {
 }
 
 template<Membership membership>
+Isotope DepictionDataCore::DepictionData<membership>::getIsotope(Vertex v) const {
+	const auto &pMol = get_molecule(depict.lr);
+	switch(membership) {
+	case Membership::Left:
+		return pMol.getLeft()[v].getIsotope();
+	case Membership::Right:
+		return pMol.getRight()[v].getIsotope();
+	case Membership::Context:
+		auto leftId = pMol.getLeft()[v].getIsotope();
+		auto rightId = pMol.getRight()[v].getIsotope();
+		if(leftId == rightId) return leftId;
+		else return Isotope();
+	}
+}
+
+template<Membership membership>
 Charge DepictionDataCore::DepictionData<membership>::getCharge(Vertex v) const {
 	const auto &pMol = get_molecule(depict.lr);
 	switch(membership) {
@@ -89,7 +105,7 @@ BondType DepictionDataCore::DepictionData<membership>::getBondData(Edge e) const
 }
 
 template<Membership membership>
-std::string DepictionDataCore::DepictionData<membership>::getVertexLabelNoChargeRadical(Vertex v) const {
+std::string DepictionDataCore::DepictionData<membership>::getVertexLabelNoIsotopeChargeRadical(Vertex v) const {
 	auto atomId = getAtomId(v);
 	if(atomId != AtomIds::Invalid)
 		return Chem::symbolFromAtomId(atomId);
@@ -307,7 +323,9 @@ DepictionDataCore::DepictionDataCore(const LabelledRule &lr) : lr(lr), hasMolecu
 			Vertex v = p.first;
 			Membership m = p.second;
 			assert(m != Membership::Context);
-			auto label = std::get<0>(Chem::extractChargeRadical(m == Membership::Left ? pString.getLeft()[v] : pString.getRight()[v]));
+			std::string label = std::get<0>(Chem::extractIsotopeChargeRadical(
+					m == Membership::Left ? pString.getLeft()[v] : pString.getRight()[v]
+					));
 			auto iter = labelToAtomId.find(label);
 			if(iter == end(labelToAtomId)) {
 				unsigned char atomId = 1;

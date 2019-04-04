@@ -20,7 +20,7 @@ void Printer_doExport() {
 	py::class_<Printer>("GraphPrinter")
 			// rst:		.. py:method:: __init__(self)
 			// rst:
-			// rst:			The default constructor enables edges as bonds and raised charges.
+			// rst:			The default constructor enables edges as bonds, raised charges, and raised isotopes.
 			// rst:		.. py:method:: setMolDefault()
 			// rst:
 			// rst:			Shortcut for enabling all but thickening and index printing.

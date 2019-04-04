@@ -17,7 +17,7 @@ PropMoleculeCore::PropMoleculeCore(const GraphType &g, const PropStringCore &lab
 		auto decodeLabel = [this](const std::string & label) {
 			auto p = Chem::decodeVertexLabel(label);
 			if(std::get<0>(p) == AtomIds::Invalid) isReaction = false;
-			return AtomData(std::get<0>(p), std::get<1>(p), std::get<2>(p));
+			return AtomData(std::get<0>(p), std::get<1>(p), std::get<2>(p), std::get<3>(p));
 		};
 		auto vId = get(boost::vertex_index_t(), g, v);
 		switch(g[v].membership) {

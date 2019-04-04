@@ -35,6 +35,14 @@ AtomId Graph::Vertex::getAtomId() const {
 	return g->getGraph().getMoleculeState()[v].getAtomId();
 }
 
+Isotope Graph::Vertex::getIsotope() const {
+	if(!g) throw LogicError("Can not get isotope on a null vertex.");
+	const auto &graph = g->getGraph().getGraph();
+	using boost::vertices;
+	auto v = *(vertices(graph).first + vId);
+	return g->getGraph().getMoleculeState()[v].getIsotope();
+}
+
 Charge Graph::Vertex::getCharge() const {
 	if(!g) throw LogicError("Can not get charge on a null vertex.");
 	const auto &graph = g->getGraph().getGraph();

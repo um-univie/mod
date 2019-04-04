@@ -45,9 +45,6 @@ void Execute::executeImpl(std::ostream &s, const GraphState &input) {
 			},
 	[&input](std::vector<std::shared_ptr<graph::Graph> > &universe) {
 		for(const lib::Graph::Single *g : input.getUniverse()) universe.push_back(g->getAPIReference());
-	},
-	[this](std::vector<dg::DG::HyperEdge> &edges) {
-		getExecutionEnv().fillHyperEdges(edges);
 	});
 	(*func)(gs);
 }

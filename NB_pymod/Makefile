@@ -53,7 +53,7 @@ CCADMIN=CCadmin
 # build
 build: .build-post
 
-.build-pre: #../src/mod/VM/Parser/Common.h.gch
+.build-pre:
 # Add your pre 'build' code here...
 	cd ${CND_BASEDIR}/../NB_mod && make -f Makefile .build-pre
 	mkdir -p ${CND_BASEDIR}/../NB_mod/dist/lib
@@ -68,7 +68,6 @@ clean: .clean-post
 
 .clean-pre:
 # Add your pre 'clean' code here...
-#	${RM} ${CND_BASEDIR}/../src/mod/VM/Parser/Common.h.gch
 
 .clean-post: .clean-impl
 # Add your post 'clean' code here...

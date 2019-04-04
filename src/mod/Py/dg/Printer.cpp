@@ -35,6 +35,14 @@ void Printer_pushEdgeColour(Printer &printer, std::shared_ptr<mod::Function<std:
 	printer.pushEdgeColour(mod::toStdFunction(f));
 }
 
+void Printer_setRotationOverwrite(Printer &printer, std::shared_ptr<mod::Function<int(std::shared_ptr<graph::Graph>) > > f) {
+	printer.setRotationOverwrite(mod::toStdFunction(f));
+}
+
+void Printer_setMirrorOverwrite(Printer &printer, std::shared_ptr<mod::Function<bool(std::shared_ptr<graph::Graph>) > > f) {
+	printer.setMirrorOverwrite(mod::toStdFunction(f));
+}
+
 } // namespace 
 
 void Printer_doExport() {
@@ -253,6 +261,22 @@ void Printer_doExport() {
 			// rst:
 			// rst:			Remove the last pushed hyperedge colouring function.
 			.def("popEdgeColour", &Printer::popEdgeColour)
+			// rst:		.. py:method:: setRotationOverwrite(f)
+			// rst:
+			// rst:			Overwrite the rotation set in the nested :py:class:`GraphPrinter`. The given function will be used
+			// rst:			to set the rotation of each printed graph.
+			// rst:
+			// rst:			:param f: the function called on each graph to retrieve the rotation to render it with.
+			// rst:			:type f: int(:class:`GraphPrinter`)
+			.def("setRotationOverwrite", &Printer_setRotationOverwrite)
+			// rst:		.. py:method:: setMirrorOverwrite(f)
+			// rst:
+			// rst:			Overwrite the mirror set in the nested :py:class:`GraphPrinter`. The given function will be used
+			// rst:			to set the mirror of each printed graph.
+			// rst:
+			// rst:			:param f: the function called on each graph to retrieve the mirror to render it with.
+			// rst:			:type f: bool(:class:`GraphPrinter`)
+			.def("setMirrorOverwrite", &Printer_setMirrorOverwrite)
 			;
 }
 

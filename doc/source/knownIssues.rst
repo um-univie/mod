@@ -11,4 +11,5 @@ However, if the Latex installation is upgraded after MØD is installed this erro
 
 Completely reinstalling MØD will definitely solve the problem.
 However, in the build directory, if you find ``commonPreabmle.fmt`` and delete it,
-then running ``make`` and ``make install`` should quickly recompile just the format file update the installation.
+then running ``make`` and ``make install`` should quickly recompile just the format file
+and update the installation.

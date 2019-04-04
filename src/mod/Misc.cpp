@@ -4,6 +4,8 @@
 #include <mod/dg/DG.h>
 #include <mod/graph/Graph.h>
 #include <mod/lib/DG/Hyper.h>
+#include <mod/lib/Graph/Single.h>
+#include <mod/lib/Graph/Properties/Molecule.h>
 #include <mod/lib/IO/IO.h>
 #include <mod/lib/IO/Stereo.h>
 #include <mod/lib/Stereo/GeometryGraph.h>

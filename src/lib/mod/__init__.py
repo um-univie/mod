@@ -1,7 +1,9 @@
 from .mod_ import *
 import collections
+import inspect
 import math
 import sys
+
 
 # from http://mail.python.org/pipermail/tutor/2003-November/026645.html
 class Unbuffered(object):
@@ -22,6 +24,33 @@ def _NoNew__setattr__(self, name, value):
 		msg += "\ndir(" + str(self) + "):\n"
 		for name in dir(self): msg += "\t" + name + "\n"
 		raise AttributeError(msg)
+
+def _fixClass(name, c, indent):
+	if not name.startswith("Func_"):
+		c.__setattr__ = _NoNew__setattr__
+
+	if name.startswith("Func_") or name.startswith("Vec"):
+		c.__hash__ = None
+	elif name.endswith("Vertex"):
+		assert c.__hash__ is not None and c.__hash__ != object.__hash__
+	elif issubclass(c, int):
+		# Enums fall into this.
+		assert c.__hash__ != object.__hash__
+	elif c.__hash__ == object.__hash__:
+		c.__hash__ = None
+
+	if not (name.startswith("Func_") or name.startswith("Vec")):
+		if name.endswith("Vertex") or name.endswith("Edge"):
+			assert c.__bool__ is not None
+
+	for a in inspect.getmembers(c, inspect.isclass):
+		if a[0] == "__class__": continue
+		_fixClass(a[0], a[1], indent + 1)
+
+classes = inspect.getmembers(sys.modules[__name__], inspect.isclass)
+for c in classes:
+	if c[1] == Unbuffered: continue
+	_fixClass(c[0], c[1], 0)
 
 #----------------------------------------------------------
 # Wrappers
@@ -47,7 +76,6 @@ def _funcWrap(F, f, resultWrap=None, module=mod_):
 			def clone(self):
 				return module._sharedToStd(FuncWrapper(self.f))
 			def __str__(self):
-				import inspect
 				lines, lnum = inspect.getsourcelines(self.f)
 				source = ''.join(lines)
 				filename = inspect.getfile(self.f)
@@ -88,9 +116,6 @@ BondType.__str__ = mod_._bondTypeToString
 # Config
 #----------------------------------------------------------
 
-Config.__setattr__ = _NoNew__setattr__
-for a in Config.classNames:
-	getattr(Config, a).__setattr__ = _NoNew__setattr__
 config = getConfig()
 
 #----------------------------------------------------------
@@ -99,18 +124,9 @@ config = getConfig()
 
 Derivation.__repr__ = Derivation.__str__
 
-def _Derivation__getattribute__(self, name):
-	if name == "left" or name == "right":
-		return object.__getattribute__(self, "_" + name)
-	else:
-		return object.__getattribute__(self, name)
-Derivation.__getattribute__ = _Derivation__getattribute__
-
 def _Derivation__setattr__(self, name, value):
-	if name == "left":
-		self._left = _wrap(VecGraph, value)
-	elif name == "right":
-		self._right = _wrap(VecGraph, value)
+	if name == "left" or name == "right":
+		object.__setattr__(self, name, _wrap(VecGraph, value))
 	else:
 		_NoNew__setattr__(self, name, value)
 Derivation.__setattr__ = _Derivation__setattr__
@@ -190,58 +206,46 @@ DG.__hash__ = lambda self: self.id
 # DGHyperEdge
 #----------------------------------------------------------
 
-def _DGHyperEdge__getattribute__(self, name):
-	if name == "derivation":
-		print("Warning: DGHyperEdge.derivation is deprecated")
-		d = Derivation()
-		for vSrc in self.sources:
-			d.left.append(vSrc.graph)
-		for vTar in self.targets:
-			d.right.append(vTar.graph)
-		if len(self.rules) == 0:
-			print("Can not get derivation from hyperedge with no rules")
-		if len(self.rules) > 0:
-			d.rule = list(self.rules)[0]
-		return d
-	return object.__getattribute__(self, name)
-DGHyperEdge.__getattribute__ = _DGHyperEdge__getattribute__
+_DGHyperEdge_print_orig = DGHyperEdge.print
+DGHyperEdge.print = lambda self, *args, **kwargs: _unwrap(_DGHyperEdge_print_orig(self, *args, **kwargs))
 
 
 #----------------------------------------------------------
 # DGPrinter
 #----------------------------------------------------------
 
-DGPrinter.__setattr__ = _NoNew__setattr__
-
 _DGPrinter_pushVertexVisible_orig = DGPrinter.pushVertexVisible
-def _DGPrinter_pushVertexVisible(self, f):
-	_DGPrinter_pushVertexVisible_orig(self, _funcWrap(Func_BoolGraphDG, f))
-DGPrinter.pushVertexVisible = _DGPrinter_pushVertexVisible
+DGPrinter.pushVertexVisible = \
+	lambda self, f: _DGPrinter_pushVertexVisible_orig(self, _funcWrap(Func_BoolGraphDG, f))
 
 _DGPrinter_pushEdgeVisible_orig = DGPrinter.pushEdgeVisible
-def _DGPrinter_pushEdgeVisible(self, f):
-	_DGPrinter_pushEdgeVisible_orig(self, _funcWrap(Func_BoolDGHyperEdge, f))
-DGPrinter.pushEdgeVisible = _DGPrinter_pushEdgeVisible
+DGPrinter.pushEdgeVisible = \
+	lambda self, f: _DGPrinter_pushEdgeVisible_orig(self, _funcWrap(Func_BoolDGHyperEdge, f))
 
 _DGPrinter_pushVertexLabel_orig = DGPrinter.pushVertexLabel
-def _DGPrinter_pushVertexLabel(self, f):
-	_DGPrinter_pushVertexLabel_orig(self, _funcWrap(Func_StringGraphDG, f))
-DGPrinter.pushVertexLabel = _DGPrinter_pushVertexLabel
+DGPrinter.pushVertexLabel = \
+	lambda self, f: _DGPrinter_pushVertexLabel_orig(self, _funcWrap(Func_StringGraphDG, f))
 
 _DGPrinter_pushEdgeLabel_orig = DGPrinter.pushEdgeLabel
-def _DGPrinter_pushEdgeLabel(self, f):
-	_DGPrinter_pushEdgeLabel_orig(self, _funcWrap(Func_StringDGHyperEdge, f))
-DGPrinter.pushEdgeLabel = _DGPrinter_pushEdgeLabel
+DGPrinter.pushEdgeLabel = \
+	lambda self, f: _DGPrinter_pushEdgeLabel_orig(self, _funcWrap(Func_StringDGHyperEdge, f))
 
 _DGPrinter_pushVertexColour_orig = DGPrinter.pushVertexColour
-def _DGPrinter_pushVertexColour(self, f, extendToEdges=True):
-	_DGPrinter_pushVertexColour_orig(self, _funcWrap(Func_StringGraphDG, f), extendToEdges)
-DGPrinter.pushVertexColour = _DGPrinter_pushVertexColour
+DGPrinter.pushVertexColour = \
+	lambda self, f, extendToEdges=True: _DGPrinter_pushVertexColour_orig(self, _funcWrap(Func_StringGraphDG, f), extendToEdges)
 
 _DGPrinter_pushEdgeColour_orig = DGPrinter.pushEdgeColour
-def _DGPrinter_pushEdgeColour(self, f):
-	_DGPrinter_pushEdgeColour_orig(self, _funcWrap(Func_StringDGHyperEdge, f))
-DGPrinter.pushEdgeColour = _DGPrinter_pushEdgeColour
+DGPrinter.pushEdgeColour = \
+	lambda self, f: _DGPrinter_pushEdgeColour_orig(self, _funcWrap(Func_StringDGHyperEdge, f))
+
+_DGPrinter_setRotationOverwrite_orig = DGPrinter.setRotationOverwrite
+DGPrinter.setRotationOverwrite = \
+	lambda self, f: _DGPrinter_setRotationOverwrite_orig(self, _funcWrap(Func_IntGraph, f))
+
+_DGPrinter_setMirrorOverwrite_orig = DGPrinter.setMirrorOverwrite
+DGPrinter.setMirrorOverwrite = \
+	lambda self, f: _DGPrinter_setMirrorOverwrite_orig(self, _funcWrap(Func_BoolGraph, f))
+
 
 #----------------------------------------------------------
 # DGStrat
@@ -252,13 +256,9 @@ def _DGStratGraphState__getattribute__(self, name):
 		return _unwrap(self._subset)
 	elif name == "universe":
 		return _unwrap(self._universe)
-	elif name == "hyperEdges":
-		return _unwrap(self._hyperEdges)
 	else:
 		return object.__getattribute__(self, name)
 DGStratGraphState.__getattribute__ = _DGStratGraphState__getattribute__
-
-DGStratGraphState.__setattr__ = _NoNew__setattr__
 
 _DGStrat_makeAddStatic_orig = DGStrat.makeAddStatic
 def _DGStrat_makeAddStatic(onlyUniverse, graphs):
@@ -334,30 +334,20 @@ Graph.getGMLString = lambda self, withCoords=False: _Graph_getGMLString(self, wi
 _Graph_printGML = Graph.printGML
 Graph.printGML = lambda self, withCoords=False: _Graph_printGML(self, withCoords)
 
-def graphGMLString(d, name=None):
-	a = mod_.graphGMLString(d)
-	inputGraphs.append(a)
+def _graphLoad(a, name, add):
 	if name != None:
 		a.name = name
+	if add:
+		inputGraphs.append(a)
 	return a
-def graphGML(f, name=None):
-	a = mod_.graphGML(f)
-	inputGraphs.append(a)
-	if name != None:
-		a.name = name
-	return a
-def graphDFS(s, name=None):
-	a = mod_.graphDFS(s)
-	inputGraphs.append(a)
-	if name != None:
-		a.name = name
-	return a
-def smiles(s, name=None):
-	a = mod_.smiles(s)
-	inputGraphs.append(a)
-	if name != None:
-		a.name = name
-	return a
+def graphGMLString(d, name=None, add=True):
+	return _graphLoad(mod_.graphGMLString(d), name, add)
+def graphGML(f, name=None, add=True):
+	return _graphLoad(mod_.graphGML(f), name, add)
+def graphDFS(s, name=None, add=True):
+	return _graphLoad(mod_.graphDFS(s), name, add)
+def smiles(s, name=None, add=True):
+	return _graphLoad(mod_.smiles(s), name, add)
 
 def _Graph__repr__(self):
 	return str(self) + "(" + str(self.id) + ")"
@@ -375,12 +365,6 @@ def _Graph__setattr__(self, name, value):
 Graph.__setattr__ = _Graph__setattr__
 
 #----------------------------------------------------------
-# GraphPrinter
-#----------------------------------------------------------
-
-GraphPrinter.__setattr__ = _NoNew__setattr__
-
-#----------------------------------------------------------
 # RCEvaluator
 #----------------------------------------------------------
 
@@ -392,8 +376,6 @@ def _RCEvaluator__getattribute__(self, name):
 	else:
 		return object.__getattribute__(self, name)
 RCEvaluator.__getattribute__ = _RCEvaluator__getattribute__
-
-RCEvaluator.__setattr__ = _NoNew__setattr__
 
 _RCEvaluator_eval = RCEvaluator.eval
 RCEvaluator.eval = lambda self, e: _unwrap(_RCEvaluator_eval(self, e))
@@ -426,20 +408,25 @@ Rule.getGMLString = lambda self, withCoords=False: _Rule_getGMLString(self, with
 _Rule_printGML = Rule.printGML
 Rule.printGML = lambda self, withCoords=False: _Rule_printGML(self, withCoords)
 
-def ruleGMLString(s, invert=False):
+def ruleGMLString(s, invert=False, add=True):
 	a = mod_.ruleGMLString(s, invert)
-	inputRules.append(a)
+	if add:
+		inputRules.append(a)
 	return a
-def ruleGML(s, invert=False):
-	a = mod_.ruleGML(s, invert)
-	inputRules.append(a)
+def ruleGML(f, invert=False, add=True):
+	a = mod_.ruleGML(f, invert)
+	if add:
+		inputRules.append(a)
 	return a
 
 Rule.__repr__ = lambda self: str(self) + "(" + str(self.id) + ")"
 Rule.__eq__ = lambda self, other: self.id == other.id
 Rule.__hash__ = lambda self: self.id
 
-Rule.__setattr__ = _NoNew__setattr__
+#----------------------------------------------------------
+# DG
+#----------------------------------------------------------
+
 
 #----------------------------------------------------------
 # DG Strategy Prettification
@@ -754,6 +741,7 @@ class BoltzmannGroupIsomers(object):
 				self.groups[Histogram(a)] += boltzmannFactor(self.temperature, a.energy)
 		return boltzmannFactor(self.temperature, g.energy) / self.groups[Histogram(g)]
 
+
 #class BoltzmannGroupWeight(object):
 #	def __init__(self, temperature):
 #		self.temperature = temperature
@@ -771,12 +759,6 @@ class BoltzmannGroupIsomers(object):
 #				self.sums[weight] += boltzmannFactor(self.temperature, a.energy)
 #		weight = int(g.weight)
 #		return boltzmannFactor(self.temperature, g.energy) / self.sums[weight]
-
-
-
-
-
-
 
 
 

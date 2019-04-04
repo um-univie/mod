@@ -153,26 +153,25 @@ struct Wam {
 		std::vector<bool> doCopy(arity, false);
 		for(int i = 1; i <= arity; ++i) {
 			const auto addrArg = deref(addr + i);
-			auto &argCell = getCell(addrArg);
-			assert(argCell.tag != CellTag::STR);
-			if(argCell.tag == CellTag::REF) {
+			assert(getCell(addrArg).tag != CellTag::STR);
+			if(getCell(addrArg).tag == CellTag::REF) {
 				const auto heapAddrArg = putRefPtr();
-				argCell.REF.addr = heapAddrArg;
+				//				getCell(addrArg).REF.addr = heapAddrArg; // TODO: why was this here?
 				if(addrArg.type == AddressType::Heap) {
 					// bind the new to the old
 					getCell(heapAddrArg).REF.addr = addrArg;
 				} else {
 					// bind the temp to the heap
-					argCell.REF.addr = heapAddrArg;
+					getCell(addrArg).REF.addr = heapAddrArg;
 				}
 			} else {
-				assert(argCell.tag == CellTag::Structure);
-				const auto arity = argCell.Structure.arity;
+				assert(getCell(addrArg).tag == CellTag::Structure);
+				const auto arity = getCell(addrArg).Structure.arity;
 				if(arity == 0) {
 					// just copy it inline
-					const auto addrNew = putStructure(argCell.Structure.name, arity);
-					argCell.tag = CellTag::STR;
-					argCell.STR.addr = addrNew;
+					const auto addrNew = putStructure(getCell(addrArg).Structure.name, arity);
+					getCell(addrArg).tag = CellTag::STR;
+					getCell(addrArg).STR.addr = addrNew;
 				} else {
 					// put a dummy to reserve the space
 					putStructurePtr(-1);

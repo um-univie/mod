@@ -109,7 +109,6 @@ struct ListElementPrinter {
 	}
 };
 
-template<>
 template<std::size_t N, typename ...Expr>
 struct ListElementPrinter<N, N, Expr...> {
 
@@ -139,7 +138,6 @@ struct ListElementHandler {
 	}
 };
 
-template<>
 template<std::size_t N, typename ...Expr>
 struct ListElementHandler<N, N, Expr...> {
 
@@ -165,7 +163,6 @@ struct ListElementUpperBound {
 	}
 };
 
-template<>
 template<std::size_t N, typename ...Expr>
 struct ListElementUpperBound<N, N, Expr...> {
 
@@ -193,7 +190,6 @@ private:
 	ParentAttr &parentAttr;
 };
 
-template<>
 template<typename AttrHandler, typename ParentAttr>
 struct ListAttrHandler<Unused, AttrHandler, ParentAttr> {
 
@@ -208,7 +204,6 @@ private:
 	Unused unused;
 };
 
-template<>
 template<typename AttrHandler, typename ParentAttr>
 struct ListAttrHandler<Parent, AttrHandler, ParentAttr> {
 

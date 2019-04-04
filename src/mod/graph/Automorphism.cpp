@@ -17,14 +17,14 @@ Graph::Aut::Aut(std::shared_ptr<Graph> g, LabelType lt, bool withStereo, std::si
 
 Graph::Vertex Graph::Aut::operator[](Vertex v) const {
 	const auto &group = g->getGraph().getAutGroup(lt, withStereo);
-	const auto &p = generators(group)[i];
+	const auto &p = group.generators()[i];
 	const auto img = perm_group::get(p, v.getId());
 	return Vertex(g, img);
 }
 
 std::ostream &operator<<(std::ostream &s, const Graph::Aut &a) {
 	const auto &group = a.g->getGraph().getAutGroup(a.lt, a.withStereo);
-	const auto &p = generators(group)[a.i];
+	const auto &p = group.generators()[a.i];
 	return perm_group::write_permutation_cycles(s, p);
 }
 
@@ -42,7 +42,7 @@ Graph::AutGroup::Gens::iterator Graph::AutGroup::Gens::begin() const {
 
 Graph::AutGroup::Gens::iterator Graph::AutGroup::Gens::end() const {
 	const auto &group = g->getGraph().getAutGroup(lt, withStereo);
-	return iterator(g, lt, withStereo, generators(group).size());
+	return iterator(g, lt, withStereo, group.generators().size());
 }
 
 Graph::Aut Graph::AutGroup::Gens::operator[](std::size_t i) const {

@@ -86,7 +86,7 @@ void TikzPrinter::begin() {
 }
 
 void TikzPrinter::end() {
-	s << "\\end{tikzpicture}\n";
+	s << "\\end{tikzpicture}%\n";
 }
 
 void TikzPrinter::comment(const std::string &str) {
@@ -190,10 +190,23 @@ void TikzPrinter::transitEdge(const std::string &idTail, const std::string &idHe
 std::function<std::string(const lib::DG::Hyper&, lib::DG::HyperVertex, const std::string&) > TikzPrinter::getImageCreator() {
 	return [this](const lib::DG::Hyper &dg, lib::DG::HyperVertex v, const std::string & id) -> std::string {
 		const auto &g = *dg.getGraph()[v].graph;
-		if(this->options.withInlineGraphs) {
-			return IO::Graph::Write::tikz(g, graphOptions, true, "v-" + id + "-");
+		const auto doIt = [&](const auto &gOpts) {
+			if(this->options.withInlineGraphs) {
+				return IO::Graph::Write::tikz(g, gOpts, true, "v-" + id + "-");
+			} else {
+				return IO::Graph::Write::pdf(g, gOpts);
+			}
+		};
+		if(!options.rotationOverwrite && !options.mirrorOverwrite) {
+			return doIt(graphOptions);
 		} else {
-			return IO::Graph::Write::pdf(g, graphOptions);
+			auto gOpts = graphOptions;
+			const auto gAPI = g.getAPIReference();
+			if(options.rotationOverwrite)
+				gOpts.Rotation(options.rotationOverwrite(gAPI));
+			if(options.mirrorOverwrite)
+				gOpts.Mirror(options.mirrorOverwrite(gAPI));
+			return doIt(gOpts);
 		}
 	};
 }
@@ -426,12 +439,12 @@ void Data::compile(Options &options) const {
 Printer::Printer() : vertexLabelSep(", "), edgeLabelSep(", "),
 withGraphName(true), withRuleName(false), withRuleId(true) { }
 
-std::string Printer::printHyper(const Data &data, const IO::Graph::Write::Options &graphOptions) {
+std::pair<std::string, std::string> Printer::printHyper(const Data &data, const IO::Graph::Write::Options &graphOptions) {
 	Options options = prePrint(data);
 	const auto &dg = data.getDG();
-	std::string file = IO::DG::Write::pdf(dg, options, graphOptions);
+	const auto files = IO::DG::Write::pdf(dg, options, graphOptions);
 	postPrint();
-	return file;
+	return files;
 }
 
 void Printer::pushSuffix(const std::string suffix) {
@@ -495,6 +508,14 @@ void Printer::pushEdgeColour(std::function<std::string(Vertex, const lib::DG::Hy
 void Printer::popEdgeColour() {
 	assert(!edgeColour.empty());
 	edgeColour.pop_back();
+}
+
+void Printer::setRotationOverwrite(std::function<int(std::shared_ptr<graph::Graph>) > f) {
+	baseOptions.rotationOverwrite = f;
+}
+
+void Printer::setMirrorOverwrite(std::function<bool(std::shared_ptr<graph::Graph>) > f) {
+	baseOptions.mirrorOverwrite = f;
 }
 
 Options Printer::prePrint(const Data &data) {
@@ -726,7 +747,12 @@ std::string dot(const lib::DG::Hyper &dg, const Options &options, const IO::Grap
 
 	struct DotPrinter : SyntaxPrinter {
 
-		DotPrinter(std::string file, const IO::Graph::Write::Options &graphOptions) : s(file), graphOptions(graphOptions) { }
+		DotPrinter(std::string file, const IO::Graph::Write::Options &graphOptions)
+		: SyntaxPrinter(file), graphOptions(graphOptions) { }
+
+		std::string getName() const override {
+			return "dot";
+		}
 
 		void begin() {
 			s << "digraph g {\n";
@@ -786,7 +812,6 @@ std::string dot(const lib::DG::Hyper &dg, const Options &options, const IO::Grap
 			};
 		}
 	public:
-		FileHandle s;
 		const IO::Graph::Write::Options &graphOptions;
 	};
 	std::string file = getUniqueFilePrefix();
@@ -825,19 +850,19 @@ std::string pdfFromDot(const lib::DG::Hyper &dg, const Options &options, const I
 	return fileNoExt + ".pdf";
 }
 
-std::string pdf(const lib::DG::Hyper &dg, const Options &options, const IO::Graph::Write::Options &graphOptions) {
+std::pair<std::string, std::string> pdf(const lib::DG::Hyper &dg, const Options &options, const IO::Graph::Write::Options &graphOptions) {
 	auto tikzFiles = tikz(dg, options, graphOptions);
 	std::string fileNoExt = tikzFiles.first.substr(0, tikzFiles.first.length() - 4);
 	std::string fileCoordsNoExt = tikzFiles.second.substr(0, tikzFiles.second.length() - 4);
 	IO::post() << "compileTikz \"" << fileNoExt << "\" \"" << fileCoordsNoExt << "\"";
 	if(options.withInlineGraphs) IO::post() << " 3";
 	IO::post() << std::endl;
-	return fileNoExt + ".pdf";
+	return {fileNoExt + ".pdf", tikzFiles.second};
 }
 
-std::string summary(const Data &data, Printer &printer, const IO::Graph::Write::Options &graphOptions) {
-	const std::string file = printer.printHyper(data, graphOptions);
-	std::string fileNoExt = file;
+std::pair<std::string, std::string> summary(const Data &data, Printer &printer, const IO::Graph::Write::Options &graphOptions) {
+	const auto files = printer.printHyper(data, graphOptions);
+	std::string fileNoExt = files.first;
 	const auto &dg = data.getDG();
 	fileNoExt.erase(end(fileNoExt) - 4, end(fileNoExt));
 	IO::post() << "summaryDGHyper \"dg_" << dg.getNonHyper().getId() << "\" \"" << fileNoExt << "\"\n";
@@ -845,7 +870,7 @@ std::string summary(const Data &data, Printer &printer, const IO::Graph::Write::
 		std::string fileNoExtNonHyper = pdfNonHyper(dg.getNonHyper());
 		IO::post() << "summaryDGNonHyper \"dg_" << dg.getNonHyper().getId() << "\" \"" << fileNoExtNonHyper << "\"\n";
 	}
-	return file;
+	return files;
 }
 
 } // namespace Write

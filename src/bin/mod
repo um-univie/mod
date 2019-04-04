@@ -15,7 +15,7 @@ function printHelp {
 	echo "	clean           Delete out/ and summary/. Any other args are ignored."
 	echo "	-j <N>          Set number of available threads for post processing."
 	echo "	-i              Enter interactive mode after execution, and disable the log."
-	echo "	-q              Use quite mode."
+	echo "	-q              Use quiet mode."
 }
 
 # Args
@@ -30,7 +30,7 @@ clean="false"
 vgArgs=""
 pymod="true"
 interactive="false"
-quite="false"
+quiet="false"
 interceptedArgs=""
 summaryArgs=""
 
@@ -116,7 +116,7 @@ while test "$1" != ""; do
 			shift
 			;;
 		"-q" )
-			quite="true"
+			quiet="true"
 			shift
 			;;
 		* )
@@ -126,12 +126,12 @@ while test "$1" != ""; do
 	esac
 done
 
-if test "$quite" = "false"; then
+if test "$quiet" = "false"; then
 	echo "MØD Wrapper --------------------------------------------------------"
 	echo "Prefix: $MOD_PREFIX"
 	echo -n "MedØlDatschgerl version "
 fi
-if test "$quite" = "false" -o "$doVersion" = "true"; then
+if test "$quiet" = "false" -o "$doVersion" = "true"; then
 	cat $MOD_PREFIX/share/mod/VERSION
 fi
 
@@ -144,7 +144,7 @@ if test "$doVersion" = "true"; then
 	exit 0
 fi
 if test "$getLatex" = "true"; then
-	if test "$quite" = "false"; then
+	if test "$quiet" = "false"; then
 		echo "cp $MOD_PREFIX/share/mod/mod.{sty,mk} ./"
 	fi
 	cp $MOD_PREFIX/share/mod/mod.{sty,mk} ./
@@ -153,7 +153,7 @@ fi
 
 
 
-if test "$quite" = "false"; then
+if test "$quiet" = "false"; then
 	echo "Plugins ------------------------------------------------------------"
 fi
 pySearchPaths=""
@@ -192,7 +192,7 @@ function loadPluginFile {
 	fi
 	plugins+=($name)
 	pySearchPath="$pySearchPath:$pluginPath"
-	if test "$quite" = "false"; then
+	if test "$quiet" = "false"; then
 		echo " $name: $pluginPath"
 	fi
 }
@@ -207,13 +207,13 @@ function loadPlugins {
 }
 
 globalPluginPath="$MOD_PREFIX/share/mod/plugins"
-if test "$quite" = "false"; then
+if test "$quiet" = "false"; then
 	echo "Global ($globalPluginPath):"
 fi
 loadPlugins "$globalPluginPath"
 IFS=":" read -ra paths <<< "$MOD_PLUGIN_PATH"
 for p in ${paths[@]}; do
-	if test "$quite" = "false"; then
+	if test "$quiet" = "false"; then
 		echo "Additional ($p):"
 	fi
 	loadPlugins "$p"
@@ -227,7 +227,7 @@ if [ $profile = "true" -o $memcheck = "true" ]; then
 	precommand="valgrind"
 fi
 if [ $profile = "true" ]; then
-	precommand="$precommand --tool=callgrind $vgArgs"
+	precommand="$precommand --tool=callgrind --dump-instr=yes --collect-jumps=yes $vgArgs"
 elif [ $memcheck = "true" ]; then
 	function checkSuppFile {
 		stat $MOD_PREFIX/share/mod/$1 &> /dev/null
@@ -268,7 +268,7 @@ else
 fi
 
 function executeVM {
-	if test "$quite" = "false"; then
+	if test "$quiet" = "false"; then
 		echo "Running VM ---------------------------------------------------------"
 		time "$@"
 	else
@@ -303,10 +303,10 @@ mod.includedFiles = set()
 def include(fName, checkDup=True, putDup=True, skipDup=True):
 	t = fName.rpartition("/")
 	if(fName != prefixFilename(fName)):
-		if not mod.config.common.quite:
+		if not mod.config.common.quiet:
 			print("Executing code from '", fName, "' ('", prefixFilename(fName), "')", sep="")
 	else:
-		if not mod.config.common.quite:
+		if not mod.config.common.quiet:
 			print("Executing code from '", fName, "'", sep="")
 	fPrefixed = prefixFilename(fName)
 	skip = False
@@ -323,7 +323,7 @@ def include(fName, checkDup=True, putDup=True, skipDup=True):
 	if t[1] != "":
 		pushFilePrefix(t[0] + t[1])
 	if skip:
-		if not mod.config.common.quite:
+		if not mod.config.common.quiet:
 			print("Skipping inclusion (already included)")
 	else:
 		with open(fPrefixed) as f:
@@ -331,7 +331,7 @@ def include(fName, checkDup=True, putDup=True, skipDup=True):
 		exec(code, globals())
 	if t[1] != "":
 		popFilePrefix()
-	if not mod.config.common.quite:
+	if not mod.config.common.quiet:
 		if(fName != prefixFilename(fName)):
 			print("End of code from '", fName, "' ('", prefixFilename(fName), "')", sep="")
 		else:
@@ -343,8 +343,8 @@ EOF
 	preamble >> $pyFile
 
 	echo '# From command line arguments' >> $pyFile
-	if test "$quite" = "true"; then
-		echo "config.common.quite = True" >> $pyFile
+	if test "$quiet" = "true"; then
+		echo "config.common.quiet = True" >> $pyFile
 	fi
 	while [ $1 ]; do
 		case $1 in
@@ -371,7 +371,7 @@ EOF
 	done
 	export PYTHONPATH="$PYTHONPATH:$pySearchPath:$(pwd)"
 	echo "# PYTHONPATH=$PYTHONPATH" >> $pyFile
-	if test "$quite" = "false"; then
+	if test "$quiet" = "false"; then
 		echo "Input --------------------------------------------------------------"
 		echo "(see $pyFile)"
 		echo "Command ------------------------------------------------------------"
@@ -382,13 +382,13 @@ EOF
 		if test $? -eq 0; then
 			pythonvm="ipython3"
 		fi
-		if test "$quite" = "false"; then
+		if test "$quiet" = "false"; then
 			echo "$precommand $pythonvm -i $pyFile"
 		fi
 		executeVM $precommand $pythonvm -i $pyFile
 		ret=$?
 	else
-		if test "$quite" = "false"; then
+		if test "$quiet" = "false"; then
 			echo "$precommand $pythonvm $pyFile"
 		fi
 		executeVM $precommand $pythonvm $pyFile 2>&1 | tee out/log.txt

@@ -43,7 +43,7 @@ namespace detail {
 
 struct MatchMakerCallback {
 
-	MatchMakerCallback(std::function<void(std::unique_ptr<lib::Rules::Real>) > rr) : rr(rr) { }
+	MatchMakerCallback(std::function<bool(std::unique_ptr<lib::Rules::Real>) > rr) : rr(rr) { }
 
 	template<typename InvertibleVertexMap>
 	bool operator()(const lib::Rules::Real &rFirst, const lib::Rules::Real &rSecond, InvertibleVertexMap &&m) const {
@@ -59,18 +59,20 @@ struct MatchMakerCallback {
 			if(getConfig().rc.printMatches.get()) {
 				IO::RC::Write::test(rFirst, rSecond, m, *rResult);
 			}
-			rr(std::move(rResult));
+			const bool cont = rr(std::move(rResult));
+			if(!cont) return false;
 		}
 		return true;
 	}
 private:
-	std::function<void(std::unique_ptr<lib::Rules::Real>) > rr;
+	std::function<bool(std::unique_ptr<lib::Rules::Real>) > rr;
 };
 
 } // namespace detail
 
 template<typename MatchMaker>
-void composeRuleRealByMatchMakerGeneric(const lib::Rules::Real &rFirst, const lib::Rules::Real &rSecond, MatchMaker mm, std::function<void(std::unique_ptr<lib::Rules::Real>) > rr, LabelSettings labelSettings) {
+void composeRuleRealByMatchMakerGeneric(const lib::Rules::Real &rFirst, const lib::Rules::Real &rSecond, MatchMaker mm,
+		std::function<bool(std::unique_ptr<lib::Rules::Real>) > rr, LabelSettings labelSettings) {
 	if(getConfig().rc.printMatches.get()) {
 		IO::post() << "summarySection \"RC Matches\"\n";
 	}

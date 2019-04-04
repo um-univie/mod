@@ -101,7 +101,7 @@
                             OP="dist/lib/libmod.${CND_DLIB_EXT}">
               </makeArtifact>
             </linkerLibProjectItem>
-            <linkerLibLibItem>boost_python3</linkerLibLibItem>
+            <linkerLibLibItem>boost_python36</linkerLibLibItem>
             <linkerOptionItem>`pkg-config --libs python3`</linkerOptionItem>
           </linkerLibItems>
           <commandLine>-rdynamic -Wl,--no-undefined</commandLine>

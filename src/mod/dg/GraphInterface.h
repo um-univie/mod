@@ -9,6 +9,8 @@
 
 #include <boost/iterator/iterator_facade.hpp>
 
+#include <functional>
+
 namespace mod {
 namespace dg {
 
@@ -32,6 +34,11 @@ public:
 	friend bool operator==(const Vertex &v1, const Vertex &v2);
 	friend bool operator!=(const Vertex &v1, const Vertex &v2);
 	friend bool operator<(const Vertex &v1, const Vertex &v2);
+	std::size_t hash() const;
+	// rst: .. function:: explicit operator bool() const
+	// rst:
+	// rst:		:returns: :cpp:expr:`!isNull()`
+	explicit operator bool() const;
 	// rst:	.. function:: bool isNull() const
 	// rst:
 	// rst:		:returns: whether this is a null descriptor or not.
@@ -94,6 +101,11 @@ public:
 	friend bool operator==(const HyperEdge &e1, const HyperEdge &e2);
 	friend bool operator!=(const HyperEdge &e1, const HyperEdge &e2);
 	friend bool operator<(const HyperEdge &e1, const HyperEdge &e2);
+	std::size_t hash() const;
+	// rst: .. function:: explicit operator bool() const
+	// rst:
+	// rst:		:returns: :cpp:expr:`!isNull()`
+	explicit operator bool() const;
 	// rst:	.. function:: bool isNull() const
 	// rst:
 	// rst:		:returns: whether this is a null descriptor or not.
@@ -140,15 +152,18 @@ public:
 	// rst: 	:throws: :cpp:class:`LogicError` if it is a null descriptor.
 	HyperEdge getInverse() const;
 public:
-	// rst: .. function:: void print(const graph::Printer &printer, const std::string &nomatchColour, const std::string &matchColour) const
+	// rst: .. function:: std::vector<std::pair<std::string, std::string> > print(const graph::Printer &printer, const std::string &nomatchColour, const std::string &matchColour) const
 	// rst:
 	// rst:		Print the derivations represented by the hyperedge.
 	// rst:		All possible Double-Pushout diagrams are printed.
 	// rst:		The ``matchColour`` must be a valid colour for TikZ, which is applied to the rule
 	// rst:		and its image in the bottom span.
 	// rst:
+	// rst:		:returns: A list with file data for each DPO diagram printed.
+	// rst:			Each element is a pair of filename prefixes, where the first entry is completed by appending ``_derL``, ``_derK``, or ``_derR``.
+	// rst:			The second entry is completed similarly by appending ``_derG``, ``_derD``, or ``_derH``.
 	// rst: 	:throws: :cpp:class:`LogicError` if it is a null descriptor.
-	void print(const graph::Printer &printer, const std::string &nomatchColour, const std::string &matchColour) const;
+	std::vector<std::pair<std::string, std::string> > print(const graph::Printer &printer, const std::string &nomatchColour, const std::string &matchColour) const;
 	// rst: .. function:: void printTransitionState() const
 	// rst:               void printTransitionState(const graph::Printer &printer) const
 	// rst:
@@ -598,5 +613,24 @@ inline DG::RuleIterator DG::RuleRange::end() const {
 
 } // namespace dg
 } // namespace mod
+namespace std {
+
+template<>
+struct hash<mod::dg::DG::Vertex> {
+
+	std::size_t operator()(const mod::dg::DG::Vertex &v) const {
+		return v.hash();
+	}
+};
+
+template<>
+struct hash<mod::dg::DG::HyperEdge> {
+
+	std::size_t operator()(const mod::dg::DG::HyperEdge &v) const {
+		return v.hash();
+	}
+};
+
+} // namespace std
 
 #endif /* MOD_DG_GRAPHINTERFACE_H */

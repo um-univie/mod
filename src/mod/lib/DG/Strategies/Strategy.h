@@ -36,8 +36,6 @@ struct ExecutionEnv {
 	virtual void popLeftPredicate() = 0;
 	virtual void popRightPredicate() = 0;
 public:
-	virtual void fillHyperEdges(std::vector<dg::DG::HyperEdge> &edges) const = 0;
-public:
 	const LabelSettings labelSettings;
 };
 
