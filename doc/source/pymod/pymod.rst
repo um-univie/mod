@@ -1,4 +1,3 @@
-
 .. py:module:: mod
 
 *****

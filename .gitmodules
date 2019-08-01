@@ -1,0 +1,3 @@
+[submodule "external/graph_canon"]
+	path = external/graph_canon
+	url = ../graph_canon

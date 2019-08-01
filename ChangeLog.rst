@@ -1,15 +1,66 @@
 .. cpp:namespace:: mod
-.. py:module:: mod
+.. py:currentmodule:: mod
 
 Changes
 #######
 
-Release 0.8.0 (2019-04-04)
-==========================
+v0.9.0 (2019-08-02)
+===================
 
 Incompatible Changes
 --------------------
 
+- Change to CMake as build system.
+  See :ref:`installation` for how to build the package,
+  or used it as a submodule in another CMake project.
+- Now requires v0.4 of
+  `GraphCanon <https://github.com/jakobandersen/graph_canon>`__
+  (and `PermGroup <https://github.com/jakobandersen/perm_group>`__).
+- :cpp:func:`dg::DG::getGraphDatabase` now returns a :cpp:any:`std::vector`
+  instead of a :cpp:any:`std::unordered_set`.
+- Hide internal symbols in the library to increase optimization opportunities,
+  and hide symbols in library dependencies.
+  Libraries linking against libmod may stop linking, but configuration options
+  has been added to disable symbol hiding.
+
+
+New Features
+------------
+
+- :py:func:`dgDump`/:cpp:func:`dg::DG::dump` should now be much, much faster
+  in parsing the input file and loading the contained derivation graph.
+- :py:func:`dgRuleComp`/:cpp:func:`dg::DG::ruleComp` should now be much faster
+  during calculation.
+- Added :py:func:`Graph.instantiateStereo`/:cpp:func:`graph::Graph::instantiateStereo`.
+- Added :py:func:`rngReseed`/:cpp:func:`rngReseed`.
+
+
+Bugs Fixed
+----------
+
+- Fixed off-by-one error in DG dump loading, :py:func:`dgDump`/:cpp:func:`dg::DG::dump`.
+- Fixed issues with ``auto`` in function signatures which is not yet in the C++ standard.
+
+
+Other
+-----
+
+- The functions :py:func:`prefixFilename`, :py:func:`pushFilePrefix`, and :py:func:`popFilePrefix`
+  used by the :py:func:`include` function are now documented.
+  A new class :py:class:`CWDPath` has been added.
+- Use interprocedural/link-time optimization as default.
+  It can be disabled with a configuration option.
+
+
+v0.8.0 (2019-04-04)
+===================
+
+Incompatible Changes
+--------------------
+
+- Now requires v0.3 of
+  `GraphCanon <https://github.com/jakobandersen/graph_canon>`__
+  (and `PermGroup <https://github.com/jakobandersen/perm_group>`__).
 - ``graph::Graph::getMolarMass``/``Graph.molarMass`` has been removed.
 - Python interface: remove auto-generated hash-functions from all classes.
   Note, most code broken by this was already silemtly broken.
@@ -36,9 +87,9 @@ New Features
   to allow disabling of messages to stdout during calculation.
 - The graph interface on :cpp:any:`dg::DG`/:py:obj:`DG` can now be used before and during
   calculation.
-- Added include of the PGFPlots package in the summary preable.
+- Added include of the PGFPlots package in the summary preamble.
 - Added :cpp:any:`AtomId::symbol`/:py:obj:`AtomId.symbol`.
-- Adeed an ``add`` parameter to :py:obj:`graphGMLString`, :py:obj:`graphGML`,
+- Added an ``add`` parameter to :py:obj:`graphGMLString`, :py:obj:`graphGML`,
   :py:obj:`graphDFS`, :py:obj:`smiles`, :py:obj:`ruleGMLString`, and :py:obj:`ruleGML`.
   It controls whether the graph/rule is appended to :py:obj:`inputGraphs`/:py:obj:`inputRules`
   or not. It defaults to ``True``.
@@ -98,8 +149,8 @@ Other
 - The Makefile from ``mod --get-latex`` now cleans ``.vrb``, ``.snm``, and ``.nav`` files as well.
 
 
-Release 0.7.0 (2018-03-08)
-==========================
+v0.7.0 (2018-03-08)
+===================
 
 Incompatible Changes
 --------------------
@@ -192,8 +243,8 @@ Other
   post-processing may fail if ``pdflatex`` has been upgraded after installation
 
 
-Release 0.6.0 (2016-12-22)
-==========================
+v0.6.0 (2016-12-22)
+===================
 
 Incompatible Changes
 --------------------
@@ -264,7 +315,7 @@ Bugs Fixed
 - Properly handle empty vertex/hyperedge ranges for DGs. Thanks to Robert Haas for reporting.
 
 
-Release 0.5.0 (2016-03-07)
-==========================
+v0.5.0 (2016-03-07)
+===================
 
 Initial public version.

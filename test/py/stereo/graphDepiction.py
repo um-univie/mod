@@ -1,0 +1,124 @@
+def doPrint(a):
+	pg = GraphPrinter()
+	pm = GraphPrinter()
+	pm.setMolDefault()
+	a.print(pg, pm)
+	pg.withRawStereo = True
+	pm.withRawStereo = True
+	pg.withIndex = True
+	pm.withIndex = True
+	a.print(pg, pm)
+	
+
+postSection("All")
+a = graphGMLString("""graph [
+	node [ id 0 label "C" stereo "[1, 2, 3, 4]!" ]
+	node [ id 1 label "O" ]
+	node [ id 2 label "N" ]
+	node [ id 3 label "S" ]
+	node [ id 4 label "P" ]
+	edge [ source 0 target 1 label "-" ]
+	edge [ source 0 target 2 label "-" ]
+	edge [ source 0 target 3 label "-" ]
+	edge [ source 0 target 4 label "-" ]
+]""")
+doPrint(a)
+a = graphGMLString("""graph [
+	node [ id 0 label "C" stereo "[1, 2, 4, 3]!" ]
+	node [ id 1 label "O" ]
+	node [ id 2 label "N" ]
+	node [ id 3 label "S" ]
+	node [ id 4 label "P" ]
+	edge [ source 0 target 1 label "-" ]
+	edge [ source 0 target 2 label "-" ]
+	edge [ source 0 target 3 label "-" ]
+	edge [ source 0 target 4 label "-" ]
+]""")
+doPrint(a)
+
+postSection("Lone Pair")
+a = graphGMLString("""graph [
+	node [ id 0 label "N" stereo "[1, 2, 3, e]!" ]
+	node [ id 1 label "O" ]
+	node [ id 2 label "N" ]
+	node [ id 3 label "S" ]
+	edge [ source 0 target 1 label "-" ]
+	edge [ source 0 target 2 label "-" ]
+	edge [ source 0 target 3 label "-" ]
+]""")
+doPrint(a)
+a = graphGMLString("""graph [
+	node [ id 0 label "N" stereo "[1, 2, e, 3]!" ]
+	node [ id 1 label "O" ]
+	node [ id 2 label "N" ]
+	node [ id 3 label "S" ]
+	edge [ source 0 target 1 label "-" ]
+	edge [ source 0 target 2 label "-" ]
+	edge [ source 0 target 3 label "-" ]
+]""")
+doPrint(a)
+
+a = graphGMLString("""graph [
+	node [ id 0 label "N" stereo "[e, 1, 2, 3]!" ]
+	node [ id 1 label "O" ]
+	node [ id 2 label "N" ]
+	node [ id 3 label "S" ]
+	edge [ source 0 target 1 label "-" ]
+	edge [ source 0 target 2 label "-" ]
+	edge [ source 0 target 3 label "-" ]
+]""")
+doPrint(a)
+
+postSection("H")
+a = graphGMLString("""graph [
+	node [ id 0 label "C" stereo "[1, 2, 3, 4]!" ]
+	node [ id 1 label "O" ]
+	node [ id 2 label "N" ]
+	node [ id 3 label "S" ]
+	node [ id 4 label "H" ]
+	edge [ source 0 target 1 label "-" ]
+	edge [ source 0 target 2 label "-" ]
+	edge [ source 0 target 3 label "-" ]
+	edge [ source 0 target 4 label "-" ]
+]""")
+doPrint(a)
+a = graphGMLString("""graph [
+	node [ id 0 label "C" stereo "[1, 2, 4, 3]!" ]
+	node [ id 1 label "O" ]
+	node [ id 2 label "N" ]
+	node [ id 3 label "S" ]
+	node [ id 4 label "H" ]
+	edge [ source 0 target 1 label "-" ]
+	edge [ source 0 target 2 label "-" ]
+	edge [ source 0 target 3 label "-" ]
+	edge [ source 0 target 4 label "-" ]
+]""")
+doPrint(a)
+
+a = graphGMLString("""graph [
+	node [ id 0 label "C" stereo "[1, 2, 3, 4]!" ]
+	node [ id 1 label "H" ]
+	node [ id 2 label "N" ]
+	node [ id 3 label "S" ]
+	node [ id 4 label "O" ]
+	edge [ source 0 target 1 label "-" ]
+	edge [ source 0 target 2 label "-" ]
+	edge [ source 0 target 3 label "-" ]
+	edge [ source 0 target 4 label "-" ]
+]""")
+doPrint(a)
+
+
+postSection("All H")
+a = graphGMLString("""graph [
+	node [ id 0 label "C" stereo "[1, 2, 3, 4]!" ]
+	node [ id 1 label "H" ]
+	node [ id 2 label "H" ]
+	node [ id 3 label "H" ]
+	node [ id 4 label "H" ]
+	edge [ source 0 target 1 label "-" ]
+	edge [ source 0 target 2 label "-" ]
+	edge [ source 0 target 3 label "-" ]
+	edge [ source 0 target 4 label "-" ]
+]""")
+doPrint(a)

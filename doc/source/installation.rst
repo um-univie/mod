@@ -1,28 +1,123 @@
+.. _installation:
+
 Installation
 ============
 
-The package is built and installed as a normal autotools project (i.e., use ``configure`` then ``make`` amd ``make install``).
-The following is a list of dependencies, where relevant arguments for ``configure`` is shown in parenthesis.
-Futher below are specific instructions on how to install these dependencies.
 
-* This documentation requires `Sphinx`_, preferably in the newest development version (``--enable-doc-checks``, ``--disable-doc-checks``).
-* libMØD:
+From a Git Repository
+---------------------
+
+After a checkout of the desired version, do::
+
+	git submodule update --init --recursive
+	./bootstrap.sh
+
+This is needed to first fetch certain dependencies and second
+to generate build files, extract the API documentation,
+and create the file ``VERSION`` based on the current commit.
+
+See :ref:`source-build` on how to then build the package.
+
+
+As Dependency of Another CMake Project
+--------------------------------------
+
+MØD supports use via ``add_subdirectory`` in CMake.
+The target ``mod::libmod`` is exported,
+which can be used with ``target_link_libraries`` to link against libMØD.
+The version is in the variable ``mod_VERSION``.
+Note that running ``./bootstrap.sh`` is still needed if the
+source is a repository clone (e.g., a Git submodule).
+
+
+.. _source-build:
+
+From a Source Archive
+---------------------
+
+The package is build and installed from source as a CMake project.
+Generally that means something like::
+
+	mkdir build
+	cd build
+	cmake ../ <options>
+	make -j <n>
+	make install
+
+A source archive can also be created with ``make dist``.
+
+The following is a list of commonly used options for ``cmake``,
+and additional options specific for MØD.
+See also :ref:`dependencies` for elaboration on some of them.
+
+- ``-DCMAKE_INSTALL_PREFIX=<prefix>``, set a non-standard installation directory.
+  Note also that the
+  `GNUInstallDirs <https://cmake.org/cmake/help/latest/module/GNUInstallDirs.html>`__
+  module is used.
+- ``-DCMAKE_BUILD_TYPE=<build type>``, set a non-standard build type.
+  The default is `RelWithDebInfo <https://cmake.org/cmake/help/latest/variable/CMAKE_BUILD_TYPE.html?highlight=build_type#variable:CMAKE_BUILD_TYPE>`__.
+  An additional build type ``OptDebug`` is available which adds the compilation flags ``-g -O3``.
+- ``-DCMAKE_PROGRAM_PATH=<paths>``, set a ``;``-separated list of paths used for some dependency searches.
+  See also https://cmake.org/cmake/help/latest/variable/CMAKE_PROGRAM_PATH.html.
+- ``-DBUILD_DOC=on``, whether to build documentation or not.
+  This is forced to ``off`` when used via ``add_subdirectory``.
+- ``-DBUILD_POST_MOD=on``, whether to build the post-processor or not.
+- ``-DBUILD_PY_MOD=on``, whether to build the Python bindings or not.
+- ``-DBUILD_EXAMPLES=off``, whether to build and allow running of examples as
+  tests or not.
+  This is forced to ``off`` when used via ``add_subdirectory``.
+  This is forced to ``off`` when ``BUILD_TESTING`` is ``off``.
+- ``-DBUILD_TESTING=off``, whether to allow test building or not.
+  This is forced to ``off`` when used via ``add_subdirectory``.
+  When ``on`` the tests can be build with ``make tests`` and run with ``ctest``.
+- ``-DBUILD_TESTING_SANITIZERS=on``, whether to compile tests with sanitizers or not.
+  This has no effect with code coverage is enabled.
+- ``-DBUILD_COVERAGE=off``, whether to compile code and run tests with GCov.
+  When ``on`` the sanitizers on tests will be disabled.
+  After building the tests, execute ``make coverage_collect`` without parallel jobs to run tests.
+  Afterwards, execute ``make coverage_build`` to compile the code coverage report.
+- ``-DENABLE_SYMBOL_HIDING=on``, whether symbols internal to the library are hidden or not.
+  Disabling this option may degrade performance, and should only be done while developing extensions to the C++ library.
+- ``-DENABLE_DEP_SYMBOL_HIDING=on``, whether symbols from library dependencies are hidden or not.
+  Disabling this option may make it slower to load the library at runtime.
+- ``-DENABLE_IPO=on``, whether to use link-time optimization or not.
+  Disabling this option may degrade performance, but speed up linking time.
+  As default the link-time optimizer will only use 1 thread.
+  To use more threads, e.g., 7, use the following options for configuration
+  ``-DCMAKE_MODULE_LINKER_FLAGS="-flto=7" -DCMAKE_SHARED_LINKER_FLAGS="-flto=7"``, when using GCC as the compiler.
+- ``-DUSE_NESTED_GRAPH_CANON=on``, whether to use the dependency GraphCanon from the Git submodule or not.
+- ``-DWITH_OPENBABEL=on``, whether to enable/disable features depending on Open Babel.
+
+
+.. _dependencies:
+
+Dependencies
+------------
+
+- This documentation requires a supported version of `Sphinx <http://sphinx-doc.org>`__
+  (``-DBUILD_DOC=on``).
+- libMØD:
 
   - A C++ compiler with reasonable C++14 support is needed. GCC 5.1 or later should work.
-  - `Boost`_ dev >= 1.64 (``--with-boost=<path>``).
-  - (optional) `Open Babel`_ dev, >= 2.3.2 (``--with-OpenBabel=yes|no|<path>``).
+  - `Boost <http://boost.org>`__ dev >= 1.64
+    (use ``-DBOOST_ROOT=<path>`` for non-standard locations).
+  - `GraphCanon <https://github.com/jakobandersen/graph_canon>`__ >= 0.4.
+    This is fulfilled via a Git submodule (make sure to do ``git submodule update --init --recursive``),
+    but if another source is needed, set ``-DUSE_NESTED_GRAPH_CANON=off``.
+  - (optional) `Open Babel`_ dev, >= 2.3.2 (``-DWITH_OPENBABEL=on``).
 
-* PyMØD (``--enable-pymod``, ``--disable-pymod``):
+- PyMØD (``-DBUILD_PY_MOD=on``):
 
   - Python 3 dev
   - Boost.Python built with Python 3
   - (Optional) IPython 3
 
-* PostMØD (``--enable-postmod``, ``--disable-postmod``):
+- PostMØD (``-DBUILD_POST_MOD=on``):
 
-  - ``pdflatex`` available in the ``PATH``, with not too old packages (Tex Live 2012 or newer should work).
-  - ``pdf2svg`` available in the ``PATH``
-  - ``dot`` and ``neato`` from Graphviz available in the ``PATH``.
+  - ``pdflatex`` available in the ``PATH`` or in ``CMAKE_PROGRAM_PATH``,
+    with not too old packages (Tex Live 2012 or newer should work).
+  - ``pdf2svg`` available in the ``PATH`` or in ``CMAKE_PROGRAM_PATH``.
+  - ``dot`` and ``neato`` from Graphviz available in the ``PATH`` or in ``CMAKE_PROGRAM_PATH``.
     They must additionally be able to load SVG files and output as both SVG and PDF files (all via cairo).
     That is, in the output of ``dot -P`` the following edges must exist:
 
@@ -69,6 +164,7 @@ Boost and Boost.Python with Python 3
 
 A package with the sources of Boost can be downloaded from `http://boost.org`.
 
+
 Basic Installation
 """"""""""""""""""
 
@@ -83,6 +179,7 @@ After ``bootstrap.sh`` has been run, the file ``project-config.jam``
 has been created, which can be edited to customise installation path and a lot of other
 things. All edits should be done before running ``b2``.
 
+
 Non-standard Python Installation
 """"""""""""""""""""""""""""""""
 
@@ -95,6 +192,7 @@ If Python is installed in a non-standard location, add the a line similar to
 "``using python : 3.3 : python3 : /path/to/python/3/installtion/include ;``" to
 ``project-config.jam``, where the last path is the path to the
 ``include``-folder of the Python-installation.
+
 
 Custom GCC Version
 """"""""""""""""""

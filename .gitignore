@@ -1,50 +1,21 @@
 *.swp
 *~
-__pycache__/
+__pycache__
+*.pyc
 
-/aclocal.m4
-/ar-lib
-/autom4te.cache
-/auxConfig/
-/build/
-/config.guess
-/config.sub
-/configure
-/depcomp
-/install-sh
-/ltmain.sh
-/m4/libtool.m4
-/m4/ltoptions.m4
-/m4/ltsugar.m4
-/m4/ltversion.m4
-/m4/lt~obsolete.m4
-/Makefile.in
-/missing
-/preBuild/
+/CMakeFiles.txt
 /VERSION
-/src/Makefile.am
-/src/Makefile.in
-/src/mod/BuildConfig.h_.in
 
-/NB_boost/.dep.inc
-/NB_boost/build/
-/NB_boost/dist/
-/NB_boost/nbproject/private/
 
-/NB_mod/.dep.inc
-/NB_mod/build/
-/NB_mod/dist/
-/NB_mod/nbproject/private/
+/.idea
+/build
+/stage
+/test/py/**/out/
+/test/py/**/summary/
+/test/py/**/.gdb_history
+/test/py/graph/myGraph.gml
+/test/py/rule/myRule.gml
 
-/NB_pymod/.dep.inc
-/NB_pymod/build/
-/NB_pymod/dist/
-/NB_pymod/nbproject/private/
-
-/doc/build/
-/doc/Makefile.am
-/doc/Makefile.in
-/doc/doctrees
 /doc/source/index.rst
 /doc/source/references.rst
 /doc/source/toc.rst
@@ -52,3 +23,5 @@ __pycache__/
 /doc/source/pymod/[A-Z]*.rst
 /doc/source/libmod/[^/]*/
 /doc/source/pymod/[^/]*/
+/doc/source/_static/examples/libmod_cmake
+/doc/source/_static/examples/pymod_extension

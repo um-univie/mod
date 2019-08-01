@@ -1,5 +1,5 @@
 
-from sphinx.environment import NoUri
+from sphinx.errors import NoUri
 
 anys = [
 	"ignoreRuleLabelTypes", "labelSettings",
