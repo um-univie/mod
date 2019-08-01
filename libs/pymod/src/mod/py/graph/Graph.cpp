@@ -259,7 +259,7 @@ void Graph_doExport() {
 					// rst:			:type: int
 			.add_property("minExternalId", &Graph::getMinExternalId)
 			.add_property("maxExternalId", &Graph::getMaxExternalId)
-					// rst: 	.. py:method: instantiateStereo()
+					// rst: 	.. py:method:: instantiateStereo()
 					// rst:
 					// rst: 		Make sure that stereo data is instantiated.
 					// rst:

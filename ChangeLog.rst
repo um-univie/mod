@@ -16,7 +16,7 @@ Incompatible Changes
 - Now requires v0.4 of
   `GraphCanon <https://github.com/jakobandersen/graph_canon>`__
   (and `PermGroup <https://github.com/jakobandersen/perm_group>`__).
-- :cpp:func:`DG::getGraphDatabase` now returns a :cpp:any:`std::vector`
+- :cpp:func:`dg::DG::getGraphDatabase` now returns a :cpp:any:`std::vector`
   instead of a :cpp:any:`std::unordered_set`.
 - Hide internal symbols in the library to increase optimization opportunities,
   and hide symbols in library dependencies.
@@ -29,7 +29,7 @@ New Features
 
 - :py:func:`dgDump`/:cpp:func:`dg::DG::dump` should now be much, much faster
   in parsing the input file and loading the contained derivation graph.
-- :py:func:`dgRulecomp`/:cpp:func:`dg::DG::ruleComp` should now be much faster
+- :py:func:`dgRuleComp`/:cpp:func:`dg::DG::ruleComp` should now be much faster
   during calculation.
 - Added :py:func:`Graph.instantiateStereo`/:cpp:func:`graph::Graph::instantiateStereo`.
 - Added :py:func:`rngReseed`/:cpp:func:`rngReseed`.

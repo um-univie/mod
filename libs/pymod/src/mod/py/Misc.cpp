@@ -21,9 +21,9 @@ namespace Py {
 // rst: 	This function is used in all PyMØD functions that takes a filename as argument.
 // rst: 	To circumvent this prefixing use the :py:class:`CWDPath` class.
 // rst:
-// rst: 	:returns: :py:attr:`name` prefixed with all strings pushed with :py:func:`pushFilePrefix`
+// rst: 	:returns: `name` prefixed with all strings pushed with :py:func:`pushFilePrefix`
 // rst: 		and popped yet.
-// rst: 	:rtype: str
+// rst: 	:rtype: string
 // rst:
 // rst: .. function:: pushFilePrefix(s)
 // rst:
@@ -33,7 +33,7 @@ namespace Py {
 // rst: 	If the argument starts with ``/``, then during concatenation all previously pushed prefixes are ignored.
 // rst:
 // rst: 	:param s: the string to push as a prefix to be concatenated in :py:func:`prefixFilename`.
-// rst: 	:type s: str
+// rst: 	:type s: string
 // rst:
 // rst: .. function:: popFilePrefix()
 // rst:
