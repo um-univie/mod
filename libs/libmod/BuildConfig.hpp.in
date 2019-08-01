@@ -1,0 +1,15 @@
+#ifndef MOD_BUILDCONFIG_HPP
+#define MOD_BUILDCONFIG_HPP
+
+#include <boost/config.hpp>
+
+#if defined(MOD_SOURCE)
+#	define MOD_DECL BOOST_SYMBOL_EXPORT
+#else
+#	define MOD_DECL BOOST_SYMBOL_IMPORT
+#endif
+
+#cmakedefine MOD_HAVE_OPENBABEL
+#define MOD_VERSION "@PROJECT_VERSION@"
+
+#endif // MOD_BUILDCONFIG_HPP

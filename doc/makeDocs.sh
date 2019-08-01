@@ -5,24 +5,7 @@ if [ "x$1" = "xclean" ]; then
     exit 0
 fi
 
-# the main logic for building is based on the auto-generated Makefile from Sphinx
-
-sphinxBuild=${1:-sphinx-build}
-topSrcDir=${2:-..}
-topBuildDir=${3:-..}
-
-which $sphinxBuild &> /dev/null
-if [ $? -ne 0 ]; then
-	echo "Error: '$sphinxBuild' was not found."
-	exit 1
-fi
-
-function doBuild {
-	allOpts="-d $topBuildDir/doc/doctrees $topSrcDir/doc/source"
-	mkdir -p $topSrcDir/doc/source/_static
-	$sphinxBuild -b html $allOpts $topBuildDir/doc/build/html -j 8 -n
-	echo "$sphinxBuild -b html $allOpts $topBuildDir/doc/build/html"
-}
+topSrcDir=${1:-..}
 
 function outputRST {
 	mkdir -p $topSrcDir/doc/source/$(dirname $1)
@@ -138,15 +121,15 @@ BEGIN {
 }
 
 function getModHeaders {
-	find $topSrcDir/src/mod/ -iname "*.h" \
-		| grep -v -e "/Py/" -e "/lib/"  \
-		| sed -e "s/.*\/src\/mod\///" -e "s/\.h$//" \
+	find $topSrcDir/libs/libmod/src/mod/ -iname "*.hpp" \
+		| grep -v -e "/lib/"  \
+		| sed -e "s/.*\/src\/mod\///" -e "s/\.hpp$//" \
 		| sort
 }
 
 function getPyModCPPs {
-	find $topSrcDir/src/mod/Py/ -iname "*.cpp" \
-		| sed -e "s/.*\/src\/mod\/Py\///" -e "s/\.cpp$//" \
+	find $topSrcDir/libs/pymod/src/mod/py -iname "*.cpp" \
+		| sed -e "s!.*/libs/pymod/src/mod/py/!!" -e "s/\.cpp$//" \
 		| sort \
 		| grep -v Module | grep -v Collections | grep -v Function
 }
@@ -232,7 +215,7 @@ function makeLibMod {
 		echo ".. _cpp-$f:"
 		echo ""
 		echo "**********************************************************"
-		echo "$f.h"
+		echo "$f.hpp"
 		echo "**********************************************************"
 		cat << "EOF"
 .. default-domain:: cpp
@@ -241,7 +224,7 @@ function makeLibMod {
 .. cpp:namespace:: mod
 
 EOF
-		fFull=$topSrcDir/src/mod/$f.h
+		fFull=$topSrcDir/libs/libmod/src/mod/$f.hpp
 		cat $fFull | filterCPP
 		if [ $? -ne 0 ]; then
 			echo "Error in $fFull" 1>&2
@@ -304,7 +287,7 @@ function makePyMod {
 .. cpp:namespace:: mod
 
 EOF
-		fFull=$topSrcDir/src/mod/Py/$f.cpp
+		fFull=$topSrcDir/libs/pymod/src/mod/py/$f.cpp
 		cat $fFull | filterCPP
 		if [ $? -ne 0 ]; then
 			echo "Error in $fFull" 1>&2
@@ -352,4 +335,8 @@ EOF
 makeIndex || exit 1
 makeLibMod || exit 1
 makePyMod || exit 1
-doBuild
+
+rm -rf $topSrcDir/doc/source/_static/examples
+mkdir -p $topSrcDir/doc/source/_static/examples
+cp -a $topSrcDir/examples/libmod_cmake $topSrcDir/doc/source/_static/examples/
+cp -a $topSrcDir/examples/pymod_extension $topSrcDir/doc/source/_static/examples/

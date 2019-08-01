@@ -1,3 +1,5 @@
+.. default-domain:: py
+.. py:currentmodule:: mod
 
 .. _mod-wrapper:
 
@@ -136,7 +138,8 @@ The preamble has the following effects.
   .. py:function:: include(fName, checkDup=True, putDup=True, skipDup=True) 
   
     Include the file ``fName`` in somewhat the same way that the ``#include`` directive
-    in the C/C++ preprocessor includes files (e.g., handling relative paths).
+    in the C/C++ preprocessor includes files. Paths are handled relatively using the functions
+    :py:func:`prefixFilename`, :py:func:`pushFilePrefix`, and :py:func:`popFilePrefix`.
     
     :param fName: the file to be included.
     :type fName: string
