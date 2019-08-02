@@ -1,0 +1,57 @@
+.. _cpp-Derivation:
+
+**********************************************************
+Derivation.hpp
+**********************************************************
+.. default-domain:: cpp
+
+.. py:currentmodule:: mod
+.. cpp:namespace:: mod
+
+
+Class ``Derivation``
+--------------------------------------------------------------------------------------------------------------------------------
+
+.. class:: Derivation
+    
+
+    This class represents a derivation :math:`G\Rightarrow^p H`, with :math:`G` and :math:`H` being multisets of graphs.
+
+
+Synopsis
+^^^^^^^^
+
+.. code-block:: c++
+    
+    struct MOD_DECL Derivation {
+        using GraphList = std::vector<std::shared_ptr<graph::Graph> >;
+    public:
+        MOD_DECL friend std::ostream &operator<<(std::ostream &s, const Derivation &d);
+    public:
+        GraphList left;
+        std::shared_ptr<rule::Rule> r;
+        GraphList right;
+    };
+
+Details
+^^^^^^^
+
+.. cpp:namespace:: mod
+
+.. cpp:namespace-push:: Derivation
+
+.. type:: std::vector<std::shared_ptr<graph::Graph> > GraphList
+
+    Representation of a multiset of graphs.
+.. member:: GraphList left
+
+    Represents the multi-set of left graphs :math:`G` in a derivation :math:`G\Rightarrow^p H`.
+.. member:: std::shared_ptr<rule::Rule> r
+
+    Represents the transformation rule :math:`p` in a derivation :math:`G\Rightarrow^p H`.
+.. member:: GraphList right
+
+    Represents the multi-set of right graphs :math:`H` in a derivation :math:`G\Rightarrow^p H`.
+
+.. cpp:namespace:: mod
+

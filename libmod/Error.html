@@ -1,0 +1,365 @@
+
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta charset="utf-8" />
+    <title>2.2.4. Error.hpp &#8212; MØD 0.9.0 documentation</title>
+    <link rel="stylesheet" href="../_static/classic.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <script type="text/javascript" src="../_static/language_data.js"></script>
+    <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="2.2.5. Function.hpp" href="Function.html" />
+    <link rel="prev" title="2.2.3. Derivation.hpp" href="Derivation.html" /> 
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="Function.html" title="2.2.5. Function.hpp"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="Derivation.html" title="2.2.3. Derivation.hpp"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">MØD 0.9.0 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="libmod.html" >2. libMØD</a> &#187;</li>
+          <li class="nav-item nav-item-2"><a href="api.html" accesskey="U">2.2. API Reference</a> &#187;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="error-hpp">
+<span id="cpp-error"></span><h1>2.2.4. Error.hpp<a class="headerlink" href="#error-hpp" title="Permalink to this headline">¶</a></h1>
+<p>This file contains the functionality used for reporting errors.
+In the description of the exceptions we use the standard terminology (see e.g., <a class="reference external" href="http://en.wikipedia.org/wiki/Exception_safety">Exception Safety</a>).
+If nothing else is specified a thrown exception from MØD provides no exception safety.
+Any exception thrown from MØD or any dependencies are intented to derive from <code class="docutils literal notranslate"><span class="pre">std::exception</span></code>,
+and any exception from MØD derives from <a class="reference internal" href="#_CPPv4N3mod9ExceptionE" title="mod::Exception"><code class="xref cpp cpp-class docutils literal notranslate"><span class="pre">Exception</span></code></a>.
+The exceptions are in general only thrown from the outer-most interface, and not from within the <code class="docutils literal notranslate"><span class="pre">mod::lib</span></code> namespace.</p>
+<div class="section" id="class-stacktrace">
+<h2>2.2.4.1. Class <code class="docutils literal notranslate"><span class="pre">Stacktrace</span></code><a class="headerlink" href="#class-stacktrace" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="_CPPv4N3mod10StacktraceE">
+<span id="_CPPv3N3mod10StacktraceE"></span><span id="_CPPv2N3mod10StacktraceE"></span><span id="mod::Stacktrace"></span><em class="property">class </em><code class="sig-name descname">Stacktrace</code><a class="headerlink" href="#_CPPv4N3mod10StacktraceE" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>A class encapsulating the current stacktrace at construction time.
+Stacktraces may not be supported on all platforms.</p>
+</dd></dl>
+
+<div class="section" id="synopsis">
+<h3>2.2.4.1.1. Synopsis<a class="headerlink" href="#synopsis" title="Permalink to this headline">¶</a></h3>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="k">struct</span> <span class="n">MOD_DECL</span> <span class="n">Stacktrace</span> <span class="p">{</span>
+    <span class="n">Stacktrace</span><span class="p">(</span><span class="kt">unsigned</span> <span class="kt">int</span> <span class="n">frameLimit</span><span class="p">,</span> <span class="kt">unsigned</span> <span class="kt">int</span> <span class="n">numSkip</span><span class="p">);</span>
+    <span class="kt">void</span> <span class="nf">print</span><span class="p">(</span><span class="kt">unsigned</span> <span class="kt">int</span> <span class="n">frameLimit</span><span class="p">,</span> <span class="n">std</span><span class="o">::</span><span class="n">ostream</span> <span class="o">&amp;</span><span class="n">s</span><span class="p">)</span> <span class="k">const</span><span class="p">;</span>
+<span class="k">private</span><span class="o">:</span>
+    <span class="n">std</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;</span><span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="o">&gt;</span> <span class="n">raw</span><span class="p">;</span>
+    <span class="n">std</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;</span><span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="o">&gt;</span> <span class="n">demangled</span><span class="p">;</span>
+<span class="p">};</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="details">
+<h3>2.2.4.1.2. Details<a class="headerlink" href="#details" title="Permalink to this headline">¶</a></h3>
+<dl class="function">
+<dt id="_CPPv4N3mod10Stacktrace10StacktraceEjj">
+<span id="_CPPv3N3mod10Stacktrace10StacktraceEjj"></span><span id="_CPPv2N3mod10Stacktrace10StacktraceEjj"></span><span id="mod::Stacktrace::Stacktrace__unsigned-i.unsigned-i"></span><code class="sig-name descname">Stacktrace</code><span class="sig-paren">(</span>unsigned int <em>frameLimit</em>, unsigned int <em>numSkip</em><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N3mod10Stacktrace10StacktraceEjj" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Capture a stacktrace with at most <code class="docutils literal notranslate"><span class="pre">frameLimit</span></code> frames and without the first <code class="docutils literal notranslate"><span class="pre">numSkip</span></code> frames.
+The frame from the constructor it self is always skipped.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="_CPPv4NK3mod10Stacktrace5printEjRNSt7ostreamE">
+<span id="_CPPv3NK3mod10Stacktrace5printEjRNSt7ostreamE"></span><span id="_CPPv2NK3mod10Stacktrace5printEjRNSt7ostreamE"></span><span id="mod::Stacktrace::print__unsigned-i.osRC"></span>void <code class="sig-name descname">print</code><span class="sig-paren">(</span>unsigned int <em>frameLimit</em>, std::ostream &amp;<em>s</em><span class="sig-paren">)</span> <em class="property">const</em><a class="headerlink" href="#_CPPv4NK3mod10Stacktrace5printEjRNSt7ostreamE" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Print at most the first <code class="docutils literal notranslate"><span class="pre">frameLimit</span></code> frames from the capture stacktrace. Use 0 to print all available frames.
+Symbol names will be demangled if possible.</p>
+</dd></dl>
+
+</div>
+</div>
+<div class="section" id="class-exception">
+<h2>2.2.4.2. Class <code class="docutils literal notranslate"><span class="pre">Exception</span></code><a class="headerlink" href="#class-exception" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="_CPPv4N3mod9ExceptionE">
+<span id="_CPPv3N3mod9ExceptionE"></span><span id="_CPPv2N3mod9ExceptionE"></span><span id="mod::Exception"></span><em class="property">class </em><code class="sig-name descname">Exception</code> : <em class="property">public</em> std::exception<a class="headerlink" href="#_CPPv4N3mod9ExceptionE" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>The base class of all MØD exceptions.</p>
+</dd></dl>
+
+<div class="section" id="id1">
+<h3>2.2.4.2.1. Synopsis<a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h3>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="k">struct</span> <span class="n">MOD_DECL</span> <span class="nl">Exception</span> <span class="p">:</span> <span class="k">public</span> <span class="n">std</span><span class="o">::</span><span class="n">exception</span> <span class="p">{</span>
+<span class="k">protected</span><span class="o">:</span>
+    <span class="n">Exception</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">string</span> <span class="o">&amp;&amp;</span><span class="n">text</span><span class="p">,</span> <span class="kt">unsigned</span> <span class="kt">int</span> <span class="n">numSkip</span><span class="p">,</span> <span class="kt">unsigned</span> <span class="kt">int</span> <span class="n">frameLimit</span><span class="p">)</span> <span class="o">:</span> <span class="n">text</span><span class="p">(</span><span class="n">text</span><span class="p">),</span> <span class="n">stacktrace</span><span class="p">(</span><span class="n">frameLimit</span><span class="p">,</span> <span class="n">numSkip</span><span class="p">)</span> <span class="p">{</span> <span class="p">}</span>
+    <span class="n">Exception</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">string</span> <span class="o">&amp;&amp;</span><span class="n">text</span><span class="p">,</span> <span class="kt">unsigned</span> <span class="kt">int</span> <span class="n">numSkip</span><span class="p">)</span> <span class="o">:</span> <span class="n">Exception</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">move</span><span class="p">(</span><span class="n">text</span><span class="p">),</span> <span class="n">numSkip</span><span class="p">,</span> <span class="mi">20</span><span class="p">)</span> <span class="p">{</span> <span class="p">}</span>
+    <span class="n">Exception</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">string</span> <span class="o">&amp;&amp;</span><span class="n">text</span><span class="p">)</span> <span class="o">:</span> <span class="n">Exception</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">move</span><span class="p">(</span><span class="n">text</span><span class="p">),</span> <span class="mi">0</span><span class="p">)</span> <span class="p">{</span> <span class="p">}</span>
+<span class="k">public</span><span class="o">:</span>
+    <span class="k">virtual</span> <span class="n">std</span><span class="o">::</span><span class="n">string</span> <span class="n">getName</span><span class="p">()</span> <span class="k">const</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+    <span class="k">virtual</span> <span class="k">const</span> <span class="kt">char</span> <span class="o">*</span><span class="nf">what</span><span class="p">()</span> <span class="k">const</span> <span class="k">noexcept</span><span class="p">;</span>
+    <span class="kt">void</span> <span class="nf">printStacktrace</span><span class="p">(</span><span class="kt">unsigned</span> <span class="kt">int</span> <span class="n">frameLimit</span><span class="p">,</span> <span class="n">std</span><span class="o">::</span><span class="n">ostream</span> <span class="o">&amp;</span><span class="n">s</span><span class="p">)</span> <span class="k">const</span><span class="p">;</span>
+    <span class="kt">void</span> <span class="nf">append</span><span class="p">(</span><span class="k">const</span> <span class="n">std</span><span class="o">::</span><span class="n">string</span> <span class="o">&amp;</span><span class="n">text</span><span class="p">);</span>
+<span class="k">protected</span><span class="o">:</span>
+    <span class="n">std</span><span class="o">::</span><span class="n">string</span> <span class="n">text</span><span class="p">;</span>
+    <span class="n">Stacktrace</span> <span class="n">stacktrace</span><span class="p">;</span>
+    <span class="k">mutable</span> <span class="n">std</span><span class="o">::</span><span class="n">string</span> <span class="n">whatString</span><span class="p">;</span> <span class="c1">// is set by the what function</span>
+<span class="p">};</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="id2">
+<h3>2.2.4.2.2. Details<a class="headerlink" href="#id2" title="Permalink to this headline">¶</a></h3>
+<dl class="function">
+<dt id="_CPPv4NK3mod9Exception7getNameEv">
+<span id="_CPPv3NK3mod9Exception7getNameEv"></span><span id="_CPPv2NK3mod9Exception7getNameEv"></span><span id="mod::Exception::getNameC"></span><em class="property">virtual</em> std::string <code class="sig-name descname">getName</code><span class="sig-paren">(</span><span class="sig-paren">)</span> <em class="property">const</em> = 0<a class="headerlink" href="#_CPPv4NK3mod9Exception7getNameEv" title="Permalink to this definition">¶</a><br /></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>the name of the exception.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="_CPPv4NK3mod9Exception4whatEv">
+<span id="_CPPv3NK3mod9Exception4whatEv"></span><span id="_CPPv2NK3mod9Exception4whatEv"></span><span id="mod::Exception::whatC"></span><em class="property">virtual</em> <em class="property">const</em> char *<code class="sig-name descname">what</code><span class="sig-paren">(</span><span class="sig-paren">)</span> <em class="property">const</em> <em class="property">noexcept</em><a class="headerlink" href="#_CPPv4NK3mod9Exception4whatEv" title="Permalink to this definition">¶</a><br /></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>the description for the exception.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="_CPPv4NK3mod9Exception15printStacktraceEjRNSt7ostreamE">
+<span id="_CPPv3NK3mod9Exception15printStacktraceEjRNSt7ostreamE"></span><span id="_CPPv2NK3mod9Exception15printStacktraceEjRNSt7ostreamE"></span><span id="mod::Exception::printStacktrace__unsigned-i.osRC"></span>void <code class="sig-name descname">printStacktrace</code><span class="sig-paren">(</span>unsigned int <em>frameLimit</em>, std::ostream &amp;<em>s</em><span class="sig-paren">)</span> <em class="property">const</em><a class="headerlink" href="#_CPPv4NK3mod9Exception15printStacktraceEjRNSt7ostreamE" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Print the stacktrace captured when the exception was constructed. See <a class="reference internal" href="#_CPPv4NK3mod10Stacktrace5printEjRNSt7ostreamE" title="mod::Stacktrace::print"><code class="xref cpp cpp-func docutils literal notranslate"><span class="pre">Stacktrace::print()</span></code></a>.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="_CPPv4N3mod9Exception6appendERKNSt6stringE">
+<span id="_CPPv3N3mod9Exception6appendERKNSt6stringE"></span><span id="_CPPv2N3mod9Exception6appendERKNSt6stringE"></span><span id="mod::Exception::append__ssCR"></span>void <code class="sig-name descname">append</code><span class="sig-paren">(</span><em class="property">const</em> std::string &amp;<em>text</em><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N3mod9Exception6appendERKNSt6stringE" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Append text to the exception message.</p>
+</dd></dl>
+
+</div>
+</div>
+<div class="section" id="class-fatalerror">
+<h2>2.2.4.3. Class <code class="docutils literal notranslate"><span class="pre">FatalError</span></code><a class="headerlink" href="#class-fatalerror" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="_CPPv4N3mod10FatalErrorE">
+<span id="_CPPv3N3mod10FatalErrorE"></span><span id="_CPPv2N3mod10FatalErrorE"></span><span id="mod::FatalError"></span><em class="property">class </em><code class="sig-name descname">FatalError</code> : <em class="property">public</em> <a class="reference internal" href="#_CPPv4N3mod9ExceptionE" title="mod::Exception">Exception</a><a class="headerlink" href="#_CPPv4N3mod10FatalErrorE" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>When thrown there is no exception safety. It is not safe to continue after catching it.</p>
+</dd></dl>
+
+<div class="section" id="id3">
+<h3>2.2.4.3.1. Synopsis<a class="headerlink" href="#id3" title="Permalink to this headline">¶</a></h3>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="k">struct</span> <span class="n">MOD_DECL</span> <span class="nl">FatalError</span> <span class="p">:</span> <span class="k">public</span> <span class="n">Exception</span> <span class="p">{</span>
+    <span class="n">FatalError</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">string</span> <span class="o">&amp;&amp;</span><span class="n">text</span><span class="p">,</span> <span class="kt">unsigned</span> <span class="kt">int</span> <span class="n">numSkip</span><span class="p">)</span> <span class="o">:</span> <span class="n">Exception</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">move</span><span class="p">(</span><span class="n">text</span><span class="p">),</span> <span class="n">numSkip</span><span class="p">)</span> <span class="p">{</span> <span class="p">}</span>
+    <span class="n">FatalError</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">string</span> <span class="o">&amp;&amp;</span><span class="n">text</span><span class="p">)</span> <span class="o">:</span> <span class="n">Exception</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">move</span><span class="p">(</span><span class="n">text</span><span class="p">))</span> <span class="p">{</span> <span class="p">}</span>
+    <span class="n">std</span><span class="o">::</span><span class="n">string</span> <span class="n">getName</span><span class="p">()</span> <span class="k">const</span> <span class="p">{</span>
+        <span class="k">return</span> <span class="s">&quot;MØD FatalError&quot;</span><span class="p">;</span>
+    <span class="p">}</span>
+    <span class="k">const</span> <span class="kt">char</span> <span class="o">*</span><span class="n">what</span><span class="p">()</span> <span class="k">const</span> <span class="k">noexcept</span><span class="p">;</span>
+<span class="p">};</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="section" id="class-inputerror">
+<h2>2.2.4.4. Class <code class="docutils literal notranslate"><span class="pre">InputError</span></code><a class="headerlink" href="#class-inputerror" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="_CPPv4N3mod10InputErrorE">
+<span id="_CPPv3N3mod10InputErrorE"></span><span id="_CPPv2N3mod10InputErrorE"></span><span id="mod::InputError"></span><em class="property">class </em><code class="sig-name descname">InputError</code> : <em class="property">public</em> <a class="reference internal" href="#_CPPv4N3mod9ExceptionE" title="mod::Exception">Exception</a><a class="headerlink" href="#_CPPv4N3mod10InputErrorE" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>When thrown there is strong exception safety.
+This exception is thrown when bad data has been provided to a loading function.</p>
+</dd></dl>
+
+<div class="section" id="id4">
+<h3>2.2.4.4.1. Synopsis<a class="headerlink" href="#id4" title="Permalink to this headline">¶</a></h3>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="k">struct</span> <span class="n">MOD_DECL</span> <span class="nl">InputError</span> <span class="p">:</span> <span class="k">public</span> <span class="n">Exception</span> <span class="p">{</span>
+    <span class="n">InputError</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">string</span> <span class="o">&amp;&amp;</span><span class="n">text</span><span class="p">)</span> <span class="o">:</span> <span class="n">Exception</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">move</span><span class="p">(</span><span class="n">text</span><span class="p">))</span> <span class="p">{</span> <span class="p">}</span>
+    <span class="n">std</span><span class="o">::</span><span class="n">string</span> <span class="n">getName</span><span class="p">()</span> <span class="k">const</span> <span class="p">{</span>
+        <span class="k">return</span> <span class="s">&quot;MØD InputError&quot;</span><span class="p">;</span>
+    <span class="p">}</span>
+<span class="p">};</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="section" id="class-logicerror">
+<h2>2.2.4.5. Class <code class="docutils literal notranslate"><span class="pre">LogicError</span></code><a class="headerlink" href="#class-logicerror" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="_CPPv4N3mod10LogicErrorE">
+<span id="_CPPv3N3mod10LogicErrorE"></span><span id="_CPPv2N3mod10LogicErrorE"></span><span id="mod::LogicError"></span><em class="property">class </em><code class="sig-name descname">LogicError</code> : <em class="property">public</em> <a class="reference internal" href="#_CPPv4N3mod9ExceptionE" title="mod::Exception">Exception</a><a class="headerlink" href="#_CPPv4N3mod10LogicErrorE" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>When thrown there is strong exception safety.
+This exception is thrown when a pre-condition of a function is violated.</p>
+</dd></dl>
+
+<div class="section" id="id5">
+<h3>2.2.4.5.1. Synopsis<a class="headerlink" href="#id5" title="Permalink to this headline">¶</a></h3>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="k">struct</span> <span class="n">MOD_DECL</span> <span class="nl">LogicError</span> <span class="p">:</span> <span class="k">public</span> <span class="n">Exception</span> <span class="p">{</span>
+    <span class="n">LogicError</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">string</span> <span class="o">&amp;&amp;</span><span class="n">text</span><span class="p">)</span> <span class="o">:</span> <span class="n">Exception</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">move</span><span class="p">(</span><span class="n">text</span><span class="p">))</span> <span class="p">{</span> <span class="p">}</span>
+    <span class="n">std</span><span class="o">::</span><span class="n">string</span> <span class="n">getName</span><span class="p">()</span> <span class="k">const</span> <span class="p">{</span>
+        <span class="k">return</span> <span class="s">&quot;MØD LogicError&quot;</span><span class="p">;</span>
+    <span class="p">}</span>
+<span class="p">};</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="section" id="class-termparsingerror">
+<h2>2.2.4.6. Class <code class="docutils literal notranslate"><span class="pre">TermParsingError</span></code><a class="headerlink" href="#class-termparsingerror" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="_CPPv4N3mod16TermParsingErrorE">
+<span id="_CPPv3N3mod16TermParsingErrorE"></span><span id="_CPPv2N3mod16TermParsingErrorE"></span><span id="mod::TermParsingError"></span><em class="property">class </em><code class="sig-name descname">TermParsingError</code> : <em class="property">public</em> <a class="reference internal" href="#_CPPv4N3mod9ExceptionE" title="mod::Exception">Exception</a><a class="headerlink" href="#_CPPv4N3mod16TermParsingErrorE" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>When thrown there is at least basic exception safety.
+This exception is thrown if <a class="reference internal" href="Config.html#_CPPv4N3mod9LabelType4TermE" title="mod::LabelType::Term"><code class="xref cpp cpp-any docutils literal notranslate"><span class="pre">LabelType::Term</span></code></a> is used and
+parsing of a string into a first-order term fails.</p>
+</dd></dl>
+
+<div class="section" id="id6">
+<h3>2.2.4.6.1. Synopsis<a class="headerlink" href="#id6" title="Permalink to this headline">¶</a></h3>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="k">struct</span> <span class="n">MOD_DECL</span> <span class="nl">TermParsingError</span> <span class="p">:</span> <span class="k">public</span> <span class="n">Exception</span> <span class="p">{</span>
+    <span class="n">TermParsingError</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">string</span> <span class="o">&amp;&amp;</span><span class="n">text</span><span class="p">)</span> <span class="o">:</span> <span class="n">Exception</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">move</span><span class="p">(</span><span class="n">text</span><span class="p">))</span> <span class="p">{</span> <span class="p">}</span>
+    <span class="n">std</span><span class="o">::</span><span class="n">string</span> <span class="n">getName</span><span class="p">()</span> <span class="k">const</span> <span class="p">{</span>
+        <span class="k">return</span> <span class="s">&quot;MØD TermParsingError&quot;</span><span class="p">;</span>
+    <span class="p">}</span>
+<span class="p">};</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="section" id="class-stereodeductionerror">
+<h2>2.2.4.7. Class <code class="docutils literal notranslate"><span class="pre">StereoDeductionError</span></code><a class="headerlink" href="#class-stereodeductionerror" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="_CPPv4N3mod20StereoDeductionErrorE">
+<span id="_CPPv3N3mod20StereoDeductionErrorE"></span><span id="_CPPv2N3mod20StereoDeductionErrorE"></span><span id="mod::StereoDeductionError"></span><em class="property">class </em><code class="sig-name descname">StereoDeductionError</code> : <em class="property">public</em> <a class="reference internal" href="#_CPPv4N3mod9ExceptionE" title="mod::Exception">Exception</a><a class="headerlink" href="#_CPPv4N3mod20StereoDeductionErrorE" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>When thrown there is at least basic exception safety.
+This exception is thrown if stereo data is requested and
+deduction failed.</p>
+</dd></dl>
+
+<div class="section" id="id7">
+<h3>2.2.4.7.1. Synopsis<a class="headerlink" href="#id7" title="Permalink to this headline">¶</a></h3>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="k">struct</span> <span class="n">MOD_DECL</span> <span class="nl">StereoDeductionError</span> <span class="p">:</span> <span class="k">public</span> <span class="n">Exception</span> <span class="p">{</span>
+    <span class="n">StereoDeductionError</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">string</span> <span class="o">&amp;&amp;</span><span class="n">text</span><span class="p">)</span> <span class="o">:</span> <span class="n">Exception</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">move</span><span class="p">(</span><span class="n">text</span><span class="p">))</span> <span class="p">{</span> <span class="p">}</span>
+    <span class="n">std</span><span class="o">::</span><span class="n">string</span> <span class="n">getName</span><span class="p">()</span> <span class="k">const</span> <span class="p">{</span>
+        <span class="k">return</span> <span class="s">&quot;MØD StereoDeductionError&quot;</span><span class="p">;</span>
+    <span class="p">}</span>
+<span class="p">};</span>
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="../index.html">Table of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">2.2.4. Error.hpp</a><ul>
+<li><a class="reference internal" href="#class-stacktrace">2.2.4.1. Class <code class="docutils literal notranslate"><span class="pre">Stacktrace</span></code></a><ul>
+<li><a class="reference internal" href="#synopsis">2.2.4.1.1. Synopsis</a></li>
+<li><a class="reference internal" href="#details">2.2.4.1.2. Details</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#class-exception">2.2.4.2. Class <code class="docutils literal notranslate"><span class="pre">Exception</span></code></a><ul>
+<li><a class="reference internal" href="#id1">2.2.4.2.1. Synopsis</a></li>
+<li><a class="reference internal" href="#id2">2.2.4.2.2. Details</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#class-fatalerror">2.2.4.3. Class <code class="docutils literal notranslate"><span class="pre">FatalError</span></code></a><ul>
+<li><a class="reference internal" href="#id3">2.2.4.3.1. Synopsis</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#class-inputerror">2.2.4.4. Class <code class="docutils literal notranslate"><span class="pre">InputError</span></code></a><ul>
+<li><a class="reference internal" href="#id4">2.2.4.4.1. Synopsis</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#class-logicerror">2.2.4.5. Class <code class="docutils literal notranslate"><span class="pre">LogicError</span></code></a><ul>
+<li><a class="reference internal" href="#id5">2.2.4.5.1. Synopsis</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#class-termparsingerror">2.2.4.6. Class <code class="docutils literal notranslate"><span class="pre">TermParsingError</span></code></a><ul>
+<li><a class="reference internal" href="#id6">2.2.4.6.1. Synopsis</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#class-stereodeductionerror">2.2.4.7. Class <code class="docutils literal notranslate"><span class="pre">StereoDeductionError</span></code></a><ul>
+<li><a class="reference internal" href="#id7">2.2.4.7.1. Synopsis</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="Derivation.html"
+                        title="previous chapter">2.2.3. Derivation.hpp</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="Function.html"
+                        title="next chapter">2.2.5. Function.hpp</a></p>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../_sources/libmod/Error.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="Function.html" title="2.2.5. Function.hpp"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="Derivation.html" title="2.2.3. Derivation.hpp"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">MØD 0.9.0 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="libmod.html" >2. libMØD</a> &#187;</li>
+          <li class="nav-item nav-item-2"><a href="api.html" >2.2. API Reference</a> &#187;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2013-2018, Jakob Lykke Andersen.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 2.1.3+/83a3b7a8.
+    </div>
+  </body>
+</html>

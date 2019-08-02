@@ -1,0 +1,333 @@
+
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta charset="utf-8" />
+    <title>2.2.8.5. dg/Strategies.hpp &#8212; MØD 0.9.0 documentation</title>
+    <link rel="stylesheet" href="../../_static/classic.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <script type="text/javascript" src="../../_static/language_data.js"></script>
+    <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="2.2.9. graph" href="../graph/index.html" />
+    <link rel="prev" title="2.2.8.4. dg/Printer.hpp" href="Printer.html" /> 
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="../graph/index.html" title="2.2.9. graph"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="Printer.html" title="2.2.8.4. dg/Printer.hpp"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">MØD 0.9.0 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../libmod.html" >2. libMØD</a> &#187;</li>
+          <li class="nav-item nav-item-2"><a href="../api.html" >2.2. API Reference</a> &#187;</li>
+          <li class="nav-item nav-item-3"><a href="index.html" accesskey="U">2.2.8. dg</a> &#187;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="dg-strategies-hpp">
+<span id="cpp-dg-strategies"></span><h1>2.2.8.5. dg/Strategies.hpp<a class="headerlink" href="#dg-strategies-hpp" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="class-dg-strategy">
+<h2>2.2.8.5.1. Class <code class="docutils literal notranslate"><span class="pre">dg::Strategy</span></code><a class="headerlink" href="#class-dg-strategy" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="_CPPv4N3mod2dg8StrategyE">
+<span id="_CPPv3N3mod2dg8StrategyE"></span><span id="_CPPv2N3mod2dg8StrategyE"></span><span id="mod::dg::Strategy"></span><em class="property">class </em><code class="sig-prename descclassname">dg<code class="sig-prename descclassname">::</code></code><code class="sig-name descname">Strategy</code><a class="headerlink" href="#_CPPv4N3mod2dg8StrategyE" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Derivation graph strategies are used in <a class="reference internal" href="DG.html#_CPPv4N3mod2dg2DG8ruleCompERKNSt6vectorINSt10shared_ptrIN5graph5GraphEEEEENSt10shared_ptrI8StrategyEE13LabelSettingsb" title="mod::dg::DG::ruleComp"><code class="xref cpp cpp-func docutils literal notranslate"><span class="pre">DG::ruleComp()</span></code></a>.</p>
+</dd></dl>
+
+<div class="section" id="synopsis">
+<h3>2.2.8.5.1.1. Synopsis<a class="headerlink" href="#synopsis" title="Permalink to this headline">¶</a></h3>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="k">struct</span> <span class="n">MOD_DECL</span> <span class="n">Strategy</span> <span class="p">{</span>
+    <span class="n">Strategy</span><span class="p">(</span><span class="k">const</span> <span class="n">Strategy</span><span class="o">&amp;</span><span class="p">)</span> <span class="o">=</span> <span class="k">delete</span><span class="p">;</span>
+    <span class="n">Strategy</span> <span class="o">&amp;</span><span class="k">operator</span><span class="o">=</span><span class="p">(</span><span class="k">const</span> <span class="n">Strategy</span><span class="o">&amp;</span><span class="p">)</span> <span class="o">=</span> <span class="k">delete</span><span class="p">;</span>
+<span class="k">public</span><span class="o">:</span>
+    <span class="k">struct</span> <span class="n">GraphState</span> <span class="p">{</span>
+        <span class="n">GraphState</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">function</span><span class="o">&lt;</span><span class="kt">void</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;</span><span class="n">std</span><span class="o">::</span><span class="n">shared_ptr</span><span class="o">&lt;</span><span class="n">graph</span><span class="o">::</span><span class="n">Graph</span><span class="o">&gt;</span> <span class="o">&gt;&amp;</span><span class="p">)</span> <span class="o">&gt;</span> <span class="n">fSubset</span><span class="p">,</span>
+                <span class="n">std</span><span class="o">::</span><span class="n">function</span><span class="o">&lt;</span><span class="kt">void</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;</span><span class="n">std</span><span class="o">::</span><span class="n">shared_ptr</span><span class="o">&lt;</span><span class="n">graph</span><span class="o">::</span><span class="n">Graph</span><span class="o">&gt;</span> <span class="o">&gt;&amp;</span><span class="p">)</span> <span class="o">&gt;</span> <span class="n">fUniverse</span><span class="p">);</span>
+        <span class="k">const</span> <span class="n">std</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;</span><span class="n">std</span><span class="o">::</span><span class="n">shared_ptr</span><span class="o">&lt;</span><span class="n">graph</span><span class="o">::</span><span class="n">Graph</span><span class="o">&gt;</span> <span class="o">&gt;</span> <span class="o">&amp;</span><span class="n">getSubset</span><span class="p">()</span> <span class="k">const</span><span class="p">;</span>
+        <span class="k">const</span> <span class="n">std</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;</span><span class="n">std</span><span class="o">::</span><span class="n">shared_ptr</span><span class="o">&lt;</span><span class="n">graph</span><span class="o">::</span><span class="n">Graph</span><span class="o">&gt;</span> <span class="o">&gt;</span> <span class="o">&amp;</span><span class="n">getUniverse</span><span class="p">()</span> <span class="k">const</span><span class="p">;</span>
+    <span class="k">private</span><span class="o">:</span>
+        <span class="k">mutable</span> <span class="kt">bool</span> <span class="n">subsetInit</span><span class="p">,</span> <span class="n">universeInit</span><span class="p">;</span>
+        <span class="k">mutable</span> <span class="n">std</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;</span><span class="n">std</span><span class="o">::</span><span class="n">shared_ptr</span><span class="o">&lt;</span><span class="n">graph</span><span class="o">::</span><span class="n">Graph</span><span class="o">&gt;</span> <span class="o">&gt;</span> <span class="n">subset</span><span class="p">,</span> <span class="n">universe</span><span class="p">;</span>
+        <span class="n">std</span><span class="o">::</span><span class="n">function</span><span class="o">&lt;</span><span class="kt">void</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;</span><span class="n">std</span><span class="o">::</span><span class="n">shared_ptr</span><span class="o">&lt;</span><span class="n">graph</span><span class="o">::</span><span class="n">Graph</span><span class="o">&gt;</span> <span class="o">&gt;&amp;</span><span class="p">)</span> <span class="o">&gt;</span> <span class="n">fSubset</span><span class="p">,</span> <span class="n">fUniverse</span><span class="p">;</span>
+    <span class="p">};</span>
+<span class="k">private</span><span class="o">:</span>
+    <span class="n">Strategy</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">unique_ptr</span><span class="o">&lt;</span><span class="n">lib</span><span class="o">::</span><span class="n">DG</span><span class="o">::</span><span class="n">Strategies</span><span class="o">::</span><span class="n">Strategy</span><span class="o">&gt;</span> <span class="n">strategy</span><span class="p">);</span>
+<span class="k">public</span><span class="o">:</span>
+    <span class="o">~</span><span class="n">Strategy</span><span class="p">();</span>
+    <span class="n">std</span><span class="o">::</span><span class="n">unique_ptr</span><span class="o">&lt;</span><span class="n">Strategy</span><span class="o">&gt;</span> <span class="n">clone</span><span class="p">()</span> <span class="k">const</span><span class="p">;</span>
+    <span class="n">MOD_DECL</span> <span class="k">friend</span> <span class="n">std</span><span class="o">::</span><span class="n">ostream</span> <span class="o">&amp;</span><span class="k">operator</span><span class="o">&lt;&lt;</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">ostream</span> <span class="o">&amp;</span><span class="n">s</span><span class="p">,</span> <span class="k">const</span> <span class="n">Strategy</span> <span class="o">&amp;</span><span class="n">strat</span><span class="p">);</span>
+    <span class="n">lib</span><span class="o">::</span><span class="n">DG</span><span class="o">::</span><span class="n">Strategies</span><span class="o">::</span><span class="n">Strategy</span> <span class="o">&amp;</span><span class="n">getStrategy</span><span class="p">();</span>
+<span class="k">private</span><span class="o">:</span>
+    <span class="k">struct</span> <span class="n">Pimpl</span><span class="p">;</span>
+    <span class="n">std</span><span class="o">::</span><span class="n">unique_ptr</span><span class="o">&lt;</span><span class="n">Pimpl</span><span class="o">&gt;</span> <span class="n">p</span><span class="p">;</span>
+<span class="k">public</span><span class="o">:</span>
+    <span class="k">static</span> <span class="n">std</span><span class="o">::</span><span class="n">shared_ptr</span><span class="o">&lt;</span><span class="n">Strategy</span><span class="o">&gt;</span> <span class="n">makeAdd</span><span class="p">(</span><span class="kt">bool</span> <span class="n">onlyUniverse</span><span class="p">,</span> <span class="k">const</span> <span class="n">std</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;</span><span class="n">std</span><span class="o">::</span><span class="n">shared_ptr</span><span class="o">&lt;</span><span class="n">graph</span><span class="o">::</span><span class="n">Graph</span><span class="o">&gt;</span> <span class="o">&gt;</span> <span class="o">&amp;</span><span class="n">graphs</span><span class="p">);</span>
+    <span class="k">static</span> <span class="n">std</span><span class="o">::</span><span class="n">shared_ptr</span><span class="o">&lt;</span><span class="n">Strategy</span><span class="o">&gt;</span> <span class="n">makeAdd</span><span class="p">(</span><span class="kt">bool</span> <span class="n">onlyUniverse</span><span class="p">,</span> <span class="k">const</span> <span class="n">std</span><span class="o">::</span><span class="n">shared_ptr</span><span class="o">&lt;</span><span class="n">Function</span><span class="o">&lt;</span><span class="n">std</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;</span><span class="n">std</span><span class="o">::</span><span class="n">shared_ptr</span><span class="o">&lt;</span><span class="n">graph</span><span class="o">::</span><span class="n">Graph</span><span class="o">&gt;</span> <span class="o">&gt;</span><span class="p">()</span> <span class="o">&gt;</span> <span class="o">&gt;</span> <span class="n">generator</span><span class="p">);</span>
+    <span class="k">static</span> <span class="n">std</span><span class="o">::</span><span class="n">shared_ptr</span><span class="o">&lt;</span><span class="n">Strategy</span><span class="o">&gt;</span> <span class="n">makeExecute</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">shared_ptr</span><span class="o">&lt;</span><span class="n">Function</span><span class="o">&lt;</span><span class="kt">void</span><span class="p">(</span><span class="k">const</span> <span class="n">Strategy</span><span class="o">::</span><span class="n">GraphState</span><span class="o">&amp;</span><span class="p">)</span><span class="o">&gt;</span> <span class="o">&gt;</span> <span class="n">func</span><span class="p">);</span>
+    <span class="k">static</span> <span class="n">std</span><span class="o">::</span><span class="n">shared_ptr</span><span class="o">&lt;</span><span class="n">Strategy</span><span class="o">&gt;</span> <span class="n">makeFilter</span><span class="p">(</span><span class="kt">bool</span> <span class="n">alsoUniverse</span><span class="p">,</span>
+            <span class="n">std</span><span class="o">::</span><span class="n">shared_ptr</span><span class="o">&lt;</span><span class="n">Function</span><span class="o">&lt;</span><span class="kt">bool</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">shared_ptr</span><span class="o">&lt;</span><span class="n">graph</span><span class="o">::</span><span class="n">Graph</span><span class="o">&gt;</span><span class="p">,</span> <span class="k">const</span> <span class="n">Strategy</span><span class="o">::</span><span class="n">GraphState</span><span class="o">&amp;</span><span class="p">,</span> <span class="kt">bool</span><span class="p">)</span><span class="o">&gt;</span> <span class="o">&gt;</span> <span class="n">filterFunc</span><span class="p">);</span>
+    <span class="k">static</span> <span class="n">std</span><span class="o">::</span><span class="n">shared_ptr</span><span class="o">&lt;</span><span class="n">Strategy</span><span class="o">&gt;</span> <span class="n">makeLeftPredicate</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">shared_ptr</span><span class="o">&lt;</span><span class="n">Function</span><span class="o">&lt;</span><span class="kt">bool</span><span class="p">(</span><span class="k">const</span> <span class="n">Derivation</span><span class="o">&amp;</span><span class="p">)</span> <span class="o">&gt;</span> <span class="o">&gt;</span> <span class="n">predicate</span><span class="p">,</span> <span class="n">std</span><span class="o">::</span><span class="n">shared_ptr</span><span class="o">&lt;</span><span class="n">Strategy</span><span class="o">&gt;</span> <span class="n">strat</span><span class="p">);</span>
+    <span class="k">static</span> <span class="n">std</span><span class="o">::</span><span class="n">shared_ptr</span><span class="o">&lt;</span><span class="n">Strategy</span><span class="o">&gt;</span> <span class="n">makeParallel</span><span class="p">(</span><span class="k">const</span> <span class="n">std</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;</span><span class="n">std</span><span class="o">::</span><span class="n">shared_ptr</span><span class="o">&lt;</span><span class="n">Strategy</span><span class="o">&gt;</span> <span class="o">&gt;</span> <span class="o">&amp;</span><span class="n">strategies</span><span class="p">);</span>
+    <span class="k">static</span> <span class="n">std</span><span class="o">::</span><span class="n">shared_ptr</span><span class="o">&lt;</span><span class="n">Strategy</span><span class="o">&gt;</span> <span class="n">makeRepeat</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="kt">size_t</span> <span class="n">limit</span><span class="p">,</span> <span class="n">std</span><span class="o">::</span><span class="n">shared_ptr</span><span class="o">&lt;</span><span class="n">Strategy</span><span class="o">&gt;</span> <span class="n">strategy</span><span class="p">);</span>
+    <span class="k">static</span> <span class="n">std</span><span class="o">::</span><span class="n">shared_ptr</span><span class="o">&lt;</span><span class="n">Strategy</span><span class="o">&gt;</span> <span class="n">makeRevive</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">shared_ptr</span><span class="o">&lt;</span><span class="n">Strategy</span><span class="o">&gt;</span> <span class="n">strategy</span><span class="p">);</span>
+    <span class="k">static</span> <span class="n">std</span><span class="o">::</span><span class="n">shared_ptr</span><span class="o">&lt;</span><span class="n">Strategy</span><span class="o">&gt;</span> <span class="n">makeRightPredicate</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">shared_ptr</span><span class="o">&lt;</span><span class="n">Function</span><span class="o">&lt;</span><span class="kt">bool</span><span class="p">(</span><span class="k">const</span> <span class="n">Derivation</span><span class="o">&amp;</span><span class="p">)</span> <span class="o">&gt;</span> <span class="o">&gt;</span> <span class="n">predicate</span><span class="p">,</span>
+            <span class="n">std</span><span class="o">::</span><span class="n">shared_ptr</span><span class="o">&lt;</span><span class="n">Strategy</span><span class="o">&gt;</span> <span class="n">strat</span><span class="p">);</span>
+    <span class="k">static</span> <span class="n">std</span><span class="o">::</span><span class="n">shared_ptr</span><span class="o">&lt;</span><span class="n">Strategy</span><span class="o">&gt;</span> <span class="n">makeRule</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">shared_ptr</span><span class="o">&lt;</span><span class="n">rule</span><span class="o">::</span><span class="n">Rule</span><span class="o">&gt;</span> <span class="n">r</span><span class="p">);</span>
+    <span class="k">static</span> <span class="n">std</span><span class="o">::</span><span class="n">shared_ptr</span><span class="o">&lt;</span><span class="n">Strategy</span><span class="o">&gt;</span> <span class="n">makeSequence</span><span class="p">(</span><span class="k">const</span> <span class="n">std</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;</span><span class="n">std</span><span class="o">::</span><span class="n">shared_ptr</span><span class="o">&lt;</span><span class="n">Strategy</span><span class="o">&gt;</span> <span class="o">&gt;</span> <span class="o">&amp;</span><span class="n">strategies</span><span class="p">);</span>
+    <span class="c1">// TODO: remove</span>
+    <span class="k">static</span> <span class="n">std</span><span class="o">::</span><span class="n">shared_ptr</span><span class="o">&lt;</span><span class="n">Strategy</span><span class="o">&gt;</span> <span class="n">makeSort</span><span class="p">(</span><span class="kt">bool</span> <span class="n">doUniverse</span><span class="p">,</span>
+            <span class="n">std</span><span class="o">::</span><span class="n">shared_ptr</span><span class="o">&lt;</span><span class="n">Function</span><span class="o">&lt;</span><span class="kt">bool</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">shared_ptr</span><span class="o">&lt;</span><span class="n">graph</span><span class="o">::</span><span class="n">Graph</span><span class="o">&gt;</span><span class="p">,</span> <span class="n">std</span><span class="o">::</span><span class="n">shared_ptr</span><span class="o">&lt;</span><span class="n">graph</span><span class="o">::</span><span class="n">Graph</span><span class="o">&gt;</span><span class="p">,</span> <span class="k">const</span> <span class="n">Strategy</span><span class="o">::</span><span class="n">GraphState</span><span class="o">&amp;</span><span class="p">)</span><span class="o">&gt;</span> <span class="o">&gt;</span> <span class="n">less</span><span class="p">);</span>
+    <span class="c1">// TODO: remove</span>
+    <span class="k">static</span> <span class="n">std</span><span class="o">::</span><span class="n">shared_ptr</span><span class="o">&lt;</span><span class="n">Strategy</span><span class="o">&gt;</span> <span class="n">makeTake</span><span class="p">(</span><span class="kt">bool</span> <span class="n">doUniverse</span><span class="p">,</span> <span class="kt">unsigned</span> <span class="kt">int</span> <span class="n">limit</span><span class="p">);</span>
+<span class="p">};</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="details">
+<h3>2.2.8.5.1.2. Details<a class="headerlink" href="#details" title="Permalink to this headline">¶</a></h3>
+<dl class="function">
+<dt id="_CPPv4N3mod2dg8Strategy7makeAddEbRKNSt6vectorINSt10shared_ptrIN5graph5GraphEEEEE">
+<span id="_CPPv3N3mod2dg8Strategy7makeAddEbRKNSt6vectorINSt10shared_ptrIN5graph5GraphEEEEE"></span><span id="_CPPv2N3mod2dg8Strategy7makeAddEbRKNSt6vectorINSt10shared_ptrIN5graph5GraphEEEEE"></span><span id="mod::dg::Strategy::makeAdd__b.std::vector:std::shared_ptr:graph::Graph::CR"></span><em class="property">static</em> std::shared_ptr&lt;<a class="reference internal" href="#_CPPv4N3mod2dg8StrategyE" title="mod::dg::Strategy">Strategy</a>&gt; <code class="sig-name descname">makeAdd</code><span class="sig-paren">(</span>bool <em>onlyUniverse</em>, <em class="property">const</em> std::vector&lt;std::shared_ptr&lt;graph::<a class="reference internal" href="../graph/Graph.html#_CPPv4N3mod5graph5GraphE" title="mod::graph::Graph">Graph</a>&gt;&gt; &amp;<em>graphs</em><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N3mod2dg8Strategy7makeAddEbRKNSt6vectorINSt10shared_ptrIN5graph5GraphEEEEE" title="Permalink to this definition">¶</a><br /></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>an <a class="reference internal" href="../../dgStrat/dgStrat.html#strat-adduniverse"><span class="std std-ref">Add Universe</span></a> strategy if <code class="docutils literal notranslate"><span class="pre">onlyUniverse</span></code> is <code class="docutils literal notranslate"><span class="pre">True</span></code>, otherwise an <a class="reference internal" href="../../dgStrat/dgStrat.html#strat-addsubset"><span class="std std-ref">Add Subset</span></a> strategy.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="_CPPv4N3mod2dg8Strategy7makeAddEbKNSt10shared_ptrI8FunctionIFNSt6vectorINSt10shared_ptrIN5graph5GraphEEEEEvEEEE">
+<span id="_CPPv3N3mod2dg8Strategy7makeAddEbKNSt10shared_ptrI8FunctionIFNSt6vectorINSt10shared_ptrIN5graph5GraphEEEEEvEEEE"></span><span id="_CPPv2N3mod2dg8Strategy7makeAddEbKNSt10shared_ptrI8FunctionIFNSt6vectorINSt10shared_ptrIN5graph5GraphEEEEEvEEEE"></span><em class="property">static</em> std::shared_ptr&lt;<a class="reference internal" href="#_CPPv4N3mod2dg8StrategyE" title="mod::dg::Strategy">Strategy</a>&gt; <code class="sig-name descname">makeAdd</code><span class="sig-paren">(</span>bool <em>onlyUniverse</em>, <em class="property">const</em> std::shared_ptr&lt;Function&lt;std::vector&lt;std::shared_ptr&lt;graph::<a class="reference internal" href="../graph/Graph.html#_CPPv4N3mod5graph5GraphE" title="mod::graph::Graph">Graph</a>&gt;&gt;<span class="sig-paren">(</span><span class="sig-paren">)</span>&gt;&gt; <em>generator</em><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N3mod2dg8Strategy7makeAddEbKNSt10shared_ptrI8FunctionIFNSt6vectorINSt10shared_ptrIN5graph5GraphEEEEEvEEEE" title="Permalink to this definition">¶</a><br /></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>an <a class="reference internal" href="../../dgStrat/dgStrat.html#strat-adduniverse"><span class="std std-ref">Add Universe</span></a> strategy if <code class="docutils literal notranslate"><span class="pre">onlyUniverse</span></code> is <code class="docutils literal notranslate"><span class="pre">True</span></code>, otherwise an <a class="reference internal" href="../../dgStrat/dgStrat.html#strat-addsubset"><span class="std std-ref">Add Subset</span></a> strategy.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="_CPPv4N3mod2dg8Strategy11makeExecuteENSt10shared_ptrI8FunctionIFvRKN8Strategy10GraphStateEEEEE">
+<span id="_CPPv3N3mod2dg8Strategy11makeExecuteENSt10shared_ptrI8FunctionIFvRKN8Strategy10GraphStateEEEEE"></span><span id="_CPPv2N3mod2dg8Strategy11makeExecuteENSt10shared_ptrI8FunctionIFvRKN8Strategy10GraphStateEEEEE"></span><em class="property">static</em> std::shared_ptr&lt;<a class="reference internal" href="#_CPPv4N3mod2dg8StrategyE" title="mod::dg::Strategy">Strategy</a>&gt; <code class="sig-name descname">makeExecute</code><span class="sig-paren">(</span>std::shared_ptr&lt;Function&lt;void<span class="sig-paren">(</span><em class="property">const</em> <a class="reference internal" href="#_CPPv4N3mod2dg8StrategyE" title="mod::dg::Strategy">Strategy</a>::<a class="reference internal" href="#_CPPv4N3mod2dg8Strategy10GraphStateE" title="mod::dg::Strategy::GraphState">GraphState</a>&amp;<span class="sig-paren">)</span>&gt;&gt; <em>func</em><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N3mod2dg8Strategy11makeExecuteENSt10shared_ptrI8FunctionIFvRKN8Strategy10GraphStateEEEEE" title="Permalink to this definition">¶</a><br /></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>an <a class="reference internal" href="../../dgStrat/dgStrat.html#strat-execute"><span class="std std-ref">Execute</span></a> strategy.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="_CPPv4N3mod2dg8Strategy10makeFilterEbNSt10shared_ptrI8FunctionIFbNSt10shared_ptrIN5graph5GraphEEERKN8Strategy10GraphStateEbEEEE">
+<span id="_CPPv3N3mod2dg8Strategy10makeFilterEbNSt10shared_ptrI8FunctionIFbNSt10shared_ptrIN5graph5GraphEEERKN8Strategy10GraphStateEbEEEE"></span><span id="_CPPv2N3mod2dg8Strategy10makeFilterEbNSt10shared_ptrI8FunctionIFbNSt10shared_ptrIN5graph5GraphEEERKN8Strategy10GraphStateEbEEEE"></span><em class="property">static</em> std::shared_ptr&lt;<a class="reference internal" href="#_CPPv4N3mod2dg8StrategyE" title="mod::dg::Strategy">Strategy</a>&gt; <code class="sig-name descname">makeFilter</code><span class="sig-paren">(</span>bool <em>alsoUniverse</em>, std::shared_ptr&lt;Function&lt;bool<span class="sig-paren">(</span>std::shared_ptr&lt;graph::<a class="reference internal" href="../graph/Graph.html#_CPPv4N3mod5graph5GraphE" title="mod::graph::Graph">Graph</a>&gt;, <em class="property">const</em> <a class="reference internal" href="#_CPPv4N3mod2dg8StrategyE" title="mod::dg::Strategy">Strategy</a>::<a class="reference internal" href="#_CPPv4N3mod2dg8Strategy10GraphStateE" title="mod::dg::Strategy::GraphState">GraphState</a>&amp;, bool<span class="sig-paren">)</span>&gt;&gt; <em>filterFunc</em><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N3mod2dg8Strategy10makeFilterEbNSt10shared_ptrI8FunctionIFbNSt10shared_ptrIN5graph5GraphEEERKN8Strategy10GraphStateEbEEEE" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>The filtering predicate will be called for each graph in either the subset or the universe.
+The predicate is called with the graph and the graph state as arguments, and a bool stating whether or not
+the call is the first in the filtering process.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>a <a class="reference internal" href="../../dgStrat/dgStrat.html#strat-filteruniverse"><span class="std std-ref">Filter Universe</span></a> strategy if <code class="docutils literal notranslate"><span class="pre">onlyUniverse</span></code> is <code class="docutils literal notranslate"><span class="pre">True</span></code>, otherwise a <a class="reference internal" href="../../dgStrat/dgStrat.html#strat-filtersubset"><span class="std std-ref">Filter Subset</span></a> strategy.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="_CPPv4N3mod2dg8Strategy17makeLeftPredicateENSt10shared_ptrI8FunctionIFbRK10DerivationEEEENSt10shared_ptrI8StrategyEE">
+<span id="_CPPv3N3mod2dg8Strategy17makeLeftPredicateENSt10shared_ptrI8FunctionIFbRK10DerivationEEEENSt10shared_ptrI8StrategyEE"></span><span id="_CPPv2N3mod2dg8Strategy17makeLeftPredicateENSt10shared_ptrI8FunctionIFbRK10DerivationEEEENSt10shared_ptrI8StrategyEE"></span><em class="property">static</em> std::shared_ptr&lt;<a class="reference internal" href="#_CPPv4N3mod2dg8StrategyE" title="mod::dg::Strategy">Strategy</a>&gt; <code class="sig-name descname">makeLeftPredicate</code><span class="sig-paren">(</span>std::shared_ptr&lt;Function&lt;bool<span class="sig-paren">(</span><em class="property">const</em> <a class="reference internal" href="../Derivation.html#_CPPv4N3mod10DerivationE" title="mod::Derivation">Derivation</a>&amp;<span class="sig-paren">)</span>&gt;&gt; <em>predicate</em>, std::shared_ptr&lt;<a class="reference internal" href="#_CPPv4N3mod2dg8StrategyE" title="mod::dg::Strategy">Strategy</a>&gt; <em>strat</em>, <span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N3mod2dg8Strategy17makeLeftPredicateENSt10shared_ptrI8FunctionIFbRK10DerivationEEEENSt10shared_ptrI8StrategyEE" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Even though the predicate is called with a <a class="reference internal" href="../Derivation.html#_CPPv4N3mod10DerivationE" title="mod::Derivation"><code class="xref cpp cpp-class docutils literal notranslate"><span class="pre">Derivation</span></code></a> object, only the left side and the rule of the object is valid.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>a <a class="reference internal" href="../../dgStrat/dgStrat.html#strat-leftpredicate"><span class="std std-ref">Derivation Predicates</span></a> strategy.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="_CPPv4N3mod2dg8Strategy12makeParallelERKNSt6vectorINSt10shared_ptrI8StrategyEEEE">
+<span id="_CPPv3N3mod2dg8Strategy12makeParallelERKNSt6vectorINSt10shared_ptrI8StrategyEEEE"></span><span id="_CPPv2N3mod2dg8Strategy12makeParallelERKNSt6vectorINSt10shared_ptrI8StrategyEEEE"></span><span id="mod::dg::Strategy::makeParallel__std::vector:std::shared_ptr:Strategy::CR"></span><em class="property">static</em> std::shared_ptr&lt;<a class="reference internal" href="#_CPPv4N3mod2dg8StrategyE" title="mod::dg::Strategy">Strategy</a>&gt; <code class="sig-name descname">makeParallel</code><span class="sig-paren">(</span><em class="property">const</em> std::vector&lt;std::shared_ptr&lt;<a class="reference internal" href="#_CPPv4N3mod2dg8StrategyE" title="mod::dg::Strategy">Strategy</a>&gt;&gt; &amp;<em>strategies</em><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N3mod2dg8Strategy12makeParallelERKNSt6vectorINSt10shared_ptrI8StrategyEEEE" title="Permalink to this definition">¶</a><br /></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>a <a class="reference internal" href="../../dgStrat/dgStrat.html#strat-parallel"><span class="std std-ref">Parallel</span></a> strategy.</p>
+</dd>
+<dt class="field-even">Throws</dt>
+<dd class="field-even"><p><a class="reference internal" href="../Error.html#_CPPv4N3mod10LogicErrorE" title="mod::LogicError"><code class="xref cpp cpp-class docutils literal notranslate"><span class="pre">LogicError</span></code></a> if <cite>strategies</cite> is empty.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="_CPPv4N3mod2dg8Strategy10makeRepeatEjNSt10shared_ptrI8StrategyEE">
+<span id="_CPPv3N3mod2dg8Strategy10makeRepeatEjNSt10shared_ptrI8StrategyEE"></span><span id="_CPPv2N3mod2dg8Strategy10makeRepeatEjNSt10shared_ptrI8StrategyEE"></span><span id="mod::dg::Strategy::makeRepeat__unsigned-i.std::shared_ptr:Strategy:"></span><em class="property">static</em> std::shared_ptr&lt;<a class="reference internal" href="#_CPPv4N3mod2dg8StrategyE" title="mod::dg::Strategy">Strategy</a>&gt; <code class="sig-name descname">makeRepeat</code><span class="sig-paren">(</span>unsigned int <em>limit</em>, std::shared_ptr&lt;<a class="reference internal" href="#_CPPv4N3mod2dg8StrategyE" title="mod::dg::Strategy">Strategy</a>&gt; <em>strategy</em><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N3mod2dg8Strategy10makeRepeatEjNSt10shared_ptrI8StrategyEE" title="Permalink to this definition">¶</a><br /></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>a <a class="reference internal" href="../../dgStrat/dgStrat.html#strat-repeat"><span class="std std-ref">Repeat</span></a> strategy.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="_CPPv4N3mod2dg8Strategy10makeReviveENSt10shared_ptrI8StrategyEE">
+<span id="_CPPv3N3mod2dg8Strategy10makeReviveENSt10shared_ptrI8StrategyEE"></span><span id="_CPPv2N3mod2dg8Strategy10makeReviveENSt10shared_ptrI8StrategyEE"></span><span id="mod::dg::Strategy::makeRevive__std::shared_ptr:Strategy:"></span><em class="property">static</em> std::shared_ptr&lt;<a class="reference internal" href="#_CPPv4N3mod2dg8StrategyE" title="mod::dg::Strategy">Strategy</a>&gt; <code class="sig-name descname">makeRevive</code><span class="sig-paren">(</span>std::shared_ptr&lt;<a class="reference internal" href="#_CPPv4N3mod2dg8StrategyE" title="mod::dg::Strategy">Strategy</a>&gt; <em>strategy</em><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N3mod2dg8Strategy10makeReviveENSt10shared_ptrI8StrategyEE" title="Permalink to this definition">¶</a><br /></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>a <a class="reference internal" href="../../dgStrat/dgStrat.html#strat-revive"><span class="std std-ref">Revive</span></a> strategy.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="_CPPv4N3mod2dg8Strategy18makeRightPredicateENSt10shared_ptrI8FunctionIFbRK10DerivationEEEENSt10shared_ptrI8StrategyEE">
+<span id="_CPPv3N3mod2dg8Strategy18makeRightPredicateENSt10shared_ptrI8FunctionIFbRK10DerivationEEEENSt10shared_ptrI8StrategyEE"></span><span id="_CPPv2N3mod2dg8Strategy18makeRightPredicateENSt10shared_ptrI8FunctionIFbRK10DerivationEEEENSt10shared_ptrI8StrategyEE"></span><em class="property">static</em> std::shared_ptr&lt;<a class="reference internal" href="#_CPPv4N3mod2dg8StrategyE" title="mod::dg::Strategy">Strategy</a>&gt; <code class="sig-name descname">makeRightPredicate</code><span class="sig-paren">(</span>std::shared_ptr&lt;Function&lt;bool<span class="sig-paren">(</span><em class="property">const</em> <a class="reference internal" href="../Derivation.html#_CPPv4N3mod10DerivationE" title="mod::Derivation">Derivation</a>&amp;<span class="sig-paren">)</span>&gt;&gt; <em>predicate</em>, std::shared_ptr&lt;<a class="reference internal" href="#_CPPv4N3mod2dg8StrategyE" title="mod::dg::Strategy">Strategy</a>&gt; <em>strat</em>, <span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N3mod2dg8Strategy18makeRightPredicateENSt10shared_ptrI8FunctionIFbRK10DerivationEEEENSt10shared_ptrI8StrategyEE" title="Permalink to this definition">¶</a><br /></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>a <a class="reference internal" href="../../dgStrat/dgStrat.html#strat-rightpredicate"><span class="std std-ref">Derivation Predicates</span></a> strategy.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="_CPPv4N3mod2dg8Strategy8makeRuleENSt10shared_ptrIN4rule4RuleEEE">
+<span id="_CPPv3N3mod2dg8Strategy8makeRuleENSt10shared_ptrIN4rule4RuleEEE"></span><span id="_CPPv2N3mod2dg8Strategy8makeRuleENSt10shared_ptrIN4rule4RuleEEE"></span><span id="mod::dg::Strategy::makeRule__std::shared_ptr:rule::Rule:"></span><em class="property">static</em> std::shared_ptr&lt;<a class="reference internal" href="#_CPPv4N3mod2dg8StrategyE" title="mod::dg::Strategy">Strategy</a>&gt; <code class="sig-name descname">makeRule</code><span class="sig-paren">(</span>std::shared_ptr&lt;rule::<a class="reference internal" href="../rule/Rule.html#_CPPv4N3mod4rule4RuleE" title="mod::rule::Rule">Rule</a>&gt; <em>r</em><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N3mod2dg8Strategy8makeRuleENSt10shared_ptrIN4rule4RuleEEE" title="Permalink to this definition">¶</a><br /></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>a <a class="reference internal" href="../../dgStrat/dgStrat.html#strat-rule"><span class="std std-ref">Rule</span></a> strategy.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="_CPPv4N3mod2dg8Strategy12makeSequenceERKNSt6vectorINSt10shared_ptrI8StrategyEEEE">
+<span id="_CPPv3N3mod2dg8Strategy12makeSequenceERKNSt6vectorINSt10shared_ptrI8StrategyEEEE"></span><span id="_CPPv2N3mod2dg8Strategy12makeSequenceERKNSt6vectorINSt10shared_ptrI8StrategyEEEE"></span><span id="mod::dg::Strategy::makeSequence__std::vector:std::shared_ptr:Strategy::CR"></span><em class="property">static</em> std::shared_ptr&lt;<a class="reference internal" href="#_CPPv4N3mod2dg8StrategyE" title="mod::dg::Strategy">Strategy</a>&gt; <code class="sig-name descname">makeSequence</code><span class="sig-paren">(</span><em class="property">const</em> std::vector&lt;std::shared_ptr&lt;<a class="reference internal" href="#_CPPv4N3mod2dg8StrategyE" title="mod::dg::Strategy">Strategy</a>&gt;&gt; &amp;<em>strategies</em><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N3mod2dg8Strategy12makeSequenceERKNSt6vectorINSt10shared_ptrI8StrategyEEEE" title="Permalink to this definition">¶</a><br /></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Retunrs</dt>
+<dd class="field-odd"><p>a <a class="reference internal" href="../../dgStrat/dgStrat.html#strat-sequence"><span class="std std-ref">Sequence</span></a> strategy.</p>
+</dd>
+</dl>
+</dd></dl>
+
+</div>
+</div>
+<div class="section" id="class-dg-strategy-graphstate">
+<h2>2.2.8.5.2. Class <code class="docutils literal notranslate"><span class="pre">dg::Strategy::GraphState</span></code><a class="headerlink" href="#class-dg-strategy-graphstate" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="_CPPv4N3mod2dg8Strategy10GraphStateE">
+<span id="_CPPv3N3mod2dg8Strategy10GraphStateE"></span><span id="_CPPv2N3mod2dg8Strategy10GraphStateE"></span><span id="mod::dg::Strategy::GraphState"></span><em class="property">class </em><code class="sig-prename descclassname">dg::<a class="reference internal" href="#_CPPv4N3mod2dg8StrategyE" title="mod::dg::Strategy">Strategy</a><code class="sig-prename descclassname">::</code></code><code class="sig-name descname">GraphState</code><a class="headerlink" href="#_CPPv4N3mod2dg8Strategy10GraphStateE" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>This class represents a graph state with a subset <span class="math notranslate nohighlight">\(S\)</span> and a universe <span class="math notranslate nohighlight">\(U\)</span> fulfilling <span class="math notranslate nohighlight">\(S\subseteq U\)</span>.</p>
+<dl class="function">
+<dt id="_CPPv4NK3mod2dg8Strategy10GraphState9getSubsetEv">
+<span id="_CPPv3NK3mod2dg8Strategy10GraphState9getSubsetEv"></span><span id="_CPPv2NK3mod2dg8Strategy10GraphState9getSubsetEv"></span><span id="mod::dg::Strategy::GraphState::getSubsetC"></span><em class="property">const</em> std::vector&lt;std::shared_ptr&lt;graph::<a class="reference internal" href="../graph/Graph.html#_CPPv4N3mod5graph5GraphE" title="mod::graph::Graph">Graph</a>&gt;&gt; &amp;<code class="sig-name descname">getSubset</code><span class="sig-paren">(</span><span class="sig-paren">)</span> <em class="property">const</em><a class="headerlink" href="#_CPPv4NK3mod2dg8Strategy10GraphState9getSubsetEv" title="Permalink to this definition">¶</a><br /></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>the subset <span class="math notranslate nohighlight">\(\mathcal{S}\)</span>.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="_CPPv4NK3mod2dg8Strategy10GraphState11getUniverseEv">
+<span id="_CPPv3NK3mod2dg8Strategy10GraphState11getUniverseEv"></span><span id="_CPPv2NK3mod2dg8Strategy10GraphState11getUniverseEv"></span><span id="mod::dg::Strategy::GraphState::getUniverseC"></span><em class="property">const</em> std::vector&lt;std::shared_ptr&lt;graph::<a class="reference internal" href="../graph/Graph.html#_CPPv4N3mod5graph5GraphE" title="mod::graph::Graph">Graph</a>&gt;&gt; &amp;<code class="sig-name descname">getUniverse</code><span class="sig-paren">(</span><span class="sig-paren">)</span> <em class="property">const</em><a class="headerlink" href="#_CPPv4NK3mod2dg8Strategy10GraphState11getUniverseEv" title="Permalink to this definition">¶</a><br /></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>the universe <span class="math notranslate nohighlight">\(\mathcal{U}\)</span></p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="../../index.html">Table of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">2.2.8.5. dg/Strategies.hpp</a><ul>
+<li><a class="reference internal" href="#class-dg-strategy">2.2.8.5.1. Class <code class="docutils literal notranslate"><span class="pre">dg::Strategy</span></code></a><ul>
+<li><a class="reference internal" href="#synopsis">2.2.8.5.1.1. Synopsis</a></li>
+<li><a class="reference internal" href="#details">2.2.8.5.1.2. Details</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#class-dg-strategy-graphstate">2.2.8.5.2. Class <code class="docutils literal notranslate"><span class="pre">dg::Strategy::GraphState</span></code></a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="Printer.html"
+                        title="previous chapter">2.2.8.4. dg/Printer.hpp</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="../graph/index.html"
+                        title="next chapter">2.2.9. graph</a></p>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../../_sources/libmod/dg/Strategies.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="../graph/index.html" title="2.2.9. graph"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="Printer.html" title="2.2.8.4. dg/Printer.hpp"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">MØD 0.9.0 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../libmod.html" >2. libMØD</a> &#187;</li>
+          <li class="nav-item nav-item-2"><a href="../api.html" >2.2. API Reference</a> &#187;</li>
+          <li class="nav-item nav-item-3"><a href="index.html" >2.2.8. dg</a> &#187;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2013-2018, Jakob Lykke Andersen.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 2.1.3+/83a3b7a8.
+    </div>
+  </body>
+</html>

@@ -1,0 +1,305 @@
+
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta charset="utf-8" />
+    <title>2.2.9.5. graph/Printer.hpp &#8212; MØD 0.9.0 documentation</title>
+    <link rel="stylesheet" href="../../_static/classic.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <script type="text/javascript" src="../../_static/language_data.js"></script>
+    <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="2.2.10. rule" href="../rule/index.html" />
+    <link rel="prev" title="2.2.9.4. graph/GraphInterface.hpp" href="GraphInterface.html" /> 
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="../rule/index.html" title="2.2.10. rule"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="GraphInterface.html" title="2.2.9.4. graph/GraphInterface.hpp"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">MØD 0.9.0 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../libmod.html" >2. libMØD</a> &#187;</li>
+          <li class="nav-item nav-item-2"><a href="../api.html" >2.2. API Reference</a> &#187;</li>
+          <li class="nav-item nav-item-3"><a href="index.html" accesskey="U">2.2.9. graph</a> &#187;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="graph-printer-hpp">
+<span id="cpp-graph-printer"></span><h1>2.2.9.5. graph/Printer.hpp<a class="headerlink" href="#graph-printer-hpp" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="class-graph-printer">
+<h2>2.2.9.5.1. Class <code class="docutils literal notranslate"><span class="pre">graph::Printer</span></code><a class="headerlink" href="#class-graph-printer" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="_CPPv4N3mod5graph7PrinterE">
+<span id="_CPPv3N3mod5graph7PrinterE"></span><span id="_CPPv2N3mod5graph7PrinterE"></span><span id="mod::graph::Printer"></span><em class="property">class </em><code class="sig-prename descclassname">graph<code class="sig-prename descclassname">::</code></code><code class="sig-name descname">Printer</code><a class="headerlink" href="#_CPPv4N3mod5graph7PrinterE" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>This class is used to configure how graphs are visualised.</p>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>Some of these options greatly alter how graphs are depicted
+and the result may not accurately represent the underlying graph,
+and may make non-molecules look like molecules.</p>
+</div>
+</dd></dl>
+
+<div class="section" id="synopsis">
+<h3>2.2.9.5.1.1. Synopsis<a class="headerlink" href="#synopsis" title="Permalink to this headline">¶</a></h3>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="k">struct</span> <span class="n">MOD_DECL</span> <span class="n">Printer</span> <span class="p">{</span>
+    <span class="n">Printer</span><span class="p">();</span>
+    <span class="n">Printer</span><span class="p">(</span><span class="k">const</span> <span class="n">Printer</span> <span class="o">&amp;</span><span class="n">that</span><span class="p">);</span>
+    <span class="n">Printer</span> <span class="o">&amp;</span><span class="k">operator</span><span class="o">=</span><span class="p">(</span><span class="k">const</span> <span class="n">Printer</span> <span class="o">&amp;</span><span class="n">that</span><span class="p">);</span>
+    <span class="o">~</span><span class="n">Printer</span><span class="p">();</span>
+    <span class="k">const</span> <span class="n">lib</span><span class="o">::</span><span class="n">IO</span><span class="o">::</span><span class="n">Graph</span><span class="o">::</span><span class="n">Write</span><span class="o">::</span><span class="n">Options</span> <span class="o">&amp;</span><span class="n">getOptions</span><span class="p">()</span> <span class="k">const</span><span class="p">;</span>
+    <span class="kt">void</span> <span class="nf">setMolDefault</span><span class="p">();</span>
+    <span class="kt">void</span> <span class="nf">setReactionDefault</span><span class="p">();</span>
+    <span class="kt">void</span> <span class="nf">disableAll</span><span class="p">();</span>
+    <span class="kt">void</span> <span class="nf">enableAll</span><span class="p">();</span>
+    <span class="kt">void</span> <span class="nf">setEdgesAsBonds</span><span class="p">(</span><span class="kt">bool</span> <span class="n">value</span><span class="p">);</span>
+    <span class="kt">bool</span> <span class="nf">getEdgesAsBonds</span><span class="p">()</span> <span class="k">const</span><span class="p">;</span>
+    <span class="kt">void</span> <span class="nf">setCollapseHydrogens</span><span class="p">(</span><span class="kt">bool</span> <span class="n">value</span><span class="p">);</span>
+    <span class="kt">bool</span> <span class="nf">getCollapseHydrogens</span><span class="p">()</span> <span class="k">const</span><span class="p">;</span>
+    <span class="kt">void</span> <span class="nf">setRaiseCharges</span><span class="p">(</span><span class="kt">bool</span> <span class="n">value</span><span class="p">);</span>
+    <span class="kt">bool</span> <span class="nf">getRaiseCharges</span><span class="p">()</span> <span class="k">const</span><span class="p">;</span>
+    <span class="kt">void</span> <span class="nf">setSimpleCarbons</span><span class="p">(</span><span class="kt">bool</span> <span class="n">value</span><span class="p">);</span>
+    <span class="kt">bool</span> <span class="nf">getSimpleCarbons</span><span class="p">()</span> <span class="k">const</span><span class="p">;</span>
+    <span class="kt">void</span> <span class="nf">setThick</span><span class="p">(</span><span class="kt">bool</span> <span class="n">value</span><span class="p">);</span>
+    <span class="kt">bool</span> <span class="nf">getThick</span><span class="p">()</span> <span class="k">const</span><span class="p">;</span>
+    <span class="kt">void</span> <span class="nf">setWithColour</span><span class="p">(</span><span class="kt">bool</span> <span class="n">value</span><span class="p">);</span>
+    <span class="kt">bool</span> <span class="nf">getWithColour</span><span class="p">()</span> <span class="k">const</span><span class="p">;</span>
+    <span class="kt">void</span> <span class="nf">setWithIndex</span><span class="p">(</span><span class="kt">bool</span> <span class="n">value</span><span class="p">);</span>
+    <span class="kt">bool</span> <span class="nf">getWithIndex</span><span class="p">()</span> <span class="k">const</span><span class="p">;</span>
+    <span class="kt">void</span> <span class="nf">setWithTexttt</span><span class="p">(</span><span class="kt">bool</span> <span class="n">value</span><span class="p">);</span>
+    <span class="kt">bool</span> <span class="nf">getWithTexttt</span><span class="p">()</span> <span class="k">const</span><span class="p">;</span>
+    <span class="kt">void</span> <span class="nf">setWithRawStereo</span><span class="p">(</span><span class="kt">bool</span> <span class="n">value</span><span class="p">);</span>
+    <span class="kt">bool</span> <span class="nf">getWithRawStereo</span><span class="p">()</span> <span class="k">const</span><span class="p">;</span>
+    <span class="kt">void</span> <span class="nf">setWithPrettyStereo</span><span class="p">(</span><span class="kt">bool</span> <span class="n">value</span><span class="p">);</span>
+    <span class="kt">bool</span> <span class="nf">getWithPrettyStereo</span><span class="p">()</span> <span class="k">const</span><span class="p">;</span>
+    <span class="kt">void</span> <span class="nf">setRotation</span><span class="p">(</span><span class="kt">int</span> <span class="n">degrees</span><span class="p">);</span>
+    <span class="kt">int</span> <span class="nf">getRotation</span><span class="p">()</span> <span class="k">const</span><span class="p">;</span>
+    <span class="kt">void</span> <span class="nf">setMirror</span><span class="p">(</span><span class="kt">bool</span> <span class="n">value</span><span class="p">);</span>
+    <span class="kt">bool</span> <span class="nf">getMirror</span><span class="p">()</span> <span class="k">const</span><span class="p">;</span>
+<span class="k">private</span><span class="o">:</span>
+    <span class="n">std</span><span class="o">::</span><span class="n">unique_ptr</span><span class="o">&lt;</span><span class="n">lib</span><span class="o">::</span><span class="n">IO</span><span class="o">::</span><span class="n">Graph</span><span class="o">::</span><span class="n">Write</span><span class="o">::</span><span class="n">Options</span><span class="o">&gt;</span> <span class="n">options</span><span class="p">;</span>
+<span class="p">};</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="details">
+<h3>2.2.9.5.1.2. Details<a class="headerlink" href="#details" title="Permalink to this headline">¶</a></h3>
+<dl class="function">
+<dt id="_CPPv4N3mod5graph7Printer13setMolDefaultEv">
+<span id="_CPPv3N3mod5graph7Printer13setMolDefaultEv"></span><span id="_CPPv2N3mod5graph7Printer13setMolDefaultEv"></span><span id="mod::graph::Printer::setMolDefault"></span>void <code class="sig-name descname">setMolDefault</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N3mod5graph7Printer13setMolDefaultEv" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Shortcut for enabling all but thickening and index printing.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="_CPPv4N3mod5graph7Printer18setReactionDefaultEv">
+<span id="_CPPv3N3mod5graph7Printer18setReactionDefaultEv"></span><span id="_CPPv2N3mod5graph7Printer18setReactionDefaultEv"></span><span id="mod::graph::Printer::setReactionDefault"></span>void <code class="sig-name descname">setReactionDefault</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N3mod5graph7Printer18setReactionDefaultEv" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Shortcut for enabling all but thickening, index printing and simplification of carbon atoms.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="_CPPv4N3mod5graph7Printer10disableAllEv">
+<span id="_CPPv3N3mod5graph7Printer10disableAllEv"></span><span id="_CPPv2N3mod5graph7Printer10disableAllEv"></span><span id="mod::graph::Printer::disableAll"></span>void <code class="sig-name descname">disableAll</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N3mod5graph7Printer10disableAllEv" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Disable all special printing features.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="_CPPv4N3mod5graph7Printer9enableAllEv">
+<span id="_CPPv3N3mod5graph7Printer9enableAllEv"></span><span id="_CPPv2N3mod5graph7Printer9enableAllEv"></span><span id="mod::graph::Printer::enableAll"></span>void <code class="sig-name descname">enableAll</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N3mod5graph7Printer9enableAllEv" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Enable all special printing features, except typewriter font.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="_CPPv4N3mod5graph7Printer15setEdgesAsBondsEb">
+<span id="_CPPv3N3mod5graph7Printer15setEdgesAsBondsEb"></span><span id="_CPPv2N3mod5graph7Printer15setEdgesAsBondsEb"></span><span id="mod::graph::Printer::setEdgesAsBonds__b"></span>void <code class="sig-name descname">setEdgesAsBonds</code><span class="sig-paren">(</span>bool <em>value</em><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N3mod5graph7Printer15setEdgesAsBondsEb" title="Permalink to this definition">¶</a><br /></dt>
+<dt id="_CPPv4NK3mod5graph7Printer15getEdgesAsBondsEv">
+<span id="_CPPv3NK3mod5graph7Printer15getEdgesAsBondsEv"></span><span id="_CPPv2NK3mod5graph7Printer15getEdgesAsBondsEv"></span><span id="mod::graph::Printer::getEdgesAsBondsC"></span>bool <code class="sig-name descname">getEdgesAsBonds</code><span class="sig-paren">(</span><span class="sig-paren">)</span> <em class="property">const</em><a class="headerlink" href="#_CPPv4NK3mod5graph7Printer15getEdgesAsBondsEv" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Control whether edges with special labels are drawn as chemical bonds.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="_CPPv4N3mod5graph7Printer20setCollapseHydrogensEb">
+<span id="_CPPv3N3mod5graph7Printer20setCollapseHydrogensEb"></span><span id="_CPPv2N3mod5graph7Printer20setCollapseHydrogensEb"></span><span id="mod::graph::Printer::setCollapseHydrogens__b"></span>void <code class="sig-name descname">setCollapseHydrogens</code><span class="sig-paren">(</span>bool <em>value</em><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N3mod5graph7Printer20setCollapseHydrogensEb" title="Permalink to this definition">¶</a><br /></dt>
+<dt id="_CPPv4NK3mod5graph7Printer20getCollapseHydrogensEv">
+<span id="_CPPv3NK3mod5graph7Printer20getCollapseHydrogensEv"></span><span id="_CPPv2NK3mod5graph7Printer20getCollapseHydrogensEv"></span><span id="mod::graph::Printer::getCollapseHydrogensC"></span>bool <code class="sig-name descname">getCollapseHydrogens</code><span class="sig-paren">(</span><span class="sig-paren">)</span> <em class="property">const</em><a class="headerlink" href="#_CPPv4NK3mod5graph7Printer20getCollapseHydrogensEv" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Control whether vertices representing hydrogen atoms are collapsed into their neighbours labels.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="_CPPv4N3mod5graph7Printer15setRaiseChargesEb">
+<span id="_CPPv3N3mod5graph7Printer15setRaiseChargesEb"></span><span id="_CPPv2N3mod5graph7Printer15setRaiseChargesEb"></span><span id="mod::graph::Printer::setRaiseCharges__b"></span>void <code class="sig-name descname">setRaiseCharges</code><span class="sig-paren">(</span>bool <em>value</em><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N3mod5graph7Printer15setRaiseChargesEb" title="Permalink to this definition">¶</a><br /></dt>
+<dt id="_CPPv4NK3mod5graph7Printer15getRaiseChargesEv">
+<span id="_CPPv3NK3mod5graph7Printer15getRaiseChargesEv"></span><span id="_CPPv2NK3mod5graph7Printer15getRaiseChargesEv"></span><span id="mod::graph::Printer::getRaiseChargesC"></span>bool <code class="sig-name descname">getRaiseCharges</code><span class="sig-paren">(</span><span class="sig-paren">)</span> <em class="property">const</em><a class="headerlink" href="#_CPPv4NK3mod5graph7Printer15getRaiseChargesEv" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Control whether a vertex label suffix encoding a charge is written as a superscript to the rest of the label.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="_CPPv4N3mod5graph7Printer16setSimpleCarbonsEb">
+<span id="_CPPv3N3mod5graph7Printer16setSimpleCarbonsEb"></span><span id="_CPPv2N3mod5graph7Printer16setSimpleCarbonsEb"></span><span id="mod::graph::Printer::setSimpleCarbons__b"></span>void <code class="sig-name descname">setSimpleCarbons</code><span class="sig-paren">(</span>bool <em>value</em><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N3mod5graph7Printer16setSimpleCarbonsEb" title="Permalink to this definition">¶</a><br /></dt>
+<dt id="_CPPv4NK3mod5graph7Printer16getSimpleCarbonsEv">
+<span id="_CPPv3NK3mod5graph7Printer16getSimpleCarbonsEv"></span><span id="_CPPv2NK3mod5graph7Printer16getSimpleCarbonsEv"></span><span id="mod::graph::Printer::getSimpleCarbonsC"></span>bool <code class="sig-name descname">getSimpleCarbons</code><span class="sig-paren">(</span><span class="sig-paren">)</span> <em class="property">const</em><a class="headerlink" href="#_CPPv4NK3mod5graph7Printer16getSimpleCarbonsEv" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Control whether some vertices encoding carbon atoms are depicted without any label.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="_CPPv4N3mod5graph7Printer8setThickEb">
+<span id="_CPPv3N3mod5graph7Printer8setThickEb"></span><span id="_CPPv2N3mod5graph7Printer8setThickEb"></span><span id="mod::graph::Printer::setThick__b"></span>void <code class="sig-name descname">setThick</code><span class="sig-paren">(</span>bool <em>value</em><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N3mod5graph7Printer8setThickEb" title="Permalink to this definition">¶</a><br /></dt>
+<dt id="_CPPv4NK3mod5graph7Printer8getThickEv">
+<span id="_CPPv3NK3mod5graph7Printer8getThickEv"></span><span id="_CPPv2NK3mod5graph7Printer8getThickEv"></span><span id="mod::graph::Printer::getThickC"></span>bool <code class="sig-name descname">getThick</code><span class="sig-paren">(</span><span class="sig-paren">)</span> <em class="property">const</em><a class="headerlink" href="#_CPPv4NK3mod5graph7Printer8getThickEv" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Control whether all edges are drawn thicker than normal and all labels are written in bold.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="_CPPv4N3mod5graph7Printer13setWithColourEb">
+<span id="_CPPv3N3mod5graph7Printer13setWithColourEb"></span><span id="_CPPv2N3mod5graph7Printer13setWithColourEb"></span><span id="mod::graph::Printer::setWithColour__b"></span>void <code class="sig-name descname">setWithColour</code><span class="sig-paren">(</span>bool <em>value</em><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N3mod5graph7Printer13setWithColourEb" title="Permalink to this definition">¶</a><br /></dt>
+<dt id="_CPPv4NK3mod5graph7Printer13getWithColourEv">
+<span id="_CPPv3NK3mod5graph7Printer13getWithColourEv"></span><span id="_CPPv2NK3mod5graph7Printer13getWithColourEv"></span><span id="mod::graph::Printer::getWithColourC"></span>bool <code class="sig-name descname">getWithColour</code><span class="sig-paren">(</span><span class="sig-paren">)</span> <em class="property">const</em><a class="headerlink" href="#_CPPv4NK3mod5graph7Printer13getWithColourEv" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Control whether colour is applied to certain elements of the graph which are molecule-like.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="_CPPv4N3mod5graph7Printer12setWithIndexEb">
+<span id="_CPPv3N3mod5graph7Printer12setWithIndexEb"></span><span id="_CPPv2N3mod5graph7Printer12setWithIndexEb"></span><span id="mod::graph::Printer::setWithIndex__b"></span>void <code class="sig-name descname">setWithIndex</code><span class="sig-paren">(</span>bool <em>value</em><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N3mod5graph7Printer12setWithIndexEb" title="Permalink to this definition">¶</a><br /></dt>
+<dt id="_CPPv4NK3mod5graph7Printer12getWithIndexEv">
+<span id="_CPPv3NK3mod5graph7Printer12getWithIndexEv"></span><span id="_CPPv2NK3mod5graph7Printer12getWithIndexEv"></span><span id="mod::graph::Printer::getWithIndexC"></span>bool <code class="sig-name descname">getWithIndex</code><span class="sig-paren">(</span><span class="sig-paren">)</span> <em class="property">const</em><a class="headerlink" href="#_CPPv4NK3mod5graph7Printer12getWithIndexEv" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Control whether the underlying indices of the vertices are printed.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="_CPPv4N3mod5graph7Printer13setWithTextttEb">
+<span id="_CPPv3N3mod5graph7Printer13setWithTextttEb"></span><span id="_CPPv2N3mod5graph7Printer13setWithTextttEb"></span><span id="mod::graph::Printer::setWithTexttt__b"></span>void <code class="sig-name descname">setWithTexttt</code><span class="sig-paren">(</span>bool <em>value</em><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N3mod5graph7Printer13setWithTextttEb" title="Permalink to this definition">¶</a><br /></dt>
+<dt id="_CPPv4NK3mod5graph7Printer13getWithTextttEv">
+<span id="_CPPv3NK3mod5graph7Printer13getWithTextttEv"></span><span id="_CPPv2NK3mod5graph7Printer13getWithTextttEv"></span><span id="mod::graph::Printer::getWithTextttC"></span>bool <code class="sig-name descname">getWithTexttt</code><span class="sig-paren">(</span><span class="sig-paren">)</span> <em class="property">const</em><a class="headerlink" href="#_CPPv4NK3mod5graph7Printer13getWithTextttEv" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Control whether the vertex and edge labels are written with typewriter font.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="_CPPv4N3mod5graph7Printer16setWithRawStereoEb">
+<span id="_CPPv3N3mod5graph7Printer16setWithRawStereoEb"></span><span id="_CPPv2N3mod5graph7Printer16setWithRawStereoEb"></span><span id="mod::graph::Printer::setWithRawStereo__b"></span>void <code class="sig-name descname">setWithRawStereo</code><span class="sig-paren">(</span>bool <em>value</em><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N3mod5graph7Printer16setWithRawStereoEb" title="Permalink to this definition">¶</a><br /></dt>
+<dt id="_CPPv4NK3mod5graph7Printer16getWithRawStereoEv">
+<span id="_CPPv3NK3mod5graph7Printer16getWithRawStereoEv"></span><span id="_CPPv2NK3mod5graph7Printer16getWithRawStereoEv"></span><span id="mod::graph::Printer::getWithRawStereoC"></span>bool <code class="sig-name descname">getWithRawStereo</code><span class="sig-paren">(</span><span class="sig-paren">)</span> <em class="property">const</em><a class="headerlink" href="#_CPPv4NK3mod5graph7Printer16getWithRawStereoEv" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Control whether the vertices and edges are annotated with the raw stereo properties.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="_CPPv4N3mod5graph7Printer19setWithPrettyStereoEb">
+<span id="_CPPv3N3mod5graph7Printer19setWithPrettyStereoEb"></span><span id="_CPPv2N3mod5graph7Printer19setWithPrettyStereoEb"></span><span id="mod::graph::Printer::setWithPrettyStereo__b"></span>void <code class="sig-name descname">setWithPrettyStereo</code><span class="sig-paren">(</span>bool <em>value</em><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N3mod5graph7Printer19setWithPrettyStereoEb" title="Permalink to this definition">¶</a><br /></dt>
+<dt id="_CPPv4NK3mod5graph7Printer19getWithPrettyStereoEv">
+<span id="_CPPv3NK3mod5graph7Printer19getWithPrettyStereoEv"></span><span id="_CPPv2NK3mod5graph7Printer19getWithPrettyStereoEv"></span><span id="mod::graph::Printer::getWithPrettyStereoC"></span>bool <code class="sig-name descname">getWithPrettyStereo</code><span class="sig-paren">(</span><span class="sig-paren">)</span> <em class="property">const</em><a class="headerlink" href="#_CPPv4NK3mod5graph7Printer19getWithPrettyStereoEv" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Control whether the vertices and edges are annotated with stylized stereo properties.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="_CPPv4N3mod5graph7Printer11setRotationEi">
+<span id="_CPPv3N3mod5graph7Printer11setRotationEi"></span><span id="_CPPv2N3mod5graph7Printer11setRotationEi"></span><span id="mod::graph::Printer::setRotation__i"></span>void <code class="sig-name descname">setRotation</code><span class="sig-paren">(</span>int <em>degrees</em><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N3mod5graph7Printer11setRotationEi" title="Permalink to this definition">¶</a><br /></dt>
+<dt id="_CPPv4NK3mod5graph7Printer11getRotationEv">
+<span id="_CPPv3NK3mod5graph7Printer11getRotationEv"></span><span id="_CPPv2NK3mod5graph7Printer11getRotationEv"></span><span id="mod::graph::Printer::getRotationC"></span>int <code class="sig-name descname">getRotation</code><span class="sig-paren">(</span><span class="sig-paren">)</span> <em class="property">const</em><a class="headerlink" href="#_CPPv4NK3mod5graph7Printer11getRotationEv" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Rotation of internally computed coordinates.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="_CPPv4N3mod5graph7Printer9setMirrorEb">
+<span id="_CPPv3N3mod5graph7Printer9setMirrorEb"></span><span id="_CPPv2N3mod5graph7Printer9setMirrorEb"></span><span id="mod::graph::Printer::setMirror__b"></span>void <code class="sig-name descname">setMirror</code><span class="sig-paren">(</span>bool <em>value</em><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N3mod5graph7Printer9setMirrorEb" title="Permalink to this definition">¶</a><br /></dt>
+<dt id="_CPPv4NK3mod5graph7Printer9getMirrorEv">
+<span id="_CPPv3NK3mod5graph7Printer9getMirrorEv"></span><span id="_CPPv2NK3mod5graph7Printer9getMirrorEv"></span><span id="mod::graph::Printer::getMirrorC"></span>bool <code class="sig-name descname">getMirror</code><span class="sig-paren">(</span><span class="sig-paren">)</span> <em class="property">const</em><a class="headerlink" href="#_CPPv4NK3mod5graph7Printer9getMirrorEv" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Mirror internally computed coordinates in the y-axis.</p>
+</dd></dl>
+
+</div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="../../index.html">Table of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">2.2.9.5. graph/Printer.hpp</a><ul>
+<li><a class="reference internal" href="#class-graph-printer">2.2.9.5.1. Class <code class="docutils literal notranslate"><span class="pre">graph::Printer</span></code></a><ul>
+<li><a class="reference internal" href="#synopsis">2.2.9.5.1.1. Synopsis</a></li>
+<li><a class="reference internal" href="#details">2.2.9.5.1.2. Details</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="GraphInterface.html"
+                        title="previous chapter">2.2.9.4. graph/GraphInterface.hpp</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="../rule/index.html"
+                        title="next chapter">2.2.10. rule</a></p>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../../_sources/libmod/graph/Printer.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="../rule/index.html" title="2.2.10. rule"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="GraphInterface.html" title="2.2.9.4. graph/GraphInterface.hpp"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">MØD 0.9.0 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../libmod.html" >2. libMØD</a> &#187;</li>
+          <li class="nav-item nav-item-2"><a href="../api.html" >2.2. API Reference</a> &#187;</li>
+          <li class="nav-item nav-item-3"><a href="index.html" >2.2.9. graph</a> &#187;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2013-2018, Jakob Lykke Andersen.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 2.1.3+/83a3b7a8.
+    </div>
+  </body>
+</html>

@@ -1,0 +1,271 @@
+.. _cpp-rule/CompositionExpr:
+
+**********************************************************
+rule/CompositionExpr.hpp
+**********************************************************
+.. default-domain:: cpp
+
+.. py:currentmodule:: mod
+.. cpp:namespace:: mod
+
+RCExp
+---------------------------
+
+In this namespace the data structures and operators for representing rule composition expressions are defined.
+An expression, ``RCExp``, can be evaluated through the method ``Composer::eval``. The result of an expression
+is a set of rules.
+
+
+Class ``rule::RCExp::Union``
+--------------------------------------------------------------------------------------------------------------------------------
+
+.. class:: rule::RCExp::Union
+    
+
+    Return the union of the subexpressions. I.e., flatten the subresult lists into a single list.
+
+
+Synopsis
+^^^^^^^^
+
+.. code-block:: c++
+    
+    struct MOD_DECL Union {
+        Union(std::vector<Expression> exps);
+        MOD_DECL friend std::ostream &operator<<(std::ostream &s, const Union &par);
+        const std::vector<Expression> &getExpressions() const;
+    private:
+        std::vector<Expression> exps;
+    };
+
+Class ``rule::RCExp::Bind``
+--------------------------------------------------------------------------------------------------------------------------------
+
+.. class:: rule::RCExp::Bind
+    
+
+    Return the singleton list with the rule :math:`(\emptyset, \emptyset, G)` for the given graph :math:`G`.
+
+
+Synopsis
+^^^^^^^^
+
+.. code-block:: c++
+    
+    struct MOD_DECL Bind {
+        Bind(std::shared_ptr<graph::Graph> g);
+        MOD_DECL friend std::ostream &operator<<(std::ostream &s, const Bind &b);
+        std::shared_ptr<graph::Graph> getGraph() const;
+    private:
+        std::shared_ptr<graph::Graph> g;
+    };
+
+Class ``rule::RCExp::Id``
+--------------------------------------------------------------------------------------------------------------------------------
+
+.. class:: rule::RCExp::Id
+    
+
+    Return the singleton list with the rule :math:`(G, G, G)` for the given graph :math:`G`.
+
+
+Synopsis
+^^^^^^^^
+
+.. code-block:: c++
+    
+    struct MOD_DECL Id {
+        Id(std::shared_ptr<graph::Graph> g);
+        MOD_DECL friend std::ostream &operator<<(std::ostream &s, const Id &i);
+        std::shared_ptr<graph::Graph> getGraph() const;
+    private:
+        std::shared_ptr<graph::Graph> g;
+    };
+
+Class ``rule::RCExp::Unbind``
+--------------------------------------------------------------------------------------------------------------------------------
+
+.. class:: rule::RCExp::Unbind
+    
+
+    Return the singleton list with the rule :math:`(G, \emptyset, \emptyset)` for the given graph :math:`G`.
+
+
+Synopsis
+^^^^^^^^
+
+.. code-block:: c++
+    
+    struct MOD_DECL Unbind {
+        Unbind(std::shared_ptr<graph::Graph> g);
+        MOD_DECL friend std::ostream &operator<<(std::ostream &s, const Unbind &u);
+        std::shared_ptr<graph::Graph> getGraph() const;
+    private:
+        std::shared_ptr<graph::Graph> g;
+    };
+
+Class ``rule::RCExp::Expression``
+--------------------------------------------------------------------------------------------------------------------------------
+
+.. class:: rule::RCExp::Expression
+    
+
+    A generic rule composition expression.
+
+
+Synopsis
+^^^^^^^^
+
+.. code-block:: c++
+    
+    struct MOD_DECL Expression {
+        Expression(std::shared_ptr<Rule> r);
+        Expression(Union u);
+        Expression(Bind bind);
+        Expression(Id id);
+        Expression(Unbind unbind);
+        Expression(ComposeCommon compose);
+        Expression(ComposeParallel compose);
+        Expression(ComposeSub compose);
+        Expression(ComposeSuper compose);
+        template<typename Visitor>
+        typename Visitor::result_type applyVisitor(Visitor visitor) const {
+            return boost::apply_visitor(visitor, data);
+        }
+        MOD_DECL friend std::ostream &operator<<(std::ostream &s, const Expression &exp);
+    private:
+        boost::variant<std::shared_ptr<Rule>, Union, Bind, Id, Unbind,
+                boost::recursive_wrapper<ComposeCommon>,
+                boost::recursive_wrapper<ComposeParallel>,
+                boost::recursive_wrapper<ComposeSub>,
+                boost::recursive_wrapper<ComposeSuper>
+        > data;
+    };
+
+Class ``rule::RCExp::ComposeBase``
+--------------------------------------------------------------------------------------------------------------------------------
+
+.. class:: rule::RCExp::ComposeBase
+    
+
+    The base class for the composition of two rule :math:`(L_1, K_1, R_1)` and :math:`(L_2, K_2, R_2)`.
+
+
+Synopsis
+^^^^^^^^
+
+.. code-block:: c++
+    
+    class MOD_DECL ComposeBase {
+    protected:
+        ComposeBase(Expression first, Expression second, bool discardNonchemical);
+    public:
+        virtual ~ComposeBase();
+        MOD_DECL friend std::ostream &operator<<(std::ostream &s, const ComposeBase &compose);
+        const Expression &getFirst() const;
+        const Expression &getSecond() const;
+        bool getDiscardNonchemical() const;
+    private:
+        virtual std::ostream &print(std::ostream &s) const = 0;
+    private:
+        Expression first, second;
+        bool discardNonchemical;
+    };
+
+Class ``rule::RCExp::ComposeCommon``
+--------------------------------------------------------------------------------------------------------------------------------
+
+.. class:: rule::RCExp::ComposeCommon
+    
+
+    Compose the rules by all common subgraphs of :math:`R_1` and :math:`L_2`,
+    possibly limited to connected subgraphs or to the subgraphs of maximum size.
+
+
+Synopsis
+^^^^^^^^
+
+.. code-block:: c++
+    
+    struct MOD_DECL ComposeCommon : public ComposeBase {
+        ComposeCommon(Expression first, Expression second, bool discardNonchemical, bool maximum, bool connected);
+        bool getMaxmimum() const;
+        bool getConnected() const;
+    private:
+        std::ostream &print(std::ostream &s) const;
+    private:
+        bool maximum, connected;
+    };
+
+Class ``rule::RCExp::ComposeParallel``
+--------------------------------------------------------------------------------------------------------------------------------
+
+.. class:: rule::RCExp::ComposeParallel
+    
+
+    Compose the rules by the empty graph, i.e., create a rule representing the parallel application of two input rules.
+
+
+Synopsis
+^^^^^^^^
+
+.. code-block:: c++
+    
+    struct MOD_DECL ComposeParallel : public ComposeBase {
+        ComposeParallel(Expression first, Expression second, bool discardNonchemical);
+    private:
+        std::ostream &print(std::ostream &s) const;
+    };
+
+Class ``rule::RCExp::ComposeSub``
+--------------------------------------------------------------------------------------------------------------------------------
+
+.. class:: rule::RCExp::ComposeSub
+    
+
+    Compose the rules such that overlapping connected components of :math:`R_1` and :math:`L_2` have the :math:`L_2` component as a subgraph of :math:`R_1`.
+    The overlap is `partial` if not every connected component of :math:`L_2` is participating in the common subgraph.
+
+
+Synopsis
+^^^^^^^^
+
+.. code-block:: c++
+    
+    struct MOD_DECL ComposeSub : public ComposeBase {
+        ComposeSub(Expression first, Expression second, bool discardNonchemical, bool allowPartial);
+        bool getAllowPartial() const;
+    private:
+        std::ostream &print(std::ostream &s) const;
+    private:
+        bool allowPartial;
+    };
+
+Class ``rule::RCExp::ComposeSuper``
+--------------------------------------------------------------------------------------------------------------------------------
+
+.. class:: rule::RCExp::ComposeSuper
+    
+
+    Compose the rules such that overlapping connected components of :math:`R_1` and :math:`L_2` have the :math:`R_1` component as a subgraph of :math:`L_2`.
+    The overlap is `partial` if not every connected component of :math:`R_1` is participating in the common subgraph.
+
+
+Synopsis
+^^^^^^^^
+
+.. code-block:: c++
+    
+    struct MOD_DECL ComposeSuper : public ComposeBase {
+        ComposeSuper(Expression first,
+                         Expression second,
+                         bool discardNonchemical,
+                         bool allowPartial,
+                         bool enforceConstraints);
+        bool getAllowPartial() const;
+        bool getEnforceConstraints() const;
+    private:
+        std::ostream &print(std::ostream &s) const;
+    private:
+        bool allowPartial, enforceConstraints;
+    };

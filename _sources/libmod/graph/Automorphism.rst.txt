@@ -1,0 +1,134 @@
+.. _cpp-graph/Automorphism:
+
+**********************************************************
+graph/Automorphism.hpp
+**********************************************************
+.. default-domain:: cpp
+
+.. py:currentmodule:: mod
+.. cpp:namespace:: mod
+
+
+Class ``graph::Graph::Aut``
+--------------------------------------------------------------------------------------------------------------------------------
+
+.. class:: graph::Graph::Aut
+    
+
+    A class representing an automorphism of a :class:`Graph`.
+
+
+Synopsis
+^^^^^^^^
+
+.. code-block:: c++
+    
+    struct Graph::Aut {
+        Aut(std::shared_ptr<Graph> g, LabelType lt, bool withStereo, std::size_t i);
+        Vertex operator[](Vertex v) const;
+        MOD_DECL friend std::ostream &operator<<(std::ostream &s, const Aut &a);
+    private:
+        std::shared_ptr<Graph> g;
+        LabelType lt;
+        bool withStereo;
+        std::size_t i;
+    };
+
+Details
+^^^^^^^
+
+.. cpp:namespace:: mod
+
+.. cpp:namespace-push:: graph::Graph::Aut
+
+.. cpp:function:: Vertex operator[](Vertex v) const
+
+    :returns: the image of the given vertex under the permutation.
+
+.. cpp:namespace:: mod
+
+
+Class ``graph::Graph::AutGroup``
+--------------------------------------------------------------------------------------------------------------------------------
+
+.. class:: graph::Graph::AutGroup
+    
+
+    A class representing the automorphism group of a :class:`Graph`.
+
+
+Synopsis
+^^^^^^^^
+
+.. code-block:: c++
+    
+    struct Graph::AutGroup {
+        struct Gens {
+            class iterator : public boost::iterator_facade<iterator, Aut, std::random_access_iterator_tag, Aut> {
+                friend class Gens;
+                iterator() = default;
+                iterator(std::shared_ptr<Graph> g, LabelType lt, bool withStereo, std::size_t i);
+            private:
+                friend class boost::iterator_core_access;
+                bool equal(const iterator &other) const;
+                void increment();
+                Aut dereference() const;
+                std::size_t distance_to(const iterator &other) const;
+                void advance(std::size_t n);
+            private:
+                std::shared_ptr<Graph> g;
+                LabelType lt = LabelType::String;
+                bool withStereo = false;
+                std::size_t i = 0;
+            };
+            using const_iterator = iterator;
+        private:
+            friend class AutGroup;
+            Gens(std::shared_ptr<Graph> g, LabelType lt, bool withStereo);
+        public:
+            iterator begin() const;
+            iterator end() const;
+            Aut operator[](std::size_t i) const;
+            std::size_t size() const;
+        private:
+            std::shared_ptr<Graph> g;
+            LabelType lt;
+            bool withStereo;
+        };
+    public:
+        AutGroup(std::shared_ptr<Graph> g, LabelSettings labelSettings);
+        Gens gens() const;
+        MOD_DECL friend std::ostream &operator<<(std::ostream &s, const AutGroup &a);
+    private:
+        std::shared_ptr<Graph> g;
+        LabelType lt;
+        bool withStereo;
+    };
+
+Details
+^^^^^^^
+
+.. cpp:namespace:: mod
+
+.. cpp:namespace-push:: graph::Graph::AutGroup
+
+.. function:: AutGroup(std::shared_ptr<const Graph> g, LabelSettings labelSettings)
+
+.. function:: Gens gens() const
+
+    :returns: a range of the generators for the group.
+
+.. cpp:namespace:: mod
+
+
+Class ``graph::Graph::AutGroup::Gens``
+---------------------------------------------------------------
+
+.. class:: graph::Graph::AutGroup::Gens
+
+
+    A random-access range of the generators for the automorphism group.
+
+
+
+
