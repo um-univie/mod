@@ -78,8 +78,8 @@ std::size_t nextRuleNum = 0;
 } // namespace 
 
 Real::Real(LabelledRule &&rule, boost::optional<LabelType> labelType)
-: id(nextRuleNum++), name("r_{" + boost::lexical_cast<std::string>(id) + "}"), labelType(labelType),
-dpoRule(std::move(rule)) {
+		: id(nextRuleNum++), name("r_{" + boost::lexical_cast<std::string>(id) + "}"), labelType(labelType),
+		  dpoRule(std::move(rule)) {
 	if(dpoRule.numLeftComponents == std::numeric_limits<std::size_t>::max()) dpoRule.initComponents();
 	// only one of propString and propTerm should be defined
 	assert(this->dpoRule.pString || this->dpoRule.pTerm);
@@ -90,14 +90,14 @@ dpoRule(std::move(rule)) {
 	}
 }
 
-Real::~Real() { }
+Real::~Real() = default;
 
 std::size_t Real::getId() const {
 	return id;
 }
 
 std::shared_ptr<rule::Rule> Real::getAPIReference() const {
-	if(apiReference.use_count() > 0) return std::shared_ptr<rule::Rule > (apiReference);
+	if(apiReference.use_count() > 0) return std::shared_ptr<rule::Rule>(apiReference);
 	else std::abort();
 }
 
@@ -161,8 +161,8 @@ const PropStringCore &Real::getStringState() const {
 	assert(dpoRule.pString || dpoRule.pTerm);
 	if(!dpoRule.pString) {
 		dpoRule.pString.reset(new PropStringCore(get_graph(dpoRule),
-				dpoRule.leftMatchConstraints, dpoRule.rightMatchConstraints,
-				getTermState(), lib::Term::getStrings()));
+		                                         dpoRule.leftMatchConstraints, dpoRule.rightMatchConstraints,
+		                                         getTermState(), lib::Term::getStrings()));
 	}
 	return *dpoRule.pString;
 }
@@ -171,8 +171,8 @@ const PropTermCore &Real::getTermState() const {
 	assert(dpoRule.pString || dpoRule.pTerm);
 	if(!dpoRule.pTerm) {
 		dpoRule.pTerm.reset(new PropTermCore(get_graph(dpoRule),
-				dpoRule.leftMatchConstraints, dpoRule.rightMatchConstraints,
-				getStringState(), lib::Term::getStrings()));
+		                                     dpoRule.leftMatchConstraints, dpoRule.rightMatchConstraints,
+		                                     getStringState(), lib::Term::getStrings()));
 	}
 	return *dpoRule.pTerm;
 }
@@ -184,20 +184,48 @@ const PropMoleculeCore &Real::getMoleculeState() const {
 namespace {
 
 template<typename Finder>
-std::size_t morphism(const Real &gDomain, const Real &gCodomain, std::size_t maxNumMatches, LabelSettings labelSettings, Finder finder) {
+std::size_t morphism(const Real &gDomain,
+                     const Real &gCodomain,
+                     std::size_t maxNumMatches,
+                     LabelSettings labelSettings,
+                     Finder finder) {
 	auto mr = jla_boost::GraphMorphism::makeLimit(maxNumMatches);
-	lib::GraphMorphism::morphismSelectByLabelSettings(gDomain.getDPORule(), gCodomain.getDPORule(), labelSettings, finder, std::ref(mr), MembershipPredWrapper());
+	lib::GraphMorphism::morphismSelectByLabelSettings(gDomain.getDPORule(), gCodomain.getDPORule(), labelSettings,
+	                                                  finder, std::ref(mr), MembershipPredWrapper());
 	return mr.getNumHits();
 }
 
 } // namespace
 
-std::size_t Real::isomorphism(const Real &rDom, const Real &rCodom, std::size_t maxNumMatches, LabelSettings labelSettings) {
+std::size_t Real::isomorphism(const Real &rDom,
+                              const Real &rCodom,
+                              std::size_t maxNumMatches,
+                              LabelSettings labelSettings) {
 	return morphism(rDom, rCodom, maxNumMatches, labelSettings, lib::GraphMorphism::VF2Isomorphism());
 }
 
-std::size_t Real::monomorphism(const Real &rDom, const Real &rCodom, std::size_t maxNumMatches, LabelSettings labelSettings) {
+std::size_t Real::monomorphism(const Real &rDom,
+                               const Real &rCodom,
+                               std::size_t maxNumMatches,
+                               LabelSettings labelSettings) {
 	return morphism(rDom, rCodom, maxNumMatches, labelSettings, lib::GraphMorphism::VF2Monomorphism());
+}
+
+bool Real::isomorphicLeftRight(const Real &rDom, const Real &rCodom, LabelSettings labelSettings) {
+	auto mrLeft = jla_boost::GraphMorphism::makeLimit(1);
+	lib::GraphMorphism::morphismSelectByLabelSettings(
+			get_labelled_left(rDom.getDPORule()),
+			get_labelled_left(rCodom.getDPORule()),
+			labelSettings,
+			lib::GraphMorphism::VF2Isomorphism(), std::ref(mrLeft));
+	if(mrLeft.getNumHits() == 0) return false;
+	auto mrRight = jla_boost::GraphMorphism::makeLimit(1);
+	lib::GraphMorphism::morphismSelectByLabelSettings(
+			get_labelled_right(rDom.getDPORule()),
+			get_labelled_right(rCodom.getDPORule()),
+			labelSettings,
+			lib::GraphMorphism::VF2Isomorphism(), std::ref(mrRight));
+	return mrRight.getNumHits() == 1;
 }
 
 } // namespace Rules

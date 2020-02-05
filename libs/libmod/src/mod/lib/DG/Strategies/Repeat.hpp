@@ -1,5 +1,5 @@
 #ifndef MOD_LIB_DG_STRATEGIES_REPEAT_H
-#define	MOD_LIB_DG_STRATEGIES_REPEAT_H
+#define   MOD_LIB_DG_STRATEGIES_REPEAT_H
 
 #include <mod/lib/DG/Strategies/Strategy.hpp>
 
@@ -10,20 +10,20 @@ namespace Strategies {
 
 struct Repeat : Strategy {
 	Repeat(Strategy *strat, std::size_t limit);
-	~Repeat();
-	Strategy *clone() const;
-	void preAddGraphs(std::function<void(std::shared_ptr<graph::Graph>) > add) const;
-	void forEachRule(std::function<void(const lib::Rules::Real&)> f) const;
-	void printInfo(std::ostream &s) const;
-	const GraphState &getOutput() const;
-	bool isConsumed(const lib::Graph::Single *g) const;
+	virtual ~Repeat() override;
+	virtual Strategy *clone() const override;
+	virtual void preAddGraphs(std::function<void(std::shared_ptr<graph::Graph>, IsomorphismPolicy)> add) const override;
+	virtual void forEachRule(std::function<void(const lib::Rules::Real &)> f) const override;
+	virtual void printInfo(PrintSettings settings) const override;
+	virtual const GraphState &getOutput() const override;
+	virtual bool isConsumed(const lib::Graph::Single *g) const override;
 private:
-	void setExecutionEnvImpl();
-	void executeImpl(std::ostream &s, const GraphState &input);
+	virtual void setExecutionEnvImpl() override;
+	virtual void executeImpl(PrintSettings settings, const GraphState &input) override;
 private:
 	Strategy *strat;
 	std::size_t limit;
-	std::vector<Strategy*> subStrats;
+	std::vector<Strategy *> subStrats;
 };
 
 } // namespace Strategies
@@ -31,4 +31,4 @@ private:
 } // namespace lib
 } // namespace mod
 
-#endif	/* MOD_LIB_DG_STRATEGIES_REPEAT_H */
+#endif   /* MOD_LIB_DG_STRATEGIES_REPEAT_H */

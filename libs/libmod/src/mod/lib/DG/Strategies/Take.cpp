@@ -13,33 +13,32 @@ namespace Strategies {
 
 Take::Take(unsigned int limit, bool doUniverse) : Strategy(0), limit(limit), doUniverse(doUniverse) { }
 
-Take::~Take() { }
+Take::~Take() = default;
 
 Strategy *Take::clone() const {
 	return new Take(limit, doUniverse);
 }
 
-void Take::preAddGraphs(std::function<void(std::shared_ptr<graph::Graph>) > add) const { }
+void Take::preAddGraphs(std::function<void(std::shared_ptr<graph::Graph>, IsomorphismPolicy)> add) const { }
 
-void Take::printInfo(std::ostream &s) const {
-	s << indent << "Take";
+void Take::printInfo(PrintSettings settings) const {
+	settings.indent() << "Take";
+	std::ostream &s = settings.s;
 	if(doUniverse) s << " of universe";
-	s << std::endl;
-	indentLevel++;
-	s << indent << "limit = " << limit << std::endl;
-	printBaseInfo(s);
-	indentLevel--;
+	s << '\n';
+	++settings.indentLevel;
+	settings.indent() << "limit = " << limit << '\n';
+	printBaseInfo(settings);
 }
 
 bool Take::isConsumed(const Graph::Single *g) const {
 	return false;
 }
 
-void Take::executeImpl(std::ostream &s, const GraphState &input) {
+void Take::executeImpl(PrintSettings settings, const GraphState &input) {
 	if(getConfig().dg.calculateVerbose.get()) {
-		s << "Take: ";
-		s << std::endl;
-		indentLevel++;
+		settings.indent() << "Take: " << std::endl;
+		++settings.indentLevel;
 	}
 	assert(!output);
 	if(doUniverse) {
@@ -78,7 +77,8 @@ void Take::executeImpl(std::ostream &s, const GraphState &input) {
 			}
 		}
 	}
-	if(getConfig().dg.calculateVerbose.get()) indentLevel--;
+	if(getConfig().dg.calculateVerbose.get())
+		--settings.indentLevel;
 }
 
 } // namespace Strategies

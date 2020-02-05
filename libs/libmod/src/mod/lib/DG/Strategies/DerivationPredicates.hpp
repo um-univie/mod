@@ -13,19 +13,19 @@ struct DerivationPredicate : Strategy {
 protected:
 	DerivationPredicate(std::shared_ptr<mod::Function<bool(const mod::Derivation&)> > predicate, Strategy *strat);
 public:
-	virtual ~DerivationPredicate();
-	void preAddGraphs(std::function<void(std::shared_ptr<graph::Graph>) > add) const;
-	void forEachRule(std::function<void(const lib::Rules::Real&)> f) const;
-	void printInfo(std::ostream &s) const;
-	const GraphState &getOutput() const;
-	bool isConsumed(const lib::Graph::Single *g) const;
+	virtual ~DerivationPredicate() override;
+	virtual void preAddGraphs(std::function<void(std::shared_ptr<graph::Graph>, IsomorphismPolicy)> add) const override;
+	virtual void forEachRule(std::function<void(const lib::Rules::Real&)> f) const override;
+	virtual void printInfo(PrintSettings settings) const override;
+	virtual const GraphState &getOutput() const override;
+	virtual bool isConsumed(const lib::Graph::Single *g) const override;
 protected:
 	virtual void printName(std::ostream &s) const = 0;
 	virtual void pushPredicate(std::shared_ptr<mod::Function<bool(const mod::Derivation&)> > pred) = 0;
 	virtual void popPredicate() = 0;
 private:
-	void setExecutionEnvImpl();
-	void executeImpl(std::ostream &s, const GraphState &input);
+	virtual void setExecutionEnvImpl() override;
+	virtual void executeImpl(PrintSettings settings, const GraphState &input) override;
 protected:
 	std::shared_ptr<mod::Function<bool(const mod::Derivation&)> > predicate;
 	Strategy *strat;

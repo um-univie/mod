@@ -142,6 +142,7 @@ DG::RuleRange DG::HyperEdge::rules() const {
 
 DG::HyperEdge DG::HyperEdge::getInverse() const {
 	if(isNull()) throw LogicError("Can not get inverse of null edge.");
+	if(!getDG()->isLocked()) throw LogicError("Can not get inverse edge before the DG is locked.");
 	const auto &dgHyper = g->getHyper();
 	const auto &dg = dgHyper.getGraph();
 	using boost::vertices;

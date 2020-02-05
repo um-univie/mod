@@ -6,13 +6,15 @@ anys = [
 ]
 exacts = {
 	'cpp': [
+		"mod",
 		"AtomIds",
 		"graph", "graph::GraphLess",
 		"rule", "rule::RCExp", "RCExp",
 		"dg",
 		"lib", "boost",
 	],
-	'py': ["bool", "string", "std::size_t", "int", "unsigned int", "float", "list of ", "double", "uint", "uintptr_t",
+	'py': [
+		"Callable",
 		"GraphIncidentEdgeRange", "GraphVertexRange", "GraphEdgeRange",
 		"RuleIncidentEdgeRange", "RuleVertexRange", "RuleEdgeRange",
 		"RuleLeftGraphIncidentEdgeRange", "RuleLeftGraphVertexRange", "RuleLeftGraphEdgeRange",
@@ -31,7 +33,7 @@ exactsType =  {
 }
 prefixes = {
 	'cpp': [
-		"Function<", "lib::", "boost::",
+		"mod::", "Function<", "lib::", "boost::",
 	]
 }
 

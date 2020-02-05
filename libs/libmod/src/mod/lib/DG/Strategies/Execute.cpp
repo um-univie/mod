@@ -10,23 +10,21 @@ namespace lib {
 namespace DG {
 namespace Strategies {
 
-Execute::Execute(std::shared_ptr<mod::Function<void(const dg::Strategy::GraphState&)> > func)
-: Strategy::Strategy(0), func(func) { }
+Execute::Execute(std::shared_ptr<mod::Function<void(const dg::Strategy::GraphState &)> > func)
+		: Strategy::Strategy(0), func(func) {}
 
 Strategy *Execute::clone() const {
 	return new Execute(func->clone());
 }
 
-void Execute::preAddGraphs(std::function<void(std::shared_ptr<graph::Graph>) > add) const { }
+void Execute::preAddGraphs(std::function<void(std::shared_ptr<graph::Graph>, IsomorphismPolicy)> add) const {}
 
-void Execute::printInfo(std::ostream &s) const {
-	s << indent << "Execute";
-	s << ":" << std::endl;
-	indentLevel++;
-	s << indent << "function = ";
-	func->print(s);
-	s << std::endl;
-	indentLevel--;
+void Execute::printInfo(PrintSettings settings) const {
+	settings.indent() << "Execute:\n";
+	++settings.indentLevel;
+	settings.indent() << "function = ";
+	func->print(settings.s);
+	settings.s << '\n';
 }
 
 const GraphState &Execute::getOutput() const {
@@ -37,15 +35,16 @@ bool Execute::isConsumed(const lib::Graph::Single *g) const {
 	return false;
 }
 
-void Execute::executeImpl(std::ostream &s, const GraphState &input) {
-	if(getConfig().dg.calculateVerbose.get()) printInfo(s);
+void Execute::executeImpl(PrintSettings settings, const GraphState &input) {
+	if(settings.verbosity >= PrintSettings::V_Execute)
+		printInfo(settings);
 	dg::Strategy::GraphState gs(
 			[&input](std::vector<std::shared_ptr<graph::Graph> > &subset) {
 				for(const lib::Graph::Single *g : input.getSubset(0)) subset.push_back(g->getAPIReference());
 			},
-	[&input](std::vector<std::shared_ptr<graph::Graph> > &universe) {
-		for(const lib::Graph::Single *g : input.getUniverse()) universe.push_back(g->getAPIReference());
-	});
+			[&input](std::vector<std::shared_ptr<graph::Graph> > &universe) {
+				for(const lib::Graph::Single *g : input.getUniverse()) universe.push_back(g->getAPIReference());
+			});
 	(*func)(gs);
 }
 

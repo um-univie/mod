@@ -10,18 +10,17 @@ namespace DG {
 namespace Strategies {
 
 struct Execute : Strategy {
-	Execute(std::shared_ptr<mod::Function<void(const dg::Strategy::GraphState&)> > func);
-	Strategy *clone() const;
-	void preAddGraphs(std::function<void(std::shared_ptr<graph::Graph>) > add) const;
-
-	void forEachRule(std::function<void(const lib::Rules::Real&) > f) const { }
-	void printInfo(std::ostream &s) const;
-	const GraphState &getOutput() const;
-	bool isConsumed(const Graph::Single *g) const;
+	Execute(std::shared_ptr<mod::Function<void(const dg::Strategy::GraphState &)> > func);
+	virtual Strategy *clone() const override;
+	virtual void preAddGraphs(std::function<void(std::shared_ptr<graph::Graph>, IsomorphismPolicy)> add) const override;
+	virtual void forEachRule(std::function<void(const lib::Rules::Real &)> f) const override {}
+	virtual void printInfo(PrintSettings settings) const override;
+	virtual const GraphState &getOutput() const override;
+	virtual bool isConsumed(const Graph::Single *g) const override;
 private:
-	void executeImpl(std::ostream &s, const GraphState &input);
+	virtual void executeImpl(PrintSettings settings, const GraphState &input) override;
 private:
-	std::shared_ptr<mod::Function<void(const dg::Strategy::GraphState&)> > func;
+	std::shared_ptr<mod::Function<void(const dg::Strategy::GraphState &)> > func;
 };
 
 } // namespace Strategies

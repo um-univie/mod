@@ -18,6 +18,8 @@ void Function_doExport() {
 	// Derivation -> X
 	exportFunc<bool(const Derivation&) >("Func_BoolDerivation");
 	exportFunc < std::string(const Derivation&)>("Func_StringDerivation");
+	// DG::Vertex -> X
+	exportFunc<bool(dg::DG::Vertex)>("Func_BoolDGVertex");
 	// DG::HyperEdge -> X
 	exportFunc<bool(dg::DG::HyperEdge)>("Func_BoolDGHyperEdge");
 	exportFunc < std::string(dg::DG::HyperEdge)>("Func_StringDGHyperEdge");

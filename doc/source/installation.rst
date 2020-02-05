@@ -57,8 +57,9 @@ See also :ref:`dependencies` for elaboration on some of them.
 - ``-DCMAKE_BUILD_TYPE=<build type>``, set a non-standard build type.
   The default is `RelWithDebInfo <https://cmake.org/cmake/help/latest/variable/CMAKE_BUILD_TYPE.html?highlight=build_type#variable:CMAKE_BUILD_TYPE>`__.
   An additional build type ``OptDebug`` is available which adds the compilation flags ``-g -O3``.
-- ``-DCMAKE_PROGRAM_PATH=<paths>``, set a ``;``-separated list of paths used for some dependency searches.
-  See also https://cmake.org/cmake/help/latest/variable/CMAKE_PROGRAM_PATH.html.
+- ``-DCMAKE_PREFIX_PATH=<paths>``, set a ``;``-separated list of paths used for finding most dependencies.
+  The paths should generally be the prefixes specified when the dependency was installed.
+  See also https://cmake.org/cmake/help/latest/variable/CMAKE_PREFIX_PATH.html#variable:CMAKE_PREFIX_PATH.
 - ``-DBUILD_DOC=on``, whether to build documentation or not.
   This is forced to ``off`` when used via ``add_subdirectory``.
 - ``-DBUILD_POST_MOD=on``, whether to build the post-processor or not.
@@ -94,11 +95,13 @@ See also :ref:`dependencies` for elaboration on some of them.
 Dependencies
 ------------
 
-- This documentation requires a supported version of `Sphinx <http://sphinx-doc.org>`__
-  (``-DBUILD_DOC=on``).
+- This documentation requires (``-DBUILD_DOC=on``):
+
+  - A supported version of `Sphinx <http://sphinx-doc.org>`__.
+
 - libMØD:
 
-  - A C++ compiler with reasonable C++14 support is needed. GCC 5.1 or later should work.
+  - A C++ compiler with reasonable C++14 support is needed. GCC 6.1 or later should work.
   - `Boost <http://boost.org>`__ dev >= 1.64
     (use ``-DBOOST_ROOT=<path>`` for non-standard locations).
   - `GraphCanon <https://github.com/jakobandersen/graph_canon>`__ >= 0.4.

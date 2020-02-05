@@ -224,6 +224,8 @@ done
 # Create precommand (gdb/valgrind/...)
 precommand=""
 if [ $profile = "true" -o $memcheck = "true" ]; then
+	echo "Exporting environment for memcheck: PYTHONMALLOC=malloc"
+	export PYTHONMALLOC=malloc
 	precommand="valgrind"
 fi
 if [ $profile = "true" ]; then
@@ -340,6 +342,9 @@ def include(fName, checkDup=True, putDup=True, skipDup=True):
 			print("End of code from '", fName, "'", sep="")
 mod.include = include
 EOF
+		if [ ! -z "$MOD_NO_DEPRECATED" ]; then
+			echo "config.common.ignoreDeprecation = False"
+		fi
 	}
 	echo '# Preamble' >> $pyFile
 	preamble >> $pyFile

@@ -27,7 +27,7 @@ function handleFile {
 origDir=$(pwd)
 
 function doIt {
-	for f in $(find . -name "*.py"); do
+	for f in $(find . -name "*.py" | sort -n); do
 		cd $origDir
 		handleFile $f "$@"
 	done

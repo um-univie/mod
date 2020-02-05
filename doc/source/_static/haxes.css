@@ -1,0 +1,17 @@
+
+dd {
+	margin-left: 20px;
+}
+
+code {
+	padding: 0;
+	color: black;
+}
+
+code > a, a > code {
+	color: #003080;
+}
+
+div.highlight > pre {
+	background-color: #fdf6e3;
+}

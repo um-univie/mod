@@ -21,7 +21,7 @@ def fail(f, a, ls, o):
         assert False
     except LogicError as e:
         print(e)
-f = lambda a, ls, o: dgRuleComp([], a, ls, ignoreRuleLabelTypes=o)
+f = lambda a, ls, o: dgRuleComp([], a, ls, ignoreRuleLabelTypes=o).calc()
 f(s, lsString, False)
 f(t, lsTerm, False)
 fail(f, s, lsTerm, False)

@@ -10,7 +10,7 @@ namespace DG {
 namespace Strategies {
 
 Strategy::Strategy(unsigned int maxComponents)
-: env(nullptr), maxComponents(maxComponents), input(nullptr), output(nullptr) { }
+		: env(nullptr), maxComponents(maxComponents), input(nullptr), output(nullptr) {}
 
 Strategy::~Strategy() {
 	delete output;
@@ -25,10 +25,10 @@ unsigned int Strategy::getMaxComponents() const {
 	return maxComponents;
 }
 
-void Strategy::execute(std::ostream &s, const GraphState &input) {
+void Strategy::execute(PrintSettings settings, const GraphState &input) {
 	assert(env);
 	this->input = &input;
-	executeImpl(s, input);
+	executeImpl(settings, input);
 }
 
 const GraphState &Strategy::getOutput() const {
@@ -42,53 +42,52 @@ ExecutionEnv &Strategy::getExecutionEnv() {
 	return *env;
 }
 
-void Strategy::printBaseInfo(std::ostream &s) const {
-	s << indent << "input:" << std::endl;
-	indentLevel++;
+void Strategy::printBaseInfo(PrintSettings settings) const {
+	settings.indent() << "input:\n";
+	++settings.indentLevel;
+	std::ostream &s = settings.s;
 	assert(input);
-	for(const GraphState::SubsetStore::value_type &subset : input->getSubsets()) {
-		s << indent << "subset " << subset.first << " =";
-		for(const Graph::Single *g : subset.second) s << " " << g->getName();
-		s << std::endl;
+	for(const auto &subset : input->getSubsets()) {
+		settings.indent() << "subset " << subset.first << " =";
+		for(const auto *g : subset.second)
+			s << " " << g->getName();
+		s << '\n';
 	}
-	s << indent << "universe =";
-	if(getConfig().dg.listUniverse.get()) for(const Graph::Single * g : input->getUniverse()) s << " " << g->getName();
+	settings.indent() << "universe =";
+	if(settings.withUniverse)
+		for(const auto *g : input->getUniverse())
+			s << " " << g->getName();
 	else s << " [listing disabled]";
-	s << std::endl;
-	indentLevel--;
-	s << indent << "output:" << std::endl;
-	indentLevel++;
+	s << '\n';
+	--settings.indentLevel;
+	settings.indent() << "output:\n";
+	++settings.indentLevel;
 	// important to use getOutput(), it might be overwritten
 
-	for(const GraphState::SubsetStore::value_type &subset : getOutput().getSubsets()) {
-		s << indent << "subset " << subset.first << " =";
-		for(const Graph::Single *g : subset.second) s << " " << g->getName();
-		s << std::endl;
+	for(const auto &subset : getOutput().getSubsets()) {
+		settings.indent() << "subset " << subset.first << " =";
+		for(const auto *g : subset.second)
+			s << " " << g->getName();
+		s << '\n';
 	}
-	s << indent << "universe =";
-	if(getConfig().dg.listUniverse.get()) for(const Graph::Single * g : getOutput().getUniverse()) s << " " << g->getName();
+	settings.indent() << "universe =";
+	if(settings.withUniverse)
+		for(const auto *g : getOutput().getUniverse())
+			s << " " << g->getName();
 	else s << " [listing disabled]";
-	s << std::endl;
-	indentLevel--;
+	s << '\n';
 }
 
-void Strategy::setExecutionEnvImpl() { }
+void Strategy::setExecutionEnvImpl() {}
 
 //------------------------------------------------------------------------------
 // Static
 //------------------------------------------------------------------------------
 
-unsigned int Strategy::calcMaxNumComponents(const std::vector<Strategy*>& strats) {
+unsigned int Strategy::calcMaxNumComponents(const std::vector<Strategy *> &strats) {
 	unsigned int res = 0;
 	for(const Strategy *strat : strats) res = std::max(res, strat->getMaxComponents());
 	return res;
-}
-
-unsigned int indentLevel = 0;
-
-std::ostream &indent(std::ostream& s) {
-	for(unsigned int i = 0; i < indentLevel; i++) s << "   ";
-	return s;
 }
 
 } // namespace Strategies

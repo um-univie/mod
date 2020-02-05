@@ -23,7 +23,7 @@ void exportLeft() {
 			// rst:
 			// rst:			(Read-only) The rule the graph belongs to.
 			// rst:
-			// rst:			:type: :py:class:`Rule`
+			// rst:			:type: Rule
 			.add_property("rule", &Rule::LeftGraph::getRule)
 			// rst:		.. py:attribute:: numVertices
 			// rst:
@@ -35,7 +35,7 @@ void exportLeft() {
 			// rst:
 			// rst:			(Read-only) An iterable of all vertices in the graph.
 			// rst:
-			// rst:			:type: :py:class:`RuleLeftGraphVertexRange`
+			// rst:			:type: RuleLeftGraphVertexRange
 			.add_property("vertices", &Rule::LeftGraph::vertices)
 			// rst:		.. py:attribute:: numEdges
 			// rst:
@@ -47,7 +47,7 @@ void exportLeft() {
 			// rst:
 			// rst:			(Read-only) An iterable of all edges in the graph.
 			// rst:
-			// rst:			:type: :py:class:`RuleLeftGraphEdgeRange`
+			// rst:			:type: RuleLeftGraphEdgeRange
 			.add_property("edges", &Rule::LeftGraph::edges)
 			;
 
@@ -86,14 +86,14 @@ void exportLeft() {
 			// rst:
 			// rst:			(Read-only) The rule the vertex belongs to.
 			// rst:
-			// rst:			:type: :py:class:`Rule`
+			// rst:			:type: Rule
 			// rst:			:raises: :py:class:`LogicError` if it is a null descriptor.
 			.add_property("rule", &Rule::LeftGraph::Vertex::getRule)
 			// rst:		.. py:attribute:: core
 			// rst:
 			// rst:			(Read-only) The descriptor for this vertex in the core graph.
 			// rst:
-			// rst:			:type: :py:class:`RuleVertex`
+			// rst:			:type: RuleVertex
 			.add_property("core", &Rule::LeftGraph::Vertex::getCore)
 			// rst:		.. py:attribute:: degree
 			// rst:
@@ -106,35 +106,35 @@ void exportLeft() {
 			// rst:
 			// rst:			(Read-only) A range of incident edges to this vertex.
 			// rst:
-			// rst:			:type: :py:class:`RuleLeftGraphIncidentEdgeRange`
+			// rst:			:type: RuleLeftGraphIncidentEdgeRange
 			// rst:			:raises: :py:class:`LogicError` if it is a null descriptor.
 			.add_property("incidentEdges", &Rule::LeftGraph::Vertex::incidentEdges)
 			// rst:		.. py:attribute:: stringLabel
 			// rst:
 			// rst:			(Read-only) The string label of the vertex.
 			// rst:
-			// rst:			:type: string
+			// rst:			:type: str
 			// rst:			:raises: :py:class:`LogicError` if it is a null descriptor.
 			.add_property("stringLabel", py::make_function(&Rule::LeftGraph::Vertex::getStringLabel, py::return_value_policy<py::copy_const_reference>()))
 			// rst:		.. py:attribute:: atomId
 			// rst:
 			// rst:			(Read-only) The atom id of the vertex.
 			// rst:
-			// rst:			:type: :py:class:`AtomId`
+			// rst:			:type: AtomId
 			// rst:			:raises: :py:class:`LogicError` if it is a null descriptor.
 			.add_property("atomId", &Rule::LeftGraph::Vertex::getAtomId)
 			// rst:		.. py:attribute:: isotope
 			// rst:
 			// rst:			(Read-only) The isotope of the vertex.
 			// rst:
-			// rst:			:type: :py:class:`Isotope`
+			// rst:			:type: Isotope
 			// rst:			:raises: :py:class:`LogicError` if it is a null descriptor.
 			.add_property("isotope", &Rule::LeftGraph::Vertex::getIsotope)
 			// rst:		.. py:attribute:: charge
 			// rst:
 			// rst:			(Read-only) The charge of the vertex.
 			// rst:
-			// rst:			:type: :py:class:`Charge`
+			// rst:			:type: Charge
 			// rst:			:raises: :py:class:`LogicError` if it is a null descriptor.
 			.add_property("charge", &Rule::LeftGraph::Vertex::getCharge)
 			// rst:		.. py:attribute:: radical
@@ -149,10 +149,9 @@ void exportLeft() {
 			// rst:
 			// rst:			Print the stereo configuration for the vertex.
 			// rst:
-			// rst:			:param p: the printing options used for the depiction.
-			// rst:			:type p: :class:`GraphPrinter`
+			// rst:			:param GraphPrinter p: the printing options used for the depiction.
 			// rst:			:returns: the name of the PDF-file that will be compiled in post-processing.
-			// rst:			:rtype: string
+			// rst:			:rtype: str
 			// rst:			:raises: :py:class:`LogicError` if it is a null descriptor.
 			.def("printStereo", printStereoWithoutOptions)
 			.def("printStereo", printStereoWithOptions)
@@ -185,41 +184,41 @@ void exportLeft() {
 			// rst:
 			// rst:			(Read-only) The rule the edge belongs to.
 			// rst:
-			// rst:			:type: :py:class:`Rule`
+			// rst:			:type: Rule
 			// rst:			:raises: :py:class:`LogicError` if it is a null descriptor.
 			.add_property("rule", &Rule::LeftGraph::Edge::getRule)
 			// rst:		.. py:attribute:: core
 			// rst:
 			// rst:			(Read-only) The descriptor for this edge in the core graph.
 			// rst:
-			// rst:			:type: :py:class:`RuleEdge`
+			// rst:			:type: RuleEdge
 			.add_property("core", &Rule::LeftGraph::Edge::getCore)
 			// rst:		.. py:attribute:: source
 			// rst:
 			// rst:			(Read-only) The source vertex of the edge.
 			// rst:
-			// rst:			:type: :py:class:`RuleLeftGraphVertex`
+			// rst:			:type: RuleLeftGraphVertex
 			// rst: 		:raises: :py:class:`LogicError` if it is a null descriptor.
 			.add_property("source", &Rule::LeftGraph::Edge::source)
 			// rst:		.. attribute:: target
 			// rst:
 			// rst:			(Read-only) The target vertex of the edge.
 			// rst:
-			// rst:			:type: :py:class:`RuleLeftGraphVertex`
+			// rst:			:type: RuleLeftGraphVertex
 			// rst: 		:raises: :py:class:`LogicError` if it is a null descriptor.
 			.add_property("target", &Rule::LeftGraph::Edge::target)
 			// rst:		.. py:attribute:: stringLabel
 			// rst:
 			// rst:			(Read-only) The string label of the edge.
 			// rst:
-			// rst:			:type: string
+			// rst:			:type: str
 			// rst:			:raises: :py:class:`LogicError` if it is a null descriptor.
 			.add_property("stringLabel", py::make_function(&Rule::LeftGraph::Edge::getStringLabel, py::return_value_policy<py::copy_const_reference>()))
 			// rst:		.. py:attribute:: bondType
 			// rst:
 			// rst:			(Read-only) The bond type of the edge.
 			// rst:
-			// rst:			:type: :py:class:`BondType`
+			// rst:			:type: BondType
 			// rst:			:raises: :py:class:`LogicError` if it is a null descriptor.
 			.add_property("bondType", &Rule::LeftGraph::Edge::getBondType)
 			;
@@ -246,7 +245,7 @@ void exportContext() {
 			// rst:
 			// rst:			(Read-only) The rule the graph belongs to.
 			// rst:
-			// rst:			:type: :py:class:`Rule`
+			// rst:			:type: Rule
 			.add_property("rule", &Rule::ContextGraph::getRule)
 			// rst:		.. py:attribute:: numVertices
 			// rst:
@@ -258,7 +257,7 @@ void exportContext() {
 			// rst:
 			// rst:			(Read-only) An iterable of all vertices in the graph.
 			// rst:
-			// rst:			:type: :py:class:`RuleContextGraphVertexRange`
+			// rst:			:type: RuleContextGraphVertexRange
 			.add_property("vertices", &Rule::ContextGraph::vertices)
 			// rst:		.. py:attribute:: numEdges
 			// rst:
@@ -270,7 +269,7 @@ void exportContext() {
 			// rst:
 			// rst:			(Read-only) An iterable of all edges in the graph.
 			// rst:
-			// rst:			:type: :py:class:`RuleContextGraphEdgeRange`
+			// rst:			:type: RuleContextGraphEdgeRange
 			.add_property("edges", &Rule::ContextGraph::edges)
 			;
 
@@ -309,14 +308,14 @@ void exportContext() {
 			// rst:
 			// rst:			(Read-only) The rule the vertex belongs to.
 			// rst:
-			// rst:			:type: :py:class:`Rule`
+			// rst:			:type: Rule
 			// rst:			:raises: :py:class:`LogicError` if it is a null descriptor.
 			.add_property("rule", &Rule::ContextGraph::Vertex::getRule)
 			// rst:		.. py:attribute:: core
 			// rst:
 			// rst:			(Read-only) The descriptor for this vertex in the core graph.
 			// rst:
-			// rst:			:type: :py:class:`RuleVertex`
+			// rst:			:type: RuleVertex
 			.add_property("core", &Rule::ContextGraph::Vertex::getCore)
 			// rst:		.. py:attribute:: degree
 			// rst:
@@ -329,7 +328,7 @@ void exportContext() {
 			// rst:
 			// rst:			(Read-only) A range of incident edges to this vertex.
 			// rst:
-			// rst:			:type: :py:class:`RuleContextGraphIncidentEdgeRange`
+			// rst:			:type: RuleContextGraphIncidentEdgeRange
 			// rst:			:raises: :py:class:`LogicError` if it is a null descriptor.
 			.add_property("incidentEdges", &Rule::ContextGraph::Vertex::incidentEdges)
 			;
@@ -361,27 +360,27 @@ void exportContext() {
 			// rst:
 			// rst:			(Read-only) The rule the edge belongs to.
 			// rst:
-			// rst:			:type: :py:class:`Rule`
+			// rst:			:type: Rule
 			// rst:			:raises: :py:class:`LogicError` if it is a null descriptor.
 			.add_property("rule", &Rule::ContextGraph::Edge::getRule)
 			// rst:		.. py:attribute:: core
 			// rst:
 			// rst:			(Read-only) The descriptor for this edge in the core graph.
 			// rst:
-			// rst:			:type: :py:class:`RuleEdge`
+			// rst:			:type: RuleEdge
 			.add_property("core", &Rule::ContextGraph::Edge::getCore)
 			// rst:		.. py:attribute:: source
 			// rst:
 			// rst:			(Read-only) The source vertex of the edge.
 			// rst:
-			// rst:			:type: :py:class:`RuleContextGraphVertex`
+			// rst:			:type: RuleContextGraphVertex
 			// rst: 		:raises: :py:class:`LogicError` if it is a null descriptor.
 			.add_property("source", &Rule::ContextGraph::Edge::source)
 			// rst:		.. attribute:: target
 			// rst:
 			// rst:			(Read-only) The target vertex of the edge.
 			// rst:
-			// rst:			:type: :py:class:`RuleContextGraphVertex`
+			// rst:			:type: RuleContextGraphVertex
 			// rst: 		:raises: :py:class:`LogicError` if it is a null descriptor.
 			.add_property("target", &Rule::ContextGraph::Edge::target)
 			;
@@ -411,7 +410,7 @@ void exportRight() {
 			// rst:
 			// rst:			(Read-only) The rule the graph belongs to.
 			// rst:
-			// rst:			:type: :py:class:`Rule`
+			// rst:			:type: Rule
 			.add_property("rule", &Rule::RightGraph::getRule)
 			// rst:		.. py:attribute:: numVertices
 			// rst:
@@ -423,7 +422,7 @@ void exportRight() {
 			// rst:
 			// rst:			(Read-only) An iterable of all vertices in the graph.
 			// rst:
-			// rst:			:type: :py:class:`RuleRightGraphVertexRange`
+			// rst:			:type: RuleRightGraphVertexRange
 			.add_property("vertices", &Rule::RightGraph::vertices)
 			// rst:		.. py:attribute:: numEdges
 			// rst:
@@ -435,7 +434,7 @@ void exportRight() {
 			// rst:
 			// rst:			(Read-only) An iterable of all edges in the graph.
 			// rst:
-			// rst:			:type: :py:class:`RuleRightGraphEdgeRange`
+			// rst:			:type: RuleRightGraphEdgeRange
 			.add_property("edges", &Rule::RightGraph::edges)
 			;
 
@@ -474,14 +473,14 @@ void exportRight() {
 			// rst:
 			// rst:			(Read-only) The rule the vertex belongs to.
 			// rst:
-			// rst:			:type: :py:class:`Rule`
+			// rst:			:type: Rule
 			// rst:			:raises: :py:class:`LogicError` if it is a null descriptor.
 			.add_property("rule", &Rule::RightGraph::Vertex::getRule)
 			// rst:		.. py:attribute:: core
 			// rst:
 			// rst:			(Read-only) The descriptor for this vertex in the core graph.
 			// rst:
-			// rst:			:type: :py:class:`RuleVertex`
+			// rst:			:type: RuleVertex
 			.add_property("core", &Rule::RightGraph::Vertex::getCore)
 			// rst:		.. py:attribute:: degree
 			// rst:
@@ -494,35 +493,35 @@ void exportRight() {
 			// rst:
 			// rst:			(Read-only) A range of incident edges to this vertex.
 			// rst:
-			// rst:			:type: :py:class:`RuleRightGraphIncidentEdgeRange`
+			// rst:			:type: RuleRightGraphIncidentEdgeRange
 			// rst:			:raises: :py:class:`LogicError` if it is a null descriptor.
 			.add_property("incidentEdges", &Rule::RightGraph::Vertex::incidentEdges)
 			// rst:		.. py:attribute:: stringLabel
 			// rst:
 			// rst:			(Read-only) The string label of the vertex.
 			// rst:
-			// rst:			:type: string
+			// rst:			:type: str
 			// rst:			:raises: :py:class:`LogicError` if it is a null descriptor.
 			.add_property("stringLabel", py::make_function(&Rule::RightGraph::Vertex::getStringLabel, py::return_value_policy<py::copy_const_reference>()))
 			// rst:		.. py:attribute:: atomId
 			// rst:
 			// rst:			(Read-only) The atom id of the vertex.
 			// rst:
-			// rst:			:type: :py:class:`AtomId`
+			// rst:			:type: AtomId
 			// rst:			:raises: :py:class:`LogicError` if it is a null descriptor.
 			.add_property("atomId", &Rule::RightGraph::Vertex::getAtomId)
 			// rst:		.. py:attribute:: isotope
 			// rst:
 			// rst:			(Read-only) The isotope of the vertex.
 			// rst:
-			// rst:			:type: :py:class:`Isotope`
+			// rst:			:type: Isotope
 			// rst:			:raises: :py:class:`LogicError` if it is a null descriptor.
 			.add_property("isotope", &Rule::RightGraph::Vertex::getIsotope)
 			// rst:		.. py:attribute:: charge
 			// rst:
 			// rst:			(Read-only) The charge of the vertex.
 			// rst:
-			// rst:			:type: :py:class:`Charge`
+			// rst:			:type: Charge
 			// rst:			:raises: :py:class:`LogicError` if it is a null descriptor.
 			.add_property("charge", &Rule::RightGraph::Vertex::getCharge)
 			// rst:		.. py:attribute:: radical
@@ -537,10 +536,9 @@ void exportRight() {
 			// rst:
 			// rst:			Print the stereo configuration for the vertex.
 			// rst:
-			// rst:			:param p: the printing options used for the depiction.
-			// rst:			:type p: :class:`GraphPrinter`
+			// rst:			:param GraphPrinter p: the printing options used for the depiction.
 			// rst:			:returns: the name of the PDF-file that will be compiled in post-processing.
-			// rst:			:rtype: string
+			// rst:			:rtype: str
 			// rst:			:raises: :py:class:`LogicError` if it is a null descriptor.
 			.def("printStereo", printStereoWithoutOptions)
 			.def("printStereo", printStereoWithOptions)
@@ -573,41 +571,41 @@ void exportRight() {
 			// rst:
 			// rst:			(Read-only) The rule the edge belongs to.
 			// rst:
-			// rst:			:type: :py:class:`Rule`
+			// rst:			:type: Rule
 			// rst:			:raises: :py:class:`LogicError` if it is a null descriptor.
 			.add_property("rule", &Rule::RightGraph::Edge::getRule)
 			// rst:		.. py:attribute:: core
 			// rst:
 			// rst:			(Read-only) The descriptor for this edge in the core graph.
 			// rst:
-			// rst:			:type: :py:class:`RuleEdge`
+			// rst:			:type: RuleEdge
 			.add_property("core", &Rule::RightGraph::Edge::getCore)
 			// rst:		.. py:attribute:: source
 			// rst:
 			// rst:			(Read-only) The source vertex of the edge.
 			// rst:
-			// rst:			:type: :py:class:`RuleRightGraphVertex`
+			// rst:			:type: RuleRightGraphVertex
 			// rst: 		:raises: :py:class:`LogicError` if it is a null descriptor.
 			.add_property("source", &Rule::RightGraph::Edge::source)
 			// rst:		.. attribute:: target
 			// rst:
 			// rst:			(Read-only) The target vertex of the edge.
 			// rst:
-			// rst:			:type: :py:class:`RuleRightGraphVertex`
+			// rst:			:type: RuleRightGraphVertex
 			// rst: 		:raises: :py:class:`LogicError` if it is a null descriptor.
 			.add_property("target", &Rule::RightGraph::Edge::target)
 			// rst:		.. py:attribute:: stringLabel
 			// rst:
 			// rst:			(Read-only) The string label of the edge.
 			// rst:
-			// rst:			:type: string
+			// rst:			:type: str
 			// rst:			:raises: :py:class:`LogicError` if it is a null descriptor.
 			.add_property("stringLabel", py::make_function(&Rule::RightGraph::Edge::getStringLabel, py::return_value_policy<py::copy_const_reference>()))
 			// rst:		.. py:attribute:: bondType
 			// rst:
 			// rst:			(Read-only) The bond type of the edge.
 			// rst:
-			// rst:			:type: :py:class:`BondType`
+			// rst:			:type: BondType
 			// rst:			:raises: :py:class:`LogicError` if it is a null descriptor.
 			.add_property("bondType", &Rule::RightGraph::Edge::getBondType)
 			;
@@ -660,7 +658,7 @@ void exportCore() {
 			// rst:
 			// rst:			(Read-only) The rule the vertex belongs to.
 			// rst:
-			// rst:			:type: :py:class:`Rule`
+			// rst:			:type: Rule
 			// rst:			:raises: :py:class:`LogicError` if it is a null descriptor.
 			.add_property("rule", &Rule::Vertex::getRule)
 			// rst:		.. py:attribute:: left
@@ -689,7 +687,7 @@ void exportCore() {
 			// rst:
 			// rst:			(Read-only) A range of incident edges to this vertex.
 			// rst:
-			// rst:			:type: :py:class:`RuleIncidentEdgeRange`
+			// rst:			:type: RuleIncidentEdgeRange
 			// rst:			:raises: :py:class:`LogicError` if it is a null descriptor.
 			.add_property("incidentEdges", &Rule::Vertex::incidentEdges)
 			// rst:		.. py:method:: get2DX(withHydrogens=True)
@@ -737,7 +735,7 @@ void exportCore() {
 			// rst:
 			// rst:			(Read-only) The rule the edge belongs to.
 			// rst:
-			// rst:			:type: :py:class:`Rule`
+			// rst:			:type: Rule
 			// rst:			:raises: :py:class:`LogicError` if it is a null descriptor.
 			.add_property("rule", &Rule::Edge::getRule)
 			// rst:		.. py:attribute:: left
@@ -759,14 +757,14 @@ void exportCore() {
 			// rst:
 			// rst:			(Read-only) The source vertex of the edge.
 			// rst:
-			// rst:			:type: :py:class:`RuleVertex`
+			// rst:			:type: RuleVertex
 			// rst: 		:raises: :py:class:`LogicError` if it is a null descriptor.
 			.add_property("source", &Rule::Edge::source)
 			// rst:		.. attribute:: target
 			// rst:
 			// rst:			(Read-only) The target vertex of the edge.
 			// rst:
-			// rst:			:type: :py:class:`RuleVertex`
+			// rst:			:type: RuleVertex
 			// rst: 		:raises: :py:class:`LogicError` if it is a null descriptor.
 			.add_property("target", &Rule::Edge::target)
 			;

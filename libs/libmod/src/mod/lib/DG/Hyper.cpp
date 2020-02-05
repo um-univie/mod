@@ -159,7 +159,7 @@ void Hyper::addVertex(const lib::Graph::Single *g) {
 	}
 }
 
-Hyper::~Hyper() {}
+Hyper::~Hyper() = default;
 
 const NonHyper &Hyper::getNonHyper() const {
 	return nonHyper;

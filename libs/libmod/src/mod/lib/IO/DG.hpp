@@ -14,17 +14,29 @@ namespace mod {
 namespace lib {
 namespace DG {
 class Hyper;
-
 class NonHyper;
 } // namespace DG
 namespace IO {
 namespace DG {
 namespace Read {
+
+struct AbstractDerivation {
+	using List = std::vector<std::pair<unsigned int, std::string>>;
+public:
+	List left;
+	bool reversible;
+	List right;
+public:
+	friend bool operator==(const AbstractDerivation &l, const AbstractDerivation &r) {
+		return std::tie(l.left, l.reversible, l.right) == std::tie(r.left, r.reversible, r.right);
+	}
+};
+
 std::unique_ptr<lib::DG::NonHyper> dump(const std::vector<std::shared_ptr<graph::Graph> > &graphs,
-													 const std::vector<std::shared_ptr<rule::Rule> > &rules,
-													 const std::string &file,
-													 std::ostream &err);
-std::unique_ptr<lib::DG::NonHyper> abstract(const std::string &s, std::ostream &err);
+                                        const std::vector<std::shared_ptr<rule::Rule> > &rules,
+                                        const std::string &file,
+                                        std::ostream &err);
+boost::optional<std::vector<AbstractDerivation>> abstract(const std::string &s, std::ostream &err);
 } // namespace Read
 namespace Write {
 using Vertex = lib::DG::HyperVertex;
@@ -50,29 +62,29 @@ struct SyntaxPrinter {
 	virtual void end() = 0;
 	virtual void comment(const std::string &str) = 0;
 	virtual void vertex(const std::string &id,
-							  const std::string &label,
-							  const std::string &image,
-							  const std::string &colour) = 0;
+	                    const std::string &label,
+	                    const std::string &image,
+	                    const std::string &colour) = 0;
 	virtual void vertexHidden(const std::string &id, bool large) = 0;
 	virtual void hyperEdge(const std::string &id, const std::string &label, const std::string &colour) = 0;
 	virtual void tailConnector(const std::string &idVertex,
-										const std::string &idHyperEdge,
-										const std::string &colour,
-										unsigned int num,
-										unsigned int maxNum) = 0;
+	                           const std::string &idHyperEdge,
+	                           const std::string &colour,
+	                           unsigned int num,
+	                           unsigned int maxNum) = 0;
 	virtual void headConnector(const std::string &idHyperEdge,
-										const std::string &idVertex,
-										const std::string &colour,
-										unsigned int num,
-										unsigned int maxNum) = 0;
+	                           const std::string &idVertex,
+	                           const std::string &colour,
+	                           unsigned int num,
+	                           unsigned int maxNum) = 0;
 	virtual void shortcutEdge(const std::string &idTail,
-									  const std::string &idHead,
-									  const std::string &label,
-									  const std::string &colour,
-									  bool hasReverse) = 0;
+	                          const std::string &idHead,
+	                          const std::string &label,
+	                          const std::string &colour,
+	                          bool hasReverse) = 0;
 	virtual std::function<std::string(const lib::DG::Hyper &,
-												 lib::DG::HyperVertex,
-												 const std::string &)> getImageCreator() = 0;
+	                                  lib::DG::HyperVertex,
+	                                  const std::string &)> getImageCreator() = 0;
 public:
 	FileHandle s;
 };
@@ -80,9 +92,9 @@ public:
 struct TikzPrinter : SyntaxPrinter {
 
 	TikzPrinter(std::string file,
-					std::string coords,
-					const Options &options,
-					const IO::Graph::Write::Options &graphOptions)
+	            std::string coords,
+	            const Options &options,
+	            const IO::Graph::Write::Options &graphOptions)
 			: SyntaxPrinter(file), coords(coords), options(options), graphOptions(graphOptions) {}
 
 	std::string getName() const override {
@@ -93,42 +105,42 @@ struct TikzPrinter : SyntaxPrinter {
 	void end() override;
 	void comment(const std::string &str) override;
 	void vertex(const std::string &id,
-					const std::string &label,
-					const std::string &image,
-					const std::string &colour) override;
+	            const std::string &label,
+	            const std::string &image,
+	            const std::string &colour) override;
 	void vertexHidden(const std::string &id, bool large) override;
 	void transitVertex(const std::string &idHost,
-							 const std::string &idTransit,
-							 const std::string &angle,
-							 const std::string &label);
+	                   const std::string &idTransit,
+	                   const std::string &angle,
+	                   const std::string &label);
 	void hyperEdge(const std::string &id, const std::string &label, const std::string &colour) override;
 	void connector(const std::string &idTail,
-						const std::string &idHead,
-						const std::string &colour,
-						unsigned int num,
-						unsigned int maxNum);
+	               const std::string &idHead,
+	               const std::string &colour,
+	               unsigned int num,
+	               unsigned int maxNum);
 	void tailConnector(const std::string &idVertex,
-							 const std::string &idHyperEdge,
-							 const std::string &colour,
-							 unsigned int num,
-							 unsigned int maxNum) override;
+	                   const std::string &idHyperEdge,
+	                   const std::string &colour,
+	                   unsigned int num,
+	                   unsigned int maxNum) override;
 	void headConnector(const std::string &idHyperEdge,
-							 const std::string &idVertex,
-							 const std::string &colour,
-							 unsigned int num,
-							 unsigned int maxNum) override;
+	                   const std::string &idVertex,
+	                   const std::string &colour,
+	                   unsigned int num,
+	                   unsigned int maxNum) override;
 	void shortcutEdge(const std::string &idTail,
-							const std::string &idHead,
-							const std::string &label,
-							const std::string &colour,
-							bool hasReverse) override;
+	                  const std::string &idHead,
+	                  const std::string &label,
+	                  const std::string &colour,
+	                  bool hasReverse) override;
 	void transitEdge(const std::string &idTail,
-						  const std::string &idHead,
-						  const std::string &label,
-						  const std::string &colour);
+	                 const std::string &idHead,
+	                 const std::string &label,
+	                 const std::string &colour);
 	std::function<std::string(const lib::DG::Hyper &,
-									  lib::DG::HyperVertex,
-									  const std::string &)> getImageCreator() override;
+	                          lib::DG::HyperVertex,
+	                          const std::string &)> getImageCreator() override;
 public:
 	std::string coords;
 	const Options &options;
@@ -147,7 +159,7 @@ struct Options {
 public:
 
 	Options() : withShortcutEdges(true), withGraphImages(true), labelsAsLatexMath(true),
-					withShortcutEdgesAfterVisibility(false), withInlineGraphs(false) {}
+	            withShortcutEdgesAfterVisibility(false), withInlineGraphs(false) {}
 
 	Options &Non() {
 		return WithShortcutEdges(false).WithGraphImages(false).LabelsAsLatexMath(false);
@@ -244,9 +256,9 @@ public:
 	std::pair<unsigned int, DupVertex> inDegreeVisible(DupVertex e, const lib::DG::Hyper &dg) const;
 	std::pair<unsigned int, DupVertex> outDegreeVisible(DupVertex e, const lib::DG::Hyper &dg) const;
 	bool isShortcutEdge(DupVertex e,
-							  const lib::DG::Hyper &dg,
-							  unsigned int inDegreeVisible,
-							  unsigned int outDegreeVisible) const;
+	                    const lib::DG::Hyper &dg,
+	                    unsigned int inDegreeVisible,
+	                    unsigned int outDegreeVisible) const;
 	std::string vDupToId(DupVertex vDup, const lib::DG::Hyper &dg) const;
 public:
 	bool withShortcutEdges;
@@ -322,7 +334,7 @@ struct Printer {
 	void pushEdgeLabel(std::function<std::string(Vertex, const lib::DG::Hyper &)> f);
 	void popEdgeLabel();
 	void pushVertexColour(std::function<std::string(Vertex, const lib::DG::Hyper &)> f,
-								 bool extendToEdges); // colour(v) == first f(v) != ""
+	                      bool extendToEdges); // colour(v) == first f(v) != ""
 	void popVertexColour();
 	void pushEdgeColour(std::function<std::string(Vertex, const lib::DG::Hyper &)> f); // colour(v) == first f(v) != ""
 	void popEdgeColour();
@@ -352,15 +364,15 @@ void generic(const lib::DG::Hyper &dg, const Options &options, SyntaxPrinter &pr
 std::string dot(const lib::DG::Hyper &dg, const Options &options, const IO::Graph::Write::Options &graphOptions);
 std::string coords(const lib::DG::Hyper &dg, const Options &options, const IO::Graph::Write::Options &graphOptions);
 std::pair<std::string, std::string> tikz(const lib::DG::Hyper &dg,
-													  const Options &options,
-													  const IO::Graph::Write::Options &graphOptions);
+                                         const Options &options,
+                                         const IO::Graph::Write::Options &graphOptions);
 std::string pdfFromDot(const lib::DG::Hyper &dg, const Options &options, const IO::Graph::Write::Options &graphOptions);
 std::pair<std::string, std::string> pdf(const lib::DG::Hyper &dg,
-													 const Options &options,
-													 const IO::Graph::Write::Options &graphOptions);
+                                        const Options &options,
+                                        const IO::Graph::Write::Options &graphOptions);
 std::pair<std::string, std::string> summary(const Data &data,
-														  Printer &printer,
-														  const IO::Graph::Write::Options &graphOptions);
+                                            Printer &printer,
+                                            const IO::Graph::Write::Options &graphOptions);
 
 } // namespace Write
 } // namespace DG

@@ -21,22 +21,6 @@ The DOT format (from `Graphviz`_) is used for generating vertex coordinates for 
 when `Open Babel`_ can not be used.
 
 
-.. _graph-gml:
-
-GML (Graph)
-############
-
-A graph can be specified as :ref:`GML` by giving a list of vertices and edges with the key ``graph``.
-The following grammar exemplifies the required key-value structure.
-
-.. productionlist:: GraphGMLGrammar
-   graphGML: 'graph [' (`node` | `edge`)* ']'
-   node: 'node [ id' `int` 'label' `quoteEscapedString` ']'
-   edge: 'edge [ source' `int` 'target' `int` 'label' `quoteEscapedString` ']'
-
-Note though that list elements can appear in any order.
-
-
 .. _graph-smiles:
 
 SMILES
@@ -115,33 +99,35 @@ The semantics of ring-closures/back-edges are in particular not the same.
 Grammar
 -------
 
-.. productionlist:: GraphDFSGrammar
+.. productionlist:: graphDFS
    graphDFS: `chain`
    chain: `vertex` `evPair`*
    vertex: (`labelVertex` | `ringClosure`) `branch`*
    evPair: `edge` `vertex`
-   labelVertex: '[' `bracketEscapedString` ']' [ `defRingId` ]
+   labelVertex: '[' bracketEscapedString ']' [ `defRingId` ]
               : `implicitHydrogenVertexLabels` [ `defRingId` ]
-   implicitHydrogenVertexLabels: 'B' | 'C' | 'N' | 'O' | 'P' | 'S' | 'F' | 'Cl' | 'Br' | 'I'
-   defRingId: `unsignedInt`
-   ringClosure: `unsignedInt`
-   edge: '{' `braceEscapedString` '}'
+   implicitHydrogenVertexLabels: 'B' | 'C' | 'N' | 'O' | 'P' | 'S' | 'F' \
+   | 'Cl' | 'Br' | 'I'
+   defRingId: unsignedInt
+   ringClosure: unsignedInt
+   edge: '{' braceEscapedString '}'
        : `shorthandEdgeLabels`
    shorthandEdgeLabels: '-' | ':' | '=' | '#' | ''
    branch: '(' `evPair`+ ')'
 
-A :token:`bracketEscapedString` and :token:`braceEscapedString` are zero or more characters
-except respectively ``]`` and ``}``. To have these characters in each of their strings
-they must be escaped, i.e., ``\]`` and ``\}`` respectively.
+A ``bracketEscapedString`` and ``braceEscapedString`` are zero or more
+characters except respectively ``]`` and ``}``. To have these characters in
+each of their strings they must be escaped, i.e., ``\]`` and ``\}``
+respectively.
 
-The parser additionally enforces that a :token:`defRingId` may not be a number which has
-previously been used.
-Similarly, a :token:`ringClosure` may only be a number which has previously occured in a
-:token:`defRingId`.
+The parser additionally enforces that a :token:`~graphDFS:defRingId` may not be
+a number which has previously been used.
+Similarly, a :token:`~graphDFS:ringClosure` may only be a number which has
+previously occured in a :token:`~graphDFS:defRingId`.
 
-A vertex specified via the :token:`implicitHydrogenVertexLabels` rule will potentially have
-ekstra neighbours added after parsning. The rules are the exact same as for implicit hydrogen
-atoms in :ref:`graph-smiles`.
+A vertex specified via the :token:`~graphDFS:implicitHydrogenVertexLabels` rule
+will potentially have ekstra neighbours added after parsning. The rules are the
+exact same as for implicit hydrogen atoms in :ref:`graph-smiles`.
 
 
 Semantics
@@ -153,16 +139,19 @@ Vertex labels are enclosed in square brackets and edge labels are enclosed in cu
 However, a special set of labels can be specified without the enclosing brackets.
 An edge label may additionally be completely omitted as a shorthand for a dash (``-``).
 
-A vertex can have a numeric identifier, defined by the :token:`defRingId` non-terminal.
-At a later stage this identifier can be used as a vertex specification to specify a back-edge
-in the depth-first traversal.
+A vertex can have a numeric identifier, defined by the
+:token:`~graphDFS:defRingId` non-terminal.
+At a later stage this identifier can be used as a vertex specification to
+specify a back-edge in the depth-first traversal.
 Example: ``[v1]1-[v2]-[v3]-[v4]-1``, specifies a labelled :math:`C_3`
 (which equivalently can be specified shorter as ``[v1]1[v2][v3][v4]1``).
 
-A :token:`vertex` being a :token:`ringClosure` can never be the first vertex in a string, and
-is thus preceded with a :token:`edge`. As in a depth-first traversal, such a back-edge is a
-kind of degenerated branch. Example: ``[v1]1[v2][v3][v4]1[v5][v6]1``, this specifies a graph
-which is two fused :math:`C_4` with a common edge (and not just a common vertex).
+A :token:`~graphDFS:vertex` being a :token:`~graphDFS:ringClosure` can never be
+the first vertex in a string, and is thus preceded with a
+:token:`~graphDFS:edge`. As in a depth-first traversal, such a back-edge is a
+kind of degenerated branch. Example: ``[v1]1[v2][v3][v4]1[v5][v6]1``, this
+specifies a graph which is two fused :math:`C_4` with a common edge (and not
+just a common vertex).
 
 .. warning:: The semantics of back-edges/ring closures are **not** the same as in SMILES strings.
    In SMILES, a pair of matching numeric identifiers denote the individual back-edges.

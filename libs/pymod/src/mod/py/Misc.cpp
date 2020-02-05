@@ -23,7 +23,7 @@ namespace Py {
 // rst:
 // rst: 	:returns: `name` prefixed with all strings pushed with :py:func:`pushFilePrefix`
 // rst: 		and popped yet.
-// rst: 	:rtype: string
+// rst: 	:rtype: str
 // rst:
 // rst: .. function:: pushFilePrefix(s)
 // rst:
@@ -32,8 +32,7 @@ namespace Py {
 // rst: 	No directory delimiters are inserted, so they must explicitly be part of the pushed prefixes.
 // rst: 	If the argument starts with ``/``, then during concatenation all previously pushed prefixes are ignored.
 // rst:
-// rst: 	:param s: the string to push as a prefix to be concatenated in :py:func:`prefixFilename`.
-// rst: 	:type s: string
+// rst: 	:param str s: the string to push as a prefix to be concatenated in :py:func:`prefixFilename`.
 // rst:
 // rst: .. function:: popFilePrefix()
 // rst:
@@ -75,13 +74,13 @@ void Misc_doExport() {
 	// rst:
 	// rst:		:returns: a number unique for each instantiation of libMØD. This can be used to check for the diamond problem for shared libraries.
 	// rst:
-	// rst:		:rtype: uintptr_t
+	// rst:		:rtype: int
 	py::def("magicLibraryValue", &magicLibraryValue);
 
 	// rst: .. function:: version()
 	// rst:
 	// rst:		:returns: the version of MØD.
-	// rst:		:rtype: string
+	// rst:		:rtype: str
 	py::def("version", &mod::version);
 
 	// rst: .. function:: rngReseed(seed)

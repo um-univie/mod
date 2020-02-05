@@ -10,17 +10,19 @@ namespace lib {
 namespace DG {
 namespace Strategies {
 
-unsigned int calcMaxNumComponents(const std::vector<Strategy*>& strats) {
+unsigned int calcMaxNumComponents(const std::vector<Strategy *> &strats) {
 	unsigned int res = 0;
 	for(const Strategy *strat : strats) res = std::max(res, strat->getMaxComponents());
 	return res;
 }
 
-Parallel::Parallel(const std::vector<Strategy*>& strats) : Strategy::Strategy(calcMaxNumComponents(strats)), strats(strats) {
+Parallel::Parallel(const std::vector<Strategy *> &strats) : Strategy::Strategy(calcMaxNumComponents(strats)),
+																				strats(strats) {
 	if(strats.size() == 0) {
 		if(getConfig().dg.disallowEmptyParallelStrategies.get()) {
 			IO::log() << "ERROR: parallel strategy is empty." << std::endl;
-			IO::log() << "Use the config variable " << getConfig().dg.disallowEmptyParallelStrategies.getName() << " to allow it." << std::endl;
+			IO::log() << "Use the config variable " << getConfig().dg.disallowEmptyParallelStrategies.getName()
+						 << " to allow it." << std::endl;
 			throw std::exception();
 		} else {
 			IO::log() << "WARNING: parallel strategy is empty." << std::endl;
@@ -33,36 +35,34 @@ Parallel::~Parallel() {
 }
 
 Strategy *Parallel::clone() const {
-	std::vector<Strategy*> subStrats;
+	std::vector<Strategy *> subStrats;
 	for(const Strategy *s : strats) subStrats.push_back(s->clone());
 	return new Parallel(subStrats);
 }
 
-void Parallel::preAddGraphs(std::function<void(std::shared_ptr<graph::Graph>) > add) const {
+void Parallel::preAddGraphs(std::function<void(std::shared_ptr<graph::Graph>, IsomorphismPolicy)> add) const {
 	for(const auto *s : strats) s->preAddGraphs(add);
 }
 
-void Parallel::forEachRule(std::function<void(const lib::Rules::Real&)> f) const {
+void Parallel::forEachRule(std::function<void(const lib::Rules::Real &)> f) const {
 	for(const auto *s : strats) s->forEachRule(f);
 }
 
-void Parallel::printInfo(std::ostream& s) const {
-	s << indent << "Parallel: " << strats.size() << " substrats" << std::endl;
-	indentLevel++;
-	for(unsigned int i = 0; i < strats.size(); i++) {
-		s << indent << "Substrat " << i << ":" << std::endl;
-		indentLevel++;
-		strats[i]->printInfo(s);
-		indentLevel--;
+void Parallel::printInfo(PrintSettings settings) const {
+	settings.indent() << "Parallel: " << strats.size() << " substrategies" << std::endl;
+	++settings.indentLevel;
+	for(int i = 0; i != strats.size(); i++) {
+		settings.indent() << "Parallel: substrategy " << (i + 1) << ":" << std::endl;
+		++settings.indentLevel;
+		strats[i]->printInfo(settings);
+		--settings.indentLevel;
 	}
-	printBaseInfo(s);
-	indentLevel--;
+	printBaseInfo(settings);
 }
 
 bool Parallel::isConsumed(const Graph::Single *g) const {
-	for(const Strategy *strat : strats) {
+	for(const Strategy *strat : strats)
 		if(strat->isConsumed(g)) return true;
-	}
 	return false;
 }
 
@@ -70,29 +70,28 @@ void Parallel::setExecutionEnvImpl() {
 	for(Strategy *strat : strats) strat->setExecutionEnv(getExecutionEnv());
 }
 
-void Parallel::executeImpl(std::ostream& s, const GraphState &input) {
-	if(getConfig().dg.calculateVerbose.get()) {
-		s << indent << "parallel: " << strats.size() << " substrats" << std::endl;
-		indentLevel++;
+void Parallel::executeImpl(PrintSettings settings, const GraphState &input) {
+	if(settings.verbosity >= PrintSettings::V_Parallel) {
+		settings.indent() << "Parallel: " << strats.size() << " substrategies" << std::endl;
+		++settings.indentLevel;
 	}
-
-	for(unsigned int i = 0; i < strats.size(); i++) {
+	for(unsigned int i = 0; i != strats.size(); i++) {
 		Strategy *strat = strats[i];
-		if(getConfig().dg.calculateVerbose.get()) {
-			s << indent << "substrat " << i << ":" << std::endl;
-			indentLevel++;
+		if(settings.verbosity >= PrintSettings::V_Parallel) {
+			settings.indent() << "Parallel, substrategy " << (i + 1) << ":" << std::endl;
+			++settings.indentLevel;
 		}
-		strat->execute(s, input);
-		if(getConfig().dg.calculateVerbose.get()) indentLevel--;
+		strat->execute(settings, input);
+		if(settings.verbosity >= PrintSettings::V_Parallel)
+			--settings.indentLevel;
 	}
-	std::vector<const GraphState*> outputs;
-	for(const Strategy *strat : strats) outputs.push_back(&strat->getOutput());
+	std::vector<const GraphState *> outputs;
+	for(const Strategy *strat : strats)
+		outputs.push_back(&strat->getOutput());
 	output = new GraphState(outputs);
 	output->sortUniverse(Graph::Single::nameLess);
-	for(const GraphState::SubsetStore::value_type &vt : output->getSubsets()) {
+	for(const GraphState::SubsetStore::value_type &vt : output->getSubsets())
 		output->sortSubset(vt.first, Graph::Single::nameLess);
-	}
-	if(getConfig().dg.calculateVerbose.get()) indentLevel--;
 }
 
 } // namespace Strategies

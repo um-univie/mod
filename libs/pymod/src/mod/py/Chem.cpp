@@ -34,7 +34,7 @@ void Chem_doExport() {
 			// rst:
 			// rst:		    (Read-only) The symbol represented by the atom id.
 			// rst:
-			// rst:			:type: string
+			// rst:			:type: str
 			// rst:			:raises: :py:class:`LogicError` if the id is invalid.
 			.add_property("symbol", &mod::AtomId::symbol)
 			// rst: 	.. py:method:: __int__(self)
@@ -120,19 +120,19 @@ void Chem_doExport() {
 			// rst:
 			// rst:			(Read-only) The atom id.
 			// rst:
-			// rst:			:type: :py:class:`AtomId`
+			// rst:			:type: AtomId
 			.add_property("atomId", &mod::AtomData::getAtomId)
 			// rst:		.. py:attribute: isotope
 			// rst:
 			// rst:			(Read-only) The isotope.
 			// rst:
-			// rst:			:type: :py:class:`Isotope`
+			// rst:			:type: Isotope
 			.add_property("isotope", &mod::AtomData::getIsotope)
 			// rst:		.. py:attribute:: charge
 			// rst:
 			// rst:			(Read-only) The charge.
 			// rst:
-			// rst:			:type: :py:class:`Charge`
+			// rst:			:type: Charge
 			.add_property("charge", &mod::AtomData::getCharge)
 			// rst:		.. py::attribute:: radical
 			// rst:
@@ -182,13 +182,13 @@ void Chem_doExport() {
 	// rst:
 	// rst:			Constant for the invalid atom id.
 	// rst:
-	// rst:			:type: :py:class:`AtomId`
+	// rst:			:type: AtomId
 	// rst:
 	// rst:		.. py:attribute:: Max
 	// rst:
 	// rst:			An atom id equal to the atom id with the maximum valid id.
 	// rst:
-	// rst:			:type: :py:class:`AtomId`
+	// rst:			:type: AtomId
 	// rst:
 
 	struct Dummy {

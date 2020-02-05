@@ -61,7 +61,7 @@ Collection::Collection(LabelSettings ls, Config::IsomorphismAlg alg)
 		: ls(ls.type, LabelRelation::Isomorphism,
 			  ls.withStereo, LabelRelation::Isomorphism) {}
 
-Collection::~Collection() {}
+Collection::~Collection() = default;
 
 const std::vector<std::shared_ptr<graph::Graph>> &Collection::asList() const {
 	return graphs;
@@ -104,7 +104,7 @@ bool Collection::trustInsert(std::shared_ptr<graph::Graph> g) {
 		return true;
 	} else {
 		const bool res = iterStore->second->trustInsert(gLib);
-		if(res)graphs.push_back(g);
+		if(res) graphs.push_back(g);
 		return res;
 	}
 }

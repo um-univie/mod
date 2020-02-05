@@ -11,7 +11,7 @@ namespace lib {
 namespace DG {
 namespace Strategies {
 
-Revive::Revive(Strategy *strat) : Strategy(strat->getMaxComponents()), strat(strat) { }
+Revive::Revive(Strategy *strat) : Strategy(strat->getMaxComponents()), strat(strat) {}
 
 Revive::~Revive() {
 	delete strat;
@@ -21,23 +21,23 @@ Strategy *Revive::clone() const {
 	return new Revive(strat->clone());
 }
 
-void Revive::preAddGraphs(std::function<void(std::shared_ptr<graph::Graph>) > add) const {
+void Revive::preAddGraphs(std::function<void(std::shared_ptr<graph::Graph>, IsomorphismPolicy)> add) const {
 	strat->preAddGraphs(add);
 }
 
-void Revive::forEachRule(std::function<void(const lib::Rules::Real&)> f) const {
+void Revive::forEachRule(std::function<void(const lib::Rules::Real &)> f) const {
 	strat->forEachRule(f);
 }
 
-void Revive::printInfo(std::ostream &s) const {
-	s << indent << "Revive:" << std::endl;
-	indentLevel++;
-	strat->printInfo(s);
-	printBaseInfo(s);
-	s << indent << "revived =";
-	for(const Graph::Single *g : revivedGraphs) s << " " << g->getName();
-	s << std::endl;
-	indentLevel--;
+void Revive::printInfo(PrintSettings settings) const {
+	settings.indent() << "Revive:\n";
+	++settings.indentLevel;
+	strat->printInfo(settings);
+	printBaseInfo(settings);
+	settings.indent() << "revived =";
+	for(const auto *g : revivedGraphs)
+		settings.s << " " << g->getName();
+	settings.s << '\n';
 }
 
 bool Revive::isConsumed(const Graph::Single *g) const {
@@ -48,22 +48,20 @@ void Revive::setExecutionEnvImpl() {
 	strat->setExecutionEnv(getExecutionEnv());
 }
 
-void Revive::executeImpl(std::ostream &s, const GraphState &input) {
-	if(getConfig().dg.calculateVerbose.get()) {
-		s << indent << "Revive:" << std::endl;
-		indentLevel++;
+void Revive::executeImpl(PrintSettings settings, const GraphState &input) {
+	if(settings.verbosity >= PrintSettings::V_Revive) {
+		settings.indent() << "Revive:" << std::endl;
+		++settings.indentLevel;
 	}
-	strat->execute(s, input);
+	strat->execute(settings, input);
 	output = new GraphState(strat->getOutput());
-	assert(*output == strat->getOutput());
 
-	for(const Graph::Single *g : input.getSubset(0)) {
+	for(const auto *g : input.getSubset(0)) {
 		if(!strat->isConsumed(g) && output->isInUniverse(g)) {
 			output->addToSubset(0, g);
 			revivedGraphs.push_back(g);
 		}
 	}
-	if(getConfig().dg.calculateVerbose.get()) indentLevel--;
 }
 
 } // namespace Strategies

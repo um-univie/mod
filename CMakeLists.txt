@@ -1,5 +1,6 @@
 cmake_minimum_required(VERSION 3.10)
 list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_LIST_DIR}/cmake)
+include(FindPythonModule)
 
 ###########################################################################
 # Package Properties
@@ -69,6 +70,13 @@ set(libmod_config_find_files "FindPackageHandleStandardArgs.cmake;FindPackageMes
 
 # Boost
 # -------------------------------------------------------------------------
+# TODO: at Boost 1.70-1.72 there is a strange error with Boost.Pyton where the build yields:
+#    libs/pymod/CMakeFiles/pymod.dir/build.make:473: *** target pattern contains no '%'. Stop.
+#    CMakeFiles/Makefile2:681: recipe for target 'libs/pymod/CMakeFiles/pymod.dir/all' failed
+# and that line has
+#    libs/pymod/libpymod.so: Boost::python-NOTFOUND
+# so we use the CMake module only for now.
+set(Boost_NO_BOOST_CMAKE ON)
 set(v 1.64.0)
 if(BUILD_PY_MOD)
     foreach(PY 3 34 35 36 37 38 39)
@@ -86,7 +94,8 @@ if(BUILD_PY_MOD)
     endif()
 endif()
 find_package(Boost ${v} REQUIRED COMPONENTS iostreams regex system)
-string(APPEND libmod_config_dependencies "set(BOOST_FOUND 0)\n") # TODO: remove with CMake 3.15 is required https://gitlab.kitware.com/cmake/cmake/issues/18590
+string(APPEND libmod_config_dependencies "set(Boost_NO_BOOST_CMAKE ON)\n")
+string(APPEND libmod_config_dependencies "set(BOOST_FOUND 0)\n") # TODO: remove when CMake 3.15 is required https://gitlab.kitware.com/cmake/cmake/issues/18590
 string(APPEND libmod_config_dependencies "find_dependency(Boost ${v} COMPONENTS iostreams regex system)\n")
 list(APPEND libmod_config_find_files "FindBoost.cmake")
 

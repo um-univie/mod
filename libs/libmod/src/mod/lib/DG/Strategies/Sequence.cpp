@@ -7,8 +7,8 @@ namespace lib {
 namespace DG {
 namespace Strategies {
 
-Sequence::Sequence(const std::vector<Strategy*>& strats)
-: Strategy(calcMaxNumComponents(strats)), strats(strats) {
+Sequence::Sequence(const std::vector<Strategy *> &strats)
+		: Strategy(calcMaxNumComponents(strats)), strats(strats) {
 	assert(strats.size() > 0);
 }
 
@@ -17,30 +17,29 @@ Sequence::~Sequence() {
 }
 
 Strategy *Sequence::clone() const {
-	std::vector<Strategy*> subStrats;
+	std::vector<Strategy *> subStrats;
 	for(const Strategy *s : strats) subStrats.push_back(s->clone());
 	return new Sequence(subStrats);
 }
 
-void Sequence::preAddGraphs(std::function<void(std::shared_ptr<graph::Graph>) > add) const {
+void Sequence::preAddGraphs(std::function<void(std::shared_ptr<graph::Graph>, IsomorphismPolicy)> add) const {
 	for(const auto *s : strats) s->preAddGraphs(add);
 }
 
-void Sequence::forEachRule(std::function<void(const lib::Rules::Real&)> f) const {
+void Sequence::forEachRule(std::function<void(const lib::Rules::Real &)> f) const {
 	for(const auto *s : strats) s->forEachRule(f);
 }
 
-void Sequence::printInfo(std::ostream& s) const {
-	s << indent << "Sequence: " << strats.size() << " substrats" << std::endl;
-	indentLevel++;
-	for(unsigned int i = 0; i < strats.size(); i++) {
-		s << indent << "Substrat " << i << ":" << std::endl;
-		indentLevel++;
-		strats[i]->printInfo(s);
-		indentLevel--;
+void Sequence::printInfo(PrintSettings settings) const {
+	settings.indent() << "Sequence: " << strats.size() << " substrategies\n";
+	++settings.indentLevel;
+	for(int i = 0; i != strats.size(); i++) {
+		settings.indent() << "Substrategy " << (i + 1) << ":\n";
+		++settings.indentLevel;
+		strats[i]->printInfo(settings);
+		--settings.indentLevel;
 	}
-	printBaseInfo(s);
-	indentLevel--;
+	printBaseInfo(settings);
 }
 
 const GraphState &Sequence::getOutput() const {
@@ -48,9 +47,8 @@ const GraphState &Sequence::getOutput() const {
 }
 
 bool Sequence::isConsumed(const Graph::Single *g) const {
-	for(const Strategy *strat : strats) {
+	for(const Strategy *strat : strats)
 		if(strat->isConsumed(g)) return true;
-	}
 	return false;
 }
 
@@ -58,35 +56,24 @@ void Sequence::setExecutionEnvImpl() {
 	for(Strategy *strat : strats) strat->setExecutionEnv(getExecutionEnv());
 }
 
-void Sequence::executeImpl(std::ostream& s, const GraphState &input) {
-	if(getConfig().dg.calculateVerbose.get()) {
-		s << indent << "Sequence: " << strats.size() << " substrats" << std::endl;
-		indentLevel++;
+void Sequence::executeImpl(PrintSettings settings, const GraphState &input) {
+	if(settings.verbosity >= PrintSettings::V_Sequence) {
+		settings.indent() << "Sequence: " << strats.size() << " substrategies" << std::endl;
+		++settings.indentLevel;
 	}
-
-	// the first
-	{
-		Strategy *strat = strats.front();
-		if(getConfig().dg.calculateVerbose.get()) {
-			s << indent << "substrat 0:" << std::endl;
-			indentLevel++;
-		}
-		strat->execute(s, input);
-		if(getConfig().dg.calculateVerbose.get()) indentLevel--;
-	}
-
-	// the rest
-	for(unsigned int i = 1; i < strats.size(); i++) {
+	for(int i = 0; i != strats.size(); ++i) {
 		Strategy *strat = strats[i];
-		if(getConfig().dg.calculateVerbose.get()) {
-			s << indent << "substrat " << i << ":" << std::endl;
-			indentLevel++;
+		if(settings.verbosity >= PrintSettings::V_Sequence) {
+			settings.indent() << "Sequence, substrategy " << (i + 1) << ":" << std::endl;
+			++settings.indentLevel;
 		}
-		strat->execute(s, strats[i - 1]->getOutput());
-		if(getConfig().dg.calculateVerbose.get()) indentLevel--;
+		if(i == 0)
+			strat->execute(settings, input);
+		else
+			strat->execute(settings, strats[i - 1]->getOutput());
+		if(settings.verbosity >= PrintSettings::V_Sequence)
+			--settings.indentLevel;
 	}
-
-	if(getConfig().dg.calculateVerbose.get()) indentLevel--;
 }
 
 } // namespace Strategies

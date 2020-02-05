@@ -1,5 +1,5 @@
 #ifndef MOD_LIB_DG_STRATEGIES_SEQUENCE_H
-#define	MOD_LIB_DG_STRATEGIES_SEQUENCE_H
+#define   MOD_LIB_DG_STRATEGIES_SEQUENCE_H
 
 #include <mod/lib/DG/Strategies/Strategy.hpp>
 
@@ -11,19 +11,20 @@ namespace DG {
 namespace Strategies {
 
 struct Sequence : Strategy {
-	Sequence(const std::vector<Strategy*> &strats);
-	~Sequence();
-	Strategy *clone() const;
-	void preAddGraphs(std::function<void(std::shared_ptr<graph::Graph>) > add) const;
-	void forEachRule(std::function<void(const lib::Rules::Real&)> f) const;
-	void printInfo(std::ostream &s) const;
-	const GraphState &getOutput() const;
-	bool isConsumed(const lib::Graph::Single *g) const;
+	// pre: !strats.empty()
+	Sequence(const std::vector<Strategy *> &strats);
+	virtual ~Sequence() override;
+	virtual Strategy *clone() const override;
+	virtual void preAddGraphs(std::function<void(std::shared_ptr<graph::Graph>, IsomorphismPolicy)> add) const override;
+	virtual void forEachRule(std::function<void(const lib::Rules::Real &)> f) const override;
+	virtual void printInfo(PrintSettings settings) const override;
+	virtual const GraphState &getOutput() const override;
+	virtual bool isConsumed(const lib::Graph::Single *g) const override;
 private:
-	void setExecutionEnvImpl();
-	void executeImpl(std::ostream &s, const GraphState &input);
+	virtual void setExecutionEnvImpl() override;
+	virtual void executeImpl(PrintSettings settings, const GraphState &input) override;
 private:
-	std::vector<Strategy*> strats;
+	std::vector<Strategy *> strats;
 };
 
 } // namespace Strategies
@@ -31,5 +32,5 @@ private:
 } // namespace lib
 } // namespace mod
 
-#endif	/* MOD_LIB_DG_STRATEGIES_SEQUENCE_H */
+#endif   /* MOD_LIB_DG_STRATEGIES_SEQUENCE_H */
 

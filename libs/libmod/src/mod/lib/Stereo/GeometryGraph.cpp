@@ -129,9 +129,9 @@ GeometryGraph::GeometryGraph() {
 	V(N, 0, false, 3, 0, 0, 0, 1, tetrahedral);
 	V(N, 1, false, 4, 0, 0, 0, 0, tetrahedral);
 
-	V(O, 0, false, 2, 0, 0, 0, 2, tetrahedral);
-	V(O, 0, false, 0, 1, 0, 0, 2, trigonalPlanar);
-	V(O, -1, false, 1, 0, 0, 0, 3, tetrahedral);
+	//V(O, 0, false, 2, 0, 0, 0, 2, tetrahedral);
+	//V(O, 0, false, 0, 1, 0, 0, 2, trigonalPlanar);
+	//V(O, -1, false, 1, 0, 0, 0, 3, tetrahedral);
 
 	V(P, 0, false, 3, 1, 0, 0, 0, tetrahedral);
 

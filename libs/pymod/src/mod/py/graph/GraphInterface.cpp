@@ -47,7 +47,7 @@ void GraphInterface_doExport() {
 			// rst:
 			// rst:			(Read-only) The graph the vertex belongs to.
 			// rst:
-			// rst:			:type: :py:class:`Graph`
+			// rst:			:type: Graph
 			// rst:			:raises: :py:class:`LogicError` if it is a null descriptor.
 			.add_property("graph", &Graph::Vertex::getGraph)
 			// rst:		.. py:attribute:: degree
@@ -61,35 +61,35 @@ void GraphInterface_doExport() {
 			// rst:
 			// rst:			(Read-only) A range of incident edges to this vertex.
 			// rst:
-			// rst:			:type: :py:class:`GraphIncidentEdgeRange`
+			// rst:			:type: GraphIncidentEdgeRange
 			// rst:			:raises: :py:class:`LogicError` if it is a null descriptor.
 			.add_property("incidentEdges", &Graph::Vertex::incidentEdges)
 			// rst:		.. py:attribute:: stringLabel
 			// rst:
 			// rst:			(Read-only) The string label of the vertex.
 			// rst:
-			// rst:			:type: string
+			// rst:			:type: str
 			// rst:			:raises: :py:class:`LogicError` if it is a null descriptor.
 			.add_property("stringLabel", py::make_function(&Graph::Vertex::getStringLabel, py::return_value_policy<py::copy_const_reference>()))
 			// rst:		.. py:attribute:: atomId
 			// rst:
 			// rst:			(Read-only) The atom id of the vertex.
 			// rst:
-			// rst:			:type: :py:class:`AtomId`
+			// rst:			:type: AtomId
 			// rst:			:raises: :py:class:`LogicError` if it is a null descriptor.
 			.add_property("atomId", &Graph::Vertex::getAtomId)
 			// rst:		.. py:attribute:: isotope
 			// rst:
 			// rst:			(Read-only) The isotope of the vertex.
 			// rst:
-			// rst:			:type: :py:class:`Isotope`
+			// rst:			:type: Isotope
 			// rst:			:raises: :py:class:`LogicError` if it is a null descriptor.
 			.add_property("isotope", &Graph::Vertex::getIsotope)
 			// rst:		.. py:attribute:: charge
 			// rst:
 			// rst:			(Read-only) The charge of the vertex.
 			// rst:
-			// rst:			:type: :py:class:`Charge`
+			// rst:			:type: Charge
 			// rst:			:raises: :py:class:`LogicError` if it is a null descriptor.
 			.add_property("charge", &Graph::Vertex::getCharge)
 			// rst:		.. py:attribute:: radical
@@ -104,10 +104,9 @@ void GraphInterface_doExport() {
 			// rst:
 			// rst:			Print the stereo configuration for the vertex.
 			// rst:
-			// rst:			:param p: the printing options used for the depiction.
-			// rst:			:type p: :class:`GraphPrinter`
+			// rst:			:param GraphPrinter p: the printing options used for the depiction.
 			// rst:			:returns: the name of the PDF-file that will be compiled in post-processing.
-			// rst:			:rtype: string
+			// rst:			:rtype: str
 			// rst:			:raises: :py:class:`LogicError` if it is a null descriptor.
 			.def("printStereo", printStereoWithoutOptions)
 			.def("printStereo", printStereoWithOptions)
@@ -140,35 +139,35 @@ void GraphInterface_doExport() {
 			// rst:
 			// rst:			(Read-only) The graph the edge belongs to.
 			// rst:
-			// rst:			:type: :py:class:`Graph`
+			// rst:			:type: Graph
 			// rst:			:raises: :py:class:`LogicError` if it is a null descriptor.
 			.add_property("graph", &Graph::Edge::getGraph)
 			// rst:		.. py:attribute:: source
 			// rst:
 			// rst:			(Read-only) The source vertex of the edge.
 			// rst:
-			// rst:			:type: :py:class:`GraphVertex`
+			// rst:			:type: GraphVertex
 			// rst: 		:raises: :py:class:`LogicError` if it is a null descriptor.
 			.add_property("source", &Graph::Edge::source)
 			// rst:		.. attribute:: target
 			// rst:
 			// rst:			(Read-only) The target vertex of the edge.
 			// rst:
-			// rst:			:type: :py:class:`GraphVertex`
+			// rst:			:type: GraphVertex
 			// rst: 		:raises: :py:class:`LogicError` if it is a null descriptor.
 			.add_property("target", &Graph::Edge::target)
 			// rst:		.. py:attribute:: stringLabel
 			// rst:
 			// rst:			(Read-only) The string label of the edge.
 			// rst:
-			// rst:			:type: string
+			// rst:			:type: str
 			// rst:			:raises: :py:class:`LogicError` if it is a null descriptor.
 			.add_property("stringLabel", py::make_function(&Graph::Edge::getStringLabel, py::return_value_policy<py::copy_const_reference>()))
 			// rst:		.. py:attribute:: bondType
 			// rst:
 			// rst:			(Read-only) The bond type of the edge.
 			// rst:
-			// rst:			:type: :py:class:`BondType`
+			// rst:			:type: BondType
 			// rst:			:raises: :py:class:`LogicError` if it is a null descriptor.
 			.add_property("bondType", &Graph::Edge::getBondType)
 			;

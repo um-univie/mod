@@ -19,7 +19,7 @@ for a in inputRules:
 	fail(lambda: a.printTermState())
 
 fail(lambda: dgRuleComp(inputGraphs, addSubset(lambda: []), ls))
-fail(lambda: dgRuleComp([], addSubset(inputGraphs), ls))
+fail(lambda: dgRuleComp([], addSubset(inputGraphs), ls).calc())
 dg = dgRuleComp([], addSubset(lambda: inputGraphs), ls)
 fail(lambda: dg.calc())
 dg = dgRuleComp([], inputRules, ls)

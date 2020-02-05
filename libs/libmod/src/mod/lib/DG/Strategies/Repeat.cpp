@@ -10,8 +10,8 @@ namespace lib {
 namespace DG {
 namespace Strategies {
 
-Repeat::Repeat(Strategy* strat, std::size_t limit)
-: Strategy(strat->getMaxComponents()), strat(strat), limit(limit) { }
+Repeat::Repeat(Strategy *strat, std::size_t limit)
+		: Strategy(strat->getMaxComponents()), strat(strat), limit(limit) {}
 
 Repeat::~Repeat() {
 	delete strat;
@@ -22,25 +22,24 @@ Strategy *Repeat::clone() const {
 	return new Repeat(strat->clone(), limit);
 }
 
-void Repeat::preAddGraphs(std::function<void(std::shared_ptr<graph::Graph>) > add) const {
+void Repeat::preAddGraphs(std::function<void(std::shared_ptr<graph::Graph>, IsomorphismPolicy)> add) const {
 	strat->preAddGraphs(add);
 }
 
-void Repeat::forEachRule(std::function<void(const lib::Rules::Real&)> f) const {
+void Repeat::forEachRule(std::function<void(const lib::Rules::Real &)> f) const {
 	strat->forEachRule(f);
 }
 
-void Repeat::printInfo(std::ostream &s) const {
-	s << indent << "Repeat, limit = " << limit << std::endl;
-	indentLevel++;
-	for(unsigned int i = 0; i < subStrats.size(); i++) {
-		s << indent << "Substrat " << i << ":" << std::endl;
-		indentLevel++;
-		subStrats[i]->printInfo(s);
-		indentLevel--;
+void Repeat::printInfo(PrintSettings settings) const {
+	settings.indent() << "Repeat, limit = " << limit << '\n';
+	++settings.indentLevel;
+	for(int i = 0; i != subStrats.size(); i++) {
+		settings.indent() << "Round " << (i + 1) << ":\n";
+		++settings.indentLevel;
+		subStrats[i]->printInfo(settings);
+		--settings.indentLevel;
 	}
-	printBaseInfo(s);
-	indentLevel--;
+	printBaseInfo(settings);
 }
 
 const GraphState &Repeat::getOutput() const {
@@ -52,9 +51,8 @@ const GraphState &Repeat::getOutput() const {
 }
 
 bool Repeat::isConsumed(const Graph::Single *g) const {
-	for(const Strategy *strat : subStrats) {
-		if(strat->isConsumed(g)) return true;
-	}
+	for(const auto *s : subStrats)
+		if(s->isConsumed(g)) return true;
 	return false;
 }
 
@@ -62,46 +60,47 @@ void Repeat::setExecutionEnvImpl() {
 	strat->setExecutionEnv(getExecutionEnv());
 }
 
-void Repeat::executeImpl(std::ostream& s, const GraphState& input) {
-	s << indent << "Repeat, limit = " << limit << std::endl;
+void Repeat::executeImpl(PrintSettings settings, const GraphState &input) {
+	if(settings.verbosity >= PrintSettings::V_Repeat)
+		settings.indent() << "Repeat, limit = " << limit << std::endl;
 	if(limit == 0) return;
-	indentLevel++;
-	// handle the first
-	Strategy *firstStrat = strat->clone();
-	firstStrat->setExecutionEnv(getExecutionEnv());
-	s << indent << "Substrat 0" << std::endl;
-	indentLevel++;
-	firstStrat->execute(s, input);
-	indentLevel--;
-	s << indent << "Got " << firstStrat->getOutput().getSubset(0).size() << " graphs" << std::endl;
-	subStrats.push_back(firstStrat);
-	if(firstStrat->getOutput().getSubset(0).empty()) {
-		indentLevel--;
-		return;
-	}
-	for(unsigned int i = 0; i < limit - 1; i++) {
+	assert(limit > 0);
+	++settings.indentLevel;
+	for(int i = 0; i != limit; ++i) {
 		Strategy *subStrat = strat->clone();
 		subStrat->setExecutionEnv(getExecutionEnv());
-		s << indent << "Substrat " << (i + 1) << std::endl;
-		indentLevel++;
-		subStrat->execute(s, subStrats.at(i)->getOutput());
-		indentLevel--;
-		s << indent << "Got " << subStrat->getOutput().getSubset(0).size() << " graphs" << std::endl;
+		if(settings.verbosity >= PrintSettings::V_Repeat)
+			settings.indent() << "Round " << (i + 1) << ":" << std::endl;
+		++settings.indentLevel;
+		if(i == 0)
+			subStrat->execute(settings, input);
+		else
+			subStrat->execute(settings, subStrats[i - 1]->getOutput());
+		--settings.indentLevel;
+
+		if(settings.verbosity >= PrintSettings::V_Repeat) {
+			settings.indent() << "Round " << (i + 1) << ": Result subset has "
+									<< subStrat->getOutput().getSubset(0).size()
+									<< " graphs." << std::endl;
+		}
 		subStrats.push_back(subStrat);
 		if(!getConfig().dg.ignoreSubset.get()) {
 			if(subStrat->getOutput().getSubset(0).empty()) {
-				if(getConfig().dg.calculateVerbose.get()) s << indent << "Breaking repeat due to empty subset" << std::endl;
+				if(settings.verbosity >= PrintSettings::V_RepeatBreak)
+					settings.indent() << "Round " << (i + 1) << ": Breaking repeat due to empty subset." << std::endl;
 				break;
 			}
 		}
 		if(!getConfig().dg.disableRepeatFixedPointCheck.get()) {
-			if(subStrat->getOutput() == subStrats[i]->getOutput()) {
-				if(getConfig().dg.calculateVerbose.get()) s << indent << "Breaking repeat due to fixed point" << std::endl;
-				break;
+			if(i > 0) {
+				if(subStrat->getOutput() == subStrats[i - 1]->getOutput()) {
+					if(settings.verbosity >= PrintSettings::V_RepeatBreak)
+						settings.indent() << "Round " << (i + 1) << ": Breaking repeat due to fixed point." << std::endl;
+					break;
+				}
 			}
 		}
 	}
-	indentLevel--;
 }
 
 } // namespace Strategies

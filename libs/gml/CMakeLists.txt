@@ -47,6 +47,9 @@ if(BUILD_TESTING)
     set(sanFlags -g -fsanitize=undefined -fsanitize=address -fsanitize=leak)
     foreach(testName ${mod_gml_TEST_FILES})
         add_executable(${testName} EXCLUDE_FROM_ALL test/${testName}.cpp)
+        target_compile_options(${testName} PRIVATE -Wall -Wextra -Werror -pedantic
+                -Wno-unused-parameter
+                -Wno-parentheses)
         target_link_libraries(${testName} PRIVATE GML::gml)
         if(BUILD_TESTING_SANITIZERS AND NOT BUILD_COVERAGE)
             target_compile_options(${testName} PRIVATE ${sanFlags})

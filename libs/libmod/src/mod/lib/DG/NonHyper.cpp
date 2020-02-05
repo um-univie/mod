@@ -35,22 +35,25 @@ namespace {
 std::size_t nextDGNum = 0;
 }// namespace 
 
-NonHyper::NonHyper(const std::vector<std::shared_ptr<graph::Graph> > &graphDatabase, LabelSettings labelSettings)
+NonHyper::NonHyper(LabelSettings labelSettings,
+                   const std::vector<std::shared_ptr<graph::Graph> > &graphDatabase, IsomorphismPolicy graphPolicy)
 		: id(nextDGNum++),
 		  labelSettings(labelSettings),
 		  graphDatabase(labelSettings, getConfig().graph.isomorphismAlg.get()) {
-	if(getConfig().dg.skipInitialGraphIsomorphismCheck.get()) {
+	switch(graphPolicy) {
+	case IsomorphismPolicy::TrustMe:
 		for(const auto gCand : graphDatabase)
 			this->graphDatabase.trustInsert(gCand);
-	} else {
+		break;
+	case IsomorphismPolicy::Check: {
 		const auto ls = LabelSettings{this->labelSettings.type, LabelRelation::Isomorphism,
-												this->labelSettings.withStereo, LabelRelation::Isomorphism};
+		                              this->labelSettings.withStereo, LabelRelation::Isomorphism};
 		for(const auto gCand : graphDatabase) {
 			if(ls.type == LabelType::Term) {
 				const auto &term = get_term(gCand->getGraph().getLabelledGraph());
 				if(!isValid(term)) {
 					std::string msg = "Parsing failed for graph '" + gCand->getName() +
-											"' in graph database. " + term.getParsingError();
+					                  "' in graph database. " + term.getParsingError();
 					throw TermParsingError(std::move(msg));
 				}
 			}
@@ -58,14 +61,16 @@ NonHyper::NonHyper(const std::vector<std::shared_ptr<graph::Graph> > &graphDatab
 			// we don't care if the user gives the same graph multiple times
 			if(gp.first != gCand) {
 				std::string msg = "Isomorphic graphs '" + gp.first->getName() + "' and '" + gCand->getName() +
-										"' in initial graph database.";
+				                  "' in initial graph database.";
 				throw LogicError(std::move(msg));
 			}
 		}
-	}
+	} // case Check
+		break;
+	} // switch(graphPolicy)
 }
 
-NonHyper::~NonHyper() {}
+NonHyper::~NonHyper() = default;
 
 std::size_t NonHyper::getId() const {
 	return id;
@@ -86,6 +91,14 @@ LabelSettings NonHyper::getLabelSettings() const {
 	return labelSettings;
 }
 
+bool NonHyper::getHasStartedCalculation() const {
+	return hasStartedCalculation;
+}
+
+bool NonHyper::getHasCalculated() const {
+	return hasCalculated;
+}
+
 void NonHyper::calculatePrologue() {
 	if(getHasStartedCalculation()) MOD_ABORT;
 	if(hyperCreator) MOD_ABORT;
@@ -103,20 +116,6 @@ void NonHyper::calculateEpilogue() {
 	hasCalculated = true;
 }
 
-void NonHyper::calculate(bool printInfo) {
-	calculatePrologue();
-	calculateImpl(printInfo);
-	calculateEpilogue();
-}
-
-bool NonHyper::getHasStartedCalculation() const {
-	return hasStartedCalculation;
-}
-
-bool NonHyper::getHasCalculated() const {
-	return hasCalculated;
-}
-
 void NonHyper::tryAddGraph(std::shared_ptr<graph::Graph> gCand) {
 	if(getHasCalculated()) std::abort();
 	const auto ls = LabelSettings{
@@ -127,16 +126,17 @@ void NonHyper::tryAddGraph(std::shared_ptr<graph::Graph> gCand) {
 	if(ls.type == LabelType::Term) {
 		const auto &term = get_term(gCand->getGraph().getLabelledGraph());
 		if(!isValid(term)) {
-			std::string msg = "Parsing failed for graph '" + gCand->getName() + "' in dynamic add strategy. " +
-									term.getParsingError();
+			std::string msg = "Parsing failed for graph '" + gCand->getName() + "'. " +
+			                  term.getParsingError();
 			throw TermParsingError(std::move(msg));
 		}
 	}
 	const auto gp = this->graphDatabase.tryInsert(gCand);
-	// we don't care if the user gives the same graph multiple times
+	// (we don't care if the user gives the same graph multiple times)
 	if(gp.first != gCand) {
-		std::string msg = "Isomorphic graphs '" + gp.first->getName() + "' and '" + gCand->getName() +
-								"' in initial graph database.";
+		std::string msg =
+				"Isomorphic graphs. Candidate graph '" + gCand->getName() + "' is isomorphic to '" + gp.first->getName() +
+				"' in the graph database.";
 		throw LogicError(std::move(msg));
 	}
 }
@@ -192,8 +192,8 @@ bool NonHyper::addProduct(std::shared_ptr<graph::Graph> g) {
 }
 
 std::pair<NonHyper::Edge, bool> NonHyper::isDerivation(const GraphMultiset &gmsSrc,
-																		 const GraphMultiset &gmsTar,
-																		 const lib::Rules::Real *r) const {
+                                                       const GraphMultiset &gmsTar,
+                                                       const lib::Rules::Real *r) const {
 	const auto iterLeft = multisetToVertex.find(gmsSrc);
 	if(iterLeft == end(multisetToVertex)) return std::make_pair(Edge(), false);
 	const auto iterRight = multisetToVertex.find(gmsTar);
@@ -248,10 +248,6 @@ void NonHyper::findReversiblePairs() {
 	}
 }
 
-void NonHyper::list(std::ostream &s) const {
-	listImpl(s);
-}
-
 const NonHyper::GraphType &NonHyper::getGraph() const {
 	if(!hyper) MOD_ABORT;
 	return dg;
@@ -281,7 +277,7 @@ HyperVertex NonHyper::getHyperEdge(Edge e) const {
 }
 
 HyperVertex NonHyper::findHyperEdge(const std::vector<Hyper::Vertex> &sources,
-												const std::vector<Hyper::Vertex> &targets) const {
+                                    const std::vector<Hyper::Vertex> &targets) const {
 	const auto &dgHyper = getHyper().getGraph();
 #ifndef NDEBUG
 	for(auto v : sources) assert(dgHyper[v].kind == HyperVertexKind::Vertex);
@@ -324,9 +320,9 @@ void NonHyper::diff(const NonHyper &dg1, const NonHyper &dg2) {
 	for(const auto v : dg2.getAPIReference()->vertices()) vertexGraphsUnique.insert(v.getGraph());
 	std::vector<std::shared_ptr<graph::Graph> > vertexGraphs(begin(vertexGraphsUnique), end(vertexGraphsUnique));
 	std::sort(begin(vertexGraphs), end(vertexGraphs),
-				 [](std::shared_ptr<graph::Graph> g1, std::shared_ptr<graph::Graph> g2) {
-					 return g1->getName() < g2->getName();
-				 });
+	          [](std::shared_ptr<graph::Graph> g1, std::shared_ptr<graph::Graph> g2) {
+		          return g1->getName() < g2->getName();
+	          });
 	for(const auto g : vertexGraphs) {
 		const bool in1 = dg1.getHyper().isVertexGraph(&g->getGraph());
 		const bool in2 = dg2.getHyper().isVertexGraph(&g->getGraph());
@@ -361,20 +357,20 @@ void NonHyper::diff(const NonHyper &dg1, const NonHyper &dg2) {
 			ders2 = makeDers(*dg2.getAPIReference());
 	const auto derLess = [](const Derivation &d1, const Derivation &d2) {
 		if(std::lexicographical_compare(begin(d1.left), end(d1.left),
-												  begin(d2.left), end(d2.left),
-												  graph::GraphLess()))
+		                                begin(d2.left), end(d2.left),
+		                                graph::GraphLess()))
 			return true;
 		else if(std::lexicographical_compare(begin(d2.left), end(d2.left),
-														 begin(d1.left), end(d1.left),
-														 graph::GraphLess()))
+		                                     begin(d1.left), end(d1.left),
+		                                     graph::GraphLess()))
 			return false;
 		if(std::lexicographical_compare(begin(d1.right), end(d1.right),
-												  begin(d2.right), end(d2.right),
-												  graph::GraphLess()))
+		                                begin(d2.right), end(d2.right),
+		                                graph::GraphLess()))
 			return true;
 		else if(std::lexicographical_compare(begin(d2.right), end(d2.right),
-														 begin(d1.right), end(d1.right),
-														 graph::GraphLess()))
+		                                     begin(d1.right), end(d1.right),
+		                                     graph::GraphLess()))
 			return false;
 		return d1.r->getId() < d2.r->getId();
 	};

@@ -7,24 +7,24 @@
 namespace gml {
 namespace converter {
 inline namespace edsl {
-	// such that 'using namespace gml::converter::edsl;' gives Parent as well
-	using gml::converter::Parent;
+// such that 'using namespace gml::converter::edsl;' gives Parent as well
+using gml::converter::Parent;
 
-#define MAKE_CREATOR(Name, VarName)                                                \
-	struct Name ## Creator {                                                         \
-		Name<AttrHandler<Unused> > operator()(const std::string &key) const {          \
-			return Name<AttrHandler<Unused> >(key, AttrHandler<Unused>());               \
-		}                                                                              \
-                                                                                   \
-	  template<typename Data>                                                        \
-		Name<AttrHandler<Data> > operator()(const std::string &key, Data data) const { \
-			return Name<AttrHandler<Data> >(key, AttrHandler<Data>(data));               \
-		}                                                                              \
-	};                                                                               \
-	const Name ## Creator VarName;
-MAKE_CREATOR(Int, int_);
-MAKE_CREATOR(Float, float_);
-MAKE_CREATOR(String, string);
+#define MAKE_CREATOR(Name, VarName)                                                    \
+    struct Name ## Creator {                                                           \
+        Name<AttrHandler<Unused> > operator()(const std::string &key) const {          \
+            return Name<AttrHandler<Unused> >(key, AttrHandler<Unused>());             \
+        }                                                                              \
+                                                                                       \
+      template<typename Data>                                                          \
+        Name<AttrHandler<Data> > operator()(const std::string &key, Data data) const { \
+            return Name<AttrHandler<Data> >(key, AttrHandler<Data>(data));             \
+        }                                                                              \
+    };                                                                                 \
+    const Name ## Creator VarName;
+MAKE_CREATOR(Int, int_)
+MAKE_CREATOR(Float, float_)
+MAKE_CREATOR(String, string)
 #undef MAKE_CREATOR
 
 template<typename Type, typename AttrHandler, typename ...Expr>
@@ -32,10 +32,10 @@ struct ListWithKey {
 	using Elems = std::tuple<ListElement<Expr>...>;
 
 	ListWithKey(const std::string &key, AttrHandler attrHandler)
-	: key(key), attrHandler(attrHandler) { }
+			: key(key), attrHandler(attrHandler) {}
 
 	ListWithKey(const std::string &key, AttrHandler attrHandler, Elems elems)
-	: key(key), attrHandler(attrHandler), elems(elems) { }
+			: key(key), attrHandler(attrHandler), elems(elems) {}
 
 	template<typename ExprT>
 	auto operator()(ExprT &&expr, std::size_t lowerBound, std::size_t upperBound) const
@@ -43,7 +43,7 @@ struct ListWithKey {
 		using AsConverterExpr = decltype(asConverter(expr));
 		ListElement<AsConverterExpr> newElem(lowerBound, upperBound, asConverter(expr));
 		auto newElems = std::tuple_cat(elems, std::tuple<ListElement<AsConverterExpr> >(newElem));
-		return ListWithKey<Type, AttrHandler, Expr..., AsConverterExpr > (key, attrHandler, newElems);
+		return ListWithKey<Type, AttrHandler, Expr..., AsConverterExpr>(key, attrHandler, newElems);
 	}
 
 	template<typename ExprT>

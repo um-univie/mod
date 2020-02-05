@@ -4,6 +4,96 @@
 Changes
 #######
 
+v0.10.0 (2020-02-05)
+====================
+
+Incompatible Changes
+--------------------
+
+- ``dg::DG::abstract``/``dgAbstract`` has been removed. Use
+  :cpp:func:`dg::Builder::addAbstract`/:py:func:`DGBuilder.addAbstract`
+  instead. Added slightly better documentation as well, :ref:`dg_abstract-desc`.
+- ``dg::DG::derivations`` has been removed. Use the repeated calls
+  to :cpp:func:`dg::Builder::addDerivation` instead.
+- ``dg::DG::ruleComp`` and ``dg::DG::calc()`` has been removed.
+  Use the new :cpp:func:`dg::Builder::execute` instead.
+- ``dgRuleComp`` and ``DG.calc`` has been deprecated,
+  and their implementation is now based on :py:meth:`DGBuilder.execute`.
+  Use :py:meth:`DGBuilder.execute` directly instead.
+- The implementation of ``dgDerivations`` has changed and the function
+  is now deprecated. Use repeated calls to
+  :py:meth:`DGBuilder.addDerivation` instead.
+- :cpp:func:`dg::Strategy::makeAdd` overloads,
+  :py:meth:`DGStrat.makeAddStatic`, and :py:meth:`DGStrat.makeAddDynamic`
+  now requires another argument of type
+  :cpp:enum:`IsomorphismPolicy`/:py:class:`IsomorphismPolicy`.
+- :ref:`strat-addSubset` and :ref:`strat-addUniverse` now accepts a new optional
+  keyword argument ``graphPolicy`` of type :py:class:`IsomorphismPolicy`.
+- ``dg::DG::list``/``DG.list`` has been removed,
+  use :cpp:func:`dg::ExecuteResult::list`/:py:meth:`DGExecuteResult.list`
+  instead.
+- Information from strategies has been updated.
+
+
+New Features
+------------
+
+- Added new incremental build interface for :py:class:`DG`/:cpp:class:`dg::DG`.
+  It includes:
+
+  - :py:meth:`DG.__init__`/:cpp:func:`dg::DG::make` for constructing a
+    derivation graph with this new interface.
+  - :py:meth:`DG.build`/:cpp:func:`dg::DG::build` for obtaining an RAII-style
+    proxy object for controlling the construction
+    (:py:class:`DGBuilder`/:cpp:class:`dg::Builder`).
+  - :py:attr:`DG.hasActiveBuilder`/:cpp:func:`dg::DG::hasActiveBuilder`
+  - :py:attr:`DG.locked`/:cpp:func:`dg::DG::isLocked`
+
+- Added :py:class:`Derivations`/:cpp:class:`Derivations` as an alternative
+  to :py:class:`Derivation`/:cpp:class:`Derivation` which contains a list
+  of rules instead of at most a single rule.
+  The latter is implicitly convertible to the former.
+- :py:class:`Rule` now has an overloaded operator ``<``.
+- :py:class:`IsomorphismPolicy`/:cpp:enum:`IsomorphismPolicy` has been added
+  to help configure various algorithms by users.
+- Added :py:attr:`DG.labelSettings`/:cpp:func:`dg::DG::getLabelSettings`.
+- Added :envvar:`MOD_NO_DEPRECATED` to make it easier to find usage of
+  deprecated behaviour.
+- Added :py:func:`Rule.isomorphicLeftRight`/:cpp:func:`rule::Rule::isomorphicLeftRight`.
+
+Bugs Fixed
+----------
+
+- Changed assert to a proper error message at code related to Open Babel.
+  If MØD, or an extension library, is loaded with ``dlopen`` without the
+  ``RTLD_GLOBAL`` flag, there can be multiple copies of Open Babel symbols at
+  the same time, which prevent MØD from accessing Open Babel operations..
+- Document and check proper preconditions on :cpp:class:`dg::DG`/:py:class:`DG`.
+- Document and check precondition on
+  :cpp:func:`dg::DG::HyperEdge::getInverse`/:py:attr:`DGHyperEdge.inverse`,
+  that it is only avilable after the DG is locked.
+- Properly throw an exception if
+  :py:meth:`DGStrat.makeSequence`/:cpp:func:`dg::Strategy::makeSequence`
+  if given an empty list of strategies.
+- Properly implementing stringification of
+  :py:class:`LabelType`/:cpp:enum:`LabelType`,
+  :py:class:`LabelRelation`/:cpp:enum:`LabelRelation`,
+  :py:class:`LabelSettings`/:cpp:class:`LabelSettings`, and
+  :py:class:`IsomorphismPolicy`/:cpp:enum:`IsomorphismPolicy`.
+- Build: disallow use of experimental Boost CMake support due to a linking
+  problem.
+
+Other
+-----
+
+- Various fixes for documentation formatting including new themeing.
+- Installation, highlight the more relevant ``CMAKE_PREFIX_PATH`` instead of
+  ``CMAKE_PROGRAM_PATH``.
+- Bump recommended lower bound on GCC version to 6.1 in the documentation.
+- Updated documentation for :cpp:class:`mod::Derivation`/:py:class:`Derivation`.
+- Documentation, added explicit example section.
+
+
 v0.9.0 (2019-08-02)
 ===================
 
@@ -29,7 +119,7 @@ New Features
 
 - :py:func:`dgDump`/:cpp:func:`dg::DG::dump` should now be much, much faster
   in parsing the input file and loading the contained derivation graph.
-- :py:func:`dgRuleComp`/:cpp:func:`dg::DG::ruleComp` should now be much faster
+- ``dgRuleComp``/``dg::DG::ruleComp`` should now be much faster
   during calculation.
 - Added :py:func:`Graph.instantiateStereo`/:cpp:func:`graph::Graph::instantiateStereo`.
 - Added :py:func:`rngReseed`/:cpp:func:`rngReseed`.
@@ -83,7 +173,7 @@ New Features
 - Added support for isotopes (see :ref:`mol-enc`).
 - Added :cpp:any:`graph::Graph::getExactMass`/:py:obj:`Graph.exactMass`.
 - Added optional ``printInfo`` parameter to
-  :cpp:any:`dg::DG::calc`/:py:obj:`DG.calc`
+  ``dg::DG::calc``/``DG.calc``.
   to allow disabling of messages to stdout during calculation.
 - The graph interface on :cpp:any:`dg::DG`/:py:obj:`DG` can now be used before and during
   calculation.
@@ -224,10 +314,10 @@ Bugs Fixed
   with a graph not in the derivation graph.
 - Don't crash when trying to print derivations with multiple rules.
 - Fix documentation formatting errors.
-- #2, throw exceptions from :cpp:any:`dg::DG::ruleComp`/:py:obj:`dgRuleComp`
-  and :cpp:any:`dg::DG::calc`/:py:obj:`DG.calc` when isomorphic graphs are given.
+- #2, throw exceptions from ``dg::DG::ruleComp``/``dgRuleComp``
+  and ``dg::DG::calc``/``DG.calc`` when isomorphic graphs are given.
 - Throw more appropriate exception if :cpp:any:`dg::DG::print`/:py:obj:`DG.print`
-  is called before :cpp:any:`dg::DG::calc`/:py:obj:`DG.calc`.
+  is called before ``dg::DG::calc``/``DG.calc``.
 - Various issues in graph/rule depiction related to positioning of hydrogens, charges, etc.
 - Build system: give better error messages if a file is given where a path is expected.
 - The produced SMILES strings are now truely canonical, as the new
@@ -271,7 +361,7 @@ Incompatible Changes
 - Move ``DGPrinter`` and ``DGPrintData`` into a separate header.
 - All SBML features have been removed from the library.
 - The deprecated ``DG::printMatrix`` function has been removed.
-- :cpp:any:`dg::DG::calc`/:py:obj:`DG.calc` will no longer print a message when it is done.
+- ``dg::DG::calc``/``DG.calc`` will no longer print a message when it is done.
 - :cpp:any:`dg::DG::print`/:py:obj:`DG.print` by default now only prints the hypergraph rendering.
   (For now, set ``Config::DG::printNonHyper`` to enable printing of the non-hypergraph rendering)
 - :cpp:any:`graph::Graph::print`/:py:obj:`Graph.print` and

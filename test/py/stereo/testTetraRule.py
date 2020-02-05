@@ -20,11 +20,8 @@ g = smiles("[O][C@]([C@H3])([C@H2][C@H3])([C@H2][C@H3])")
 
 postChapter("DG")
 ls = LabelSettings(LabelType.String, LabelRelation.Isomorphism, LabelRelation.Specialisation)
-dg = dgRuleComp(inputGraphs, addSubset(g) >> r, labelSettings=ls)
-#config.rc.verbose = True
-config.dg.calculateVerbose = True
-config.dg.calculateDetailsVerbose = True
-dg.calc()
+dg = DG(graphDatabase=inputGraphs, labelSettings=ls)
+dg.build().execute(addSubset(g) >> r, verbosity=100)
 dg.print()
 for a in dg.graphDatabase:
 	a.print()

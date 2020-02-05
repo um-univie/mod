@@ -23,14 +23,15 @@ struct PostStream {
 		enabled = s.is_open();
 	}
 
-	~PostStream() { }
+	~PostStream() {}
 
-	std::ofstream & getStream() {
+	std::ofstream &getStream() {
 		if(enabled) return s;
 		std::cerr << "ERROR: can not write to '" << prefix + "post.sh'" << std::endl;
 		std::cerr << "Does '" << prefix << "' exist?" << std::endl;
 		std::exit(1);
 	}
+
 private:
 	bool enabled;
 	std::ofstream s;
@@ -62,15 +63,12 @@ std::string escapeForLatex(const std::string &str) {
 		case '#':
 		case '_':
 		case '{':
-		case '}':
-			res += "\\";
+		case '}': res += "\\";
 			res += c;
 			break;
-		case '*':
-			res += "\\ensuremath{*}";
+		case '*': res += "\\ensuremath{*}";
 			break;
-		default:
-			res += c;
+		default: res += c;
 		}
 	}
 	return res;
@@ -80,12 +78,10 @@ std::string asLatexMath(const std::string &str) {
 	std::string res = "$\\mathrm{";
 	for(char c : str) {
 		switch(c) {
-		case ' ':
-			res += "\\";
+		case ' ': res += "\\";
 			res += c;
 			break;
-		default:
-			res += c;
+		default: res += c;
 		}
 	}
 	res += "}$";
@@ -105,6 +101,16 @@ std::ostream &log() {
 	std::cout.flush();
 	bool log = true;
 	return log ? std::cout : nullStream();
+}
+
+std::ostream &Logger::indent() const {
+	assert(indentLevel >= 0);
+	return s << std::string(indentLevel * 2, ' ');
+}
+
+std::ostream &Logger::sep(char c) const {
+	assert(indentLevel >= 0);
+	return s << std::string(std::max(10, 80 - indentLevel * 2), c) << '\n';
 }
 
 } // namespace IO

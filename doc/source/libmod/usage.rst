@@ -7,10 +7,13 @@ The source code listed below can be found `here <../_static/examples/libmod_cmak
 
 For example, we could make a simple program from the following source:
 
-.. literalinclude:: ../_static/examples/libmod_cmake/main.cpp
+.. literalinclude:: /_static/examples/libmod_cmake/main.cpp
 	:language: c++
+	:tab-width: 3
 
 The program can then be build as a CMake project with the following:
 
-.. literalinclude:: ../_static/examples/libmod_cmake/CMakeLists.txt
-    :language: cmake
+.. literalinclude:: /_static/examples/libmod_cmake/CMakeLists.txt
+	:language: cmake
+	:tab-width: 3
+

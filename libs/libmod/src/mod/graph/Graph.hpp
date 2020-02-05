@@ -84,11 +84,11 @@ public:
 	// rst: .. function:: std::pair<std::string, std::string> print() const
 	// rst:               std::pair<std::string, std::string> print(const Printer &first, const Printer &second) const
 	// rst:
-	// rst:		Print the graph, using either the default options or the options in ``first`` and ``second``.
-	// rst:		If ``first`` and ``second`` are the same, only one depiction will be made.
+	// rst:		Print the graph, using either the default options or the options in `first` and `second`.
+	// rst:		If `first` and `second` are the same, only one depiction will be made.
 	// rst:
 	// rst:		:returns: a pair of names for the PDF-files that will be compiled in post-processing.
-	// rst:			If ``first`` and ``second`` are the same, the two file prefixes are equal.
+	// rst:			If `first` and `second` are the same, the two file prefixes are equal.
 	std::pair<std::string, std::string> print() const;
 	std::pair<std::string, std::string> print(const Printer &first, const Printer &second) const;
 	// rst: .. function:: void printTermState() const
@@ -174,11 +174,11 @@ public:
 	unsigned int eLabelCount(const std::string &label) const;
 	// rst: .. function:: std::size_t isomorphism(std::shared_ptr<Graph> g, std::size_t maxNumMatches, LabelSettings labelSettings) const
 	// rst:
-	// rst:		:returns: the number of isomorphisms found from this graph to ``g``, but at most ``maxNumMatches``.
+	// rst:		:returns: the number of isomorphisms found from this graph to `g`, but at most `maxNumMatches`.
 	std::size_t isomorphism(std::shared_ptr<Graph> g, std::size_t maxNumMatches, LabelSettings labelSettings) const;
 	// rst: .. function:: std::size_t monomorphism(std::shared_ptr<Graph> g, std::size_t maxNumMatches, LabelSettings labelSettings) const
 	// rst:
-	// rst:		:returns: the number of monomorphisms from this graph to ``g``, though at most ``maxNumMatches``.
+	// rst:		:returns: the number of monomorphisms from this graph to `g`, though at most `maxNumMatches`.
 	std::size_t monomorphism(std::shared_ptr<Graph> g, std::size_t maxNumMatches, LabelSettings labelSettings) const;
 	// rst: .. function:: std::shared_ptr<Graph> makePermutation() const
 	// rst:
@@ -189,7 +189,7 @@ public:
 	// rst:		Set a custom depiction for the graph. The depiction file used will be the string
 	// rst:		returned by the given function, with ``.pdf`` appended.
 	// rst:		The function will only be called once.
-	// rst:		Give ``nullptr`` to use auto-generated depiction.
+	// rst:		Give `nullptr` to use auto-generated depiction.
 	void setImage(std::shared_ptr<Function<std::string()> > image);
 	// rst: .. function:: std::shared_ptr<Function<std::string()> > getImage() const
 	// rst:

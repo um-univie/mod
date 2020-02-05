@@ -10,7 +10,7 @@
 // rst: This file contains the functionality used for reporting errors.
 // rst: In the description of the exceptions we use the standard terminology (see e.g., `Exception Safety <http://en.wikipedia.org/wiki/Exception_safety>`_).
 // rst: If nothing else is specified a thrown exception from MØD provides no exception safety.
-// rst: Any exception thrown from MØD or any dependencies are intented to derive from ``std::exception``,
+// rst: Any exception thrown from MØD or any dependencies are intented to derive from `std::exception`,
 // rst: and any exception from MØD derives from :class:`Exception`.
 // rst: The exceptions are in general only thrown from the outer-most interface, and not from within the ``mod::lib`` namespace.
 
@@ -25,12 +25,12 @@ namespace mod {
 struct MOD_DECL Stacktrace {
 	// rst: .. function:: Stacktrace(unsigned int frameLimit, unsigned int numSkip)
 	// rst:
-	// rst:		Capture a stacktrace with at most ``frameLimit`` frames and without the first ``numSkip`` frames.
+	// rst:		Capture a stacktrace with at most `frameLimit` frames and without the first `numSkip` frames.
 	// rst:		The frame from the constructor it self is always skipped.
 	Stacktrace(unsigned int frameLimit, unsigned int numSkip);
 	// rst: .. function:: void print(unsigned int frameLimit, std::ostream &s) const
 	// rst: 
-	// rst:		Print at most the first ``frameLimit`` frames from the capture stacktrace. Use 0 to print all available frames.
+	// rst:		Print at most the first `frameLimit` frames from the capture stacktrace. Use 0 to print all available frames.
 	// rst:		Symbol names will be demangled if possible.
 	void print(unsigned int frameLimit, std::ostream &s) const;
 private:
@@ -47,12 +47,10 @@ private:
 
 struct MOD_DECL Exception : public std::exception {
 protected:
-	Exception(std::string &&text, unsigned int numSkip, unsigned int frameLimit) : text(text), stacktrace(frameLimit, numSkip) { }
-
-	Exception(std::string &&text, unsigned int numSkip) : Exception(std::move(text), numSkip, 20) { }
-
-	Exception(std::string &&text) : Exception(std::move(text), 0) { }
-
+	Exception(std::string &&text, unsigned int numSkip, unsigned int frameLimit)
+			: text(text), stacktrace(frameLimit, numSkip) {}
+	Exception(std::string &&text, unsigned int numSkip) : Exception(std::move(text), numSkip, 20) {}
+	Exception(std::string &&text) : Exception(std::move(text), 0) {}
 public:
 	// rst: .. function:: virtual std::string getName() const = 0
 	// rst:
@@ -84,9 +82,9 @@ protected:
 // rst-class-start:
 
 struct MOD_DECL FatalError : public Exception {
-	FatalError(std::string &&text, unsigned int numSkip) : Exception(std::move(text), numSkip) { }
+	FatalError(std::string &&text, unsigned int numSkip) : Exception(std::move(text), numSkip) {}
 
-	FatalError(std::string &&text) : Exception(std::move(text)) { }
+	FatalError(std::string &&text) : Exception(std::move(text)) {}
 
 	std::string getName() const {
 		return "MØD FatalError";
@@ -103,7 +101,7 @@ struct MOD_DECL FatalError : public Exception {
 // rst-class-start:
 
 struct MOD_DECL InputError : public Exception {
-	InputError(std::string &&text) : Exception(std::move(text)) { }
+	InputError(std::string &&text) : Exception(std::move(text)) {}
 
 	std::string getName() const {
 		return "MØD InputError";
@@ -119,7 +117,7 @@ struct MOD_DECL InputError : public Exception {
 // rst-class-start:
 
 struct MOD_DECL LogicError : public Exception {
-	LogicError(std::string &&text) : Exception(std::move(text)) { }
+	LogicError(std::string &&text) : Exception(std::move(text)) {}
 
 	std::string getName() const {
 		return "MØD LogicError";
@@ -136,7 +134,7 @@ struct MOD_DECL LogicError : public Exception {
 // rst-class-start:
 
 struct MOD_DECL TermParsingError : public Exception {
-	TermParsingError(std::string &&text) : Exception(std::move(text)) { }
+	TermParsingError(std::string &&text) : Exception(std::move(text)) {}
 
 	std::string getName() const {
 		return "MØD TermParsingError";
@@ -153,7 +151,7 @@ struct MOD_DECL TermParsingError : public Exception {
 // rst-class-start:
 
 struct MOD_DECL StereoDeductionError : public Exception {
-	StereoDeductionError(std::string &&text) : Exception(std::move(text)) { }
+	StereoDeductionError(std::string &&text) : Exception(std::move(text)) {}
 
 	std::string getName() const {
 		return "MØD StereoDeductionError";
@@ -162,7 +160,8 @@ struct MOD_DECL StereoDeductionError : public Exception {
 // rst-class-end:
 
 MOD_DECL
-void fatal(std::string function, std::string file, std::size_t line) __attribute__((__noreturn__)); // TODO: change to C++11 syntax at some point
+void fatal(std::string function, std::string file,
+		   std::size_t line) __attribute__((__noreturn__)); // TODO: change to C++11 syntax at some point
 #define MOD_ABORT mod::fatal(__func__, __FILE__, __LINE__)
 
 } // namespace mod

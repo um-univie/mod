@@ -35,17 +35,23 @@ public:
 	// rst: .. function:: const std::unordered_set<std::shared_ptr<Rule> > &getRuleDatabase() const
 	// rst: 
 	// rst:		:returns: the set of unique rules known by the evaluator.
-	const std::unordered_set<std::shared_ptr<Rule> > &getRuleDatabase() const;
+	const std::unordered_set<std::shared_ptr<Rule>> &getRuleDatabase() const;
 	// rst: .. function:: const std::unordered_set<std::shared_ptr<Rule> > &getProducts() const
 	// rst:
 	// rst:		:returns: the set of unique rules this evaluator has constructed.
-	const std::unordered_set<std::shared_ptr<Rule> > &getProducts() const;
-	// rst: .. function:: std::unordered_set<std::shared_ptr<Rule> > eval(const RCExp::Expression &exp)
+	const std::unordered_set<std::shared_ptr<Rule>> &getProducts() const;
+	// rst: .. function:: std::unordered_set<std::shared_ptr<Rule> > eval(const RCExp::Expression &exp, int verbosity)
 	// rst:
 	// rst:		Evaluates a rule composition expression. Any created rule is replaced by a rule in the database if they are isomorphic.
 	// rst:
+	// rst:		The :var:`verbosity` has the following meaning:
+	// rst:
+	// rst:		- 0 (or less): no information is printed.
+	// rst:		- 10: Print information about morphism generation for rule composition.
+	// rst:		- 20: Print rule composition information.
+	// rst:
 	// rst:		:returns: the result of the expression.
-	std::unordered_set<std::shared_ptr<Rule> > eval(const RCExp::Expression &exp);
+	std::unordered_set<std::shared_ptr<Rule>> eval(const RCExp::Expression &exp, int verbosity);
 	// rst: .. function:: void print() const
 	// rst:
 	// rst:		Print the graph representing all expressions evaluated so far.

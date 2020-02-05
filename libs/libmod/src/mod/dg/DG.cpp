@@ -2,13 +2,13 @@
 
 #include <mod/Error.hpp>
 #include <mod/Misc.hpp>
+#include <mod/dg/Builder.hpp>
 #include <mod/dg/GraphInterface.hpp>
 #include <mod/dg/Printer.hpp>
 #include <mod/graph/Printer.hpp>
 #include <mod/lib/DG/Hyper.hpp>
 #include <mod/lib/DG/NonHyper.hpp>
-#include <mod/lib/DG/NonHyperDerivations.hpp>
-#include <mod/lib/DG/NonHyperRuleComp.hpp>
+#include <mod/lib/DG/NonHyperBuilder.hpp>
 #include <mod/lib/DG/Strategies/GraphState.hpp>
 #include <mod/lib/DG/Strategies/Strategy.hpp>
 #include <mod/lib/Graph/Single.hpp>
@@ -27,14 +27,15 @@ namespace dg {
 
 struct DG::Pimpl {
 
-	Pimpl(std::unique_ptr<lib::DG::NonHyper> dg) : dg(std::move(dg)) { }
+	Pimpl(std::unique_ptr<lib::DG::NonHyper> dg) : dg(std::move(dg)) {}
+
 public:
 	const std::unique_ptr<lib::DG::NonHyper> dg;
 };
 
-DG::DG(std::unique_ptr<lib::DG::NonHyper> dg) : p(new Pimpl(std::move(dg))) { }
+DG::DG(std::unique_ptr<lib::DG::NonHyper> dg) : p(new Pimpl(std::move(dg))) {}
 
-DG::~DG() { }
+DG::~DG() = default;
 
 std::size_t DG::getId() const {
 	return p->dg->getId();
@@ -52,9 +53,25 @@ const lib::DG::Hyper &DG::getHyper() const {
 	return getNonHyper().getHyper();
 }
 
+LabelSettings DG::getLabelSettings() const {
+	return getNonHyper().getLabelSettings();
+}
+
+//------------------------------------------------------------------------------
+
+bool DG::hasActiveBuilder() const {
+	return p->dg->getHasStartedCalculation() && !p->dg->getHasCalculated();
+}
+
+bool DG::isLocked() const {
+	return p->dg->getHasCalculated();
+}
+
 //------------------------------------------------------------------------------
 
 std::size_t DG::numVertices() const {
+	if(!(hasActiveBuilder() || isLocked()))
+		throw LogicError("The DG neither has an active builder nor is locked yet.");
 	using boost::vertices;
 	auto vs = vertices(getHyper().getGraph());
 	return std::count_if(vs.first, vs.second, [this](lib::DG::HyperVertex v) {
@@ -63,10 +80,14 @@ std::size_t DG::numVertices() const {
 }
 
 DG::VertexRange DG::vertices() const {
+	if(!(hasActiveBuilder() || isLocked()))
+		throw LogicError("The DG neither has an active builder nor is locked yet.");
 	return VertexRange(getNonHyper().getAPIReference());
 }
 
 std::size_t DG::numEdges() const {
+	if(!(hasActiveBuilder() || isLocked()))
+		throw LogicError("The DG neither has an active builder nor is locked yet.");
 	using boost::vertices;
 	auto vs = vertices(getHyper().getGraph());
 	return std::count_if(vs.first, vs.second, [this](lib::DG::HyperVertex v) {
@@ -75,39 +96,50 @@ std::size_t DG::numEdges() const {
 }
 
 DG::EdgeRange DG::edges() const {
+	if(!(hasActiveBuilder() || isLocked()))
+		throw LogicError("The DG neither has an active builder nor is locked yet.");
 	return EdgeRange(getNonHyper().getAPIReference());
 }
 
 //------------------------------------------------------------------------------
 
 DG::Vertex DG::findVertex(std::shared_ptr<graph::Graph> g) const {
+	if(!(hasActiveBuilder() || isLocked()))
+		throw LogicError("The DG neither has an active builder nor is locked yet.");
 	const auto &dg = getHyper();
 	const auto v = dg.getVertexOrNullFromGraph(&g->getGraph());
 	return dg.getInterfaceVertex(v);
 }
 
 DG::HyperEdge DG::findEdge(const std::vector<Vertex> &sources, const std::vector<Vertex> &targets) const {
+	if(!(hasActiveBuilder() || isLocked()))
+		throw LogicError("The DG neither has an active builder nor is locked yet.");
 	using boost::vertices;
 	const auto &dg = getHyper().getGraph();
-	auto vs = vertices(dg).first;
+	const auto vs = vertices(dg).first;
 	std::vector<lib::DG::Hyper::Vertex> vSources, vTargets;
 	for(auto v : sources) {
 		if(v.isNull()) throw LogicError("Source vertex descriptor is null.");
-		if(v.getDG() != getNonHyper().getAPIReference()) throw LogicError("Source vertex descriptor does not belong to this derivation graph: "
-				+ boost::lexical_cast<std::string>(v));
+		if(v.getDG() != getNonHyper().getAPIReference())
+			throw LogicError("Source vertex descriptor does not belong to this derivation graph: "
+			                 + boost::lexical_cast<std::string>(v));
 		vSources.push_back(vs[v.getId()]);
 	}
 	for(auto v : targets) {
 		if(v.isNull()) throw LogicError("Target vertex descriptor is null.");
-		if(v.getDG() != getNonHyper().getAPIReference()) throw LogicError("Target vertex descriptor does not belong to this derivation graph: "
-				+ boost::lexical_cast<std::string>(v));
+		if(v.getDG() != getNonHyper().getAPIReference())
+			throw LogicError("Target vertex descriptor does not belong to this derivation graph: "
+			                 + boost::lexical_cast<std::string>(v));
 		vTargets.push_back(vs[v.getId()]);
 	}
 	const auto vInner = getNonHyper().findHyperEdge(vSources, vTargets);
 	return getHyper().getInterfaceEdge(vInner);
 }
 
-DG::HyperEdge DG::findEdge(const std::vector<std::shared_ptr<graph::Graph> > &sources, const std::vector<std::shared_ptr<graph::Graph> > &targets) const {
+DG::HyperEdge DG::findEdge(const std::vector<std::shared_ptr<graph::Graph> > &sources,
+                           const std::vector<std::shared_ptr<graph::Graph> > &targets) const {
+	if(!(hasActiveBuilder() || isLocked()))
+		throw LogicError("The DG neither has an active builder nor is locked yet.");
 	std::vector<Vertex> vSources, vTargets;
 	for(auto g : sources) vSources.push_back(findVertex(g));
 	for(auto g : targets) vTargets.push_back(findVertex(g));
@@ -116,12 +148,14 @@ DG::HyperEdge DG::findEdge(const std::vector<std::shared_ptr<graph::Graph> > &so
 
 //------------------------------------------------------------------------------
 
-void DG::calc(bool printInfo) {
-	if(p->dg->getHasCalculated()) {
-		lib::IO::log() << "Notice: no effect of calculation for derivation graph. Already done." << std::endl;
-		return;
-	}
-	p->dg->calculate(printInfo);
+Builder DG::build() {
+	if(isLocked())
+		throw LogicError("The DG is locked.");
+	if(hasActiveBuilder())
+		throw LogicError("Another build is already in progress.");
+	if(auto *ptr = dynamic_cast<lib::DG::NonHyperBuilder *> (p->dg.get())) {
+		return Builder(*ptr);
+	} else throw LogicError("Only DGs from DG::builder can be built\n");
 }
 
 const std::vector<std::shared_ptr<graph::Graph>> &DG::getGraphDatabase() const {
@@ -141,33 +175,21 @@ std::pair<std::string, std::string> DG::print(const PrintData &data, const Print
 	if(data.getDG() != getNonHyper().getAPIReference()) {
 		std::ostringstream err;
 		err << "PrintData is for another derivation graph (id=" << data.getDG()->getId()
-				<< ") than this (id=" << getId() << ")" << std::endl;
+		    << ") than this (id=" << getId() << ")" << std::endl;
 		throw LogicError(err.str());
 	}
 	return lib::IO::DG::Write::summary(data.getData(), printer.getPrinter(), printer.getGraphPrinter().getOptions());
 }
 
 std::string DG::dump() const {
-	if(!p->dg->getHasCalculated()) throw LogicError("No dump can be done before the derivation graph it has been calculated.\n");
+	if(!p->dg->getHasCalculated())
+		throw LogicError("No dump can be done before the derivation graph it has been calculated.\n");
 	else return lib::IO::DG::Write::dump(*p->dg);
-}
-
-void DG::list() const {
-	p->dg->list(lib::IO::log());
 }
 
 void DG::listStats() const {
 	if(!p->dg->getHasCalculated()) throw LogicError("No stats can be printed before calculation.\n");
 	else p->dg->getHyper().printStats(lib::IO::log());
-}
-
-std::vector<std::shared_ptr<graph::Graph> > DG::getStratOutputSubset() const {
-	std::vector<std::shared_ptr<graph::Graph> > res;
-	if(auto *ptr = dynamic_cast<lib::DG::NonHyperRuleComp*> (p->dg.get())) {
-		if(!p->dg->getHasCalculated()) throw LogicError("The output subset can not be retrieved before calculation.\n");
-		else for(auto *g : ptr->getOutput().getSubset(0)) res.push_back(g->getAPIReference());
-	} else throw LogicError("The output subset can only be retrieved from derivation graphs based on rule composition.\n");
-	return res;
 }
 
 //------------------------------------------------------------------------------
@@ -179,34 +201,22 @@ namespace {
 std::shared_ptr<DG> wrapIt(DG *dgPtr) {
 	std::shared_ptr<DG> dg(dgPtr);
 	const lib::DG::NonHyper &cNonHyper = dg->getNonHyper();
-	const_cast<lib::DG::NonHyper&> (cNonHyper).setAPIReference(dg);
+	const_cast<lib::DG::NonHyper &> (cNonHyper).setAPIReference(dg);
 	return dg;
 }
 
 } // namespace
 
-std::shared_ptr<DG> DG::derivations(const std::vector<Derivation> &derivations) {
-	for(const auto &d : derivations) {
-		if(d.left.empty()) throw InputError("Derivation has empty left side: " + boost::lexical_cast<std::string>(d));
-		if(d.right.empty()) throw InputError("Derivation has empty right side: " + boost::lexical_cast<std::string>(d));
-	}
-	return wrapIt(new DG(std::make_unique<lib::DG::NonHyperDerivations>(derivations)));
-}
-
-std::shared_ptr<DG> DG::abstract(const std::string &specification) {
-	std::ostringstream err;
-	std::unique_ptr<lib::DG::NonHyper> dgInternal(lib::IO::DG::Read::abstract(specification, err));
-	if(!dgInternal) throw InputError(err.str());
+std::shared_ptr<DG> DG::make(LabelSettings labelSettings,
+                             const std::vector<std::shared_ptr<graph::Graph> > &graphDatabase,
+                             IsomorphismPolicy graphPolicy) {
+	auto dgInternal = std::make_unique<lib::DG::NonHyperBuilder>(labelSettings, graphDatabase, graphPolicy);
 	return wrapIt(new DG(std::move(dgInternal)));
 }
 
-std::shared_ptr<DG> DG::ruleComp(const std::vector<std::shared_ptr<graph::Graph> > &graphs,
-		std::shared_ptr<Strategy> strategy, LabelSettings labelSettings, bool ignoreRuleLabelTypes) {
-	auto dgInternal = std::make_unique<lib::DG::NonHyperRuleComp>(graphs, strategy->getStrategy().clone(), labelSettings, ignoreRuleLabelTypes);
-	return wrapIt(new DG(std::move(dgInternal)));
-}
-
-std::shared_ptr<DG> DG::dumpImport(const std::vector<std::shared_ptr<graph::Graph> > &graphs, const std::vector<std::shared_ptr<rule::Rule> > &rules, const std::string &file) {
+std::shared_ptr<DG> DG::dumpImport(const std::vector<std::shared_ptr<graph::Graph> > &graphs,
+                                   const std::vector<std::shared_ptr<rule::Rule> > &rules,
+                                   const std::string &file) {
 	std::ifstream fileStream(file.c_str());
 	if(!fileStream.is_open()) throw InputError("DG dump file not found, '" + file + "'\n");
 	fileStream.close();

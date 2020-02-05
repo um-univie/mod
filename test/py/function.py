@@ -2,7 +2,6 @@ include("formoseCommon/grammar.py")
 
 dg = dgRuleComp(inputGraphs, addSubset(inputGraphs) >> inputRules[0] >> inputRules[2])
 dg.calc()
-dg.list()
 
 printer = DGPrinter()
 postSection("Const False")

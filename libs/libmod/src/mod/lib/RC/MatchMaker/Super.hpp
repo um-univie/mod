@@ -26,8 +26,8 @@ struct Super {
 	using VertexMapType = jla_boost::GraphMorphism::InvertibleVectorVertexMap<GraphDom, GraphCodom>;
 public:
 
-	Super(bool allowPartial, bool enforceConstraints)
-			: allowPartial(allowPartial), enforceConstraints(enforceConstraints) {}
+	Super(int verbosity, IO::Logger logger, bool allowPartial, bool enforceConstraints)
+			: verbosity(verbosity), logger(logger), allowPartial(allowPartial), enforceConstraints(enforceConstraints) {}
 
 	template<typename RFirst, typename RSecond, typename MR>
 	void makeMatches(const RFirst &rFirst, const RSecond &rSecond, MR &&mr, LabelSettings labelSettings) const {
@@ -41,9 +41,10 @@ private:
 
 	template<bool AllowPartial, typename RFirst, typename RSecond, typename MR>
 	void makeMatchesInternal(const RFirst &rFirst, const RSecond &rSecond, MR &&mr, LabelSettings labelSettings) const {
-		if(getConfig().componentSG.verbose.get()) {
-			IO::log() << "ComponentSG: " << rFirst.getName() << " -> " << rSecond.getName() << std::endl;
-			IO::log() << "ComponentSG: " << "labelSettings = " << labelSettings << std::endl;
+		if(verbosity >= V_MorphismGen) {
+			logger.indent() << "Super: " << rFirst.getName() << " -> " << rSecond.getName() << std::endl;
+			++logger.indentLevel;
+			logger.indent() << "labelSettings = " << labelSettings << std::endl;
 		}
 		initByLabelSettings(rFirst, rSecond, labelSettings);
 		const auto &lgDomPatterns = get_labelled_left(rSecond.getDPORule());
@@ -72,32 +73,37 @@ private:
 		//			IO::log() << "\n";
 		//		}
 		//		IO::log() << std::endl;
-		auto mp = makeRuleRuleComponentMonomorphism(lgDomPatterns, lgCodomHosts, enforceConstraints, labelSettings);
+		auto mp = makeRuleRuleComponentMonomorphism(lgDomPatterns, lgCodomHosts, enforceConstraints, labelSettings,
+																  verbosity >= V_MorphismGen, logger);
 		auto mm = makeMultiDimSelector<AllowPartial>(
 				get_num_connected_components(lgDomPatterns),
 				get_num_connected_components(lgCodomHosts), mp);
-		if(getConfig().componentSG.verbose.get()) {
-			IO::log() << "ComponentSG: " << "Match matrix, " << mm.morphisms.size() << " x " << mm.morphisms.front().size()
-						 << std::endl;
+		if(verbosity >= V_MorphismGen) {
+			logger.indent() << "Super: " << "Match matrix, "
+								 << mm.morphisms.size() << " x " << mm.morphisms.front().size() << std::endl;
+			++logger.indentLevel;
 			for(int i = 0; i != mm.morphisms.size(); ++i) {
-				IO::log() << "ComponentSG: ";
-				if(mm.preDisabled[i]) IO::log() << "x:";
-				else IO::log() << " :";
+				logger.indent();
+				if(mm.preDisabled[i])
+					logger.s << "x:";
+				else logger.s << " :";
 				const auto &m = mm.morphisms[i];
 				for(int j = 0; j != m.size(); ++j)
-					IO::log() << " " << std::setw(2) << m[j].size();
-				IO::log() << std::endl;
+					logger.s << " " << std::setw(2) << m[j].size();
+				logger.s << std::endl;
 			}
+			--logger.indentLevel;
 		}
 		for(const auto &position : mm) {
 			auto maybeMap = matchFromPosition(rFirst, rSecond, position);
 			if(!maybeMap) {
-				if(getConfig().componentSG.verbose.get())
-					IO::log() << "ComponentSG: matchFromPosition returned none." << std::endl;
+				if(verbosity >= V_MorphismGen)
+					IO::log() << "Super: matchFromPosition returned none." << std::endl;
 				continue;
 			}
 			auto map = *std::move(maybeMap);
-			bool continue_ = handleMapByLabelSettings(rFirst, rSecond, std::move(map), mr, labelSettings);
+			bool continue_ = handleMapByLabelSettings(rFirst, rSecond, std::move(map), mr, labelSettings,
+																	verbosity, logger);
 			if(!continue_) break;
 		}
 	}
@@ -108,6 +114,8 @@ public:
 																	 const lib::Rules::Real &rSecond,
 																	 const std::vector<Position> &position) const;
 private:
+	const int verbosity;
+	mutable IO::Logger logger;
 	bool allowPartial;
 	bool enforceConstraints;
 };

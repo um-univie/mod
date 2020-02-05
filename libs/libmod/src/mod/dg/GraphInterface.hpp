@@ -1,7 +1,7 @@
 #ifndef MOD_DG_GRAPHINTERFACE_H
 #define MOD_DG_GRAPHINTERFACE_H
 
-// rst: This header contains the definitions for the hypergraph interface for :cpp:class:`dg::DG`.
+// rst: This header contains the definitions for the hypergraph interface for :class:`dg::DG`.
 // rst:
 
 #include <mod/BuildConfig.hpp>
@@ -38,7 +38,7 @@ public:
 	std::size_t hash() const;
 	// rst: .. function:: explicit operator bool() const
 	// rst:
-	// rst:		:returns: :cpp:expr:`!isNull()`
+	// rst:		:returns: `!isNull()`
 	explicit operator bool() const;
 	// rst:	.. function:: bool isNull() const
 	// rst:
@@ -47,37 +47,37 @@ public:
 	// rst:	.. function:: std::size_t getId() const
 	// rst:
 	// rst:		:returns: the index of the vertex. It will be in the range :math:`[0, numVertices + numEdges[`.
-	// rst:		:throws: :cpp:class:`LogicError` if it is a null descriptor.
+	// rst:		:throws: :class:`LogicError` if it is a null descriptor.
 	std::size_t getId() const;
 	// rst:	.. function:: std::shared_ptr<DG> getDG() const
 	// rst:
 	// rst:		:returns: the derivation graph the vertex belongs to.
-	// rst:		:throws: :cpp:class:`LogicError` if it is a null descriptor.
+	// rst:		:throws: :class:`LogicError` if it is a null descriptor.
 	std::shared_ptr<DG> getDG() const;
 	// rst:	.. function:: std::size_t inDegree() const
 	// rst:
 	// rst:		:returns: the in-degree of the vertex, including multiplicity of target multisets.
-	// rst:		:throws: :cpp:class:`LogicError` if it is a null descriptor.
+	// rst:		:throws: :class:`LogicError` if it is a null descriptor.
 	std::size_t inDegree() const;
 	// rst:	.. function:: InEdgeRange inEdges() const
 	// rst:
 	// rst:		:returns: a range of in-hyperedges for this vertex.
-	// rst:		:throws: :cpp:class:`LogicError` if it is a null descriptor.
+	// rst:		:throws: :class:`LogicError` if it is a null descriptor.
 	InEdgeRange inEdges() const;
 	// rst:	.. function:: std::size_t getOutDegree() const
 	// rst:
 	// rst:		:returns: the out-degree of the vertex, including multiplicity of source multisets.
-	// rst:		:throws: :cpp:class:`LogicError` if it is a null descriptor.
+	// rst:		:throws: :class:`LogicError` if it is a null descriptor.
 	std::size_t outDegree() const;
 	// rst:	.. function:: OutEdgeRange outEdges() const
 	// rst:
 	// rst:		:returns: a range of out-hyperedges for this vertex.
-	// rst:		:throws: :cpp:class:`LogicError` if it is a null descriptor.
+	// rst:		:throws: :class:`LogicError` if it is a null descriptor.
 	OutEdgeRange outEdges() const;
 	// rst:	.. function:: std::shared_ptr<graph::Graph> &getGraph() const
 	// rst:
-	// rst: 	:returns: the graph label of the vertex.
-	// rst: 	:throws: :cpp:class:`LogicError` if it is a null descriptor.
+	// rst:		:returns: the graph label of the vertex.
+	// rst:		:throws: :class:`LogicError` if it is a null descriptor.
 	std::shared_ptr<graph::Graph> getGraph() const;
 private:
 	std::shared_ptr<DG> g;
@@ -105,7 +105,7 @@ public:
 	std::size_t hash() const;
 	// rst: .. function:: explicit operator bool() const
 	// rst:
-	// rst:		:returns: :cpp:expr:`!isNull()`
+	// rst:		:returns: `!isNull()`
 	explicit operator bool() const;
 	// rst:	.. function:: bool isNull() const
 	// rst:
@@ -114,64 +114,66 @@ public:
 	// rst:	.. function:: std::size_t getId() const
 	// rst:
 	// rst:		:returns: the index of the hyperedge. It will be in the range :math:`[0, numVertices + numEdges[`.
-	// rst:		:throws: :cpp:class:`LogicError` if it is a null descriptor.
+	// rst:		:throws: :class:`LogicError` if it is a null descriptor.
 	std::size_t getId() const;
 	// rst:	.. function:: std::shared_ptr<DG> getDG() const
 	// rst:
 	// rst:		:returns: the derivation graph the hyperedge belongs to.
-	// rst:		:throws: :cpp:class:`LogicError` if it is a null descriptor.
+	// rst:		:throws: :class:`LogicError` if it is a null descriptor.
 	std::shared_ptr<DG> getDG() const;
 	// rst:	.. function:: std::size_t numSources() const
 	// rst:
 	// rst:		:returns: the number of sources of the hyperedge.
-	// rst: 	:throws: :cpp:class:`LogicError` if it is a null descriptor.
+	// rst:		:throws: :class:`LogicError` if it is a null descriptor.
 	std::size_t numSources() const;
 	// rst:	.. function:: SourceRange sources() const
 	// rst:
 	// rst:		:returns: the sources of the hyperedge.
-	// rst: 	:throws: :cpp:class:`LogicError` if it is a null descriptor.
+	// rst:		:throws: :class:`LogicError` if it is a null descriptor.
 	SourceRange sources() const;
 	// rst:	.. function:: std::size_t numTargets() const
 	// rst:
 	// rst:		:returns: the number of targets of the hyperedge.
-	// rst: 	:throws: :cpp:class:`LogicError` if it is a null descriptor.
+	// rst:		:throws: :class:`LogicError` if it is a null descriptor.
 	std::size_t numTargets() const;
 	// rst:	.. function:: TargetRange targets() const
 	// rst:
 	// rst:		:returns: the targets of the hyperedge.
-	// rst: 	:throws: :cpp:class:`LogicError` if it is a null descriptor.
+	// rst:		:throws: :class:`LogicError` if it is a null descriptor.
 	TargetRange targets() const;
 	// rst:	.. function:: RuleRange rules() const
 	// rst:
-	// rst: 	:returns: a range of the rules associated with the hyperedge.
-	// rst: 	:throws: :cpp:class:`LogicError` if it is a null descriptor.
+	// rst:		:returns: a range of the rules associated with the hyperedge.
+	// rst:		:throws: :class:`LogicError` if it is a null descriptor.
 	RuleRange rules() const;
 	// rst: .. function:: HyperEdge getInverse() const
 	// rst:
 	// rst:		:returns: a descriptor for the inverse hyperedge of this one, if it exists.
 	// rst:			Otherwise a null descriptor is returned.
-	// rst: 	:throws: :cpp:class:`LogicError` if it is a null descriptor.
+	// rst:		:throws: :class:`LogicError` if it is a null descriptor.
+	// rst:		:throws: :class:`LogicError` if not `getDG()->isLocked()`.
 	HyperEdge getInverse() const;
 public:
 	// rst: .. function:: std::vector<std::pair<std::string, std::string> > print(const graph::Printer &printer, const std::string &nomatchColour, const std::string &matchColour) const
 	// rst:
 	// rst:		Print the derivations represented by the hyperedge.
 	// rst:		All possible Double-Pushout diagrams are printed.
-	// rst:		The ``matchColour`` must be a valid colour for TikZ, which is applied to the rule
+	// rst:		The `matchColour` must be a valid colour for TikZ, which is applied to the rule
 	// rst:		and its image in the bottom span.
 	// rst:
 	// rst:		:returns: A list with file data for each DPO diagram printed.
 	// rst:			Each element is a pair of filename prefixes, where the first entry is completed by appending ``_derL``, ``_derK``, or ``_derR``.
 	// rst:			The second entry is completed similarly by appending ``_derG``, ``_derD``, or ``_derH``.
-	// rst: 	:throws: :cpp:class:`LogicError` if it is a null descriptor.
-	std::vector<std::pair<std::string, std::string> > print(const graph::Printer &printer, const std::string &nomatchColour, const std::string &matchColour) const;
+	// rst:		:throws: :class:`LogicError` if it is a null descriptor.
+	std::vector<std::pair<std::string, std::string> >
+	print(const graph::Printer &printer, const std::string &nomatchColour, const std::string &matchColour) const;
 	// rst: .. function:: void printTransitionState() const
 	// rst:               void printTransitionState(const graph::Printer &printer) const
 	// rst:
 	// rst:		Print the derivations represented by the hyperedge in style of a chemical transition state.
 	// rst:		For all possible Double-Pushout diagrams a figure printed.
 	// rst:
-	// rst: 	:throws: :cpp:class:`LogicError` if it is a null descriptor.
+	// rst:		:throws: :class:`LogicError` if it is a null descriptor.
 	void printTransitionState() const;
 	void printTransitionState(const graph::Printer &printer) const;
 private:
@@ -531,7 +533,7 @@ private:
 // VertexRange
 //------------------------------------------------------------------------------
 
-inline DG::VertexRange::VertexRange(std::shared_ptr<DG> g) : g(g) { }
+inline DG::VertexRange::VertexRange(std::shared_ptr<DG> g) : g(g) {}
 
 inline DG::VertexIterator DG::VertexRange::begin() const {
 	return VertexIterator(g);
@@ -544,7 +546,7 @@ inline DG::VertexIterator DG::VertexRange::end() const {
 // EdgeRange
 //------------------------------------------------------------------------------
 
-inline DG::EdgeRange::EdgeRange(std::shared_ptr<DG> g) : g(g) { }
+inline DG::EdgeRange::EdgeRange(std::shared_ptr<DG> g) : g(g) {}
 
 inline DG::EdgeIterator DG::EdgeRange::begin() const {
 	return EdgeIterator(g);
@@ -557,7 +559,7 @@ inline DG::EdgeIterator DG::EdgeRange::end() const {
 // InEdgeRange
 //------------------------------------------------------------------------------
 
-inline DG::InEdgeRange::InEdgeRange(std::shared_ptr<DG> g, std::size_t vId) : g(g), vId(vId) { }
+inline DG::InEdgeRange::InEdgeRange(std::shared_ptr<DG> g, std::size_t vId) : g(g), vId(vId) {}
 
 inline DG::InEdgeIterator DG::InEdgeRange::begin() const {
 	return InEdgeIterator(g, vId);
@@ -570,7 +572,7 @@ inline DG::InEdgeIterator DG::InEdgeRange::end() const {
 // OutEdgeRange
 //------------------------------------------------------------------------------
 
-inline DG::OutEdgeRange::OutEdgeRange(std::shared_ptr<DG> g, std::size_t vId) : g(g), vId(vId) { }
+inline DG::OutEdgeRange::OutEdgeRange(std::shared_ptr<DG> g, std::size_t vId) : g(g), vId(vId) {}
 
 inline DG::OutEdgeIterator DG::OutEdgeRange::begin() const {
 	return OutEdgeIterator(g, vId);
@@ -583,7 +585,7 @@ inline DG::OutEdgeIterator DG::OutEdgeRange::end() const {
 // SourceRange
 //------------------------------------------------------------------------------
 
-inline DG::SourceRange::SourceRange(std::shared_ptr<DG> g, std::size_t eId) : g(g), eId(eId) { }
+inline DG::SourceRange::SourceRange(std::shared_ptr<DG> g, std::size_t eId) : g(g), eId(eId) {}
 
 inline DG::SourceIterator DG::SourceRange::begin() const {
 	return SourceIterator(g, eId);
@@ -596,7 +598,7 @@ inline DG::SourceIterator DG::SourceRange::end() const {
 // TargetRange
 //------------------------------------------------------------------------------
 
-inline DG::TargetRange::TargetRange(std::shared_ptr<DG> g, std::size_t eId) : g(g), eId(eId) { }
+inline DG::TargetRange::TargetRange(std::shared_ptr<DG> g, std::size_t eId) : g(g), eId(eId) {}
 
 inline DG::TargetIterator DG::TargetRange::begin() const {
 	return TargetIterator(g, eId);
@@ -609,7 +611,7 @@ inline DG::TargetIterator DG::TargetRange::end() const {
 // RuleRange
 //------------------------------------------------------------------------------
 
-inline DG::RuleRange::RuleRange(std::shared_ptr<DG> g, std::size_t eId) : g(g), eId(eId) { }
+inline DG::RuleRange::RuleRange(std::shared_ptr<DG> g, std::size_t eId) : g(g), eId(eId) {}
 
 inline DG::RuleIterator DG::RuleRange::begin() const {
 	return RuleIterator(g, eId);

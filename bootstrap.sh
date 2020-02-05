@@ -53,13 +53,19 @@ function gen_file_lists {
 	echo "set(mod_TEST_PY_FILES"
 	find test/py -iname "*.py" | sed -e "s!^test/!!" -e 's!\.py$!!' | indent
 	echo ")"
+	echo "set(mod_TEST_CPP_FILES"
+	find test/cpp -iname "*.cpp" | sed -e "s!^test/!!" -e 's!\.cpp$!!' | indent
+	echo ")"
 	echo ""
+	echo "set(mod_EXAMPLES_PY_FILES"
+	find examples/py -iname "*.py" | sed -e "s!^examples/!!" -e 's!\.py$!!' | indent
+	echo ")"
 }
 
 echo "VERSION"
 # public versions are tagged with 'vA.B.0' and private with 'priv-A.B.0'
 # these are converted into A.B.0 and A.B.1, with the commit offset as 4th component
-v=$(git describe --tags --always | sed -e "s/^v//" -e 's/priv-\([0-9]*\.[0-9]*\)\.0/\1.1/' -e "s/-g.*$//" -e "s/-/./")
+v=$(git describe --tags --always --exclude "archive/*" | sed -e "s/^v//" -e 's/priv-\([0-9]*\.[0-9]*\)\.0/\1.1/' -e "s/-g.*$//" -e "s/-/./")
 echo $v > VERSION
 cat VERSION
 echo "CMakeFiles.txt"
