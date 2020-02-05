@@ -19,7 +19,7 @@ namespace RCExp {
 // rst: ---------------------------
 // rst:
 // rst: In this namespace the data structures and operators for representing rule composition expressions are defined.
-// rst: An expression, ``RCExp``, can be evaluated through the method ``Composer::eval``. The result of an expression
+// rst: An expression, ``RCExp``, can be evaluated through the method `rule::Composer::eval`. The result of an expression
 // rst: is a set of rules.
 // rst:
 
@@ -191,7 +191,7 @@ private:
 // rst-class: rule::RCExp::ComposeSub
 // rst:
 // rst:		Compose the rules such that overlapping connected components of :math:`R_1` and :math:`L_2` have the :math:`L_2` component as a subgraph of :math:`R_1`.
-// rst:		The overlap is `partial` if not every connected component of :math:`L_2` is participating in the common subgraph.
+// rst:		The overlap is *partial* if not every connected component of :math:`L_2` is participating in the common subgraph.
 // rst:
 // rst-class-start:
 
@@ -208,16 +208,16 @@ private:
 // rst-class: rule::RCExp::ComposeSuper
 // rst:
 // rst:		Compose the rules such that overlapping connected components of :math:`R_1` and :math:`L_2` have the :math:`R_1` component as a subgraph of :math:`L_2`.
-// rst:		The overlap is `partial` if not every connected component of :math:`R_1` is participating in the common subgraph.
+// rst:		The overlap is *partial* if not every connected component of :math:`R_1` is participating in the common subgraph.
 // rst:
 // rst-class-start:
 
 struct MOD_DECL ComposeSuper : public ComposeBase {
 	ComposeSuper(Expression first,
-					 Expression second,
-					 bool discardNonchemical,
-					 bool allowPartial,
-					 bool enforceConstraints);
+				 Expression second,
+				 bool discardNonchemical,
+				 bool allowPartial,
+				 bool enforceConstraints);
 	bool getAllowPartial() const;
 	bool getEnforceConstraints() const;
 private:

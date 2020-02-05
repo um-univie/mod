@@ -10,7 +10,7 @@ namespace Py {
 struct AttributeIsNotReadable {
 };
 
-inline void noGet(AttributeIsNotReadable) { }
+inline void noGet(AttributeIsNotReadable) {}
 
 // From https://wiki.python.org/moin/boost.python/HowTo#Dynamic_template_to-python_converters.
 

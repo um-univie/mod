@@ -17,30 +17,30 @@ Strategy *Sort::clone() const {
 	return new Sort(less->clone(), doUniverse);
 }
 
-void Sort::preAddGraphs(std::function<void(std::shared_ptr<graph::Graph>) > add) const { }
+void Sort::preAddGraphs(std::function<void(std::shared_ptr<graph::Graph>, IsomorphismPolicy) > add) const { }
 
-void Sort::printInfo(std::ostream &s) const {
-	s << indent << "Sort";
+void Sort::printInfo(PrintSettings settings) const {
+	settings.indent() << "Sort";
+	std::ostream &s = settings.s;
 	if(doUniverse) s << " universe";
-	s << std::endl;
-	indentLevel++;
-	s << indent << "evaluation function = ";
+	s << '\n';
+	++settings.indentLevel;
+	settings.indent() << "evaluation function = ";
 	less->print(s);
-	s << std::endl;
-	printBaseInfo(s);
-	indentLevel--;
+	s << '\n';
+	printBaseInfo(settings);
 }
 
 bool Sort::isConsumed(const lib::Graph::Single *g) const {
 	return false;
 }
 
-void Sort::executeImpl(std::ostream &s, const GraphState &input) {
+void Sort::executeImpl(PrintSettings settings, const GraphState &input) {
 	if(getConfig().dg.calculateVerbose.get()) {
-		s << "Sort: ";
-		less->print(s);
-		s << std::endl;
-		indentLevel++;
+		settings.indent() << "Sort: ";
+		less->print(settings.s);
+		settings.s << std::endl;
+		++settings.indentLevel;
 	}
 
 	assert(!output);
@@ -60,7 +60,8 @@ void Sort::executeImpl(std::ostream &s, const GraphState &input) {
 	assert(output->getSubsets().size() == 1);
 	if(doUniverse) output->sortUniverse(comp);
 	else output->sortSubset(0, comp); // TODO: put the subset index here
-	if(getConfig().dg.calculateVerbose.get()) indentLevel--;
+	if(getConfig().dg.calculateVerbose.get())
+		--settings.indentLevel;
 }
 
 } // namespace Strategies

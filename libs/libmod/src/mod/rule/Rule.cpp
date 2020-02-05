@@ -21,14 +21,15 @@ struct Rule::Pimpl {
 	Pimpl(std::unique_ptr<lib::Rules::Real> r) : r(std::move(r)) {
 		assert(this->r);
 	}
+
 public:
 	const std::unique_ptr<lib::Rules::Real> r;
 	std::unique_ptr<const std::map<int, std::size_t> > externalToInternalIds;
 };
 
-Rule::Rule(std::unique_ptr<lib::Rules::Real> r) : p(new Pimpl(std::move(r))) { }
+Rule::Rule(std::unique_ptr<lib::Rules::Real> r) : p(new Pimpl(std::move(r))) {}
 
-Rule::~Rule() { }
+Rule::~Rule() = default;
 
 unsigned int Rule::getId() const {
 	return getRule().getId();
@@ -78,7 +79,7 @@ std::shared_ptr<Rule> Rule::makeInverse() const {
 	lib::Rules::LabelledRule dpoRule(getRule().getDPORule(), true);
 	if(getConfig().rule.ignoreConstraintsDuringInversion.get()) {
 		if(dpoRule.leftMatchConstraints.size() > 0
-				|| dpoRule.rightMatchConstraints.size() > 0) {
+		   || dpoRule.rightMatchConstraints.size() > 0) {
 			lib::IO::log() << "WARNING: inversion of rule strips constraints.\n";
 		}
 	} else {
@@ -172,6 +173,12 @@ std::size_t Rule::monomorphism(std::shared_ptr<Rule> r, std::size_t maxNumMatche
 	return lib::Rules::Real::monomorphism(this->getRule(), r->getRule(), maxNumMatches, labelSettings);
 }
 
+bool Rule::isomorphicLeftRight(std::shared_ptr<Rule> r, LabelSettings labelSettings) const {
+	checkTermParsing(this->getRule(), labelSettings);
+	checkTermParsing(r->getRule(), labelSettings);
+	return lib::Rules::Real::isomorphicLeftRight(this->getRule(), r->getRule(), labelSettings);
+}
+
 Rule::Vertex Rule::getVertexFromExternalId(int id) const {
 	if(!p->externalToInternalIds) return Vertex();
 	auto iter = p->externalToInternalIds->find(id);
@@ -195,7 +202,10 @@ int Rule::getMaxExternalId() const {
 
 namespace {
 
-std::shared_ptr<Rule> handleLoadedRule(lib::IO::Rules::Read::Data &&data, bool invert, const std::string &dataSource, std::ostringstream &err) {
+std::shared_ptr<Rule> handleLoadedRule(lib::IO::Rules::Read::Data &&data,
+                                       bool invert,
+                                       const std::string &dataSource,
+                                       std::ostringstream &err) {
 	if(!data.rule) {
 		err << "\nCould not load rule from " << dataSource << "." << std::endl;
 		throw InputError(err.str());
@@ -211,7 +221,8 @@ std::shared_ptr<Rule> handleLoadedRule(lib::IO::Rules::Read::Data &&data, bool i
 			else stream << "anon";
 			stream << "' from " << dataSource << " has matching constraints ";
 			if(!ignore) {
-				stream << "and can not be reversed. Use " << getConfig().rule.ignoreConstraintsDuringInversion.getName() << " == true to strip constraints." << std::endl;
+				stream << "and can not be reversed. Use " << getConfig().rule.ignoreConstraintsDuringInversion.getName()
+				       << " == true to strip constraints." << std::endl;
 				throw InputError(err.str());
 			} else {
 				stream << "and these will be stripped from the reversed rule." << std::endl;
@@ -242,14 +253,16 @@ std::shared_ptr<Rule> Rule::ruleGML(const std::string &file, bool invert) {
 }
 
 std::shared_ptr<Rule> Rule::makeRule(std::unique_ptr<lib::Rules::Real> r) {
-	return makeRule(std::move(r),{});
+	return makeRule(std::move(r), {});
 }
 
-std::shared_ptr<Rule> Rule::makeRule(std::unique_ptr<lib::Rules::Real> r, std::map<int, std::size_t> externalToInternalIds) {
+std::shared_ptr<Rule> Rule::makeRule(std::unique_ptr<lib::Rules::Real> r,
+                                     std::map<int, std::size_t> externalToInternalIds) {
 	std::shared_ptr<Rule> rWrapped(new Rule(std::move(r)));
 	rWrapped->p->r->setAPIReference(rWrapped);
 	if(!externalToInternalIds.empty()) {
-		rWrapped->p->externalToInternalIds = std::make_unique<std::map<int, std::size_t> >(std::move(externalToInternalIds));
+		rWrapped->p->externalToInternalIds = std::make_unique<std::map<int, std::size_t> >(
+				std::move(externalToInternalIds));
 	}
 	return rWrapped;
 }

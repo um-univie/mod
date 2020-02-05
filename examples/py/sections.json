@@ -1,0 +1,7 @@
+[
+{"first":0,  "last":100,"id":"basics","title":"Basics, Graphs, and Rules"},
+{"first":100,"last":200,"id":"rc",    "title":"Rule Composition"},
+{"first":200,"last":300,"id":"dg",    "title":"Derivations and Reaction Networks"},
+{"first":300,"last":350,"id":"stereo","title":"Local Geometry and Stereochemistry"},
+{"first":500,"last":550,"id":"flow",  "title":"Integer Hyperflows and Pathways","future":true}
+]

@@ -12,21 +12,21 @@
 #include <vector>
 
 namespace mod {
-struct Derivation;
 namespace dg {
 
 // rst-class: dg::DG
 // rst:
-// rst:		The main derivation graph class. A derivation graph is a directed hypergraph
-// rst:		:math:`\mathcal{H} = (V, E)`.
-// rst:		Each vertex is annotated with a graph, and each hyperedge is annotated with a transformation rule.
-// rst:		A derivation graph can either be calculated from a strategy or loaded from external data.
+// rst:		The derivation graph class. A derivation graph is a directed multi-hypergraph
+// rst:		:math:`\mathcal{H} = (V, E)`. Each hyperedge :math:`e\in E` is thus an ordered pair
+// rst:		:math:`(e^+, e^-)` of multisets of vertices, the sources and the targets.
+// rst:		Each vertex is annotated with a graph, and each hyperedge is annotated with list of transformation rules.
+// rst:		A derivation graph is constructed incrementally using a :cpp:class:`Builder` obtained from the :cpp:func:`build()`
+// rst:		function. When the obtained builder is destructed the derivation graph becomes locked and can no longer be modified.
 // rst: 
 // rst-class-start:
-
 struct MOD_DECL DG {
-	DG(const DG&) = delete;
-	DG &operator=(const DG&) = delete;
+	DG(const DG &) = delete;
+	DG &operator=(const DG &) = delete;
 public:
 	class Vertex;
 	class HyperEdge;
@@ -50,137 +50,148 @@ public:
 	~DG();
 	// rst: .. function:: std::size_t getId() const
 	// rst:
-	// rst: 	:returns: the instance identifier for the object.
+	// rst:		:returns: the instance identifier for the object.
 	std::size_t getId() const;
+	// rst: .. function:: friend std::ostream &operator<<(std::ostream &s, const DG &dg)
 	MOD_DECL friend std::ostream &operator<<(std::ostream &s, const DG &dg);
 	// rst: .. function:: const lib::DG::NonHyper &getNonHyper() const
 	// rst:               const lib::DG::Hyper &getHyper() const
 	// rst: 
-	// rst: 	:returns: the internal data structures of the derivation graph.
+	// rst:		:returns: the internal data structures of the derivation graph.
 	const lib::DG::NonHyper &getNonHyper() const;
 	const lib::DG::Hyper &getHyper() const;
+	// rst: .. function:: LabelSettings getLabelSettings() const
+	// rst:
+	// rst:		:returns: the label settings for the derivation graph.
+	LabelSettings getLabelSettings() const;
+public: // object state
+	// rst: .. function:: bool hasActiveBuilder() const
+	// rst:
+	// rst:		:returns: whether :cpp:func:`build` has been called and the returned :cpp:class:`Builder` is still active.
+	bool hasActiveBuilder() const;
+	// rst: .. function:: bool isLocked() const
+	// rst:
+	// rst:		:returns: whether the derivation graph is locked or not.
+	bool isLocked() const;
 public: // hypergraph interface
 	// rst: .. function:: std::size_t numVertices() const
 	// rst:
 	// rst:		:returns: the number of vertices in the derivation graph.
+	// rst:		:throws: :class:`LogicError` if not `hasActiveBuilder()` or `isLocked()`.
 	std::size_t numVertices() const;
 	// rst: .. function:: VertexRange vertices() const
 	// rst:
 	// rst:		:returns: a range of all vertices in the derivation graph.
+	// rst:		:throws: :class:`LogicError` if not `hasActiveBuilder()` or `isLocked()`.
 	VertexRange vertices() const;
 	// rst: .. function:: std::size_t numEdges() const
 	// rst:
 	// rst:		:returns: the number of edges in the derivation graph.
+	// rst:		:throws: :class:`LogicError` if not `hasActiveBuilder()` or `isLocked()`.
 	std::size_t numEdges() const;
 	// rst: .. function:: EdgeRange edges() const
 	// rst:
 	// rst:		:returns: a range of all edges in the derivation graph.
+	// rst:		:throws: :class:`LogicError` if not `hasActiveBuilder()` or `isLocked()`.
 	EdgeRange edges() const;
 public: // searching for vertices and hyperedges
 	// rst: .. function:: Vertex findVertex(std::shared_ptr<graph::Graph> g) const
 	// rst:
 	// rst:		:returns: a vertex descriptor for which the given graph is associated,
 	// rst:			or a null descriptor if no such vertex exists.
+	// rst:		:throws: :class:`LogicError` if not `hasActiveBuilder()` or `isLocked()`.
 	Vertex findVertex(std::shared_ptr<graph::Graph> g) const;
 	// rst: .. function:: HyperEdge findEdge(const std::vector<Vertex> &sources, const std::vector<Vertex> &targets) const
 	// rst:               HyperEdge findEdge(const std::vector<std::shared_ptr<graph::Graph> > &sources, const std::vector<std::shared_ptr<graph::Graph> > &targets) const
 	// rst: 
-	// rst: 	:returns: a hyperedge with the given sources and targets.
-	// rst: 	  If no such hyperedge exists in the derivation graph then a null edge is returned.
-	// rst:		  In the second version, the graphs are put through :func:`findVertex` first.
+	// rst:		:returns: a hyperedge with the given sources and targets.
+	// rst:			If no such hyperedge exists in the derivation graph then a null edge is returned.
+	// rst:			In the second version, the graphs are put through :func:`findVertex` first.
 	// rst:		:throws: :class:`LogicError` if a vertex descriptor is null, or does not belong to the derivation graph.
+	// rst:		:throws: :class:`LogicError` if not `hasActiveBuilder()` or `isLocked()`.
 	HyperEdge findEdge(const std::vector<Vertex> &sources, const std::vector<Vertex> &targets) const;
-	HyperEdge findEdge(const std::vector<std::shared_ptr<graph::Graph> > &sources, const std::vector<std::shared_ptr<graph::Graph> > &targets) const;
+	HyperEdge findEdge(const std::vector<std::shared_ptr<graph::Graph> > &sources,
+	                   const std::vector<std::shared_ptr<graph::Graph> > &targets) const;
 public:
-	// rst: .. function:: void calc(bool printInfo = true)
+	// rst: .. function:: Builder build()
 	// rst:
-	// rst:		Compute the derivation graph.
-	// rst:
-	// rst:		:throws: :class:`LogicError` if created from :cpp:any:`ruleComp` and a dynamic add strategy adds a graph
-	// rst:			isomorphic to an already known graph, but represented by a different object.
-	void calc(bool printInfo = true);
+	// rst:		:returns: an RAII-style move-only object which can be used to construct the derivation graph.
+	// rst:			Only one of these objects can be active at the same time, and on destruction an active builder object
+	// rst:			will lock the associated DG object for further modification.
+	// rst:		:throws: :cpp:class:`LogicError` if `hasActiveBuilder()`.
+	// rst:		:throws: :cpp:class:`LogicError` if `isLocked()`.
+	Builder build();
 	// rst: .. function:: const std::vector<std::shared_ptr<graph::Graph>> &getGraphDatabase() const
 	// rst:
-	// rst: 	:returns: a list of all graphs created by the derivation graph,
-	// rst: 		and all graphs given when constructed.
+	// rst:		:returns: a list of all graphs created by the derivation graph,
+	// rst:			and all graphs given when constructed.
 	const std::vector<std::shared_ptr<graph::Graph>> &getGraphDatabase() const;
 	// rst: .. function:: const std::vector<std::shared_ptr<graph::Graph> > &getProducts() const
 	// rst:
-	// rst: 	:returns: the list of new graphs discovered by the derivation graph.
+	// rst:		:returns: the list of new graphs discovered by the derivation graph.
 	const std::vector<std::shared_ptr<graph::Graph> > &getProducts() const;
 	// rst: .. function:: std::pair<std::string, std::string> print(const PrintData &data, const Printer &printer) const
 	// rst:
-	// rst: 	Print the derivation graph in style of a hypergraph.
-	// rst: 	:returns: the name of the PDF-file that will be compiled in post-processing and the name of the coordinate tex-file used.
-	// rst: 	:throws: :class:`LogicError` if the print data is not for this DG.
+	// rst:		Print the derivation graph in style of a hypergraph.
+	// rst:
+	// rst:		:returns: the name of the PDF-file that will be compiled in post-processing and the name of the coordinate tex-file used.
+	// rst:		:throws: :class:`LogicError` if the print data is not for this DG.
 	std::pair<std::string, std::string> print(const PrintData &data, const Printer &printer) const;
 	// rst: .. function:: std::string dump() const
 	// rst:
-	// rst: 	Exports the derivation graph to a text file, which can be importetet.
+	// rst:		Exports the derivation graph to a text file, which can be importetet.
 	// rst:
-	// rst: 	:returns: the name of the file with the exported data.
-	// rst: 	:throws: :class:`LogicError` if the DG has not been calculated.
+	// rst:		:returns: the name of the file with the exported data.
+	// rst:		:throws: :class:`LogicError` if the DG has not been calculated.
 	std::string dump() const;
-	// rst: .. function:: void list() const
-	// rst:
-	// rst: 	Output information on the calculation of the derivation graph.
-	// rst: 	For strategy-based calculations, this outputs the expression tree.
-	void list() const;
 	// rst: .. function:: void listStats() const
 	// rst: 
-	// rst: 	Output various stats of the derivation graph.
+	// rst:		Output various stats of the derivation graph.
 	// rst:
-	// rst: 	:throws: :class:`LogicError` if the DG has not been calculated.
+	// rst:		:throws: :class:`LogicError` if the DG has not been calculated.
 	void listStats() const;
-	// :throws: :class:`LogicError` if the DG has not been calculated or if the DG is not created from strategies.
-	std::vector<std::shared_ptr<graph::Graph> > getStratOutputSubset() const;
 private:
 	struct Pimpl;
 	std::unique_ptr<Pimpl> p;
 public:
-	// rst: .. function:: static std::shared_ptr<DG> derivations(const std::vector<Derivation> &derivations)
+	// rst: .. function:: static std::shared_ptr<DG> make(LabelSettings labelSettings, \
+	// rst:                                              const std::vector<std::shared_ptr<graph::Graph> > &graphDatabase, \
+	// rst:                                              IsomorphismPolicy graphPolicy)
 	// rst:
-	// rst: 	Create a derivation graph from a list of :class:`Derivation`.
-	static std::shared_ptr<DG> derivations(const std::vector<Derivation> &derivations);
-	// rst: .. function:: static std::shared_ptr<DG> abstract(const std::string &specification)
+	// rst:		Create an empty unlocked derivation graph object.
 	// rst:
-	// rst: 	Create a derivation graph from an abstract description according to the following grammar.
+	// rst:		The given :cpp:class:`LabelSettings` defines which category the derivation graph object works in.
+	// rst:		All morphism calculations (monomorphism and isomorphism) are thus defined by the :cpp:enum:`LabelType`,
+	// rst:		while the :cpp:enum:`LabelRelation` is used for for monomorphism enumeration.
 	// rst:
-	// rst: 	.. productionlist::
-	// rst: 		description: `derivation` { `derivation` }
-	// rst: 		derivation: `side` ("->" | "<=>") `side`
-	// rst:	 		side: `term` { "+" `term` }
-	// rst: 		term: [ `unsignedInt` ] `identifier`
+	// rst:		The graphs is the given :cpp:var:`graphDatabase` are used as the initial graph database.
+	// rst:		Any subsequently added or constructed graph for this object
+	// rst:		will be checked for isomorphism against the graph database.
 	// rst:
-	// rst: 	:throws: :class:`InputError` on bad input.
-	static std::shared_ptr<DG> abstract(const std::string &specification);
-	// rst: .. function:: static std::shared_ptr<DG> ruleComp(const std::vector<std::shared_ptr<graph::Graph> > &graphs, \
-	// rst:               std::shared_ptr<Strategy> strategy, LabelSettings labelSettings, bool ignoreRuleLabelTypes)
+	// rst:		The given :cpp:var:`graphPolicy` refers to how the graphs of :cpp:var:`graphDatabase` are checked for
+	// rst:		isomorphism against each other initially. Only use :cpp:enumerator:`IsomorphismPolicy::TrustMe` if you are
+	// rst:		absolutely sure that the graphs are unique up to isomorphism.
 	// rst:
-	// rst: 	Initialize a derivation graph with a :cpp:class:`Strategy` and an initial graph database.
-	// rst: 	Any derived graph isomorphic to a given graph is replaced by the given graph.
-	// rst:		The given :cpp:class:`LabelSettings` is used for both monomorphism enumeration,
-	// rst:		and its :cpp:enum:`LabelType` is used in isomorphism checks.
-	// rst:
-	// rst:		:throws: :class:`LogicError` if two graphs in :cpp:any:`graphs` are different by isomorphic objects,
-	// rst:			or similarly if a static add strategy adds an isomorphic graph.
-	// rst:		:throws: :class:`LogicError` if :cpp:any:`ignoreRuleLabelTypes` is `false` and a rule in the given strategy
-	// rst:			has an intended label type different from the given type in :cpp:any:`labelSettings`.
-	static std::shared_ptr<DG> ruleComp(const std::vector<std::shared_ptr<graph::Graph> > &graphs,
-			std::shared_ptr<Strategy> strategy, LabelSettings labelSettings, bool ignoreRuleLabelTypes);
+	// rst:		:throws: :class:`LogicError` if `graphPolicy == IsomorphismPolicy::Check` and two graph objects
+	// rst:			in :cpp:any:`graphDatabase` are different objects but represents isomorphic graphs.
+	static std::shared_ptr<DG> make(LabelSettings labelSettings,
+	                                const std::vector<std::shared_ptr<graph::Graph> > &graphDatabase,
+	                                IsomorphismPolicy graphPolicy);
 	// rst: .. function:: static std::shared_ptr<DG> dumpImport(const std::vector<std::shared_ptr<graph::Graph> > &graphs, const std::vector<std::shared_ptr<rule::Rule> > &rules, const std::string &file)
 	// rst:
-	// rst: 	Load a derivation graph dump. Any graph in the dump which is isomorphic to a given graph is replaced by the given graph.
-	// rst: 	The same procedure is done for the rules, however only using the name of the rule for comparison.
+	// rst: 		Load a derivation graph dump. Any graph in the dump which is isomorphic to a given graph is replaced by the given graph.
+	// rst: 		The same procedure is done for the rules, however only using the name of the rule for comparison.
 	// rst:
-	// rst: 	:throws: :class:`InputError` on bad input.
-	static std::shared_ptr<DG> dumpImport(const std::vector<std::shared_ptr<graph::Graph> > &graphs, const std::vector<std::shared_ptr<rule::Rule> > &rules, const std::string &file);
+	// rst: 		:throws: :class:`InputError` on bad input.
+	static std::shared_ptr<DG> dumpImport(const std::vector<std::shared_ptr<graph::Graph> > &graphs,
+	                                      const std::vector<std::shared_ptr<rule::Rule> > &rules,
+	                                      const std::string &file);
 	// rst: .. function:: static void diff(std::shared_ptr<DG> dg1, std::shared_ptr<DG> dg2)
 	// rst:
-	// rst: 	Compare two derivation graphs and lists the difference.
-	// rst: 	This is not a general isomorphism check; two vertices are equal if they have
-	// rst: 	the same graph attached. Edges are equal if the head and tail sets are equal
-	// rst: 	and if the attached rule is the same.
+	// rst: 		Compare two derivation graphs and lists the difference.
+	// rst: 		This is not a general isomorphism check; two vertices are equal if they have
+	// rst: 		the same graph attached. Edges are equal if the head and tail sets are equal
+	// rst: 		and if the attached rule is the same.
 	static void diff(std::shared_ptr<DG> dg1, std::shared_ptr<DG> dg2);
 };
 // rst-class-end:

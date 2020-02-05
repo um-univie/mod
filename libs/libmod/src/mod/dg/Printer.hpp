@@ -96,7 +96,7 @@ struct MOD_DECL Printer {
 	// rst: .. function:: void pushVertexVisible(std::function<bool(std::shared_ptr<graph::Graph>, std::shared_ptr<DG>)> f)
 	// rst:
 	// rst:		Add another function controlling the visibility of vertices.
-	// rst:		All visibility functions must return ``true`` for a vertex to be visible.
+	// rst:		All visibility functions must return `true` for a vertex to be visible.
 	void pushVertexVisible(std::function<bool(std::shared_ptr<graph::Graph>, std::shared_ptr<DG>) > f);
 	// rst: .. function:: void popVertexVisible()
 	// rst:
@@ -105,7 +105,7 @@ struct MOD_DECL Printer {
 	// rst: .. function:: void pushEdgeVisible(std::function<bool(DG::HyperEdge) > f)
 	// rst:
 	// rst:		Add another function controlling the visibility of hyperedges.
-	// rst:		All visibility functions must return ``true`` for a hyperedge to be visible.
+	// rst:		All visibility functions must return `true` for a hyperedge to be visible.
 	void pushEdgeVisible(std::function<bool(DG::HyperEdge) > f);
 	// rst: .. function:: void popEdgeVisible()
 	// rst:
@@ -173,7 +173,7 @@ struct MOD_DECL Printer {
 	// rst:
 	// rst:		Add another function for colouring vertices. The final colour of a vertex is the result of the first colour function returning a non-empty string.
 	// rst:		The functions are evaluated in the order they are pushed and the resulting string is used directly as a colour in Tikz.
-	// rst:		A hyperedge is also coloured if at least one head and one tail *can* be coloured with a colour for which ``extendToEdges`` is ``true``.
+	// rst:		A hyperedge is also coloured if at least one head and one tail *can* be coloured with a colour for which `extendToEdges` is `true`.
 	// rst:		In this case, the hyperedge (and a subset of the head and tail connectors) is coloured with the first applicable colour.
 	// rst:		The edge extension of vertex colour takes lower precedence than explicitly added hyperedge colouring functions.
 	void pushVertexColour(std::function<std::string(std::shared_ptr<graph::Graph>, std::shared_ptr<DG>) > f, bool extendToEdges);

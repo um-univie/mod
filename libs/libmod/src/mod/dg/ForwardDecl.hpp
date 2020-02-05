@@ -3,7 +3,9 @@
 
 namespace mod {
 namespace dg {
+struct Builder;
 struct DG;
+struct ExecuteResult;
 struct PrintData;
 struct Printer;
 struct Strategy;
@@ -12,6 +14,7 @@ namespace lib {
 namespace DG {
 struct Hyper;
 struct NonHyper;
+struct NonHyperBuilder;
 namespace Strategies {
 struct Strategy;
 } // namespace Strategies

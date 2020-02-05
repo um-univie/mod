@@ -15,10 +15,9 @@ void Automorphism_doExport() {
 	py::class_<Graph::Aut>("GraphAut", py::no_init)
 			// rst:		.. py:method:: __getitem__(v)
 			// rst:
-			// rst:			:param v: the vertex to permute.
-			// rst:			:type v: :py:class:`GraphVertex`
+			// rst:			:param GraphVertex v: the vertex to permute.
 			// rst:			:returns: the image of the given vertex under the permutation.
-			// rst:			:rtype: :py:class:`GraphVertex`
+			// rst:			:rtype: GraphVertex
 			.def("__getitem__", &Graph::Aut::operator[])
 			.def(str(py::self))
 			;
@@ -32,7 +31,7 @@ void Automorphism_doExport() {
 			// rst:
 			// rst:			(Read-only) A range of the generators for the group.
 			// rst:
-			// rst:			:type: :py:class:`GraphAutGroupGensRange`
+			// rst:			:type: GraphAutGroupGensRange
 			.add_property("gens", &Graph::AutGroup::gens)
 			.def(str(py::self))
 			;

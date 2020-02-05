@@ -40,9 +40,10 @@ target_compile_options(libmod PRIVATE -Wall -Wextra
         -Wno-sign-compare
         -Wno-unused-local-typedefs
         -Wno-unused-const-variable # gives false positive in the ILP wrapper
+        $<$<CXX_COMPILER_ID:Clang>:-Wno-unused-private-field>
         )
 target_compile_options(libmod PUBLIC
-        $<$<CXX_COMPILER_ID:Clang>:-Wno-mismatched-tagsL>
+        $<$<CXX_COMPILER_ID:Clang>:-Wno-mismatched-tags>
         $<$<CXX_COMPILER_ID:AppleClang>:-Wno-mismatched-tags>)
 set_target_properties(libmod PROPERTIES OUTPUT_NAME "mod")
 if(ENABLE_SYMBOL_HIDING)

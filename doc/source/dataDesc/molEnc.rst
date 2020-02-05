@@ -28,12 +28,12 @@ Vertices / Atoms
 
 A vertex encodes an atom with a charge if and only if its label conforms to the following grammar.
 
-.. productionlist:: VertexLabel
-   vertexLabel: [ isotope ] `atomSymbol` [ charge ] [ radical ]
-   isotope: `unsignedInt`
-   charge: `singleDigit` ('-' | '+')
-   radical: '.'
+.. productionlist:: molecularVertexLabel
+	vertexLabel: [ isotope ] `atomSymbol` [ `charge` ] [ `radical` ]
+	isotope: unsignedInt
+	charge: singleDigit ('-' | '+')
+	radical: '.'
+	atomSymbol: an atom symbol with the first letter capitalised
 
-With :token:`atomSymbol` being a properly capitalised atom symbol.
-
-Currently there are no valence requirements for a graph being recognised as a molecule.
+Currently there are no valence requirements for a graph being recognised as a
+molecule.

@@ -10,15 +10,15 @@ namespace Strategies {
 
 struct Revive : Strategy {
 	Revive(Strategy *strat);
-	~Revive();
-	Strategy *clone() const;
-	void preAddGraphs(std::function<void(std::shared_ptr<graph::Graph>) > add) const;
-	void forEachRule(std::function<void(const lib::Rules::Real&)> f) const;
-	void printInfo(std::ostream &s) const;
-	bool isConsumed(const lib::Graph::Single *g) const;
+	virtual ~Revive() override;
+	virtual Strategy *clone() const override;
+	virtual void preAddGraphs(std::function<void(std::shared_ptr<graph::Graph>, IsomorphismPolicy)> add) const override;
+	virtual void forEachRule(std::function<void(const lib::Rules::Real&)> f) const override;
+	virtual void printInfo(PrintSettings settings) const override;
+	virtual bool isConsumed(const lib::Graph::Single *g) const override;
 private:
-	void setExecutionEnvImpl();
-	void executeImpl(std::ostream &s, const GraphState &input);
+	virtual void setExecutionEnvImpl() override;
+	virtual void executeImpl(PrintSettings settings, const GraphState &input) override;
 private:
 	Strategy *strat;
 	std::vector<const lib::Graph::Single*> revivedGraphs;

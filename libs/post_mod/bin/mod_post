@@ -195,6 +195,10 @@ else # $1 == --mode
 				touch out/disableSummary
 			}
 
+			function enableSummary {
+				rm -f out/disableSummary
+			}
+
 			function summaryChapter {
 				echo "	echo '\summaryChapter{$(latexEsc "$1")}' >> $texFile" >> $makefile
 			}
@@ -212,6 +216,12 @@ else # $1 == --mode
 			}
 			function summaryInput {
 				echo "	echo '\input{$1}' >> $texFile" >> $makefile
+			}
+
+			# fileNoExt
+			function summaryPDF {
+				echo -n " $1.pdf" >> $makefileDep
+				echo "	echo '\summaryPDF{$1}{\\texttt{$(latexEsc $1)}}' >> $texFile" >> $makefile
 			}
 
 			# name fileNoExt fileMolNoExt
@@ -371,6 +381,7 @@ else # $1 == --mode
 				echo -n " $fileNoExt.{pdf,out,aux,log}" >> $makefileClean
 				echo -n "$fileNoExt.pdf:" >> $makefileImpl
 				echo -n  " $fileCoordNoExt.tex" >> $makefileImpl
+				echo -n  " $fileNoExt.tex" >> $makefileImpl
 				echo "" >> $makefileImpl
 				echo "	$this --mode compileTikz \"$fileNoExt\" \"$fileCoordNoExt\" $repeats" >> $makefileImpl
 				echo -n " $fileNoExt.pdf" >> $makefileDep

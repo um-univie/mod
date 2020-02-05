@@ -94,9 +94,9 @@ void TikzPrinter::comment(const std::string &str) {
 }
 
 void TikzPrinter::vertex(const std::string &id,
-								 const std::string &label,
-								 const std::string &image,
-								 const std::string &colour) {
+						 const std::string &label,
+						 const std::string &image,
+						 const std::string &colour) {
 	bool haveLabel = label != "";
 	bool haveImage = image != "";
 	s << "\\node[modStyleDGHyperVertex, at=(v-coord-" << id << ")";
@@ -126,9 +126,9 @@ void TikzPrinter::vertexHidden(const std::string &id, bool large) {
 }
 
 void TikzPrinter::transitVertex(const std::string &idHost,
-										  const std::string &idTransit,
-										  const std::string &angle,
-										  const std::string &label) {
+								const std::string &idTransit,
+								const std::string &angle,
+								const std::string &label) {
 	s << "\\node[modStyleDGTransitVertex, at=(v-" << idHost << "." << angle << ")";
 	if(!label.empty()) s << ", label=" << angle << ":{" << label << "}";
 	s << "] (v-" << idTransit << ") {};" << std::endl;
@@ -146,10 +146,10 @@ void TikzPrinter::hyperEdge(const std::string &id, const std::string &label, con
 }
 
 void TikzPrinter::connector(const std::string &idTail,
-									 const std::string &idHead,
-									 const std::string &colour,
-									 unsigned int num,
-									 unsigned int maxNum) {
+							const std::string &idHead,
+							const std::string &colour,
+							unsigned int num,
+							unsigned int maxNum) {
 	if(maxNum > 1) {
 		s << "\\pgfmathparse{";
 		int position = num - maxNum / 2 - 1;
@@ -165,26 +165,26 @@ void TikzPrinter::connector(const std::string &idTail,
 }
 
 void TikzPrinter::tailConnector(const std::string &idVertex,
-										  const std::string &idHyperEdge,
-										  const std::string &colour,
-										  unsigned int num,
-										  unsigned int maxNum) {
+								const std::string &idHyperEdge,
+								const std::string &colour,
+								unsigned int num,
+								unsigned int maxNum) {
 	connector(idVertex, idHyperEdge, colour, num, maxNum);
 }
 
 void TikzPrinter::headConnector(const std::string &idHyperEdge,
-										  const std::string &idVertex,
-										  const std::string &colour,
-										  unsigned int num,
-										  unsigned int maxNum) {
+								const std::string &idVertex,
+								const std::string &colour,
+								unsigned int num,
+								unsigned int maxNum) {
 	connector(idHyperEdge, idVertex, colour, num, maxNum);
 }
 
 void TikzPrinter::shortcutEdge(const std::string &idTail,
-										 const std::string &idHead,
-										 const std::string &label,
-										 const std::string &colour,
-										 bool hasReverse) {
+							   const std::string &idHead,
+							   const std::string &label,
+							   const std::string &colour,
+							   bool hasReverse) {
 	s << "\\path[modStyleDGHyperConnector";
 	if(!colour.empty()) s << ", draw=" << colour;
 	s << "] (v-" << idTail << ") to";
@@ -198,9 +198,9 @@ void TikzPrinter::shortcutEdge(const std::string &idTail,
 }
 
 void TikzPrinter::transitEdge(const std::string &idTail,
-										const std::string &idHead,
-										const std::string &label,
-										const std::string &colour) {
+							  const std::string &idHead,
+							  const std::string &label,
+							  const std::string &colour) {
 	s << "\\path[modStyleDGHyperConnector";
 	if(!colour.empty()) s << ", draw=" << colour;
 	s << "] (v-" << idTail << ") to";
@@ -213,8 +213,8 @@ void TikzPrinter::transitEdge(const std::string &idTail,
 }
 
 std::function<std::string(const lib::DG::Hyper &,
-								  lib::DG::HyperVertex,
-								  const std::string &)> TikzPrinter::getImageCreator() {
+						  lib::DG::HyperVertex,
+						  const std::string &)> TikzPrinter::getImageCreator() {
 	return [this](const lib::DG::Hyper &dg, lib::DG::HyperVertex v, const std::string &id) -> std::string {
 		const auto &g = *dg.getGraph()[v].graph;
 		const auto doIt = [&](const auto &gOpts) {
@@ -271,14 +271,14 @@ std::pair<unsigned int, Options::DupVertex> Options::outDegreeVisible(DupVertex 
 }
 
 bool Options::isShortcutEdge(DupVertex e,
-									  const lib::DG::Hyper &dg,
-									  unsigned int inDegreeVisible,
-									  unsigned int outDegreeVisible) const {
+							 const lib::DG::Hyper &dg,
+							 unsigned int inDegreeVisible,
+							 unsigned int outDegreeVisible) const {
 	const auto &g = dg.getGraph();
 	Vertex v = dupGraph[e].v;
 	return (withShortcutEdges && in_degree(v, g) == 1 && out_degree(v, g) == 1 && inDegreeVisible > 0 &&
-			  outDegreeVisible > 0)
-			 || (withShortcutEdgesAfterVisibility && inDegreeVisible == 1 && outDegreeVisible == 1);
+			outDegreeVisible > 0)
+		   || (withShortcutEdgesAfterVisibility && inDegreeVisible == 1 && outDegreeVisible == 1);
 }
 
 std::string Options::vDupToId(DupVertex vDup, const lib::DG::Hyper &dg) const {
@@ -327,13 +327,13 @@ void Data::removeDuplicate(Vertex e, unsigned int eDup) {
 namespace {
 
 void reconnectCommon(const lib::DG::Hyper &dgHyper,
-							Data::ConnectionsStore &connections,
-							Vertex v,
-							unsigned int eDup,
-							Vertex headOrTail,
-							unsigned int vDupTar,
-							unsigned int vDupSrc,
-							bool isTail) {
+					 Data::ConnectionsStore &connections,
+					 Vertex v,
+					 unsigned int eDup,
+					 Vertex headOrTail,
+					 unsigned int vDupTar,
+					 unsigned int vDupSrc,
+					 bool isTail) {
 	//	std::cout << "reconnect(" << std::boolalpha << isTail << ", " << v << ", " << eDup << ", " << headOrTail << ", " << vDupTar << ", " << vDupSrc << ")" << std::endl;
 	const auto &dg = dgHyper.getGraph();
 	assert(dg[v].kind == lib::DG::HyperVertexKind::Edge);
@@ -344,7 +344,7 @@ void reconnectCommon(const lib::DG::Hyper &dgHyper,
 	if(iterEdgeCons == end(iterEdgeDups->second)) {
 		std::stringstream ss;
 		ss << "Derivation duplicate " << eDup << " does not exist for derivation " << dgHyper.getDerivation(v)
-			<< std::endl;
+		   << std::endl;
 		ss << "Duplicates:";
 		for(const auto &dups : iterEdgeDups->second) ss << " " << dups.first;
 		ss << std::endl;
@@ -356,8 +356,8 @@ void reconnectCommon(const lib::DG::Hyper &dgHyper,
 	auto &dupNums = isTail ? cons.tail : cons.head;
 	for(unsigned int i = 0; i < theDegree; i++) {
 		Vertex vCand = isTail
-							? *(inv_adjacent_vertices(v, dg).first + i)
-							: *(adjacent_vertices(v, dg).first + i);
+					   ? *(inv_adjacent_vertices(v, dg).first + i)
+					   : *(adjacent_vertices(v, dg).first + i);
 		if(vCand != headOrTail) continue;
 		if(vDupSrc != std::numeric_limits<unsigned int>::max() && dupNums[i] != vDupSrc) continue;
 		offset = i;
@@ -370,8 +370,8 @@ void reconnectCommon(const lib::DG::Hyper &dgHyper,
 		ss << " duplicate " << vDupSrc << " does not exist. Duplicates are:";
 		for(unsigned int i = 0; i < theDegree; i++) {
 			Vertex vCand = isTail
-								? *(inv_adjacent_vertices(v, dg).first + i)
-								: *(adjacent_vertices(v, dg).first + i);
+						   ? *(inv_adjacent_vertices(v, dg).first + i)
+						   : *(adjacent_vertices(v, dg).first + i);
 			if(vCand != headOrTail) continue;
 			ss << " " << dupNums[i];
 		}
@@ -426,7 +426,7 @@ void Data::compile(Options &options) const {
 		unsigned int vId = idx[v];
 		const auto &dups = duplicates[vId];
 		if(dups.empty() &&
-			removedIfDegreeZero.find(v) == removedIfDegreeZero.end()) { // happens when a vertex has degree 0
+		   removedIfDegreeZero.find(v) == removedIfDegreeZero.end()) { // happens when a vertex has degree 0
 			DupVertex vDup = add_vertex(dupGraph);
 			dupGraph[vDup].v = v;
 			dupGraph[vDup].dupNum = 0;
@@ -478,10 +478,10 @@ void Data::compile(Options &options) const {
 //------------------------------------------------------------------------------
 
 Printer::Printer() : vertexLabelSep(", "), edgeLabelSep(", "),
-							withGraphName(true), withRuleName(false), withRuleId(true) {}
+					 withGraphName(true), withRuleName(false), withRuleId(true) {}
 
 std::pair<std::string, std::string> Printer::printHyper(const Data &data,
-																		  const IO::Graph::Write::Options &graphOptions) {
+														const IO::Graph::Write::Options &graphOptions) {
 	Options options = prePrint(data);
 	const auto &dg = data.getDG();
 	const auto files = IO::DG::Write::pdf(dg, options, graphOptions);
@@ -660,7 +660,6 @@ void Printer::setup(Options &options) {
 		return std::string();
 	};
 
-
 	auto getRawHyperEdgeColour = [this](Vertex v, const lib::DG::Hyper &dg) {
 		assert(dg.getGraph()[v].kind == lib::DG::HyperVertexKind::Edge);
 		for(const auto &f : edgeColour) {
@@ -812,9 +811,9 @@ std::string dot(const lib::DG::Hyper &dg, const Options &options, const IO::Grap
 		}
 
 		virtual void vertex(const std::string &id,
-								  const std::string &label,
-								  const std::string &image,
-								  const std::string &colour) override {
+							const std::string &label,
+							const std::string &image,
+							const std::string &colour) override {
 			s << '"' << id << "\" [ shape=ellipse label=\"" << label << "\"";
 			if(!image.empty()) s << " image=\"" << image << "\"";
 			if(!colour.empty()) s << " color=\"" << colour << "\"";
@@ -832,10 +831,10 @@ std::string dot(const lib::DG::Hyper &dg, const Options &options, const IO::Grap
 		}
 
 		void connector(const std::string &idSrc,
-							const std::string &idTarget,
-							const std::string &colour,
-							unsigned int num,
-							unsigned int maxNum) {
+					   const std::string &idTarget,
+					   const std::string &colour,
+					   unsigned int num,
+					   unsigned int maxNum) {
 			// dot handles parallel edges fine, just print the data
 			s << '"' << idSrc << "\" -> \"" << idTarget << "\" [";
 			if(!colour.empty()) s << "color=\"" << colour << "\"";
@@ -843,34 +842,34 @@ std::string dot(const lib::DG::Hyper &dg, const Options &options, const IO::Grap
 		}
 
 		virtual void tailConnector(const std::string &idVertex,
-											const std::string &idHyperEdge,
-											const std::string &colour,
-											unsigned int num,
-											unsigned int maxNum) override {
+								   const std::string &idHyperEdge,
+								   const std::string &colour,
+								   unsigned int num,
+								   unsigned int maxNum) override {
 			connector(idVertex, idHyperEdge, colour, num, maxNum);
 		}
 
 		virtual void headConnector(const std::string &idHyperEdge,
-											const std::string &idVertex,
-											const std::string &colour,
-											unsigned int num,
-											unsigned int maxNum) override {
+								   const std::string &idVertex,
+								   const std::string &colour,
+								   unsigned int num,
+								   unsigned int maxNum) override {
 			connector(idHyperEdge, idVertex, colour, num, maxNum);
 		}
 
 		virtual void shortcutEdge(const std::string &idTail,
-										  const std::string &idHead,
-										  const std::string &label,
-										  const std::string &colour,
-										  bool hasReverse) override {
+								  const std::string &idHead,
+								  const std::string &label,
+								  const std::string &colour,
+								  bool hasReverse) override {
 			s << '"' << idTail << "\" -> \"" << idHead << "\" [ label=\"" << label << "\"";
 			if(!colour.empty()) s << " color=\"" << colour << "\"";
 			s << " ];" << std::endl;
 		}
 
 		virtual std::function<std::string(const lib::DG::Hyper &,
-													 lib::DG::HyperVertex,
-													 const std::string &)> getImageCreator() override {
+										  lib::DG::HyperVertex,
+										  const std::string &)> getImageCreator() override {
 			return [this](const lib::DG::Hyper &dg, lib::DG::HyperVertex v, const std::string &id) -> std::string {
 				const auto &g = *dg.getGraph()[v].graph;
 				return IO::Graph::Write::svg(g, graphOptions);
@@ -899,8 +898,8 @@ std::string coords(const lib::DG::Hyper &dg, const Options &options, const IO::G
 }
 
 std::pair<std::string, std::string> tikz(const lib::DG::Hyper &dg,
-													  const Options &options,
-													  const IO::Graph::Write::Options &graphOptions) {
+										 const Options &options,
+										 const IO::Graph::Write::Options &graphOptions) {
 	std::string fileCoordsExt = coords(dg, options, graphOptions);
 	std::string file = getUniqueFilePrefix();
 	file += "dg_" + boost::lexical_cast<std::string>(dg.getNonHyper().getId()) + "_";
@@ -912,8 +911,8 @@ std::pair<std::string, std::string> tikz(const lib::DG::Hyper &dg,
 }
 
 std::string pdfFromDot(const lib::DG::Hyper &dg,
-							  const Options &options,
-							  const IO::Graph::Write::Options &graphOptions) {
+					   const Options &options,
+					   const IO::Graph::Write::Options &graphOptions) {
 	std::string fileNoExt = dot(dg, options, graphOptions);
 	fileNoExt.erase(end(fileNoExt) - 4, end(fileNoExt));
 	IO::post() << "gv dgHyper \"" << fileNoExt << "\" pdf" << std::endl;
@@ -921,8 +920,8 @@ std::string pdfFromDot(const lib::DG::Hyper &dg,
 }
 
 std::pair<std::string, std::string> pdf(const lib::DG::Hyper &dg,
-													 const Options &options,
-													 const IO::Graph::Write::Options &graphOptions) {
+										const Options &options,
+										const IO::Graph::Write::Options &graphOptions) {
 	auto tikzFiles = tikz(dg, options, graphOptions);
 	std::string fileNoExt = tikzFiles.first.substr(0, tikzFiles.first.length() - 4);
 	std::string fileCoordsNoExt = tikzFiles.second.substr(0, tikzFiles.second.length() - 4);
@@ -933,8 +932,8 @@ std::pair<std::string, std::string> pdf(const lib::DG::Hyper &dg,
 }
 
 std::pair<std::string, std::string> summary(const Data &data,
-														  Printer &printer,
-														  const IO::Graph::Write::Options &graphOptions) {
+											Printer &printer,
+											const IO::Graph::Write::Options &graphOptions) {
 	const auto files = printer.printHyper(data, graphOptions);
 	std::string fileNoExt = files.first;
 	const auto &dg = data.getDG();

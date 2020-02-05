@@ -74,13 +74,11 @@ BEGIN {
 			print "Details"
 			print "^^^^^^^"
 			print ""
-			print ".. cpp:namespace:: mod"
-			print ""
 			print ".. cpp:namespace-push:: " lastClass
 			print ""
 			for(i = 0; i < lineNum; i++) print normalRST[i]
 			print ""
-			print ".. cpp:namespace:: mod"
+			print ".. cpp:namespace-pop::"
 			print ""
 			lineNum = 0
 		}
@@ -144,6 +142,7 @@ function makeIndex {
 	modWrapper/modWrapper
 	dataDesc/dataDesc
 	dgStrat/dgStrat
+	examples/index
 	
 	knownIssues
 	changes
@@ -189,22 +188,10 @@ The package contains the following components.
     Additionally, it can run the chosen virtual machine through ``gdb``
     and/or ``valgrind`` (either normal memcheck or callgrind).
 
-
-Indices and Tables
-==================
-
-* :ref:`genindex`
 EOF
 cat << "EOF"
 
-Table of Contents
-=================
-
-.. toctree::
-	:maxdepth: 4
-	
 EOF
-		indexFiles
 	}
 	data | outputRST index
 }
@@ -219,6 +206,7 @@ function makeLibMod {
 		echo "**********************************************************"
 		cat << "EOF"
 .. default-domain:: cpp
+.. default-role:: cpp:expr
 
 .. py:currentmodule:: mod
 .. cpp:namespace:: mod
@@ -340,3 +328,4 @@ rm -rf $topSrcDir/doc/source/_static/examples
 mkdir -p $topSrcDir/doc/source/_static/examples
 cp -a $topSrcDir/examples/libmod_cmake $topSrcDir/doc/source/_static/examples/
 cp -a $topSrcDir/examples/pymod_extension $topSrcDir/doc/source/_static/examples/
+cp -a $topSrcDir/examples/py $topSrcDir/doc/source/_static/examples/

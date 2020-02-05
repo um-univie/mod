@@ -28,13 +28,20 @@ struct CompositionHelper {
 	using EdgeSecond = typename boost::graph_traits<GraphSecond>::edge_descriptor;
 public:
 
-	CompositionHelper(const RuleFirst &rFirst, const RuleSecond &rSecond, const InvertibleVertexMap &match, Visitor visitor)
-	: rFirst(rFirst), rSecond(rSecond), match(match), visitor(std::move(visitor)) { }
+	CompositionHelper(const RuleFirst &rFirst,
+							const RuleSecond &rSecond,
+							const InvertibleVertexMap &match,
+							Visitor visitor)
+			: rFirst(rFirst), rSecond(rSecond), match(match), visitor(std::move(visitor)) {}
 
-	boost::optional<Result> operator()() && {
+	boost::optional<Result> operator()() &&{
+		if(Verbose) IO::log() << std::string(80, '=') << std::endl;
 		Result result(rFirst, rSecond);
 		bool resInit = visitor.template init<Verbose>(rFirst, rSecond, match, result);
-		if(!resInit) return boost::none;
+		if(!resInit) {
+			if(Verbose) IO::log() << std::string(80, '=') << std::endl;
+			return boost::none;
+		}
 		// Vertices
 		//--------------------------------------------------------------------------
 		copyVerticesFirst(result);
@@ -42,18 +49,28 @@ public:
 		// Edges
 		//--------------------------------------------------------------------------
 		bool resFirst = copyEdgesFirstUnmatched(result);
-		if(!resFirst) return boost::none;
+		if(!resFirst) {
+			if(Verbose) IO::log() << std::string(80, '=') << std::endl;
+			return boost::none;
+		}
 		bool resSecond = composeEdgesSecond(result);
-		if(!resSecond) return boost::none;
+		if(!resSecond) {
+			if(Verbose) IO::log() << std::string(80, '=') << std::endl;
+			return boost::none;
+		}
 
 		// Finish it
 		//--------------------------------------------------------------------------
 		bool resFinal = visitor.template finalize<Verbose>(rFirst, rSecond, match, result);
-		if(!resFinal) return boost::none;
+		if(!resFinal) {
+			if(Verbose) IO::log() << std::string(80, '=') << std::endl;
+			return boost::none;
+		}
+		if(Verbose) IO::log() << std::string(80, '=') << std::endl;
 		return boost::optional<Result>(std::move(result)); // something strange is going on with just "return result;"
 	}
-private:
 
+private:
 	VertexFirst getNullFirst() const {
 		return boost::graph_traits<GraphFirst>::null_vertex();
 	}
@@ -80,6 +97,7 @@ private:
 		assert(membership(rFirst, vFirst) != Membership::Left);
 		return get_inverse(match, gDom, gCodom, vFirst);
 	}
+
 private:
 
 	void copyVerticesFirst(Result &result) {
@@ -91,9 +109,9 @@ private:
 		for(const auto vFirst : asRange(vertices(gFirst))) {
 			if(Verbose) {
 				IO::log() << "rFirst node:\t"
-						<< get(boost::vertex_index_t(), gFirst, vFirst)
-						<< "(" << membership(rFirst, vFirst) << ")"
-						<< "(";
+							 << get(boost::vertex_index_t(), gFirst, vFirst)
+							 << "(" << membership(rFirst, vFirst) << ")"
+							 << "(";
 				visitor.template printVertexFirst(rFirst, rSecond, match, result, IO::log(), vFirst);
 				IO::log() << ")" << std::endl;
 			}
@@ -118,8 +136,8 @@ private:
 				visitor.template copyVertexFirst<Verbose>(rFirst, rSecond, match, result, vFirst, vResult);
 				if(Verbose) {
 					IO::log() << "new node:\t"
-							<< get(boost::vertex_index_t(), gResult, vResult)
-							<< "(" << membership(rResult, vResult) << ")(";
+								 << get(boost::vertex_index_t(), gResult, vResult)
+								 << "(" << membership(rResult, vResult) << ")(";
 					visitor.template printVertexResult(rFirst, rSecond, match, result, IO::log(), vResult);
 					IO::log() << ")" << std::endl;
 				}
@@ -137,9 +155,9 @@ private:
 		for(const auto vSecond : asRange(vertices(gSecond))) {
 			if(Verbose) {
 				IO::log() << "rSecond node:\t"
-						<< get(boost::vertex_index_t(), gSecond, vSecond)
-						<< "(" << membership(rSecond, vSecond) << ")"
-						<< "(";
+							 << get(boost::vertex_index_t(), gSecond, vSecond)
+							 << "(" << membership(rSecond, vSecond) << ")"
+							 << "(";
 				visitor.template printVertexSecond(rFirst, rSecond, match, result, IO::log(), vSecond);
 				IO::log() << ")" << std::endl;
 			}
@@ -155,8 +173,8 @@ private:
 				visitor.template copyVertexSecond<Verbose>(rFirst, rSecond, match, result, vSecond, vResult);
 				if(Verbose) {
 					IO::log() << "new node:\t" << get(boost::vertex_index_t(), gResult, vResult)
-							<< "(" << membership(rResult, vResult) << ")"
-							<< "(";
+								 << "(" << membership(rResult, vResult) << ")"
+								 << "(";
 					visitor.template printVertexResult(rFirst, rSecond, match, result, IO::log(), vResult);
 					IO::log() << ")" << std::endl;
 				}
@@ -168,8 +186,8 @@ private:
 				} else {
 					if(Verbose) {
 						IO::log() << "match to:\t" << get(boost::vertex_index_t(), gResult, vResult)
-								<< "(" << membership(rResult, vResult) << ")"
-								<< "(";
+									 << "(" << membership(rResult, vResult) << ")"
+									 << "(";
 						visitor.template printVertexResult(rFirst, rSecond, match, result, IO::log(), vResult);
 						IO::log() << ")" << std::endl;
 					}
@@ -220,9 +238,10 @@ private:
 				const auto vSrcResult = get(result.mFirstToResult, gFirst, gResult, vSrcFirst);
 				const auto vTarResult = get(result.mFirstToResult, gFirst, gResult, vTarFirst);
 				// vSrcResult/vTarResult may be null_vertex
-				IO::log() << "Edge first:\t(" << vSrcFirst << ", " << vTarFirst << ") maybe copy to new (" << vSrcResult << ", " << vTarResult << ")"
-						<< "(" << meFirst << ")"
-						<< "(";
+				IO::log() << "Edge first:\t(" << vSrcFirst << ", " << vTarFirst << ") maybe copy to new (" << vSrcResult
+							 << ", " << vTarResult << ")"
+							 << "(" << meFirst << ")"
+							 << "(";
 				visitor.template printEdgeFirst(rFirst, rSecond, match, result, IO::log(), eFirst);
 				IO::log() << ")" << std::endl;
 			}
@@ -239,8 +258,10 @@ private:
 				const auto eResult = peResult.first;
 				put_membership(rResult, eResult, membership(rFirst, eFirst));
 				visitor.template copyEdgeFirst<Verbose>(rFirst, rSecond, match, result, eFirst, eResult);
-				assert(membership(rResult, vSrcResult) == Membership::Context || membership(rResult, vSrcResult) == meFirst);
-				assert(membership(rResult, vTarResult) == Membership::Context || membership(rResult, vTarResult) == meFirst);
+				assert(
+						membership(rResult, vSrcResult) == Membership::Context || membership(rResult, vSrcResult) == meFirst);
+				assert(
+						membership(rResult, vTarResult) == Membership::Context || membership(rResult, vTarResult) == meFirst);
 			};
 			// and now the actual case analysis
 			if(meFirst == Membership::Left) {
@@ -256,9 +277,11 @@ private:
 			if(isSrcMatched && isTarMatched) {
 				if(Verbose) IO::log() << "\tBoth ends matched" << std::endl;
 				const auto oeSecond = out_edges(vSrcSecond, gSecond);
-				const auto eSecondIter = std::find_if(oeSecond.first, oeSecond.second, [&gSecond, vTarSecond, this](const auto &eSecond) {
-					return target(eSecond, gSecond) == vTarSecond && membership(rSecond, eSecond) != Membership::Right;
-				});
+				const auto eSecondIter = std::find_if(oeSecond.first, oeSecond.second,
+																  [&gSecond, vTarSecond, this](const auto &eSecond) {
+																	  return target(eSecond, gSecond) == vTarSecond &&
+																				membership(rSecond, eSecond) != Membership::Right;
+																  });
 				// TODO: why do we check the membership in the find_if?
 				// There should be only one edge, so we can bail out here, right?
 				const bool isEdgeMatched = eSecondIter != oeSecond.second;
@@ -269,8 +292,9 @@ private:
 						return true;
 					}
 
-					if(Verbose) IO::log() << "\teFirst matched and in CONTEXT, copying to LEFT or CONTEXT (depending on eSecond ("
-						<< membership(rSecond, eSecond) << "))" << std::endl;
+					if(Verbose)
+						IO::log() << "\teFirst matched and in CONTEXT, copying to LEFT or CONTEXT (depending on eSecond ("
+									 << membership(rSecond, eSecond) << "))" << std::endl;
 					const auto vSrcResult = get(result.mFirstToResult, gFirst, gResult, vSrcFirst);
 					const auto vTarResult = get(result.mFirstToResult, gFirst, gResult, vTarFirst);
 					// vResultSrc/vResultTar can not be null_vertex
@@ -302,8 +326,9 @@ private:
 				const auto mvSrcResult = membership(rResult, vSrcResult);
 				const auto mvTarResult = membership(rResult, vTarResult);
 				if(mvSrcResult == Membership::Left || mvTarResult == Membership::Left) {
-					if(Verbose) IO::log() << "\tComposition failure: at least one matched vertex has inconsistent context ("
-						<< mvSrcResult << " and " << mvTarResult << "), eFirst is (" << meFirst << ")" << std::endl;
+					if(Verbose)
+						IO::log() << "\tComposition failure: at least one matched vertex has inconsistent context ("
+									 << mvSrcResult << " and " << mvTarResult << "), eFirst is (" << meFirst << ")" << std::endl;
 					return false;
 				}
 
@@ -327,8 +352,9 @@ private:
 				// matched, but is it consistent?
 				const auto mvMatchedResult = membership(rResult, vResultMatched);
 				if(mvMatchedResult == Membership::Left) {
-					if(Verbose) IO::log() << "\tComposition failure: matched vertex has inconsistent context ("
-						<< mvMatchedResult << "), eFirst is (" << meFirst << ")" << std::endl;
+					if(Verbose)
+						IO::log() << "\tComposition failure: matched vertex has inconsistent context ("
+									 << mvMatchedResult << "), eFirst is (" << meFirst << ")" << std::endl;
 					return false;
 				}
 
@@ -336,7 +362,7 @@ private:
 				makeCopy();
 				return true;
 			}
-			
+
 			if(Verbose) IO::log() << "\tNo ends matched" << std::endl;
 			makeCopy();
 			return true;
@@ -348,7 +374,7 @@ private:
 		return true;
 	}
 
-	bool composeEdgesSecond(Result & result) {
+	bool composeEdgesSecond(Result &result) {
 		if(Verbose) IO::log() << "composeEdgesSecond\n" << std::string(80, '-') << std::endl;
 		//		const auto &gFirst = get_graph(rFirst);
 		const auto &gSecond = get_graph(rSecond);
@@ -361,9 +387,10 @@ private:
 			auto vResultTar = get(result.mSecondToResult, gSecond, gResult, vSecondTar);
 			if(Verbose) {
 				// vSrcNew/vTarNew may be null_vertex
-				IO::log() << "Edge second:\t(" << vSecondSrc << ", " << vSecondTar << ")\tmapped to (" << vResultSrc << ", " << vResultTar << ")"
-						<< ", (" << membership(rSecond, eSecond) << ")"
-						<< "(";
+				IO::log() << "Edge second:\t(" << vSecondSrc << ", " << vSecondTar << ")\tmapped to (" << vResultSrc << ", "
+							 << vResultTar << ")"
+							 << ", (" << membership(rSecond, eSecond) << ")"
+							 << "(";
 				visitor.template printEdgeSecond(rFirst, rSecond, match, result, IO::log(), eSecond);
 				IO::log() << ")" << std::endl;
 			}
@@ -387,28 +414,35 @@ private:
 					visitor.template copyEdgeSecond<Verbose>(rFirst, rSecond, match, result, eSecond, eResult);
 				} else { // one end matched
 					assert(vResultSrc != boost::graph_traits<GraphResult>::null_vertex()
-							|| vResultTar != boost::graph_traits<GraphResult>::null_vertex());
-					bool isOk = composeEdgeSecond_oneEndMatched(result, eSecond, vResultSrc, vResultTar, isSrcMatched, isTarMatched);
+							 || vResultTar != boost::graph_traits<GraphResult>::null_vertex());
+					bool isOk = composeEdgeSecond_oneEndMatched(result, eSecond, vResultSrc, vResultTar, isSrcMatched,
+																			  isTarMatched);
 					if(!isOk) return false;
 				} // if 0 or 1 end matched
 			} else { // maybe a matched edge
-				bool isOk = composeEdgeSecond_bothEndsMatched(result, eSecond, vFirstSrc, vFirstTar, vResultSrc, vResultTar);
+				bool isOk = composeEdgeSecond_bothEndsMatched(result, eSecond, vFirstSrc, vFirstTar, vResultSrc,
+																			 vResultTar);
 				if(!isOk) return false;
 			} // end if 0 or 1 matched endNodes
 		} // end for each eSecond
 		return true;
 	}
+
 private:
 
-	bool composeEdgeSecond_oneEndMatched(Result &result, EdgeSecond eSecond, VertexResult vResultSrc, VertexResult vResultTar,
-			bool isSrcMatched, bool isTarMatched) {
+	bool composeEdgeSecond_oneEndMatched(Result &result,
+													 EdgeSecond eSecond,
+													 VertexResult vResultSrc,
+													 VertexResult vResultTar,
+													 bool isSrcMatched,
+													 bool isTarMatched) {
 		auto &rResult = result.rResult;
 		auto &gResult = get_graph(rResult);
 		if(Verbose) IO::log() << "One end matched, eSecond should be copied" << std::endl;
 		assert(isSrcMatched ^ isTarMatched);
 		// at most one of vResultSrc and vResultTar may be null_vertex
 		assert(vResultSrc != boost::graph_traits<GraphResult>::null_vertex()
-				|| vResultTar != boost::graph_traits<GraphResult>::null_vertex());
+				 || vResultTar != boost::graph_traits<GraphResult>::null_vertex());
 		auto vResultMatched = isSrcMatched ? vResultSrc : vResultTar;
 		auto vResultOther = isSrcMatched ? vResultTar : vResultSrc;
 		// vResultMatched may be null_vertex, if it's a RIGHT vs. LEFT vertex
@@ -425,8 +459,9 @@ private:
 
 		auto mvResultMatched = membership(rResult, vResultMatched);
 		if(mvResultMatched != Membership::Context && mvResultMatched != meSecond) {
-			if(Verbose) IO::log() << "\tComposition failure: matched vertex has inconsistent context ("
-				<< mvResultMatched << "), eSecond is (" << meSecond << ")" << std::endl;
+			if(Verbose)
+				IO::log() << "\tComposition failure: matched vertex has inconsistent context ("
+							 << mvResultMatched << "), eSecond is (" << meSecond << ")" << std::endl;
 			return false;
 		}
 
@@ -440,8 +475,12 @@ private:
 		return true;
 	}
 
-	bool composeEdgeSecond_bothEndsMatched(Result &result, EdgeSecond eSecond, VertexFirst vFirstSrc, VertexFirst vFirstTar,
-			VertexResult vResultSrc, VertexResult vResultTar) {
+	bool composeEdgeSecond_bothEndsMatched(Result &result,
+														EdgeSecond eSecond,
+														VertexFirst vFirstSrc,
+														VertexFirst vFirstTar,
+														VertexResult vResultSrc,
+														VertexResult vResultTar) {
 		const auto &gFirst = get_graph(rFirst);
 		auto &rResult = result.rResult;
 		auto &gResult = get_graph(rResult);
@@ -521,7 +560,9 @@ private:
 			// creating parallel in right
 			//    -> | vs.    -> |
 			// |  -> | vs.    -> |
-			if(Verbose) IO::log() << "\tComposition failure: eSecond in RIGHT, eFirst in CONTEXT or RIGHT, i.e., parallel edge in R" << std::endl;
+			if(Verbose)
+				IO::log() << "\tComposition failure: eSecond in RIGHT, eFirst in CONTEXT or RIGHT, i.e., parallel edge in R"
+							 << std::endl;
 			return false;
 		}
 		// remaining possibilities:
@@ -534,8 +575,9 @@ private:
 		if(meSecond == Membership::Left) {
 			//    -> | vs. |  ->	first not in result
 			// |  -> | vs. |  -> 	first in result as LEFT
-			if(Verbose) IO::log() << "\teSecond matched in (" << meSecond << ")"
-					<< ", either in LEFT or both eSecond and eFirst in CONTEXT" << std::endl;
+			if(Verbose)
+				IO::log() << "\teSecond matched in (" << meSecond << ")"
+							 << ", either in LEFT or both eSecond and eFirst in CONTEXT" << std::endl;
 			return true;
 		}
 		// remaining possibilities:
@@ -569,11 +611,15 @@ private:
 		});
 		assert(edgeIter != edgesResult.second);
 		auto eResult = *edgeIter;
-		if(Verbose) IO::log() << "\t'|  ->   vs.    -> |' or '|  -> | vs. |  -> |', promote eNew to CONTEXT and set right from second right" << std::endl;
+		if(Verbose)
+			IO::log()
+					<< "\t'|  ->   vs.    -> |' or '|  -> | vs. |  -> |', promote eNew to CONTEXT and set right from second right"
+					<< std::endl;
 		put_membership(rResult, eResult, Membership::Context);
 		visitor.template setEdgeResultRightFromSecondRight<Verbose>(rFirst, rSecond, match, result, eResult, eSecond);
 		return true;
 	}
+
 private:
 	const RuleFirst &rFirst;
 	const RuleSecond &rSecond;

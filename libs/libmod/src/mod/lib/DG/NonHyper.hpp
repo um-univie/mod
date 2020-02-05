@@ -33,7 +33,8 @@ public:
 	using Vertex = NonHyperVertex;
 	using Edge = NonHyperEdge;
 protected:
-	NonHyper(const std::vector<std::shared_ptr<graph::Graph> > &graphDatabase, LabelSettings labelSettings);
+	NonHyper(LabelSettings labelSettings,
+	         const std::vector<std::shared_ptr<graph::Graph> > &graphDatabase, IsomorphismPolicy graphPolicy);
 public: // general
 	virtual ~NonHyper();
 	std::size_t getId() const;
@@ -42,13 +43,11 @@ public: // general
 	LabelSettings getLabelSettings() const;
 	virtual std::string getType() const = 0;
 public: // calculation
-	void calculatePrologue();
-	void calculateEpilogue();
-	void calculate(bool printInfo); // uses the two above and the calculateImpl
 	bool getHasStartedCalculation() const;
 	bool getHasCalculated() const;
 protected: // calculation
-	virtual void calculateImpl(bool printInfo) = 0;
+	void calculatePrologue(); // call this before modifying the DG
+	void calculateEpilogue(); // call this when done with the modifications
 	// Overall Idea
 	// ------------
 	// For a new generated graph:
@@ -83,21 +82,20 @@ protected: // calculation
 	// checks if this derivation already exists
 	// if it does then the edge descriptor of that derivation is returned, otherwise the edge descriptor is bogus
 	std::pair<Edge, bool> isDerivation(const GraphMultiset &gmsSrc,
-												  const GraphMultiset &gmsTar,
-												  const lib::Rules::Real *r) const;
+	                                   const GraphMultiset &gmsTar,
+	                                   const lib::Rules::Real *r) const;
 	// adds a derivation if it does not exist already
 	// the edge descriptor of the derivation is returned, along with the existence status before the call
 	// the rule may be nullptr
 	std::pair<Edge, bool> suggestDerivation(const GraphMultiset &gmsSrc,
-														 const GraphMultiset &gmsTar,
-														 const lib::Rules::Real *r);
+	                                        const GraphMultiset &gmsTar,
+	                                        const lib::Rules::Real *r);
 	const GraphType &getGraphDuringCalculation() const;
 private: // calculation
 	// adds the graph as a vertex, if it's not there already, and returns the vertex
 	Vertex getVertex(const GraphMultiset &gms);
 	void findReversiblePairs();
 public: // post calculation
-	void list(std::ostream &s) const;
 	const GraphType &getGraph() const;
 	const Hyper &getHyper() const;
 	const Graph::Collection &getGraphDatabase() const;
@@ -105,8 +103,6 @@ public: // post calculation
 	void print() const;
 	HyperVertex getHyperEdge(Edge e) const;
 	HyperVertex findHyperEdge(const std::vector<HyperVertex> &sources, const std::vector<HyperVertex> &targets) const;
-protected:
-	virtual void listImpl(std::ostream &s) const = 0;
 private: // general
 	std::size_t id;
 	std::weak_ptr<dg::DG> apiReference;

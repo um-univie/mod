@@ -14,6 +14,8 @@
 namespace mod {
 namespace lib {
 namespace RC {
+constexpr int V_MorphismGen = 2;
+constexpr int V_Composition = 12;
 namespace detail {
 
 template<typename RFirst, typename RSecond>
@@ -44,8 +46,7 @@ template<typename RFirst, typename RSecond>
 void initByLabelSettings(const RFirst &rFirst, const RSecond &rSecond, LabelSettings labelSettings) {
 	switch(labelSettings.type) {
 	case LabelType::String: break;
-	case LabelType::Term:
-		detail::initTermLabel(rFirst, rSecond);
+	case LabelType::Term: detail::initTermLabel(rFirst, rSecond);
 		break;
 	}
 	if(labelSettings.withStereo) detail::initStereoLabel(rFirst, rSecond);
@@ -59,27 +60,27 @@ namespace detail {
 //}
 
 template<typename RFirst, typename RSecond, typename MR, typename VertexMap>
-bool handleMapToStereo(const RFirst &rFirst, const RSecond &rSecond, VertexMap &&m, MR &&mr, LabelSettings labelSettings) {
+bool handleMapToStereo(const RFirst &rFirst, const RSecond &rSecond,
+							  VertexMap &&m, MR &&mr,
+							  LabelSettings labelSettings,
+							  const int verbosity, IO::Logger logger) {
 	if(!labelSettings.withStereo) {
-		return mr(rFirst, rSecond, std::move(m));
+		return mr(rFirst, rSecond, std::move(m), verbosity >= V_Composition, logger);
 	}
 	const auto &lgDom = get_labelled_left(rSecond.getDPORule());
 	const auto &lgCodom = get_labelled_right(rFirst.getDPORule());
-	auto mrInner = [&](auto &&mInner, const auto&, const auto&) {
-		return mr(rFirst, rSecond, std::move(mInner));
+	auto mrInner = [&](auto &&mInner, const auto &, const auto &) {
+		return mr(rFirst, rSecond, std::move(mInner), verbosity >= V_Composition, logger);
 	};
 	switch(labelSettings.stereoRelation) {
-	case LabelRelation::Isomorphism:
-	{
+	case LabelRelation::Isomorphism: {
 		MOD_ABORT;
 	}
-	case LabelRelation::Specialisation:
-	{
+	case LabelRelation::Specialisation: {
 		auto mrStereo = lib::GraphMorphism::Stereo::makeToVertexMapSpec(lgDom, lgCodom, mrInner);
 		return mrStereo(std::move(m), get_graph(lgDom), get_graph(lgCodom));
 	}
-	case LabelRelation::Unification:
-	{
+	case LabelRelation::Unification: {
 		MOD_ABORT;
 	}
 	}
@@ -87,7 +88,10 @@ bool handleMapToStereo(const RFirst &rFirst, const RSecond &rSecond, VertexMap &
 }
 
 template<typename RFirst, typename RSecond, typename MR, typename VertexMap>
-bool handleMapToTerm(const RFirst &rFirst, const RSecond &rSecond, VertexMap &&m, MR &&mr, LabelSettings labelSettings) {
+bool handleMapToTerm(const RFirst &rFirst, const RSecond &rSecond,
+							VertexMap &&m, MR &&mr,
+							LabelSettings labelSettings,
+							const int verbosity, IO::Logger logger) {
 	namespace GM = jla_boost::GraphMorphism;
 	using GraphDom = typename GM::VertexMapTraits<VertexMap>::GraphDom;
 	using GraphCodom = typename GM::VertexMapTraits<VertexMap>::GraphCodom;
@@ -141,16 +145,19 @@ bool handleMapToTerm(const RFirst &rFirst, const RSecond &rSecond, VertexMap &&m
 	//		lib::IO::Term::Write::wam(termSecond.getMachine(), lib::Term::getStrings(), lib::IO::log() << "MachineSecond:\n");
 	lib::GraphMorphism::TermData data{std::move(machine), std::move(mgu)};
 	auto mTerm = GM::addProp(std::move(m), lib::GraphMorphism::TermDataT(), std::move(data));
-	return handleMapToStereo(rFirst, rSecond, std::move(mTerm), mr, labelSettings);
+	return handleMapToStereo(rFirst, rSecond, std::move(mTerm), mr, labelSettings, verbosity, logger);
 }
 
 template<typename RFirst, typename RSecond, typename MR, typename VertexMap>
-bool handleMapToStringOrTerm(const RFirst &rFirst, const RSecond &rSecond, VertexMap &&m, MR &&mr, LabelSettings labelSettings) {
+bool handleMapToStringOrTerm(const RFirst &rFirst, const RSecond &rSecond,
+									  VertexMap &&m, MR &&mr,
+									  LabelSettings labelSettings,
+									  const int verbosity, IO::Logger logger) {
 	switch(labelSettings.type) {
 	case LabelType::String:
-		return handleMapToStereo(rFirst, rSecond, std::move(m), std::move(mr), labelSettings);
+		return handleMapToStereo(rFirst, rSecond, std::move(m), std::move(mr), labelSettings, verbosity, logger);
 	case LabelType::Term:
-		return handleMapToTerm(rFirst, rSecond, std::move(m), std::move(mr), labelSettings);
+		return handleMapToTerm(rFirst, rSecond, std::move(m), std::move(mr), labelSettings, verbosity, logger);
 	}
 	MOD_ABORT;
 }
@@ -158,8 +165,12 @@ bool handleMapToStringOrTerm(const RFirst &rFirst, const RSecond &rSecond, Verte
 } // namesapce detail
 
 template<typename RFirst, typename RSecond, typename VertexMap, typename MR>
-bool handleMapByLabelSettings(const RFirst &rFirst, const RSecond &rSecond, VertexMap &&m, MR &&mr, LabelSettings labelSettings) {
-	return detail::handleMapToStringOrTerm(rFirst, rSecond, std::forward<VertexMap>(m), std::forward<MR>(mr), labelSettings);
+bool handleMapByLabelSettings(const RFirst &rFirst, const RSecond &rSecond,
+										VertexMap &&m, MR &&mr,
+										LabelSettings labelSettings,
+										const int verbosity, IO::Logger logger) {
+	return detail::handleMapToStringOrTerm(rFirst, rSecond, std::forward<VertexMap>(m), std::forward<MR>(mr),
+														labelSettings, verbosity, logger);
 }
 
 } // namespace RC

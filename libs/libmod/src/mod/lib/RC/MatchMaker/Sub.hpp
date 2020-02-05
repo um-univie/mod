@@ -26,10 +26,14 @@ struct Sub {
 	using VertexMapType = jla_boost::GraphMorphism::InvertibleVectorVertexMap<GraphDom, GraphCodom>;
 public:
 
-	explicit Sub(bool allowPartial) : allowPartial(allowPartial) { }
+	explicit Sub(int verbosity, IO::Logger logger, bool allowPartial)
+			: verbosity(verbosity), logger(logger), allowPartial(allowPartial) {}
 
 	template<typename MR>
-	void makeMatches(const lib::Rules::Real &rFirst, const lib::Rules::Real &rSecond, MR mr, LabelSettings labelSettings) const {
+	void makeMatches(const lib::Rules::Real &rFirst,
+						  const lib::Rules::Real &rSecond,
+						  MR mr,
+						  LabelSettings labelSettings) const {
 		if(allowPartial)
 			makeMatchesInternal<true>(rFirst, rSecond, mr, labelSettings);
 		else
@@ -39,11 +43,16 @@ public:
 private:
 
 	template<bool AllowPartial, typename MR>
-	void makeMatchesInternal(const lib::Rules::Real &rFirst, const lib::Rules::Real &rSecond, MR mr, LabelSettings labelSettings) const {
+	void makeMatchesInternal(const lib::Rules::Real &rFirst,
+									 const lib::Rules::Real &rSecond,
+									 MR mr,
+									 LabelSettings labelSettings) const {
 		initByLabelSettings(rFirst, rSecond, labelSettings);
 		const auto &lgCodomPatterns = get_labelled_right(rFirst.getDPORule());
 		const auto &lgDomHosts = get_labelled_left(rSecond.getDPORule());
-		auto mp = makeRuleRuleComponentMonomorphism(lgCodomPatterns, lgDomHosts, false, labelSettings);
+		IO::Logger logger(IO::log());
+		auto mp = makeRuleRuleComponentMonomorphism(lgCodomPatterns, lgDomHosts, false, labelSettings,
+																  false, logger);
 		auto mm = makeMultiDimSelector<AllowPartial>(
 				get_num_connected_components(lgCodomPatterns),
 				get_num_connected_components(lgDomHosts), mp);
@@ -51,20 +60,28 @@ private:
 			auto maybeMap = matchFromPosition(rFirst, rSecond, position);
 			if(!maybeMap) continue;
 			auto map = *std::move(maybeMap);
-			bool continue_ = handleMapByLabelSettings(rFirst, rSecond, std::move(map), mr, labelSettings);
+			bool continue_ = handleMapByLabelSettings(rFirst, rSecond, std::move(map), mr, labelSettings,
+																	verbosity, logger);
 			if(!continue_) break;
 		}
 	}
+
 public:
 	template<typename Position>
-	boost::optional<VertexMapType> matchFromPosition(const lib::Rules::Real &rFirst, const lib::Rules::Real &rSecond, const std::vector<Position> &position) const;
+	boost::optional<VertexMapType> matchFromPosition(const lib::Rules::Real &rFirst,
+																	 const lib::Rules::Real &rSecond,
+																	 const std::vector<Position> &position) const;
 private:
+	const int verbosity;
+	IO::Logger logger;
 	const bool allowPartial;
 };
 
 template<typename Position>
 inline boost::optional<Sub::VertexMapType>
-Sub::matchFromPosition(const lib::Rules::Real &rFirst, const lib::Rules::Real &rSecond, const std::vector<Position> &position) const {
+Sub::matchFromPosition(const lib::Rules::Real &rFirst,
+							  const lib::Rules::Real &rSecond,
+							  const std::vector<Position> &position) const {
 	const auto &gDom = get_graph(get_labelled_left(rSecond.getDPORule()));
 	const auto &lgCodom = get_labelled_right(rFirst.getDPORule());
 	const auto &gCodom = get_graph(lgCodom);

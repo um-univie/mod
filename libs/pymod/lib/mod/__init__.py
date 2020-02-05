@@ -1,9 +1,14 @@
-from .libpymod import *
+
 import collections
+import ctypes
 import inspect
 import math
 import sys
 
+_oldFlags = sys.getdlopenflags()
+sys.setdlopenflags(_oldFlags | ctypes.RTLD_GLOBAL)
+from .libpymod import *
+sys.setdlopenflags(_oldFlags)
 
 # from http://mail.python.org/pipermail/tutor/2003-November/026645.html
 class Unbuffered(object):
@@ -17,6 +22,9 @@ class Unbuffered(object):
 sys.stdout = Unbuffered(sys.stdout)
 
 def _NoNew__setattr__(self, name, value):
+	if hasattr(self, "_frozen") and self._frozen:
+		msg = "Can not modify object '%s' of type '%s'. It has been frozen." % (self, type(self))
+		raise AttributeError(msg)
 	if hasattr(self, name):
 		object.__setattr__(self, name, value)
 	else:
@@ -24,6 +32,7 @@ def _NoNew__setattr__(self, name, value):
 		msg += "\ndir(" + str(self) + "):\n"
 		for name in dir(self): msg += "\t" + name + "\n"
 		raise AttributeError(msg)
+
 
 def _fixClass(name, c, indent):
 	if not name.startswith("Func_"):
@@ -52,6 +61,13 @@ for c in classes:
 	if c[1] == Unbuffered: continue
 	_fixClass(c[0], c[1], 0)
 
+#----------------------------------------------------------
+
+def _deprecation(msg):
+	if config.common.ignoreDeprecation:
+		print("WARNING: {} Use config.common.ignoreDeprecation = False to make this an exception.".format(msg))
+	else:
+		raise DeprecationWarning("{} Use config.common.ignoreDeprecation = True to make this just a warning.".format(msg))
 
 #----------------------------------------------------------
 # Script Inclusion Support
@@ -150,6 +166,10 @@ BondType.__str__ = libpymod._bondTypeToString
 # Config
 #----------------------------------------------------------
 
+LabelType.__str__ = libpymod._LabelType__str__
+LabelRelation.__str__ = libpymod._LabelRelation__str__
+IsomorphismPolicy.__str__ = libpymod._IsomorphismPolicy__str__
+
 config = getConfig()
 
 #----------------------------------------------------------
@@ -159,22 +179,69 @@ config = getConfig()
 Derivation.__repr__ = Derivation.__str__
 
 def _Derivation__setattr__(self, name, value):
-	if name == "left" or name == "right":
+	if name in ("left", "right"):
 		object.__setattr__(self, name, _wrap(VecGraph, value))
 	else:
 		_NoNew__setattr__(self, name, value)
 Derivation.__setattr__ = _Derivation__setattr__
 
 #----------------------------------------------------------
+# Derivations
+#----------------------------------------------------------
+
+Derivations.__repr__ = Derivations.__str__
+
+def _Derivations__setattr__(self, name, value):
+	if name in ("left", "right"):
+		object.__setattr__(self, name, _wrap(VecGraph, value))
+	elif name == "rules":
+		object.__setattr__(self, name, _wrap(VecRule, value))
+	else:
+		_NoNew__setattr__(self, name, value)
+Derivations.__setattr__ = _Derivations__setattr__
+
+#----------------------------------------------------------
 # DG
 #----------------------------------------------------------
 
 def dgDerivations(ders):
-	return libpymod.dgDerivations(_wrap(VecDerivation, ders))
+	_deprecation("dgDerivations is deprecated. Use the new build interface.")
+	dg = DG()
+	with dg.build() as b:
+		for d in ders:
+			b.addDerivation(d)
+	return dg
+
 def dgRuleComp(graphs, strat, labelSettings=LabelSettings(LabelType.String, LabelRelation.Isomorphism), ignoreRuleLabelTypes=False):
-	return libpymod.dgRuleComp(_wrap(VecGraph, graphs), dgStrat(strat), labelSettings, ignoreRuleLabelTypes)
+	_deprecation("dgRuleComp is deprecated. Use the new build interface.")
+	dg = DG(labelSettings=labelSettings, graphDatabase=graphs)
+	object.__setattr__(dg, "_ruleCompData", {
+		"ignoreRuleLabelTypes": ignoreRuleLabelTypes,
+		"strat": strat
+	})
+	def _DG_calc(dg, printInfo=True):
+		_deprecation("DG.calc() is deprecated. Use the new build interface.")
+		d = dg._ruleCompData
+		dg.build().execute(d["strat"], ignoreRuleLabelTypes=d["ignoreRuleLabelTypes"])
+	import types
+	object.__setattr__(dg, "calc", types.MethodType(_DG_calc, dg))
+	return dg
+
 def dgDump(graphs, rules, f):
 	return libpymod.dgDump(_wrap(VecGraph, graphs), _wrap(VecRule, rules), prefixFilename(f))
+
+_DG__init__old = DG.__init__
+def _DG__init__(self, *,
+	            labelSettings=LabelSettings(
+	                LabelType.String,
+	                LabelRelation.Isomorphism),
+	            graphDatabase=[],
+	            graphPolicy=IsomorphismPolicy.Check):
+	return _DG__init__old(self,
+	                      labelSettings,
+	                      _wrap(VecGraph, graphDatabase),
+	                      graphPolicy)
+DG.__init__ = _DG__init__
 
 _DG_print_orig = DG.print
 def _DG_print(self, printer=None, data=None):
@@ -210,26 +277,62 @@ def _DG__getattribute__(self, name):
 		return _unwrap(self._graphDatabase)
 	elif name == "products":
 		return _unwrap(self._products)
-	elif name == "printOptions":
-		if hasattr(self, "_cachedPrintOptions"):
-			return self._cachedPrintOptions
-		else:
-			return object.__getattribute__(self, name)						# TODO:
-			self._cachedPrintOptions = object.__getattribute__(self, name)
-			return self._cachedPrintOptions
 	else:
 		return object.__getattribute__(self, name)
 DG.__getattribute__ = _DG__getattribute__
 
-def _DG__setattr__(self, name, value):
-	if name == "_cachedPrintOptions":
-		object.__setattr__(self, name, value)
-	else:
-		_NoNew__setattr__(self, name, value)
-DG.__setattr__ = _DG__setattr__
-
 DG.__eq__ = lambda self, other: self.id == other.id
 DG.__hash__ = lambda self: self.id
+
+
+class DGBuildContextManager(object):
+	def __init__(self, dg):
+		assert dg is not None
+		self.dg = dg
+		self._builder = _DG_build_orig(self.dg)
+
+	def __enter__(self):
+		return self
+
+	def __exit__(self, exc_type, exc_val, exc_tb):
+		del self._builder
+		self.dg = None
+		self._builder = None
+
+	def _check(self):
+		assert self._builder
+
+	def addDerivation(self, d, graphPolicy=IsomorphismPolicy.Check):
+		self._check()
+		return self._builder.addDerivation(d, graphPolicy)
+
+	def execute(self, strategy, *, verbosity=2, ignoreRuleLabelTypes=False):
+		self._check()
+		return self._builder.execute(dgStrat(strategy), verbosity, ignoreRuleLabelTypes)
+
+	def addAbstract(self, description):
+		self._check()
+		return self._builder.addAbstract(description)
+	
+_DG_build_orig = DG.build
+DG.build = lambda self: DGBuildContextManager(self)
+
+
+#----------------------------------------------------------
+# DGExecuteResult
+#----------------------------------------------------------
+
+def _DGExecuteResult__getattribute__(self, name):
+	if name in ("subset", "universe"):
+		return _unwrap(object.__getattribute__(self, name))
+	return object.__getattribute__(self, name)
+
+DGExecuteResult.__getattribute__ = _DGExecuteResult__getattribute__
+
+_DGExecuteResult_list_old = DGExecuteResult.list
+def _DGExecuteResult_list(self, *, withUniverse=False):
+	return _DGExecuteResult_list_old(self, withUniverse)
+DGExecuteResult.list = _DGExecuteResult_list
 
 
 #----------------------------------------------------------
@@ -291,13 +394,13 @@ def _DGStratGraphState__getattribute__(self, name):
 DGStratGraphState.__getattribute__ = _DGStratGraphState__getattribute__
 
 _DGStrat_makeAddStatic_orig = DGStrat.makeAddStatic
-def _DGStrat_makeAddStatic(onlyUniverse, graphs):
-	return _DGStrat_makeAddStatic_orig(onlyUniverse, _wrap(VecGraph, graphs))
+def _DGStrat_makeAddStatic(onlyUniverse, graphs, graphPolicy):
+	return _DGStrat_makeAddStatic_orig(onlyUniverse, _wrap(VecGraph, graphs), graphPolicy)
 DGStrat.makeAddStatic = _DGStrat_makeAddStatic
 
 _DGStrat_makeAddDynamic_orig = DGStrat.makeAddDynamic
-def _DGStrat_makeAddDynamic(onlyUniverse, generator):
-	return _DGStrat_makeAddDynamic_orig(onlyUniverse, _funcWrap(Func_VecGraph, generator, resultWrap=VecGraph))
+def _DGStrat_makeAddDynamic(onlyUniverse, generator, graphPolicy):
+	return _DGStrat_makeAddDynamic_orig(onlyUniverse, _funcWrap(Func_VecGraph, generator, resultWrap=VecGraph), graphPolicy)
 DGStrat.makeAddDynamic = _DGStrat_makeAddDynamic
 
 _DGStrat_makeExecute_orig = DGStrat.makeExecute
@@ -379,10 +482,7 @@ def graphDFS(s, name=None, add=True):
 def smiles(s, name=None, add=True):
 	return _graphLoad(libpymod.smiles(s), name, add)
 
-def _Graph__repr__(self):
-	return str(self) + "(" + str(self.id) + ")"
-Graph.__repr__ = _Graph__repr__
-
+Graph.__repr__ = lambda self: str(self) + "(" + str(self.id) + ")"
 Graph.__eq__ = lambda self, other: self.id == other.id
 Graph.__lt__ = lambda self, other: self.id < other.id
 Graph.__hash__ = lambda self: self.id
@@ -408,7 +508,7 @@ def _RCEvaluator__getattribute__(self, name):
 RCEvaluator.__getattribute__ = _RCEvaluator__getattribute__
 
 _RCEvaluator_eval = RCEvaluator.eval
-RCEvaluator.eval = lambda self, e: _unwrap(_RCEvaluator_eval(self, e))
+RCEvaluator.eval = lambda self, e, *, verbosity=2: _unwrap(_RCEvaluator_eval(self, e, verbosity))
 
 def rcEvaluator(rules, labelSettings=LabelSettings(LabelType.String, LabelRelation.Isomorphism)):
 	return libpymod.rcEvaluator(_wrap(VecRule, rules), labelSettings)
@@ -451,12 +551,8 @@ def ruleGML(f, invert=False, add=True):
 
 Rule.__repr__ = lambda self: str(self) + "(" + str(self.id) + ")"
 Rule.__eq__ = lambda self, other: self.id == other.id
+Rule.__lt__ = lambda self, other: self.id < other.id
 Rule.__hash__ = lambda self: self.id
-
-#----------------------------------------------------------
-# DG
-#----------------------------------------------------------
-
 
 #----------------------------------------------------------
 # DG Strategy Prettification
@@ -474,31 +570,31 @@ def dgStrat(s):
 		l = [dgStrat(a) for a in s]
 		return DGStrat.makeParallel(l)	
 	else:
-		raise TypeError("Can not convert type '" + str(type(s)) + "' to DGStrat")
+		raise TypeError("Can not convert type '" + str(type(s)) + "' to DGStrat.")
 
 # add
 #----------------------------------------------------------
 
-def _DGStrat_add(doUniverse, g, gs):
+def _DGStrat_add(doUniverse, g, gs, graphPolicy):
 	if hasattr(g, "__call__"): # assume the dynamic version is meant
 		if len(gs) > 0:
-			raise TypeError("The dynamic version of addSubset/addUniverse takes exactly 1 argument (" + str(len(gs)) + " given)")
-		return DGStrat.makeAddDynamic(doUniverse, g)
+			raise TypeError("The dynamic version of addSubset/addUniverse takes exactly 1 argument (" + str(len(gs) + 1) + " given).")
+		return DGStrat.makeAddDynamic(doUniverse, g, graphPolicy)
 	else: # assume the static version was meant
-		graphs=[]
 		def convertGraphs(graphs, g):
 			if isinstance(g, Graph):
 				graphs.append(g)
 			else:
 				graphs.extend(a for a in g)
+		graphs=[]
 		convertGraphs(graphs, g)
 		for a in gs:
 			convertGraphs(graphs, a)
-		return DGStrat.makeAddStatic(doUniverse, graphs)
-def addUniverse(g, *gs):
-	return _DGStrat_add(True, g, gs)
-def addSubset(g, *gs):
-	return _DGStrat_add(False, g, gs)
+		return DGStrat.makeAddStatic(doUniverse, graphs, graphPolicy)
+def addUniverse(g, *gs, graphPolicy=IsomorphismPolicy.Check):
+	return _DGStrat_add(True, g, gs, graphPolicy)
+def addSubset(g, *gs, graphPolicy=IsomorphismPolicy.Check):
+	return _DGStrat_add(False, g, gs, graphPolicy)
 
 # derivation predicates
 #----------------------------------------------------------

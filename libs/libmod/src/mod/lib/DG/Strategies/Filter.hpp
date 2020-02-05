@@ -10,17 +10,18 @@ namespace DG {
 namespace Strategies {
 
 struct Filter : Strategy {
-	Filter(std::shared_ptr<mod::Function<bool(std::shared_ptr<graph::Graph>, const dg::Strategy::GraphState&, bool)> > filterFunc, bool filterUniverse);
-	Strategy *clone() const;
-	void preAddGraphs(std::function<void(std::shared_ptr<graph::Graph>) > add) const;
-
-	void forEachRule(std::function<void(const lib::Rules::Real&) > f) const { }
-	void printInfo(std::ostream &s) const;
-	bool isConsumed(const lib::Graph::Single *g) const;
+	Filter(std::shared_ptr<mod::Function<bool(std::shared_ptr<graph::Graph>, const dg::Strategy::GraphState &,
+	                                          bool)>> filterFunc, bool filterUniverse);
+	virtual Strategy *clone() const override;
+	virtual void preAddGraphs(std::function<void(std::shared_ptr<graph::Graph>, IsomorphismPolicy)> add) const override;
+	virtual void forEachRule(std::function<void(const lib::Rules::Real &)> f) const override {}
+	virtual void printInfo(PrintSettings settings) const override;
+	virtual bool isConsumed(const lib::Graph::Single *g) const override;
 private:
-	void executeImpl(std::ostream &s, const GraphState &input);
+	virtual void executeImpl(PrintSettings settings, const GraphState &input) override;
 private:
-	std::shared_ptr<mod::Function<bool(std::shared_ptr<graph::Graph>, const dg::Strategy::GraphState&, bool)> > filterFunc;
+	std::shared_ptr<mod::Function<bool(std::shared_ptr<graph::Graph>, const dg::Strategy::GraphState &,
+	                                   bool)> > filterFunc;
 	bool filterUniverse;
 };
 

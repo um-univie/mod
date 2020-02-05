@@ -10,7 +10,7 @@ The Wrapper Script (``mod``)
 The script ``mod`` is a convenience script primarily for starting ``python3``
 and after its exit execute PostMØD (the summary generator).
 The execution can however be customised somewhat, e.g., by running ``python3``
-thorugh ``valgrind`` or ``gdb``.
+through ``valgrind`` or ``gdb``.
 At some point the script will be able to call some other virtual machine than Python,
 which is why the documentation will not refer directly to running ``python3`` but
 instead simply say "running the selected virtual machine (VM)". As default ``python3``
@@ -100,6 +100,11 @@ Usage
 
   Use quiet mode. Certain messages are not printed.
 
+.. envvar:: MOD_NO_DEPRECATED
+
+  When set to a non-empty string, and Python is the VM,
+  then the string ``config.common.ignoreDeprecation = False`` is executed first.
+  This can be used to force errors when scripts use deprecated functionality.
 
 
 Plugins (Loading of Additional Modules)
@@ -141,12 +146,8 @@ The preamble has the following effects.
     in the C/C++ preprocessor includes files. Paths are handled relatively using the functions
     :py:func:`prefixFilename`, :py:func:`pushFilePrefix`, and :py:func:`popFilePrefix`.
     
-    :param fName: the file to be included.
-    :type fName: string
-    :param checkDup: check if the file has already been included before (with ``putDup=True``)
-    :type checkDup: bool
-    :param putDup: remember that this file has been included in subsequent calls.
-    :type putDup: bool
-    :param skipDup: skip inclusion instead of exiting if the file has already been included
+    :param str fName: the file to be included.
+    :param bool checkDup: check if the file has already been included before (with ``putDup=True``)
+    :param bool putDup: remember that this file has been included in subsequent calls.
+    :param bool skipDup: skip inclusion instead of exiting if the file has already been included
       before (with ``putDup=True``)
-    :type skipDup: bool

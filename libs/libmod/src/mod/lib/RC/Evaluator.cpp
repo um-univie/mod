@@ -21,7 +21,8 @@ namespace {
 
 struct EvalVisitor : public boost::static_visitor<std::unordered_set<std::shared_ptr<rule::Rule> > > {
 
-	EvalVisitor(Evaluator &evaluator) : evaluator(evaluator) { }
+	EvalVisitor(int verbosity, IO::Logger logger, Evaluator &evaluator)
+			: verbosity(verbosity), logger(logger), evaluator(evaluator) {}
 
 	// Nullary/unary
 	//----------------------------------------------------------------------
@@ -61,14 +62,15 @@ struct EvalVisitor : public boost::static_visitor<std::unordered_set<std::shared
 	//----------------------------------------------------------------------
 
 	template<typename Composer>
-	std::unordered_set<std::shared_ptr<rule::Rule> > composeTemplate(const rule::RCExp::ComposeBase &compose, Composer composer) {
+	std::unordered_set<std::shared_ptr<rule::Rule> > composeTemplate(
+			const rule::RCExp::ComposeBase &compose, Composer composer) {
 		auto firstResult = compose.getFirst().applyVisitor(*this);
 		auto secondResult = compose.getSecond().applyVisitor(*this);
 		std::unordered_set<std::shared_ptr<rule::Rule> > result;
 		for(auto rFirst : firstResult) {
 			for(auto rSecond : secondResult) {
-				std::vector<lib::Rules::Real*> resultVec;
-				auto reporter = [&resultVec] (std::unique_ptr<lib::Rules::Real> r) {
+				std::vector<lib::Rules::Real *> resultVec;
+				auto reporter = [&resultVec](std::unique_ptr<lib::Rules::Real> r) {
 					resultVec.push_back(r.release());
 					return true;
 				};
@@ -91,46 +93,54 @@ struct EvalVisitor : public boost::static_visitor<std::unordered_set<std::shared
 
 	std::unordered_set<std::shared_ptr<rule::Rule> > operator()(const rule::RCExp::ComposeCommon &common) {
 		const auto composer = [&common, this](const lib::Rules::Real &rFirst, const lib::Rules::Real &rSecond,
-				std::function<bool(std::unique_ptr<lib::Rules::Real>) > reporter) {
-			RC::Common mm(common.getMaxmimum(), common.getConnected());
+														  std::function<bool(std::unique_ptr<lib::Rules::Real>)> reporter) {
+			RC::Common mm(matchMakerVerbosity(), logger, common.getMaxmimum(), common.getConnected());
 			lib::RC::composeRuleRealByMatchMaker(rFirst, rSecond, mm, reporter, evaluator.labelSettings);
 		};
 		return composeTemplate(common, composer);
 	}
 
 	std::unordered_set<std::shared_ptr<rule::Rule> > operator()(const rule::RCExp::ComposeParallel &common) {
-		const auto composer = [this](const lib::Rules::Real &rFirst, const lib::Rules::Real & rSecond,
-				std::function<bool(std::unique_ptr<lib::Rules::Real>) > reporter) {
-			lib::RC::composeRuleRealByMatchMaker(rFirst, rSecond, lib::RC::Parallel(), reporter, evaluator.labelSettings);
+		const auto composer = [this](const lib::Rules::Real &rFirst, const lib::Rules::Real &rSecond,
+											  std::function<bool(std::unique_ptr<lib::Rules::Real>)> reporter) {
+			lib::RC::composeRuleRealByMatchMaker(rFirst, rSecond, lib::RC::Parallel(verbosity, logger),
+															 reporter, evaluator.labelSettings);
 		};
 		return composeTemplate(common, composer);
 	}
 
 	std::unordered_set<std::shared_ptr<rule::Rule> > operator()(const rule::RCExp::ComposeSub &sub) {
-		const auto composer = [&sub, this](const lib::Rules::Real &rFirst, const lib::Rules::Real & rSecond,
-				std::function<bool(std::unique_ptr<lib::Rules::Real>) > reporter) {
-			RC::Sub mm(sub.getAllowPartial());
+		const auto composer = [&sub, this](const lib::Rules::Real &rFirst, const lib::Rules::Real &rSecond,
+													  std::function<bool(std::unique_ptr<lib::Rules::Real>)> reporter) {
+			RC::Sub mm(matchMakerVerbosity(), logger, sub.getAllowPartial());
 			lib::RC::composeRuleRealByMatchMaker(rFirst, rSecond, mm, reporter, evaluator.labelSettings);
 		};
 		return composeTemplate(sub, composer);
 	}
 
 	std::unordered_set<std::shared_ptr<rule::Rule> > operator()(const rule::RCExp::ComposeSuper &super) {
-		const auto composer = [&super, this](const lib::Rules::Real &rFirst, const lib::Rules::Real & rSecond,
-				std::function<bool(std::unique_ptr<lib::Rules::Real>) > reporter) {
-			RC::Super mm(super.getAllowPartial(), super.getEnforceConstraints());
+		const auto composer = [&super, this](const lib::Rules::Real &rFirst, const lib::Rules::Real &rSecond,
+														 std::function<bool(std::unique_ptr<lib::Rules::Real>)> reporter) {
+			RC::Super mm(matchMakerVerbosity(), logger, super.getAllowPartial(), super.getEnforceConstraints());
 			lib::RC::composeRuleRealByMatchMaker(rFirst, rSecond, mm, reporter, evaluator.labelSettings);
 		};
 		return composeTemplate(super, composer);
 	}
+
+	int matchMakerVerbosity() const {
+		return std::max(0, verbosity - 10 + V_MorphismGen);
+	}
+
 private:
+	const int verbosity;
+	IO::Logger logger;
 	Evaluator &evaluator;
 };
 
 } // namespace 
 
 Evaluator::Evaluator(std::unordered_set<std::shared_ptr<rule::Rule> > database, LabelSettings labelSettings)
-: labelSettings(labelSettings), database(database) {
+		: labelSettings(labelSettings), database(database) {
 	if(labelSettings.type == LabelType::Term) {
 		for(const auto r : database) {
 			const auto &term = get_term(r->getRule().getDPORule());
@@ -150,11 +160,9 @@ const std::unordered_set<std::shared_ptr<rule::Rule> > &Evaluator::getProducts()
 	return products;
 }
 
-std::unordered_set<std::shared_ptr<rule::Rule> > Evaluator::eval(const rule::RCExp::Expression &exp) {
-
+std::unordered_set<std::shared_ptr<rule::Rule> > Evaluator::eval(const rule::RCExp::Expression &exp, int verbosity) {
 	struct PreEvalVisitor : public boost::static_visitor<void> {
-
-		PreEvalVisitor(Evaluator &evaluator) : evaluator(evaluator) { }
+		PreEvalVisitor(Evaluator &evaluator) : evaluator(evaluator) {}
 
 		// Nullary/unary
 		//----------------------------------------------------------------------
@@ -208,11 +216,12 @@ std::unordered_set<std::shared_ptr<rule::Rule> > Evaluator::eval(const rule::RCE
 			compose.getFirst().applyVisitor(*this);
 			compose.getSecond().applyVisitor(*this);
 		}
+
 	private:
 		Evaluator &evaluator;
 	};
 	exp.applyVisitor(PreEvalVisitor(*this));
-	std::unordered_set<std::shared_ptr<rule::Rule> > result = exp.applyVisitor(EvalVisitor(*this));
+	auto result = exp.applyVisitor(EvalVisitor(verbosity, IO::Logger(IO::log()), *this));
 	return result;
 }
 
@@ -235,7 +244,8 @@ void Evaluator::giveProductStatus(std::shared_ptr<rule::Rule> r) {
 
 std::shared_ptr<rule::Rule> Evaluator::checkIfNew(lib::Rules::Real *rCand) const {
 	for(auto rOther : database) {
-		if(lib::Rules::makeIsomorphismPredicate(labelSettings.type, labelSettings.withStereo)(&rOther->getRule(), rCand)) {
+		if(lib::Rules::makeIsomorphismPredicate(labelSettings.type, labelSettings.withStereo)
+				(&rOther->getRule(), rCand)) {
 			delete rCand;
 			return rOther;
 		}
@@ -243,7 +253,9 @@ std::shared_ptr<rule::Rule> Evaluator::checkIfNew(lib::Rules::Real *rCand) const
 	return rule::Rule::makeRule(std::unique_ptr<lib::Rules::Real>(rCand));
 }
 
-void Evaluator::suggestComposition(const lib::Rules::Real *rFirst, const lib::Rules::Real *rSecond, const lib::Rules::Real *rResult) {
+void Evaluator::suggestComposition(const lib::Rules::Real *rFirst,
+											  const lib::Rules::Real *rSecond,
+											  const lib::Rules::Real *rResult) {
 	Vertex vComp = getVertexFromArgs(rFirst, rSecond);
 	Vertex vResult = getVertexFromRule(rResult);
 	for(Vertex vOut : asRange(adjacent_vertices(vComp, rcg))) {

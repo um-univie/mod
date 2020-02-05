@@ -1,4 +1,3 @@
-config.rc.verbose = True
 inc = ruleGMLString("""rule [
 	ruleID "inc"
 	left [
@@ -14,7 +13,7 @@ a = graphGMLString("""graph [
 ]""")
 
 rcEval = rcEvaluator(inputRules, labelSettings=LabelSettings(LabelType.Term, LabelRelation.Specialisation))
-res = rcEval.eval(rcId(a) *rcSuper* inc)
+res = rcEval.eval(rcId(a) *rcSuper* inc, verbosity=20)
 for a in res:
 	a.printTermState()
 	a.print()

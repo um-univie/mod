@@ -43,24 +43,15 @@ struct ConstructionData {
 };
 
 struct NonHyperDump : public NonHyper {
-
 	NonHyperDump(const std::vector<std::shared_ptr<graph::Graph> > &graphs,
-					 ConstructionData &&constructionData)
-			: NonHyper(graphs, {LabelType::String, LabelRelation::Isomorphism}), constructionData(&constructionData) {
-		calculate(true);
-	}
-
-private:
-
-	virtual std::string getType() const override {
-		return "DGDump";
-	}
-
-	virtual void calculateImpl(bool printInfo) override {
-		const std::vector<std::shared_ptr<rule::Rule> > &rules = constructionData->rules;
-		auto &vertices = constructionData->vertices;
-		const auto &rulesParsed = constructionData->rulesParsed;
-		const auto &edges = constructionData->edges;
+	             ConstructionData &&constructionData)
+			: NonHyper({LabelType::String, LabelRelation::Isomorphism}, graphs, IsomorphismPolicy::Check) {
+		calculatePrologue();
+		constexpr bool printInfo = true;
+		const std::vector<std::shared_ptr<rule::Rule> > &rules = constructionData.rules;
+		auto &vertices = constructionData.vertices;
+		const auto &rulesParsed = constructionData.rulesParsed;
+		const auto &edges = constructionData.edges;
 		std::unordered_map<unsigned int, std::shared_ptr<rule::Rule> > ruleMap;
 		std::unordered_map<unsigned int, std::shared_ptr<graph::Graph> > graphMap;
 		this->rules.reserve(rulesParsed.size());
@@ -131,14 +122,14 @@ private:
 				MOD_ABORT;
 			}
 		}
-		constructionData = nullptr;
+		calculateEpilogue();
 	}
-
-	virtual void listImpl(std::ostream &s) const override {}
-
+private:
+	virtual std::string getType() const override {
+		return "DGDump";
+	}
 private:
 	std::vector<std::shared_ptr<rule::Rule> > rules;
-	ConstructionData *constructionData;
 };
 
 template<typename Iter>
@@ -148,11 +139,11 @@ auto makePosIter(Iter iter) {
 
 template<typename Iter, typename Parser, typename Attr>
 bool parse(Iter &textFirst,
-			  IO::PositionIter<Iter> &first,
-			  const IO::PositionIter<Iter> &last,
-			  const Parser &p,
-			  Attr &attr,
-			  std::ostream &err) {
+           IO::PositionIter<Iter> &first,
+           const IO::PositionIter<Iter> &last,
+           const Parser &p,
+           Attr &attr,
+           std::ostream &err) {
 	try {
 		bool res = IO::detail::ParseDispatch<x3::space_type>::parse(first, last, p, attr, x3::space);
 		if(!res) {
@@ -171,9 +162,9 @@ bool parse(Iter &textFirst,
 } // namespace
 
 std::unique_ptr<NonHyper> load(const std::vector<std::shared_ptr<graph::Graph> > &graphs,
-										 const std::vector<std::shared_ptr<rule::Rule> > &rules,
-										 const std::string &file,
-										 std::ostream &err) {
+                               const std::vector<std::shared_ptr<rule::Rule> > &rules,
+                               const std::string &file,
+                               std::ostream &err) {
 	boost::iostreams::mapped_file_source ifs(file);
 
 	auto textFirst = ifs.begin();
@@ -250,7 +241,7 @@ std::unique_ptr<NonHyper> load(const std::vector<std::shared_ptr<graph::Graph> >
 		for(const auto rId : ruleIds) {
 			if(validRules.find(rId) == end(validRules)) {
 				err << "Parsed data is corrupt, ruleId, " << rId << ", out of range [0, " << numRules << "[ for edge " << id
-					 << std::endl;
+				    << std::endl;
 				return nullptr;
 			}
 		}

@@ -54,8 +54,7 @@ void Printer_doExport() {
 	py::class_<PrintData>("DGPrintData", py::no_init)
 			// rst:		.. py:method:: __init__(self, dg)
 			// rst:
-			// rst:			:param dg: the derivation graph to hold data for.
-			// rst:			:type dg: :class:`DG`
+			// rst:			:param DG dg: the derivation graph to hold data for.
 			.def(py::init<std::shared_ptr<DG> >())
 			// rst:		.. py:attribute:: dg
 			// rst:
@@ -65,45 +64,33 @@ void Printer_doExport() {
 			// rst:
 			// rst:			Create another version of the given derivation and give it the given duplicate number.
 			// rst:
-			// rst:			:param e: a reference to the derivation to duplicate.
-			// rst:			:type e: :class:`DGHyperEdge`
-			// rst:			:param eDup: the duplicate number for the new version of the derivation.
-			// rst:			:type eDup: unsigned int
+			// rst:			:param DGHyperEdge e: a reference to the derivation to duplicate.
+			// rst:			:param int eDup: the duplicate number for the new version of the derivation.
 			.def("makeDuplicate", &PrintData::makeDuplicate)
 			// rst:		.. py:method:: removeDuplicate(e, eDup)
 			// rst:
 			// rst:			Remove the version of the given derivation with the given duplicate number.
 			// rst:
-			// rst:			:param e: a reference to the derivation to duplicate.
-			// rst:			:type e: :class:`DGHyperEdge`
-			// rst:			:param eDup: the duplicate number for the version of the derivation to remove.
-			// rst:			:type eDup: unsigned int
+			// rst:			:param DGHyperEdge e: a reference to the derivation to duplicate.
+			// rst:			:param int eDup: the duplicate number for the version of the derivation to remove.
 			.def("removeDuplicate", &PrintData::removeDuplicate)
 			// rst:		.. py:method:: reconnectTail(e, eDup, g, vDupTar)
 			// rst:
 			// rst:			Reconnect an arbitrary version of the tail specified by the given graph in the derivation duplicate given.
 			// rst:
-			// rst:			:param e: a reference to the derivation to reconnect.
-			// rst:			:type e: :class:`DGHyperEdge`
-			// rst:			:param eDup: the duplicate number of the derivation to reconnect.
-			// rst:			:type eDup: unsigned int
-			// rst:			:param g: a graph representing the tail vertex to reconnect.
-			// rst:			:type g: :class:`Graph`
-			// rst:			:param vDupTar: the new duplicate number for the tail vertex.
-			// rst:			:type vDupTar: unsigned int
+			// rst:			:param DGHyperEdge e: a reference to the derivation to reconnect.
+			// rst:			:param int eDup: the duplicate number of the derivation to reconnect.
+			// rst:			:param Graph g: a graph representing the tail vertex to reconnect.
+			// rst:			:param int vDupTar: the new duplicate number for the tail vertex.
 			.def("reconnectTail", &PrintData::reconnectTail)
 			// rst:		.. py:method:: reconnectHead(e, eDup, g, vDupTar)
 			// rst:
 			// rst:			Reconnect an arbitrary version of the head specified by the given graph in the derivation duplicate given.
 			// rst:
-			// rst:			:param e: a reference to the derivation to reconnect.
-			// rst:			:type e: :class:`DGHyperEdge`
-			// rst:			:param eDup: the duplicate number of the derivation to reconnect.
-			// rst:			:type eDup: unsigned int
-			// rst:			:param g: a graph representing the head vertex to reconnect.
-			// rst:			:type g: :class:`Graph`
-			// rst:			:param vDupTar: the new duplicate number for the tail vertex.
-			// rst:			:type vDupTar: unsigned int
+			// rst:			:param DGHyperEdge e: a reference to the derivation to reconnect.
+			// rst:			:param int eDup: the duplicate number of the derivation to reconnect.
+			// rst:			:param Graph g: a graph representing the head vertex to reconnect.
+			// rst:			:param int vDupTar: the new duplicate number for the tail vertex.
 			.def("reconnectHead", &PrintData::reconnectHead)
 			;
 
@@ -118,7 +105,7 @@ void Printer_doExport() {
 			// rst:
 			// rst:			(Read-only) Retrieve the :class:`GraphPrinter` used when printing images of graphs.
 			// rst:
-			// rst:			:type: :class:`GraphPrinter`
+			// rst:			:type: GraphPrinter
 			.add_property("graphPrinter", py::make_function(Printer_getGraphPrinter, py::return_internal_reference<1>()))
 			// rst:		.. py:attribute:: withShortcutEdges
 			// rst:
@@ -147,7 +134,7 @@ void Printer_doExport() {
 			// rst:			All visibility functions must return ``true`` for a vertex to be visible.
 			// rst:
 			// rst:			:param f: the function to push for specifying vertex visibility.
-			// rst:			:type f: bool(:class:`Graph`, :class:`DG`)
+			// rst:			:type f: Callable[[Graph, DG], bool]
 			.def("pushVertexVisible", &Printer_pushVertexVisible)
 			// rst:		.. py:method:: popVertexVisible()
 			// rst:
@@ -159,7 +146,7 @@ void Printer_doExport() {
 			// rst:			All visibility functions must return ``true`` for a hyperedge to be visible.
 			// rst:
 			// rst:			:param f: the function to push for specifying hyperedge visibility.
-			// rst:			:type f: bool(:class:`DGHyperEdge`)
+			// rst:			:type f: Callable[[DGHyperEdge], bool]
 			.def("pushEdgeVisible", &Printer_pushEdgeVisible)
 			// rst:		.. py:method:: popEdgeVisible()
 			// rst:
@@ -175,7 +162,7 @@ void Printer_doExport() {
 			// rst:
 			// rst:			The string used as separator between each part of each vertex label.
 			// rst:	
-			// rst:			:type: string
+			// rst:			:type: str
 			.add_property("vertexLabelSep",
 			py::make_function(&Printer::getVertexLabelSep, py::return_value_policy<py::copy_const_reference>()),
 			&Printer::setVertexLabelSep)
@@ -183,7 +170,7 @@ void Printer_doExport() {
 			// rst:
 			// rst:			The string used as separator between each part of each edge label.
 			// rst:
-			// rst:			:type: string
+			// rst:			:type: str
 			.add_property("edgeLabelSep",
 			py::make_function(&Printer::getEdgeLabelSep, py::return_value_policy<py::copy_const_reference>()),
 			&Printer::setEdgeLabelSep)
@@ -192,7 +179,7 @@ void Printer_doExport() {
 			// rst:			Add another function for vertex labelling. The result of this function is added to the end of each label.
 			// rst:
 			// rst:			:param f: the function to push for labelling vertices.
-			// rst:			:type f: string(:class:`Graph`, :class:`DG`)
+			// rst:			:type f: Callable[[Graph, DG], str]
 			.def("pushVertexLabel", &Printer_pushVertexLabel)
 			// rst:		.. py:method:: popVertexLabel()
 			// rst:
@@ -203,7 +190,7 @@ void Printer_doExport() {
 			// rst:			Add another function for edge labelling. The result of this function is appended to each label.
 			// rst:
 			// rst:			:param f: the function to push for labelling edges.
-			// rst:			:type f: string(:class:`DGHyperEdge`)
+			// rst:			:type f: Callable[[DGHyperEdge], str]
 			.def("pushEdgeLabel", &Printer_pushEdgeLabel)
 			// rst:		.. py:method:: popEdgeLabel()
 			// rst:
@@ -242,7 +229,7 @@ void Printer_doExport() {
 			// rst:			The edge extension of vertex colour takes lower precedence than explicitly added hyperedge colouring functions.
 			// rst:
 			// rst:			:param f: the function to push for colouring vertices.
-			// rst:			:type f: string(:class:`Graph`, :class:`DG`)
+			// rst:			:type f: Callable[[Graph, DG], str]
 			// rst:			:param bool extendToEdges: whether or not some hyperedges are coloured as well (see above).
 			.def("pushVertexColour", &Printer_pushVertexColour)
 			// rst:		.. py:method:: popVertexColour()
@@ -255,7 +242,7 @@ void Printer_doExport() {
 			// rst:			first colour function returning a non-empty string.
 			// rst:			
 			// rst:			:param f: the function to push for colouring hyperedges.
-			// rst:			:type f: string(:class:`DGHyperEdge`)
+			// rst:			:type f: Callable[[DGHyperEdge], str]
 			.def("pushEdgeColour", &Printer_pushEdgeColour)
 			// rst:		.. py:method:: popEdgeColour()
 			// rst:
@@ -267,7 +254,7 @@ void Printer_doExport() {
 			// rst:			to set the rotation of each printed graph.
 			// rst:
 			// rst:			:param f: the function called on each graph to retrieve the rotation to render it with.
-			// rst:			:type f: int(:class:`GraphPrinter`)
+			// rst:			:type f: Callable[[GraphPrinter], int]
 			.def("setRotationOverwrite", &Printer_setRotationOverwrite)
 			// rst:		.. py:method:: setMirrorOverwrite(f)
 			// rst:
@@ -275,7 +262,7 @@ void Printer_doExport() {
 			// rst:			to set the mirror of each printed graph.
 			// rst:
 			// rst:			:param f: the function called on each graph to retrieve the mirror to render it with.
-			// rst:			:type f: bool(:class:`GraphPrinter`)
+			// rst:			:type f: Callable[[GraphPrinter], bool]
 			.def("setMirrorOverwrite", &Printer_setMirrorOverwrite)
 			;
 }

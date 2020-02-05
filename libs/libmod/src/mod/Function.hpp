@@ -1,8 +1,9 @@
 #ifndef MOD_FUNCTION_H
-#define	MOD_FUNCTION_H
+#define MOD_FUNCTION_H
 
-// rst: The template class ``Function`` is used throughout the library to represent
-// rst: functors.
+// rst: The class template `Function` is used throughout the library to represent
+// rst: function objects.
+// rst:
 
 #include <boost/type_traits/function_traits.hpp>
 
@@ -13,20 +14,21 @@
 
 namespace mod {
 
+// rst: .. class:: template<typename Sig> Function
+
+template<typename Sig>
+struct Function {
+};
+
 // rst-class: template<typename R, typename ...Args> Function<R(Args...)>
 // rst:
 // rst:		Abstract base class template for fuctors used in the library.
 // rst:
 // rst-class-start:
 
-template<typename Sig>
-struct Function {
-};
-
 template<typename R, typename ...Args>
 struct Function<R(Args...)> {
-
-	virtual ~Function() { };
+	virtual ~Function() {};
 	// rst: .. function:: virtual std::shared_ptr<Function<R(Args...)> > clone() const = 0
 	// rst:
 	// rst:		Cloning function used when a copy of a given functor is needed.
@@ -53,13 +55,11 @@ struct StdFunctionWrapper {
 
 template<typename R, typename ...Args>
 struct StdFunctionWrapper<R(Args...)> : public Function<R(Args...)> {
+	StdFunctionWrapper(std::string name, std::function<R(Args...)> f) : name(name), f(f) {}
+	StdFunctionWrapper(std::function<R(Args...)> f) : name("<C++ lambda>"), f(f) {}
 
-	StdFunctionWrapper(std::string name, std::function<R(Args...) > f) : name(name), f(f) { }
-
-	StdFunctionWrapper(std::function<R(Args...) > f) : name("<C++ lambda>"), f(f) { }
-
-	std::shared_ptr < Function < R(Args...)> > clone() const {
-		return std::unique_ptr < Function < R(Args...)> >(new StdFunctionWrapper(*this));
+	std::shared_ptr<Function<R(Args...)> > clone() const {
+		return std::unique_ptr<Function<R(Args...)> >(new StdFunctionWrapper(*this));
 	}
 
 	void print(std::ostream &s) const {
@@ -71,7 +71,7 @@ struct StdFunctionWrapper<R(Args...)> : public Function<R(Args...)> {
 	}
 private:
 	const std::string name;
-	std::function < R(Args...) > f;
+	std::function<R(Args...)> f;
 };
 
 template<typename Sig>
@@ -80,9 +80,8 @@ struct ToStdFunctionHelper {
 
 template<typename R, typename ...Args>
 struct ToStdFunctionHelper<R(Args...)> {
-
-	static std::function < R(Args...) > get(std::shared_ptr<Function<R(Args...)> > fMod) {
-		return [fMod] (Args ...args) -> R {
+	static std::function<R(Args...)> get(std::shared_ptr<Function<R(Args...)> > fMod) {
+		return [fMod](Args ...args) -> R {
 			return (*fMod)(args...);
 		};
 	}
@@ -107,4 +106,4 @@ std::function<Sig> toStdFunction(std::shared_ptr<Function<Sig> > fMod) {
 
 } // namespace mod
 
-#endif	/* MOD_FUNCTION_H */
+#endif    /* MOD_FUNCTION_H */

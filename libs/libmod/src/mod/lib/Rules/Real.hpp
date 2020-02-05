@@ -18,7 +18,6 @@ struct PropStereo;
 struct PropString;
 struct Single;
 } // namespace Graph
-
 namespace Rules {
 struct PropStringCore;
 struct PropMoleculeCore;
@@ -51,8 +50,17 @@ public: // deprecated
 	const PropTermCore &getTermState() const;
 	const PropMoleculeCore &getMoleculeState() const;
 public:
-	static std::size_t isomorphism(const Real &rDom, const Real &rCodom, std::size_t maxNumMatches, LabelSettings labelSettings);
-	static std::size_t monomorphism(const Real &rDom, const Real &rCodom, std::size_t maxNumMatches, LabelSettings labelSettings);
+	static std::size_t isomorphism(const Real &rDom,
+	                               const Real &rCodom,
+	                               std::size_t maxNumMatches,
+	                               LabelSettings labelSettings);
+	static std::size_t monomorphism(const Real &rDom,
+	                                const Real &rCodom,
+	                                std::size_t maxNumMatches,
+	                                LabelSettings labelSettings);
+	static bool isomorphicLeftRight(const Real &rDom,
+	                                const Real &rCodom,
+	                                LabelSettings labelSettings);
 private:
 	const std::size_t id;
 	std::weak_ptr<rule::Rule> apiReference;
@@ -64,7 +72,6 @@ private:
 };
 
 struct LessById {
-
 	bool operator()(const Real *r1, const Real *r2) const {
 		return r1->getId() < r2->getId();
 	}
@@ -73,13 +80,13 @@ struct LessById {
 namespace detail {
 
 struct IsomorphismPredicate {
-
 	IsomorphismPredicate(LabelType labelType, bool withStereo)
-	: settings(labelType, LabelRelation::Isomorphism, withStereo, LabelRelation::Isomorphism) { }
+			: settings(labelType, LabelRelation::Isomorphism, withStereo, LabelRelation::Isomorphism) {}
 
 	bool operator()(const Real *rDom, const Real *rCodom) const {
 		return 1 == Real::isomorphism(*rDom, *rCodom, 1, settings);
 	}
+
 private:
 	LabelSettings settings;
 };
@@ -91,7 +98,6 @@ inline detail::IsomorphismPredicate makeIsomorphismPredicate(LabelType labelType
 }
 
 struct MembershipPredWrapper {
-
 	template<typename OuterGraph, typename Pred>
 	auto operator()(const OuterGraph &gDomain, const OuterGraph &gCodomain, Pred pred) const {
 		return jla_boost::GraphMorphism::makePropertyPredicateEq(

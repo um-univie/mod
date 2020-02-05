@@ -21,41 +21,60 @@ struct Parallel;
 struct Sub;
 struct Super;
 
-template<LabelType labelType, bool withStereo, typename InvertibleVertexMap>
-std::unique_ptr<lib::Rules::Real> composeRuleRealByMatch(const lib::Rules::Real &rFirst, const lib::Rules::Real &rSecond, InvertibleVertexMap &match) {
-	if(getConfig().rc.verbose.get()) IO::log() << "Composing " << rFirst.getName() << " and " << rSecond.getName() << "\n" << std::string(80, '=') << std::endl;
+template<bool verbose, LabelType labelType, bool withStereo, typename InvertibleVertexMap>
+auto composeRuleRealByMatch(const lib::Rules::Real &rFirst,
+                            const lib::Rules::Real &rSecond,
+                            InvertibleVertexMap &match) {
 	using Result = BaseResult<lib::Rules::LabelledRule, lib::Rules::LabelledRule, lib::Rules::LabelledRule>;
 	auto visitor = Visitor::MatchConstraints<labelType>();
-	auto resultOpt = getConfig().rc.verbose.get()
-			? composeLabelled<true, Result, labelType, withStereo>(rFirst.getDPORule(), rSecond.getDPORule(), match, visitor)
-			: composeLabelled<false, Result, labelType, withStereo>(rFirst.getDPORule(), rSecond.getDPORule(), match, visitor);
+	auto res = composeLabelled<verbose, Result, labelType, withStereo>(
+			rFirst.getDPORule(), rSecond.getDPORule(), match, visitor);
+	if(res) res->rResult.initComponents(); // TODO: move to the visitor finalizer
+	return res;
+}
+
+template<LabelType labelType, bool withStereo, typename InvertibleVertexMap>
+std::unique_ptr<lib::Rules::Real> composeRuleRealByMatch(const lib::Rules::Real &rFirst,
+                                                         const lib::Rules::Real &rSecond,
+                                                         InvertibleVertexMap &match,
+                                                         const bool verbose, IO::Logger logger) {
+	if(verbose) {
+		logger.indent() << "Composing " << rFirst.getName() << " and " << rSecond.getName() << "\n";
+		++logger.indentLevel;
+	}
+	auto resultOpt = verbose
+	                 ? composeRuleRealByMatch<true, labelType, withStereo>(rFirst, rSecond, match)
+	                 : composeRuleRealByMatch<false, labelType, withStereo>(rFirst, rSecond, match);
 	if(!resultOpt) {
-		if(getConfig().rc.verbose.get()) IO::log() << "Composition failed" << std::endl;
+		if(verbose) logger.indent() << "Composition failed" << std::endl;
 		return nullptr;
 	}
-	resultOpt->rResult.initComponents(); // TODO: move to the visitor finalizer
 	auto rResult = std::make_unique<lib::Rules::Real>(std::move(resultOpt->rResult), labelType);
-	if(getConfig().rc.verbose.get()) IO::log() << "Composition done, rNew is '" << rResult->getName() << "'" << std::endl;
+	if(verbose)
+		logger.indent() << "Composition done, rNew is '" << rResult->getName() << "'" << std::endl;
 	return rResult;
 }
 
 namespace detail {
 
 struct MatchMakerCallback {
-
-	MatchMakerCallback(std::function<bool(std::unique_ptr<lib::Rules::Real>) > rr) : rr(rr) { }
+	MatchMakerCallback(std::function<bool(std::unique_ptr<lib::Rules::Real>)> rr) : rr(rr) {}
 
 	template<typename InvertibleVertexMap>
-	bool operator()(const lib::Rules::Real &rFirst, const lib::Rules::Real &rSecond, InvertibleVertexMap &&m) const {
+	bool operator()(const lib::Rules::Real &rFirst,
+	                const lib::Rules::Real &rSecond,
+	                InvertibleVertexMap &&m,
+	                bool verbose,
+	                IO::Logger logger) const {
 		using HasTerm = GraphMorphism::HasTermData<InvertibleVertexMap>;
 		using HasStereo = GraphMorphism::HasStereoData<InvertibleVertexMap>;
 		constexpr LabelType labelType = HasTerm::value ? LabelType::Term : LabelType::String;
-		auto rResult = composeRuleRealByMatch<labelType, HasStereo::value>(rFirst, rSecond, m);
+		auto rResult = composeRuleRealByMatch<labelType, HasStereo::value>(rFirst, rSecond, m, verbose, logger);
 		if(rResult) {
-			if(getConfig().rc.verbose.get())
-				IO::log() << "RuleComp\t" << rResult->getName()
-				<< "\t= " << rFirst.getName()
-				<< "\t. " << rSecond.getName() << std::endl;
+			if(verbose)
+				logger.indent() << "RuleComp\t" << rResult->getName()
+				                << "\t= " << rFirst.getName()
+				                << "\t. " << rSecond.getName() << std::endl;
 			if(getConfig().rc.printMatches.get()) {
 				IO::RC::Write::test(rFirst, rSecond, m, *rResult);
 			}
@@ -64,18 +83,21 @@ struct MatchMakerCallback {
 		}
 		return true;
 	}
+
 private:
-	std::function<bool(std::unique_ptr<lib::Rules::Real>) > rr;
+	std::function<bool(std::unique_ptr<lib::Rules::Real>)> rr;
 };
 
 } // namespace detail
 
 template<typename MatchMaker>
-void composeRuleRealByMatchMakerGeneric(const lib::Rules::Real &rFirst, const lib::Rules::Real &rSecond, MatchMaker mm,
-		std::function<bool(std::unique_ptr<lib::Rules::Real>) > rr, LabelSettings labelSettings) {
-	if(getConfig().rc.printMatches.get()) {
+void composeRuleRealByMatchMakerGeneric(const lib::Rules::Real &rFirst,
+                                        const lib::Rules::Real &rSecond,
+                                        MatchMaker mm,
+                                        std::function<bool(std::unique_ptr<lib::Rules::Real>)> rr,
+                                        LabelSettings labelSettings) {
+	if(getConfig().rc.printMatches.get())
 		IO::post() << "summarySection \"RC Matches\"\n";
-	}
 	mm.makeMatches(rFirst, rSecond, detail::MatchMakerCallback(rr), labelSettings);
 }
 

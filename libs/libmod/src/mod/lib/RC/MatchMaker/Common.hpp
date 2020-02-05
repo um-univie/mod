@@ -15,12 +15,16 @@ namespace RC {
 
 struct Common {
 
-	Common(bool maximum, bool connected) : maximum(maximum), connected(connected) { }
+	Common(int verbosity, IO::Logger logger, bool maximum, bool connected)
+			: verbosity(verbosity), logger(logger), maximum(maximum), connected(connected) {}
 
 	template<typename Callback>
-	void makeMatches(const lib::Rules::Real &rFirst, const lib::Rules::Real &rSecond, Callback callback, LabelSettings labelSettings) {
-		const auto mr = [&rFirst, &rSecond, &callback](auto &&m, const auto &gSecond, const auto &gFirst) -> bool {
-			return callback(rFirst, rSecond, std::move(m));
+	void makeMatches(const lib::Rules::Real &rFirst,
+						  const lib::Rules::Real &rSecond,
+						  Callback callback,
+						  LabelSettings labelSettings) {
+		const auto mr = [&rFirst, &rSecond, &callback, this](auto &&m, const auto &gSecond, const auto &gFirst) -> bool {
+			return callback(rFirst, rSecond, std::move(m), verbosity, logger);
 		};
 		const auto &lgDom = get_labelled_left(rSecond.getDPORule());
 		const auto &lgCodom = get_labelled_right(rFirst.getDPORule());
@@ -33,7 +37,10 @@ struct Common {
 		}
 		lib::GraphMorphism::morphismSelectByLabelSettings(lgDom, lgCodom, labelSettings, finder, mr);
 	}
+
 private:
+	const int verbosity;
+	IO::Logger logger;
 	const bool maximum;
 	const bool connected;
 };

@@ -29,7 +29,6 @@ class Config;
 // rst:
 // rst:		Selector for which type of label to use in algorithms.
 // rst:
-
 enum struct LabelType {
 	// rst:		.. enumerator:: String
 	// rst:
@@ -45,14 +44,12 @@ enum struct LabelType {
 	// rst:			in an :cpp:class:`TermParsingError` if a string can not be parsed.
 			Term
 };
-
-std::ostream &operator<<(std::ostream &s, const LabelType &lt);
+MOD_DECL std::ostream &operator<<(std::ostream &s, LabelType lt);
 
 // rst: .. enum-struct:: LabelRelation
 // rst:
 // rst:		Selector for which type of labelled morphism to use in an algorithm.
 // rst:
-
 enum class LabelRelation {
 	// rst:		.. enumerator:: Isomorphism
 	// rst:
@@ -73,6 +70,7 @@ enum class LabelRelation {
 	// rst:			is used for substitution in some algorithms.
 			Unification
 };
+MOD_DECL std::ostream &operator<<(std::ostream &s, LabelRelation lt);
 
 // rst: .. class:: LabelSettings
 // rst:
@@ -80,27 +78,24 @@ enum class LabelRelation {
 // rst:
 
 struct LabelSettings {
-	// rst: 	.. function:: LabelSettings(LabelType type, LabelRelation relation)
+	// rst:		.. function:: LabelSettings(LabelType type, LabelRelation relation)
 	// rst:
-	// rst:		Construct label settings that only uses the vertex and edge labels.
+	// rst:			Construct label settings that only uses the vertex and edge labels.
+	LabelSettings(LabelType type, LabelRelation relation)
+			: LabelSettings(type, relation, false, LabelRelation::Isomorphism) {}
 
-	LabelSettings(LabelType type, LabelRelation relation) : LabelSettings(type, relation, false,
-																								 LabelRelation::Isomorphism) {}
-
-	// rst: 	.. function:: LabelSettings(LabelType type, LabelRelation relation, LabelRelation stereoRelation)
+	// rst:		.. function:: LabelSettings(LabelType type, LabelRelation relation, LabelRelation stereoRelation)
 	// rst:
-	// rst:		Construct label settings that include both vertex and edge labels, and stereo information.
+	// rst:			Construct label settings that include both vertex and edge labels, and stereo information.
+	LabelSettings(LabelType type, LabelRelation relation, LabelRelation stereoRelation)
+			: LabelSettings(type, relation, true, stereoRelation) {}
 
-	LabelSettings(LabelType type, LabelRelation relation, LabelRelation stereoRelation) : LabelSettings(type, relation,
-																																		 true,
-																																		 stereoRelation) {}
-
-	// rst: 	.. function:: LabelSettings(LabelType type, LabelRelation relation, bool withStereo, LabelRelation stereoRelation)
-
+	// rst:		.. function:: LabelSettings(LabelType type, LabelRelation relation, bool withStereo, LabelRelation stereoRelation)
 	LabelSettings(LabelType type, LabelRelation relation, bool withStereo, LabelRelation stereoRelation)
 			: type(type), relation(relation), withStereo(withStereo), stereoRelation(stereoRelation) {}
 
-	friend std::ostream &operator<<(std::ostream &s, const LabelSettings &ls);
+	// rst:		.. function:: friend std::ostream &operator<<(std::ostream &s, const LabelSettings &ls)
+	MOD_DECL friend std::ostream &operator<<(std::ostream &s, LabelSettings ls);
 public:
 	// rst:		.. member:: LabelType type
 	LabelType type;
@@ -111,6 +106,28 @@ public:
 	// rst:		.. member:: LabelRelation stereoRelation
 	LabelRelation stereoRelation;
 };
+
+// rst: ..  enum-struct:: IsomorphismPolicy
+// rst:
+// rst:		For some functions there is a choice of how to handle given arguments
+// rst:		where two different objects may be isomorphic. Most notably the case is with graphs (:class:`graph::Graph`).
+// rst:
+enum class IsomorphismPolicy {
+	// rst:		.. enumerator:: Check
+	// rst:
+	// rst:			Objects are checked for isomorphism as needed and exceptions are thrown when different objects are isomorphic.
+	// rst:			If in doubt, use this.
+			Check,
+	// rst:		.. enumerator:: TrustMe
+	// rst:
+	// rst:			No checks are performed and the function trusts the caller to have performed the equivalent isomorphism checks.
+	// rst:			Only use this when you are completely sure that no exceptions would have been thrown if using :enumerator:`Check`.
+	// rst:
+	// rst:			.. warning:: Generally the library has undefined behaviour if you use this option
+	// rst:				but an exception would have been thrown with :enumerator:`Check`.
+			TrustMe
+};
+MOD_DECL std::ostream &operator<<(std::ostream &s, IsomorphismPolicy p);
 
 // rst: .. function:: Config &getConfig()
 // rst: 
@@ -125,14 +142,12 @@ MOD_DECL Config &getConfig();
 
 template<typename T>
 struct ConfigSetting {
-
 	ConfigSetting(T value, const std::string &name) : value(value), name(name) {}
 
 	// rst: .. function:: void set(T value)
 	// rst:
 	// rst:		Sets the configuration value.
 	// rst:
-
 	void set(T value) {
 		this->value = value;
 	};
@@ -141,7 +156,6 @@ struct ConfigSetting {
 	// rst:
 	// rst:		:returns: The configuration value.
 	// rst:
-
 	T get() const {
 		return value;
 	}
@@ -150,7 +164,6 @@ struct ConfigSetting {
 	// rst:
 	// rst:		Access the value.
 	// rst:
-
 	T &operator()() {
 		return value;
 	}
@@ -158,7 +171,6 @@ struct ConfigSetting {
 	const std::string &getName() const {
 		return name;
 	}
-
 private:
 	T value;
 	const std::string name;
@@ -170,9 +182,7 @@ private:
 // rst:		Holds all configuration settings.
 // rst:
 // rst-class-end:
-
 struct Config {
-
 	enum class IsomorphismAlg {
 		VF2, Canon, SmilesCanonVF2
 	};
@@ -191,107 +201,99 @@ struct Config {
 
 #define MOD_CONFIG_DATA_NS_SIZE() 3
 #define MOD_CONFIG_DATA_SETTING_SIZE() 3
-#define MOD_CONFIG_DATA()                                                       \
-	/* rst: .. todo:: write documentation for all settings */                     \
-	((Canon, canon,                                                               \
-		((bool, printStats, false))                                                 \
-	))                                                                            \
-	((Common, common,                                                             \
-		((bool, quiet, false))                                                      \
-		((unsigned int, numThreads, 1))                                             \
-	))                                                                            \
-	((ComponentSG, componentSG,                                                   \
-		((bool, verbose, false))                                                    \
-	))                                                                            \
-	((DG, dg,                                                                     \
-		((bool, skipInitialGraphIsomorphismCheck, false))                           \
-		((bool, calculateVerbose, false))                                           \
-		((bool, calculateVerbosePrint, false))                                      \
-		((bool, calculateDetailsVerbose, false))                                    \
-		((bool, calculatePredicatesVerbose, false))                                 \
-		((bool, listUniverse, false))                                               \
-		((unsigned int, printGraphProduction, std::numeric_limits<unsigned int>::max())) \
-		((unsigned int, productLimit, std::numeric_limits<unsigned int>::max()))    \
-		((bool, onlyProduceMolecules, false))                                       \
-		((bool, putAllProductsInSubset, false))                                     \
-		((bool, printVerticesAsPoints, false))                                      \
-		((bool, dryDerivationPrinting, false))                                      \
-		((bool, derivationDebugOutput, false))                                      \
-		((bool, ignoreSubset, false))                                               \
-		((bool, disableRepeatFixedPointCheck, false))                               \
-		((bool, useDotCoords, false))                                               \
-		((std::string, graphvizCoordsBegin, ""))                                    \
-		((std::string, tikzPictureOption, "scale=\\modDGHyperScale"))               \
-		((bool, disallowEmptyParallelStrategies, true))                             \
-		((bool, printVertexIds, false))                                             \
-		((bool, printNonHyper, false))                                              \
-	))                                                                            \
-	((Graph, graph,                                                               \
-		((bool, ignoreStereoInSmiles, false))                                       \
-		((bool, verboseCache, false))                                               \
-		((bool, printSmilesParsingWarnings, true))                                  \
-		((bool, appendSmilesClass, false))                                          \
-		((mod::Config::IsomorphismAlg, isomorphismAlg, mod::Config::IsomorphismAlg::VF2)) \
-		((bool, useWrongSmilesCanonAlg, false))                                     \
-		((unsigned long, numIsomorphismCalls, 0))                                   \
-	))                                                                            \
-	((IO, io,                                                                     \
-		((std::string, dotCoordOptions, ""))                                        \
-		((bool, useOpenBabelCoords, true))                                          \
-	))                                                                            \
-	((OBabel, obabel,                                                             \
-		((bool, verbose, false))                                                    \
-	))                                                                            \
-	((Rule, rule,                                                                 \
-		((bool, ignoreConstraintsDuringInversion, false))                           \
-		((std::string, changeColour, ""))                                           \
-		((std::string, changeColourL, "NavyBlue"))                                  \
-		((std::string, changeColourK, "Purple"))                                    \
-		((std::string, changeColourR, "Green"))                                     \
-		((bool, printChangedEdgesInContext, false))                                 \
-		((bool, printCombined, true))                                               \
-		((bool, collapseChangedHydrogens, false))                                   \
-	))                                                                            \
-	((RC, rc,                                                                     \
-		((bool, verbose, false))                                                    \
-		((bool, composeConstraints, true))                                          \
-		((bool, printMatches, false))                                               \
-		((bool, matchesWithIndex, false))                                           \
-	))                                                                            \
-	((Stereo, stereo,                                                             \
-		((bool, silenceDeductionWarnings, false))                                   \
-	))                                                                            \
-	((Term, unification,                                                          \
-		((bool, verboseMGU, false))                                                 \
-	))
+#define MOD_CONFIG_DATA()                                                           \
+    /* rst: .. todo:: write documentation for all settings */                       \
+    ((Canon, canon,                                                                 \
+        ((bool, printStats, false))                                                 \
+    ))                                                                              \
+    ((Common, common,                                                               \
+        ((bool, quiet, false))                                                      \
+        ((bool, ignoreDeprecation, true))                                           \
+        ((unsigned int, numThreads, 1))                                             \
+    ))                                                                              \
+    ((DG, dg,                                                                       \
+        ((bool, calculateVerbose, false))                                           \
+        ((bool, calculateVerbosePrint, false))                                      \
+        ((unsigned int, printGraphProduction, std::numeric_limits<unsigned int>::max())) \
+        ((unsigned int, productLimit, std::numeric_limits<unsigned int>::max()))    \
+        ((bool, onlyProduceMolecules, false))                                       \
+        ((bool, putAllProductsInSubset, false))                                     \
+        ((bool, dryDerivationPrinting, false))                                      \
+        ((bool, derivationDebugOutput, false))                                      \
+        ((bool, ignoreSubset, false))                                               \
+        ((bool, disableRepeatFixedPointCheck, false))                               \
+        ((bool, useDotCoords, false))                                               \
+        ((std::string, graphvizCoordsBegin, ""))                                    \
+        ((std::string, tikzPictureOption, "scale=\\modDGHyperScale"))               \
+        ((bool, disallowEmptyParallelStrategies, true))                             \
+        ((bool, printVertexIds, false))                                             \
+        ((bool, printNonHyper, false))                                              \
+        ((int, derivationVerbosity, 0))                                             \
+    ))                                                                              \
+    ((Graph, graph,                                                                 \
+        ((bool, ignoreStereoInSmiles, false))                                       \
+        ((bool, printSmilesParsingWarnings, true))                                  \
+        ((bool, appendSmilesClass, false))                                          \
+        ((mod::Config::IsomorphismAlg, isomorphismAlg, mod::Config::IsomorphismAlg::VF2)) \
+        ((bool, useWrongSmilesCanonAlg, false))                                     \
+        ((unsigned long, numIsomorphismCalls, 0))                                   \
+    ))                                                                              \
+    ((IO, io,                                                                       \
+        ((std::string, dotCoordOptions, ""))                                        \
+        ((bool, useOpenBabelCoords, true))                                          \
+    ))                                                                              \
+    ((OBabel, obabel,                                                               \
+        ((bool, verbose, false))                                                    \
+    ))                                                                              \
+    ((Rule, rule,                                                                   \
+        ((bool, ignoreConstraintsDuringInversion, false))                           \
+        ((std::string, changeColour, ""))                                           \
+        ((std::string, changeColourL, "NavyBlue"))                                  \
+        ((std::string, changeColourK, "Purple"))                                    \
+        ((std::string, changeColourR, "Green"))                                     \
+        ((bool, printChangedEdgesInContext, false))                                 \
+        ((bool, printCombined, true))                                               \
+        ((bool, collapseChangedHydrogens, false))                                   \
+    ))                                                                              \
+    ((RC, rc,                                                                       \
+        ((bool, composeConstraints, true))                                          \
+        ((bool, printMatches, false))                                               \
+        ((bool, matchesWithIndex, false))                                           \
+    ))                                                                              \
+    ((Stereo, stereo,                                                               \
+        ((bool, silenceDeductionWarnings, false))                                   \
+    ))                                                                              \
+    ((Term, unification,                                                            \
+        ((bool, verboseMGU, false))                                                 \
+    ))
 
-#define MOD_CONFIG_nsIter(rNS, dataNS, tNS)                                       \
-   struct BOOST_PP_TUPLE_ELEM(MOD_CONFIG_DATA_NS_SIZE(), 0, tNS) {                 \
-      using Self = BOOST_PP_TUPLE_ELEM(MOD_CONFIG_DATA_NS_SIZE(), 0, tNS);          \
-      BOOST_PP_TUPLE_ELEM(MOD_CONFIG_DATA_NS_SIZE(), 0, tNS)(const Self&) = delete; \
-      Self &operator=(const Self&) = delete;                                        \
-      BOOST_PP_TUPLE_ELEM(MOD_CONFIG_DATA_NS_SIZE(), 0, tNS)(Self&&) = delete;      \
-      Self &operator=(Self&&) = delete;                                             \
-      inline BOOST_PP_TUPLE_ELEM(MOD_CONFIG_DATA_NS_SIZE(), 0, tNS)() :             \
-      BOOST_PP_SEQ_ENUM(BOOST_PP_SEQ_TRANSFORM(MOD_CONFIG_settingIterCons,          \
-         BOOST_PP_TUPLE_ELEM(MOD_CONFIG_DATA_NS_SIZE(), 0, tNS),                     \
-         BOOST_PP_TUPLE_ELEM(MOD_CONFIG_DATA_NS_SIZE(), 2, tNS))                     \
-      ) {}                                                                          \
-      BOOST_PP_SEQ_FOR_EACH_I(MOD_CONFIG_settingIter,                               \
-         BOOST_PP_TUPLE_ELEM(MOD_CONFIG_DATA_NS_SIZE(), 0, tNS),                     \
-         BOOST_PP_TUPLE_ELEM(MOD_CONFIG_DATA_NS_SIZE(), 2, tNS))                     \
-   } BOOST_PP_TUPLE_ELEM(MOD_CONFIG_DATA_NS_SIZE(), 1, tNS);
+#define MOD_CONFIG_nsIter(rNS, dataNS, tNS)                                           \
+    struct BOOST_PP_TUPLE_ELEM(MOD_CONFIG_DATA_NS_SIZE(), 0, tNS) {                   \
+        using Self = BOOST_PP_TUPLE_ELEM(MOD_CONFIG_DATA_NS_SIZE(), 0, tNS);          \
+        BOOST_PP_TUPLE_ELEM(MOD_CONFIG_DATA_NS_SIZE(), 0, tNS)(const Self&) = delete; \
+        Self &operator=(const Self&) = delete;                                        \
+        BOOST_PP_TUPLE_ELEM(MOD_CONFIG_DATA_NS_SIZE(), 0, tNS)(Self&&) = delete;      \
+        Self &operator=(Self&&) = delete;                                             \
+        inline BOOST_PP_TUPLE_ELEM(MOD_CONFIG_DATA_NS_SIZE(), 0, tNS)() :             \
+        BOOST_PP_SEQ_ENUM(BOOST_PP_SEQ_TRANSFORM(MOD_CONFIG_settingIterCons,          \
+            BOOST_PP_TUPLE_ELEM(MOD_CONFIG_DATA_NS_SIZE(), 0, tNS),                   \
+            BOOST_PP_TUPLE_ELEM(MOD_CONFIG_DATA_NS_SIZE(), 2, tNS))                   \
+        ) {}                                                                          \
+        BOOST_PP_SEQ_FOR_EACH_I(MOD_CONFIG_settingIter,                               \
+            BOOST_PP_TUPLE_ELEM(MOD_CONFIG_DATA_NS_SIZE(), 0, tNS),                   \
+            BOOST_PP_TUPLE_ELEM(MOD_CONFIG_DATA_NS_SIZE(), 2, tNS))                   \
+    } BOOST_PP_TUPLE_ELEM(MOD_CONFIG_DATA_NS_SIZE(), 1, tNS);
 
-#define MOD_CONFIG_settingIterCons(rSettting, dataSetting, tSetting)                                \
-   BOOST_PP_TUPLE_ELEM(MOD_CONFIG_DATA_SETTING_SIZE(), 1, tSetting)(                                 \
-      BOOST_PP_TUPLE_ELEM(MOD_CONFIG_DATA_SETTING_SIZE(), 2, tSetting),                               \
-      MOD_toString(dataSetting) "::"                                                                  \
-      MOD_toString(BOOST_PP_EXPAND(BOOST_PP_TUPLE_ELEM(MOD_CONFIG_DATA_SETTING_SIZE(), 1, tSetting))) \
-   )
+#define MOD_CONFIG_settingIterCons(rSettting, dataSetting, tSetting)                                    \
+    BOOST_PP_TUPLE_ELEM(MOD_CONFIG_DATA_SETTING_SIZE(), 1, tSetting)(                                   \
+        BOOST_PP_TUPLE_ELEM(MOD_CONFIG_DATA_SETTING_SIZE(), 2, tSetting),                               \
+        MOD_toString(dataSetting) "::"                                                                  \
+        MOD_toString(BOOST_PP_EXPAND(BOOST_PP_TUPLE_ELEM(MOD_CONFIG_DATA_SETTING_SIZE(), 1, tSetting))) \
+    )
 
-#define MOD_CONFIG_settingIter(rSettting, dataSetting, nSetting, tSetting)        \
-   ConfigSetting<BOOST_PP_TUPLE_ELEM(MOD_CONFIG_DATA_SETTING_SIZE(), 0, tSetting)> \
-      BOOST_PP_TUPLE_ELEM(MOD_CONFIG_DATA_SETTING_SIZE(), 1, tSetting);
+#define MOD_CONFIG_settingIter(rSettting, dataSetting, nSetting, tSetting)          \
+    ConfigSetting<BOOST_PP_TUPLE_ELEM(MOD_CONFIG_DATA_SETTING_SIZE(), 0, tSetting)> \
+        BOOST_PP_TUPLE_ELEM(MOD_CONFIG_DATA_SETTING_SIZE(), 1, tSetting);
 
 #define MOD_toString(s) MOD_toString1(s)
 #define MOD_toString1(s) #s

@@ -17,14 +17,11 @@ namespace DG {
 namespace Strategies {
 
 struct GraphState {
-	typedef std::vector<const lib::Graph::Single*> GraphList;
+	using GraphList = std::vector<const lib::Graph::Single *>;
 
 	struct Subset {
-
 		struct Transformer {
-
-			Transformer(const GraphList &graphs) : graphs(graphs) { }
-
+			Transformer(const GraphList &graphs) : graphs(graphs) {}
 			GraphList::value_type operator()(unsigned int i) const {
 				assert(i < graphs.size());
 				return graphs[i];
@@ -32,14 +29,11 @@ struct GraphState {
 		private:
 			const GraphList &graphs;
 		};
-		typedef boost::transform_iterator<Transformer, std::vector<unsigned int>::const_iterator,
-		const lib::Graph::Single*> const_iterator;
-		typedef std::vector<unsigned int>::size_type size_type;
+		using const_iterator = boost::transform_iterator<Transformer, std::vector<unsigned int>::const_iterator, const lib::Graph::Single *>;
+		using size_type = std::vector<unsigned int>::size_type;
 	public:
-
-		explicit Subset(const GraphState &rs) : rs(rs) { }
-
-		explicit Subset(const GraphState &rs, const Subset &other) : rs(rs), indices(other.indices) { }
+		explicit Subset(const GraphState &rs) : rs(rs) {}
+		explicit Subset(const GraphState &rs, const Subset &other) : rs(rs), indices(other.indices) {}
 
 		const_iterator begin() const {
 			return const_iterator(indices.begin(), Transformer(rs.getUniverse()));
@@ -61,7 +55,7 @@ struct GraphState {
 		const GraphState &rs;
 		std::vector<unsigned int> indices;
 	};
-	typedef std::unordered_map<unsigned int, Subset> SubsetStore;
+	using SubsetStore = std::unordered_map<unsigned int, Subset>;
 private:
 	void commonInit();
 private:
@@ -69,15 +63,18 @@ private:
 public:
 	explicit GraphState();
 	explicit GraphState(const GraphState &other);
-	explicit GraphState(const std::vector<const Graph::Single*> &universe);
-	explicit GraphState(const std::vector<const GraphState*> &resultSets);
+	explicit GraphState(const std::vector<const Graph::Single *> &universe);
+	explicit GraphState(const std::vector<const GraphState *> &resultSets);
 	~GraphState();
 	//	void promoteToSubset(unsigned int subsetIndex, const lib::Graph::Single *g);
 	void addToSubset(unsigned int subsetIndex, const lib::Graph::Single *g);
 	void addToUniverse(const lib::Graph::Single *g);
-	template<typename T> struct Compare;
-	template<typename T> void sortUniverse(const T compare);
-	template<typename T> void sortSubset(unsigned int subsetIndex, const T compare);
+	template<typename T>
+	struct Compare;
+	template<typename T>
+	void sortUniverse(const T compare);
+	template<typename T>
+	void sortSubset(unsigned int subsetIndex, const T compare);
 	bool hasSubset(unsigned int subsetIndex) const;
 	const Subset &getSubset(unsigned int i) const;
 	const SubsetStore &getSubsets() const;
@@ -97,7 +94,7 @@ class GraphState::Compare {
 public:
 
 	explicit Compare(const GraphState::GraphList &graphs, T compare)
-	: graphs(graphs), compare(compare) { }
+			: graphs(graphs), compare(compare) {}
 
 	bool operator()(unsigned int a, unsigned int b) {
 		assert(a < graphs.size());

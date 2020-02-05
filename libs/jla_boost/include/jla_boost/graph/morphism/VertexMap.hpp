@@ -44,7 +44,7 @@ struct VertexMapConcept {
 		auto mReinterpret = Traits::template reinterpret<GraphDom, GraphCodom>(std::move(vertexMap), gDom, gCodom, gDom, gCodom);
 		(void) mReinterpret;
 		auto trans = [](auto &&m, auto &gDom, auto &gCodom) {
-			return m;
+			return std::move(m);
 		};
 		auto mTransform = Traits::transform(trans, std::move(vertexMap), gDom, gCodom);
 		(void) mTransform;

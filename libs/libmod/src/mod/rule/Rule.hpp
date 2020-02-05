@@ -88,13 +88,13 @@ public:
 	// rst: .. function:: std::pair<std::string, std::string> print() const
 	// rst:               std::pair<std::string, std::string> print(const graph::Printer &first, const graph::Printer &second) const
 	// rst:
-	// rst:		Print the rule, using either the default options or the options in ``first`` and ``second``.
-	// rst:		If ``first`` and ``second`` are the same, only one depiction will be made.
+	// rst:		Print the rule, using either the default options or the options in `first` and `second`.
+	// rst:		If `first` and `second` are the same, only one depiction will be made.
 	// rst:
 	// rst:		:returns: a pair of filename prefixes for the PDF-files that will be compiled in post-processing.
 	// rst:			The actual names can be obtained by appending ``_L.pdf``, ``_K.pdf``, and ``_R.pdf`` for
 	// rst:			respectively the left side, context, and right side graphs.
-	// rst:			If ``first`` and ``second`` are the same, the two file prefixes are equal.
+	// rst:			If `first` and `second` are the same, the two file prefixes are equal.
 	std::pair<std::string, std::string> print() const;
 	std::pair<std::string, std::string> print(const graph::Printer &first, const graph::Printer &second) const;
 	// rst: .. function:: void printTermState() const
@@ -137,12 +137,16 @@ public:
 	std::size_t getNumRightComponents() const;
 	// rst: .. function:: std::size_t isomorphism(std::shared_ptr<Rule> r, std::size_t maxNumMatches, LabelSettings labelSettings) const
 	// rst:
-	// rst:		:returns: the number of isomorphisms found between ``r`` and this graph, but at most ``maxNumMatches``.
+	// rst:		:returns: the number of isomorphisms found between `r` and this graph, but at most `maxNumMatches`.
 	std::size_t isomorphism(std::shared_ptr<Rule> r, std::size_t maxNumMatches, LabelSettings labelSettings) const;
 	// rst: .. function:: std::size_t monomorphism(std::shared_ptr<Rule> r, std::size_t maxNumMatches, LabelSettings labelSettings) const
 	// rst:
-	// rst:		:returns: the number of monomorphism from this rule to subgraphs of ``r``, though at most ``maxNumMatches``.
+	// rst:		:returns: the number of monomorphism from this rule to subgraphs of `r`, though at most `maxNumMatches`.
 	std::size_t monomorphism(std::shared_ptr<Rule> r, std::size_t maxNumMatches, LabelSettings labelSettings) const;
+	// rst: .. function:: bool isomorphicLeftRight(std::shared_ptr<Rule> r, LabelSettings labelSettings) const
+	// rst:
+	// rst:		:returns: whether the left-hand sides are isomorphic and the right-hand sides are isomorphic.
+	bool isomorphicLeftRight(std::shared_ptr<Rule> r, LabelSettings labelSettings) const;
 	// rst: .. function:: Vertex getVertexFromExternalId(int id) const
 	// rst:
 	// rst:		If the rule was not loaded from an external data format, then this function
@@ -179,7 +183,7 @@ public:
 	static std::shared_ptr<Rule> ruleGMLString(const std::string &data, bool invert);
 	// rst: .. function:: static std::shared_ptr<Rule> ruleGML(const std::string &file, bool invert)
 	// rst:		
-	// rst:		Read ``file`` and pass the contents to :cpp:func:`ruleGMLString`.
+	// rst:		Read `file` and pass the contents to :cpp:func:`ruleGMLString`.
 	// rst:
 	// rst:		:returns: the loaded (possibly inverted) rule.
 	// rst:		:throws: :class:`InputError` on bad data and when inversion fails due to constraints.

@@ -1,6 +1,7 @@
 #include "OBabel.hpp"
 
 #ifdef MOD_HAVE_OPENBABEL
+
 #include <mod/Config.hpp>
 #include <mod/Error.hpp>
 
@@ -18,6 +19,7 @@
 // such that they are visible.
 // Assuming GCC and Clang the following define seems to do the trick:
 #define HAVE_GCC_VISIBILITY 1
+
 #include <openbabel/atom.h>
 #include <openbabel/bond.h>
 #include <openbabel/builder.h>
@@ -35,22 +37,22 @@ namespace Chem {
 
 struct OBMolHandle::Pimpl {
 	std::unique_ptr<OpenBabel::OBMol> m;
-	std::map<OpenBabel::OBBond*, enum OpenBabel::OBStereo::BondDirection> updown;
-	std::map<OpenBabel::OBBond*, OpenBabel::OBStereo::Ref> from;
+	std::map<OpenBabel::OBBond *, enum OpenBabel::OBStereo::BondDirection> updown;
+	std::map<OpenBabel::OBBond *, OpenBabel::OBStereo::Ref> from;
 };
 
-OBMolHandle::OBMolHandle() { }
+OBMolHandle::OBMolHandle() {}
 
-OBMolHandle::OBMolHandle(OBMolHandle &&o) : p(std::move(o.p)) { }
+OBMolHandle::OBMolHandle(OBMolHandle &&o) : p(std::move(o.p)) {}
 
 OBMolHandle &OBMolHandle::operator=(OBMolHandle &&o) {
 	p = std::move(o.p);
 	return *this;
 }
 
-OBMolHandle::OBMolHandle(std::unique_ptr<Pimpl> p) : p(std::move(p)) { }
+OBMolHandle::OBMolHandle(std::unique_ptr<Pimpl> p) : p(std::move(p)) {}
 
-OBMolHandle::~OBMolHandle() { }
+OBMolHandle::~OBMolHandle() = default;
 
 OBMolHandle::operator bool() const {
 	return bool(p);
@@ -58,7 +60,7 @@ OBMolHandle::operator bool() const {
 
 void OBMolHandle::setCoordinates(const std::vector<double> &x, const std::vector<double> &y) {
 	assert(x.size() == y.size());
-	auto &mol = const_cast<OpenBabel::OBMol&> (*p->m); // becuase bah
+	auto &mol = const_cast<OpenBabel::OBMol &> (*p->m); // becuase bah
 	mol.BeginModify();
 	for(std::size_t i = 0; i < x.size(); ++i) {
 		auto *aPtr = mol.GetAtomById(i);
@@ -78,13 +80,14 @@ double OBMolHandle::getMolarMass() const {
 }
 
 double OBMolHandle::getEnergy() const {
-	auto &mol = const_cast<OpenBabel::OBMol&> (*p->m); // becuase bah
-	if(getConfig().obabel.verbose.get()) IO::log() << "OBabel energy: '" << mol.GetTitle() << "'"
-		<< "\t" << mol.NumAtoms() << " atoms\t" << mol.NumBonds() << " bonds"
-		<< std::endl;
+	auto &mol = const_cast<OpenBabel::OBMol &> (*p->m); // becuase bah
+	if(getConfig().obabel.verbose.get())
+		IO::log() << "OBabel energy: '" << mol.GetTitle() << "'"
+					 << "\t" << mol.NumAtoms() << " atoms\t" << mol.NumBonds() << " bonds"
+					 << std::endl;
 	// code originally from GGL
 
-	OpenBabel::OBForceField* pFF = nullptr;
+	OpenBabel::OBForceField *pFF = nullptr;
 
 	unsigned int conformers = 25;
 	unsigned int geomSteps = 100;
@@ -155,9 +158,10 @@ void OBMolHandle::print2Dsvg(std::ostream &s) const {
 double OBMolHandle::getCoordScaling() const {
 	// this is an adaptation of the code from Open Babel (src/depict/depict.cpp)
 	if(p->m->NumBonds() == 0) return 1;
-	auto &obMolNoConst = const_cast<OpenBabel::OBMol&> (*p->m); // TODO: and Open Babel, please get your shit together!
+	auto &obMolNoConst = const_cast<OpenBabel::OBMol &> (*p->m); // TODO: and Open Babel, please get your shit together!
 	double sumLengths = 0;
-	for(auto bIter = obMolNoConst.BeginBonds(); bIter != obMolNoConst.EndBonds(); ++bIter) sumLengths += (*bIter)->GetLength();
+	for(auto bIter = obMolNoConst.BeginBonds(); bIter != obMolNoConst.EndBonds(); ++bIter)
+		sumLengths += (*bIter)->GetLength();
 	return p->m->NumBonds() / sumLengths; // == 1 / (length / count);
 }
 
@@ -202,18 +206,26 @@ void generateCoordinates(OpenBabel::OBMol &mol) {
 	// this is based on OpenBabel formats/svgformat.cpp and depict/depict.cpp
 	OpenBabel::OBConversion conv; // because the constructor apparently takes care of lib loading
 	OpenBabel::OBOp *op = OpenBabel::OBOp::FindType("gen2D");
-	assert(op);
+	if(!op) {
+		std::cerr << "MØD Error: Could not load Open Babel gen2D operation."
+						 " This can happen if the MØD library or an extension library was loaded with dlopen,"
+						 " but without the RTLD_GLOBAL flag. If you are executing from Python then you can insert\n"
+						 "\timport ctypes\n"
+						 "\timport sys\n"
+						 "\tsys.setdlopenflags(sys.getdlopenflags() | ctypes.RTLD_GLOBAL)\n"
+						 "before importing any modules. If this does not work, please open an issue.\n";
+		std::exit(1);
+	}
 	bool res = op->Do(&mol);
-	(void) res;
-	assert(res);
+	if(!res) MOD_ABORT;
 }
 
 template<typename Graph, typename MayCollapse, typename Callback>
 OBMolHandle makeOBMolImpl(const Graph &g,
-		std::function<const AtomData &(typename boost::graph_traits<Graph>::vertex_descriptor) > atomData,
-		std::function<BondType(typename boost::graph_traits<Graph>::edge_descriptor) > bondData,
-		MayCollapse mayCollapse,
-		const bool ignoreDuplicateBonds, const bool withCoordinates, Callback callback) {
+								  std::function<const AtomData &(typename boost::graph_traits<Graph>::vertex_descriptor)> atomData,
+								  std::function<BondType(typename boost::graph_traits<Graph>::edge_descriptor)> bondData,
+								  MayCollapse mayCollapse,
+								  const bool ignoreDuplicateBonds, const bool withCoordinates, Callback callback) {
 	std::unique_ptr<OpenBabel::OBMol> mol(new OpenBabel::OBMol());
 	mol->BeginModify();
 
@@ -242,20 +254,15 @@ OBMolHandle makeOBMolImpl(const Graph &g,
 		int order;
 		switch(bondData(e)) {
 		case BondType::Invalid:
-		case BondType::Single:
-			order = 1;
+		case BondType::Single: order = 1;
 			break;
-		case BondType::Aromatic:
-			order = 5;
+		case BondType::Aromatic: order = 5;
 			break;
-		case BondType::Double:
-			order = 2;
+		case BondType::Double: order = 2;
 			break;
-		case BondType::Triple:
-			order = 3;
+		case BondType::Triple: order = 3;
 			break;
-		default:
-			std::abort();
+		default: std::abort();
 		}
 		OpenBabel::OBBond *bond = mol->GetBond(src, tar);
 		if(!ignoreDuplicateBonds && bond) MOD_ABORT;
@@ -282,10 +289,10 @@ OBMolHandle makeOBMolImpl(const Graph &g,
 
 template<typename Graph, typename Stereo>
 void convertStereo(const Graph &g,
-		std::function<const AtomData &(typename boost::graph_traits<Graph>::vertex_descriptor) > atomData,
-		std::function<BondType(typename boost::graph_traits<Graph>::edge_descriptor) > bondData,
-		std::function<bool(typename boost::graph_traits<Graph>::vertex_descriptor) > hasImportantStereo,
-		const bool withHydrogen, const Stereo &pStereo, OpenBabel::OBMol &mol) {
+						 std::function<const AtomData &(typename boost::graph_traits<Graph>::vertex_descriptor)> atomData,
+						 std::function<BondType(typename boost::graph_traits<Graph>::edge_descriptor)> bondData,
+						 std::function<bool(typename boost::graph_traits<Graph>::vertex_descriptor)> hasImportantStereo,
+						 const bool withHydrogen, const Stereo &pStereo, OpenBabel::OBMol &mol) {
 	using Emb = lib::Stereo::EmbeddingEdge;
 	for(const auto v : asRange(vertices(g))) {
 		const auto vId = get(boost::vertex_index_t(), g, v);
@@ -295,7 +302,7 @@ void convertStereo(const Graph &g,
 		const auto &conf = *pStereo[v];
 		const auto vGeo = conf.getGeometryVertex();
 		if(vGeo == geo.tetrahedral) {
-			const auto &c = static_cast<const lib::Stereo::Tetrahedral&> (conf);
+			const auto &c = static_cast<const lib::Stereo::Tetrahedral &> (conf);
 			if(!c.getFixation().asSimple()) continue;
 			auto tetra = std::make_unique<OpenBabel::OBTetrahedralStereo>(&mol);
 			OpenBabel::OBTetrahedralStereo::Config config;
@@ -349,27 +356,28 @@ OBMolHandle copyOBMol(const OBMolHandle &mol) {
 }
 
 OBMolHandle makeOBMol(const lib::Graph::GraphType &g,
-		std::function<const AtomData &(lib::Graph::Vertex) > atomData,
-		std::function<BondType(lib::Graph::Edge) > bondData,
-		std::function<bool(lib::Graph::Vertex) > hasImportantStereo,
-		const bool withHydrogen, const lib::Graph::PropStereo *pStereo) {
+							 std::function<const AtomData &(lib::Graph::Vertex)> atomData,
+							 std::function<BondType(lib::Graph::Edge)> bondData,
+							 std::function<bool(lib::Graph::Vertex)> hasImportantStereo,
+							 const bool withHydrogen, const lib::Graph::PropStereo *pStereo) {
 	const auto mayCollapse = [&](const auto v, const auto &g, const auto &atomData, const auto &bondData) {
 		if(withHydrogen) return false;
 		return isCollapsible(v, g, atomData, bondData, hasImportantStereo);
 	};
-	auto res = makeOBMolImpl(g, atomData, bondData, mayCollapse, false, true, [&](OpenBabel::OBMol & mol) {
+	auto res = makeOBMolImpl(g, atomData, bondData, mayCollapse, false, true, [&](OpenBabel::OBMol &mol) {
 		if(pStereo) convertStereo(g, atomData, bondData, hasImportantStereo, withHydrogen, *pStereo, mol);
 	});
 	return res;
 }
 
-std::tuple<OBMolHandle, OBMolHandle, OBMolHandle> makeOBMol(const lib::Rules::LabelledRule &lr,
-		std::function<const AtomData &(lib::Rules::Vertex) > atomData,
-		std::function<BondType(lib::Rules::Edge) > bondData,
-		std::function<const AtomData &(lib::Rules::Vertex) > atomDataLeft,
-		std::function<BondType(lib::Rules::Edge) > bondDataLeft,
-		std::function<const AtomData &(lib::Rules::Vertex) > atomDataRight,
-		std::function<BondType(lib::Rules::Edge) > bondDataRight,
+std::tuple<OBMolHandle, OBMolHandle, OBMolHandle> makeOBMol(
+		const lib::Rules::LabelledRule &lr,
+		std::function<const AtomData &(lib::Rules::Vertex)> atomData,
+		std::function<BondType(lib::Rules::Edge)> bondData,
+		std::function<const AtomData &(lib::Rules::Vertex)> atomDataLeft,
+		std::function<BondType(lib::Rules::Edge)> bondDataLeft,
+		std::function<const AtomData &(lib::Rules::Vertex)> atomDataRight,
+		std::function<BondType(lib::Rules::Edge)> bondDataRight,
 		const bool withHydrogen) {
 	OBMolHandle obMol, obMolLeft, obMolRight;
 	const auto hasImportantStereo = [&](const auto v) {
@@ -390,7 +398,7 @@ std::tuple<OBMolHandle, OBMolHandle, OBMolHandle> makeOBMol(const lib::Rules::La
 		}
 		return isCollapsible(v, g, atomData, bondData, hasImportantStereo);
 	};
-	obMol = makeOBMolImpl(get_graph(lr), atomData, bondData, mayCollapse, true, true, [](OpenBabel::OBMol & mol) {
+	obMol = makeOBMolImpl(get_graph(lr), atomData, bondData, mayCollapse, true, true, [](OpenBabel::OBMol &mol) {
 	});
 	const auto &lgLeft = get_labelled_left(lr);
 	const auto &lgRight = get_labelled_right(lr);
@@ -404,32 +412,40 @@ std::tuple<OBMolHandle, OBMolHandle, OBMolHandle> makeOBMol(const lib::Rules::La
 		if(!has_stereo(lg)) return false;
 		return !get_stereo(lg)[v]->morphismDynamicOk();
 	};
-	obMolLeft = makeOBMolImpl(get_graph(lgLeft), atomDataLeft, bondDataLeft, mayCollapse, false, false, [&](OpenBabel::OBMol & mol) {
-		const auto &g = get_graph(lgLeft);
-		if(has_stereo(lr)) convertStereo(g, atomDataLeft, bondDataLeft, hasImportantStereoLeft, true, get_stereo(lgLeft), mol);
-			for(const auto v : asRange(vertices(g))) {
-				const auto vId = get(boost::vertex_index_t(), g, v);
-						const auto *aBase = obMol.p->m->GetAtomById(vId);
-				if(!aBase) continue;
-						auto *aSide = mol.GetAtomById(vId);
+	obMolLeft = makeOBMolImpl(
+			get_graph(lgLeft), atomDataLeft, bondDataLeft, mayCollapse, false, false,
+			[&](OpenBabel::OBMol &mol) {
+				const auto &g = get_graph(lgLeft);
+				if(has_stereo(lr))
+					convertStereo(g, atomDataLeft, bondDataLeft, hasImportantStereoLeft, true,
+									  get_stereo(lgLeft), mol);
+				for(const auto v : asRange(vertices(g))) {
+					const auto vId = get(boost::vertex_index_t(), g, v);
+					const auto *aBase = obMol.p->m->GetAtomById(vId);
+					if(!aBase) continue;
+					auto *aSide = mol.GetAtomById(vId);
 					if(!aSide) continue;
-							aSide->SetVector(aBase->GetX(), aBase->GetY(), 0);
-					}
-		mol.SetDimension(2);
-	});
-	obMolRight = makeOBMolImpl(get_graph(lgRight), atomDataRight, bondDataRight, mayCollapse, false, false, [&](OpenBabel::OBMol & mol) {
-		const auto &g = get_graph(lgRight);
-		if(has_stereo(lr)) convertStereo(g, atomDataRight, bondDataRight, hasImportantStereoRight, true, get_stereo(lgRight), mol);
-			for(const auto v : asRange(vertices(g))) {
-				const auto vId = get(boost::vertex_index_t(), g, v);
-						const auto *aBase = obMol.p->m->GetAtomById(vId);
-				if(!aBase) continue;
-						auto *aSide = mol.GetAtomById(vId);
+					aSide->SetVector(aBase->GetX(), aBase->GetY(), 0);
+				}
+				mol.SetDimension(2);
+			});
+	obMolRight = makeOBMolImpl(
+			get_graph(lgRight), atomDataRight, bondDataRight, mayCollapse, false, false,
+			[&](OpenBabel::OBMol &mol) {
+				const auto &g = get_graph(lgRight);
+				if(has_stereo(lr))
+					convertStereo(g, atomDataRight, bondDataRight, hasImportantStereoRight, true,
+									  get_stereo(lgRight), mol);
+				for(const auto v : asRange(vertices(g))) {
+					const auto vId = get(boost::vertex_index_t(), g, v);
+					const auto *aBase = obMol.p->m->GetAtomById(vId);
+					if(!aBase) continue;
+					auto *aSide = mol.GetAtomById(vId);
 					if(!aSide) continue;
-							aSide->SetVector(aBase->GetX(), aBase->GetY(), 0);
-					}
-		mol.SetDimension(2);
-	});
+					aSide->SetVector(aBase->GetX(), aBase->GetY(), 0);
+				}
+				mol.SetDimension(2);
+			});
 	return std::make_tuple(std::move(obMol), std::move(obMolLeft), std::move(obMolRight));
 }
 

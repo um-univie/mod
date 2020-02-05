@@ -11,16 +11,24 @@ namespace lib {
 namespace RC {
 
 struct Parallel {
+	Parallel(int verbosity, IO::Logger logger) : verbosity(verbosity), logger(logger) {}
 
 	template<typename Callback>
-	void makeMatches(const lib::Rules::Real &rFirst, const lib::Rules::Real &rSecond, Callback callback, LabelSettings labelSettings) {
+	void makeMatches(const lib::Rules::Real &rFirst,
+						  const lib::Rules::Real &rSecond,
+						  Callback callback,
+						  LabelSettings labelSettings) {
 		using GraphDom = lib::Rules::LabelledRule::LeftGraphType;
 		using GraphCodom = lib::Rules::LabelledRule::RightGraphType;
 		using Map = jla_boost::GraphMorphism::InvertibleVectorVertexMap<GraphDom, GraphCodom>;
 		const auto &gDom = get_graph(get_labelled_left(rSecond.getDPORule()));
 		const auto &gCodom = get_graph(get_labelled_right(rFirst.getDPORule()));
-		handleMapByLabelSettings(rFirst, rSecond, Map(gDom, gCodom), callback, labelSettings);
+		handleMapByLabelSettings(rFirst, rSecond, Map(gDom, gCodom), callback, labelSettings, verbosity, logger);
 	}
+
+private:
+	const int verbosity;
+	IO::Logger logger;
 };
 
 } // namespace RC

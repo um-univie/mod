@@ -1,7 +1,44 @@
-include("formoseCommon/grammar_H.py")
+post("disableSummary")
+g1 = smiles('O', name="g1")
+g2 = smiles('C', name="g2")
+r = ruleGMLString("""rule [ ruleID "r" context [ node [ id 0 label "O" ] ] ]""")
 
+##############################################################################
 d = Derivation()
-d.left = inputGraphs
-d.rule = inputRules[0]
-d.right = inputGraphs
-print("Derivation:\t", d)
+assert str(d) == "{ }, { }"
+assert repr(d) == str(d)
+d.left = [g1]
+assert d.left == [g1]
+assert str(d) == "{ 'g1' }, { }"
+
+d.rule = r
+assert d.rule == r
+assert str(d) == "{ 'g1' }, 'r', { }"
+d.right = [g2]
+assert d.right == [g2]
+assert str(d) == "{ 'g1' }, 'r', { 'g2' }"
+
+##############################################################################
+d = Derivations()
+assert str(d) == "{ } < > { }"
+assert repr(d) == str(d)
+d.left = [g1]
+assert d.left == [g1]
+assert str(d) == "{ 'g1' } < > { }"
+
+d.rules = [r]
+assert d.rules == [r]
+assert str(d) == "{ 'g1' } < 'r' > { }"
+d.right = [g2]
+assert d.right == [g2]
+assert str(d) == "{ 'g1' } < 'r' > { 'g2' }"
+
+##############################################################################
+d = Derivation()
+d.left = [g1]
+d.rule = r
+d.right = [g2]
+
+dd = Derivations(d)
+assert str(d) == "{ 'g1' }, 'r', { 'g2' }"
+assert str(dd) == "{ 'g1' } < 'r' > { 'g2' }"

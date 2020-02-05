@@ -13,8 +13,7 @@ def check(exp, checks, resSize=1):
 	checkNum += 1
 	res = rc.eval(exp)
 	def redo():
-		config.rc.verbose = True
-		rc.eval(exp)
+		rc.eval(exp, verbosity=20)
 	if len(rc.products) != 0:
 		postSection("Product Error, Result")
 		print("ERROR")

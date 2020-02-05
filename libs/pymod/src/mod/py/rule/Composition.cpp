@@ -18,12 +18,12 @@
 // rst: A rule composition expression always returns a list of rules when evaluated.
 // rst: The following is the grammar for the expressions.
 // rst:
-// rst: .. productionlist:: RCExpExp
+// rst: .. productionlist:: rcExp
 // rst:    rcExp: `rcExp` `op` `rcExp`
-// rst:         : "rcBind(" `graphs` ")"
-// rst:         : "rcUnbind(" `graphs` ")"
-// rst:         : "rcId(" `graphs` ")"
-// rst:         : `rules`
+// rst:         : "rcBind(" graphs ")"
+// rst:         : "rcUnbind(" graphs ")"
+// rst:         : "rcId(" graphs ")"
+// rst:         : rules
 // rst:    op: "*" `opObject` "*"
 // rst:    opObject: "rcParallel"
 // rst:            : "rcSuper(allowPartial=False)"
@@ -33,9 +33,10 @@
 // rst:            : "rcCommon"
 // rst:
 // rst: Here a ``graphs`` is any Python expression that is either a single :class:`Graph` or an iterable of graphs.
-// rst: Similarly, a ``rules`` must be either a :class:`Rule` or an iterable of rules.
-// rst: An :token:`rcExp` may additionally be an iterable of expressions.
-// rst: See the API below for more details on the semantics of each expression, and the corresponding :ref:`C++ page<cpp-rule/CompositionExpr>`.
+// rst: Similarly, ``rules`` must be either a :class:`Rule` or an iterable of rules.
+// rst: An :token:`~rcExp:rcExp` may additionally be an iterable of expressions.
+// rst: See the API below for more details on the semantics of each expression,
+// rst: and the corresponding :ref:`C++ page<cpp-rule/CompositionExpr>`.
 // rst:
 
 namespace mod {
@@ -51,8 +52,8 @@ std::vector<std::shared_ptr<Rule> > getProducts(std::shared_ptr<Composer> rc) {
 	return std::vector < std::shared_ptr<Rule> >(begin(rc->getProducts()), end(rc->getProducts()));
 }
 
-std::vector<std::shared_ptr<Rule> > eval(std::shared_ptr<Composer> rc, const RCExp::Expression &e) {
-	auto result = rc->eval(e);
+std::vector<std::shared_ptr<Rule> > eval(std::shared_ptr<Composer> rc, const RCExp::Expression &e, int verbosity) {
+	auto result = rc->eval(e, verbosity);
 	return std::vector<std::shared_ptr<Rule> >(begin(result), end(result));
 }
 
@@ -85,21 +86,22 @@ void RC_doExport() {
 			// rst:
 			// rst:			(Read-only) The list of unique rules known by the evaluator.
 			// rst:
-			// rst:			:type: list of :class:`Rule`
+			// rst:			:type: list[Rule]
 			.add_property("_ruleDatabase", &getRuleDatabase)
 			// rst:		.. attribute:: products
 			// rst:
 			// rst:			(Read-only) The list of unique rules this evaluator has constructed.
 			// rst:
-			// rst:			:type: list of :class:`Rule`
+			// rst:			:type: list[Rule]
 			.add_property("_products", &getProducts)
-			// rst:		.. method:: eval(exp)
+			// rst:		.. method:: eval(exp, *, verbosity=0)
 			// rst:
 			// rst:			Evaluates a rule composition expression. Any created rule is replaced by a rule in the database if they are isomorphic.
 			// rst:
+			// rst:			:param RCExpExp exp: the expression to evaluate.
+			// rst:			:param int verbosity: the level of information being printed about the evaluation.
+			// rst:				See :cpp:func:`rule::Composer::eval` for details.
 			// rst:			:returns: the resulting list of rules of the expression.
-			// rst:			:param exp: the expression to evaluate.
-			// rst:			:type exp: :class:`RCExpExp`
 			.def("eval", &eval)
 			// rst:		.. method:: print()
 			// rst:
@@ -110,11 +112,10 @@ void RC_doExport() {
 	// rst: .. method:: rcEvaluator(database, labelSettings)
 	// rst:
 	// rst:		:param database: a list of isomorphic rules the evaluator will compare against.
-	// rst:		:type database: list of :class:`Rule`
-	// rst:		:param labelSettings: the settings to use for morphisms.
-	// rst:		:type labelSettings: :class:`LabelSettings`
+	// rst:		:type database: list[Rule]
+	// rst:		:param LabelSettings labelSettings: the settings to use for morphisms.
 	// rst:		:returns: a rule composition expression evaluator.
-	// rst:		:rtype: :class:`RCEvaluator`
+	// rst:		:rtype: RCEvaluator
 	// rst:
 	// rst:		.. note:: The caller is responsible for ensuring the given rules are unique.
 	// rst:
