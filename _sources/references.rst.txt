@@ -1,0 +1,12 @@
+
+**********
+References
+**********
+
+* Boost http://boost.org
+* ChemFig http://www.ctan.org/pkg/chemfig
+* GGL http://www.tbi.univie.ac.at/software/GGL
+* Graphviz http://www.graphviz.org
+* Open Babel http://openbabel.org
+* Sphinx http://sphinx-doc.org
+* Tikz http://www.ctan.org/pkg/pgf

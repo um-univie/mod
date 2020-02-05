@@ -1,0 +1,69 @@
+.. _py-Misc:
+
+**********************************************************
+Misc
+**********************************************************
+.. default-domain:: py
+
+.. py:currentmodule:: mod
+.. cpp:namespace:: mod
+
+
+.. function:: prefixFilename(name)
+
+    Utility function for converting script-relative paths to current-working-directory-relative paths
+    (see also :py:func:`include`).
+    This function is used in all PyMØD functions that takes a filename as argument.
+    To circumvent this prefixing use the :py:class:`CWDPath` class.
+
+    :returns: `name` prefixed with all strings pushed with :py:func:`pushFilePrefix`
+        and popped yet.
+    :rtype: str
+
+.. function:: pushFilePrefix(s)
+
+    Push another prefix used in :py:func:`prefixFilename`.
+    The prefixes are concatenated in the order they are pushed.
+    No directory delimiters are inserted, so they must explicitly be part of the pushed prefixes.
+    If the argument starts with ``/``, then during concatenation all previously pushed prefixes are ignored.
+
+    :param str s: the string to push as a prefix to be concatenated in :py:func:`prefixFilename`.
+
+.. function:: popFilePrefix()
+
+    Pop a previously pushed prefix.
+
+.. class:: CWDPath
+
+    A dummy class to wrap a filename in to disable prefixing.
+
+    For example, if a graph GML file is to be loaded relative to the current file
+    (assuming :py:func:`include` is used for script inclusion), then it can be done with
+
+    .. code-block:: python
+
+        g = graphGML(f)
+
+    If the file is located relative to the current working directory
+    (i.e., where the :any:`mod` wrapper script were invoked from), then the graph loading should be done as
+
+    .. code-block:: python
+
+        g = graphGML(CWDPath(f))
+
+    .. function:: __init__(self, f)
+
+        Wrap a filename.
+
+.. function:: magicLibraryValue()
+
+    :returns: a number unique for each instantiation of libMØD. This can be used to check for the diamond problem for shared libraries.
+
+    :rtype: int
+.. function:: version()
+
+    :returns: the version of MØD.
+    :rtype: str
+.. function:: rngReseed(seed)
+
+        Reseed the random bit generator used in the library.

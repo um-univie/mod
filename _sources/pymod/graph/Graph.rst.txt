@@ -1,0 +1,255 @@
+.. _py-graph/Graph:
+
+**********************************************************
+graph/Graph
+**********************************************************
+.. default-domain:: py
+
+.. py:currentmodule:: mod
+.. cpp:namespace:: mod
+
+
+Class ``Graph``
+--------------------------------------------------------------------------------------------------------------------------------
+
+.. py:class:: Graph
+
+    This class models an undirected graph with labels on vertices and edges,
+    without loops and without parallel edges.
+    Certain labels are regarded as models of chemical atoms and bonds.
+    See :ref:`mol-enc` for more information on this.
+
+    .. py:attribute:: id
+
+        (Read-only) A unique instance id among :class:`Graph` objects.
+
+        :type: int
+    .. py:attribute:: numVertices
+
+        (Read-only) The number of vertices in the graph.
+
+        :type: int
+    .. py:attribute:: vertices
+
+        (Read-only) An iterable of all vertices in the graph.
+
+        :type: GraphVertexRange
+    .. py:attribute:: numEdges
+
+        (Read-only) The number of edges in the graph.
+
+        :type: int
+    .. py:attribute:: edges
+
+        (Read-only) An iterable of all edges in the graph.
+
+        :type: GraphEdgeRange
+    .. py:function:: aut(labelSettings=LabelSettings(LabelType.String, LabelRelation.Isomorphism))
+
+        :param LabelSettings labelSettings: the label settings to use.
+        :returns: an object representing the automorphism group of the graph, with the given label settings.
+        :rtype: GraphAutGroup
+    .. py:method:: print()
+                   print(first, second=None)
+
+        Print the graph, using either the default options or the options in ``first`` and ``second``.
+        If ``first`` and ``second`` are the same, only one depiction will be made.
+
+        :param GraphPrinter first: the printing options used for the first depiction.
+        :param GraphPrinter second: the printing options used for the second depiction.
+            If it is ``None`` then it is set to ``first``.
+        :returns: the names for the PDF-files that will be compiled in post-processing.
+            If ``first`` and ``second`` are the same, the two file prefixes are equal.
+        :rtype: tuple[str, str]
+    .. py:method:: printTermState
+
+        Print the term state for the graph.
+    .. py:method:: getGMLString(withCoords=False)
+
+        :returns: the :ref:`GML <graph-gml>` representation of the graph,
+                  optionally with generated 2D coordinates.
+        :rtype: str
+        :raises: :py:class:`LogicError` when coordinates are requested, but
+                 none can be generated.
+    .. py:method:: printGML(withCoords=False)
+
+        Print the :ref:`GML <graph-gml>` representation of the graph,
+        optionally with generated 2D coordinates.
+
+        :returns: the filename of the printed GML file.
+        :rtype: str
+        :raises: :py:class:`LogicError` when coordinates are requested, but
+                 none can be generated.
+    .. py:attribute:: name
+
+        The name of the graph. The default name includes the unique instance id.
+
+        :type: str
+    .. py:attribute:: smiles
+
+        (Read-only) If the graph models a molecule, this is the canonical :ref:`SMILES string <graph-smiles>` for it.
+
+        :type: str
+        :raises: :py:class:`LogicError` if the graph is not a molecule.
+    .. py:attribute:: smilesWithIds
+
+        (Read-only) If the graph models a molecule, this is the canonical :ref:`SMILES string <graph-smiles>` for it,
+        that includes the internal vertex id as a class label on each atom.
+
+        :type: str
+        :raises: :py:class:`LogicError` if the graph is not a molecule.
+    .. py:attribute:: graphDFS
+
+        (Read-only) This is a :ref:`GraphDFS <graph-graphDFS>` of the graph.
+
+        :type: str
+    .. py:attribute:: graphDFSWithIds
+
+        (Read-only) This is a :ref:`GraphDFS <graph-graphDFS>` of the graph, where each vertices have an explicit id,
+        corresponding to its internal vertex id.
+
+        :type: str
+    .. py:attribute:: linearEncoding
+
+        (Read-only) If the graph models a molecule this is the :ref:`SMILES string <graph-smiles>` string, otherwise it is the :ref:`GraphDFS <graph-graphDFS>` string.
+
+        :type: str
+    .. py:attribute:: isMolecule
+
+        (Read-only) Whether or not the graph models a molecule. See :ref:`mol-enc`.
+
+        :type: bool
+    .. py:attribute:: energy
+
+        (Read-only) If the graph models a molecule, this is some energy value.
+        The energy is calculated using Open Babel, unless already calculated or cached by :py:meth:`Graph.cacheEnergy`.
+
+        :type: float
+    .. py:method:: cacheEnergy(e)
+
+        If the graph models a molecule, sets the energy to a given value.
+
+        :param float e: the value for the energy to be set.
+    .. py:attribute:: exactMass
+
+        (Read-only) The exact mass of the graph, if it is a molecule.
+        It is the sum of the exact mass of each atom, with the mass of electrons subtracted corresponding to the integer charge.
+        That is, the mass is :math:`\sum_a (mass(a) - mass(e)\cdot charge(a))`.
+        If an atom has no specified isotope, then the most abundant is used.
+
+        :type: float
+        :raises: :class:`LogicError` if it is not a molecule, including if some isotope has not been tabulated.
+    .. py:method:: vLabelCount(label)
+
+        :param str label: some label for querying.
+        :returns: the number of vertices in the graph with the given label.
+        :rtype: int
+    .. py:method:: eLabelCount(label)
+
+        :param str label: some label for querying.
+        :returns: the number of edges in the graph with the given label.
+        :rtype: int
+    .. py:method:: isomorphism(other, maxNumMatches=1, labelSettings=LabelSettings(LabelType.String, LabelRelation.Isomorphism))
+
+        :param Graph other: the codomain :class:`Graph` for finding morphisms.
+        :param int maxNumMatches: the maximum number of isomorphisms to search for.
+        :param LabelSettings labelSettings: the label settings to use during the search.
+        :returns: the number of isomorphisms from this graph to ``other``, but at most ``maxNumMatches``.
+        :rtype: int
+    .. py:method:: monomorphism(other, maxNumMatches=1, labelSettings=LabelSettings(LabelType.String, LabelRelation.Isomorphism))
+
+        :param Graph other: the codomain :class:`Graph` for finding morphisms.
+        :param int maxNumMatches: the maximum number of monomorphisms to search for.
+        :param LabelSettings labelSettings: the label settings to use during the search.
+        :returns: the number of monomorphisms from this graph to ``other``, though at most ``maxNumMatches``.
+        :rtype: int
+    .. py:method:: makePermutation()
+
+        :returns: a graph isomorphic to this, but with the vertex indices randomly permuted.
+        :rtype: Graph
+    .. py:attribute:: image
+
+        (Write-only) A custom depiction for the graph. The depiction file used will be the string
+        returned by the given function, with ``.pdf`` appended.
+        The function will only be called once.
+
+        :type: Callable[[], str]
+    .. py:attribute:: imageCommad
+
+        A command to be run in post-processing if a custom depiction is set.
+        The command is only run once.
+
+        :type: str
+    .. py:method:: getVertexFromExternalId(id)
+
+        If the graph was not loaded from an external data format, then this function
+        always return a null descriptor.
+        If the graph was loaded from a SMILES string, but *any* class label was not unique,
+        then the function always return a null descriptor.
+
+        .. note:: In general there is no correlation between external and internal ids.
+
+        :param int id: the external id to find the vertex descriptor for.
+        :returns: the vertex descriptor for the given external id.
+                The descriptor is null if the external id was not used.
+        :rtype: GraphVertex
+    .. py:attribute:: minExternalId
+                      maxExternalId
+
+        If the graph was not loaded from an external data format, then these attributes
+        are always return 0. Otherwise, they are the minimum/maximum external id from which
+        non-null vertices can be obtained from :py:meth:`getVertexFromExternalId`.
+        If no such minimum and maximum exists, then they are 0.
+
+        :type: int
+    .. py:method:: instantiateStereo()
+
+        Make sure that stereo data is instantiated.
+
+        :raises: :py:class:`StereoDeductionError` if the data was not instantiated and deduction failed.
+.. py:data:: inputGraphs
+
+    A list of graphs to which explicitly loaded graphs as default are appended.
+
+    :type: list[Graph]
+
+.. py:method:: graphGMLString(s, name=None, add=True)
+
+    Load a graph in :ref:`GML <graph-gml>` format from a given string.
+
+    :param str s: the string with the :ref:`GML <graph-gml>` data to load from.
+    :param str name: the name of the graph. If none is given the default name is used.
+    :param bool add: whether to append the graph to :data:`inputGraphs` or not.
+    :returns: the loaded graph.
+    :rtype: Graph
+    :raises: :class:`InputError` on bad input.
+.. py:method:: graphGML(f, name=None, add=True)
+
+    Load a graph in :ref:`GML <graph-gml>` format from a given file.
+
+    :param str f: name of the :ref:`GML <graph-gml>` file to be loaded.
+    :param str name: the name of the graph. If none is given the default name is used.
+    :param bool add: whether to append the graph to :data:`inputGraphs` or not.
+    :returns: the loaded graph.
+    :rtype: Graph
+    :raises: :class:`InputError` on bad input.
+.. py:method:: graphDFS(s, name=None, add=True)
+
+    Load a graph from a :ref:`GraphDFS <graph-graphDFS>` string.
+
+    :param str s: the :ref:`GraphDFS <graph-graphDFS>` string to parse.
+    :param str name: the name of the graph. If none is given the default name is used.
+    :param bool add: whether to append the graph to :data:`inputGraphs` or not.
+    :returns: the loaded graph.
+    :rtype: Graph
+    :raises: :class:`InputError` on bad input.
+.. py:method:: smiles(s, name=None, add=True)
+
+    Load a molecule from a :ref:`SMILES <graph-smiles>` string.
+
+    :param str s: the :ref:`SMILES <graph-smiles>` string to parse.
+    :param str name: the name of the graph. If none is given the default name is used.
+    :param bool add: whether to append the graph to :data:`inputGraphs` or not.
+    :returns: the loaded molecule.
+    :rtype: Graph
+    :raises: :class:`InputError` on bad input.

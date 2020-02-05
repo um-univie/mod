@@ -1,0 +1,1062 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta charset="utf-8" />
+    <title>2.2.8.4. dg/GraphInterface.hpp &#8212; MØD 0.10.0 documentation</title>
+    <link rel="stylesheet" href="../../_static/bootstrap-sphinx.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/haxes.css" />
+    <script id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+    <script src="../../_static/jquery.js"></script>
+    <script src="../../_static/underscore.js"></script>
+    <script src="../../_static/doctools.js"></script>
+    <script src="../../_static/language_data.js"></script>
+    <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="2.2.8.5. dg/Printer.hpp" href="Printer.html" />
+    <link rel="prev" title="2.2.8.3. dg/ForwardDecl.hpp" href="ForwardDecl.html" />
+<meta charset='utf-8'>
+<meta http-equiv='X-UA-Compatible' content='IE=edge,chrome=1'>
+<meta name='viewport' content='width=device-width, initial-scale=1.0, maximum-scale=1'>
+<meta name="apple-mobile-web-app-capable" content="yes">
+<script type="text/javascript" src="../../_static/js/jquery-1.11.0.min.js "></script>
+<script type="text/javascript" src="../../_static/js/jquery-fix.js "></script>
+<script type="text/javascript" src="../../_static/bootstrap-3.3.7/js/bootstrap.min.js "></script>
+<script type="text/javascript" src="../../_static/bootstrap-sphinx.js "></script>
+
+  </head><body>
+
+  <div id="navbar" class="navbar navbar-default navbar-fixed-top">
+    <div class="container">
+      <div class="navbar-header">
+        <!-- .btn-navbar is used as the toggle for collapsed navbar content -->
+        <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".nav-collapse">
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+        </button>
+        <a class="navbar-brand" href="../../index.html">
+          MØD</a>
+        <span class="navbar-text navbar-version pull-left"><b>0.10.0</b></span>
+      </div>
+
+        <div class="collapse navbar-collapse nav-collapse">
+          <ul class="nav navbar-nav">
+            
+                <li><a href="../../genindex.html">Index</a></li>
+            
+            
+              <li class="dropdown globaltoc-container">
+  <a role="button"
+     id="dLabelGlobalToc"
+     data-toggle="dropdown"
+     data-target="#"
+     href="../../index.html">Site <b class="caret"></b></a>
+  <ul class="dropdown-menu globaltoc"
+      role="menu"
+      aria-labelledby="dLabelGlobalToc"><ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../../installation.html">1. Installation</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../libmod.html">2. libMØD</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../pymod/pymod.html">3. PyMØD</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../postmod/postmod.html">4. PostMØD (<code class="docutils literal notranslate"><span class="pre">mod_post</span></code>)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../modWrapper/modWrapper.html">5. The Wrapper Script (<code class="docutils literal notranslate"><span class="pre">mod</span></code>)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../dataDesc/dataDesc.html">6. Data Formats</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../dgStrat/dgStrat.html">7. Derivation Graph Strategies</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../examples/index.html">8. Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../knownIssues.html">9. Known Issues</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../changes.html">10. Changes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../references.html">11. References</a></li>
+</ul>
+</ul>
+</li>
+              
+                <li class="dropdown">
+  <a role="button"
+     id="dLabelLocalToc"
+     data-toggle="dropdown"
+     data-target="#"
+     href="#">Page <b class="caret"></b></a>
+  <ul class="dropdown-menu localtoc"
+      role="menu"
+      aria-labelledby="dLabelLocalToc"><ul>
+<li><a class="reference internal" href="#">2.2.8.4. dg/GraphInterface.hpp</a><ul>
+<li><a class="reference internal" href="#class-dg-dg-vertex">2.2.8.4.1. Class <code class="docutils literal notranslate"><span class="pre">dg::DG::Vertex</span></code></a><ul>
+<li><a class="reference internal" href="#synopsis">2.2.8.4.1.1. Synopsis</a></li>
+<li><a class="reference internal" href="#details">2.2.8.4.1.2. Details</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#class-dg-dg-hyperedge">2.2.8.4.2. Class <code class="docutils literal notranslate"><span class="pre">dg::DG::HyperEdge</span></code></a><ul>
+<li><a class="reference internal" href="#id1">2.2.8.4.2.1. Synopsis</a></li>
+<li><a class="reference internal" href="#id2">2.2.8.4.2.2. Details</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#class-dg-dg-vertexiterator">2.2.8.4.3. Class <code class="docutils literal notranslate"><span class="pre">dg::DG::VertexIterator</span></code></a><ul>
+<li><a class="reference internal" href="#id3">2.2.8.4.3.1. Synopsis</a></li>
+<li><a class="reference internal" href="#id4">2.2.8.4.3.2. Details</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#class-dg-dg-vertexrange">2.2.8.4.4. Class <code class="docutils literal notranslate"><span class="pre">dg::DG::VertexRange</span></code></a><ul>
+<li><a class="reference internal" href="#id5">2.2.8.4.4.1. Synopsis</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#class-dg-dg-edgeiterator">2.2.8.4.5. Class <code class="docutils literal notranslate"><span class="pre">dg::DG::EdgeIterator</span></code></a><ul>
+<li><a class="reference internal" href="#id6">2.2.8.4.5.1. Synopsis</a></li>
+<li><a class="reference internal" href="#id7">2.2.8.4.5.2. Details</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#class-dg-dg-edgerange">2.2.8.4.6. Class <code class="docutils literal notranslate"><span class="pre">dg::DG::EdgeRange</span></code></a><ul>
+<li><a class="reference internal" href="#id8">2.2.8.4.6.1. Synopsis</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#class-dg-dg-inedgeiterator">2.2.8.4.7. Class <code class="docutils literal notranslate"><span class="pre">dg::DG::InEdgeIterator</span></code></a><ul>
+<li><a class="reference internal" href="#id9">2.2.8.4.7.1. Synopsis</a></li>
+<li><a class="reference internal" href="#id10">2.2.8.4.7.2. Details</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#class-dg-dg-inedgerange">2.2.8.4.8. Class <code class="docutils literal notranslate"><span class="pre">dg::DG::InEdgeRange</span></code></a><ul>
+<li><a class="reference internal" href="#id11">2.2.8.4.8.1. Synopsis</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#class-dg-dg-outedgeiterator">2.2.8.4.9. Class <code class="docutils literal notranslate"><span class="pre">dg::DG::OutEdgeIterator</span></code></a><ul>
+<li><a class="reference internal" href="#id12">2.2.8.4.9.1. Synopsis</a></li>
+<li><a class="reference internal" href="#id13">2.2.8.4.9.2. Details</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#class-dg-dg-outedgerange">2.2.8.4.10. Class <code class="docutils literal notranslate"><span class="pre">dg::DG::OutEdgeRange</span></code></a><ul>
+<li><a class="reference internal" href="#id14">2.2.8.4.10.1. Synopsis</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#class-dg-dg-sourceiterator">2.2.8.4.11. Class <code class="docutils literal notranslate"><span class="pre">dg::DG::SourceIterator</span></code></a><ul>
+<li><a class="reference internal" href="#id15">2.2.8.4.11.1. Synopsis</a></li>
+<li><a class="reference internal" href="#id16">2.2.8.4.11.2. Details</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#class-dg-dg-sourcerange">2.2.8.4.12. Class <code class="docutils literal notranslate"><span class="pre">dg::DG::SourceRange</span></code></a><ul>
+<li><a class="reference internal" href="#id17">2.2.8.4.12.1. Synopsis</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#class-dg-dg-targetiterator">2.2.8.4.13. Class <code class="docutils literal notranslate"><span class="pre">dg::DG::TargetIterator</span></code></a><ul>
+<li><a class="reference internal" href="#id18">2.2.8.4.13.1. Synopsis</a></li>
+<li><a class="reference internal" href="#id19">2.2.8.4.13.2. Details</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#class-dg-dg-targetrange">2.2.8.4.14. Class <code class="docutils literal notranslate"><span class="pre">dg::DG::TargetRange</span></code></a><ul>
+<li><a class="reference internal" href="#id20">2.2.8.4.14.1. Synopsis</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#class-dg-dg-ruleiterator">2.2.8.4.15. Class <code class="docutils literal notranslate"><span class="pre">dg::DG::RuleIterator</span></code></a><ul>
+<li><a class="reference internal" href="#id21">2.2.8.4.15.1. Synopsis</a></li>
+<li><a class="reference internal" href="#id22">2.2.8.4.15.2. Details</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#class-dg-dg-rulerange">2.2.8.4.16. Class <code class="docutils literal notranslate"><span class="pre">dg::DG::RuleRange</span></code></a><ul>
+<li><a class="reference internal" href="#id23">2.2.8.4.16.1. Synopsis</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</ul>
+</li>
+              
+            
+            
+              
+                
+  <li>
+    <a href="ForwardDecl.html" title="Previous Chapter: 2.2.8.3. dg/ForwardDecl.hpp"><span class="glyphicon glyphicon-chevron-left visible-sm"></span><span class="hidden-sm hidden-tablet">&laquo; 2.2.8.3. dg/F...</span>
+    </a>
+  </li>
+  <li>
+    <a href="Printer.html" title="Next Chapter: 2.2.8.5. dg/Printer.hpp"><span class="glyphicon glyphicon-chevron-right visible-sm"></span><span class="hidden-sm hidden-tablet">2.2.8.5. dg/P... &raquo;</span>
+    </a>
+  </li>
+              
+            
+            
+            
+            
+          </ul>
+
+          
+            
+<form class="navbar-form navbar-right" action="../../search.html" method="get">
+ <div class="form-group">
+  <input type="text" name="q" class="form-control" placeholder="Search" />
+ </div>
+  <input type="hidden" name="check_keywords" value="yes" />
+  <input type="hidden" name="area" value="default" />
+</form>
+          
+        </div>
+    </div>
+  </div>
+
+<div class="container">
+  <div class="row">
+    <div class="body col-md-12 content" role="main">
+      
+  <div class="section" id="dg-graphinterface-hpp">
+<span id="cpp-dg-graphinterface"></span><h1><span class="section-number">2.2.8.4. </span>dg/GraphInterface.hpp<a class="headerlink" href="#dg-graphinterface-hpp" title="Permalink to this headline">¶</a></h1>
+<p>This header contains the definitions for the hypergraph interface for <a class="reference internal" href="DG.html#_CPPv4N3mod2dg2DGE" title="mod::dg::DG"><code class="xref cpp cpp-class docutils literal notranslate"><span class="pre">dg::DG</span></code></a>.</p>
+<div class="section" id="class-dg-dg-vertex">
+<h2><span class="section-number">2.2.8.4.1. </span>Class <code class="docutils literal notranslate"><span class="pre">dg::DG::Vertex</span></code><a class="headerlink" href="#class-dg-dg-vertex" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="_CPPv4N3mod2dg2DG6VertexE">
+<span id="_CPPv3N3mod2dg2DG6VertexE"></span><span id="_CPPv2N3mod2dg2DG6VertexE"></span><span id="mod::dg::DG::Vertex"></span><em class="property">class </em><code class="sig-prename descclassname">dg::<a class="reference internal" href="DG.html#_CPPv4N3mod2dg2DGE" title="mod::dg::DG">DG</a><code class="sig-prename descclassname">::</code></code><code class="sig-name descname">Vertex</code><a class="headerlink" href="#_CPPv4N3mod2dg2DG6VertexE" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>A descriptor of either a vertex in a graph, or a null vertex.</p>
+</dd></dl>
+
+<div class="section" id="synopsis">
+<h3><span class="section-number">2.2.8.4.1.1. </span>Synopsis<a class="headerlink" href="#synopsis" title="Permalink to this headline">¶</a></h3>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">MOD_DECL</span> <span class="n">DG</span><span class="o">::</span><span class="n">Vertex</span> <span class="p">{</span>
+    <span class="k">friend</span> <span class="k">class</span> <span class="nc">lib</span><span class="o">::</span><span class="n">DG</span><span class="o">::</span><span class="n">Hyper</span><span class="p">;</span>
+    <span class="n">Vertex</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">shared_ptr</span><span class="o">&lt;</span><span class="n">DG</span><span class="o">&gt;</span> <span class="n">g</span><span class="p">,</span> <span class="n">std</span><span class="o">::</span><span class="kt">size_t</span> <span class="n">vId</span><span class="p">);</span>
+<span class="k">public</span><span class="o">:</span>
+    <span class="n">Vertex</span><span class="p">();</span>
+    <span class="n">MOD_DECL</span> <span class="k">friend</span> <span class="n">std</span><span class="o">::</span><span class="n">ostream</span> <span class="o">&amp;</span><span class="k">operator</span><span class="o">&lt;&lt;</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">ostream</span> <span class="o">&amp;</span><span class="n">s</span><span class="p">,</span> <span class="k">const</span> <span class="n">Vertex</span> <span class="o">&amp;</span><span class="n">v</span><span class="p">);</span>
+    <span class="n">MOD_DECL</span> <span class="k">friend</span> <span class="kt">bool</span> <span class="k">operator</span><span class="o">==</span><span class="p">(</span><span class="k">const</span> <span class="n">Vertex</span> <span class="o">&amp;</span><span class="n">v1</span><span class="p">,</span> <span class="k">const</span> <span class="n">Vertex</span> <span class="o">&amp;</span><span class="n">v2</span><span class="p">);</span>
+    <span class="n">MOD_DECL</span> <span class="k">friend</span> <span class="kt">bool</span> <span class="k">operator</span><span class="o">!=</span><span class="p">(</span><span class="k">const</span> <span class="n">Vertex</span> <span class="o">&amp;</span><span class="n">v1</span><span class="p">,</span> <span class="k">const</span> <span class="n">Vertex</span> <span class="o">&amp;</span><span class="n">v2</span><span class="p">);</span>
+    <span class="n">MOD_DECL</span> <span class="k">friend</span> <span class="kt">bool</span> <span class="k">operator</span><span class="o">&lt;</span><span class="p">(</span><span class="k">const</span> <span class="n">Vertex</span> <span class="o">&amp;</span><span class="n">v1</span><span class="p">,</span> <span class="k">const</span> <span class="n">Vertex</span> <span class="o">&amp;</span><span class="n">v2</span><span class="p">);</span>
+    <span class="n">std</span><span class="o">::</span><span class="kt">size_t</span> <span class="n">hash</span><span class="p">()</span> <span class="k">const</span><span class="p">;</span>
+    <span class="k">explicit</span> <span class="k">operator</span> <span class="nf">bool</span><span class="p">()</span> <span class="k">const</span><span class="p">;</span>
+    <span class="kt">bool</span> <span class="nf">isNull</span><span class="p">()</span> <span class="k">const</span><span class="p">;</span>
+    <span class="n">std</span><span class="o">::</span><span class="kt">size_t</span> <span class="n">getId</span><span class="p">()</span> <span class="k">const</span><span class="p">;</span>
+    <span class="n">std</span><span class="o">::</span><span class="n">shared_ptr</span><span class="o">&lt;</span><span class="n">DG</span><span class="o">&gt;</span> <span class="n">getDG</span><span class="p">()</span> <span class="k">const</span><span class="p">;</span>
+    <span class="n">std</span><span class="o">::</span><span class="kt">size_t</span> <span class="n">inDegree</span><span class="p">()</span> <span class="k">const</span><span class="p">;</span>
+    <span class="n">InEdgeRange</span> <span class="nf">inEdges</span><span class="p">()</span> <span class="k">const</span><span class="p">;</span>
+    <span class="n">std</span><span class="o">::</span><span class="kt">size_t</span> <span class="n">outDegree</span><span class="p">()</span> <span class="k">const</span><span class="p">;</span>
+    <span class="n">OutEdgeRange</span> <span class="nf">outEdges</span><span class="p">()</span> <span class="k">const</span><span class="p">;</span>
+    <span class="n">std</span><span class="o">::</span><span class="n">shared_ptr</span><span class="o">&lt;</span><span class="n">graph</span><span class="o">::</span><span class="n">Graph</span><span class="o">&gt;</span> <span class="n">getGraph</span><span class="p">()</span> <span class="k">const</span><span class="p">;</span>
+<span class="k">private</span><span class="o">:</span>
+    <span class="n">std</span><span class="o">::</span><span class="n">shared_ptr</span><span class="o">&lt;</span><span class="n">DG</span><span class="o">&gt;</span> <span class="n">g</span><span class="p">;</span>
+    <span class="n">std</span><span class="o">::</span><span class="kt">size_t</span> <span class="n">vId</span><span class="p">;</span>
+<span class="p">};</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="details">
+<h3><span class="section-number">2.2.8.4.1.2. </span>Details<a class="headerlink" href="#details" title="Permalink to this headline">¶</a></h3>
+<dl class="function">
+<dt id="_CPPv4N3mod2dg2DG6Vertex6VertexEv">
+<span id="_CPPv3N3mod2dg2DG6Vertex6VertexEv"></span><span id="_CPPv2N3mod2dg2DG6Vertex6VertexEv"></span><span id="mod::dg::DG::Vertex::Vertex"></span><code class="sig-name descname">Vertex</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N3mod2dg2DG6Vertex6VertexEv" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Constructs a null descriptor.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="_CPPv4NK3mod2dg2DG6VertexcvbEv">
+<span id="_CPPv3NK3mod2dg2DG6VertexcvbEv"></span><span id="_CPPv2NK3mod2dg2DG6VertexcvbEv"></span><span id="mod::dg::DG::Vertex::castto-b-operatorC"></span><em class="property">explicit</em> <code class="sig-name descname">operator bool</code><span class="sig-paren">(</span><span class="sig-paren">)</span> <em class="property">const</em><a class="headerlink" href="#_CPPv4NK3mod2dg2DG6VertexcvbEv" title="Permalink to this definition">¶</a><br /></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p><code class="xref cpp cpp-expr docutils literal notranslate"><span class="pre">!</span><a class="reference internal" href="#_CPPv4NK3mod2dg2DG6Vertex6isNullEv" title="mod::dg::DG::Vertex::isNull"><span class="pre">isNull</span></a><span class="pre">(</span><span class="pre">)</span></code></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="_CPPv4NK3mod2dg2DG6Vertex6isNullEv">
+<span id="_CPPv3NK3mod2dg2DG6Vertex6isNullEv"></span><span id="_CPPv2NK3mod2dg2DG6Vertex6isNullEv"></span><span id="mod::dg::DG::Vertex::isNullC"></span>bool <code class="sig-name descname">isNull</code><span class="sig-paren">(</span><span class="sig-paren">)</span> <em class="property">const</em><a class="headerlink" href="#_CPPv4NK3mod2dg2DG6Vertex6isNullEv" title="Permalink to this definition">¶</a><br /></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>whether this is a null descriptor or not.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="_CPPv4NK3mod2dg2DG6Vertex5getIdEv">
+<span id="_CPPv3NK3mod2dg2DG6Vertex5getIdEv"></span><span id="_CPPv2NK3mod2dg2DG6Vertex5getIdEv"></span><span id="mod::dg::DG::Vertex::getIdC"></span>std::size_t <code class="sig-name descname">getId</code><span class="sig-paren">(</span><span class="sig-paren">)</span> <em class="property">const</em><a class="headerlink" href="#_CPPv4NK3mod2dg2DG6Vertex5getIdEv" title="Permalink to this definition">¶</a><br /></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>the index of the vertex. It will be in the range <span class="math notranslate nohighlight">\([0, numVertices + numEdges[\)</span>.</p>
+</dd>
+<dt class="field-even">Throws</dt>
+<dd class="field-even"><p><a class="reference internal" href="../Error.html#_CPPv4N3mod10LogicErrorE" title="mod::LogicError"><code class="xref cpp cpp-class docutils literal notranslate"><span class="pre">LogicError</span></code></a> if it is a null descriptor.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="_CPPv4NK3mod2dg2DG6Vertex5getDGEv">
+<span id="_CPPv3NK3mod2dg2DG6Vertex5getDGEv"></span><span id="_CPPv2NK3mod2dg2DG6Vertex5getDGEv"></span><span id="mod::dg::DG::Vertex::getDGC"></span>std::shared_ptr&lt;<a class="reference internal" href="DG.html#_CPPv4N3mod2dg2DGE" title="mod::dg::DG">DG</a>&gt; <code class="sig-name descname">getDG</code><span class="sig-paren">(</span><span class="sig-paren">)</span> <em class="property">const</em><a class="headerlink" href="#_CPPv4NK3mod2dg2DG6Vertex5getDGEv" title="Permalink to this definition">¶</a><br /></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>the derivation graph the vertex belongs to.</p>
+</dd>
+<dt class="field-even">Throws</dt>
+<dd class="field-even"><p><a class="reference internal" href="../Error.html#_CPPv4N3mod10LogicErrorE" title="mod::LogicError"><code class="xref cpp cpp-class docutils literal notranslate"><span class="pre">LogicError</span></code></a> if it is a null descriptor.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="_CPPv4NK3mod2dg2DG6Vertex8inDegreeEv">
+<span id="_CPPv3NK3mod2dg2DG6Vertex8inDegreeEv"></span><span id="_CPPv2NK3mod2dg2DG6Vertex8inDegreeEv"></span><span id="mod::dg::DG::Vertex::inDegreeC"></span>std::size_t <code class="sig-name descname">inDegree</code><span class="sig-paren">(</span><span class="sig-paren">)</span> <em class="property">const</em><a class="headerlink" href="#_CPPv4NK3mod2dg2DG6Vertex8inDegreeEv" title="Permalink to this definition">¶</a><br /></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>the in-degree of the vertex, including multiplicity of target multisets.</p>
+</dd>
+<dt class="field-even">Throws</dt>
+<dd class="field-even"><p><a class="reference internal" href="../Error.html#_CPPv4N3mod10LogicErrorE" title="mod::LogicError"><code class="xref cpp cpp-class docutils literal notranslate"><span class="pre">LogicError</span></code></a> if it is a null descriptor.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="_CPPv4NK3mod2dg2DG6Vertex7inEdgesEv">
+<span id="_CPPv3NK3mod2dg2DG6Vertex7inEdgesEv"></span><span id="_CPPv2NK3mod2dg2DG6Vertex7inEdgesEv"></span><span id="mod::dg::DG::Vertex::inEdgesC"></span><a class="reference internal" href="#_CPPv4N3mod2dg2DG11InEdgeRangeE" title="mod::dg::DG::InEdgeRange">InEdgeRange</a> <code class="sig-name descname">inEdges</code><span class="sig-paren">(</span><span class="sig-paren">)</span> <em class="property">const</em><a class="headerlink" href="#_CPPv4NK3mod2dg2DG6Vertex7inEdgesEv" title="Permalink to this definition">¶</a><br /></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>a range of in-hyperedges for this vertex.</p>
+</dd>
+<dt class="field-even">Throws</dt>
+<dd class="field-even"><p><a class="reference internal" href="../Error.html#_CPPv4N3mod10LogicErrorE" title="mod::LogicError"><code class="xref cpp cpp-class docutils literal notranslate"><span class="pre">LogicError</span></code></a> if it is a null descriptor.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="_CPPv4NK3mod2dg2DG6Vertex12getOutDegreeEv">
+<span id="_CPPv3NK3mod2dg2DG6Vertex12getOutDegreeEv"></span><span id="_CPPv2NK3mod2dg2DG6Vertex12getOutDegreeEv"></span><span id="mod::dg::DG::Vertex::getOutDegreeC"></span>std::size_t <code class="sig-name descname">getOutDegree</code><span class="sig-paren">(</span><span class="sig-paren">)</span> <em class="property">const</em><a class="headerlink" href="#_CPPv4NK3mod2dg2DG6Vertex12getOutDegreeEv" title="Permalink to this definition">¶</a><br /></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>the out-degree of the vertex, including multiplicity of source multisets.</p>
+</dd>
+<dt class="field-even">Throws</dt>
+<dd class="field-even"><p><a class="reference internal" href="../Error.html#_CPPv4N3mod10LogicErrorE" title="mod::LogicError"><code class="xref cpp cpp-class docutils literal notranslate"><span class="pre">LogicError</span></code></a> if it is a null descriptor.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="_CPPv4NK3mod2dg2DG6Vertex8outEdgesEv">
+<span id="_CPPv3NK3mod2dg2DG6Vertex8outEdgesEv"></span><span id="_CPPv2NK3mod2dg2DG6Vertex8outEdgesEv"></span><span id="mod::dg::DG::Vertex::outEdgesC"></span><a class="reference internal" href="#_CPPv4N3mod2dg2DG12OutEdgeRangeE" title="mod::dg::DG::OutEdgeRange">OutEdgeRange</a> <code class="sig-name descname">outEdges</code><span class="sig-paren">(</span><span class="sig-paren">)</span> <em class="property">const</em><a class="headerlink" href="#_CPPv4NK3mod2dg2DG6Vertex8outEdgesEv" title="Permalink to this definition">¶</a><br /></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>a range of out-hyperedges for this vertex.</p>
+</dd>
+<dt class="field-even">Throws</dt>
+<dd class="field-even"><p><a class="reference internal" href="../Error.html#_CPPv4N3mod10LogicErrorE" title="mod::LogicError"><code class="xref cpp cpp-class docutils literal notranslate"><span class="pre">LogicError</span></code></a> if it is a null descriptor.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="_CPPv4NK3mod2dg2DG6Vertex8getGraphEv">
+<span id="_CPPv3NK3mod2dg2DG6Vertex8getGraphEv"></span><span id="_CPPv2NK3mod2dg2DG6Vertex8getGraphEv"></span><span id="mod::dg::DG::Vertex::getGraphC"></span>std::shared_ptr&lt;graph::<a class="reference internal" href="../graph/Graph.html#_CPPv4N3mod5graph5GraphE" title="mod::graph::Graph">Graph</a>&gt; &amp;<code class="sig-name descname">getGraph</code><span class="sig-paren">(</span><span class="sig-paren">)</span> <em class="property">const</em><a class="headerlink" href="#_CPPv4NK3mod2dg2DG6Vertex8getGraphEv" title="Permalink to this definition">¶</a><br /></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>the graph label of the vertex.</p>
+</dd>
+<dt class="field-even">Throws</dt>
+<dd class="field-even"><p><a class="reference internal" href="../Error.html#_CPPv4N3mod10LogicErrorE" title="mod::LogicError"><code class="xref cpp cpp-class docutils literal notranslate"><span class="pre">LogicError</span></code></a> if it is a null descriptor.</p>
+</dd>
+</dl>
+</dd></dl>
+
+</div>
+</div>
+<div class="section" id="class-dg-dg-hyperedge">
+<h2><span class="section-number">2.2.8.4.2. </span>Class <code class="docutils literal notranslate"><span class="pre">dg::DG::HyperEdge</span></code><a class="headerlink" href="#class-dg-dg-hyperedge" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="_CPPv4N3mod2dg2DG9HyperEdgeE">
+<span id="_CPPv3N3mod2dg2DG9HyperEdgeE"></span><span id="_CPPv2N3mod2dg2DG9HyperEdgeE"></span><span id="mod::dg::DG::HyperEdge"></span><em class="property">class </em><code class="sig-prename descclassname">dg::<a class="reference internal" href="DG.html#_CPPv4N3mod2dg2DGE" title="mod::dg::DG">DG</a><code class="sig-prename descclassname">::</code></code><code class="sig-name descname">HyperEdge</code><a class="headerlink" href="#_CPPv4N3mod2dg2DG9HyperEdgeE" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>A descriptor of either a hyperedge in a derivation graph, or a null edge.</p>
+</dd></dl>
+
+<div class="section" id="id1">
+<h3><span class="section-number">2.2.8.4.2.1. </span>Synopsis<a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h3>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">MOD_DECL</span> <span class="n">DG</span><span class="o">::</span><span class="n">HyperEdge</span> <span class="p">{</span>
+    <span class="k">friend</span> <span class="k">class</span> <span class="nc">lib</span><span class="o">::</span><span class="n">DG</span><span class="o">::</span><span class="n">Hyper</span><span class="p">;</span>
+    <span class="n">HyperEdge</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">shared_ptr</span><span class="o">&lt;</span><span class="n">DG</span><span class="o">&gt;</span> <span class="n">g</span><span class="p">,</span> <span class="n">std</span><span class="o">::</span><span class="kt">size_t</span> <span class="n">eId</span><span class="p">);</span>
+<span class="k">public</span><span class="o">:</span>
+    <span class="n">HyperEdge</span><span class="p">();</span>
+    <span class="n">MOD_DECL</span> <span class="k">friend</span> <span class="n">std</span><span class="o">::</span><span class="n">ostream</span> <span class="o">&amp;</span><span class="k">operator</span><span class="o">&lt;&lt;</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">ostream</span> <span class="o">&amp;</span><span class="n">s</span><span class="p">,</span> <span class="k">const</span> <span class="n">HyperEdge</span> <span class="o">&amp;</span><span class="n">e</span><span class="p">);</span>
+    <span class="n">MOD_DECL</span> <span class="k">friend</span> <span class="kt">bool</span> <span class="k">operator</span><span class="o">==</span><span class="p">(</span><span class="k">const</span> <span class="n">HyperEdge</span> <span class="o">&amp;</span><span class="n">e1</span><span class="p">,</span> <span class="k">const</span> <span class="n">HyperEdge</span> <span class="o">&amp;</span><span class="n">e2</span><span class="p">);</span>
+    <span class="n">MOD_DECL</span> <span class="k">friend</span> <span class="kt">bool</span> <span class="k">operator</span><span class="o">!=</span><span class="p">(</span><span class="k">const</span> <span class="n">HyperEdge</span> <span class="o">&amp;</span><span class="n">e1</span><span class="p">,</span> <span class="k">const</span> <span class="n">HyperEdge</span> <span class="o">&amp;</span><span class="n">e2</span><span class="p">);</span>
+    <span class="n">MOD_DECL</span> <span class="k">friend</span> <span class="kt">bool</span> <span class="k">operator</span><span class="o">&lt;</span><span class="p">(</span><span class="k">const</span> <span class="n">HyperEdge</span> <span class="o">&amp;</span><span class="n">e1</span><span class="p">,</span> <span class="k">const</span> <span class="n">HyperEdge</span> <span class="o">&amp;</span><span class="n">e2</span><span class="p">);</span>
+    <span class="n">std</span><span class="o">::</span><span class="kt">size_t</span> <span class="n">hash</span><span class="p">()</span> <span class="k">const</span><span class="p">;</span>
+    <span class="k">explicit</span> <span class="k">operator</span> <span class="nf">bool</span><span class="p">()</span> <span class="k">const</span><span class="p">;</span>
+    <span class="kt">bool</span> <span class="nf">isNull</span><span class="p">()</span> <span class="k">const</span><span class="p">;</span>
+    <span class="n">std</span><span class="o">::</span><span class="kt">size_t</span> <span class="n">getId</span><span class="p">()</span> <span class="k">const</span><span class="p">;</span>
+    <span class="n">std</span><span class="o">::</span><span class="n">shared_ptr</span><span class="o">&lt;</span><span class="n">DG</span><span class="o">&gt;</span> <span class="n">getDG</span><span class="p">()</span> <span class="k">const</span><span class="p">;</span>
+    <span class="n">std</span><span class="o">::</span><span class="kt">size_t</span> <span class="n">numSources</span><span class="p">()</span> <span class="k">const</span><span class="p">;</span>
+    <span class="n">SourceRange</span> <span class="nf">sources</span><span class="p">()</span> <span class="k">const</span><span class="p">;</span>
+    <span class="n">std</span><span class="o">::</span><span class="kt">size_t</span> <span class="n">numTargets</span><span class="p">()</span> <span class="k">const</span><span class="p">;</span>
+    <span class="n">TargetRange</span> <span class="nf">targets</span><span class="p">()</span> <span class="k">const</span><span class="p">;</span>
+    <span class="n">RuleRange</span> <span class="nf">rules</span><span class="p">()</span> <span class="k">const</span><span class="p">;</span>
+    <span class="n">HyperEdge</span> <span class="nf">getInverse</span><span class="p">()</span> <span class="k">const</span><span class="p">;</span>
+<span class="k">public</span><span class="o">:</span>
+    <span class="n">std</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;</span><span class="n">std</span><span class="o">::</span><span class="n">pair</span><span class="o">&lt;</span><span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="p">,</span> <span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="o">&gt;</span> <span class="o">&gt;</span>
+    <span class="n">print</span><span class="p">(</span><span class="k">const</span> <span class="n">graph</span><span class="o">::</span><span class="n">Printer</span> <span class="o">&amp;</span><span class="n">printer</span><span class="p">,</span> <span class="k">const</span> <span class="n">std</span><span class="o">::</span><span class="n">string</span> <span class="o">&amp;</span><span class="n">nomatchColour</span><span class="p">,</span> <span class="k">const</span> <span class="n">std</span><span class="o">::</span><span class="n">string</span> <span class="o">&amp;</span><span class="n">matchColour</span><span class="p">)</span> <span class="k">const</span><span class="p">;</span>
+    <span class="kt">void</span> <span class="nf">printTransitionState</span><span class="p">()</span> <span class="k">const</span><span class="p">;</span>
+    <span class="kt">void</span> <span class="nf">printTransitionState</span><span class="p">(</span><span class="k">const</span> <span class="n">graph</span><span class="o">::</span><span class="n">Printer</span> <span class="o">&amp;</span><span class="n">printer</span><span class="p">)</span> <span class="k">const</span><span class="p">;</span>
+<span class="k">private</span><span class="o">:</span>
+    <span class="n">std</span><span class="o">::</span><span class="n">shared_ptr</span><span class="o">&lt;</span><span class="n">DG</span><span class="o">&gt;</span> <span class="n">g</span><span class="p">;</span>
+    <span class="n">std</span><span class="o">::</span><span class="kt">size_t</span> <span class="n">eId</span><span class="p">;</span>
+<span class="p">};</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="id2">
+<h3><span class="section-number">2.2.8.4.2.2. </span>Details<a class="headerlink" href="#id2" title="Permalink to this headline">¶</a></h3>
+<dl class="function">
+<dt id="_CPPv4N3mod2dg2DG9HyperEdge9HyperEdgeEv">
+<span id="_CPPv3N3mod2dg2DG9HyperEdge9HyperEdgeEv"></span><span id="_CPPv2N3mod2dg2DG9HyperEdge9HyperEdgeEv"></span><span id="mod::dg::DG::HyperEdge::HyperEdge"></span><code class="sig-name descname">HyperEdge</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N3mod2dg2DG9HyperEdge9HyperEdgeEv" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Constructs a null descriptor.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="_CPPv4NK3mod2dg2DG9HyperEdgecvbEv">
+<span id="_CPPv3NK3mod2dg2DG9HyperEdgecvbEv"></span><span id="_CPPv2NK3mod2dg2DG9HyperEdgecvbEv"></span><span id="mod::dg::DG::HyperEdge::castto-b-operatorC"></span><em class="property">explicit</em> <code class="sig-name descname">operator bool</code><span class="sig-paren">(</span><span class="sig-paren">)</span> <em class="property">const</em><a class="headerlink" href="#_CPPv4NK3mod2dg2DG9HyperEdgecvbEv" title="Permalink to this definition">¶</a><br /></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p><code class="xref cpp cpp-expr docutils literal notranslate"><span class="pre">!</span><a class="reference internal" href="#_CPPv4NK3mod2dg2DG9HyperEdge6isNullEv" title="mod::dg::DG::HyperEdge::isNull"><span class="pre">isNull</span></a><span class="pre">(</span><span class="pre">)</span></code></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="_CPPv4NK3mod2dg2DG9HyperEdge6isNullEv">
+<span id="_CPPv3NK3mod2dg2DG9HyperEdge6isNullEv"></span><span id="_CPPv2NK3mod2dg2DG9HyperEdge6isNullEv"></span><span id="mod::dg::DG::HyperEdge::isNullC"></span>bool <code class="sig-name descname">isNull</code><span class="sig-paren">(</span><span class="sig-paren">)</span> <em class="property">const</em><a class="headerlink" href="#_CPPv4NK3mod2dg2DG9HyperEdge6isNullEv" title="Permalink to this definition">¶</a><br /></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>whether this is a null descriptor or not.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="_CPPv4NK3mod2dg2DG9HyperEdge5getIdEv">
+<span id="_CPPv3NK3mod2dg2DG9HyperEdge5getIdEv"></span><span id="_CPPv2NK3mod2dg2DG9HyperEdge5getIdEv"></span><span id="mod::dg::DG::HyperEdge::getIdC"></span>std::size_t <code class="sig-name descname">getId</code><span class="sig-paren">(</span><span class="sig-paren">)</span> <em class="property">const</em><a class="headerlink" href="#_CPPv4NK3mod2dg2DG9HyperEdge5getIdEv" title="Permalink to this definition">¶</a><br /></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>the index of the hyperedge. It will be in the range <span class="math notranslate nohighlight">\([0, numVertices + numEdges[\)</span>.</p>
+</dd>
+<dt class="field-even">Throws</dt>
+<dd class="field-even"><p><a class="reference internal" href="../Error.html#_CPPv4N3mod10LogicErrorE" title="mod::LogicError"><code class="xref cpp cpp-class docutils literal notranslate"><span class="pre">LogicError</span></code></a> if it is a null descriptor.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="_CPPv4NK3mod2dg2DG9HyperEdge5getDGEv">
+<span id="_CPPv3NK3mod2dg2DG9HyperEdge5getDGEv"></span><span id="_CPPv2NK3mod2dg2DG9HyperEdge5getDGEv"></span><span id="mod::dg::DG::HyperEdge::getDGC"></span>std::shared_ptr&lt;<a class="reference internal" href="DG.html#_CPPv4N3mod2dg2DGE" title="mod::dg::DG">DG</a>&gt; <code class="sig-name descname">getDG</code><span class="sig-paren">(</span><span class="sig-paren">)</span> <em class="property">const</em><a class="headerlink" href="#_CPPv4NK3mod2dg2DG9HyperEdge5getDGEv" title="Permalink to this definition">¶</a><br /></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>the derivation graph the hyperedge belongs to.</p>
+</dd>
+<dt class="field-even">Throws</dt>
+<dd class="field-even"><p><a class="reference internal" href="../Error.html#_CPPv4N3mod10LogicErrorE" title="mod::LogicError"><code class="xref cpp cpp-class docutils literal notranslate"><span class="pre">LogicError</span></code></a> if it is a null descriptor.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="_CPPv4NK3mod2dg2DG9HyperEdge10numSourcesEv">
+<span id="_CPPv3NK3mod2dg2DG9HyperEdge10numSourcesEv"></span><span id="_CPPv2NK3mod2dg2DG9HyperEdge10numSourcesEv"></span><span id="mod::dg::DG::HyperEdge::numSourcesC"></span>std::size_t <code class="sig-name descname">numSources</code><span class="sig-paren">(</span><span class="sig-paren">)</span> <em class="property">const</em><a class="headerlink" href="#_CPPv4NK3mod2dg2DG9HyperEdge10numSourcesEv" title="Permalink to this definition">¶</a><br /></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>the number of sources of the hyperedge.</p>
+</dd>
+<dt class="field-even">Throws</dt>
+<dd class="field-even"><p><a class="reference internal" href="../Error.html#_CPPv4N3mod10LogicErrorE" title="mod::LogicError"><code class="xref cpp cpp-class docutils literal notranslate"><span class="pre">LogicError</span></code></a> if it is a null descriptor.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="_CPPv4NK3mod2dg2DG9HyperEdge7sourcesEv">
+<span id="_CPPv3NK3mod2dg2DG9HyperEdge7sourcesEv"></span><span id="_CPPv2NK3mod2dg2DG9HyperEdge7sourcesEv"></span><span id="mod::dg::DG::HyperEdge::sourcesC"></span><a class="reference internal" href="#_CPPv4N3mod2dg2DG11SourceRangeE" title="mod::dg::DG::SourceRange">SourceRange</a> <code class="sig-name descname">sources</code><span class="sig-paren">(</span><span class="sig-paren">)</span> <em class="property">const</em><a class="headerlink" href="#_CPPv4NK3mod2dg2DG9HyperEdge7sourcesEv" title="Permalink to this definition">¶</a><br /></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>the sources of the hyperedge.</p>
+</dd>
+<dt class="field-even">Throws</dt>
+<dd class="field-even"><p><a class="reference internal" href="../Error.html#_CPPv4N3mod10LogicErrorE" title="mod::LogicError"><code class="xref cpp cpp-class docutils literal notranslate"><span class="pre">LogicError</span></code></a> if it is a null descriptor.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="_CPPv4NK3mod2dg2DG9HyperEdge10numTargetsEv">
+<span id="_CPPv3NK3mod2dg2DG9HyperEdge10numTargetsEv"></span><span id="_CPPv2NK3mod2dg2DG9HyperEdge10numTargetsEv"></span><span id="mod::dg::DG::HyperEdge::numTargetsC"></span>std::size_t <code class="sig-name descname">numTargets</code><span class="sig-paren">(</span><span class="sig-paren">)</span> <em class="property">const</em><a class="headerlink" href="#_CPPv4NK3mod2dg2DG9HyperEdge10numTargetsEv" title="Permalink to this definition">¶</a><br /></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>the number of targets of the hyperedge.</p>
+</dd>
+<dt class="field-even">Throws</dt>
+<dd class="field-even"><p><a class="reference internal" href="../Error.html#_CPPv4N3mod10LogicErrorE" title="mod::LogicError"><code class="xref cpp cpp-class docutils literal notranslate"><span class="pre">LogicError</span></code></a> if it is a null descriptor.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="_CPPv4NK3mod2dg2DG9HyperEdge7targetsEv">
+<span id="_CPPv3NK3mod2dg2DG9HyperEdge7targetsEv"></span><span id="_CPPv2NK3mod2dg2DG9HyperEdge7targetsEv"></span><span id="mod::dg::DG::HyperEdge::targetsC"></span><a class="reference internal" href="#_CPPv4N3mod2dg2DG11TargetRangeE" title="mod::dg::DG::TargetRange">TargetRange</a> <code class="sig-name descname">targets</code><span class="sig-paren">(</span><span class="sig-paren">)</span> <em class="property">const</em><a class="headerlink" href="#_CPPv4NK3mod2dg2DG9HyperEdge7targetsEv" title="Permalink to this definition">¶</a><br /></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>the targets of the hyperedge.</p>
+</dd>
+<dt class="field-even">Throws</dt>
+<dd class="field-even"><p><a class="reference internal" href="../Error.html#_CPPv4N3mod10LogicErrorE" title="mod::LogicError"><code class="xref cpp cpp-class docutils literal notranslate"><span class="pre">LogicError</span></code></a> if it is a null descriptor.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="_CPPv4NK3mod2dg2DG9HyperEdge5rulesEv">
+<span id="_CPPv3NK3mod2dg2DG9HyperEdge5rulesEv"></span><span id="_CPPv2NK3mod2dg2DG9HyperEdge5rulesEv"></span><span id="mod::dg::DG::HyperEdge::rulesC"></span><a class="reference internal" href="#_CPPv4N3mod2dg2DG9RuleRangeE" title="mod::dg::DG::RuleRange">RuleRange</a> <code class="sig-name descname">rules</code><span class="sig-paren">(</span><span class="sig-paren">)</span> <em class="property">const</em><a class="headerlink" href="#_CPPv4NK3mod2dg2DG9HyperEdge5rulesEv" title="Permalink to this definition">¶</a><br /></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>a range of the rules associated with the hyperedge.</p>
+</dd>
+<dt class="field-even">Throws</dt>
+<dd class="field-even"><p><a class="reference internal" href="../Error.html#_CPPv4N3mod10LogicErrorE" title="mod::LogicError"><code class="xref cpp cpp-class docutils literal notranslate"><span class="pre">LogicError</span></code></a> if it is a null descriptor.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="_CPPv4NK3mod2dg2DG9HyperEdge10getInverseEv">
+<span id="_CPPv3NK3mod2dg2DG9HyperEdge10getInverseEv"></span><span id="_CPPv2NK3mod2dg2DG9HyperEdge10getInverseEv"></span><span id="mod::dg::DG::HyperEdge::getInverseC"></span><a class="reference internal" href="#_CPPv4N3mod2dg2DG9HyperEdgeE" title="mod::dg::DG::HyperEdge">HyperEdge</a> <code class="sig-name descname">getInverse</code><span class="sig-paren">(</span><span class="sig-paren">)</span> <em class="property">const</em><a class="headerlink" href="#_CPPv4NK3mod2dg2DG9HyperEdge10getInverseEv" title="Permalink to this definition">¶</a><br /></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>a descriptor for the inverse hyperedge of this one, if it exists.
+Otherwise a null descriptor is returned.</p>
+</dd>
+<dt class="field-even">Throws</dt>
+<dd class="field-even"><p><a class="reference internal" href="../Error.html#_CPPv4N3mod10LogicErrorE" title="mod::LogicError"><code class="xref cpp cpp-class docutils literal notranslate"><span class="pre">LogicError</span></code></a> if it is a null descriptor.</p>
+</dd>
+<dt class="field-odd">Throws</dt>
+<dd class="field-odd"><p><a class="reference internal" href="../Error.html#_CPPv4N3mod10LogicErrorE" title="mod::LogicError"><code class="xref cpp cpp-class docutils literal notranslate"><span class="pre">LogicError</span></code></a> if not <code class="xref cpp cpp-expr docutils literal notranslate"><a class="reference internal" href="#_CPPv4NK3mod2dg2DG9HyperEdge5getDGEv" title="mod::dg::DG::HyperEdge::getDG"><span class="pre">getDG</span></a><span class="pre">(</span><span class="pre">)</span><span class="pre">-&gt;</span><span class="pre">isLocked</span><span class="pre">(</span><span class="pre">)</span></code>.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="_CPPv4NK3mod2dg2DG9HyperEdge5printERKN5graph7PrinterERKNSt6stringERKNSt6stringE">
+<span id="_CPPv3NK3mod2dg2DG9HyperEdge5printERKN5graph7PrinterERKNSt6stringERKNSt6stringE"></span><span id="_CPPv2NK3mod2dg2DG9HyperEdge5printERKN5graph7PrinterERKNSt6stringERKNSt6stringE"></span><span id="mod::dg::DG::HyperEdge::print__graph::PrinterCR.ssCR.ssCRC"></span>std::vector&lt;std::pair&lt;std::string, std::string&gt;&gt; <code class="sig-name descname">print</code><span class="sig-paren">(</span><em class="property">const</em> graph::<a class="reference internal" href="../graph/Printer.html#_CPPv4N3mod5graph7PrinterE" title="mod::graph::Printer">Printer</a> &amp;<em>printer</em>, <em class="property">const</em> std::string &amp;<em>nomatchColour</em>, <em class="property">const</em> std::string &amp;<em>matchColour</em><span class="sig-paren">)</span> <em class="property">const</em><a class="headerlink" href="#_CPPv4NK3mod2dg2DG9HyperEdge5printERKN5graph7PrinterERKNSt6stringERKNSt6stringE" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Print the derivations represented by the hyperedge.
+All possible Double-Pushout diagrams are printed.
+The <code class="xref cpp cpp-expr docutils literal notranslate"><a class="reference internal" href="#_CPPv4NK3mod2dg2DG9HyperEdge5printERKN5graph7PrinterERKNSt6stringERKNSt6stringE" title="mod::dg::DG::HyperEdge::print::matchColour"><span class="pre">matchColour</span></a></code> must be a valid colour for TikZ, which is applied to the rule
+and its image in the bottom span.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>A list with file data for each DPO diagram printed.
+Each element is a pair of filename prefixes, where the first entry is completed by appending <code class="docutils literal notranslate"><span class="pre">_derL</span></code>, <code class="docutils literal notranslate"><span class="pre">_derK</span></code>, or <code class="docutils literal notranslate"><span class="pre">_derR</span></code>.
+The second entry is completed similarly by appending <code class="docutils literal notranslate"><span class="pre">_derG</span></code>, <code class="docutils literal notranslate"><span class="pre">_derD</span></code>, or <code class="docutils literal notranslate"><span class="pre">_derH</span></code>.</p>
+</dd>
+<dt class="field-even">Throws</dt>
+<dd class="field-even"><p><a class="reference internal" href="../Error.html#_CPPv4N3mod10LogicErrorE" title="mod::LogicError"><code class="xref cpp cpp-class docutils literal notranslate"><span class="pre">LogicError</span></code></a> if it is a null descriptor.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="_CPPv4NK3mod2dg2DG9HyperEdge20printTransitionStateEv">
+<span id="_CPPv3NK3mod2dg2DG9HyperEdge20printTransitionStateEv"></span><span id="_CPPv2NK3mod2dg2DG9HyperEdge20printTransitionStateEv"></span><span id="mod::dg::DG::HyperEdge::printTransitionStateC"></span>void <code class="sig-name descname">printTransitionState</code><span class="sig-paren">(</span><span class="sig-paren">)</span> <em class="property">const</em><a class="headerlink" href="#_CPPv4NK3mod2dg2DG9HyperEdge20printTransitionStateEv" title="Permalink to this definition">¶</a><br /></dt>
+<dt id="_CPPv4NK3mod2dg2DG9HyperEdge20printTransitionStateERKN5graph7PrinterE">
+<span id="_CPPv3NK3mod2dg2DG9HyperEdge20printTransitionStateERKN5graph7PrinterE"></span><span id="_CPPv2NK3mod2dg2DG9HyperEdge20printTransitionStateERKN5graph7PrinterE"></span><span id="mod::dg::DG::HyperEdge::printTransitionState__graph::PrinterCRC"></span>void <code class="sig-name descname">printTransitionState</code><span class="sig-paren">(</span><em class="property">const</em> graph::<a class="reference internal" href="../graph/Printer.html#_CPPv4N3mod5graph7PrinterE" title="mod::graph::Printer">Printer</a> &amp;<em>printer</em><span class="sig-paren">)</span> <em class="property">const</em><a class="headerlink" href="#_CPPv4NK3mod2dg2DG9HyperEdge20printTransitionStateERKN5graph7PrinterE" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Print the derivations represented by the hyperedge in style of a chemical transition state.
+For all possible Double-Pushout diagrams a figure printed.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Throws</dt>
+<dd class="field-odd"><p><a class="reference internal" href="../Error.html#_CPPv4N3mod10LogicErrorE" title="mod::LogicError"><code class="xref cpp cpp-class docutils literal notranslate"><span class="pre">LogicError</span></code></a> if it is a null descriptor.</p>
+</dd>
+</dl>
+</dd></dl>
+
+</div>
+</div>
+<div class="section" id="class-dg-dg-vertexiterator">
+<h2><span class="section-number">2.2.8.4.3. </span>Class <code class="docutils literal notranslate"><span class="pre">dg::DG::VertexIterator</span></code><a class="headerlink" href="#class-dg-dg-vertexiterator" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="_CPPv4N3mod2dg2DG14VertexIteratorE">
+<span id="_CPPv3N3mod2dg2DG14VertexIteratorE"></span><span id="_CPPv2N3mod2dg2DG14VertexIteratorE"></span><span id="mod::dg::DG::VertexIterator"></span><em class="property">class </em><code class="sig-prename descclassname">dg::<a class="reference internal" href="DG.html#_CPPv4N3mod2dg2DGE" title="mod::dg::DG">DG</a><code class="sig-prename descclassname">::</code></code><code class="sig-name descname">VertexIterator</code><a class="headerlink" href="#_CPPv4N3mod2dg2DG14VertexIteratorE" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>An iterator for traversing all vertices in a derivation graph.
+It models a forward iterator.</p>
+</dd></dl>
+
+<div class="section" id="id3">
+<h3><span class="section-number">2.2.8.4.3.1. </span>Synopsis<a class="headerlink" href="#id3" title="Permalink to this headline">¶</a></h3>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">MOD_DECL</span> <span class="n">DG</span><span class="o">::</span><span class="nl">VertexIterator</span>
+        <span class="p">:</span> <span class="k">public</span> <span class="n">boost</span><span class="o">::</span><span class="n">iterator_facade</span><span class="o">&lt;</span><span class="n">VertexIterator</span><span class="p">,</span> <span class="n">Vertex</span><span class="p">,</span> <span class="n">std</span><span class="o">::</span><span class="n">forward_iterator_tag</span><span class="p">,</span> <span class="n">Vertex</span><span class="o">&gt;</span> <span class="p">{</span>
+    <span class="k">friend</span> <span class="k">class</span> <span class="nc">DG</span><span class="p">;</span>
+    <span class="n">VertexIterator</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">shared_ptr</span><span class="o">&lt;</span><span class="n">DG</span><span class="o">&gt;</span> <span class="n">g</span><span class="p">);</span>
+<span class="k">public</span><span class="o">:</span>
+    <span class="n">VertexIterator</span><span class="p">();</span>
+<span class="k">private</span><span class="o">:</span>
+    <span class="k">friend</span> <span class="k">class</span> <span class="nc">boost</span><span class="o">::</span><span class="n">iterator_core_access</span><span class="p">;</span>
+    <span class="n">Vertex</span> <span class="nf">dereference</span><span class="p">()</span> <span class="k">const</span><span class="p">;</span>
+    <span class="kt">bool</span> <span class="nf">equal</span><span class="p">(</span><span class="k">const</span> <span class="n">VertexIterator</span> <span class="o">&amp;</span><span class="n">iter</span><span class="p">)</span> <span class="k">const</span><span class="p">;</span>
+    <span class="kt">void</span> <span class="nf">increment</span><span class="p">();</span>
+<span class="k">private</span><span class="o">:</span>
+    <span class="n">std</span><span class="o">::</span><span class="n">shared_ptr</span><span class="o">&lt;</span><span class="n">DG</span><span class="o">&gt;</span> <span class="n">g</span><span class="p">;</span>
+    <span class="n">std</span><span class="o">::</span><span class="kt">size_t</span> <span class="n">vId</span><span class="p">;</span>
+<span class="p">};</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="id4">
+<h3><span class="section-number">2.2.8.4.3.2. </span>Details<a class="headerlink" href="#id4" title="Permalink to this headline">¶</a></h3>
+<dl class="function">
+<dt id="_CPPv4N3mod2dg2DG14VertexIterator14VertexIteratorEv">
+<span id="_CPPv3N3mod2dg2DG14VertexIterator14VertexIteratorEv"></span><span id="_CPPv2N3mod2dg2DG14VertexIterator14VertexIteratorEv"></span><span id="mod::dg::DG::VertexIterator::VertexIterator"></span><code class="sig-name descname">VertexIterator</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N3mod2dg2DG14VertexIterator14VertexIteratorEv" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Construct a past-the-end iterator.</p>
+</dd></dl>
+
+</div>
+</div>
+<div class="section" id="class-dg-dg-vertexrange">
+<h2><span class="section-number">2.2.8.4.4. </span>Class <code class="docutils literal notranslate"><span class="pre">dg::DG::VertexRange</span></code><a class="headerlink" href="#class-dg-dg-vertexrange" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="_CPPv4N3mod2dg2DG11VertexRangeE">
+<span id="_CPPv3N3mod2dg2DG11VertexRangeE"></span><span id="_CPPv2N3mod2dg2DG11VertexRangeE"></span><span id="mod::dg::DG::VertexRange"></span><em class="property">class </em><code class="sig-prename descclassname">dg::<a class="reference internal" href="DG.html#_CPPv4N3mod2dg2DGE" title="mod::dg::DG">DG</a><code class="sig-prename descclassname">::</code></code><code class="sig-name descname">VertexRange</code><a class="headerlink" href="#_CPPv4N3mod2dg2DG11VertexRangeE" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>A range of all vertices in a derivation graph.</p>
+</dd></dl>
+
+<div class="section" id="id5">
+<h3><span class="section-number">2.2.8.4.4.1. </span>Synopsis<a class="headerlink" href="#id5" title="Permalink to this headline">¶</a></h3>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="k">struct</span> <span class="n">DG</span><span class="o">::</span><span class="n">VertexRange</span> <span class="p">{</span>
+    <span class="k">using</span> <span class="n">iterator</span> <span class="o">=</span> <span class="n">VertexIterator</span><span class="p">;</span>
+    <span class="k">using</span> <span class="n">const_iterator</span> <span class="o">=</span> <span class="n">iterator</span><span class="p">;</span>
+<span class="k">private</span><span class="o">:</span>
+    <span class="k">friend</span> <span class="k">class</span> <span class="nc">DG</span><span class="p">;</span>
+    <span class="n">VertexRange</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">shared_ptr</span><span class="o">&lt;</span><span class="n">DG</span><span class="o">&gt;</span> <span class="n">g</span><span class="p">);</span>
+<span class="k">public</span><span class="o">:</span>
+    <span class="n">VertexIterator</span> <span class="n">begin</span><span class="p">()</span> <span class="k">const</span><span class="p">;</span>
+    <span class="n">VertexIterator</span> <span class="nf">end</span><span class="p">()</span> <span class="k">const</span><span class="p">;</span>
+<span class="k">private</span><span class="o">:</span>
+    <span class="n">std</span><span class="o">::</span><span class="n">shared_ptr</span><span class="o">&lt;</span><span class="n">DG</span><span class="o">&gt;</span> <span class="n">g</span><span class="p">;</span>
+<span class="p">};</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="section" id="class-dg-dg-edgeiterator">
+<h2><span class="section-number">2.2.8.4.5. </span>Class <code class="docutils literal notranslate"><span class="pre">dg::DG::EdgeIterator</span></code><a class="headerlink" href="#class-dg-dg-edgeiterator" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="_CPPv4N3mod2dg2DG12EdgeIteratorE">
+<span id="_CPPv3N3mod2dg2DG12EdgeIteratorE"></span><span id="_CPPv2N3mod2dg2DG12EdgeIteratorE"></span><span id="mod::dg::DG::EdgeIterator"></span><em class="property">class </em><code class="sig-prename descclassname">dg::<a class="reference internal" href="DG.html#_CPPv4N3mod2dg2DGE" title="mod::dg::DG">DG</a><code class="sig-prename descclassname">::</code></code><code class="sig-name descname">EdgeIterator</code><a class="headerlink" href="#_CPPv4N3mod2dg2DG12EdgeIteratorE" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>An iterator for traversing all edges in a graph.
+It models a forward iterator.</p>
+</dd></dl>
+
+<div class="section" id="id6">
+<h3><span class="section-number">2.2.8.4.5.1. </span>Synopsis<a class="headerlink" href="#id6" title="Permalink to this headline">¶</a></h3>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">MOD_DECL</span> <span class="n">DG</span><span class="o">::</span><span class="nl">EdgeIterator</span>
+        <span class="p">:</span> <span class="k">public</span> <span class="n">boost</span><span class="o">::</span><span class="n">iterator_facade</span><span class="o">&lt;</span><span class="n">EdgeIterator</span><span class="p">,</span> <span class="n">HyperEdge</span><span class="p">,</span> <span class="n">std</span><span class="o">::</span><span class="n">forward_iterator_tag</span><span class="p">,</span> <span class="n">HyperEdge</span><span class="o">&gt;</span> <span class="p">{</span>
+    <span class="k">friend</span> <span class="k">class</span> <span class="nc">DG</span><span class="p">;</span>
+    <span class="n">EdgeIterator</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">shared_ptr</span><span class="o">&lt;</span><span class="n">DG</span><span class="o">&gt;</span> <span class="n">g</span><span class="p">);</span>
+<span class="k">public</span><span class="o">:</span>
+    <span class="n">EdgeIterator</span><span class="p">();</span>
+<span class="k">private</span><span class="o">:</span>
+    <span class="k">friend</span> <span class="k">class</span> <span class="nc">boost</span><span class="o">::</span><span class="n">iterator_core_access</span><span class="p">;</span>
+    <span class="n">HyperEdge</span> <span class="nf">dereference</span><span class="p">()</span> <span class="k">const</span><span class="p">;</span>
+    <span class="kt">bool</span> <span class="nf">equal</span><span class="p">(</span><span class="k">const</span> <span class="n">EdgeIterator</span> <span class="o">&amp;</span><span class="n">iter</span><span class="p">)</span> <span class="k">const</span><span class="p">;</span>
+    <span class="kt">void</span> <span class="nf">increment</span><span class="p">();</span>
+<span class="k">private</span><span class="o">:</span>
+    <span class="n">std</span><span class="o">::</span><span class="n">shared_ptr</span><span class="o">&lt;</span><span class="n">DG</span><span class="o">&gt;</span> <span class="n">g</span><span class="p">;</span>
+    <span class="n">std</span><span class="o">::</span><span class="kt">size_t</span> <span class="n">eId</span><span class="p">;</span>
+<span class="p">};</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="id7">
+<h3><span class="section-number">2.2.8.4.5.2. </span>Details<a class="headerlink" href="#id7" title="Permalink to this headline">¶</a></h3>
+<dl class="function">
+<dt id="_CPPv4N3mod2dg2DG12EdgeIterator12EdgeIteratorEv">
+<span id="_CPPv3N3mod2dg2DG12EdgeIterator12EdgeIteratorEv"></span><span id="_CPPv2N3mod2dg2DG12EdgeIterator12EdgeIteratorEv"></span><span id="mod::dg::DG::EdgeIterator::EdgeIterator"></span><code class="sig-name descname">EdgeIterator</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N3mod2dg2DG12EdgeIterator12EdgeIteratorEv" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Construct a past-the-end iterator.</p>
+</dd></dl>
+
+</div>
+</div>
+<div class="section" id="class-dg-dg-edgerange">
+<h2><span class="section-number">2.2.8.4.6. </span>Class <code class="docutils literal notranslate"><span class="pre">dg::DG::EdgeRange</span></code><a class="headerlink" href="#class-dg-dg-edgerange" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="_CPPv4N3mod2dg2DG9EdgeRangeE">
+<span id="_CPPv3N3mod2dg2DG9EdgeRangeE"></span><span id="_CPPv2N3mod2dg2DG9EdgeRangeE"></span><span id="mod::dg::DG::EdgeRange"></span><em class="property">class </em><code class="sig-prename descclassname">dg::<a class="reference internal" href="DG.html#_CPPv4N3mod2dg2DGE" title="mod::dg::DG">DG</a><code class="sig-prename descclassname">::</code></code><code class="sig-name descname">EdgeRange</code><a class="headerlink" href="#_CPPv4N3mod2dg2DG9EdgeRangeE" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>A range of all edges in a derivation graph.</p>
+</dd></dl>
+
+<div class="section" id="id8">
+<h3><span class="section-number">2.2.8.4.6.1. </span>Synopsis<a class="headerlink" href="#id8" title="Permalink to this headline">¶</a></h3>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="k">struct</span> <span class="n">DG</span><span class="o">::</span><span class="n">EdgeRange</span> <span class="p">{</span>
+    <span class="k">using</span> <span class="n">iterator</span> <span class="o">=</span> <span class="n">EdgeIterator</span><span class="p">;</span>
+    <span class="k">using</span> <span class="n">const_iterator</span> <span class="o">=</span> <span class="n">iterator</span><span class="p">;</span>
+<span class="k">private</span><span class="o">:</span>
+    <span class="k">friend</span> <span class="k">class</span> <span class="nc">DG</span><span class="p">;</span>
+    <span class="n">EdgeRange</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">shared_ptr</span><span class="o">&lt;</span><span class="n">DG</span><span class="o">&gt;</span> <span class="n">g</span><span class="p">);</span>
+<span class="k">public</span><span class="o">:</span>
+    <span class="n">EdgeIterator</span> <span class="n">begin</span><span class="p">()</span> <span class="k">const</span><span class="p">;</span>
+    <span class="n">EdgeIterator</span> <span class="nf">end</span><span class="p">()</span> <span class="k">const</span><span class="p">;</span>
+<span class="k">private</span><span class="o">:</span>
+    <span class="n">std</span><span class="o">::</span><span class="n">shared_ptr</span><span class="o">&lt;</span><span class="n">DG</span><span class="o">&gt;</span> <span class="n">g</span><span class="p">;</span>
+<span class="p">};</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="section" id="class-dg-dg-inedgeiterator">
+<h2><span class="section-number">2.2.8.4.7. </span>Class <code class="docutils literal notranslate"><span class="pre">dg::DG::InEdgeIterator</span></code><a class="headerlink" href="#class-dg-dg-inedgeiterator" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="_CPPv4N3mod2dg2DG14InEdgeIteratorE">
+<span id="_CPPv3N3mod2dg2DG14InEdgeIteratorE"></span><span id="_CPPv2N3mod2dg2DG14InEdgeIteratorE"></span><span id="mod::dg::DG::InEdgeIterator"></span><em class="property">class </em><code class="sig-prename descclassname">dg::<a class="reference internal" href="DG.html#_CPPv4N3mod2dg2DGE" title="mod::dg::DG">DG</a><code class="sig-prename descclassname">::</code></code><code class="sig-name descname">InEdgeIterator</code><a class="headerlink" href="#_CPPv4N3mod2dg2DG14InEdgeIteratorE" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>An iterator for enumerating all in-edges of a vertex.
+It models a forward iterator.</p>
+</dd></dl>
+
+<div class="section" id="id9">
+<h3><span class="section-number">2.2.8.4.7.1. </span>Synopsis<a class="headerlink" href="#id9" title="Permalink to this headline">¶</a></h3>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">MOD_DECL</span> <span class="n">DG</span><span class="o">::</span><span class="nl">InEdgeIterator</span>
+        <span class="p">:</span> <span class="k">public</span> <span class="n">boost</span><span class="o">::</span><span class="n">iterator_facade</span><span class="o">&lt;</span><span class="n">InEdgeIterator</span><span class="p">,</span> <span class="n">HyperEdge</span><span class="p">,</span> <span class="n">std</span><span class="o">::</span><span class="n">forward_iterator_tag</span><span class="p">,</span> <span class="n">HyperEdge</span><span class="o">&gt;</span> <span class="p">{</span>
+    <span class="k">friend</span> <span class="k">class</span> <span class="nc">InEdgeRange</span><span class="p">;</span>
+    <span class="n">InEdgeIterator</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">shared_ptr</span><span class="o">&lt;</span><span class="n">DG</span><span class="o">&gt;</span> <span class="n">g</span><span class="p">,</span> <span class="n">std</span><span class="o">::</span><span class="kt">size_t</span> <span class="n">vId</span><span class="p">);</span>
+<span class="k">public</span><span class="o">:</span>
+    <span class="n">InEdgeIterator</span><span class="p">();</span>
+<span class="k">private</span><span class="o">:</span>
+    <span class="k">friend</span> <span class="k">class</span> <span class="nc">boost</span><span class="o">::</span><span class="n">iterator_core_access</span><span class="p">;</span>
+    <span class="n">HyperEdge</span> <span class="nf">dereference</span><span class="p">()</span> <span class="k">const</span><span class="p">;</span>
+    <span class="kt">bool</span> <span class="nf">equal</span><span class="p">(</span><span class="k">const</span> <span class="n">InEdgeIterator</span> <span class="o">&amp;</span><span class="n">iter</span><span class="p">)</span> <span class="k">const</span><span class="p">;</span>
+    <span class="kt">void</span> <span class="nf">increment</span><span class="p">();</span>
+<span class="k">private</span><span class="o">:</span>
+    <span class="n">std</span><span class="o">::</span><span class="n">shared_ptr</span><span class="o">&lt;</span><span class="n">DG</span><span class="o">&gt;</span> <span class="n">g</span><span class="p">;</span>
+    <span class="n">std</span><span class="o">::</span><span class="kt">size_t</span> <span class="n">vId</span><span class="p">,</span> <span class="n">eId</span><span class="p">;</span>
+<span class="p">};</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="id10">
+<h3><span class="section-number">2.2.8.4.7.2. </span>Details<a class="headerlink" href="#id10" title="Permalink to this headline">¶</a></h3>
+<dl class="function">
+<dt id="_CPPv4N3mod2dg2DG14InEdgeIterator14InEdgeIteratorEv">
+<span id="_CPPv3N3mod2dg2DG14InEdgeIterator14InEdgeIteratorEv"></span><span id="_CPPv2N3mod2dg2DG14InEdgeIterator14InEdgeIteratorEv"></span><span id="mod::dg::DG::InEdgeIterator::InEdgeIterator"></span><code class="sig-name descname">InEdgeIterator</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N3mod2dg2DG14InEdgeIterator14InEdgeIteratorEv" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Construct a past-the-end iterator.</p>
+</dd></dl>
+
+</div>
+</div>
+<div class="section" id="class-dg-dg-inedgerange">
+<h2><span class="section-number">2.2.8.4.8. </span>Class <code class="docutils literal notranslate"><span class="pre">dg::DG::InEdgeRange</span></code><a class="headerlink" href="#class-dg-dg-inedgerange" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="_CPPv4N3mod2dg2DG11InEdgeRangeE">
+<span id="_CPPv3N3mod2dg2DG11InEdgeRangeE"></span><span id="_CPPv2N3mod2dg2DG11InEdgeRangeE"></span><span id="mod::dg::DG::InEdgeRange"></span><em class="property">class </em><code class="sig-prename descclassname">dg::<a class="reference internal" href="DG.html#_CPPv4N3mod2dg2DGE" title="mod::dg::DG">DG</a><code class="sig-prename descclassname">::</code></code><code class="sig-name descname">InEdgeRange</code><a class="headerlink" href="#_CPPv4N3mod2dg2DG11InEdgeRangeE" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>A range of all in-edges of a vertex.</p>
+</dd></dl>
+
+<div class="section" id="id11">
+<h3><span class="section-number">2.2.8.4.8.1. </span>Synopsis<a class="headerlink" href="#id11" title="Permalink to this headline">¶</a></h3>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="k">struct</span> <span class="n">DG</span><span class="o">::</span><span class="n">InEdgeRange</span> <span class="p">{</span>
+    <span class="k">using</span> <span class="n">iterator</span> <span class="o">=</span> <span class="n">InEdgeIterator</span><span class="p">;</span>
+    <span class="k">using</span> <span class="n">const_iterator</span> <span class="o">=</span> <span class="n">iterator</span><span class="p">;</span>
+<span class="k">private</span><span class="o">:</span>
+    <span class="k">friend</span> <span class="k">class</span> <span class="nc">Vertex</span><span class="p">;</span>
+    <span class="n">InEdgeRange</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">shared_ptr</span><span class="o">&lt;</span><span class="n">DG</span><span class="o">&gt;</span> <span class="n">g</span><span class="p">,</span> <span class="n">std</span><span class="o">::</span><span class="kt">size_t</span> <span class="n">vId</span><span class="p">);</span>
+<span class="k">public</span><span class="o">:</span>
+    <span class="n">InEdgeIterator</span> <span class="n">begin</span><span class="p">()</span> <span class="k">const</span><span class="p">;</span>
+    <span class="n">InEdgeIterator</span> <span class="nf">end</span><span class="p">()</span> <span class="k">const</span><span class="p">;</span>
+<span class="k">private</span><span class="o">:</span>
+    <span class="n">std</span><span class="o">::</span><span class="n">shared_ptr</span><span class="o">&lt;</span><span class="n">DG</span><span class="o">&gt;</span> <span class="n">g</span><span class="p">;</span>
+    <span class="n">std</span><span class="o">::</span><span class="kt">size_t</span> <span class="n">vId</span><span class="p">;</span>
+<span class="p">};</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="section" id="class-dg-dg-outedgeiterator">
+<h2><span class="section-number">2.2.8.4.9. </span>Class <code class="docutils literal notranslate"><span class="pre">dg::DG::OutEdgeIterator</span></code><a class="headerlink" href="#class-dg-dg-outedgeiterator" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="_CPPv4N3mod2dg2DG15OutEdgeIteratorE">
+<span id="_CPPv3N3mod2dg2DG15OutEdgeIteratorE"></span><span id="_CPPv2N3mod2dg2DG15OutEdgeIteratorE"></span><span id="mod::dg::DG::OutEdgeIterator"></span><em class="property">class </em><code class="sig-prename descclassname">dg::<a class="reference internal" href="DG.html#_CPPv4N3mod2dg2DGE" title="mod::dg::DG">DG</a><code class="sig-prename descclassname">::</code></code><code class="sig-name descname">OutEdgeIterator</code><a class="headerlink" href="#_CPPv4N3mod2dg2DG15OutEdgeIteratorE" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>An iterator for enumerating all out-edges of a vertex.
+It models a forward iterator.</p>
+</dd></dl>
+
+<div class="section" id="id12">
+<h3><span class="section-number">2.2.8.4.9.1. </span>Synopsis<a class="headerlink" href="#id12" title="Permalink to this headline">¶</a></h3>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">MOD_DECL</span> <span class="n">DG</span><span class="o">::</span><span class="nl">OutEdgeIterator</span>
+        <span class="p">:</span> <span class="k">public</span> <span class="n">boost</span><span class="o">::</span><span class="n">iterator_facade</span><span class="o">&lt;</span><span class="n">OutEdgeIterator</span><span class="p">,</span> <span class="n">HyperEdge</span><span class="p">,</span> <span class="n">std</span><span class="o">::</span><span class="n">forward_iterator_tag</span><span class="p">,</span> <span class="n">HyperEdge</span><span class="o">&gt;</span> <span class="p">{</span>
+    <span class="k">friend</span> <span class="k">class</span> <span class="nc">OutEdgeRange</span><span class="p">;</span>
+    <span class="n">OutEdgeIterator</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">shared_ptr</span><span class="o">&lt;</span><span class="n">DG</span><span class="o">&gt;</span> <span class="n">g</span><span class="p">,</span> <span class="n">std</span><span class="o">::</span><span class="kt">size_t</span> <span class="n">vId</span><span class="p">);</span>
+<span class="k">public</span><span class="o">:</span>
+    <span class="n">OutEdgeIterator</span><span class="p">();</span>
+<span class="k">private</span><span class="o">:</span>
+    <span class="k">friend</span> <span class="k">class</span> <span class="nc">boost</span><span class="o">::</span><span class="n">iterator_core_access</span><span class="p">;</span>
+    <span class="n">HyperEdge</span> <span class="nf">dereference</span><span class="p">()</span> <span class="k">const</span><span class="p">;</span>
+    <span class="kt">bool</span> <span class="nf">equal</span><span class="p">(</span><span class="k">const</span> <span class="n">OutEdgeIterator</span> <span class="o">&amp;</span><span class="n">iter</span><span class="p">)</span> <span class="k">const</span><span class="p">;</span>
+    <span class="kt">void</span> <span class="nf">increment</span><span class="p">();</span>
+<span class="k">private</span><span class="o">:</span>
+    <span class="n">std</span><span class="o">::</span><span class="n">shared_ptr</span><span class="o">&lt;</span><span class="n">DG</span><span class="o">&gt;</span> <span class="n">g</span><span class="p">;</span>
+    <span class="n">std</span><span class="o">::</span><span class="kt">size_t</span> <span class="n">vId</span><span class="p">,</span> <span class="n">eId</span><span class="p">;</span>
+<span class="p">};</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="id13">
+<h3><span class="section-number">2.2.8.4.9.2. </span>Details<a class="headerlink" href="#id13" title="Permalink to this headline">¶</a></h3>
+<dl class="function">
+<dt id="_CPPv4N3mod2dg2DG15OutEdgeIterator15OutEdgeIteratorEv">
+<span id="_CPPv3N3mod2dg2DG15OutEdgeIterator15OutEdgeIteratorEv"></span><span id="_CPPv2N3mod2dg2DG15OutEdgeIterator15OutEdgeIteratorEv"></span><span id="mod::dg::DG::OutEdgeIterator::OutEdgeIterator"></span><code class="sig-name descname">OutEdgeIterator</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N3mod2dg2DG15OutEdgeIterator15OutEdgeIteratorEv" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Construct a past-the-end iterator.</p>
+</dd></dl>
+
+</div>
+</div>
+<div class="section" id="class-dg-dg-outedgerange">
+<h2><span class="section-number">2.2.8.4.10. </span>Class <code class="docutils literal notranslate"><span class="pre">dg::DG::OutEdgeRange</span></code><a class="headerlink" href="#class-dg-dg-outedgerange" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="_CPPv4N3mod2dg2DG12OutEdgeRangeE">
+<span id="_CPPv3N3mod2dg2DG12OutEdgeRangeE"></span><span id="_CPPv2N3mod2dg2DG12OutEdgeRangeE"></span><span id="mod::dg::DG::OutEdgeRange"></span><em class="property">class </em><code class="sig-prename descclassname">dg::<a class="reference internal" href="DG.html#_CPPv4N3mod2dg2DGE" title="mod::dg::DG">DG</a><code class="sig-prename descclassname">::</code></code><code class="sig-name descname">OutEdgeRange</code><a class="headerlink" href="#_CPPv4N3mod2dg2DG12OutEdgeRangeE" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>A range of all out-edges of a vertex.</p>
+</dd></dl>
+
+<div class="section" id="id14">
+<h3><span class="section-number">2.2.8.4.10.1. </span>Synopsis<a class="headerlink" href="#id14" title="Permalink to this headline">¶</a></h3>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="k">struct</span> <span class="n">DG</span><span class="o">::</span><span class="n">OutEdgeRange</span> <span class="p">{</span>
+    <span class="k">using</span> <span class="n">iterator</span> <span class="o">=</span> <span class="n">OutEdgeIterator</span><span class="p">;</span>
+    <span class="k">using</span> <span class="n">const_iterator</span> <span class="o">=</span> <span class="n">iterator</span><span class="p">;</span>
+<span class="k">private</span><span class="o">:</span>
+    <span class="k">friend</span> <span class="k">class</span> <span class="nc">Vertex</span><span class="p">;</span>
+    <span class="n">OutEdgeRange</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">shared_ptr</span><span class="o">&lt;</span><span class="n">DG</span><span class="o">&gt;</span> <span class="n">g</span><span class="p">,</span> <span class="n">std</span><span class="o">::</span><span class="kt">size_t</span> <span class="n">vId</span><span class="p">);</span>
+<span class="k">public</span><span class="o">:</span>
+    <span class="n">OutEdgeIterator</span> <span class="n">begin</span><span class="p">()</span> <span class="k">const</span><span class="p">;</span>
+    <span class="n">OutEdgeIterator</span> <span class="nf">end</span><span class="p">()</span> <span class="k">const</span><span class="p">;</span>
+<span class="k">private</span><span class="o">:</span>
+    <span class="n">std</span><span class="o">::</span><span class="n">shared_ptr</span><span class="o">&lt;</span><span class="n">DG</span><span class="o">&gt;</span> <span class="n">g</span><span class="p">;</span>
+    <span class="n">std</span><span class="o">::</span><span class="kt">size_t</span> <span class="n">vId</span><span class="p">;</span>
+<span class="p">};</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="section" id="class-dg-dg-sourceiterator">
+<h2><span class="section-number">2.2.8.4.11. </span>Class <code class="docutils literal notranslate"><span class="pre">dg::DG::SourceIterator</span></code><a class="headerlink" href="#class-dg-dg-sourceiterator" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="_CPPv4N3mod2dg2DG14SourceIteratorE">
+<span id="_CPPv3N3mod2dg2DG14SourceIteratorE"></span><span id="_CPPv2N3mod2dg2DG14SourceIteratorE"></span><span id="mod::dg::DG::SourceIterator"></span><em class="property">class </em><code class="sig-prename descclassname">dg::<a class="reference internal" href="DG.html#_CPPv4N3mod2dg2DGE" title="mod::dg::DG">DG</a><code class="sig-prename descclassname">::</code></code><code class="sig-name descname">SourceIterator</code><a class="headerlink" href="#_CPPv4N3mod2dg2DG14SourceIteratorE" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>An iterator for enumerating all sources of a hyperedge.
+It models a forward iterator.</p>
+</dd></dl>
+
+<div class="section" id="id15">
+<h3><span class="section-number">2.2.8.4.11.1. </span>Synopsis<a class="headerlink" href="#id15" title="Permalink to this headline">¶</a></h3>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">MOD_DECL</span> <span class="n">DG</span><span class="o">::</span><span class="nl">SourceIterator</span>
+        <span class="p">:</span> <span class="k">public</span> <span class="n">boost</span><span class="o">::</span><span class="n">iterator_facade</span><span class="o">&lt;</span><span class="n">SourceIterator</span><span class="p">,</span> <span class="n">Vertex</span><span class="p">,</span> <span class="n">std</span><span class="o">::</span><span class="n">forward_iterator_tag</span><span class="p">,</span> <span class="n">Vertex</span><span class="o">&gt;</span> <span class="p">{</span>
+    <span class="k">friend</span> <span class="k">class</span> <span class="nc">SourceRange</span><span class="p">;</span>
+    <span class="n">SourceIterator</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">shared_ptr</span><span class="o">&lt;</span><span class="n">DG</span><span class="o">&gt;</span> <span class="n">g</span><span class="p">,</span> <span class="n">std</span><span class="o">::</span><span class="kt">size_t</span> <span class="n">eId</span><span class="p">);</span>
+<span class="k">public</span><span class="o">:</span>
+    <span class="n">SourceIterator</span><span class="p">();</span>
+<span class="k">private</span><span class="o">:</span>
+    <span class="k">friend</span> <span class="k">class</span> <span class="nc">boost</span><span class="o">::</span><span class="n">iterator_core_access</span><span class="p">;</span>
+    <span class="n">Vertex</span> <span class="nf">dereference</span><span class="p">()</span> <span class="k">const</span><span class="p">;</span>
+    <span class="kt">bool</span> <span class="nf">equal</span><span class="p">(</span><span class="k">const</span> <span class="n">SourceIterator</span> <span class="o">&amp;</span><span class="n">iter</span><span class="p">)</span> <span class="k">const</span><span class="p">;</span>
+    <span class="kt">void</span> <span class="nf">increment</span><span class="p">();</span>
+<span class="k">private</span><span class="o">:</span>
+    <span class="n">std</span><span class="o">::</span><span class="n">shared_ptr</span><span class="o">&lt;</span><span class="n">DG</span><span class="o">&gt;</span> <span class="n">g</span><span class="p">;</span>
+    <span class="n">std</span><span class="o">::</span><span class="kt">size_t</span> <span class="n">eId</span><span class="p">,</span> <span class="n">vId</span><span class="p">;</span>
+<span class="p">};</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="id16">
+<h3><span class="section-number">2.2.8.4.11.2. </span>Details<a class="headerlink" href="#id16" title="Permalink to this headline">¶</a></h3>
+<dl class="function">
+<dt id="_CPPv4N3mod2dg2DG14SourceIterator14SourceIteratorEv">
+<span id="_CPPv3N3mod2dg2DG14SourceIterator14SourceIteratorEv"></span><span id="_CPPv2N3mod2dg2DG14SourceIterator14SourceIteratorEv"></span><span id="mod::dg::DG::SourceIterator::SourceIterator"></span><code class="sig-name descname">SourceIterator</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N3mod2dg2DG14SourceIterator14SourceIteratorEv" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Construct a past-the-end iterator.</p>
+</dd></dl>
+
+</div>
+</div>
+<div class="section" id="class-dg-dg-sourcerange">
+<h2><span class="section-number">2.2.8.4.12. </span>Class <code class="docutils literal notranslate"><span class="pre">dg::DG::SourceRange</span></code><a class="headerlink" href="#class-dg-dg-sourcerange" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="_CPPv4N3mod2dg2DG11SourceRangeE">
+<span id="_CPPv3N3mod2dg2DG11SourceRangeE"></span><span id="_CPPv2N3mod2dg2DG11SourceRangeE"></span><span id="mod::dg::DG::SourceRange"></span><em class="property">class </em><code class="sig-prename descclassname">dg::<a class="reference internal" href="DG.html#_CPPv4N3mod2dg2DGE" title="mod::dg::DG">DG</a><code class="sig-prename descclassname">::</code></code><code class="sig-name descname">SourceRange</code><a class="headerlink" href="#_CPPv4N3mod2dg2DG11SourceRangeE" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>A range of all sources of a hyperedge.</p>
+</dd></dl>
+
+<div class="section" id="id17">
+<h3><span class="section-number">2.2.8.4.12.1. </span>Synopsis<a class="headerlink" href="#id17" title="Permalink to this headline">¶</a></h3>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="k">struct</span> <span class="n">DG</span><span class="o">::</span><span class="n">SourceRange</span> <span class="p">{</span>
+    <span class="k">using</span> <span class="n">iterator</span> <span class="o">=</span> <span class="n">SourceIterator</span><span class="p">;</span>
+    <span class="k">using</span> <span class="n">const_iterator</span> <span class="o">=</span> <span class="n">iterator</span><span class="p">;</span>
+<span class="k">private</span><span class="o">:</span>
+    <span class="k">friend</span> <span class="k">class</span> <span class="nc">HyperEdge</span><span class="p">;</span>
+    <span class="n">SourceRange</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">shared_ptr</span><span class="o">&lt;</span><span class="n">DG</span><span class="o">&gt;</span> <span class="n">g</span><span class="p">,</span> <span class="n">std</span><span class="o">::</span><span class="kt">size_t</span> <span class="n">eId</span><span class="p">);</span>
+<span class="k">public</span><span class="o">:</span>
+    <span class="n">SourceIterator</span> <span class="n">begin</span><span class="p">()</span> <span class="k">const</span><span class="p">;</span>
+    <span class="n">SourceIterator</span> <span class="nf">end</span><span class="p">()</span> <span class="k">const</span><span class="p">;</span>
+<span class="k">private</span><span class="o">:</span>
+    <span class="n">std</span><span class="o">::</span><span class="n">shared_ptr</span><span class="o">&lt;</span><span class="n">DG</span><span class="o">&gt;</span> <span class="n">g</span><span class="p">;</span>
+    <span class="n">std</span><span class="o">::</span><span class="kt">size_t</span> <span class="n">eId</span><span class="p">;</span>
+<span class="p">};</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="section" id="class-dg-dg-targetiterator">
+<h2><span class="section-number">2.2.8.4.13. </span>Class <code class="docutils literal notranslate"><span class="pre">dg::DG::TargetIterator</span></code><a class="headerlink" href="#class-dg-dg-targetiterator" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="_CPPv4N3mod2dg2DG14TargetIteratorE">
+<span id="_CPPv3N3mod2dg2DG14TargetIteratorE"></span><span id="_CPPv2N3mod2dg2DG14TargetIteratorE"></span><span id="mod::dg::DG::TargetIterator"></span><em class="property">class </em><code class="sig-prename descclassname">dg::<a class="reference internal" href="DG.html#_CPPv4N3mod2dg2DGE" title="mod::dg::DG">DG</a><code class="sig-prename descclassname">::</code></code><code class="sig-name descname">TargetIterator</code><a class="headerlink" href="#_CPPv4N3mod2dg2DG14TargetIteratorE" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>An iterator for enumerating all targets of a hyperedge.
+It models a forward iterator.</p>
+</dd></dl>
+
+<div class="section" id="id18">
+<h3><span class="section-number">2.2.8.4.13.1. </span>Synopsis<a class="headerlink" href="#id18" title="Permalink to this headline">¶</a></h3>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">MOD_DECL</span> <span class="n">DG</span><span class="o">::</span><span class="nl">TargetIterator</span>
+        <span class="p">:</span> <span class="k">public</span> <span class="n">boost</span><span class="o">::</span><span class="n">iterator_facade</span><span class="o">&lt;</span><span class="n">TargetIterator</span><span class="p">,</span> <span class="n">Vertex</span><span class="p">,</span> <span class="n">std</span><span class="o">::</span><span class="n">forward_iterator_tag</span><span class="p">,</span> <span class="n">Vertex</span><span class="o">&gt;</span> <span class="p">{</span>
+    <span class="k">friend</span> <span class="k">class</span> <span class="nc">TargetRange</span><span class="p">;</span>
+    <span class="n">TargetIterator</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">shared_ptr</span><span class="o">&lt;</span><span class="n">DG</span><span class="o">&gt;</span> <span class="n">g</span><span class="p">,</span> <span class="n">std</span><span class="o">::</span><span class="kt">size_t</span> <span class="n">eId</span><span class="p">);</span>
+<span class="k">public</span><span class="o">:</span>
+    <span class="n">TargetIterator</span><span class="p">();</span>
+<span class="k">private</span><span class="o">:</span>
+    <span class="k">friend</span> <span class="k">class</span> <span class="nc">boost</span><span class="o">::</span><span class="n">iterator_core_access</span><span class="p">;</span>
+    <span class="n">Vertex</span> <span class="nf">dereference</span><span class="p">()</span> <span class="k">const</span><span class="p">;</span>
+    <span class="kt">bool</span> <span class="nf">equal</span><span class="p">(</span><span class="k">const</span> <span class="n">TargetIterator</span> <span class="o">&amp;</span><span class="n">iter</span><span class="p">)</span> <span class="k">const</span><span class="p">;</span>
+    <span class="kt">void</span> <span class="nf">increment</span><span class="p">();</span>
+<span class="k">private</span><span class="o">:</span>
+    <span class="n">std</span><span class="o">::</span><span class="n">shared_ptr</span><span class="o">&lt;</span><span class="n">DG</span><span class="o">&gt;</span> <span class="n">g</span><span class="p">;</span>
+    <span class="n">std</span><span class="o">::</span><span class="kt">size_t</span> <span class="n">eId</span><span class="p">,</span> <span class="n">vId</span><span class="p">;</span>
+<span class="p">};</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="id19">
+<h3><span class="section-number">2.2.8.4.13.2. </span>Details<a class="headerlink" href="#id19" title="Permalink to this headline">¶</a></h3>
+<dl class="function">
+<dt id="_CPPv4N3mod2dg2DG14TargetIterator14TargetIteratorEv">
+<span id="_CPPv3N3mod2dg2DG14TargetIterator14TargetIteratorEv"></span><span id="_CPPv2N3mod2dg2DG14TargetIterator14TargetIteratorEv"></span><span id="mod::dg::DG::TargetIterator::TargetIterator"></span><code class="sig-name descname">TargetIterator</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N3mod2dg2DG14TargetIterator14TargetIteratorEv" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Construct a past-the-end iterator.</p>
+</dd></dl>
+
+</div>
+</div>
+<div class="section" id="class-dg-dg-targetrange">
+<h2><span class="section-number">2.2.8.4.14. </span>Class <code class="docutils literal notranslate"><span class="pre">dg::DG::TargetRange</span></code><a class="headerlink" href="#class-dg-dg-targetrange" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="_CPPv4N3mod2dg2DG11TargetRangeE">
+<span id="_CPPv3N3mod2dg2DG11TargetRangeE"></span><span id="_CPPv2N3mod2dg2DG11TargetRangeE"></span><span id="mod::dg::DG::TargetRange"></span><em class="property">class </em><code class="sig-prename descclassname">dg::<a class="reference internal" href="DG.html#_CPPv4N3mod2dg2DGE" title="mod::dg::DG">DG</a><code class="sig-prename descclassname">::</code></code><code class="sig-name descname">TargetRange</code><a class="headerlink" href="#_CPPv4N3mod2dg2DG11TargetRangeE" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>A range of all sources of a hyperedge.</p>
+</dd></dl>
+
+<div class="section" id="id20">
+<h3><span class="section-number">2.2.8.4.14.1. </span>Synopsis<a class="headerlink" href="#id20" title="Permalink to this headline">¶</a></h3>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="k">struct</span> <span class="n">DG</span><span class="o">::</span><span class="n">TargetRange</span> <span class="p">{</span>
+    <span class="k">using</span> <span class="n">iterator</span> <span class="o">=</span> <span class="n">TargetIterator</span><span class="p">;</span>
+    <span class="k">using</span> <span class="n">const_iterator</span> <span class="o">=</span> <span class="n">iterator</span><span class="p">;</span>
+<span class="k">private</span><span class="o">:</span>
+    <span class="k">friend</span> <span class="k">class</span> <span class="nc">HyperEdge</span><span class="p">;</span>
+    <span class="n">TargetRange</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">shared_ptr</span><span class="o">&lt;</span><span class="n">DG</span><span class="o">&gt;</span> <span class="n">g</span><span class="p">,</span> <span class="n">std</span><span class="o">::</span><span class="kt">size_t</span> <span class="n">eId</span><span class="p">);</span>
+<span class="k">public</span><span class="o">:</span>
+    <span class="n">TargetIterator</span> <span class="n">begin</span><span class="p">()</span> <span class="k">const</span><span class="p">;</span>
+    <span class="n">TargetIterator</span> <span class="nf">end</span><span class="p">()</span> <span class="k">const</span><span class="p">;</span>
+<span class="k">private</span><span class="o">:</span>
+    <span class="n">std</span><span class="o">::</span><span class="n">shared_ptr</span><span class="o">&lt;</span><span class="n">DG</span><span class="o">&gt;</span> <span class="n">g</span><span class="p">;</span>
+    <span class="n">std</span><span class="o">::</span><span class="kt">size_t</span> <span class="n">eId</span><span class="p">;</span>
+<span class="p">};</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="section" id="class-dg-dg-ruleiterator">
+<h2><span class="section-number">2.2.8.4.15. </span>Class <code class="docutils literal notranslate"><span class="pre">dg::DG::RuleIterator</span></code><a class="headerlink" href="#class-dg-dg-ruleiterator" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="_CPPv4N3mod2dg2DG12RuleIteratorE">
+<span id="_CPPv3N3mod2dg2DG12RuleIteratorE"></span><span id="_CPPv2N3mod2dg2DG12RuleIteratorE"></span><span id="mod::dg::DG::RuleIterator"></span><em class="property">class </em><code class="sig-prename descclassname">dg::<a class="reference internal" href="DG.html#_CPPv4N3mod2dg2DGE" title="mod::dg::DG">DG</a><code class="sig-prename descclassname">::</code></code><code class="sig-name descname">RuleIterator</code><a class="headerlink" href="#_CPPv4N3mod2dg2DG12RuleIteratorE" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>An iterator for enumerating all rules of a hyperedge.
+It models a forward iterator.</p>
+</dd></dl>
+
+<div class="section" id="id21">
+<h3><span class="section-number">2.2.8.4.15.1. </span>Synopsis<a class="headerlink" href="#id21" title="Permalink to this headline">¶</a></h3>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">MOD_DECL</span> <span class="n">DG</span><span class="o">::</span><span class="nl">RuleIterator</span>
+        <span class="p">:</span> <span class="k">public</span> <span class="n">boost</span><span class="o">::</span><span class="n">iterator_facade</span><span class="o">&lt;</span><span class="n">RuleIterator</span><span class="p">,</span> <span class="n">std</span><span class="o">::</span><span class="n">shared_ptr</span><span class="o">&lt;</span><span class="n">rule</span><span class="o">::</span><span class="n">Rule</span><span class="o">&gt;</span><span class="p">,</span> <span class="n">std</span><span class="o">::</span><span class="n">forward_iterator_tag</span><span class="p">,</span> <span class="n">std</span><span class="o">::</span><span class="n">shared_ptr</span><span class="o">&lt;</span><span class="n">rule</span><span class="o">::</span><span class="n">Rule</span><span class="o">&gt;</span> <span class="o">&gt;</span> <span class="p">{</span>
+    <span class="k">friend</span> <span class="k">class</span> <span class="nc">RuleRange</span><span class="p">;</span>
+    <span class="n">RuleIterator</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">shared_ptr</span><span class="o">&lt;</span><span class="n">DG</span><span class="o">&gt;</span> <span class="n">g</span><span class="p">,</span> <span class="n">std</span><span class="o">::</span><span class="kt">size_t</span> <span class="n">eId</span><span class="p">);</span>
+<span class="k">public</span><span class="o">:</span>
+    <span class="n">RuleIterator</span><span class="p">();</span>
+<span class="k">private</span><span class="o">:</span>
+    <span class="k">friend</span> <span class="k">class</span> <span class="nc">boost</span><span class="o">::</span><span class="n">iterator_core_access</span><span class="p">;</span>
+    <span class="n">std</span><span class="o">::</span><span class="n">shared_ptr</span><span class="o">&lt;</span><span class="n">rule</span><span class="o">::</span><span class="n">Rule</span><span class="o">&gt;</span> <span class="n">dereference</span><span class="p">()</span> <span class="k">const</span><span class="p">;</span>
+    <span class="kt">bool</span> <span class="nf">equal</span><span class="p">(</span><span class="k">const</span> <span class="n">RuleIterator</span> <span class="o">&amp;</span><span class="n">iter</span><span class="p">)</span> <span class="k">const</span><span class="p">;</span>
+    <span class="kt">void</span> <span class="nf">increment</span><span class="p">();</span>
+<span class="k">private</span><span class="o">:</span>
+    <span class="n">std</span><span class="o">::</span><span class="n">shared_ptr</span><span class="o">&lt;</span><span class="n">DG</span><span class="o">&gt;</span> <span class="n">g</span><span class="p">;</span>
+    <span class="n">std</span><span class="o">::</span><span class="kt">size_t</span> <span class="n">eId</span><span class="p">,</span> <span class="n">i</span><span class="p">;</span>
+<span class="p">};</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="id22">
+<h3><span class="section-number">2.2.8.4.15.2. </span>Details<a class="headerlink" href="#id22" title="Permalink to this headline">¶</a></h3>
+<dl class="function">
+<dt id="_CPPv4N3mod2dg2DG12RuleIterator12RuleIteratorEv">
+<span id="_CPPv3N3mod2dg2DG12RuleIterator12RuleIteratorEv"></span><span id="_CPPv2N3mod2dg2DG12RuleIterator12RuleIteratorEv"></span><span id="mod::dg::DG::RuleIterator::RuleIterator"></span><code class="sig-name descname">RuleIterator</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N3mod2dg2DG12RuleIterator12RuleIteratorEv" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Construct a past-the-end iterator.</p>
+</dd></dl>
+
+</div>
+</div>
+<div class="section" id="class-dg-dg-rulerange">
+<h2><span class="section-number">2.2.8.4.16. </span>Class <code class="docutils literal notranslate"><span class="pre">dg::DG::RuleRange</span></code><a class="headerlink" href="#class-dg-dg-rulerange" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="_CPPv4N3mod2dg2DG9RuleRangeE">
+<span id="_CPPv3N3mod2dg2DG9RuleRangeE"></span><span id="_CPPv2N3mod2dg2DG9RuleRangeE"></span><span id="mod::dg::DG::RuleRange"></span><em class="property">class </em><code class="sig-prename descclassname">dg::<a class="reference internal" href="DG.html#_CPPv4N3mod2dg2DGE" title="mod::dg::DG">DG</a><code class="sig-prename descclassname">::</code></code><code class="sig-name descname">RuleRange</code><a class="headerlink" href="#_CPPv4N3mod2dg2DG9RuleRangeE" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>A range of all rules of a hyperedge.</p>
+</dd></dl>
+
+<div class="section" id="id23">
+<h3><span class="section-number">2.2.8.4.16.1. </span>Synopsis<a class="headerlink" href="#id23" title="Permalink to this headline">¶</a></h3>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="k">struct</span> <span class="n">MOD_DECL</span> <span class="n">DG</span><span class="o">::</span><span class="n">RuleRange</span> <span class="p">{</span>
+    <span class="k">using</span> <span class="n">iterator</span> <span class="o">=</span> <span class="n">RuleIterator</span><span class="p">;</span>
+    <span class="k">using</span> <span class="n">const_iterator</span> <span class="o">=</span> <span class="n">iterator</span><span class="p">;</span>
+<span class="k">private</span><span class="o">:</span>
+    <span class="k">friend</span> <span class="k">class</span> <span class="nc">HyperEdge</span><span class="p">;</span>
+    <span class="n">RuleRange</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">shared_ptr</span><span class="o">&lt;</span><span class="n">DG</span><span class="o">&gt;</span> <span class="n">g</span><span class="p">,</span> <span class="n">std</span><span class="o">::</span><span class="kt">size_t</span> <span class="n">eId</span><span class="p">);</span>
+<span class="k">public</span><span class="o">:</span>
+    <span class="n">RuleIterator</span> <span class="n">begin</span><span class="p">()</span> <span class="k">const</span><span class="p">;</span>
+    <span class="n">RuleIterator</span> <span class="nf">end</span><span class="p">()</span> <span class="k">const</span><span class="p">;</span>
+    <span class="n">std</span><span class="o">::</span><span class="kt">size_t</span> <span class="n">size</span><span class="p">()</span> <span class="k">const</span><span class="p">;</span>
+<span class="k">private</span><span class="o">:</span>
+    <span class="n">std</span><span class="o">::</span><span class="n">shared_ptr</span><span class="o">&lt;</span><span class="n">DG</span><span class="o">&gt;</span> <span class="n">g</span><span class="p">;</span>
+    <span class="n">std</span><span class="o">::</span><span class="kt">size_t</span> <span class="n">eId</span><span class="p">;</span>
+<span class="p">};</span>
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+
+
+    </div>
+      
+  </div>
+</div>
+<footer class="footer">
+  <div class="container">
+    <p class="pull-right">
+      <a href="#">Back to top</a>
+      
+        <br/>
+        
+<div id="sourcelink">
+  <a href="../../_sources/libmod/dg/GraphInterface.rst.txt"
+     rel="nofollow">Source</a>
+</div>
+      
+    </p>
+    <p>
+        &copy; Copyright 2013-2020, Jakob Lykke Andersen.<br/>
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 3.0.0+/60e55278.<br/>
+    </p>
+  </div>
+</footer>
+  </body>
+</html>

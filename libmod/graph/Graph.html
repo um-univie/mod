@@ -1,0 +1,685 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta charset="utf-8" />
+    <title>2.2.9.3. graph/Graph.hpp &#8212; MØD 0.10.0 documentation</title>
+    <link rel="stylesheet" href="../../_static/bootstrap-sphinx.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/haxes.css" />
+    <script id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+    <script src="../../_static/jquery.js"></script>
+    <script src="../../_static/underscore.js"></script>
+    <script src="../../_static/doctools.js"></script>
+    <script src="../../_static/language_data.js"></script>
+    <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="2.2.9.4. graph/GraphInterface.hpp" href="GraphInterface.html" />
+    <link rel="prev" title="2.2.9.2. graph/ForwardDecl.hpp" href="ForwardDecl.html" />
+<meta charset='utf-8'>
+<meta http-equiv='X-UA-Compatible' content='IE=edge,chrome=1'>
+<meta name='viewport' content='width=device-width, initial-scale=1.0, maximum-scale=1'>
+<meta name="apple-mobile-web-app-capable" content="yes">
+<script type="text/javascript" src="../../_static/js/jquery-1.11.0.min.js "></script>
+<script type="text/javascript" src="../../_static/js/jquery-fix.js "></script>
+<script type="text/javascript" src="../../_static/bootstrap-3.3.7/js/bootstrap.min.js "></script>
+<script type="text/javascript" src="../../_static/bootstrap-sphinx.js "></script>
+
+  </head><body>
+
+  <div id="navbar" class="navbar navbar-default navbar-fixed-top">
+    <div class="container">
+      <div class="navbar-header">
+        <!-- .btn-navbar is used as the toggle for collapsed navbar content -->
+        <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".nav-collapse">
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+        </button>
+        <a class="navbar-brand" href="../../index.html">
+          MØD</a>
+        <span class="navbar-text navbar-version pull-left"><b>0.10.0</b></span>
+      </div>
+
+        <div class="collapse navbar-collapse nav-collapse">
+          <ul class="nav navbar-nav">
+            
+                <li><a href="../../genindex.html">Index</a></li>
+            
+            
+              <li class="dropdown globaltoc-container">
+  <a role="button"
+     id="dLabelGlobalToc"
+     data-toggle="dropdown"
+     data-target="#"
+     href="../../index.html">Site <b class="caret"></b></a>
+  <ul class="dropdown-menu globaltoc"
+      role="menu"
+      aria-labelledby="dLabelGlobalToc"><ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../../installation.html">1. Installation</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../libmod.html">2. libMØD</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../pymod/pymod.html">3. PyMØD</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../postmod/postmod.html">4. PostMØD (<code class="docutils literal notranslate"><span class="pre">mod_post</span></code>)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../modWrapper/modWrapper.html">5. The Wrapper Script (<code class="docutils literal notranslate"><span class="pre">mod</span></code>)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../dataDesc/dataDesc.html">6. Data Formats</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../dgStrat/dgStrat.html">7. Derivation Graph Strategies</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../examples/index.html">8. Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../knownIssues.html">9. Known Issues</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../changes.html">10. Changes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../references.html">11. References</a></li>
+</ul>
+</ul>
+</li>
+              
+                <li class="dropdown">
+  <a role="button"
+     id="dLabelLocalToc"
+     data-toggle="dropdown"
+     data-target="#"
+     href="#">Page <b class="caret"></b></a>
+  <ul class="dropdown-menu localtoc"
+      role="menu"
+      aria-labelledby="dLabelLocalToc"><ul>
+<li><a class="reference internal" href="#">2.2.9.3. graph/Graph.hpp</a><ul>
+<li><a class="reference internal" href="#class-graph-graph">2.2.9.3.1. Class <code class="docutils literal notranslate"><span class="pre">graph::Graph</span></code></a><ul>
+<li><a class="reference internal" href="#synopsis">2.2.9.3.1.1. Synopsis</a></li>
+<li><a class="reference internal" href="#details">2.2.9.3.1.2. Details</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</ul>
+</li>
+              
+            
+            
+              
+                
+  <li>
+    <a href="ForwardDecl.html" title="Previous Chapter: 2.2.9.2. graph/ForwardDecl.hpp"><span class="glyphicon glyphicon-chevron-left visible-sm"></span><span class="hidden-sm hidden-tablet">&laquo; 2.2.9.2. grap...</span>
+    </a>
+  </li>
+  <li>
+    <a href="GraphInterface.html" title="Next Chapter: 2.2.9.4. graph/GraphInterface.hpp"><span class="glyphicon glyphicon-chevron-right visible-sm"></span><span class="hidden-sm hidden-tablet">2.2.9.4. grap... &raquo;</span>
+    </a>
+  </li>
+              
+            
+            
+            
+            
+          </ul>
+
+          
+            
+<form class="navbar-form navbar-right" action="../../search.html" method="get">
+ <div class="form-group">
+  <input type="text" name="q" class="form-control" placeholder="Search" />
+ </div>
+  <input type="hidden" name="check_keywords" value="yes" />
+  <input type="hidden" name="area" value="default" />
+</form>
+          
+        </div>
+    </div>
+  </div>
+
+<div class="container">
+  <div class="row">
+    <div class="body col-md-12 content" role="main">
+      
+  <div class="section" id="graph-graph-hpp">
+<span id="cpp-graph-graph"></span><h1><span class="section-number">2.2.9.3. </span>graph/Graph.hpp<a class="headerlink" href="#graph-graph-hpp" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="class-graph-graph">
+<h2><span class="section-number">2.2.9.3.1. </span>Class <code class="docutils literal notranslate"><span class="pre">graph::Graph</span></code><a class="headerlink" href="#class-graph-graph" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="_CPPv4N3mod5graph5GraphE">
+<span id="_CPPv3N3mod5graph5GraphE"></span><span id="_CPPv2N3mod5graph5GraphE"></span><span id="mod::graph::Graph"></span><em class="property">class </em><code class="sig-prename descclassname">graph<code class="sig-prename descclassname">::</code></code><code class="sig-name descname">Graph</code><a class="headerlink" href="#_CPPv4N3mod5graph5GraphE" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>This class models an undirected graph with labels on vertices and edges,
+without loops and without parallel edges.
+Certain labels are regarded as models of chemical atoms and bonds.
+See <a class="reference internal" href="../../dataDesc/dataDesc.html#mol-enc"><span class="std std-ref">Molecule Encoding</span></a> for more information on this.
+See also <a class="reference internal" href="GraphInterface.html#cpp-graph-graphinterface"><span class="std std-ref">graph/GraphInterface.hpp</span></a> for the documentation for the
+graph interface for this class.</p>
+</dd></dl>
+
+<div class="section" id="synopsis">
+<h3><span class="section-number">2.2.9.3.1.1. </span>Synopsis<a class="headerlink" href="#synopsis" title="Permalink to this headline">¶</a></h3>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="k">struct</span> <span class="n">MOD_DECL</span> <span class="n">Graph</span> <span class="p">{</span>
+    <span class="k">class</span> <span class="nc">Vertex</span><span class="p">;</span>
+    <span class="k">class</span> <span class="nc">Edge</span><span class="p">;</span>
+    <span class="k">class</span> <span class="nc">VertexIterator</span><span class="p">;</span>
+    <span class="k">class</span> <span class="nc">VertexRange</span><span class="p">;</span>
+    <span class="k">class</span> <span class="nc">EdgeIterator</span><span class="p">;</span>
+    <span class="k">class</span> <span class="nc">EdgeRange</span><span class="p">;</span>
+    <span class="k">class</span> <span class="nc">IncidentEdgeIterator</span><span class="p">;</span>
+    <span class="k">class</span> <span class="nc">IncidentEdgeRange</span><span class="p">;</span>
+<span class="k">public</span><span class="o">:</span>
+    <span class="k">struct</span> <span class="n">Aut</span><span class="p">;</span>
+    <span class="k">struct</span> <span class="n">AutGroup</span><span class="p">;</span>
+    <span class="n">std</span><span class="o">::</span><span class="n">string</span> <span class="n">printStereo</span><span class="p">()</span> <span class="k">const</span><span class="p">;</span>
+    <span class="n">std</span><span class="o">::</span><span class="n">string</span> <span class="n">printStereo</span><span class="p">(</span><span class="k">const</span> <span class="n">Printer</span> <span class="o">&amp;</span><span class="n">p</span><span class="p">)</span> <span class="k">const</span><span class="p">;</span>
+<span class="k">private</span><span class="o">:</span> <span class="c1">// The actual class interface</span>
+    <span class="n">Graph</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">unique_ptr</span><span class="o">&lt;</span><span class="n">lib</span><span class="o">::</span><span class="n">Graph</span><span class="o">::</span><span class="n">Single</span><span class="o">&gt;</span> <span class="n">g</span><span class="p">);</span>
+    <span class="n">Graph</span><span class="p">(</span><span class="k">const</span> <span class="n">Graph</span><span class="o">&amp;</span><span class="p">)</span> <span class="o">=</span> <span class="k">delete</span><span class="p">;</span>
+    <span class="n">Graph</span> <span class="o">&amp;</span><span class="k">operator</span><span class="o">=</span><span class="p">(</span><span class="k">const</span> <span class="n">Graph</span><span class="o">&amp;</span><span class="p">)</span> <span class="o">=</span> <span class="k">delete</span><span class="p">;</span>
+<span class="k">public</span><span class="o">:</span>
+    <span class="o">~</span><span class="n">Graph</span><span class="p">();</span>
+    <span class="n">std</span><span class="o">::</span><span class="kt">size_t</span> <span class="n">getId</span><span class="p">()</span> <span class="k">const</span><span class="p">;</span>
+    <span class="n">MOD_DECL</span> <span class="k">friend</span> <span class="n">std</span><span class="o">::</span><span class="n">ostream</span> <span class="o">&amp;</span><span class="k">operator</span><span class="o">&lt;&lt;</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">ostream</span> <span class="o">&amp;</span><span class="n">s</span><span class="p">,</span> <span class="k">const</span> <span class="n">Graph</span> <span class="o">&amp;</span><span class="n">g</span><span class="p">);</span>
+    <span class="n">lib</span><span class="o">::</span><span class="n">Graph</span><span class="o">::</span><span class="n">Single</span> <span class="o">&amp;</span><span class="n">getGraph</span><span class="p">()</span> <span class="k">const</span><span class="p">;</span>
+<span class="k">public</span><span class="o">:</span> <span class="c1">// graph interface</span>
+    <span class="n">std</span><span class="o">::</span><span class="kt">size_t</span> <span class="n">numVertices</span><span class="p">()</span> <span class="k">const</span><span class="p">;</span>
+    <span class="n">VertexRange</span> <span class="nf">vertices</span><span class="p">()</span> <span class="k">const</span><span class="p">;</span>
+    <span class="n">std</span><span class="o">::</span><span class="kt">size_t</span> <span class="n">numEdges</span><span class="p">()</span> <span class="k">const</span><span class="p">;</span>
+    <span class="n">EdgeRange</span> <span class="nf">edges</span><span class="p">()</span> <span class="k">const</span><span class="p">;</span>
+<span class="k">public</span><span class="o">:</span>
+    <span class="n">AutGroup</span> <span class="n">aut</span><span class="p">(</span><span class="n">LabelSettings</span> <span class="n">labelSettings</span><span class="p">)</span> <span class="k">const</span><span class="p">;</span>
+<span class="k">public</span><span class="o">:</span>
+    <span class="n">std</span><span class="o">::</span><span class="n">pair</span><span class="o">&lt;</span><span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="p">,</span> <span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="o">&gt;</span> <span class="n">print</span><span class="p">()</span> <span class="k">const</span><span class="p">;</span>
+    <span class="n">std</span><span class="o">::</span><span class="n">pair</span><span class="o">&lt;</span><span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="p">,</span> <span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="o">&gt;</span> <span class="n">print</span><span class="p">(</span><span class="k">const</span> <span class="n">Printer</span> <span class="o">&amp;</span><span class="n">first</span><span class="p">,</span> <span class="k">const</span> <span class="n">Printer</span> <span class="o">&amp;</span><span class="n">second</span><span class="p">)</span> <span class="k">const</span><span class="p">;</span>
+    <span class="kt">void</span> <span class="nf">printTermState</span><span class="p">()</span> <span class="k">const</span><span class="p">;</span>
+    <span class="n">std</span><span class="o">::</span><span class="n">string</span> <span class="n">getGMLString</span><span class="p">(</span><span class="kt">bool</span> <span class="n">withCoords</span> <span class="o">=</span> <span class="nb">false</span><span class="p">)</span> <span class="k">const</span><span class="p">;</span>
+    <span class="n">std</span><span class="o">::</span><span class="n">string</span> <span class="n">printGML</span><span class="p">(</span><span class="kt">bool</span> <span class="n">withCoords</span> <span class="o">=</span> <span class="nb">false</span><span class="p">)</span> <span class="k">const</span><span class="p">;</span>
+    <span class="k">const</span> <span class="n">std</span><span class="o">::</span><span class="n">string</span> <span class="o">&amp;</span><span class="n">getName</span><span class="p">()</span> <span class="k">const</span><span class="p">;</span>
+    <span class="kt">void</span> <span class="nf">setName</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">string</span> <span class="n">name</span><span class="p">)</span> <span class="k">const</span><span class="p">;</span>
+    <span class="k">const</span> <span class="n">std</span><span class="o">::</span><span class="n">string</span> <span class="o">&amp;</span><span class="n">getSmiles</span><span class="p">()</span> <span class="k">const</span><span class="p">;</span>
+    <span class="k">const</span> <span class="n">std</span><span class="o">::</span><span class="n">string</span> <span class="o">&amp;</span><span class="n">getSmilesWithIds</span><span class="p">()</span> <span class="k">const</span><span class="p">;</span>
+    <span class="k">const</span> <span class="n">std</span><span class="o">::</span><span class="n">string</span> <span class="o">&amp;</span><span class="n">getGraphDFS</span><span class="p">()</span> <span class="k">const</span><span class="p">;</span>
+    <span class="k">const</span> <span class="n">std</span><span class="o">::</span><span class="n">string</span> <span class="o">&amp;</span><span class="n">getGraphDFSWithIds</span><span class="p">()</span> <span class="k">const</span><span class="p">;</span>
+    <span class="k">const</span> <span class="n">std</span><span class="o">::</span><span class="n">string</span> <span class="o">&amp;</span><span class="n">getLinearEncoding</span><span class="p">()</span> <span class="k">const</span><span class="p">;</span>
+    <span class="kt">bool</span> <span class="nf">getIsMolecule</span><span class="p">()</span> <span class="k">const</span><span class="p">;</span>
+    <span class="kt">double</span> <span class="nf">getEnergy</span><span class="p">()</span> <span class="k">const</span><span class="p">;</span>
+    <span class="kt">void</span> <span class="nf">cacheEnergy</span><span class="p">(</span><span class="kt">double</span> <span class="n">value</span><span class="p">)</span> <span class="k">const</span><span class="p">;</span>
+    <span class="kt">double</span> <span class="nf">getExactMass</span><span class="p">()</span> <span class="k">const</span><span class="p">;</span>
+    <span class="kt">unsigned</span> <span class="kt">int</span> <span class="nf">vLabelCount</span><span class="p">(</span><span class="k">const</span> <span class="n">std</span><span class="o">::</span><span class="n">string</span> <span class="o">&amp;</span><span class="n">label</span><span class="p">)</span> <span class="k">const</span><span class="p">;</span>
+    <span class="kt">unsigned</span> <span class="kt">int</span> <span class="nf">eLabelCount</span><span class="p">(</span><span class="k">const</span> <span class="n">std</span><span class="o">::</span><span class="n">string</span> <span class="o">&amp;</span><span class="n">label</span><span class="p">)</span> <span class="k">const</span><span class="p">;</span>
+    <span class="n">std</span><span class="o">::</span><span class="kt">size_t</span> <span class="n">isomorphism</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">shared_ptr</span><span class="o">&lt;</span><span class="n">Graph</span><span class="o">&gt;</span> <span class="n">g</span><span class="p">,</span> <span class="n">std</span><span class="o">::</span><span class="kt">size_t</span> <span class="n">maxNumMatches</span><span class="p">,</span> <span class="n">LabelSettings</span> <span class="n">labelSettings</span><span class="p">)</span> <span class="k">const</span><span class="p">;</span>
+    <span class="n">std</span><span class="o">::</span><span class="kt">size_t</span> <span class="n">monomorphism</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">shared_ptr</span><span class="o">&lt;</span><span class="n">Graph</span><span class="o">&gt;</span> <span class="n">g</span><span class="p">,</span> <span class="n">std</span><span class="o">::</span><span class="kt">size_t</span> <span class="n">maxNumMatches</span><span class="p">,</span> <span class="n">LabelSettings</span> <span class="n">labelSettings</span><span class="p">)</span> <span class="k">const</span><span class="p">;</span>
+    <span class="n">std</span><span class="o">::</span><span class="n">shared_ptr</span><span class="o">&lt;</span><span class="n">Graph</span><span class="o">&gt;</span> <span class="n">makePermutation</span><span class="p">()</span> <span class="k">const</span><span class="p">;</span>
+    <span class="kt">void</span> <span class="nf">setImage</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">shared_ptr</span><span class="o">&lt;</span><span class="n">Function</span><span class="o">&lt;</span><span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="p">()</span><span class="o">&gt;</span> <span class="o">&gt;</span> <span class="n">image</span><span class="p">);</span>
+    <span class="n">std</span><span class="o">::</span><span class="n">shared_ptr</span><span class="o">&lt;</span><span class="n">Function</span><span class="o">&lt;</span><span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="p">()</span><span class="o">&gt;</span> <span class="o">&gt;</span> <span class="n">getImage</span><span class="p">()</span> <span class="k">const</span><span class="p">;</span>
+    <span class="kt">void</span> <span class="nf">setImageCommand</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">string</span> <span class="n">cmd</span><span class="p">);</span>
+    <span class="n">std</span><span class="o">::</span><span class="n">string</span> <span class="n">getImageCommand</span><span class="p">()</span> <span class="k">const</span><span class="p">;</span>
+    <span class="n">Vertex</span> <span class="nf">getVertexFromExternalId</span><span class="p">(</span><span class="kt">int</span> <span class="n">id</span><span class="p">)</span> <span class="k">const</span><span class="p">;</span>
+    <span class="kt">int</span> <span class="nf">getMinExternalId</span><span class="p">()</span> <span class="k">const</span><span class="p">;</span>
+    <span class="kt">int</span> <span class="nf">getMaxExternalId</span><span class="p">()</span> <span class="k">const</span><span class="p">;</span>
+    <span class="kt">void</span> <span class="nf">instantiateStereo</span><span class="p">()</span> <span class="k">const</span><span class="p">;</span>
+<span class="k">private</span><span class="o">:</span>
+    <span class="k">struct</span> <span class="n">Pimpl</span><span class="p">;</span>
+    <span class="n">std</span><span class="o">::</span><span class="n">unique_ptr</span><span class="o">&lt;</span><span class="n">Pimpl</span><span class="o">&gt;</span> <span class="n">p</span><span class="p">;</span>
+<span class="k">public</span><span class="o">:</span>
+    <span class="k">static</span> <span class="n">std</span><span class="o">::</span><span class="n">shared_ptr</span><span class="o">&lt;</span><span class="n">Graph</span><span class="o">&gt;</span> <span class="n">graphGMLString</span><span class="p">(</span><span class="k">const</span> <span class="n">std</span><span class="o">::</span><span class="n">string</span> <span class="o">&amp;</span><span class="n">data</span><span class="p">);</span>
+    <span class="k">static</span> <span class="n">std</span><span class="o">::</span><span class="n">shared_ptr</span><span class="o">&lt;</span><span class="n">Graph</span><span class="o">&gt;</span> <span class="n">graphGML</span><span class="p">(</span><span class="k">const</span> <span class="n">std</span><span class="o">::</span><span class="n">string</span> <span class="o">&amp;</span><span class="n">file</span><span class="p">);</span>
+    <span class="k">static</span> <span class="n">std</span><span class="o">::</span><span class="n">shared_ptr</span><span class="o">&lt;</span><span class="n">Graph</span><span class="o">&gt;</span> <span class="n">graphDFS</span><span class="p">(</span><span class="k">const</span> <span class="n">std</span><span class="o">::</span><span class="n">string</span> <span class="o">&amp;</span><span class="n">graphDFS</span><span class="p">);</span>
+    <span class="k">static</span> <span class="n">std</span><span class="o">::</span><span class="n">shared_ptr</span><span class="o">&lt;</span><span class="n">Graph</span><span class="o">&gt;</span> <span class="n">smiles</span><span class="p">(</span><span class="k">const</span> <span class="n">std</span><span class="o">::</span><span class="n">string</span> <span class="o">&amp;</span><span class="n">smiles</span><span class="p">);</span>
+    <span class="k">static</span> <span class="n">std</span><span class="o">::</span><span class="n">shared_ptr</span><span class="o">&lt;</span><span class="n">Graph</span><span class="o">&gt;</span> <span class="n">makeGraph</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">unique_ptr</span><span class="o">&lt;</span><span class="n">lib</span><span class="o">::</span><span class="n">Graph</span><span class="o">::</span><span class="n">Single</span><span class="o">&gt;</span> <span class="n">g</span><span class="p">);</span>
+    <span class="k">static</span> <span class="n">std</span><span class="o">::</span><span class="n">shared_ptr</span><span class="o">&lt;</span><span class="n">Graph</span><span class="o">&gt;</span> <span class="n">makeGraph</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">unique_ptr</span><span class="o">&lt;</span><span class="n">lib</span><span class="o">::</span><span class="n">Graph</span><span class="o">::</span><span class="n">Single</span><span class="o">&gt;</span> <span class="n">g</span><span class="p">,</span> <span class="n">std</span><span class="o">::</span><span class="n">map</span><span class="o">&lt;</span><span class="kt">int</span><span class="p">,</span> <span class="n">std</span><span class="o">::</span><span class="kt">size_t</span><span class="o">&gt;</span> <span class="n">externalToInternalIds</span><span class="p">);</span>
+<span class="p">};</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="details">
+<h3><span class="section-number">2.2.9.3.1.2. </span>Details<a class="headerlink" href="#details" title="Permalink to this headline">¶</a></h3>
+<dl class="function">
+<dt id="_CPPv4NK3mod5graph5Graph11printStereoEv">
+<span id="_CPPv3NK3mod5graph5Graph11printStereoEv"></span><span id="_CPPv2NK3mod5graph5Graph11printStereoEv"></span><span id="mod::graph::Graph::printStereoC"></span>std::string <code class="sig-name descname">printStereo</code><span class="sig-paren">(</span><span class="sig-paren">)</span> <em class="property">const</em><a class="headerlink" href="#_CPPv4NK3mod5graph5Graph11printStereoEv" title="Permalink to this definition">¶</a><br /></dt>
+<dt id="_CPPv4NK3mod5graph5Graph11printStereoERK7Printer">
+<span id="_CPPv3NK3mod5graph5Graph11printStereoERK7Printer"></span><span id="_CPPv2NK3mod5graph5Graph11printStereoERK7Printer"></span><span id="mod::graph::Graph::printStereo__PrinterCRC"></span>std::string <code class="sig-name descname">printStereo</code><span class="sig-paren">(</span><em class="property">const</em> <a class="reference internal" href="Printer.html#_CPPv4N3mod5graph7PrinterE" title="mod::graph::Printer">Printer</a> &amp;<em>p</em><span class="sig-paren">)</span> <em class="property">const</em><a class="headerlink" href="#_CPPv4NK3mod5graph5Graph11printStereoERK7Printer" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Print the stereo configuration for the vertex.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>the name of the PDF-file that will be compiled in post-processing.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="_CPPv4NK3mod5graph5Graph5getIdEv">
+<span id="_CPPv3NK3mod5graph5Graph5getIdEv"></span><span id="_CPPv2NK3mod5graph5Graph5getIdEv"></span><span id="mod::graph::Graph::getIdC"></span>std::size_t <code class="sig-name descname">getId</code><span class="sig-paren">(</span><span class="sig-paren">)</span> <em class="property">const</em><a class="headerlink" href="#_CPPv4NK3mod5graph5Graph5getIdEv" title="Permalink to this definition">¶</a><br /></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>the unique instance id among <a class="reference internal" href="#_CPPv4N3mod5graph5GraphE" title="mod::graph::Graph"><code class="xref cpp cpp-class docutils literal notranslate"><span class="pre">Graph</span></code></a> objects.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="_CPPv4NK3mod5graph5Graph11numVerticesEv">
+<span id="_CPPv3NK3mod5graph5Graph11numVerticesEv"></span><span id="_CPPv2NK3mod5graph5Graph11numVerticesEv"></span><span id="mod::graph::Graph::numVerticesC"></span>std::size_t <code class="sig-name descname">numVertices</code><span class="sig-paren">(</span><span class="sig-paren">)</span> <em class="property">const</em><a class="headerlink" href="#_CPPv4NK3mod5graph5Graph11numVerticesEv" title="Permalink to this definition">¶</a><br /></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>the number of vertices in the graph.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="_CPPv4NK3mod5graph5Graph8verticesEv">
+<span id="_CPPv3NK3mod5graph5Graph8verticesEv"></span><span id="_CPPv2NK3mod5graph5Graph8verticesEv"></span><span id="mod::graph::Graph::verticesC"></span><a class="reference internal" href="GraphInterface.html#_CPPv4N3mod5graph5Graph11VertexRangeE" title="mod::graph::Graph::VertexRange">VertexRange</a> <code class="sig-name descname">vertices</code><span class="sig-paren">(</span><span class="sig-paren">)</span> <em class="property">const</em><a class="headerlink" href="#_CPPv4NK3mod5graph5Graph8verticesEv" title="Permalink to this definition">¶</a><br /></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>a range of all vertices in the graph.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="_CPPv4NK3mod5graph5Graph8numEdgesEv">
+<span id="_CPPv3NK3mod5graph5Graph8numEdgesEv"></span><span id="_CPPv2NK3mod5graph5Graph8numEdgesEv"></span><span id="mod::graph::Graph::numEdgesC"></span>std::size_t <code class="sig-name descname">numEdges</code><span class="sig-paren">(</span><span class="sig-paren">)</span> <em class="property">const</em><a class="headerlink" href="#_CPPv4NK3mod5graph5Graph8numEdgesEv" title="Permalink to this definition">¶</a><br /></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>the number of edges in the graph.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="_CPPv4NK3mod5graph5Graph5edgesEv">
+<span id="_CPPv3NK3mod5graph5Graph5edgesEv"></span><span id="_CPPv2NK3mod5graph5Graph5edgesEv"></span><span id="mod::graph::Graph::edgesC"></span><a class="reference internal" href="GraphInterface.html#_CPPv4N3mod5graph5Graph9EdgeRangeE" title="mod::graph::Graph::EdgeRange">EdgeRange</a> <code class="sig-name descname">edges</code><span class="sig-paren">(</span><span class="sig-paren">)</span> <em class="property">const</em><a class="headerlink" href="#_CPPv4NK3mod5graph5Graph5edgesEv" title="Permalink to this definition">¶</a><br /></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>a range of all edges in the graph.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="_CPPv4NK3mod5graph5Graph3autE13LabelSettings">
+<span id="_CPPv3NK3mod5graph5Graph3autE13LabelSettings"></span><span id="_CPPv2NK3mod5graph5Graph3autE13LabelSettings"></span><span id="mod::graph::Graph::aut__LabelSettingsC"></span><a class="reference internal" href="Automorphism.html#_CPPv4N3mod5graph5Graph8AutGroupE" title="mod::graph::Graph::AutGroup">AutGroup</a> <code class="sig-name descname">aut</code><span class="sig-paren">(</span><a class="reference internal" href="../Config.html#_CPPv4N3mod13LabelSettingsE" title="mod::LabelSettings">LabelSettings</a> <em>labelSettings</em><span class="sig-paren">)</span> <em class="property">const</em><a class="headerlink" href="#_CPPv4NK3mod5graph5Graph3autE13LabelSettings" title="Permalink to this definition">¶</a><br /></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>an object representing the automorphism group of the graph.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="_CPPv4NK3mod5graph5Graph5printEv">
+<span id="_CPPv3NK3mod5graph5Graph5printEv"></span><span id="_CPPv2NK3mod5graph5Graph5printEv"></span><span id="mod::graph::Graph::printC"></span>std::pair&lt;std::string, std::string&gt; <code class="sig-name descname">print</code><span class="sig-paren">(</span><span class="sig-paren">)</span> <em class="property">const</em><a class="headerlink" href="#_CPPv4NK3mod5graph5Graph5printEv" title="Permalink to this definition">¶</a><br /></dt>
+<dt id="_CPPv4NK3mod5graph5Graph5printERK7PrinterRK7Printer">
+<span id="_CPPv3NK3mod5graph5Graph5printERK7PrinterRK7Printer"></span><span id="_CPPv2NK3mod5graph5Graph5printERK7PrinterRK7Printer"></span><span id="mod::graph::Graph::print__PrinterCR.PrinterCRC"></span>std::pair&lt;std::string, std::string&gt; <code class="sig-name descname">print</code><span class="sig-paren">(</span><em class="property">const</em> <a class="reference internal" href="Printer.html#_CPPv4N3mod5graph7PrinterE" title="mod::graph::Printer">Printer</a> &amp;<em>first</em>, <em class="property">const</em> <a class="reference internal" href="Printer.html#_CPPv4N3mod5graph7PrinterE" title="mod::graph::Printer">Printer</a> &amp;<em>second</em><span class="sig-paren">)</span> <em class="property">const</em><a class="headerlink" href="#_CPPv4NK3mod5graph5Graph5printERK7PrinterRK7Printer" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Print the graph, using either the default options or the options in <code class="xref cpp cpp-expr docutils literal notranslate"><a class="reference internal" href="#_CPPv4NK3mod5graph5Graph5printERK7PrinterRK7Printer" title="mod::graph::Graph::print::first"><span class="pre">first</span></a></code> and <code class="xref cpp cpp-expr docutils literal notranslate"><a class="reference internal" href="#_CPPv4NK3mod5graph5Graph5printERK7PrinterRK7Printer" title="mod::graph::Graph::print::second"><span class="pre">second</span></a></code>.
+If <code class="xref cpp cpp-expr docutils literal notranslate"><a class="reference internal" href="#_CPPv4NK3mod5graph5Graph5printERK7PrinterRK7Printer" title="mod::graph::Graph::print::first"><span class="pre">first</span></a></code> and <code class="xref cpp cpp-expr docutils literal notranslate"><a class="reference internal" href="#_CPPv4NK3mod5graph5Graph5printERK7PrinterRK7Printer" title="mod::graph::Graph::print::second"><span class="pre">second</span></a></code> are the same, only one depiction will be made.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>a pair of names for the PDF-files that will be compiled in post-processing.
+If <code class="xref cpp cpp-expr docutils literal notranslate"><a class="reference internal" href="#_CPPv4NK3mod5graph5Graph5printERK7PrinterRK7Printer" title="mod::graph::Graph::print::first"><span class="pre">first</span></a></code> and <code class="xref cpp cpp-expr docutils literal notranslate"><a class="reference internal" href="#_CPPv4NK3mod5graph5Graph5printERK7PrinterRK7Printer" title="mod::graph::Graph::print::second"><span class="pre">second</span></a></code> are the same, the two file prefixes are equal.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="_CPPv4NK3mod5graph5Graph14printTermStateEv">
+<span id="_CPPv3NK3mod5graph5Graph14printTermStateEv"></span><span id="_CPPv2NK3mod5graph5Graph14printTermStateEv"></span><span id="mod::graph::Graph::printTermStateC"></span>void <code class="sig-name descname">printTermState</code><span class="sig-paren">(</span><span class="sig-paren">)</span> <em class="property">const</em><a class="headerlink" href="#_CPPv4NK3mod5graph5Graph14printTermStateEv" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Print the term state for the graph.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="_CPPv4NK3mod5graph5Graph12getGMLStringEb">
+<span id="_CPPv3NK3mod5graph5Graph12getGMLStringEb"></span><span id="_CPPv2NK3mod5graph5Graph12getGMLStringEb"></span><span id="mod::graph::Graph::getGMLString__bC"></span>std::string <code class="sig-name descname">getGMLString</code><span class="sig-paren">(</span>bool <em>withCoords</em> = false<span class="sig-paren">)</span> <em class="property">const</em><a class="headerlink" href="#_CPPv4NK3mod5graph5Graph12getGMLStringEb" title="Permalink to this definition">¶</a><br /></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>the <a class="reference internal" href="../../dataDesc/dataDesc.html#graph-gml"><span class="std std-ref">GML</span></a> representation of the graph,
+optionally with generated 2D coordinates.</p>
+</dd>
+<dt class="field-even">Throws</dt>
+<dd class="field-even"><p><a class="reference internal" href="../Error.html#_CPPv4N3mod10LogicErrorE" title="mod::LogicError"><code class="xref cpp cpp-any docutils literal notranslate"><span class="pre">LogicError</span></code></a> when coordinates are requested, but
+none can be generated.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="_CPPv4NK3mod5graph5Graph8printGMLEb">
+<span id="_CPPv3NK3mod5graph5Graph8printGMLEb"></span><span id="_CPPv2NK3mod5graph5Graph8printGMLEb"></span><span id="mod::graph::Graph::printGML__bC"></span>std::string <code class="sig-name descname">printGML</code><span class="sig-paren">(</span>bool <em>withCoords</em> = false<span class="sig-paren">)</span> <em class="property">const</em><a class="headerlink" href="#_CPPv4NK3mod5graph5Graph8printGMLEb" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Print the <a class="reference internal" href="../../dataDesc/dataDesc.html#graph-gml"><span class="std std-ref">GML</span></a> representation of the graph,
+optionally with generated 2D coordinates.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>the filename of the printed GML file.</p>
+</dd>
+<dt class="field-even">Throws</dt>
+<dd class="field-even"><p><a class="reference internal" href="../Error.html#_CPPv4N3mod10LogicErrorE" title="mod::LogicError"><code class="xref cpp cpp-any docutils literal notranslate"><span class="pre">LogicError</span></code></a> when coordinates are requested, but
+none can be generated.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="_CPPv4NK3mod5graph5Graph7getNameEv">
+<span id="_CPPv3NK3mod5graph5Graph7getNameEv"></span><span id="_CPPv2NK3mod5graph5Graph7getNameEv"></span><span id="mod::graph::Graph::getNameC"></span><em class="property">const</em> std::string &amp;<code class="sig-name descname">getName</code><span class="sig-paren">(</span><span class="sig-paren">)</span> <em class="property">const</em><a class="headerlink" href="#_CPPv4NK3mod5graph5Graph7getNameEv" title="Permalink to this definition">¶</a><br /></dt>
+<dt id="_CPPv4NK3mod5graph5Graph7setNameENSt6stringE">
+<span id="_CPPv3NK3mod5graph5Graph7setNameENSt6stringE"></span><span id="_CPPv2NK3mod5graph5Graph7setNameENSt6stringE"></span><span id="mod::graph::Graph::setName__ssC"></span>void <code class="sig-name descname">setName</code><span class="sig-paren">(</span>std::string <em>name</em><span class="sig-paren">)</span> <em class="property">const</em><a class="headerlink" href="#_CPPv4NK3mod5graph5Graph7setNameENSt6stringE" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Access the name of the graph.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="_CPPv4NK3mod5graph5Graph9getSmilesEv">
+<span id="_CPPv3NK3mod5graph5Graph9getSmilesEv"></span><span id="_CPPv2NK3mod5graph5Graph9getSmilesEv"></span><span id="mod::graph::Graph::getSmilesC"></span><em class="property">const</em> std::string &amp;<code class="sig-name descname">getSmiles</code><span class="sig-paren">(</span><span class="sig-paren">)</span> <em class="property">const</em><a class="headerlink" href="#_CPPv4NK3mod5graph5Graph9getSmilesEv" title="Permalink to this definition">¶</a><br /></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>the canonical <a class="reference internal" href="../../dataDesc/dataDesc.html#graph-smiles"><span class="std std-ref">SMILES string</span></a> of the graph, if it’s a molecule.</p>
+</dd>
+<dt class="field-even">Throws</dt>
+<dd class="field-even"><p><a class="reference internal" href="../Error.html#_CPPv4N3mod10LogicErrorE" title="mod::LogicError"><code class="xref cpp cpp-any docutils literal notranslate"><span class="pre">LogicError</span></code></a> if the graph is not a molecule.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="_CPPv4NK3mod5graph5Graph16getSmilesWithIdsEv">
+<span id="_CPPv3NK3mod5graph5Graph16getSmilesWithIdsEv"></span><span id="_CPPv2NK3mod5graph5Graph16getSmilesWithIdsEv"></span><span id="mod::graph::Graph::getSmilesWithIdsC"></span><em class="property">const</em> std::string &amp;<code class="sig-name descname">getSmilesWithIds</code><span class="sig-paren">(</span><span class="sig-paren">)</span> <em class="property">const</em><a class="headerlink" href="#_CPPv4NK3mod5graph5Graph16getSmilesWithIdsEv" title="Permalink to this definition">¶</a><br /></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>the canonical <a class="reference internal" href="../../dataDesc/dataDesc.html#graph-smiles"><span class="std std-ref">SMILES string</span></a> of the graph,
+that includes the internal vertex id as a class label on each atom, if it’s a molecule.</p>
+</dd>
+<dt class="field-even">Throws</dt>
+<dd class="field-even"><p><a class="reference internal" href="../Error.html#_CPPv4N3mod10LogicErrorE" title="mod::LogicError"><code class="xref cpp cpp-any docutils literal notranslate"><span class="pre">LogicError</span></code></a> if the graph is not a molecule.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="_CPPv4NK3mod5graph5Graph11getGraphDFSEv">
+<span id="_CPPv3NK3mod5graph5Graph11getGraphDFSEv"></span><span id="_CPPv2NK3mod5graph5Graph11getGraphDFSEv"></span><span id="mod::graph::Graph::getGraphDFSC"></span><em class="property">const</em> std::string &amp;<code class="sig-name descname">getGraphDFS</code><span class="sig-paren">(</span><span class="sig-paren">)</span> <em class="property">const</em><a class="headerlink" href="#_CPPv4NK3mod5graph5Graph11getGraphDFSEv" title="Permalink to this definition">¶</a><br /></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>a <a class="reference internal" href="../../dataDesc/dataDesc.html#graph-graphdfs"><span class="std std-ref">GraphDFS</span></a> string of the graph.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="_CPPv4NK3mod5graph5Graph18getGraphDFSWithIdsEv">
+<span id="_CPPv3NK3mod5graph5Graph18getGraphDFSWithIdsEv"></span><span id="_CPPv2NK3mod5graph5Graph18getGraphDFSWithIdsEv"></span><span id="mod::graph::Graph::getGraphDFSWithIdsC"></span><em class="property">const</em> std::string &amp;<code class="sig-name descname">getGraphDFSWithIds</code><span class="sig-paren">(</span><span class="sig-paren">)</span> <em class="property">const</em><a class="headerlink" href="#_CPPv4NK3mod5graph5Graph18getGraphDFSWithIdsEv" title="Permalink to this definition">¶</a><br /></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>a <a class="reference internal" href="../../dataDesc/dataDesc.html#graph-graphdfs"><span class="std std-ref">GraphDFS</span></a> string of the graph, where each vertices have an explicit id,
+corresponding to its internal vertex id.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="_CPPv4NK3mod5graph5Graph17getLinearEncodingEv">
+<span id="_CPPv3NK3mod5graph5Graph17getLinearEncodingEv"></span><span id="_CPPv2NK3mod5graph5Graph17getLinearEncodingEv"></span><span id="mod::graph::Graph::getLinearEncodingC"></span><em class="property">const</em> std::string &amp;<code class="sig-name descname">getLinearEncoding</code><span class="sig-paren">(</span><span class="sig-paren">)</span> <em class="property">const</em><a class="headerlink" href="#_CPPv4NK3mod5graph5Graph17getLinearEncodingEv" title="Permalink to this definition">¶</a><br /></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>the <a class="reference internal" href="../../dataDesc/dataDesc.html#graph-smiles"><span class="std std-ref">SMILES</span></a> string if the graph is a molecule, otherwise the <a class="reference internal" href="../../dataDesc/dataDesc.html#graph-graphdfs"><span class="std std-ref">GraphDFS</span></a> string.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="_CPPv4NK3mod5graph5Graph13getIsMoleculeEv">
+<span id="_CPPv3NK3mod5graph5Graph13getIsMoleculeEv"></span><span id="_CPPv2NK3mod5graph5Graph13getIsMoleculeEv"></span><span id="mod::graph::Graph::getIsMoleculeC"></span>bool <code class="sig-name descname">getIsMolecule</code><span class="sig-paren">(</span><span class="sig-paren">)</span> <em class="property">const</em><a class="headerlink" href="#_CPPv4NK3mod5graph5Graph13getIsMoleculeEv" title="Permalink to this definition">¶</a><br /></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>whether or not the graph models a molecule. See <a class="reference internal" href="../../dataDesc/dataDesc.html#mol-enc"><span class="std std-ref">Molecule Encoding</span></a>.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="_CPPv4NK3mod5graph5Graph9getEnergyEv">
+<span id="_CPPv3NK3mod5graph5Graph9getEnergyEv"></span><span id="_CPPv2NK3mod5graph5Graph9getEnergyEv"></span><span id="mod::graph::Graph::getEnergyC"></span>double <code class="sig-name descname">getEnergy</code><span class="sig-paren">(</span><span class="sig-paren">)</span> <em class="property">const</em><a class="headerlink" href="#_CPPv4NK3mod5graph5Graph9getEnergyEv" title="Permalink to this definition">¶</a><br /></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>some energy value if the graph is a molecule.
+The energy is calculated using Open Babel, unless already calculated or cached by <a class="reference internal" href="#_CPPv4NK3mod5graph5Graph11cacheEnergyEd" title="mod::graph::Graph::cacheEnergy"><code class="xref cpp cpp-func docutils literal notranslate"><span class="pre">Graph::cacheEnergy()</span></code></a>.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="_CPPv4NK3mod5graph5Graph11cacheEnergyEd">
+<span id="_CPPv3NK3mod5graph5Graph11cacheEnergyEd"></span><span id="_CPPv2NK3mod5graph5Graph11cacheEnergyEd"></span><span id="mod::graph::Graph::cacheEnergy__doubleC"></span>void <code class="sig-name descname">cacheEnergy</code><span class="sig-paren">(</span>double <em>value</em><span class="sig-paren">)</span> <em class="property">const</em><a class="headerlink" href="#_CPPv4NK3mod5graph5Graph11cacheEnergyEd" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>If the graph models a molecule, sets the energy to a given value.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Throws</dt>
+<dd class="field-odd"><p><a class="reference internal" href="../Error.html#_CPPv4N3mod10LogicErrorE" title="mod::LogicError"><code class="xref cpp cpp-class docutils literal notranslate"><span class="pre">LogicError</span></code></a> if the graph is not a molecule.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="_CPPv4NK3mod5graph5Graph12getExactMassEv">
+<span id="_CPPv3NK3mod5graph5Graph12getExactMassEv"></span><span id="_CPPv2NK3mod5graph5Graph12getExactMassEv"></span><span id="mod::graph::Graph::getExactMassC"></span>double <code class="sig-name descname">getExactMass</code><span class="sig-paren">(</span><span class="sig-paren">)</span> <em class="property">const</em><a class="headerlink" href="#_CPPv4NK3mod5graph5Graph12getExactMassEv" title="Permalink to this definition">¶</a><br /></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>the exact mass of the graph, if it is a molecule.
+It is the sum of the exact mass of each atom, with the mass of electrons subtracted corresponding to the integer charge.
+That is, the mass is <span class="math notranslate nohighlight">\(\sum_a (mass(a) - mass(e)\cdot charge(a))\)</span>.
+If an atom has no specified isotope, then the most abundant is used.</p>
+</dd>
+<dt class="field-even">Throws</dt>
+<dd class="field-even"><p><a class="reference internal" href="../Error.html#_CPPv4N3mod10LogicErrorE" title="mod::LogicError"><code class="xref cpp cpp-class docutils literal notranslate"><span class="pre">LogicError</span></code></a> if it is not a molecule, including if some isotope has not been tabulated.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="_CPPv4NK3mod5graph5Graph11vLabelCountERKNSt6stringE">
+<span id="_CPPv3NK3mod5graph5Graph11vLabelCountERKNSt6stringE"></span><span id="_CPPv2NK3mod5graph5Graph11vLabelCountERKNSt6stringE"></span><span id="mod::graph::Graph::vLabelCount__ssCRC"></span>unsigned int <code class="sig-name descname">vLabelCount</code><span class="sig-paren">(</span><em class="property">const</em> std::string &amp;<em>label</em><span class="sig-paren">)</span> <em class="property">const</em><a class="headerlink" href="#_CPPv4NK3mod5graph5Graph11vLabelCountERKNSt6stringE" title="Permalink to this definition">¶</a><br /></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>the number of vertices in the graph with the given label.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="_CPPv4NK3mod5graph5Graph11eLabelCountERKNSt6stringE">
+<span id="_CPPv3NK3mod5graph5Graph11eLabelCountERKNSt6stringE"></span><span id="_CPPv2NK3mod5graph5Graph11eLabelCountERKNSt6stringE"></span><span id="mod::graph::Graph::eLabelCount__ssCRC"></span>unsigned int <code class="sig-name descname">eLabelCount</code><span class="sig-paren">(</span><em class="property">const</em> std::string &amp;<em>label</em><span class="sig-paren">)</span> <em class="property">const</em><a class="headerlink" href="#_CPPv4NK3mod5graph5Graph11eLabelCountERKNSt6stringE" title="Permalink to this definition">¶</a><br /></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>the number of edges in the graph with the given label.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="_CPPv4NK3mod5graph5Graph11isomorphismENSt10shared_ptrI5GraphEENSt6size_tE13LabelSettings">
+<span id="_CPPv3NK3mod5graph5Graph11isomorphismENSt10shared_ptrI5GraphEENSt6size_tE13LabelSettings"></span><span id="_CPPv2NK3mod5graph5Graph11isomorphismENSt10shared_ptrI5GraphEENSt6size_tE13LabelSettings"></span><span id="mod::graph::Graph::isomorphism__std::shared_ptr:Graph:.std::s.LabelSettingsC"></span>std::size_t <code class="sig-name descname">isomorphism</code><span class="sig-paren">(</span>std::shared_ptr&lt;<a class="reference internal" href="#_CPPv4N3mod5graph5GraphE" title="mod::graph::Graph">Graph</a>&gt; <em>g</em>, std::size_t <em>maxNumMatches</em>, <a class="reference internal" href="../Config.html#_CPPv4N3mod13LabelSettingsE" title="mod::LabelSettings">LabelSettings</a> <em>labelSettings</em><span class="sig-paren">)</span> <em class="property">const</em><a class="headerlink" href="#_CPPv4NK3mod5graph5Graph11isomorphismENSt10shared_ptrI5GraphEENSt6size_tE13LabelSettings" title="Permalink to this definition">¶</a><br /></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>the number of isomorphisms found from this graph to <code class="xref cpp cpp-expr docutils literal notranslate"><a class="reference internal" href="#_CPPv4NK3mod5graph5Graph11isomorphismENSt10shared_ptrI5GraphEENSt6size_tE13LabelSettings" title="mod::graph::Graph::isomorphism::g"><span class="pre">g</span></a></code>, but at most <code class="xref cpp cpp-expr docutils literal notranslate"><a class="reference internal" href="#_CPPv4NK3mod5graph5Graph11isomorphismENSt10shared_ptrI5GraphEENSt6size_tE13LabelSettings" title="mod::graph::Graph::isomorphism::maxNumMatches"><span class="pre">maxNumMatches</span></a></code>.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="_CPPv4NK3mod5graph5Graph12monomorphismENSt10shared_ptrI5GraphEENSt6size_tE13LabelSettings">
+<span id="_CPPv3NK3mod5graph5Graph12monomorphismENSt10shared_ptrI5GraphEENSt6size_tE13LabelSettings"></span><span id="_CPPv2NK3mod5graph5Graph12monomorphismENSt10shared_ptrI5GraphEENSt6size_tE13LabelSettings"></span><span id="mod::graph::Graph::monomorphism__std::shared_ptr:Graph:.std::s.LabelSettingsC"></span>std::size_t <code class="sig-name descname">monomorphism</code><span class="sig-paren">(</span>std::shared_ptr&lt;<a class="reference internal" href="#_CPPv4N3mod5graph5GraphE" title="mod::graph::Graph">Graph</a>&gt; <em>g</em>, std::size_t <em>maxNumMatches</em>, <a class="reference internal" href="../Config.html#_CPPv4N3mod13LabelSettingsE" title="mod::LabelSettings">LabelSettings</a> <em>labelSettings</em><span class="sig-paren">)</span> <em class="property">const</em><a class="headerlink" href="#_CPPv4NK3mod5graph5Graph12monomorphismENSt10shared_ptrI5GraphEENSt6size_tE13LabelSettings" title="Permalink to this definition">¶</a><br /></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>the number of monomorphisms from this graph to <code class="xref cpp cpp-expr docutils literal notranslate"><a class="reference internal" href="#_CPPv4NK3mod5graph5Graph12monomorphismENSt10shared_ptrI5GraphEENSt6size_tE13LabelSettings" title="mod::graph::Graph::monomorphism::g"><span class="pre">g</span></a></code>, though at most <code class="xref cpp cpp-expr docutils literal notranslate"><a class="reference internal" href="#_CPPv4NK3mod5graph5Graph12monomorphismENSt10shared_ptrI5GraphEENSt6size_tE13LabelSettings" title="mod::graph::Graph::monomorphism::maxNumMatches"><span class="pre">maxNumMatches</span></a></code>.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="_CPPv4NK3mod5graph5Graph15makePermutationEv">
+<span id="_CPPv3NK3mod5graph5Graph15makePermutationEv"></span><span id="_CPPv2NK3mod5graph5Graph15makePermutationEv"></span><span id="mod::graph::Graph::makePermutationC"></span>std::shared_ptr&lt;<a class="reference internal" href="#_CPPv4N3mod5graph5GraphE" title="mod::graph::Graph">Graph</a>&gt; <code class="sig-name descname">makePermutation</code><span class="sig-paren">(</span><span class="sig-paren">)</span> <em class="property">const</em><a class="headerlink" href="#_CPPv4NK3mod5graph5Graph15makePermutationEv" title="Permalink to this definition">¶</a><br /></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>a graph isomorphic to this, but with the vertex indices randomly permuted.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="_CPPv4N3mod5graph5Graph8setImageENSt10shared_ptrI8FunctionIFNSt6stringEvEEEE">
+<span id="_CPPv3N3mod5graph5Graph8setImageENSt10shared_ptrI8FunctionIFNSt6stringEvEEEE"></span><span id="_CPPv2N3mod5graph5Graph8setImageENSt10shared_ptrI8FunctionIFNSt6stringEvEEEE"></span>void <code class="sig-name descname">setImage</code><span class="sig-paren">(</span>std::shared_ptr&lt;<a class="reference internal" href="../Function.html#_CPPv4I0EN3mod8FunctionE" title="mod::Function">Function</a>&lt;std::string<span class="sig-paren">(</span><span class="sig-paren">)</span>&gt;&gt; <em>image</em><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N3mod5graph5Graph8setImageENSt10shared_ptrI8FunctionIFNSt6stringEvEEEE" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Set a custom depiction for the graph. The depiction file used will be the string
+returned by the given function, with <code class="docutils literal notranslate"><span class="pre">.pdf</span></code> appended.
+The function will only be called once.
+Give <code class="xref cpp cpp-expr docutils literal notranslate"><span class="pre">nullptr</span></code> to use auto-generated depiction.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="_CPPv4NK3mod5graph5Graph8getImageEv">
+<span id="_CPPv3NK3mod5graph5Graph8getImageEv"></span><span id="_CPPv2NK3mod5graph5Graph8getImageEv"></span><span id="mod::graph::Graph::getImageC"></span>std::shared_ptr&lt;<a class="reference internal" href="../Function.html#_CPPv4I0EN3mod8FunctionE" title="mod::Function">Function</a>&lt;std::string<span class="sig-paren">(</span><span class="sig-paren">)</span>&gt;&gt; <code class="sig-name descname">getImage</code><span class="sig-paren">(</span><span class="sig-paren">)</span> <em class="property">const</em><a class="headerlink" href="#_CPPv4NK3mod5graph5Graph8getImageEv" title="Permalink to this definition">¶</a><br /></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>the current custom depiction file function.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="_CPPv4N3mod5graph5Graph15setImageCommandENSt6stringE">
+<span id="_CPPv3N3mod5graph5Graph15setImageCommandENSt6stringE"></span><span id="_CPPv2N3mod5graph5Graph15setImageCommandENSt6stringE"></span><span id="mod::graph::Graph::setImageCommand__ss"></span>void <code class="sig-name descname">setImageCommand</code><span class="sig-paren">(</span>std::string <em>cmd</em><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N3mod5graph5Graph15setImageCommandENSt6stringE" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Set a command to be run in post-processing if a custom depiction is set.
+The command is only run once.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="_CPPv4NK3mod5graph5Graph15getImageCommandEv">
+<span id="_CPPv3NK3mod5graph5Graph15getImageCommandEv"></span><span id="_CPPv2NK3mod5graph5Graph15getImageCommandEv"></span><span id="mod::graph::Graph::getImageCommandC"></span>std::string <code class="sig-name descname">getImageCommand</code><span class="sig-paren">(</span><span class="sig-paren">)</span> <em class="property">const</em><a class="headerlink" href="#_CPPv4NK3mod5graph5Graph15getImageCommandEv" title="Permalink to this definition">¶</a><br /></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>the current post-processing command.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="_CPPv4NK3mod5graph5Graph23getVertexFromExternalIdEi">
+<span id="_CPPv3NK3mod5graph5Graph23getVertexFromExternalIdEi"></span><span id="_CPPv2NK3mod5graph5Graph23getVertexFromExternalIdEi"></span><span id="mod::graph::Graph::getVertexFromExternalId__iC"></span><a class="reference internal" href="GraphInterface.html#_CPPv4N3mod5graph5Graph6VertexE" title="mod::graph::Graph::Vertex">Vertex</a> <code class="sig-name descname">getVertexFromExternalId</code><span class="sig-paren">(</span>int <em>id</em><span class="sig-paren">)</span> <em class="property">const</em><a class="headerlink" href="#_CPPv4NK3mod5graph5Graph23getVertexFromExternalIdEi" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>If the graph was not loaded from an external data format, then this function
+always return a null descriptor.
+If the graph was loaded from a SMILES string, but <em>any</em> class label was not unique,
+then the function always return a null descriptor.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>In general there is no correlation between external and internal ids.</p>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>the vertex descriptor for the given external id.
+The descriptor is null if the external id was not used.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="_CPPv4NK3mod5graph5Graph16getMinExternalIdEv">
+<span id="_CPPv3NK3mod5graph5Graph16getMinExternalIdEv"></span><span id="_CPPv2NK3mod5graph5Graph16getMinExternalIdEv"></span><span id="mod::graph::Graph::getMinExternalIdC"></span>int <code class="sig-name descname">getMinExternalId</code><span class="sig-paren">(</span><span class="sig-paren">)</span> <em class="property">const</em><a class="headerlink" href="#_CPPv4NK3mod5graph5Graph16getMinExternalIdEv" title="Permalink to this definition">¶</a><br /></dt>
+<dt id="_CPPv4NK3mod5graph5Graph16getMaxExternalIdEv">
+<span id="_CPPv3NK3mod5graph5Graph16getMaxExternalIdEv"></span><span id="_CPPv2NK3mod5graph5Graph16getMaxExternalIdEv"></span><span id="mod::graph::Graph::getMaxExternalIdC"></span>int <code class="sig-name descname">getMaxExternalId</code><span class="sig-paren">(</span><span class="sig-paren">)</span> <em class="property">const</em><a class="headerlink" href="#_CPPv4NK3mod5graph5Graph16getMaxExternalIdEv" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>If the graph was not loaded from an external data format, then these functions
+always return 0. Otherwise, return the minimum/maximum external id from which
+non-null vertices can be obtained from <a class="reference internal" href="#_CPPv4NK3mod5graph5Graph23getVertexFromExternalIdEi" title="mod::graph::Graph::getVertexFromExternalId"><code class="xref cpp cpp-func docutils literal notranslate"><span class="pre">getVertexFromExternalId()</span></code></a>.
+If no such minimum and maximum exists, then 0 will be returned.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="_CPPv4NK3mod5graph5Graph17instantiateStereoEv">
+<span id="_CPPv3NK3mod5graph5Graph17instantiateStereoEv"></span><span id="_CPPv2NK3mod5graph5Graph17instantiateStereoEv"></span><span id="mod::graph::Graph::instantiateStereoC"></span>void <code class="sig-name descname">instantiateStereo</code><span class="sig-paren">(</span><span class="sig-paren">)</span> <em class="property">const</em><a class="headerlink" href="#_CPPv4NK3mod5graph5Graph17instantiateStereoEv" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Make sure that stereo data is instantiated.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Throws</dt>
+<dd class="field-odd"><p><code class="xref cpp cpp-expr docutils literal notranslate"><a class="reference internal" href="../Error.html#_CPPv4N3mod20StereoDeductionErrorE" title="mod::StereoDeductionError"><span class="pre">StereoDeductionError</span></a></code> if the data was not instantiated and deduction failed.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="_CPPv4N3mod5graph5Graph14graphGMLStringERKNSt6stringE">
+<span id="_CPPv3N3mod5graph5Graph14graphGMLStringERKNSt6stringE"></span><span id="_CPPv2N3mod5graph5Graph14graphGMLStringERKNSt6stringE"></span><span id="mod::graph::Graph::graphGMLString__ssCR"></span><em class="property">static</em> std::shared_ptr&lt;<a class="reference internal" href="#_CPPv4N3mod5graph5GraphE" title="mod::graph::Graph">Graph</a>&gt; <code class="sig-name descname">graphGMLString</code><span class="sig-paren">(</span><em class="property">const</em> std::string &amp;<em>data</em><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N3mod5graph5Graph14graphGMLStringERKNSt6stringE" title="Permalink to this definition">¶</a><br /></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>a graph created from the given <a class="reference internal" href="../../dataDesc/dataDesc.html#graph-gml"><span class="std std-ref">GML</span></a> data.</p>
+</dd>
+<dt class="field-even">Throws</dt>
+<dd class="field-even"><p><a class="reference internal" href="../Error.html#_CPPv4N3mod10InputErrorE" title="mod::InputError"><code class="xref cpp cpp-class docutils literal notranslate"><span class="pre">InputError</span></code></a> on bad input.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="_CPPv4N3mod5graph5Graph8graphGMLERKNSt6stringE">
+<span id="_CPPv3N3mod5graph5Graph8graphGMLERKNSt6stringE"></span><span id="_CPPv2N3mod5graph5Graph8graphGMLERKNSt6stringE"></span><span id="mod::graph::Graph::graphGML__ssCR"></span><em class="property">static</em> std::shared_ptr&lt;<a class="reference internal" href="#_CPPv4N3mod5graph5GraphE" title="mod::graph::Graph">Graph</a>&gt; <code class="sig-name descname">graphGML</code><span class="sig-paren">(</span><em class="property">const</em> std::string &amp;<em>file</em><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N3mod5graph5Graph8graphGMLERKNSt6stringE" title="Permalink to this definition">¶</a><br /></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>a graph loaded from the given <a class="reference internal" href="../../dataDesc/dataDesc.html#graph-gml"><span class="std std-ref">GML</span></a> file.</p>
+</dd>
+<dt class="field-even">Throws</dt>
+<dd class="field-even"><p><a class="reference internal" href="../Error.html#_CPPv4N3mod10InputErrorE" title="mod::InputError"><code class="xref cpp cpp-class docutils literal notranslate"><span class="pre">InputError</span></code></a> on bad input.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="_CPPv4N3mod5graph5Graph8graphDFSERKNSt6stringE">
+<span id="_CPPv3N3mod5graph5Graph8graphDFSERKNSt6stringE"></span><span id="_CPPv2N3mod5graph5Graph8graphDFSERKNSt6stringE"></span><span id="mod::graph::Graph::graphDFS__ssCR"></span><em class="property">static</em> std::shared_ptr&lt;<a class="reference internal" href="#_CPPv4N3mod5graph5GraphE" title="mod::graph::Graph">Graph</a>&gt; <code class="sig-name descname">graphDFS</code><span class="sig-paren">(</span><em class="property">const</em> std::string &amp;<em>graphDFS</em><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N3mod5graph5Graph8graphDFSERKNSt6stringE" title="Permalink to this definition">¶</a><br /></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>a graph loaded from the given <a class="reference internal" href="../../dataDesc/dataDesc.html#graph-graphdfs"><span class="std std-ref">GraphDFS</span></a> string.</p>
+</dd>
+<dt class="field-even">Throws</dt>
+<dd class="field-even"><p><a class="reference internal" href="../Error.html#_CPPv4N3mod10InputErrorE" title="mod::InputError"><code class="xref cpp cpp-class docutils literal notranslate"><span class="pre">InputError</span></code></a> on bad input.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="_CPPv4N3mod5graph5Graph6smilesERKNSt6stringE">
+<span id="_CPPv3N3mod5graph5Graph6smilesERKNSt6stringE"></span><span id="_CPPv2N3mod5graph5Graph6smilesERKNSt6stringE"></span><span id="mod::graph::Graph::smiles__ssCR"></span><em class="property">static</em> std::shared_ptr&lt;<a class="reference internal" href="#_CPPv4N3mod5graph5GraphE" title="mod::graph::Graph">Graph</a>&gt; <code class="sig-name descname">smiles</code><span class="sig-paren">(</span><em class="property">const</em> std::string &amp;<em>smiles</em><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N3mod5graph5Graph6smilesERKNSt6stringE" title="Permalink to this definition">¶</a><br /></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>a graph representing a molecule, loaded from the given <a class="reference internal" href="../../dataDesc/dataDesc.html#graph-smiles"><span class="std std-ref">SMILES</span></a> string.</p>
+</dd>
+<dt class="field-even">Throws</dt>
+<dd class="field-even"><p><a class="reference internal" href="../Error.html#_CPPv4N3mod10InputErrorE" title="mod::InputError"><code class="xref cpp cpp-class docutils literal notranslate"><span class="pre">InputError</span></code></a> on bad input.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="_CPPv4N3mod5graph5Graph9makeGraphENSt10unique_ptrIN3lib5Graph6SingleEEE">
+<span id="_CPPv3N3mod5graph5Graph9makeGraphENSt10unique_ptrIN3lib5Graph6SingleEEE"></span><span id="_CPPv2N3mod5graph5Graph9makeGraphENSt10unique_ptrIN3lib5Graph6SingleEEE"></span><span id="mod::graph::Graph::makeGraph__std::unique_ptr:lib::Graph::Single:"></span><em class="property">static</em> std::shared_ptr&lt;<a class="reference internal" href="#_CPPv4N3mod5graph5GraphE" title="mod::graph::Graph">Graph</a>&gt; <code class="sig-name descname">makeGraph</code><span class="sig-paren">(</span>std::unique_ptr&lt;lib::Graph::Single&gt; <em>g</em><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N3mod5graph5Graph9makeGraphENSt10unique_ptrIN3lib5Graph6SingleEEE" title="Permalink to this definition">¶</a><br /></dt>
+<dt id="_CPPv4N3mod5graph5Graph9makeGraphENSt10unique_ptrIN3lib5Graph6SingleEEENSt3mapIiNSt6size_tEEE">
+<span id="_CPPv3N3mod5graph5Graph9makeGraphENSt10unique_ptrIN3lib5Graph6SingleEEENSt3mapIiNSt6size_tEEE"></span><span id="_CPPv2N3mod5graph5Graph9makeGraphENSt10unique_ptrIN3lib5Graph6SingleEEENSt3mapIiNSt6size_tEEE"></span><span id="mod::graph::Graph::makeGraph__std::unique_ptr:lib::Graph::Single:.std::map:i.std::s:"></span><em class="property">static</em> std::shared_ptr&lt;<a class="reference internal" href="#_CPPv4N3mod5graph5GraphE" title="mod::graph::Graph">Graph</a>&gt; <code class="sig-name descname">makeGraph</code><span class="sig-paren">(</span>std::unique_ptr&lt;lib::Graph::Single&gt; <em>g</em>, std::map&lt;int, std::size_t&gt; <em>externalToInternalIds</em><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N3mod5graph5Graph9makeGraphENSt10unique_ptrIN3lib5Graph6SingleEEENSt3mapIiNSt6size_tEEE" title="Permalink to this definition">¶</a><br /></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>a graph wrapping the given internal graph object. If an id mapping is given, it will be used for the <a class="reference internal" href="#_CPPv4NK3mod5graph5Graph23getVertexFromExternalIdEi" title="mod::graph::Graph::getVertexFromExternalId"><code class="xref cpp cpp-func docutils literal notranslate"><span class="pre">getVertexFromExternalId()</span></code></a> function.</p>
+</dd>
+</dl>
+</dd></dl>
+
+</div>
+</div>
+</div>
+
+
+    </div>
+      
+  </div>
+</div>
+<footer class="footer">
+  <div class="container">
+    <p class="pull-right">
+      <a href="#">Back to top</a>
+      
+        <br/>
+        
+<div id="sourcelink">
+  <a href="../../_sources/libmod/graph/Graph.rst.txt"
+     rel="nofollow">Source</a>
+</div>
+      
+    </p>
+    <p>
+        &copy; Copyright 2013-2020, Jakob Lykke Andersen.<br/>
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 3.0.0+/60e55278.<br/>
+    </p>
+  </div>
+</footer>
+  </body>
+</html>

@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta charset="utf-8" />
+    <title>3.1.4. Error &#8212; MØD 0.10.0 documentation</title>
+    <link rel="stylesheet" href="../_static/bootstrap-sphinx.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" type="text/css" href="../_static/haxes.css" />
+    <script id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+    <script src="../_static/jquery.js"></script>
+    <script src="../_static/underscore.js"></script>
+    <script src="../_static/doctools.js"></script>
+    <script src="../_static/language_data.js"></script>
+    <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="3.1.5. Misc" href="Misc.html" />
+    <link rel="prev" title="3.1.3. Derivation" href="Derivation.html" />
+<meta charset='utf-8'>
+<meta http-equiv='X-UA-Compatible' content='IE=edge,chrome=1'>
+<meta name='viewport' content='width=device-width, initial-scale=1.0, maximum-scale=1'>
+<meta name="apple-mobile-web-app-capable" content="yes">
+<script type="text/javascript" src="../_static/js/jquery-1.11.0.min.js "></script>
+<script type="text/javascript" src="../_static/js/jquery-fix.js "></script>
+<script type="text/javascript" src="../_static/bootstrap-3.3.7/js/bootstrap.min.js "></script>
+<script type="text/javascript" src="../_static/bootstrap-sphinx.js "></script>
+
+  </head><body>
+
+  <div id="navbar" class="navbar navbar-default navbar-fixed-top">
+    <div class="container">
+      <div class="navbar-header">
+        <!-- .btn-navbar is used as the toggle for collapsed navbar content -->
+        <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".nav-collapse">
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+        </button>
+        <a class="navbar-brand" href="../index.html">
+          MØD</a>
+        <span class="navbar-text navbar-version pull-left"><b>0.10.0</b></span>
+      </div>
+
+        <div class="collapse navbar-collapse nav-collapse">
+          <ul class="nav navbar-nav">
+            
+                <li><a href="../genindex.html">Index</a></li>
+            
+            
+              <li class="dropdown globaltoc-container">
+  <a role="button"
+     id="dLabelGlobalToc"
+     data-toggle="dropdown"
+     data-target="#"
+     href="../index.html">Site <b class="caret"></b></a>
+  <ul class="dropdown-menu globaltoc"
+      role="menu"
+      aria-labelledby="dLabelGlobalToc"><ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../installation.html">1. Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../libmod/libmod.html">2. libMØD</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="pymod.html">3. PyMØD</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../postmod/postmod.html">4. PostMØD (<code class="docutils literal notranslate"><span class="pre">mod_post</span></code>)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../modWrapper/modWrapper.html">5. The Wrapper Script (<code class="docutils literal notranslate"><span class="pre">mod</span></code>)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../dataDesc/dataDesc.html">6. Data Formats</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../dgStrat/dgStrat.html">7. Derivation Graph Strategies</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../examples/index.html">8. Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../knownIssues.html">9. Known Issues</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../changes.html">10. Changes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../references.html">11. References</a></li>
+</ul>
+</ul>
+</li>
+              
+                <li class="dropdown">
+  <a role="button"
+     id="dLabelLocalToc"
+     data-toggle="dropdown"
+     data-target="#"
+     href="#">Page <b class="caret"></b></a>
+  <ul class="dropdown-menu localtoc"
+      role="menu"
+      aria-labelledby="dLabelLocalToc"><ul>
+<li><a class="reference internal" href="#">3.1.4. Error</a></li>
+</ul>
+</ul>
+</li>
+              
+            
+            
+              
+                
+  <li>
+    <a href="Derivation.html" title="Previous Chapter: 3.1.3. Derivation"><span class="glyphicon glyphicon-chevron-left visible-sm"></span><span class="hidden-sm hidden-tablet">&laquo; 3.1.3. Derivation</span>
+    </a>
+  </li>
+  <li>
+    <a href="Misc.html" title="Next Chapter: 3.1.5. Misc"><span class="glyphicon glyphicon-chevron-right visible-sm"></span><span class="hidden-sm hidden-tablet">3.1.5. Misc &raquo;</span>
+    </a>
+  </li>
+              
+            
+            
+            
+            
+          </ul>
+
+          
+            
+<form class="navbar-form navbar-right" action="../search.html" method="get">
+ <div class="form-group">
+  <input type="text" name="q" class="form-control" placeholder="Search" />
+ </div>
+  <input type="hidden" name="check_keywords" value="yes" />
+  <input type="hidden" name="area" value="default" />
+</form>
+          
+        </div>
+    </div>
+  </div>
+
+<div class="container">
+  <div class="row">
+    <div class="body col-md-12 content" role="main">
+      
+  <div class="section" id="error">
+<span id="py-error"></span><h1><span class="section-number">3.1.4. </span>Error<a class="headerlink" href="#error" title="Permalink to this headline">¶</a></h1>
+<dl class="exception">
+<dt id="mod.FatalError">
+<em class="property">exception </em><code class="sig-prename descclassname">mod.</code><code class="sig-name descname">FatalError</code><a class="headerlink" href="#mod.FatalError" title="Permalink to this definition">¶</a></dt>
+<dd><p>See <a class="reference internal" href="../libmod/Error.html#_CPPv4N3mod10FatalErrorE" title="mod::FatalError"><code class="xref cpp cpp-class docutils literal notranslate"><span class="pre">FatalError</span></code></a>.</p>
+</dd></dl>
+
+<dl class="exception">
+<dt id="mod.InputError">
+<em class="property">exception </em><code class="sig-prename descclassname">mod.</code><code class="sig-name descname">InputError</code><a class="headerlink" href="#mod.InputError" title="Permalink to this definition">¶</a></dt>
+<dd><p>See <a class="reference internal" href="../libmod/Error.html#_CPPv4N3mod10InputErrorE" title="mod::InputError"><code class="xref cpp cpp-class docutils literal notranslate"><span class="pre">InputError</span></code></a>.</p>
+</dd></dl>
+
+<dl class="exception">
+<dt id="mod.LogicError">
+<em class="property">exception </em><code class="sig-prename descclassname">mod.</code><code class="sig-name descname">LogicError</code><a class="headerlink" href="#mod.LogicError" title="Permalink to this definition">¶</a></dt>
+<dd><p>See <a class="reference internal" href="../libmod/Error.html#_CPPv4N3mod10LogicErrorE" title="mod::LogicError"><code class="xref cpp cpp-class docutils literal notranslate"><span class="pre">LogicError</span></code></a>.</p>
+</dd></dl>
+
+<dl class="exception">
+<dt id="mod.TermParsingError">
+<em class="property">exception </em><code class="sig-prename descclassname">mod.</code><code class="sig-name descname">TermParsingError</code><a class="headerlink" href="#mod.TermParsingError" title="Permalink to this definition">¶</a></dt>
+<dd><p>See <a class="reference internal" href="../libmod/Error.html#_CPPv4N3mod16TermParsingErrorE" title="mod::TermParsingError"><code class="xref cpp cpp-class docutils literal notranslate"><span class="pre">TermParsingError</span></code></a>.</p>
+</dd></dl>
+
+<dl class="exception">
+<dt id="mod.StereoDeductionError">
+<em class="property">exception </em><code class="sig-prename descclassname">mod.</code><code class="sig-name descname">StereoDeductionError</code><a class="headerlink" href="#mod.StereoDeductionError" title="Permalink to this definition">¶</a></dt>
+<dd><p>See <a class="reference internal" href="../libmod/Error.html#_CPPv4N3mod20StereoDeductionErrorE" title="mod::StereoDeductionError"><code class="xref cpp cpp-class docutils literal notranslate"><span class="pre">StereoDeductionError</span></code></a>.</p>
+</dd></dl>
+
+</div>
+
+
+    </div>
+      
+  </div>
+</div>
+<footer class="footer">
+  <div class="container">
+    <p class="pull-right">
+      <a href="#">Back to top</a>
+      
+        <br/>
+        
+<div id="sourcelink">
+  <a href="../_sources/pymod/Error.rst.txt"
+     rel="nofollow">Source</a>
+</div>
+      
+    </p>
+    <p>
+        &copy; Copyright 2013-2020, Jakob Lykke Andersen.<br/>
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 3.0.0+/60e55278.<br/>
+    </p>
+  </div>
+</footer>
+  </body>
+</html>

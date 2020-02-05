@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta charset="utf-8" />
+    <title>2.2.3. Derivation.hpp &#8212; MØD 0.10.0 documentation</title>
+    <link rel="stylesheet" href="../_static/bootstrap-sphinx.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" type="text/css" href="../_static/haxes.css" />
+    <script id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+    <script src="../_static/jquery.js"></script>
+    <script src="../_static/underscore.js"></script>
+    <script src="../_static/doctools.js"></script>
+    <script src="../_static/language_data.js"></script>
+    <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="2.2.4. Error.hpp" href="Error.html" />
+    <link rel="prev" title="2.2.2. Config.hpp" href="Config.html" />
+<meta charset='utf-8'>
+<meta http-equiv='X-UA-Compatible' content='IE=edge,chrome=1'>
+<meta name='viewport' content='width=device-width, initial-scale=1.0, maximum-scale=1'>
+<meta name="apple-mobile-web-app-capable" content="yes">
+<script type="text/javascript" src="../_static/js/jquery-1.11.0.min.js "></script>
+<script type="text/javascript" src="../_static/js/jquery-fix.js "></script>
+<script type="text/javascript" src="../_static/bootstrap-3.3.7/js/bootstrap.min.js "></script>
+<script type="text/javascript" src="../_static/bootstrap-sphinx.js "></script>
+
+  </head><body>
+
+  <div id="navbar" class="navbar navbar-default navbar-fixed-top">
+    <div class="container">
+      <div class="navbar-header">
+        <!-- .btn-navbar is used as the toggle for collapsed navbar content -->
+        <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".nav-collapse">
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+        </button>
+        <a class="navbar-brand" href="../index.html">
+          MØD</a>
+        <span class="navbar-text navbar-version pull-left"><b>0.10.0</b></span>
+      </div>
+
+        <div class="collapse navbar-collapse nav-collapse">
+          <ul class="nav navbar-nav">
+            
+                <li><a href="../genindex.html">Index</a></li>
+            
+            
+              <li class="dropdown globaltoc-container">
+  <a role="button"
+     id="dLabelGlobalToc"
+     data-toggle="dropdown"
+     data-target="#"
+     href="../index.html">Site <b class="caret"></b></a>
+  <ul class="dropdown-menu globaltoc"
+      role="menu"
+      aria-labelledby="dLabelGlobalToc"><ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../installation.html">1. Installation</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="libmod.html">2. libMØD</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../pymod/pymod.html">3. PyMØD</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../postmod/postmod.html">4. PostMØD (<code class="docutils literal notranslate"><span class="pre">mod_post</span></code>)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../modWrapper/modWrapper.html">5. The Wrapper Script (<code class="docutils literal notranslate"><span class="pre">mod</span></code>)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../dataDesc/dataDesc.html">6. Data Formats</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../dgStrat/dgStrat.html">7. Derivation Graph Strategies</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../examples/index.html">8. Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../knownIssues.html">9. Known Issues</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../changes.html">10. Changes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../references.html">11. References</a></li>
+</ul>
+</ul>
+</li>
+              
+                <li class="dropdown">
+  <a role="button"
+     id="dLabelLocalToc"
+     data-toggle="dropdown"
+     data-target="#"
+     href="#">Page <b class="caret"></b></a>
+  <ul class="dropdown-menu localtoc"
+      role="menu"
+      aria-labelledby="dLabelLocalToc"><ul>
+<li><a class="reference internal" href="#">2.2.3. Derivation.hpp</a><ul>
+<li><a class="reference internal" href="#class-derivation">2.2.3.1. Class <code class="docutils literal notranslate"><span class="pre">Derivation</span></code></a><ul>
+<li><a class="reference internal" href="#synopsis">2.2.3.1.1. Synopsis</a></li>
+<li><a class="reference internal" href="#details">2.2.3.1.2. Details</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#class-derivations">2.2.3.2. Class <code class="docutils literal notranslate"><span class="pre">Derivations</span></code></a><ul>
+<li><a class="reference internal" href="#id1">2.2.3.2.1. Synopsis</a></li>
+<li><a class="reference internal" href="#id2">2.2.3.2.2. Details</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</ul>
+</li>
+              
+            
+            
+              
+                
+  <li>
+    <a href="Config.html" title="Previous Chapter: 2.2.2. Config.hpp"><span class="glyphicon glyphicon-chevron-left visible-sm"></span><span class="hidden-sm hidden-tablet">&laquo; 2.2.2. Config.hpp</span>
+    </a>
+  </li>
+  <li>
+    <a href="Error.html" title="Next Chapter: 2.2.4. Error.hpp"><span class="glyphicon glyphicon-chevron-right visible-sm"></span><span class="hidden-sm hidden-tablet">2.2.4. Error.hpp &raquo;</span>
+    </a>
+  </li>
+              
+            
+            
+            
+            
+          </ul>
+
+          
+            
+<form class="navbar-form navbar-right" action="../search.html" method="get">
+ <div class="form-group">
+  <input type="text" name="q" class="form-control" placeholder="Search" />
+ </div>
+  <input type="hidden" name="check_keywords" value="yes" />
+  <input type="hidden" name="area" value="default" />
+</form>
+          
+        </div>
+    </div>
+  </div>
+
+<div class="container">
+  <div class="row">
+    <div class="body col-md-12 content" role="main">
+      
+  <div class="section" id="derivation-hpp">
+<span id="cpp-derivation"></span><h1><span class="section-number">2.2.3. </span>Derivation.hpp<a class="headerlink" href="#derivation-hpp" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="class-derivation">
+<h2><span class="section-number">2.2.3.1. </span>Class <code class="docutils literal notranslate"><span class="pre">Derivation</span></code><a class="headerlink" href="#class-derivation" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="_CPPv4N3mod10DerivationE">
+<span id="_CPPv3N3mod10DerivationE"></span><span id="_CPPv2N3mod10DerivationE"></span><span id="mod::Derivation"></span><em class="property">class </em><code class="sig-name descname">Derivation</code><a class="headerlink" href="#_CPPv4N3mod10DerivationE" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>This class is a simple wrapper for passing data around.
+It contains two multisets of graphs <span class="math notranslate nohighlight">\(G\)</span> and <span class="math notranslate nohighlight">\(H\)</span>,
+and optionally a rule <span class="math notranslate nohighlight">\(p\)</span>.
+An object may thus implicitly store a set of direct derivations
+<span class="math notranslate nohighlight">\(G\Rightarrow^p H\)</span>, though the validity of the data is not checked.</p>
+</dd></dl>
+
+<div class="section" id="synopsis">
+<h3><span class="section-number">2.2.3.1.1. </span>Synopsis<a class="headerlink" href="#synopsis" title="Permalink to this headline">¶</a></h3>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="k">struct</span> <span class="n">MOD_DECL</span> <span class="n">Derivation</span> <span class="p">{</span>
+    <span class="k">using</span> <span class="n">GraphList</span> <span class="o">=</span> <span class="n">std</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;</span><span class="n">std</span><span class="o">::</span><span class="n">shared_ptr</span><span class="o">&lt;</span><span class="n">graph</span><span class="o">::</span><span class="n">Graph</span><span class="o">&gt;&gt;</span><span class="p">;</span>
+<span class="k">public</span><span class="o">:</span>
+    <span class="o">~</span><span class="n">Derivation</span><span class="p">();</span>
+    <span class="n">MOD_DECL</span> <span class="k">friend</span> <span class="n">std</span><span class="o">::</span><span class="n">ostream</span> <span class="o">&amp;</span><span class="k">operator</span><span class="o">&lt;&lt;</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">ostream</span> <span class="o">&amp;</span><span class="n">s</span><span class="p">,</span> <span class="k">const</span> <span class="n">Derivation</span> <span class="o">&amp;</span><span class="n">d</span><span class="p">);</span>
+<span class="k">public</span><span class="o">:</span>
+    <span class="n">GraphList</span> <span class="n">left</span><span class="p">;</span>
+    <span class="n">std</span><span class="o">::</span><span class="n">shared_ptr</span><span class="o">&lt;</span><span class="n">rule</span><span class="o">::</span><span class="n">Rule</span><span class="o">&gt;</span> <span class="n">r</span><span class="p">;</span>
+    <span class="n">GraphList</span> <span class="n">right</span><span class="p">;</span>
+<span class="k">public</span><span class="o">:</span>
+    <span class="k">operator</span> <span class="n">Derivations</span><span class="p">()</span> <span class="k">const</span><span class="p">;</span>
+<span class="p">};</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="details">
+<h3><span class="section-number">2.2.3.1.2. </span>Details<a class="headerlink" href="#details" title="Permalink to this headline">¶</a></h3>
+<dl class="type">
+<dt id="_CPPv4N3mod10Derivation9GraphListE">
+<span id="_CPPv3N3mod10Derivation9GraphListE"></span><span id="_CPPv2N3mod10Derivation9GraphListE"></span><em class="property">using </em><code class="sig-name descname">GraphList</code> = std::vector&lt;std::shared_ptr&lt;graph::<a class="reference internal" href="graph/Graph.html#_CPPv4N3mod5graph5GraphE" title="mod::graph::Graph">Graph</a>&gt;&gt;<a class="headerlink" href="#_CPPv4N3mod10Derivation9GraphListE" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Representation of a multiset of graphs.</p>
+</dd></dl>
+
+<dl class="member">
+<dt id="_CPPv4N3mod10Derivation4leftE">
+<span id="_CPPv3N3mod10Derivation4leftE"></span><span id="_CPPv2N3mod10Derivation4leftE"></span><span id="mod::Derivation::left__GraphList"></span><a class="reference internal" href="#_CPPv4N3mod10Derivation9GraphListE" title="mod::Derivation::GraphList">GraphList</a> <code class="sig-name descname">left</code><a class="headerlink" href="#_CPPv4N3mod10Derivation4leftE" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Represents the multi-set of left graphs <span class="math notranslate nohighlight">\(G\)</span>.</p>
+</dd></dl>
+
+<dl class="member">
+<dt id="_CPPv4N3mod10Derivation1rE">
+<span id="_CPPv3N3mod10Derivation1rE"></span><span id="_CPPv2N3mod10Derivation1rE"></span><span id="mod::Derivation::r__std::shared_ptr:rule::Rule:"></span>std::shared_ptr&lt;rule::<a class="reference internal" href="rule/Rule.html#_CPPv4N3mod4rule4RuleE" title="mod::rule::Rule">Rule</a>&gt; <code class="sig-name descname">r</code><a class="headerlink" href="#_CPPv4N3mod10Derivation1rE" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Represents the transformation rule <span class="math notranslate nohighlight">\(p\)</span>, or no rule at all.</p>
+</dd></dl>
+
+<dl class="member">
+<dt id="_CPPv4N3mod10Derivation5rightE">
+<span id="_CPPv3N3mod10Derivation5rightE"></span><span id="_CPPv2N3mod10Derivation5rightE"></span><span id="mod::Derivation::right__GraphList"></span><a class="reference internal" href="#_CPPv4N3mod10Derivation9GraphListE" title="mod::Derivation::GraphList">GraphList</a> <code class="sig-name descname">right</code><a class="headerlink" href="#_CPPv4N3mod10Derivation5rightE" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Represents the multi-set of right graphs <span class="math notranslate nohighlight">\(H\)</span>.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="_CPPv4NK3mod10Derivationcv11DerivationsEv">
+<span id="_CPPv3NK3mod10Derivationcv11DerivationsEv"></span><span id="_CPPv2NK3mod10Derivationcv11DerivationsEv"></span><span id="mod::Derivation::castto-Derivations-operatorC"></span><code class="sig-name descname">operator Derivations</code><span class="sig-paren">(</span><span class="sig-paren">)</span> <em class="property">const</em><a class="headerlink" href="#_CPPv4NK3mod10Derivationcv11DerivationsEv" title="Permalink to this definition">¶</a><br /></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>the <a class="reference internal" href="#_CPPv4N3mod11DerivationsE" title="mod::Derivations"><code class="xref cpp cpp-class docutils literal notranslate"><span class="pre">Derivations</span></code></a> object equivalent to this object.</p>
+</dd>
+</dl>
+</dd></dl>
+
+</div>
+</div>
+<div class="section" id="class-derivations">
+<h2><span class="section-number">2.2.3.2. </span>Class <code class="docutils literal notranslate"><span class="pre">Derivations</span></code><a class="headerlink" href="#class-derivations" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="_CPPv4N3mod11DerivationsE">
+<span id="_CPPv3N3mod11DerivationsE"></span><span id="_CPPv2N3mod11DerivationsE"></span><span id="mod::Derivations"></span><em class="property">class </em><code class="sig-name descname">Derivations</code><a class="headerlink" href="#_CPPv4N3mod11DerivationsE" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>This class is a simple wrapper for passing data around.
+It contains two multisets of graphs <span class="math notranslate nohighlight">\(G\)</span> and <span class="math notranslate nohighlight">\(H\)</span>,
+and (possibly empty) set of rules.
+An object may thus implicitly store a set of direct derivations
+<span class="math notranslate nohighlight">\(G\Rightarrow^p H\)</span> for each rule <span class="math notranslate nohighlight">\(p\)</span>,
+though the validity of the data is not checked.</p>
+</dd></dl>
+
+<div class="section" id="id1">
+<h3><span class="section-number">2.2.3.2.1. </span>Synopsis<a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h3>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="k">struct</span> <span class="n">MOD_DECL</span> <span class="n">Derivations</span> <span class="p">{</span>
+    <span class="k">using</span> <span class="n">GraphList</span> <span class="o">=</span> <span class="n">std</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;</span><span class="n">std</span><span class="o">::</span><span class="n">shared_ptr</span><span class="o">&lt;</span><span class="n">graph</span><span class="o">::</span><span class="n">Graph</span><span class="o">&gt;&gt;</span><span class="p">;</span>
+<span class="k">public</span><span class="o">:</span>
+    <span class="o">~</span><span class="n">Derivations</span><span class="p">();</span>
+    <span class="n">MOD_DECL</span> <span class="k">friend</span> <span class="n">std</span><span class="o">::</span><span class="n">ostream</span> <span class="o">&amp;</span><span class="k">operator</span><span class="o">&lt;&lt;</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">ostream</span> <span class="o">&amp;</span><span class="n">s</span><span class="p">,</span> <span class="k">const</span> <span class="n">Derivations</span> <span class="o">&amp;</span><span class="n">d</span><span class="p">);</span>
+<span class="k">public</span><span class="o">:</span>
+    <span class="n">GraphList</span> <span class="n">left</span><span class="p">;</span>
+    <span class="n">std</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;</span><span class="n">std</span><span class="o">::</span><span class="n">shared_ptr</span><span class="o">&lt;</span><span class="n">rule</span><span class="o">::</span><span class="n">Rule</span><span class="o">&gt;&gt;</span> <span class="n">rules</span><span class="p">;</span>
+    <span class="n">GraphList</span> <span class="n">right</span><span class="p">;</span>
+<span class="p">};</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="id2">
+<h3><span class="section-number">2.2.3.2.2. </span>Details<a class="headerlink" href="#id2" title="Permalink to this headline">¶</a></h3>
+<dl class="type">
+<dt id="_CPPv4N3mod11Derivations9GraphListE">
+<span id="_CPPv3N3mod11Derivations9GraphListE"></span><span id="_CPPv2N3mod11Derivations9GraphListE"></span><em class="property">using </em><code class="sig-name descname">GraphList</code> = std::vector&lt;std::shared_ptr&lt;graph::<a class="reference internal" href="graph/Graph.html#_CPPv4N3mod5graph5GraphE" title="mod::graph::Graph">Graph</a>&gt;&gt;<a class="headerlink" href="#_CPPv4N3mod11Derivations9GraphListE" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Representation of a multiset of graphs.</p>
+</dd></dl>
+
+<dl class="member">
+<dt id="_CPPv4N3mod11Derivations4leftE">
+<span id="_CPPv3N3mod11Derivations4leftE"></span><span id="_CPPv2N3mod11Derivations4leftE"></span><span id="mod::Derivations::left__GraphList"></span><a class="reference internal" href="#_CPPv4N3mod11Derivations9GraphListE" title="mod::Derivations::GraphList">GraphList</a> <code class="sig-name descname">left</code><a class="headerlink" href="#_CPPv4N3mod11Derivations4leftE" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Represents the multi-set of left graphs <span class="math notranslate nohighlight">\(G\)</span>.</p>
+</dd></dl>
+
+<dl class="member">
+<dt id="_CPPv4N3mod11Derivations5rulesE">
+<span id="_CPPv3N3mod11Derivations5rulesE"></span><span id="_CPPv2N3mod11Derivations5rulesE"></span><span id="mod::Derivations::rules__std::vector:std::shared_ptr:rule::Rule::"></span>std::vector&lt;std::shared_ptr&lt;rule::<a class="reference internal" href="rule/Rule.html#_CPPv4N3mod4rule4RuleE" title="mod::rule::Rule">Rule</a>&gt;&gt; <code class="sig-name descname">rules</code><a class="headerlink" href="#_CPPv4N3mod11Derivations5rulesE" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Represents a (possibly empty) set of transformation rules.</p>
+</dd></dl>
+
+<dl class="member">
+<dt id="_CPPv4N3mod11Derivations5rightE">
+<span id="_CPPv3N3mod11Derivations5rightE"></span><span id="_CPPv2N3mod11Derivations5rightE"></span><span id="mod::Derivations::right__GraphList"></span><a class="reference internal" href="#_CPPv4N3mod11Derivations9GraphListE" title="mod::Derivations::GraphList">GraphList</a> <code class="sig-name descname">right</code><a class="headerlink" href="#_CPPv4N3mod11Derivations5rightE" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Represents the multi-set of right graphs <span class="math notranslate nohighlight">\(H\)</span>.</p>
+</dd></dl>
+
+</div>
+</div>
+</div>
+
+
+    </div>
+      
+  </div>
+</div>
+<footer class="footer">
+  <div class="container">
+    <p class="pull-right">
+      <a href="#">Back to top</a>
+      
+        <br/>
+        
+<div id="sourcelink">
+  <a href="../_sources/libmod/Derivation.rst.txt"
+     rel="nofollow">Source</a>
+</div>
+      
+    </p>
+    <p>
+        &copy; Copyright 2013-2020, Jakob Lykke Andersen.<br/>
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 3.0.0+/60e55278.<br/>
+    </p>
+  </div>
+</footer>
+  </body>
+</html>

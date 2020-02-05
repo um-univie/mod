@@ -1,0 +1,97 @@
+.. _py-graph/Printer:
+
+**********************************************************
+graph/Printer
+**********************************************************
+.. default-domain:: py
+
+.. py:currentmodule:: mod
+.. cpp:namespace:: mod
+
+
+Class ``GraphPrinter``
+--------------------------------------------------------------------------------------------------------------------------------
+
+.. py:class:: GraphPrinter
+
+    This class is used to configure how graphs are visualised.
+
+    .. warning:: Some of these options greatly alter how graphs are depicted
+        and the result may not accurately represent the underlying graph,
+        and may make non-molecules look like molecules.
+
+    .. py:method:: __init__(self)
+
+        The default constructor enables edges as bonds, raised charges, and raised isotopes.
+    .. py:method:: setMolDefault()
+
+        Shortcut for enabling all but thickening and index printing.
+    .. py:method:: setReactionDefault()
+
+        Shortcut for enabling all but thickening, index printing and simplification of carbon atoms.
+    .. py:method:: disableAll()
+
+        Disable all special printing features.
+    .. py:method:: enableAll()
+
+        Enable all special printing features, except typewriter font.
+    .. py:attribute:: edgesAsBonds
+
+        Control whether edges with special labels are drawn as chemical bonds.
+
+        :type: bool
+    .. py:attribute:: collapseHydrogens
+
+        Control whether vertices representing hydrogen atoms are collapsed into their neighbours labels.
+
+        :type: bool
+    .. py:attribute:: raiseCharges
+
+        Control whether a vertex label suffix encoding a charge is written as a superscript to the rest of the label.
+
+        :type: bool
+    .. py:attribute:: simpleCarbons
+
+        Control whether some vertices encoding carbon atoms are depicted without any label.
+
+        :type: bool
+    .. py:attribute:: thick
+
+        Control whether all edges are drawn thicker than normal and all labels are written in bold.
+
+        :type: bool
+    .. py:attribute:: withColour
+
+        Control whether colour is applied to certain elements of the graph which are molecule-like.
+
+        :type: bool
+    .. py:attribute:: withIndex
+
+        Control whether the underlying indices of the vertices are printed.
+
+        :type: bool
+    .. py:attribute:: withTexttt
+
+        Control whether the vertex and edge labels are written with typewriter font.
+
+        :type: bool
+    .. py:attribute:: withRawStereo
+
+        Control whether the vertices and edges are annotated with the raw stereo properties.
+
+        :type: bool
+    .. py:attribute:: withPrettyStereo
+
+        Control whether the vertices and edges are annotated with stylized stereo properties.
+
+        :type: bool
+    .. py:attribute:: rotation
+
+        Rotation of internally computed coordinates.
+
+        :type: int
+    .. py:attribute:: mirror
+
+        Mirror internally computed coordinates in the y-axis.
+
+        :type: bool

@@ -1,0 +1,433 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta charset="utf-8" />
+    <title>3.1.8.3. graph/GraphInterface &#8212; MØD 0.10.0 documentation</title>
+    <link rel="stylesheet" href="../../_static/bootstrap-sphinx.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/haxes.css" />
+    <script id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+    <script src="../../_static/jquery.js"></script>
+    <script src="../../_static/underscore.js"></script>
+    <script src="../../_static/doctools.js"></script>
+    <script src="../../_static/language_data.js"></script>
+    <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="3.1.8.4. graph/Printer" href="Printer.html" />
+    <link rel="prev" title="3.1.8.2. graph/Graph" href="Graph.html" />
+<meta charset='utf-8'>
+<meta http-equiv='X-UA-Compatible' content='IE=edge,chrome=1'>
+<meta name='viewport' content='width=device-width, initial-scale=1.0, maximum-scale=1'>
+<meta name="apple-mobile-web-app-capable" content="yes">
+<script type="text/javascript" src="../../_static/js/jquery-1.11.0.min.js "></script>
+<script type="text/javascript" src="../../_static/js/jquery-fix.js "></script>
+<script type="text/javascript" src="../../_static/bootstrap-3.3.7/js/bootstrap.min.js "></script>
+<script type="text/javascript" src="../../_static/bootstrap-sphinx.js "></script>
+
+  </head><body>
+
+  <div id="navbar" class="navbar navbar-default navbar-fixed-top">
+    <div class="container">
+      <div class="navbar-header">
+        <!-- .btn-navbar is used as the toggle for collapsed navbar content -->
+        <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".nav-collapse">
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+        </button>
+        <a class="navbar-brand" href="../../index.html">
+          MØD</a>
+        <span class="navbar-text navbar-version pull-left"><b>0.10.0</b></span>
+      </div>
+
+        <div class="collapse navbar-collapse nav-collapse">
+          <ul class="nav navbar-nav">
+            
+                <li><a href="../../genindex.html">Index</a></li>
+            
+            
+              <li class="dropdown globaltoc-container">
+  <a role="button"
+     id="dLabelGlobalToc"
+     data-toggle="dropdown"
+     data-target="#"
+     href="../../index.html">Site <b class="caret"></b></a>
+  <ul class="dropdown-menu globaltoc"
+      role="menu"
+      aria-labelledby="dLabelGlobalToc"><ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../../installation.html">1. Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../libmod/libmod.html">2. libMØD</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../pymod.html">3. PyMØD</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../postmod/postmod.html">4. PostMØD (<code class="docutils literal notranslate"><span class="pre">mod_post</span></code>)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../modWrapper/modWrapper.html">5. The Wrapper Script (<code class="docutils literal notranslate"><span class="pre">mod</span></code>)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../dataDesc/dataDesc.html">6. Data Formats</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../dgStrat/dgStrat.html">7. Derivation Graph Strategies</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../examples/index.html">8. Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../knownIssues.html">9. Known Issues</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../changes.html">10. Changes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../references.html">11. References</a></li>
+</ul>
+</ul>
+</li>
+              
+                <li class="dropdown">
+  <a role="button"
+     id="dLabelLocalToc"
+     data-toggle="dropdown"
+     data-target="#"
+     href="#">Page <b class="caret"></b></a>
+  <ul class="dropdown-menu localtoc"
+      role="menu"
+      aria-labelledby="dLabelLocalToc"><ul>
+<li><a class="reference internal" href="#">3.1.8.3. graph/GraphInterface</a><ul>
+<li><a class="reference internal" href="#class-graphvertex">3.1.8.3.1. Class <code class="docutils literal notranslate"><span class="pre">GraphVertex</span></code></a></li>
+<li><a class="reference internal" href="#class-graphedge">3.1.8.3.2. Class <code class="docutils literal notranslate"><span class="pre">GraphEdge</span></code></a></li>
+</ul>
+</li>
+</ul>
+</ul>
+</li>
+              
+            
+            
+              
+                
+  <li>
+    <a href="Graph.html" title="Previous Chapter: 3.1.8.2. graph/Graph"><span class="glyphicon glyphicon-chevron-left visible-sm"></span><span class="hidden-sm hidden-tablet">&laquo; 3.1.8.2. graph/Graph</span>
+    </a>
+  </li>
+  <li>
+    <a href="Printer.html" title="Next Chapter: 3.1.8.4. graph/Printer"><span class="glyphicon glyphicon-chevron-right visible-sm"></span><span class="hidden-sm hidden-tablet">3.1.8.4. grap... &raquo;</span>
+    </a>
+  </li>
+              
+            
+            
+            
+            
+          </ul>
+
+          
+            
+<form class="navbar-form navbar-right" action="../../search.html" method="get">
+ <div class="form-group">
+  <input type="text" name="q" class="form-control" placeholder="Search" />
+ </div>
+  <input type="hidden" name="check_keywords" value="yes" />
+  <input type="hidden" name="area" value="default" />
+</form>
+          
+        </div>
+    </div>
+  </div>
+
+<div class="container">
+  <div class="row">
+    <div class="body col-md-12 content" role="main">
+      
+  <div class="section" id="graph-graphinterface">
+<span id="py-graph-graphinterface"></span><h1><span class="section-number">3.1.8.3. </span>graph/GraphInterface<a class="headerlink" href="#graph-graphinterface" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="class-graphvertex">
+<h2><span class="section-number">3.1.8.3.1. </span>Class <code class="docutils literal notranslate"><span class="pre">GraphVertex</span></code><a class="headerlink" href="#class-graphvertex" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="mod.GraphVertex">
+<em class="property">class </em><code class="sig-prename descclassname">mod.</code><code class="sig-name descname">GraphVertex</code><a class="headerlink" href="#mod.GraphVertex" title="Permalink to this definition">¶</a></dt>
+<dd><p>A descriptor of either a vertex in a graph, or a null vertex.</p>
+<dl class="function">
+<dt id="mod.GraphVertex.__init__">
+<code class="sig-name descname">__init__</code><span class="sig-paren">(</span><em class="sig-param">self</em><span class="sig-paren">)</span><a class="headerlink" href="#mod.GraphVertex.__init__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Constructs a null descriptor.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="mod.GraphVertex.isNull">
+<code class="sig-name descname">isNull</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#mod.GraphVertex.isNull" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>whether this is a null descriptor or not.</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.8)">bool</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="mod.GraphVertex.id">
+<code class="sig-name descname">id</code><a class="headerlink" href="#mod.GraphVertex.id" title="Permalink to this definition">¶</a></dt>
+<dd><p>(Read-only) The index of the vertex. It will be in the range <span class="math notranslate nohighlight">\([0, numVertices[\)</span>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)">int</a></p>
+</dd>
+<dt class="field-even">Raises</dt>
+<dd class="field-even"><p><a class="reference internal" href="../Error.html#mod.LogicError" title="mod.LogicError"><code class="xref py py-class docutils literal notranslate"><span class="pre">LogicError</span></code></a> if it is a null descriptor.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="mod.GraphVertex.graph">
+<code class="sig-name descname">graph</code><a class="headerlink" href="#mod.GraphVertex.graph" title="Permalink to this definition">¶</a></dt>
+<dd><p>(Read-only) The graph the vertex belongs to.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference internal" href="Graph.html#mod.Graph" title="mod.Graph">Graph</a></p>
+</dd>
+<dt class="field-even">Raises</dt>
+<dd class="field-even"><p><a class="reference internal" href="../Error.html#mod.LogicError" title="mod.LogicError"><code class="xref py py-class docutils literal notranslate"><span class="pre">LogicError</span></code></a> if it is a null descriptor.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="mod.GraphVertex.degree">
+<code class="sig-name descname">degree</code><a class="headerlink" href="#mod.GraphVertex.degree" title="Permalink to this definition">¶</a></dt>
+<dd><p>(Read-only) The degree of the vertex.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)">int</a></p>
+</dd>
+<dt class="field-even">Raises</dt>
+<dd class="field-even"><p><a class="reference internal" href="../Error.html#mod.LogicError" title="mod.LogicError"><code class="xref py py-class docutils literal notranslate"><span class="pre">LogicError</span></code></a> if it is a null descriptor.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="mod.GraphVertex.incidentEdges">
+<code class="sig-name descname">incidentEdges</code><a class="headerlink" href="#mod.GraphVertex.incidentEdges" title="Permalink to this definition">¶</a></dt>
+<dd><p>(Read-only) A range of incident edges to this vertex.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>GraphIncidentEdgeRange</p>
+</dd>
+<dt class="field-even">Raises</dt>
+<dd class="field-even"><p><a class="reference internal" href="../Error.html#mod.LogicError" title="mod.LogicError"><code class="xref py py-class docutils literal notranslate"><span class="pre">LogicError</span></code></a> if it is a null descriptor.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="mod.GraphVertex.stringLabel">
+<code class="sig-name descname">stringLabel</code><a class="headerlink" href="#mod.GraphVertex.stringLabel" title="Permalink to this definition">¶</a></dt>
+<dd><p>(Read-only) The string label of the vertex.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)">str</a></p>
+</dd>
+<dt class="field-even">Raises</dt>
+<dd class="field-even"><p><a class="reference internal" href="../Error.html#mod.LogicError" title="mod.LogicError"><code class="xref py py-class docutils literal notranslate"><span class="pre">LogicError</span></code></a> if it is a null descriptor.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="mod.GraphVertex.atomId">
+<code class="sig-name descname">atomId</code><a class="headerlink" href="#mod.GraphVertex.atomId" title="Permalink to this definition">¶</a></dt>
+<dd><p>(Read-only) The atom id of the vertex.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference internal" href="../Chem.html#mod.AtomId" title="mod.AtomId">AtomId</a></p>
+</dd>
+<dt class="field-even">Raises</dt>
+<dd class="field-even"><p><a class="reference internal" href="../Error.html#mod.LogicError" title="mod.LogicError"><code class="xref py py-class docutils literal notranslate"><span class="pre">LogicError</span></code></a> if it is a null descriptor.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="mod.GraphVertex.isotope">
+<code class="sig-name descname">isotope</code><a class="headerlink" href="#mod.GraphVertex.isotope" title="Permalink to this definition">¶</a></dt>
+<dd><p>(Read-only) The isotope of the vertex.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference internal" href="../Chem.html#mod.Isotope" title="mod.Isotope">Isotope</a></p>
+</dd>
+<dt class="field-even">Raises</dt>
+<dd class="field-even"><p><a class="reference internal" href="../Error.html#mod.LogicError" title="mod.LogicError"><code class="xref py py-class docutils literal notranslate"><span class="pre">LogicError</span></code></a> if it is a null descriptor.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="mod.GraphVertex.charge">
+<code class="sig-name descname">charge</code><a class="headerlink" href="#mod.GraphVertex.charge" title="Permalink to this definition">¶</a></dt>
+<dd><p>(Read-only) The charge of the vertex.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference internal" href="../Chem.html#mod.Charge" title="mod.Charge">Charge</a></p>
+</dd>
+<dt class="field-even">Raises</dt>
+<dd class="field-even"><p><a class="reference internal" href="../Error.html#mod.LogicError" title="mod.LogicError"><code class="xref py py-class docutils literal notranslate"><span class="pre">LogicError</span></code></a> if it is a null descriptor.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="mod.GraphVertex.radical">
+<code class="sig-name descname">radical</code><a class="headerlink" href="#mod.GraphVertex.radical" title="Permalink to this definition">¶</a></dt>
+<dd><p>(Read-only) The radical status of the vertex.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.8)">bool</a></p>
+</dd>
+<dt class="field-even">Raises</dt>
+<dd class="field-even"><p><a class="reference internal" href="../Error.html#mod.LogicError" title="mod.LogicError"><code class="xref py py-class docutils literal notranslate"><span class="pre">LogicError</span></code></a> if it is a null descriptor.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="mod.GraphVertex.printStereo">
+<code class="sig-name descname">printStereo</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#mod.GraphVertex.printStereo" title="Permalink to this definition">¶</a></dt>
+<dt>
+<code class="sig-name descname">printStereo</code><span class="sig-paren">(</span><em class="sig-param">p</em><span class="sig-paren">)</span></dt>
+<dd><p>Print the stereo configuration for the vertex.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>p</strong> (<a class="reference internal" href="Printer.html#mod.GraphPrinter" title="mod.GraphPrinter"><em>GraphPrinter</em></a>) – the printing options used for the depiction.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>the name of the PDF-file that will be compiled in post-processing.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)">str</a></p>
+</dd>
+<dt class="field-even">Raises</dt>
+<dd class="field-even"><p><a class="reference internal" href="../Error.html#mod.LogicError" title="mod.LogicError"><code class="xref py py-class docutils literal notranslate"><span class="pre">LogicError</span></code></a> if it is a null descriptor.</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="class-graphedge">
+<h2><span class="section-number">3.1.8.3.2. </span>Class <code class="docutils literal notranslate"><span class="pre">GraphEdge</span></code><a class="headerlink" href="#class-graphedge" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="mod.GraphEdge">
+<em class="property">class </em><code class="sig-prename descclassname">mod.</code><code class="sig-name descname">GraphEdge</code><a class="headerlink" href="#mod.GraphEdge" title="Permalink to this definition">¶</a></dt>
+<dd><p>A descriptor of either an edge in a graph, or a null edge.</p>
+<dl class="function">
+<dt id="mod.GraphEdge.__init__">
+<code class="sig-name descname">__init__</code><span class="sig-paren">(</span><em class="sig-param">self</em><span class="sig-paren">)</span><a class="headerlink" href="#mod.GraphEdge.__init__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Constructs a null descriptor.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="mod.GraphEdge.isNull">
+<code class="sig-name descname">isNull</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#mod.GraphEdge.isNull" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>whether this is a null descriptor or not.</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.8)">bool</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="mod.GraphEdge.graph">
+<code class="sig-name descname">graph</code><a class="headerlink" href="#mod.GraphEdge.graph" title="Permalink to this definition">¶</a></dt>
+<dd><p>(Read-only) The graph the edge belongs to.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference internal" href="Graph.html#mod.Graph" title="mod.Graph">Graph</a></p>
+</dd>
+<dt class="field-even">Raises</dt>
+<dd class="field-even"><p><a class="reference internal" href="../Error.html#mod.LogicError" title="mod.LogicError"><code class="xref py py-class docutils literal notranslate"><span class="pre">LogicError</span></code></a> if it is a null descriptor.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="mod.GraphEdge.source">
+<code class="sig-name descname">source</code><a class="headerlink" href="#mod.GraphEdge.source" title="Permalink to this definition">¶</a></dt>
+<dd><p>(Read-only) The source vertex of the edge.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference internal" href="#mod.GraphVertex" title="mod.GraphVertex">GraphVertex</a></p>
+</dd>
+<dt class="field-even">Raises</dt>
+<dd class="field-even"><p><a class="reference internal" href="../Error.html#mod.LogicError" title="mod.LogicError"><code class="xref py py-class docutils literal notranslate"><span class="pre">LogicError</span></code></a> if it is a null descriptor.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="mod.GraphEdge.target">
+<code class="sig-name descname">target</code><a class="headerlink" href="#mod.GraphEdge.target" title="Permalink to this definition">¶</a></dt>
+<dd><p>(Read-only) The target vertex of the edge.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference internal" href="#mod.GraphVertex" title="mod.GraphVertex">GraphVertex</a></p>
+</dd>
+<dt class="field-even">Raises</dt>
+<dd class="field-even"><p><a class="reference internal" href="../Error.html#mod.LogicError" title="mod.LogicError"><code class="xref py py-class docutils literal notranslate"><span class="pre">LogicError</span></code></a> if it is a null descriptor.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="mod.GraphEdge.stringLabel">
+<code class="sig-name descname">stringLabel</code><a class="headerlink" href="#mod.GraphEdge.stringLabel" title="Permalink to this definition">¶</a></dt>
+<dd><p>(Read-only) The string label of the edge.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)">str</a></p>
+</dd>
+<dt class="field-even">Raises</dt>
+<dd class="field-even"><p><a class="reference internal" href="../Error.html#mod.LogicError" title="mod.LogicError"><code class="xref py py-class docutils literal notranslate"><span class="pre">LogicError</span></code></a> if it is a null descriptor.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="mod.GraphEdge.bondType">
+<code class="sig-name descname">bondType</code><a class="headerlink" href="#mod.GraphEdge.bondType" title="Permalink to this definition">¶</a></dt>
+<dd><p>(Read-only) The bond type of the edge.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference internal" href="../Chem.html#mod.BondType" title="mod.BondType">BondType</a></p>
+</dd>
+<dt class="field-even">Raises</dt>
+<dd class="field-even"><p><a class="reference internal" href="../Error.html#mod.LogicError" title="mod.LogicError"><code class="xref py py-class docutils literal notranslate"><span class="pre">LogicError</span></code></a> if it is a null descriptor.</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+</div>
+
+
+    </div>
+      
+  </div>
+</div>
+<footer class="footer">
+  <div class="container">
+    <p class="pull-right">
+      <a href="#">Back to top</a>
+      
+        <br/>
+        
+<div id="sourcelink">
+  <a href="../../_sources/pymod/graph/GraphInterface.rst.txt"
+     rel="nofollow">Source</a>
+</div>
+      
+    </p>
+    <p>
+        &copy; Copyright 2013-2020, Jakob Lykke Andersen.<br/>
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 3.0.0+/60e55278.<br/>
+    </p>
+  </div>
+</footer>
+  </body>
+</html>

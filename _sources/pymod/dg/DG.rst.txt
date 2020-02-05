@@ -1,0 +1,167 @@
+.. _py-dg/DG:
+
+**********************************************************
+dg/DG
+**********************************************************
+.. default-domain:: py
+
+.. py:currentmodule:: mod
+.. cpp:namespace:: mod
+
+
+Class ``DG``
+--------------------------------------------------------------------------------------------------------------------------------
+
+.. py:class:: DG
+
+    The derivation graph class. A derivation graph is a directed multi-hypergraph
+    :math:`\mathcal{H} = (V, E)`. Each hyperedge :math:`e\in E` is thus an ordered pair
+    :math:`(e^+, e^-)` of multisets of vertices, the sources and the targets.
+    Each vertex is annotated with a graph, and each hyperedge is annotated with list of transformation rules.
+    A derivation graph is constructed incrementally using a :class:`DGBuilder` obtained from the :meth:`build()`
+    function. When the obtained builder is destructed the derivation graph becomes locked and can no longer be modified.
+
+    .. py:method:: __init__(*, labelSettings=LabelSettings(LabelType.String, LabelRelation.Isomorphism), \
+                            graphDatabase=[], \
+                            graphPolicy=IsomorphismPolicy.Check)
+
+        Create an empty unlocked derivation graph object.
+
+        :param LabelSettings labelSettings: defines which category the derivation graph object works in.
+            All morphism calculations (monomorphism and isomorphism) are thus defined by the :class:`LabelType`,
+            while the :class:`LabelRelation` is used for for monomorphism enumeration.
+        :param graphDatabase: an initial graph database.
+            Any subsequently added or constructed graph for this object
+            will be checked for isomorphism against the graph database.
+        :type graphDatabase: list[Graph]
+        :param IsomorphismPolicy graphPolicy: the policy for how the graphs of ``graphDatabase`` are checked for
+            isomorphism against each other initially. Only use ``IsomorphismPolicy.TrustMe`` if you are
+            absolutely sure that the graphs are unique up to isomorphism.
+        :raises: :class:`LogicError` if ``graphPolicy == IsomorphismPolicy.Check`` and two graphs
+            in ``graphDatabase`` are different objects but represents isomorphic graphs.
+    .. py:attribute:: id
+
+        The unique instance id among all :class:`DG` objects.
+
+        :type: int
+    .. py:attribute:: labelSettings
+
+        (Read-only) The label settings for the derivation graph.
+
+        :type: LabelSettings
+    .. py:attribute:: hasActiveBuilder
+
+        (Read-only) Whether :meth:`build` has been called and the returned :class:`DGBuilder` is still active.
+
+        :type: bool
+    .. py:attribute:: locked
+
+        (Read-only) Whether the derivation graph is locked or not.
+
+        :type: bool
+    .. py:attribute:: numVertices
+
+        (Read-only) The number of vertices in the derivation graph.
+
+        :type: int
+        :raises: :class:`LogicError` if not `hasActiveBuilder()` or `isLocked()`.
+    .. py:attribute:: vertices
+
+        (Read-only) An iterable of all vertices in the derivation graph.
+
+        :type: DGVertexRange
+        :raises: :class:`LogicError` if not `hasActiveBuilder()` or `isLocked()`.
+    .. py:attribute:: numEdges
+
+        (Read-only) The number of hyperedges in the derivation graph.
+
+        :type: int
+        :raises: :class:`LogicError` if not `hasActiveBuilder()` or `isLocked()`.
+    .. py:attribute:: edges
+
+        (Read-only) An iterable of all hyperedges in the derivation graph.
+
+        :type: DGEdgeRange
+        :raises: :class:`LogicError` if not `hasActiveBuilder()` or `isLocked()`.
+    .. py:method:: findVertex(g)
+
+        :param Graph g: the graph to find a vertex which has it associated.
+        :returns: a vertex descriptor for which the given graph is associated,
+            or a null descriptor if no such vertex exists.
+        :rtype: DGVertex
+        :raises: :class:`LogicError` if not `hasActiveBuilder()` or `isLocked()`.
+    .. py:method:: findEdge(sources, targets)
+                   findEdge(sourceGraphs, targetGraphs)
+
+        :param sources: the list of source vertices the resulting hyperedge must have.
+        :type sources: list[DGVertex]
+        :param targets: the list of targets vertices the resulting hyperedge must have.
+        :type targets: list[DGVertex]
+        :param sourceGraphs: the list of graphs that must be associated with the source vertices the resulting hyperedge must have.
+        :type sourceGraphs: list[Graph]
+        :param targetGraphs: the list of graphs that must be associated with the targets vertices the resulting hyperedge must have.
+        :type targetGraphs: list[Graph]
+        :returns: a hyperedge with the given sources and targets.
+          If no such hyperedge exists in the derivation graph then a null edge is returned.
+          In the second version, the graphs are put through :meth:`findVertex` first.
+        :raises: :class:`LogicError` if a vertex descriptor is null, or does not belong to the derivation graph.
+        :raises: :class:`LogicError` if not `hasActiveBuilder()` or `isLocked()`.
+    .. py:method:: build()
+
+        :returns: an RAII-style object which can be used to construct the derivation graph.
+            It can be used as a context manager in a ``with``-statement (see the documentation of :class:`DGBuilder`).
+        :rtype: DGBuilder
+        :raises: :class:`LogicError` if the DG already has an active builder (see :attr:`hasActiveBuilder`).
+        :raises: :class:`LogicError` if the DG is locked (see :attr:`locked`).
+    .. py:attribute:: graphDatabase
+
+        All graphs known to the derivation graph.
+
+        :type: list[Graph]
+    .. py:attribute:: products
+
+        The subset of the vertex graphs which were discovered by the calculation.
+
+        :type: list[Graph]
+    .. py:method:: print(printer=DGPrinter(), data=None)
+
+        Print the derivation graph in style of a hypergraph. The appearance and structure
+        of the visualisation can optionally be configured by giving a DG printer and/or data object.
+
+        :param DGPrinter printer: the printer to use governing the appearance.
+        :param DGPrintData data: the extra data to use encoding the structure of the graph.
+        :returns: the name of the PDF-file that will be compiled in post-processing and the name of the coordinate tex-file used.
+        :rtype: tuple[str, str]
+    .. py:method:: dump()
+
+        Export the derivation graph to an external file. The vertex graphs are exported as well.
+
+        :returns: the filename of the exported derivation graph.
+        :rtype: str
+        :raises: :py:class:`LogicError` if the DG has not been calculated.
+    .. py:method:: listStats()
+
+        Lists various statistics for the derivation graph.
+
+        :raises: :py:class:`LogicError` if the DG has not been calculated.
+.. py:method:: dgDump(graphs, rules, file)
+
+    Load a derivation graph dump.
+
+    :param graphs: Any graph in the dump which is isomorphic one of these graphs is replaced by the given graph.
+    :type graphs: list[Graph]
+    :param rules: As for the graphs the same procedure is done for the rules, however only using the name of the rule for comparison.
+    :type rules: list[Rule]
+    :returns: the loaded derivation graph.
+    :rtype: DG
+.. py:method:: diffDGs(dg1, dg2)
+
+    Compare two derivation graphs and lists the difference.
+    This is not a general isomorphism check; two vertices are equal if they have
+    the same graph attached. Edges are equal if the head and tail sets are equal
+    and if the attached rule is the same.
+
+    :param dg1: the first derivation graph.
+    :type dg1: :class:`DG`
+    :param dg2: the second derivation graph.
+    :type dg2: :class:`DG`

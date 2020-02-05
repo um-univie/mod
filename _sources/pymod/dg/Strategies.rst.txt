@@ -1,0 +1,149 @@
+.. _py-dg/Strategies:
+
+**********************************************************
+dg/Strategies
+**********************************************************
+.. default-domain:: py
+
+.. py:currentmodule:: mod
+.. cpp:namespace:: mod
+
+This section describes two interfaces for the derivation graph strategies;
+the basic API and an embedded language which is built on the basic API.
+Usually the embedded strategy language is easiest and sufficient for constructing strategies.
+
+The semantics of the individual strategies are described in :ref:`dgStrat`.
+Note that a :py:class:`DGStrat` is a representation of a strategy and must be given to a derivation graph to be evaluated.
+
+
+The Embedded Strategy Language
+###############################
+
+The strategy language is really a collection of proxy classes with a lot of operator overloading, thus
+the normal syntax and semantics of Python applies.
+
+The following is the grammar for the strategies.
+
+.. productionlist:: dgStrat
+   strat: strats
+        : `strat` ">>" `strat`
+        : rule
+        : "addSubset(" graphs ")"
+        : "addUniverse(" graphs ")"
+        : "execute(" executeFunc ")"
+        : "filterSubset(" filterPred ")"
+        : "filterUniverse(" filterPred ")"
+        : "leftPredicate[" derivationPred "](" `strat` ")"
+        : "rightPredicate[" derivationPred "](" `strat` ")"
+        : "repeat" [ "[" int "]" ] "(" strat ")"
+        : "revive(" `strat` ")"
+
+A ``strats`` must be an iterable of :token:`~dgStrat:strat`, e.g., an iterable of :class:`Rule`.
+A ``graphs`` can either be a single :class:`Graph`, an iterable of graphs,
+or a function taking no arguments and returning a list of graphs.
+
+The Basic API
+#################
+
+
+Class ``DGStratGraphState``
+--------------------------------------------------------------------------------------------------------------------------------
+
+.. py:class:: DGStratGraphState
+
+    This class represents a graph state with a subset :math:`S` and a universe :math:`U` fulfilling :math:`S\subseteq U`.
+
+    .. py:attribute:: subset
+
+        The subset :math:`\mathcal{S}`.
+
+        :type: list[Graph]
+
+    .. py:attribute:: universe
+
+        The universe :math:`\mathcal{U}`.
+
+        :type: list[Graph]
+
+
+Class ``DGStrat``
+--------------------------------------------------------------------------------------------------------------------------------
+
+.. py:class:: DGStrat
+
+    .. py:staticmethod:: makeAddStatic(onlyUniverse, graphs, graphPolicy)
+
+        :param bool onlyUniverse: if the strategy is :ref:`strat-addUniverse` or :ref:`strat-addSubset`.
+        :param graphs: the graphs to be added by the strategy.
+        :type graphs: list[Graph]
+        :param IsomorphismPolicy graphPolicy: refers to the checking of each added graph against the internal graph database.
+        :returns: an :ref:`strat-addUniverse` strategy if ``onlyUniverse`` is ``True``, otherwise an :ref:`strat-addSubset` strategy.
+        :rtype: DGStrat
+    .. py:staticmethod:: makeAddDynamic(onlyUniverse, graphsFunc, graphPolicy)
+
+        :param bool onlyUniverse: if the strategy is :ref:`strat-addUniverse` or :ref:`strat-addSubset`.
+        :param graphsFunc: a function returning the graphs to be added by the strategy.
+        :type graphsFunc: Callable[[], list[Graph]]
+        :param IsomorphismPolicy graphPolicy: refers to the checking of each added graph against the internal graph database.
+        :returns: an :ref:`strat-addUniverse` strategy if ``onlyUniverse`` is ``True``, otherwise an :ref:`strat-addSubset` strategy.
+        :rtype: DGStrat
+    .. py:staticmethod:: makeExecute(func)
+
+        :param func: A function being executed when the strategy is evaluated.
+        :type func: Callable[[DGStratGraphState], None]
+        :returns: an :ref:`strat-execute` strategy.
+        :rtype: DGStrat
+    .. py:staticmethod:: makeFilter(alsoUniverse, p)
+
+        :param bool alsoUniverse: if the strategy is :ref:`strat-filterUniverse` or :ref:`strat-filterSubset`.
+        :param p: the filtering predicate being called for each graph in either the subset or the universe.
+            The predicate is called with the graph and the graph state as arguments, and a bool stating whether or not
+            the call is the first in the filtering process.
+        :type p: Callable[[Graph, DGStratGraphState, bool], bool]
+        :returns: a :ref:`strat-filterUniverse` strategy if ``onlyUniverse`` is ``True``, otherwise a :ref:`strat-filterSubset` strategy.
+        :rtype: DGStrat
+    .. py:staticmethod:: makeLeftPredicate(p, strat)
+
+        :param p: the predicate to be called on each candidate derivation.
+            Even though the predicate is called with a :class:`Derivation` object, only the left side and the rule of the object is valid.
+        :type p: Callable[[Derivation], bool]
+        :param DGStrat strat: the sub-strategy to be evaluated under the constraints of the left predicate.
+        :returns: a :ref:`strat-leftPredicate` strategy.
+        :rtype: DGStrat
+    .. py:staticmethod:: makeParallel(strats)
+
+        :param strats: the sub-strategies to evaluate.
+        :type strats: list[DGStrat]
+        :returns: a :ref:`strat-parallel` strategy.
+        :rtype: DGStrat
+        :raises: :class:`LogicError` if `strats` is empty.
+    .. py:staticmethod:: makeRepeat(limit, strat)
+
+        :param int limit: the maximum number of iterations.
+        :param DGStrat strat: the strategy to be repeated.
+        :returns: a :ref:`strat-repeat` strategy.
+        :rtype: DGStrat
+    .. py:staticmethod:: makeRevive(strat)
+
+        :param DGStrat strat: the strategy to encapsulate.
+        :returns: a :ref:`strat-revive` strategy.
+        :rtype: DGStrat
+    .. py:staticmethod:: makeRightPredicate(p, strat)
+
+        :param p: the predicate to be called on each candidate derivation.
+        :type p: Callable[[Derivation], bool]
+        :param DGStrat strat: the sub-strategy to be evaluated under the constraints of the right predicate.
+        :returns: a :ref:`strat-rightPredicate` strategy.
+        :rtype: DGStrat
+    .. py:staticmethod:: makeRule(r)
+
+        :param Rule r: the rule to make into a strategy.
+        :returns: a :ref:`strat-rule` strategy.
+        :rtype: DGStrat
+    .. py:staticmethod:: makeSequence(strats)
+
+        :param strats: the strategies to evaluate in sequence.
+        :type strats: list[DGStrat]
+        :retunrs: a :ref:`strat-sequence` strategy.
+        :rtype: DGStrat
+        :raises: :class:`LogicError` if the given list of strategies is empty.

@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta charset="utf-8" />
+    <title>3.1.2. Config &#8212; MØD 0.10.0 documentation</title>
+    <link rel="stylesheet" href="../_static/bootstrap-sphinx.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" type="text/css" href="../_static/haxes.css" />
+    <script id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+    <script src="../_static/jquery.js"></script>
+    <script src="../_static/underscore.js"></script>
+    <script src="../_static/doctools.js"></script>
+    <script src="../_static/language_data.js"></script>
+    <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="3.1.3. Derivation" href="Derivation.html" />
+    <link rel="prev" title="3.1.1. Chem" href="Chem.html" />
+<meta charset='utf-8'>
+<meta http-equiv='X-UA-Compatible' content='IE=edge,chrome=1'>
+<meta name='viewport' content='width=device-width, initial-scale=1.0, maximum-scale=1'>
+<meta name="apple-mobile-web-app-capable" content="yes">
+<script type="text/javascript" src="../_static/js/jquery-1.11.0.min.js "></script>
+<script type="text/javascript" src="../_static/js/jquery-fix.js "></script>
+<script type="text/javascript" src="../_static/bootstrap-3.3.7/js/bootstrap.min.js "></script>
+<script type="text/javascript" src="../_static/bootstrap-sphinx.js "></script>
+
+  </head><body>
+
+  <div id="navbar" class="navbar navbar-default navbar-fixed-top">
+    <div class="container">
+      <div class="navbar-header">
+        <!-- .btn-navbar is used as the toggle for collapsed navbar content -->
+        <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".nav-collapse">
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+        </button>
+        <a class="navbar-brand" href="../index.html">
+          MØD</a>
+        <span class="navbar-text navbar-version pull-left"><b>0.10.0</b></span>
+      </div>
+
+        <div class="collapse navbar-collapse nav-collapse">
+          <ul class="nav navbar-nav">
+            
+                <li><a href="../genindex.html">Index</a></li>
+            
+            
+              <li class="dropdown globaltoc-container">
+  <a role="button"
+     id="dLabelGlobalToc"
+     data-toggle="dropdown"
+     data-target="#"
+     href="../index.html">Site <b class="caret"></b></a>
+  <ul class="dropdown-menu globaltoc"
+      role="menu"
+      aria-labelledby="dLabelGlobalToc"><ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../installation.html">1. Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../libmod/libmod.html">2. libMØD</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="pymod.html">3. PyMØD</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../postmod/postmod.html">4. PostMØD (<code class="docutils literal notranslate"><span class="pre">mod_post</span></code>)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../modWrapper/modWrapper.html">5. The Wrapper Script (<code class="docutils literal notranslate"><span class="pre">mod</span></code>)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../dataDesc/dataDesc.html">6. Data Formats</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../dgStrat/dgStrat.html">7. Derivation Graph Strategies</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../examples/index.html">8. Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../knownIssues.html">9. Known Issues</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../changes.html">10. Changes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../references.html">11. References</a></li>
+</ul>
+</ul>
+</li>
+              
+                <li class="dropdown">
+  <a role="button"
+     id="dLabelLocalToc"
+     data-toggle="dropdown"
+     data-target="#"
+     href="#">Page <b class="caret"></b></a>
+  <ul class="dropdown-menu localtoc"
+      role="menu"
+      aria-labelledby="dLabelLocalToc"><ul>
+<li><a class="reference internal" href="#">3.1.2. Config</a><ul>
+<li><a class="reference internal" href="#class-labeltype">3.1.2.1. Class <code class="docutils literal notranslate"><span class="pre">LabelType</span></code></a></li>
+<li><a class="reference internal" href="#class-labelrelation">3.1.2.2. Class <code class="docutils literal notranslate"><span class="pre">LabelRelation</span></code></a></li>
+<li><a class="reference internal" href="#class-labelsettings">3.1.2.3. Class <code class="docutils literal notranslate"><span class="pre">LabelSettings</span></code></a></li>
+<li><a class="reference internal" href="#class-isomorphismpolicy">3.1.2.4. Class <code class="docutils literal notranslate"><span class="pre">IsomorphismPolicy</span></code></a></li>
+<li><a class="reference internal" href="#class-config">3.1.2.5. Class <code class="docutils literal notranslate"><span class="pre">Config</span></code></a></li>
+</ul>
+</li>
+</ul>
+</ul>
+</li>
+              
+            
+            
+              
+                
+  <li>
+    <a href="Chem.html" title="Previous Chapter: 3.1.1. Chem"><span class="glyphicon glyphicon-chevron-left visible-sm"></span><span class="hidden-sm hidden-tablet">&laquo; 3.1.1. Chem</span>
+    </a>
+  </li>
+  <li>
+    <a href="Derivation.html" title="Next Chapter: 3.1.3. Derivation"><span class="glyphicon glyphicon-chevron-right visible-sm"></span><span class="hidden-sm hidden-tablet">3.1.3. Derivation &raquo;</span>
+    </a>
+  </li>
+              
+            
+            
+            
+            
+          </ul>
+
+          
+            
+<form class="navbar-form navbar-right" action="../search.html" method="get">
+ <div class="form-group">
+  <input type="text" name="q" class="form-control" placeholder="Search" />
+ </div>
+  <input type="hidden" name="check_keywords" value="yes" />
+  <input type="hidden" name="area" value="default" />
+</form>
+          
+        </div>
+    </div>
+  </div>
+
+<div class="container">
+  <div class="row">
+    <div class="body col-md-12 content" role="main">
+      
+  <div class="section" id="config">
+<span id="py-config"></span><h1><span class="section-number">3.1.2. </span>Config<a class="headerlink" href="#config" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="class-labeltype">
+<h2><span class="section-number">3.1.2.1. </span>Class <code class="docutils literal notranslate"><span class="pre">LabelType</span></code><a class="headerlink" href="#class-labeltype" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="mod.LabelType">
+<em class="property">class </em><code class="sig-prename descclassname">mod.</code><code class="sig-name descname">LabelType</code><a class="headerlink" href="#mod.LabelType" title="Permalink to this definition">¶</a></dt>
+<dd><p>Selector for which type of label to use in algorithms.</p>
+<dl class="attribute">
+<dt id="mod.LabelType.String">
+<code class="sig-name descname">String</code><a class="headerlink" href="#mod.LabelType.String" title="Permalink to this definition">¶</a></dt>
+<dd><p>Vertices and edges are considered to be labelled with
+character strings. If only first-order terms are present,
+then strings are generated as a serialisation of the term.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="mod.LabelType.Term">
+<code class="sig-name descname">Term</code><a class="headerlink" href="#mod.LabelType.Term" title="Permalink to this definition">¶</a></dt>
+<dd><p>Vertices and edges are considered to be labelled with
+first-order terms. If only strings are present, then first-order
+terms are generated by parsing the strings. This may result
+in an <a class="reference internal" href="Error.html#mod.TermParsingError" title="mod.TermParsingError"><code class="xref py py-class docutils literal notranslate"><span class="pre">TermParsingError</span></code></a> if a string can not be parsed.</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="class-labelrelation">
+<h2><span class="section-number">3.1.2.2. </span>Class <code class="docutils literal notranslate"><span class="pre">LabelRelation</span></code><a class="headerlink" href="#class-labelrelation" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="mod.LabelRelation">
+<em class="property">class </em><code class="sig-prename descclassname">mod.</code><code class="sig-name descname">LabelRelation</code><a class="headerlink" href="#mod.LabelRelation" title="Permalink to this definition">¶</a></dt>
+<dd><p>Selector for which type of labelled morphism to use in an algorithm.
+For strings they are all defined to be equivalent to string equality.</p>
+<dl class="attribute">
+<dt id="mod.LabelRelation.Isomorphism">
+<code class="sig-name descname">Isomorphism</code><a class="headerlink" href="#mod.LabelRelation.Isomorphism" title="Permalink to this definition">¶</a></dt>
+<dd><p>Terms are considered isomorphic when their most general unifier
+is a renaming.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="mod.LabelRelation.Specialisation">
+<code class="sig-name descname">Specialisation</code><a class="headerlink" href="#mod.LabelRelation.Specialisation" title="Permalink to this definition">¶</a></dt>
+<dd><p>A term <span class="math notranslate nohighlight">\(t_2\)</span> is more special than, or isomorphic to, a term <span class="math notranslate nohighlight">\(t_1\)</span> if there is a substitution
+which can be applied to :math: <cite>t_1</cite> to make the terms equal.
+This relation means that the right-hand side of a comparison is the more specialised term.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="mod.LabelRelation.Unification">
+<code class="sig-name descname">Unification</code><a class="headerlink" href="#mod.LabelRelation.Unification" title="Permalink to this definition">¶</a></dt>
+<dd><p>Terms unify if a most general unifier (MGU) exists. The found MGU
+is used for substitution in some algorithms.</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="class-labelsettings">
+<h2><span class="section-number">3.1.2.3. </span>Class <code class="docutils literal notranslate"><span class="pre">LabelSettings</span></code><a class="headerlink" href="#class-labelsettings" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="mod.LabelSettings">
+<em class="property">class </em><code class="sig-prename descclassname">mod.</code><code class="sig-name descname">LabelSettings</code><a class="headerlink" href="#mod.LabelSettings" title="Permalink to this definition">¶</a></dt>
+<dd><p>A group label settings commonly used together in algorithms.</p>
+<dl class="method">
+<dt id="mod.LabelSettings.__init__">
+<code class="sig-name descname">__init__</code><span class="sig-paren">(</span><em class="sig-param">self</em>, <em class="sig-param">type</em>, <em class="sig-param">relation</em><span class="sig-paren">)</span><a class="headerlink" href="#mod.LabelSettings.__init__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Construct label settings that only uses the vertex and edge labels.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>type</strong> (<a class="reference internal" href="#mod.LabelType" title="mod.LabelType"><em>LabelType</em></a>) – How to interpret labels.</p></li>
+<li><p><strong>relation</strong> (<a class="reference internal" href="#mod.LabelRelation" title="mod.LabelRelation"><em>LabelRelation</em></a>) – The relation that should hold in morphisms between two labels.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt>
+<code class="sig-name descname">__init__</code><span class="sig-paren">(</span><em class="sig-param">self</em>, <em class="sig-param">type</em>, <em class="sig-param">relation</em>, <em class="sig-param">stereoRelation</em><span class="sig-paren">)</span></dt>
+<dd><p>Construct label settings that include both vertex and edge labels, and stereo information.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>type</strong> (<a class="reference internal" href="#mod.LabelType" title="mod.LabelType"><em>LabelType</em></a>) – How to interpret labels.</p></li>
+<li><p><strong>relation</strong> (<a class="reference internal" href="#mod.LabelRelation" title="mod.LabelRelation"><em>LabelRelation</em></a>) – The relation that should hold in morphisms between two labels.</p></li>
+<li><p><strong>stereoRelation</strong> (<a class="reference internal" href="#mod.LabelRelation" title="mod.LabelRelation"><em>LabelRelation</em></a>) – The relation that should hold in morphisms between stereo data.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt>
+<code class="sig-name descname">__init__</code><span class="sig-paren">(</span><em class="sig-param">self</em>, <em class="sig-param">type</em>, <em class="sig-param">relation</em>, <em class="sig-param">withStereo</em>, <em class="sig-param">stereoRelation</em><span class="sig-paren">)</span></dt>
+<dd><p>Construct label settings that includes vertex and edge labels, and stereo information depending on the given flag.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>type</strong> (<a class="reference internal" href="#mod.LabelType" title="mod.LabelType"><em>LabelType</em></a>) – How to interpret labels.</p></li>
+<li><p><strong>relation</strong> (<a class="reference internal" href="#mod.LabelRelation" title="mod.LabelRelation"><em>LabelRelation</em></a>) – The relation that should hold in morphisms between two labels.</p></li>
+<li><p><strong>withStereo</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.8)"><em>bool</em></a>) – A flag to specify if stereo information should be included.</p></li>
+<li><p><strong>stereoRelation</strong> (<a class="reference internal" href="#mod.LabelRelation" title="mod.LabelRelation"><em>LabelRelation</em></a>) – The relation that should hold in morphisms between stereo data.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="mod.LabelSettings.type">
+<code class="sig-name descname">type</code><a class="headerlink" href="#mod.LabelSettings.type" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference internal" href="#mod.LabelType" title="mod.LabelType">LabelType</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="mod.LabelSettings.relation">
+<code class="sig-name descname">relation</code><a class="headerlink" href="#mod.LabelSettings.relation" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference internal" href="#mod.LabelRelation" title="mod.LabelRelation">LabelRelation</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="mod.LabelSettings.withStereo">
+<code class="sig-name descname">withStereo</code><a class="headerlink" href="#mod.LabelSettings.withStereo" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.8)">bool</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="mod.LabelSettings.stereoRelation">
+<code class="sig-name descname">stereoRelation</code><a class="headerlink" href="#mod.LabelSettings.stereoRelation" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference internal" href="#mod.LabelRelation" title="mod.LabelRelation">LabelRelation</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="class-isomorphismpolicy">
+<h2><span class="section-number">3.1.2.4. </span>Class <code class="docutils literal notranslate"><span class="pre">IsomorphismPolicy</span></code><a class="headerlink" href="#class-isomorphismpolicy" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="mod.IsomorphismPolicy">
+<em class="property">class </em><code class="sig-prename descclassname">mod.</code><code class="sig-name descname">IsomorphismPolicy</code><a class="headerlink" href="#mod.IsomorphismPolicy" title="Permalink to this definition">¶</a></dt>
+<dd><p>For some functions there is a choice of how to handle given arguments
+where two different objects may be isomorphic. Most notably the case is with graphs (<a class="reference internal" href="graph/Graph.html#mod.Graph" title="mod.Graph"><code class="xref py py-class docutils literal notranslate"><span class="pre">Graph</span></code></a>).</p>
+<dl class="attribute">
+<dt id="mod.IsomorphismPolicy.Check">
+<code class="sig-name descname">Check</code><a class="headerlink" href="#mod.IsomorphismPolicy.Check" title="Permalink to this definition">¶</a></dt>
+<dd><p>Objects are checked for isomorphism as needed and exceptions are thrown when different objects are isomorphic.
+If in doubt, use this.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="mod.IsomorphismPolicy.TrustMe">
+<code class="sig-name descname">TrustMe</code><a class="headerlink" href="#mod.IsomorphismPolicy.TrustMe" title="Permalink to this definition">¶</a></dt>
+<dd><p>No checks are performed and the function trusts the caller to have performed the equivalent isomorphism checks.
+Only use this when you are completely sure that no exceptions would have been thrown if using <a class="reference internal" href="#mod.IsomorphismPolicy.Check" title="mod.IsomorphismPolicy.Check"><code class="xref py py-attr docutils literal notranslate"><span class="pre">Check</span></code></a>.</p>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>Generally the library has undefined behaviour if you use this option
+but an exception would have been thrown with <a class="reference internal" href="#mod.IsomorphismPolicy.Check" title="mod.IsomorphismPolicy.Check"><code class="xref py py-attr docutils literal notranslate"><span class="pre">Check</span></code></a>.</p>
+</div>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="class-config">
+<h2><span class="section-number">3.1.2.5. </span>Class <code class="docutils literal notranslate"><span class="pre">Config</span></code><a class="headerlink" href="#class-config" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="mod.Config">
+<em class="property">class </em><code class="sig-prename descclassname">mod.</code><code class="sig-name descname">Config</code><a class="headerlink" href="#mod.Config" title="Permalink to this definition">¶</a></dt>
+<dd><p>This class contains a range of inner classes of config settings. See <a class="reference internal" href="../libmod/Config.html"><span class="doc">the libMØD documentation</span></a>.</p>
+</dd></dl>
+
+<dl class="data">
+<dt id="mod.config">
+<code class="sig-prename descclassname">mod.</code><code class="sig-name descname">config</code><a class="headerlink" href="#mod.config" title="Permalink to this definition">¶</a></dt>
+<dd><p>This variable is initialised to the return value of <a class="reference internal" href="#mod.getConfig" title="mod.getConfig"><code class="xref py py-func docutils literal notranslate"><span class="pre">getConfig()</span></code></a>, i.e., just use this instead of the method.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="mod.getConfig">
+<code class="sig-prename descclassname">mod.</code><code class="sig-name descname">getConfig</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#mod.getConfig" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>the singleton <a class="reference internal" href="../libmod/Config.html#_CPPv4N3mod6ConfigE" title="mod::Config"><code class="xref cpp cpp-class docutils literal notranslate"><span class="pre">Config</span></code></a> instance used by the library.</p>
+</dd>
+</dl>
+</dd></dl>
+
+</div>
+</div>
+
+
+    </div>
+      
+  </div>
+</div>
+<footer class="footer">
+  <div class="container">
+    <p class="pull-right">
+      <a href="#">Back to top</a>
+      
+        <br/>
+        
+<div id="sourcelink">
+  <a href="../_sources/pymod/Config.rst.txt"
+     rel="nofollow">Source</a>
+</div>
+      
+    </p>
+    <p>
+        &copy; Copyright 2013-2020, Jakob Lykke Andersen.<br/>
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 3.0.0+/60e55278.<br/>
+    </p>
+  </div>
+</footer>
+  </body>
+</html>
