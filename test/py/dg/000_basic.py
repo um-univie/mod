@@ -50,3 +50,28 @@ assert dg.labelSettings.type == LabelType.Term
 assert dg.labelSettings.relation == LabelRelation.Isomorphism
 assert dg.labelSettings.withStereo
 assert dg.labelSettings.stereoRelation == LabelRelation.Isomorphism
+
+fail(lambda: DG(graphDatabase=[None]), "Nullptr in graph database.")
+g1 = smiles('O')
+g2 = smiles('O')
+fail(lambda: DG(graphDatabase=[g1, g2]), "Isomorphic graphs '{}' and '{}' in initial graph database.".format(g1.name, g2.name))
+dg = DG(graphDatabase=[g1, g2], graphPolicy=IsomorphismPolicy.TrustMe)
+
+
+dg = DG(graphDatabase=[g])
+assert dg.products == []
+dg.build().execute(addSubset(g) >> ruleGMLString("""rule [
+	left [ node [ id 0 label "O" ] ]
+	right [ node [ id 0 label "S" ] ]
+]"""))
+assert len(dg.products) == 1
+assert dg.products[0].isomorphism(smiles("S")) == 1
+
+dg = DG(graphDatabase=[g])
+assert dg.products == []
+dg.build().apply([g], ruleGMLString("""rule [
+	left [ node [ id 0 label "O" ] ]
+	right [ node [ id 0 label "S" ] ]
+]"""))
+assert len(dg.products) == 1
+assert dg.products[0].isomorphism(smiles("S")) == 1

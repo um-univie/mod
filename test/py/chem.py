@@ -1,3 +1,4 @@
+post("disableSummary")
 print("AtomId\n----------")
 a = AtomId()
 print(a)
@@ -11,6 +12,7 @@ print(a)
 a = Charge(-42)
 print(a)
 print(int(a))
+assert a == -42
 
 print("AtomData\n----------")
 a = AtomData()
@@ -28,7 +30,7 @@ print("Vertex:", v.atomId, v.isotope, v.charge, v.radical)
 assert v.atomId == a.atomId
 assert v.isotope == a.isotope
 assert v.charge == a.charge
-assert a.radical == a.radical
+assert v.radical == a.radical
 
 print("BondType\n----------")
 for a in [BondType.Invalid, BondType.Single, BondType.Aromatic, BondType.Double, BondType.Triple]:

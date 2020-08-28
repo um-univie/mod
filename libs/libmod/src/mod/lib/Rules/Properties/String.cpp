@@ -9,16 +9,20 @@ namespace mod {
 namespace lib {
 namespace Rules {
 
+PropStringCore::PropStringCore(const GraphType &g) : PropCore(g) {
+	verify(&g);
+}
+
 PropStringCore::PropStringCore(const GraphType &g,
-		const std::vector<ConstraintPtr> &leftMatchConstraints,
-		const std::vector<ConstraintPtr> &rightMatchConstraints,
-		const PropTermCore &term, const StringStore &strings) : PropCore(g) {
+                               const std::vector<ConstraintPtr> &leftMatchConstraints,
+                               const std::vector<ConstraintPtr> &rightMatchConstraints,
+                               const PropTermCore &term, const StringStore &strings) : PropCore(g) {
 	std::stringstream ss;
 	const auto termToString = [&ss, &term, &strings](std::size_t addr) -> std::string {
 		ss.str(std::string());
 
-		lib::IO::Term::Write::term(getMachine(term),{
-			lib::Term::AddressType::Heap, addr
+		lib::IO::Term::Write::term(getMachine(term), {
+				lib::Term::AddressType::Heap, addr
 		}, strings, ss);
 		return ss.str();
 	};
@@ -58,8 +62,7 @@ PropStringCore::PropStringCore(const GraphType &g,
 	using HandlerType = decltype(termToString);
 
 	struct Visitor : lib::GraphMorphism::Constraints::AllVisitorNonConst<SideGraphType> {
-
-		Visitor(HandlerType &termToString) : termToString(termToString) { }
+		Visitor(HandlerType &termToString) : termToString(termToString) {}
 
 		virtual void operator()(lib::GraphMorphism::Constraints::VertexAdjacency<SideGraphType> &c) override {
 			assert(c.vertexLabels.size() == 0);
@@ -70,7 +73,7 @@ PropStringCore::PropStringCore(const GraphType &g,
 				c.edgeLabels.insert(termToString(t));
 		}
 
-		virtual void operator()(lib::GraphMorphism::Constraints::ShortestPath<SideGraphType> &c) override { }
+		virtual void operator()(lib::GraphMorphism::Constraints::ShortestPath<SideGraphType> &c) override {}
 	private:
 		HandlerType termToString;
 	};

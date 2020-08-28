@@ -14,14 +14,13 @@ namespace Graph {
 
 template<typename Derived, typename VertexType, typename EdgeType>
 struct Prop {
-	using This = Prop<Derived, VertexType, EdgeType>;
 	using Vertex = typename boost::graph_traits<GraphType>::vertex_descriptor;
 	using Edge = typename boost::graph_traits<GraphType>::edge_descriptor;
 public:
-	Prop(const This&) = delete;
-	Prop(This&&) = delete;
-	This &operator=(const This&) = delete;
-	This &operator=(This&&) = delete;
+	Prop(const Prop &) = delete;
+	Prop(Prop &&) = delete;
+	Prop &operator=(const Prop &) = delete;
+	Prop &operator=(Prop &&) = delete;
 public:
 	void verify(const GraphType *g) const;
 	explicit Prop(const GraphType &g);
@@ -52,25 +51,28 @@ auto get(const Prop<Derived, VertexType, EdgeType> &p, VertexOrEdge ve) -> declt
 template<typename Derived, typename VertexType, typename EdgeType>
 void Prop<Derived, VertexType, EdgeType>::verify(const GraphType *g) const {
 	if(g != &this->g) {
-		IO::log() << "Different graphs: g = " << (std::uintptr_t)g << ", &this->g = " << (std::uintptr_t) & this->g << std::endl;
+		IO::log() << "Different graphs: g = " << (std::uintptr_t) g << ", &this->g = " << (std::uintptr_t) &this->g
+		          << std::endl;
 		MOD_ABORT;
 	}
 	if(num_vertices(this->g) != vertexState.size()) {
-		IO::log() << "Different sizes: num_vertices(this->g) = " << num_vertices(this->g) << ", vertexLabels.size() = " << vertexState.size() << std::endl;
+		IO::log() << "Different sizes: num_vertices(this->g) = " << num_vertices(this->g) << ", vertexLabels.size() = "
+		          << vertexState.size() << std::endl;
 		MOD_ABORT;
 	}
 	if(num_edges(this->g) != edgeState.size()) {
-		IO::log() << "Different sizes: num_edges(this->g) = " << num_edges(this->g) << ", edgeLabels.size() = " << edgeState.size() << std::endl;
+		IO::log() << "Different sizes: num_edges(this->g) = " << num_edges(this->g) << ", edgeLabels.size() = "
+		          << edgeState.size() << std::endl;
 		MOD_ABORT;
 	}
 }
 
 template<typename Derived, typename VertexType, typename EdgeType>
-Prop<Derived, VertexType, EdgeType>::Prop(const GraphType &g) : g(g) { }
+Prop<Derived, VertexType, EdgeType>::Prop(const GraphType &g) : g(g) {}
 
 template<typename Derived, typename VertexType, typename EdgeType>
 Prop<Derived, VertexType, EdgeType>::Prop(const Prop &other, const GraphType &g)
-: g(g), vertexState(other.vertexState), edgeState(other.edgeState) { }
+		: g(g), vertexState(other.vertexState), edgeState(other.edgeState) {}
 
 template<typename Derived, typename VertexType, typename EdgeType>
 void Prop<Derived, VertexType, EdgeType>::addVertex(Vertex v, const VertexType &value) {
@@ -101,12 +103,12 @@ const EdgeType &Prop<Derived, VertexType, EdgeType>::operator[](Edge e) const {
 
 template<typename Derived, typename VertexType, typename EdgeType>
 Derived &Prop<Derived, VertexType, EdgeType>::getDerived() {
-	return static_cast<Derived&> (*this);
+	return static_cast<Derived &> (*this);
 }
 
 template<typename Derived, typename VertexType, typename EdgeType>
 const Derived &Prop<Derived, VertexType, EdgeType>::getDerived() const {
-	return static_cast<const Derived&> (*this);
+	return static_cast<const Derived &> (*this);
 }
 
 } // namespace Graph

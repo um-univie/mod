@@ -4,6 +4,8 @@
 #include <mod/graph/Graph.hpp>
 #include <mod/rule/Rule.hpp>
 
+#include <ostream>
+
 namespace mod {
 namespace rule {
 

@@ -32,9 +32,17 @@ endif()
 option(BUILD_DOC "Enable documentation building." ON)
 option(BUILD_POST_MOD "Enable building of the post processor." ON)
 option(BUILD_PY_MOD "Enable building of the Python bindings." ON)
-option(BUILD_EXAMPLES "Enable example building." OFF)
+option(BUILD_EPIM "Enable building of the EpiM extension (requires PyMØD)." ON)
+
+if(BUILD_EPIM AND NOT BUILD_PY_MOD)
+    message(FATAL_ERROR
+            "Epim requested but PyMØD is disabled.\n"
+            "Either set BUILD_EPIM=off or set BUILD_PY_MOD=on")
+endif()
+
 option(BUILD_TESTING "Enable test building." OFF)
-option(BUILD_TESTING_SANITIZERS "Compile tests with sanitizers." ON)
+option(BUILD_TESTING_SANITIZERS "Compile libraries and tests with sanitizers." ON)
+option(BUILD_EXAMPLES "Enable example as tests." ON)
 option(BUILD_COVERAGE "Enable code coverage." OFF)
 
 option(ENABLE_SYMBOL_HIDING "Hide internal symbols in the library." ON)
@@ -43,6 +51,9 @@ option(ENABLE_IPO "Using link-time optimization." ON)
 include(CheckIPOSupported)
 
 option(USE_NESTED_GRAPH_CANON "Use the GraphCanon version in external/graph_canon." ON)
+option(USE_NESTED_NLOHMANN_JSON "Use the nlohmann/json version in external/nlohmann_json." ON)
+option(USE_NESTED_JSON_SCHEMA "Use the pboettch/json-schema-validator version in external/json_schema." ON)
+
 option(WITH_OPENBABEL "Whether features depending on Open Babel are enabled or not." ON)
 
 
@@ -77,7 +88,7 @@ set(libmod_config_find_files "FindPackageHandleStandardArgs.cmake;FindPackageMes
 #    libs/pymod/libpymod.so: Boost::python-NOTFOUND
 # so we use the CMake module only for now.
 set(Boost_NO_BOOST_CMAKE ON)
-set(v 1.64.0)
+set(v 1.72.0)
 if(BUILD_PY_MOD)
     foreach(PY 3 34 35 36 37 38 39)
         set(lib "python${PY}")
@@ -93,10 +104,11 @@ if(BUILD_PY_MOD)
         message(FATAL_ERROR "Could not find Boost.Python for Python 3. Tried 'python' wih suffixes 3, 34, 35, 36, 37, 38, and 39.")
     endif()
 endif()
-find_package(Boost ${v} REQUIRED COMPONENTS iostreams regex system)
+find_package(Boost ${v} REQUIRED COMPONENTS graph iostreams)
+message(STATUS "(Boost include dir is ${Boost_INCLUDE_DIRS})")
 string(APPEND libmod_config_dependencies "set(Boost_NO_BOOST_CMAKE ON)\n")
 string(APPEND libmod_config_dependencies "set(BOOST_FOUND 0)\n") # TODO: remove when CMake 3.15 is required https://gitlab.kitware.com/cmake/cmake/issues/18590
-string(APPEND libmod_config_dependencies "find_dependency(Boost ${v} COMPONENTS iostreams regex system)\n")
+string(APPEND libmod_config_dependencies "find_dependency(Boost ${v} COMPONENTS graph iostreams)\n")
 list(APPEND libmod_config_find_files "FindBoost.cmake")
 
 
@@ -116,6 +128,31 @@ else()
     string(APPEND libmod_config_dependencies "find_dependency(GraphCanon ${v})\n")
     message(STATUS "GraphCanon version: ${GraphCanon_VERSION}")
 endif()
+
+
+# JSON and JSON Schema
+# -------------------------------------------------------------------------
+set(v 3.7.3)
+if(USE_NESTED_NLOHMANN_JSON)
+    message(STATUS "nlohmann/json: using external/nlohmann_json")
+    set(JSON_BuildTests OFF CACHE INTERNAL "")
+    add_subdirectory(external/nlohmann_json)
+else()
+    find_package(nlohmann_json ${v} REQUIRED)
+endif()
+
+# (must be after nlohmann/json to satisfy the dependency)
+set(v 2.1.1)
+if(USE_NESTED_JSON_SCHEMA)
+    message(STATUS "pboettch/json-schema-validator: using external/json_schema")
+    add_subdirectory(external/json_schema)
+else()
+    find_package(nlohmann_json_schema_validator ${v} REQUIRED)
+endif()
+set_target_properties(nlohmann_json_schema_validator PROPERTIES
+        POSITION_INDEPENDENT_CODE ON)
+# TODO: https://github.com/pboettch/json-schema-validator/issues/108
+target_compile_options(nlohmann_json_schema_validator PRIVATE -Wno-error=switch)
 
 
 # Graphviz
@@ -167,10 +204,22 @@ endif()
 # Open Babel
 # -------------------------------------------------------------------------
 if(WITH_OPENBABEL)
-    find_package(OpenBabel2 2.3.2 REQUIRED)
-    string(APPEND libmod_config_dependencies "set(OpenBabel2_FOUND 0)\n") # TODO: remove with CMake 3.15 is required https://gitlab.kitware.com/cmake/cmake/issues/18590
-    string(APPEND libmod_config_dependencies "find_dependency(OpenBabel2 2.3.2)\n")
-    list(APPEND libmod_config_find_files "FindOpenBabel2.cmake")
+    find_package(OpenBabel3 3)
+    if(OpenBabel3_FOUND)
+        string(APPEND libmod_config_dependencies "set(OpenBabel3_FOUND 0)\n") # TODO: remove with CMake 3.15 is required https://gitlab.kitware.com/cmake/cmake/issues/18590
+        string(APPEND libmod_config_dependencies "find_dependency(OpenBabel3 3)\n")
+        list(APPEND libmod_config_find_files "FindOpenBabel3.cmake")
+    else()
+        find_package(OpenBabel2 2.3.2)
+        if(OpenBabel2_FOUND)
+            string(APPEND libmod_config_dependencies "set(OpenBabel2_FOUND 0)\n") # TODO: remove with CMake 3.15 is required https://gitlab.kitware.com/cmake/cmake/issues/18590
+            string(APPEND libmod_config_dependencies "find_dependency(OpenBabel2 2.3.2)\n")
+            list(APPEND libmod_config_find_files "FindOpenBabel2.cmake")
+        else()
+            message(FATAL_ERROR "Could not find Open Babel, neither version 2 nor 3.\n"
+                    "Either disable Open Babel with WITH_OPENBABEL=off (not recommended), or add appropriate paths to CMAKE_PREFIX_PATH.")
+        endif()
+    endif()
     set(MOD_HAVE_OPENBABEL TRUE)
 endif()
 
@@ -191,7 +240,6 @@ if(BUILD_POST_MOD)
 endif()
 
 
-    string(APPEND libmod_config_dependencies "set(PNAPI_FOUND 0)\n") # TODO: remove with CMake 3.15 is required https://gitlab.kitware.com/cmake/cmake/issues/18590
 # Python
 # -------------------------------------------------------------------------
 if(BUILD_PY_MOD)
@@ -217,6 +265,13 @@ find_package(Threads REQUIRED)
 string(APPEND libmod_config_dependencies "find_dependency(Threads)\n")
 
 
+# Various Python modules
+# -------------------------------------------------------------------------
+if(BUILD_EPIM)
+
+endif()
+
+
 ###########################################################################
 # Targets and Artefacts
 ###########################################################################
@@ -233,6 +288,7 @@ if(NOT hasParent)
     set(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)        # in addition to those deduced automatically
 endif()
 
+add_subdirectory(libs/epim)
 add_subdirectory(libs/gml)
 add_subdirectory(libs/jla_boost)
 add_subdirectory(libs/libmod)
@@ -288,19 +344,21 @@ if(NOT hasParent)
     set(CPACK_SOURCE_IGNORE_FILES
             ".swp$"
             "~$"
-            "__pycache__"
-            "*.pyc$"
-            "/.git"
-            "/.idea"
-            "/build"
-            "/stage"
+            "/__pycache__/"
+            ".pyc$"
+            "/.git/"
+            "/.idea/"
+            "/build/"
+            "/stage/"
+            "/test/py/out/"
+            "/test/py/summary/"
+            "/test/py/.gdb_history$"
             "/test/py/.*/out/"
             "/test/py/.*/summary/"
-            "/test/py/.*/.gdb_history"
-            "/test/py/graph/myGraph.gml"
-            "/test/py/rule/myRule.gml"
-            "/bootstrap.sh"
-            "/external")
+            "/test/py/.*/.gdb_history$"
+            "/test/py/graph/myGraph.gml$"
+            "/test/py/rule/myRule.gml$"
+            "/bootstrap.sh$")
     add_custom_target(dist COMMAND ${CMAKE_MAKE_PROGRAM} package_source)
     include(CPack)
 endif()

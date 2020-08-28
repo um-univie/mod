@@ -29,5 +29,8 @@ dg, names = doStuff("2a -> 2 b", None, 1)
 assert dg.numVertices == 2
 assert list(sorted(names)) == ['2a', 'b']
 
-dg = DG()
-fail(lambda: dg.build().addAbstract(""), "", err=InputError)
+msg = "Could not parse description of abstract derivations."
+fail(lambda: DG().build().addAbstract(""), msg, err=InputError, isSubstring=True)
+fail(lambda: DG().build().addAbstract("\x80"), msg, err=InputError, isSubstring=True)
+fail(lambda: DG().build().addAbstract("42\x80"), msg, err=InputError, isSubstring=True)
+fail(lambda: DG().build().addAbstract("BrO3- + Br- + H+ + H+ —> HBrO2 + HOBr"), "Expected -> or <=>.", err=InputError)

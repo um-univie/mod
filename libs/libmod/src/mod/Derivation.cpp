@@ -11,11 +11,17 @@ Derivation::~Derivation() = default;
 
 std::ostream &operator<<(std::ostream &s, const Derivation &d) {
 	s << "{";
-	for(auto g : d.left) s << " '" << g->getName() << "'";
+	for(const auto &g : d.left) {
+		if(g) s << " '" << g->getName() << "'";
+		else s << " null";
+	}
 	s << " }";
 	if(d.r) s << ", '" << d.r->getName() << "'";
 	s << ", {";
-	for(auto g : d.right) s << " '" << g->getName() << "'";
+	for(const auto &g : d.right) {
+		if(g) s << " '" << g->getName() << "'";
+		else s << " null";
+	}
 	s << " }";
 	return s;
 }
@@ -30,11 +36,20 @@ Derivations::~Derivations() = default;
 
 std::ostream &operator<<(std::ostream &s, const Derivations &d) {
 	s << "{";
-	for(auto g : d.left) s << " '" << g->getName() << "'";
+	for(const auto &g : d.left) {
+		if(g) s << " '" << g->getName() << "'";
+		else s << " null";
+	}
 	s << " } <";
-	for(auto r : d.rules) s << " '" << r->getName() << "'";
+	for(const auto &r : d.rules) {
+		if(r) s << " '" << r->getName() << "'";
+		else s << " null";
+	}
 	s << " > {";
-	for(auto g : d.right) s << " '" << g->getName() << "'";
+	for(const auto &g : d.right) {
+		if(g) s << " '" << g->getName() << "'";
+		else s << " null";
+	}
 	s << " }";
 	return s;
 }

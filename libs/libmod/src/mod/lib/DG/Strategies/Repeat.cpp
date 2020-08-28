@@ -10,8 +10,10 @@ namespace lib {
 namespace DG {
 namespace Strategies {
 
-Repeat::Repeat(Strategy *strat, std::size_t limit)
-		: Strategy(strat->getMaxComponents()), strat(strat), limit(limit) {}
+Repeat::Repeat(Strategy *strat, int limit)
+		: Strategy(strat->getMaxComponents()), strat(strat), limit(limit) {
+	assert(limit > 0);
+}
 
 Repeat::~Repeat() {
 	delete strat;
@@ -63,7 +65,6 @@ void Repeat::setExecutionEnvImpl() {
 void Repeat::executeImpl(PrintSettings settings, const GraphState &input) {
 	if(settings.verbosity >= PrintSettings::V_Repeat)
 		settings.indent() << "Repeat, limit = " << limit << std::endl;
-	if(limit == 0) return;
 	assert(limit > 0);
 	++settings.indentLevel;
 	for(int i = 0; i != limit; ++i) {

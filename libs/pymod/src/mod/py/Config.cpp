@@ -18,6 +18,10 @@ std::string IsomorphismPolicy_str(IsomorphismPolicy p) {
 	return boost::lexical_cast<std::string>(p);
 }
 
+std::string SmilesClassPolicy_str(SmilesClassPolicy p) {
+	return boost::lexical_cast<std::string>(p);
+}
+
 } // namespace
 
 void Config_doExport() {
@@ -72,30 +76,24 @@ void Config_doExport() {
 	// rst:
 	py::class_<LabelSettings>("LabelSettings", py::no_init)
 			// rst:		.. py:method:: __init__(self, type, relation)
+			// rst:		               __init__(self, type, relation, stereoRelation)
+			// rst:		               __init__(self, type, relation, withStereo, stereoRelation)
 			// rst:
-			// rst:			Construct label settings that only uses the vertex and edge labels.
+			// rst:			Construct label settings that only uses at least the vertex and edge labels.
+			// rst:			If ``stereoRelation`` is given but ``withStereo`` is not, then ``withStereo`` defaults to ``True``.
 			// rst:
 			// rst:			:param LabelType type: How to interpret labels.
 			// rst:			:param LabelRelation relation: The relation that should hold in morphisms between two labels.
+			// rst:			:param bool withStereo: A flag to specify if stereo information should be included.
+			// rst:				Defaults to ``False``, unless ``stereoRelation`` is gieven, then ``True``.
+			// rst:			:param LabelRelation stereoRelation: The relation that should hold in morphisms between stereo data.
+			// rst:				Defaults to :py:class:`LabelRelation.Isomorphism`, but is only used when ``withStereo`` is ``True``.
 			.def(py::init<LabelType, LabelRelation>())
-			.def(str(py::self))
-					// rst: 	.. py:method:: __init__(self, type, relation, stereoRelation)
-					// rst:
-					// rst:			Construct label settings that include both vertex and edge labels, and stereo information.
-					// rst:
-					// rst:			:param LabelType type: How to interpret labels.
-					// rst:			:param LabelRelation relation: The relation that should hold in morphisms between two labels.
-					// rst:			:param LabelRelation stereoRelation: The relation that should hold in morphisms between stereo data.
 			.def(py::init<LabelType, LabelRelation, LabelRelation>())
-					// rst: 	.. py:method:: __init__(self, type, relation, withStereo, stereoRelation)
-					// rst:
-					// rst:			Construct label settings that includes vertex and edge labels, and stereo information depending on the given flag.
-					// rst:
-					// rst:			:param LabelType type: How to interpret labels.
-					// rst:			:param LabelRelation relation: The relation that should hold in morphisms between two labels.
-					// rst:			:param bool withStereo: A flag to specify if stereo information should be included.
-					// rst:			:param LabelRelation stereoRelation: The relation that should hold in morphisms between stereo data.
 			.def(py::init<LabelType, LabelRelation, bool, LabelRelation>())
+			.def(py::self == py::self)
+			.def(py::self != py::self)
+			.def(str(py::self))
 					// rst:		.. py:attribute:: type
 					// rst:
 					// rst:			:type: LabelType
@@ -133,6 +131,28 @@ void Config_doExport() {
 					// rst:				but an exception would have been thrown with :attr:`Check`.
 			.value("TrustMe", IsomorphismPolicy::TrustMe);
 	py::def("_IsomorphismPolicy__str__", &IsomorphismPolicy_str);
+
+	// rst: .. py:class:: SmilesClassPolicy
+	// rst:
+	// rst:		When loading SMILES strings, the class labels can be recorded and mapped into the corresponding
+	// rst:		vertices of the loaded graph. This policy dictates what should happen when the same class label
+	// rst:		is written on multiple atoms.
+	// rst:
+	py::enum_<SmilesClassPolicy>("SmilesClassPolicy")
+			// rst:		.. py:attribute:: AllOrNone
+			// rst:
+			// rst:			If a class label is duplicated, then no labels are mapped to vertices.
+			.value("NoneOnDuplicate", SmilesClassPolicy::NoneOnDuplicate)
+					// rst:		.. py:attribute:: ThrowOnDuplicate
+					// rst:
+					// rst:			If a class label is duplicated, throw a :class:`InputError`.
+			.value("ThrowOnDuplicate", SmilesClassPolicy::ThrowOnDuplicate)
+					// rst:		.. py:attribute:: MapUnique
+					// rst:
+					// rst:			Map all class labels that are unique to vertices.
+			.value("MapUnique", SmilesClassPolicy::MapUnique);
+	py::def("_SmilesClassPolicy__str__", &SmilesClassPolicy_str);
+
 
 #define NSIter(rNS, dataNS, tNS)                                                \
          BOOST_PP_SEQ_FOR_EACH_I(SettingIter, ~,                                \
@@ -213,7 +233,7 @@ void Config_doExport() {
 // rst:
 // rst:		:returns: the singleton :cpp:class:`Config` instance used by the library.
 	py::def("getConfig", &getConfig,
-			  py::return_value_policy<py::reference_existing_object>()
+	        py::return_value_policy<py::reference_existing_object>()
 	);
 }
 

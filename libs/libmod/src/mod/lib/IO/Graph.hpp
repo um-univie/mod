@@ -9,6 +9,7 @@
 #include <string>
 
 namespace mod {
+enum class SmilesClassPolicy;
 namespace lib {
 namespace Graph {
 struct DepictionData;
@@ -35,7 +36,7 @@ public:
 
 Data gml(std::istream &s, std::ostream &err);
 Data dfs(const std::string &dfs, std::ostream &err);
-Data smiles(const std::string &smiles, std::ostream &err);
+Data smiles(const std::string &smiles, std::ostream &err, bool allowAbstract, SmilesClassPolicy classPolicy);
 } // namespace Read
 namespace Write {
 
@@ -46,14 +47,14 @@ enum class EdgeFake3DType {
 EdgeFake3DType invertEdgeFake3DType(EdgeFake3DType t);
 
 struct Options {
-	Options() = default;
-
 	Options &Non() {
-		return EdgesAsBonds(false).CollapseHydrogens(false).RaiseIsotopes(false).RaiseCharges(false).SimpleCarbons(false).Thick(false).WithColour(false).WithIndex(false);
+		return EdgesAsBonds(false).CollapseHydrogens(false).RaiseIsotopes(false).RaiseCharges(false).SimpleCarbons(
+				false).Thick(false).WithColour(false).WithIndex(false);
 	}
 
 	Options &All() {
-		return EdgesAsBonds(true).CollapseHydrogens(true).RaiseIsotopes(true).RaiseCharges(true).SimpleCarbons(true).Thick(true).WithColour(true).WithIndex(true);
+		return EdgesAsBonds(true).CollapseHydrogens(true).RaiseIsotopes(true).RaiseCharges(true).SimpleCarbons(
+				true).Thick(true).WithColour(true).WithIndex(true);
 	}
 
 	Options &EdgesAsBonds(bool v) {
@@ -155,6 +156,11 @@ struct Options {
 	friend bool operator==(const Options &a, const Options &b) {
 		return a.getStringEncoding() == b.getStringEncoding();
 	}
+
+	friend bool operator!=(const Options &a, const Options &b) {
+		return !(a == b);
+	}
+
 public:
 	bool edgesAsBonds = false;
 	bool collapseHydrogens = false;
@@ -172,15 +178,23 @@ public:
 };
 
 // all return the filename _with_ extension
-void gml(const lib::Graph::LabelledGraph &gLabelled, const lib::Graph::DepictionData &depict, const std::size_t gId, bool withCoords, std::ostream &s);
+void gml(const lib::Graph::LabelledGraph &gLabelled, const lib::Graph::DepictionData &depict, const std::size_t gId,
+         bool withCoords, std::ostream &s);
 std::string gml(const lib::Graph::Single &g, bool withCoords);
 std::string dot(const lib::Graph::LabelledGraph &gLabelled, const std::size_t gId);
-std::string coords(const lib::Graph::LabelledGraph &gLabelled, const lib::Graph::DepictionData &depict, const std::size_t gId, const Options &options, bool asInline);
+std::string
+coords(const lib::Graph::LabelledGraph &gLabelled, const lib::Graph::DepictionData &depict, const std::size_t gId,
+       const Options &options, bool asInline);
 std::pair<std::string, std::string>
-tikz(const lib::Graph::LabelledGraph &gLabelled, const lib::Graph::DepictionData &depict, const std::size_t gId, const Options &options,
-		bool asInline, const std::string &idPrefix);
-std::string pdf(const lib::Graph::LabelledGraph &gLabelled, const lib::Graph::DepictionData &depict, const std::size_t gId, const Options &options);
-std::string svg(const lib::Graph::LabelledGraph &gLabelled, const lib::Graph::DepictionData &depict, const std::size_t gId, const Options &options);
+tikz(const lib::Graph::LabelledGraph &gLabelled, const lib::Graph::DepictionData &depict, const std::size_t gId,
+     const Options &options,
+     bool asInline, const std::string &idPrefix);
+std::string
+pdf(const lib::Graph::LabelledGraph &gLabelled, const lib::Graph::DepictionData &depict, const std::size_t gId,
+    const Options &options);
+std::string
+svg(const lib::Graph::LabelledGraph &gLabelled, const lib::Graph::DepictionData &depict, const std::size_t gId,
+    const Options &options);
 std::pair<std::string, std::string> summary(const lib::Graph::Single &g, const Options &first, const Options &second);
 void termState(const lib::Graph::Single &g);
 

@@ -68,7 +68,7 @@ The key-value structure is exemplified by the following grammar.
 .. productionlist:: gml
    ruleGML: 'rule ['
           :    [ 'ruleID' quoteEscapedString ]
-          :    [ 'labelType' `labelType` ]
+          :    [ 'labelType "' `labelType` '"' ]
           :    [ `leftSide` ]
           :    [ `context` ]
           :    [ `rightSide` ]

@@ -14,19 +14,9 @@ enum class ValueType {
 	Int, Float, String, List
 };
 
-inline std::ostream &operator<<(std::ostream &s, ValueType vt) {
-	switch(vt) {
-	case ValueType::Int: return s << "Int";
-	case ValueType::Float: return s << "Float";
-	case ValueType::String: return s << "String";
-	case ValueType::List: return s << "List";
-	}
-	assert(false);
-	std::abort();
-}
+std::ostream &operator<<(std::ostream &s, ValueType vt);
 
 struct ValueTypeVisitor : boost::static_visitor<ValueType> {
-
 	ValueType operator()(const int&) const {
 		return ValueType::Int;
 	}

@@ -1,5 +1,6 @@
 .. default-domain:: py
 .. py:currentmodule:: mod
+.. cpp:namespace:: mod
 
 .. _mod-wrapper:
 
@@ -11,16 +12,17 @@ The script ``mod`` is a convenience script primarily for starting ``python3``
 and after its exit execute PostMØD (the summary generator).
 The execution can however be customised somewhat, e.g., by running ``python3``
 through ``valgrind`` or ``gdb``.
-At some point the script will be able to call some other virtual machine than Python,
-which is why the documentation will not refer directly to running ``python3`` but
-instead simply say "running the selected virtual machine (VM)". As default ``python3``
-is that VM.
+At some point the script will be able to call some other virtual machine than
+Python, which is why the documentation will not refer directly to running
+``python3`` but instead simply say "running the selected virtual machine (VM)".
+As default ``python3`` is that VM.
 
 The wrapper script does the following.
 
 #. Clear the folder ``out/``. If it does not exist, if will be created.
    All printing functions in libMØD assumes ``out/`` is created.
-#. Run the selected VM, optionally through some selected command (e.g., ``gdb``).
+#. Run the selected VM, optionally through some selected command
+   (e.g., ``gdb``).
 #. If the exit code of the VM is not 0, exit with that exit code.
 #. If PostMØD is not selected to be run, exit with code 0.
 #. Run PostMØD and exit with its exit code.
@@ -41,7 +43,8 @@ Usage
 
 .. option:: --version, -v
 
-  Print the version of MØD and exit (the version is always printed in the start).
+  Print the version of MØD and exit
+  (the version is always printed in the start).
 
 .. option:: --nopost
 
@@ -49,26 +52,27 @@ Usage
 
 .. option:: --profile
 
-  Run the VM through `Valgrind <http://valgrind.org/>`_ with ``--tool=callgrind``.
+  Run the VM through `Valgrind <http://valgrind.org/>`_
+  with ``--tool=callgrind``.
   This option takes precedence over the ``memcheck`` option.
 
 .. option:: --memcheck
 
-  Run the VM through `Valgrind <http://valgrind.org/>`_ with standard options for
-  memory check.
+  Run the VM through `Valgrind <http://valgrind.org/>`_ with standard options
+  for memory check.
   If ``--debug`` is given as well, the options ``--vgdb=yes --vgdb-error=0`` are
   also given to ``valgrind`` such that ``gdb`` can be connected.
 
 .. option:: --vgArgs <args>
 
-  If either :option:`--profile` or :option:`--memcheck` is used, this inserts ``<args>`` as an extra
-  argument for ``valgrind``.
+  If either :option:`--profile` or :option:`--memcheck` is used, this inserts
+  ``<args>`` as an extra argument for ``valgrind``.
 
 .. option:: --debug
 
   Run the VM through `GDB <http://www.gnu.org/software/gdb/>`_.
-  If :option:`--memcheck` is given as well, this is not the case, but GDB can then
-  be connected to the process by the following steps:
+  If :option:`--memcheck` is given as well, this is not the case, but GDB can
+  then be connected to the process by the following steps:
   
   1. Run ``gdb python3`` (substitute ``python3`` for your VM).
   2. In the GDB prompt, run ``target remote | vgdb``
@@ -92,9 +96,9 @@ Usage
 
 .. option:: -i
 
-  Use interactive mode for the Python interpreter (i.e., pass ``-i`` as additional argument),
-  but disable the log.
-  If ``ipython3`` is available it will be used as interpreter, otherwise ``python3`` is used.
+  Use interactive mode for the Python interpreter (i.e., pass ``-i`` as
+  additional argument), but disable the log. If ``ipython3`` is available it
+  will be used as interpreter, otherwise ``python3`` is used.
 
 .. option:: -q
 

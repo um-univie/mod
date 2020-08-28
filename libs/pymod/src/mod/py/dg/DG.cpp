@@ -27,6 +27,11 @@ std::shared_ptr<Builder> DG_build(std::shared_ptr<DG> dg_) {
 } // namespace
 
 void DG_doExport() {
+	using Load = std::shared_ptr<DG> (*)(const std::vector<std::shared_ptr<graph::Graph>> &,
+	                                     const std::vector<std::shared_ptr<rule::Rule>> &,
+	                                     const std::string &,
+	                                     IsomorphismPolicy, int);
+
 	// rst: .. py:class:: DG
 	// rst:
 	// rst:		The derivation graph class. A derivation graph is a directed multi-hypergraph
@@ -55,6 +60,7 @@ void DG_doExport() {
 			// rst:				absolutely sure that the graphs are unique up to isomorphism.
 			// rst:			:raises: :class:`LogicError` if ``graphPolicy == IsomorphismPolicy.Check`` and two graphs
 			// rst:				in ``graphDatabase`` are different objects but represents isomorphic graphs.
+			// rst:			:raises: :class:`LogicError` if there is a ``None``in ``graphDatabase``.
 			.def("__init__", py::make_constructor(&DG::make))
 					// rst:		.. py:attribute:: id
 					// rst:
@@ -88,28 +94,28 @@ void DG_doExport() {
 					// rst:			(Read-only) The number of vertices in the derivation graph.
 					// rst:
 					// rst:			:type: int
-					// rst:			:raises: :class:`LogicError` if not `hasActiveBuilder()` or `isLocked()`.
+					// rst:			:raises: :class:`LogicError` if not `hasActiveBuilder` or `isLocked`.
 			.add_property("numVertices", &DG::numVertices)
 					// rst:		.. py:attribute:: vertices
 					// rst:
 					// rst:			(Read-only) An iterable of all vertices in the derivation graph.
 					// rst:
 					// rst:			:type: DGVertexRange
-					// rst:			:raises: :class:`LogicError` if not `hasActiveBuilder()` or `isLocked()`.
+					// rst:			:raises: :class:`LogicError` if not `hasActiveBuilder` or `locked`.
 			.add_property("vertices", &DG::vertices)
 					// rst:		.. py:attribute:: numEdges
 					// rst:
 					// rst:			(Read-only) The number of hyperedges in the derivation graph.
 					// rst:
 					// rst:			:type: int
-					// rst:			:raises: :class:`LogicError` if not `hasActiveBuilder()` or `isLocked()`.
+					// rst:			:raises: :class:`LogicError` if not `hasActiveBuilder` or `locked`.
 			.add_property("numEdges", &DG::numEdges)
 					// rst:		.. py:attribute:: edges
 					// rst:
 					// rst:			(Read-only) An iterable of all hyperedges in the derivation graph.
 					// rst:
 					// rst:			:type: DGEdgeRange
-					// rst:			:raises: :class:`LogicError` if not `hasActiveBuilder()` or `isLocked()`.
+					// rst:			:raises: :class:`LogicError` if not `hasActiveBuilder` or `locked`.
 			.add_property("edges", &DG::edges)
 					//------------------------------------------------------------------
 					// rst:		.. py:method:: findVertex(g)
@@ -118,7 +124,8 @@ void DG_doExport() {
 					// rst:			:returns: a vertex descriptor for which the given graph is associated,
 					// rst:				or a null descriptor if no such vertex exists.
 					// rst:			:rtype: DGVertex
-					// rst:			:raises: :class:`LogicError` if not `hasActiveBuilder()` or `isLocked()`.
+					// rst:			:raises: :class:`LogicError` if not `hasActiveBuilder` or `locked`.
+					// rst:			:raises: :class:`LogicError` if ``g`` is ``None``.
 			.def("findVertex", &DG::findVertex)
 					// rst:		.. py:method:: findEdge(sources, targets)
 					// rst:		               findEdge(sourceGraphs, targetGraphs)
@@ -134,8 +141,9 @@ void DG_doExport() {
 					// rst:			:returns: a hyperedge with the given sources and targets.
 					// rst:			  If no such hyperedge exists in the derivation graph then a null edge is returned.
 					// rst:			  In the second version, the graphs are put through :meth:`findVertex` first.
+					// rst:			:rtype: DGHyperEdge
 					// rst:			:raises: :class:`LogicError` if a vertex descriptor is null, or does not belong to the derivation graph.
-					// rst:			:raises: :class:`LogicError` if not `hasActiveBuilder()` or `isLocked()`.
+					// rst:			:raises: :class:`LogicError` if not `hasActiveBuilder` or `locked`.
 			.def("findEdge", findEdgeVertices)
 			.def("findEdge", findEdgeGraphs)
 					//------------------------------------------------------------------
@@ -185,19 +193,39 @@ void DG_doExport() {
 					// rst:			Lists various statistics for the derivation graph.
 					// rst:
 					// rst:			:raises: :py:class:`LogicError` if the DG has not been calculated.
-			.def("listStats", &DG::listStats);
-
-	// rst: .. py:method:: dgDump(graphs, rules, file)
-	// rst:
-	// rst:		Load a derivation graph dump.
-	// rst:
-	// rst:		:param graphs: Any graph in the dump which is isomorphic one of these graphs is replaced by the given graph.
-	// rst:		:type graphs: list[Graph]
-	// rst:		:param rules: As for the graphs the same procedure is done for the rules, however only using the name of the rule for comparison.
-	// rst:		:type rules: list[Rule]
-	// rst:		:returns: the loaded derivation graph.
-	// rst:		:rtype: DG
-	py::def("dgDump", &DG::dumpImport);
+			.def("listStats", &DG::listStats)
+					// rst:		.. py:method:: load(graphDatabase, ruleDatabase, file, graphPolicy=IsomorphismPolicy.Check, verbosity=2)
+					// rst:
+					// rst:			Load a derivation graph dump as a locked object.
+					// rst:			Use :py:func:`DGBuilder.load` to load a dump into a derivation graph under construction.
+					// rst:
+					// rst:			This is done roughly by making a :class:`DG` with the given `graphDatabase` and `graphPolicy`.
+					// rst:			The label settings are retrieved from the dump file.
+					// rst:			Vertices with graphs and hyperedges with rules are then added from the dump.
+					// rst:			Any graph in the dump which is isomorphic to a given graph is replaced by the given graph.
+					// rst:			The same procedure is done for the rules.
+					// rst:			If a graph/rule is not found in the given lists, a new object is instantiated and used.
+					// rst:			In the end the derivation graph is locked.
+					// rst:
+					// rst:			.. note:: If the dump to be loaded was made by version 0.10 or earlier, it does not contain the full rules
+					// rst:				but only the rule name. It is then crucial that the names of the given rules match with those used to
+					// rst:				create the dump in the first place.
+					// rst:
+					// rst:			See :cpp:func:`dg::DG::load` for an explanation of the verbosity levels.
+					// rst:
+					// rst:			:param graphDatabase: A list of graphs that will be given as graph database to :func:`__init__`.
+					// rst:			:type graphDatabase: list[Graph]
+					// rst:			:param ruleDatabase: A list of rules used as explained above.
+					// rst:			:type ruleDatabase: list[Rule]
+					// rst:			:param str file: a DG dump file to load.
+					// rst:			:param IsomorphismPolicy graphPolicy: the policy that will be given as graph policy to :func:`__init__`.
+					// rst:			:returns: the loaded derivation graph.
+					// rst:			:rtype: DG
+					// rst:			:raises: the same exceptions :func:`__init__` raises related to ``graphDatabase`` and ``graphPolicy``.
+					// rst:			:raises: :class:`LogicError` if there is a ``None`` in ``ruleDatabase``.
+					// rst:			:raises: :class:`InputError` if the file can not be opened or its content is bad.
+			.def("load", static_cast<Load>(&DG::load))
+			.staticmethod("load");
 
 	// rst: .. py:method:: diffDGs(dg1, dg2)
 	// rst:

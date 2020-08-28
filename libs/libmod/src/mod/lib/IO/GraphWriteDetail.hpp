@@ -14,25 +14,24 @@ namespace {
 namespace Loc {
 static constexpr unsigned int
 /*                      */T = 16,
-		/*        */T_left = 32, /*     */T_right = 8,
-		//
-		/*   */TL = 64, /*                     */TR = 4,
-		//
-		/**/L_up = 128, /*                        */R_up = 2,
-		//
-		//
-		L = 256, /*                                   */R = 1,
-		//
-		//
-		/**/L_down = 512, /*                      */R_down = 32768,
-		//
-		/*   */BL = 1024, /*                   */BR = 16384,
-		//
-		/*        */B_left = 2048, /*   */B_right = 8192,
-		/*                      */B = 4096
-		;
+/*        */T_left = 32, /*     */T_right = 8,
+//
+/*   */TL = 64, /*                     */TR = 4,
+//
+/**/L_up = 128, /*                        */R_up = 2,
+//
+//
+L = 256, /*                                   */R = 1,
+//
+//
+/**/L_down = 512, /*                      */R_down = 32768,
+//
+/*   */BL = 1024, /*                   */BR = 16384,
+//
+/*        */B_left = 2048, /*   */B_right = 8192,
+/*                      */B = 4096;
 static constexpr unsigned int
-R_narrow = Loc::R | Loc::R_up | Loc::R_down,
+		R_narrow = Loc::R | Loc::R_up | Loc::R_down,
 		L_narrow = Loc::L | Loc::L_up | Loc::L_down,
 		T_narrow = Loc::T | Loc::T_left | Loc::T_right,
 		B_narrow = Loc::B | Loc::B_left | Loc::B_right,
@@ -43,8 +42,7 @@ R_narrow = Loc::R | Loc::R_up | Loc::R_down,
 		R_wide = R_medium | T_right | B_right,
 		L_wide = L_medium | T_left | B_left,
 		T_wide = T_medium | R_up | L_up,
-		B_wide = B_medium | R_down | L_down
-		;
+		B_wide = B_medium | R_down | L_down;
 } // namespace Loc
 } // namespace
 
@@ -73,7 +71,8 @@ namespace Write {
 
 template<typename Graph, typename Depict, typename AdvOptions, typename BonusWriter>
 void tikz(std::ostream &s, const Options &options, const Graph &g, const Depict &depict,
-		const std::string &fileCoords, const AdvOptions &advOptions, BonusWriter bonusWriter, const std::string &idPrefix) {
+          const std::string &fileCoords, const AdvOptions &advOptions, BonusWriter bonusWriter,
+          const std::string &idPrefix) {
 	typedef typename boost::graph_traits<Graph>::vertex_descriptor Vertex;
 	typedef typename boost::graph_traits<Graph>::edge_descriptor Edge;
 
@@ -178,11 +177,14 @@ void tikz(std::ostream &s, const Options &options, const Graph &g, const Depict 
 				// a single bond blocks less than a double/aromatic and they less than a triple
 				const double f = [&]() {
 					switch(bType) {
-					case BondType::Single: return 8;
+					case BondType::Single:
+						return 8;
 					case BondType::Aromatic:
-					case BondType::Double: return 5;
+					case BondType::Double:
+						return 5;
 					case BondType::Invalid:
-					case BondType::Triple: return 3;
+					case BondType::Triple:
+						return 3;
 					}
 					std::abort();
 				}();
@@ -251,7 +253,8 @@ void tikz(std::ostream &s, const Options &options, const Graph &g, const Depict 
 	s << "\\begin{tikzpicture}[remember picture, scale=\\modGraphScale";
 	s << R"XXX(, baseline={([yshift={-0.5ex}]current bounding box)})XXX";
 	if(options.thick) s << ", thick";
-	s << ", solid"; // circumvent the strange inherited 'dashed' http://tex.stackexchange.com/questions/115887/pattern-in-addplot-inherits-dashed-option-from-previous-draw
+	s
+			<< ", solid"; // circumvent the strange inherited 'dashed' http://tex.stackexchange.com/questions/115887/pattern-in-addplot-inherits-dashed-option-from-previous-draw
 	s << "]\n";
 	if(!idPrefix.empty())
 		s << "\\renewcommand\\modIdPrefix{" << idPrefix << "}\n";
@@ -262,7 +265,8 @@ void tikz(std::ostream &s, const Options &options, const Graph &g, const Depict 
 		if(!isVisible[vId]) continue;
 		const auto atomId = depict.getAtomId(v);
 
-		const auto createDummy = [&s, vId, &advOptions, &textModifiersBegin, &textModifiersEnd](std::string suffix, bool subscript, bool superscript) {
+		const auto createDummy = [&s, vId, &advOptions, &textModifiersBegin, &textModifiersEnd](
+				std::string suffix, bool subscript, bool superscript) {
 			// create dummy vertex to make sure the bounding box is large enough
 			s << "\\node[modStyleGraphVertex, at=(\\modIdPrefix v-" << (vId + advOptions.idOffset) << suffix << ")";
 			if(subscript) s << ", text depth=.25ex";
@@ -321,7 +325,8 @@ void tikz(std::ostream &s, const Options &options, const Graph &g, const Depict 
 			const unsigned int hCount = implicitHydrogenCount[vId];
 			const bool allAuxBlocked = areAllBlocked(auxBlocked);
 			const bool hInLabel = !options.collapseHydrogens || allAuxBlocked;
-			const bool chargeOnLeft = hasBondBlockingAtChargeRight[vId] && !hasBondBlockingAtChargeLeft[vId]; // && isotope == Isotope();
+			const bool chargeOnLeft =
+					hasBondBlockingAtChargeRight[vId] && !hasBondBlockingAtChargeLeft[vId]; // && isotope == Isotope();
 
 			std::string labelNoAux = escapeForLatex(depict.getVertexLabelNoIsotopeChargeRadical(v));
 			std::string isotopeString;
@@ -395,8 +400,8 @@ void tikz(std::ostream &s, const Options &options, const Graph &g, const Depict 
 			//           Hx
 			//
 			if(auxHPosition == Loc::R_narrow &&
-					(auxBlocked & Loc::R_wide) != 0 &&
-					(auxBlocked & Loc::L_wide) == 0
+			   (auxBlocked & Loc::R_wide) != 0 &&
+			   (auxBlocked & Loc::L_wide) == 0
 					) {
 				auxHPosition = Loc::L_narrow;
 			}
@@ -410,8 +415,8 @@ void tikz(std::ostream &s, const Options &options, const Graph &g, const Depict 
 			//          x
 			//          H
 			if(/**/ auxHPosition == Loc::T_narrow
-					&& (auxBlocked & Loc::T_wide) != 0
-					&& (auxBlocked & Loc::B_wide) == 0
+			        && (auxBlocked & Loc::T_wide) != 0
+			        && (auxBlocked & Loc::B_wide) == 0
 					) {
 				auxHPosition = Loc::B_narrow;
 			}
@@ -436,7 +441,8 @@ void tikz(std::ostream &s, const Options &options, const Graph &g, const Depict 
 			}();
 
 			if(!chargeInAux && charge != 0) {
-				s << "\\node[modStyleGraphVertex" << colourString << ", at=(\\modIdPrefix v-" << (vId + advOptions.idOffset);
+				s << "\\node[modStyleGraphVertex" << colourString << ", at=(\\modIdPrefix v-"
+				  << (vId + advOptions.idOffset);
 				if(chargeOnLeft) s << ".west), anchor=east";
 				else s << ".east), anchor=west";
 				s << "] {";
@@ -447,7 +453,8 @@ void tikz(std::ostream &s, const Options &options, const Graph &g, const Depict 
 				else auxBlocked |= Loc::R & Loc::R_up & Loc::TR;
 			}
 			if(!isotopeInAux && isotope != Isotope()) {
-				s << "\\node[modStyleGraphVertex" << colourString << ", at=(\\modIdPrefix v-" << (vId + advOptions.idOffset);
+				s << "\\node[modStyleGraphVertex" << colourString << ", at=(\\modIdPrefix v-"
+				  << (vId + advOptions.idOffset);
 				s << ".west), anchor=east";
 				s << "] {";
 				s << textModifiersBegin;
@@ -458,12 +465,14 @@ void tikz(std::ostream &s, const Options &options, const Graph &g, const Depict 
 			}
 
 			if(auxHPosition != -1) {
-				s << "\\node[modStyleGraphVertex" << colourString << ", at=(\\modIdPrefix v-" << (vId + advOptions.idOffset) << ".";
+				s << "\\node[modStyleGraphVertex" << colourString << ", at=(\\modIdPrefix v-" << (vId + advOptions.idOffset)
+				  << ".";
 				/**/ if(auxHPosition == Loc::R_narrow) s << "east), anchor=west";
 				else if(auxHPosition == Loc::L_narrow) s << "west), anchor=east";
 				else if(auxHPosition == Loc::T_narrow) s << "north), anchor=south, yshift=1pt";
 				else if(auxHPosition == Loc::B_narrow) s << "south), anchor=north, yshift=-1pt";
-				else MOD_ABORT;
+				else
+					MOD_ABORT;
 				s << "] (\\modIdPrefix v-" << (vId + advOptions.idOffset) << "-aux) {";
 				s << textModifiersBegin;
 				if(chargeInAux && chargeOnLeft) s << chargeString;
@@ -485,7 +494,8 @@ void tikz(std::ostream &s, const Options &options, const Graph &g, const Depict 
 				s << textModifiersEnd << "};\n";
 				createDummy("-aux", hCount > 1, isotopeInAux && isotope != Isotope());
 				if(isAuxVertical && hCount > 1) {
-					s << "\\node[modStyleGraphVertex" << colourString << ", at=(\\modIdPrefix v-" << (vId + advOptions.idOffset) << "-aux.east), anchor=west] {";
+					s << "\\node[modStyleGraphVertex" << colourString << ", at=(\\modIdPrefix v-"
+					  << (vId + advOptions.idOffset) << "-aux.east), anchor=west] {";
 					s << textModifiersBegin;
 					s << "$_{" << hCount << "}$";
 					s << textModifiersEnd << "};\n";
@@ -509,8 +519,8 @@ void tikz(std::ostream &s, const Options &options, const Graph &g, const Depict 
 				auxBlocked |= (1 << auxRadicalPosition);
 				const double atAngle = auxRadicalPosition * 22.5;
 				s << "\\node[outer sep=0, inner sep=1, minimum size=0, fill=black, circle, "
-						<< "at=(\\modIdPrefix v-" << (vId + advOptions.idOffset) << "." << atAngle << "), "
-						<< "shift=(" << atAngle << ":3pt)] {};\n";
+				  << "at=(\\modIdPrefix v-" << (vId + advOptions.idOffset) << "." << atAngle << "), "
+				  << "shift=(" << atAngle << ":3pt)] {};\n";
 			} // end if has radical
 		} // end if simpleCarbon
 		if(options.withRawStereo || options.withPrettyStereo) {
@@ -530,17 +540,20 @@ void tikz(std::ostream &s, const Options &options, const Graph &g, const Depict 
 				auxBlocked |= (1u << stereoPosition);
 				double atAngle = stereoPosition * 22.5;
 				s << "\\node[outer sep=0, inner sep=1, at=(\\modIdPrefix v-" << (vId + advOptions.idOffset)
-						<< "." << atAngle << "), anchor=";
-				[&s, stereoPosition]() -> std::ostream& {
+				  << "." << atAngle << "), anchor=";
+				[&s, stereoPosition]() -> std::ostream & {
 					switch(stereoPosition) {
-					case 0: return s << "west";
-					case 8: return s << "east";
+					case 0:
+						return s << "west";
+					case 8:
+						return s << "east";
 					}
 					if(stereoPosition < 8) s << "south";
 					else s << "north";
 					switch(stereoPosition) {
 					case 4:
-					case 12: return s;
+					case 12:
+						return s;
 					}
 					if(stereoPosition > 4 && stereoPosition < 12) return s << " east";
 					else return s << " west";
@@ -573,9 +586,9 @@ void tikz(std::ostream &s, const Options &options, const Graph &g, const Depict 
 			auxBlocked |= (1 << auxIndexPosition);
 			const double atAngle = auxIndexPosition * 22.5;
 			s << "\\node[outer sep=0, inner sep=1" << colourString
-					<< ", at=(\\modIdPrefix v-" << (vId + advOptions.idOffset)
-					<< "." << atAngle << "), anchor=" << (atAngle + 180)
-					<< "] (\\modIdPrefix v-" << (vId + advOptions.idOffset) << "-auxId) {";
+			  << ", at=(\\modIdPrefix v-" << (vId + advOptions.idOffset)
+			  << "." << atAngle << "), anchor=" << (atAngle + 180)
+			  << "] (\\modIdPrefix v-" << (vId + advOptions.idOffset) << "-auxId) {";
 			s << textModifiersBegin;
 			s << indexString;
 			s << textModifiersEnd << "};\n";
@@ -615,7 +628,8 @@ void tikz(std::ostream &s, const Options &options, const Graph &g, const Depict 
 		}
 		EdgeFake3DType fake3Dtype = advOptions.getEdgeFake3DType(e, !options.collapseHydrogens);
 		switch(fake3Dtype) {
-		case EdgeFake3DType::None: break;
+		case EdgeFake3DType::None:
+			break;
 		case EdgeFake3DType::WedgeSL:
 			drawCommand += "WedgeSL";
 			break;
@@ -634,13 +648,14 @@ void tikz(std::ostream &s, const Options &options, const Graph &g, const Depict 
 			if(isSimpleCarbon[fromId]) fromOffset = 0;
 			if(isSimpleCarbon[toId]) toOffset = 0;
 		}
-		s << drawCommand << "{" << (fromId + advOptions.idOffset) << "}{" << (toId + advOptions.idOffset) << "}{" << fromOffset << "}{" << toOffset << "}";
+		s << drawCommand << "{" << (fromId + advOptions.idOffset) << "}{" << (toId + advOptions.idOffset) << "}{"
+		  << fromOffset << "}{" << toOffset << "}";
 		s << "{" << colourString << "}";
 		// find the label text
 		const std::string label = (!options.edgesAsBonds || bType == BondType::Invalid)
-				? escapeForLatex(depict.getEdgeLabel(e)) : std::string();
+		                          ? escapeForLatex(depict.getEdgeLabel(e)) : std::string();
 		const std::string rawStereo = options.withRawStereo
-				? "{\\tiny " + advOptions.getStereoString(e) + "}" : std::string();
+		                              ? "{\\tiny " + advOptions.getStereoString(e) + "}" : std::string();
 		const std::string extraAnnotation = advOptions.getEdgeAnnotation(e);
 		s << "{";
 		if(!label.empty() || !rawStereo.empty()) {
@@ -664,7 +679,7 @@ struct DefaultAdvancedOptions {
 	using Vertex = typename boost::graph_traits<Graph>::vertex_descriptor;
 	using Edge = typename boost::graph_traits<Graph>::edge_descriptor;
 
-	DefaultAdvancedOptions(const Graph &g, const Depict &depict) : g(g), depict(depict) { }
+	DefaultAdvancedOptions(const Graph &g, const Depict &depict) : g(g), depict(depict) {}
 
 	template<typename T>
 	std::string getColour(T) const {
@@ -710,6 +725,7 @@ struct DefaultAdvancedOptions {
 	std::string getOpts(Vertex v) const {
 		return std::string();
 	}
+
 public:
 
 	template<typename T>
@@ -724,10 +740,10 @@ private:
 };
 
 template<typename Graph, typename Depict>
-void tikz(std::ostream &s, const Options &options, const Graph &g, const Depict &depict, const std::string & fileCoords,
-		bool asInline, const std::string &idPrefix) {
+void tikz(std::ostream &s, const Options &options, const Graph &g, const Depict &depict, const std::string &fileCoords,
+          bool asInline, const std::string &idPrefix) {
 	DefaultAdvancedOptions<Graph, Depict> adv(g, depict);
-	tikz(s, options, g, depict, fileCoords, adv, [](std::ostream & s) {
+	tikz(s, options, g, depict, fileCoords, adv, [](std::ostream &s) {
 	}, idPrefix);
 }
 

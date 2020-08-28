@@ -11,7 +11,8 @@ namespace mod {
 namespace lib {
 namespace Rules {
 
-struct PropStereoCore : private PropCore<PropStereoCore, GraphType, std::unique_ptr<const lib::Stereo::Configuration>, lib::Stereo::EdgeCategory> {
+struct PropStereoCore
+		: private PropCore<PropStereoCore, GraphType, std::unique_ptr<const lib::Stereo::Configuration>, lib::Stereo::EdgeCategory> {
 	// read-only of data
 	using Base = PropCore<PropStereoCore, GraphType, std::unique_ptr<const lib::Stereo::Configuration>, lib::Stereo::EdgeCategory>;
 	using Base::LeftVertexType;
@@ -22,8 +23,8 @@ struct PropStereoCore : private PropCore<PropStereoCore, GraphType, std::unique_
 	using Base::RightType;
 
 	struct ValueTypeVertex {
-		boost::optional<const LeftVertexType&> left;
-		boost::optional<const RightVertexType&> right;
+		boost::optional<const LeftVertexType &> left;
+		boost::optional<const RightVertexType &> right;
 		bool inContext;
 	};
 
@@ -36,7 +37,7 @@ public:
 
 	template<typename InferenceLeft, typename InferenceRight, typename VertexInContext, typename EdgeInContext>
 	PropStereoCore(const GraphType &g, InferenceLeft &&leftInference, InferenceRight &&rightInference,
-			VertexInContext vCallback, EdgeInContext eCallback) : Base(g) {
+	               VertexInContext vCallback, EdgeInContext eCallback) : Base(g) {
 		// The eCallback is only responsible for the information about being in context.
 		// This function will ensure that it's valid to put in context as well.
 		// However, the vCallback is also responsible for ensuring that it is valid to put it in context.
@@ -88,7 +89,9 @@ public:
 		edgeInContext.reserve(num_edges(g));
 		for(const auto e : asRange(edges(g))) {
 			assert(get(boost::edge_index_t(), g, e) == edgeState.size());
-			lib::Stereo::EdgeCategory lCat, rCat;
+			lib::Stereo::EdgeCategory
+					lCat = static_cast<lib::Stereo::EdgeCategory>(-1),
+					rCat = static_cast<lib::Stereo::EdgeCategory>(-1);
 			if(g[e].membership != Membership::Right) lCat = leftInference.getEdgeCategory(e);
 			if(g[e].membership != Membership::Left) rCat = rightInference.getEdgeCategory(e);
 			edgeState.emplace_back(lCat, rCat);
@@ -118,6 +121,7 @@ public:
 		res.inContext = inContext(e);
 		return res;
 	}
+
 public:
 	using Base::verify;
 	using Base::getLeft;
@@ -127,7 +131,12 @@ public:
 	struct Handler {
 
 		template<typename VEProp, typename LabGraphDom, typename LabGraphCodom, typename F, typename ...Args>
-		static auto fmap2(const VEProp &l, const VEProp &r, const LabGraphDom &gDom, const LabGraphCodom &gCodom, F &&f, Args&&... args) {
+		static auto fmap2(const VEProp &l,
+		                  const VEProp &r,
+		                  const LabGraphDom &gDom,
+		                  const LabGraphCodom &gCodom,
+		                  F &&f,
+		                  Args &&... args) {
 			assert(l.left.is_initialized() || l.right.is_initialized());
 			if(l.inContext) {
 				assert(l.left.is_initialized());
@@ -142,13 +151,15 @@ public:
 			assert(l.right.is_initialized() == r.right.is_initialized());
 			using Left = decltype(f(*l.left, *r.left, get_labelled_left(gDom), get_labelled_left(gCodom), args...));
 			using Right = decltype(f(*l.right, *r.right, get_labelled_right(gDom), get_labelled_right(gCodom), args...));
-			using InContext = decltype(f(l.inContext, r.inContext, get_labelled_left(gDom), get_labelled_left(gCodom), args...));
+			using InContext = decltype(f(l.inContext, r.inContext, get_labelled_left(gDom), get_labelled_left(gCodom),
+			                             args...));
 			return std::tuple<boost::optional<Left>, boost::optional<Right>, InContext>(
-					l.left.is_initialized() ? f(*l.left, *r.left, get_labelled_left(gDom), get_labelled_left(gCodom), args...) : boost::optional<Left>(),
-					l.right.is_initialized() ? f(*l.right, *r.right, get_labelled_right(gDom), get_labelled_right(gCodom), args...) : boost::optional<Right>(),
+					l.left.is_initialized() ? f(*l.left, *r.left, get_labelled_left(gDom), get_labelled_left(gCodom),
+					                            args...) : boost::optional<Left>(),
+					l.right.is_initialized() ? f(*l.right, *r.right, get_labelled_right(gDom), get_labelled_right(gCodom),
+					                             args...) : boost::optional<Right>(),
 					f(l.inContext, r.inContext, args...)
-					)
-					;
+			);
 		}
 
 		template<typename Op, typename Val>
@@ -171,6 +182,7 @@ public:
 	bool inContext(Edge e) const {
 		return edgeInContext[get(boost::edge_index_t(), g, e)];
 	}
+
 private:
 	std::vector<bool> vertexInContext, edgeInContext;
 };

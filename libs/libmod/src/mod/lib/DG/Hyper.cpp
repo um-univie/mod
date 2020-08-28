@@ -337,6 +337,22 @@ dg::DG::HyperEdge Hyper::getInterfaceEdge(Vertex e) const {
 	return dg::DG::HyperEdge(getNonHyper().getAPIReference(), get(boost::vertex_index_t(), getGraph(), e));
 }
 
+Hyper::Vertex Hyper::getInternalVertex(const dg::DG::Vertex &v) const {
+	using boost::vertices;
+	const auto &dg = getGraph();
+	const auto iter = vertices(dg).first + v.getId();
+	assert(dg[*iter].kind == HyperVertexKind::Vertex);
+	return *iter;
+}
+
+Hyper::Vertex Hyper::getInternalVertex(const dg::DG::HyperEdge &e) const {
+	using boost::vertices;
+	const auto &dg = getGraph();
+	const auto iter = vertices(dg).first + e.getId();
+	assert(dg[*iter].kind == HyperVertexKind::Edge);
+	return *iter;
+}
+
 mod::Derivation Hyper::getDerivation(Vertex v) const {
 	assert(v != hyper.null_vertex());
 	assert(hyper[v].kind == HyperVertexKind::Edge);

@@ -15,9 +15,9 @@ add_library(mod::pymod ALIAS pymod)
 target_include_directories(pymod
         PUBLIC
         $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>
-        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src>
-        ${Boost_INCLUDE_DIR})
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src>)
 target_link_libraries(pymod PUBLIC mod::libmod Boost::${PYTHON_TARGET} Python3::Python)
+target_link_libraries(pymod PRIVATE -Wl,--no-undefined)
 target_compile_options(pymod PRIVATE -Wall -Wextra
         -Wno-unused-parameter
         -Wno-comment

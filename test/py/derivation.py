@@ -18,6 +18,12 @@ d.right = [g2]
 assert d.right == [g2]
 assert str(d) == "{ 'g1' }, 'r', { 'g2' }"
 
+d = Derivation()
+d.left = [None]
+assert str(d) == "{ null }, { }"
+d.right = [None]
+assert str(d) == "{ null }, { null }"
+
 ##############################################################################
 d = Derivations()
 assert str(d) == "{ } < > { }"
@@ -32,6 +38,14 @@ assert str(d) == "{ 'g1' } < 'r' > { }"
 d.right = [g2]
 assert d.right == [g2]
 assert str(d) == "{ 'g1' } < 'r' > { 'g2' }"
+
+d = Derivations()
+d.left = [None]
+assert str(d) == "{ null } < > { }"
+d.rules = [None]
+assert str(d) == "{ null } < null > { }"
+d.right = [None]
+assert str(d) == "{ null } < null > { null }"
 
 ##############################################################################
 d = Derivation()

@@ -1,5 +1,6 @@
 #include "Add.hpp"
 
+#include <mod/Error.hpp>
 #include <mod/Function.hpp>
 #include <mod/graph/Graph.hpp>
 #include <mod/lib/DG/Strategies/GraphState.hpp>
@@ -14,7 +15,7 @@ Add::Add(const std::vector<std::shared_ptr<graph::Graph> > graphs, bool onlyUniv
 		  graphs(graphs), onlyUniverse(onlyUniverse), graphPolicy(graphPolicy) {}
 
 Add::Add(const std::shared_ptr<mod::Function<std::vector<std::shared_ptr<graph::Graph> >()> > generator,
-			bool onlyUniverse, IsomorphismPolicy graphPolicy)
+         bool onlyUniverse, IsomorphismPolicy graphPolicy)
 		: Strategy::Strategy(0),
 		  generator(generator), onlyUniverse(onlyUniverse), graphPolicy(graphPolicy) {}
 
@@ -66,6 +67,10 @@ void Add::executeImpl(PrintSettings settings, const GraphState &input) {
 	std::vector<std::shared_ptr<graph::Graph> > graphsToAdd;
 	if(generator) {
 		graphsToAdd = (*generator)();
+		if(std::any_of(graphsToAdd.begin(), graphsToAdd.end(), [](const auto &g) {
+			return !g;
+		}))
+			throw LogicError("A graph returned in a dynamic add strategy is a null pointer.");
 	} else {
 		graphsToAdd = graphs;
 	}

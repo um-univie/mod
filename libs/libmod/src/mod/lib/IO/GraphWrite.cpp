@@ -49,16 +49,22 @@ void escapeLabelForDot(const std::string &label, std::ostream &s) {
 
 EdgeFake3DType invertEdgeFake3DType(EdgeFake3DType t) {
 	switch(t) {
-	case EdgeFake3DType::None: return t;
-	case EdgeFake3DType::WedgeSL: return EdgeFake3DType::WedgeLS;
-	case EdgeFake3DType::WedgeLS: return EdgeFake3DType::WedgeSL;
-	case EdgeFake3DType::HashSL: return EdgeFake3DType::HashLS;
-	case EdgeFake3DType::HashLS: return EdgeFake3DType::HashSL;
+	case EdgeFake3DType::None:
+		return t;
+	case EdgeFake3DType::WedgeSL:
+		return EdgeFake3DType::WedgeLS;
+	case EdgeFake3DType::WedgeLS:
+		return EdgeFake3DType::WedgeSL;
+	case EdgeFake3DType::HashSL:
+		return EdgeFake3DType::HashLS;
+	case EdgeFake3DType::HashLS:
+		return EdgeFake3DType::HashSL;
 	}
 	MOD_ABORT; // no, GCC, shh
 }
 
-void gml(const lib::Graph::LabelledGraph &gLabelled, const lib::Graph::DepictionData &depict, const std::size_t gId, bool withCoords, std::ostream &s) {
+void gml(const lib::Graph::LabelledGraph &gLabelled, const lib::Graph::DepictionData &depict, const std::size_t gId,
+         bool withCoords, std::ostream &s) {
 	if(!depict.getHasCoordinates() && withCoords) MOD_ABORT;
 	const auto &g = get_graph(gLabelled);
 	const auto &pString = get_string(gLabelled);
@@ -71,14 +77,14 @@ void gml(const lib::Graph::LabelledGraph &gLabelled, const lib::Graph::Depiction
 	}
 	for(auto e : asRange(edges(g))) {
 		s << "\tedge [ source " << get(boost::vertex_index_t(), g, source(e, g))
-				<< " target " << get(boost::vertex_index_t(), g, target(e, g))
-				<< " label \"" << pString[e] << "\" ]\n";
+		  << " target " << get(boost::vertex_index_t(), g, target(e, g))
+		  << " label \"" << pString[e] << "\" ]\n";
 	}
 	s << "]\n";
 }
 
 std::string gml(const lib::Graph::Single &g, bool withCoords) {
-	static std::set < std::pair < std::size_t, bool> > cache;
+	static std::set<std::pair<std::size_t, bool> > cache;
 	auto iter = cache.find(std::make_pair(g.getId(), withCoords));
 	std::string fileNoExt = getFilePrefix(g.getId(), true);
 	if(iter != end(cache)) return fileNoExt;
@@ -135,24 +141,24 @@ struct CoordsCacheEntry {
 	int rotation;
 	bool mirror;
 public:
-
 	friend bool operator<(const CoordsCacheEntry &a, const CoordsCacheEntry &b) {
 		return std::tie(a.id, a.collapseHydrogens, a.rotation, a.mirror)
-				< std::tie(b.id, b.collapseHydrogens, b.rotation, b.mirror);
+		       < std::tie(b.id, b.collapseHydrogens, b.rotation, b.mirror);
 	}
 };
 
-std::string coords(const lib::Graph::LabelledGraph &gLabelled, const lib::Graph::DepictionData &depict, const std::size_t gId, const Options &options, bool asInline) {
+std::string coords(const lib::Graph::LabelledGraph &gLabelled, const lib::Graph::DepictionData &depict,
+                   const std::size_t gId, const Options &options, bool asInline) {
 	static std::map<CoordsCacheEntry, std::string> cache;
 	if(!asInline) {
 		const auto iter = cache.find({gId, options.collapseHydrogens, options.rotation, options.mirror});
 		if(iter != end(cache)) return iter->second;
 	}
-	const std::string fileNoExt = getFilePrefix(gId, !asInline);
 	if(!depict.getHasCoordinates()) {
 		dot(gLabelled, gId);
+		std::string fileNoExt = getFilePrefix(gId, !asInline);
 		IO::post() << "coordsFromGV graph \"" << fileNoExt << "\"\n";
-		const std::string file = fileNoExt + "_coord.tex";
+		std::string file = std::move(fileNoExt) + "_coord.tex";
 		if(!asInline) {
 			for(bool collapse :{true, false}) {
 				for(bool mirror :{true, false}) {
@@ -164,24 +170,28 @@ std::string coords(const lib::Graph::LabelledGraph &gLabelled, const lib::Graph:
 		return file;
 	} else {
 		const auto &g = get_graph(gLabelled);
-		const std::string molString = options.collapseHydrogens ? "_mol" : "";
-		std::string f = getFilePrefix(gId, !asInline) + molString;
+		std::string f = getFilePrefix(gId, !asInline);
+		if(options.collapseHydrogens) f += "_mol";
+		if(options.rotation != 0) f += "_r" + std::to_string(options.rotation);
+		if(options.mirror) f += "_m" + std::to_string(options.mirror);
 		if(asInline) f += "i";
 		FileHandle s(f + "_coord.tex");
 		s << "% dummy\n";
 		for(const auto v : asRange(vertices(g))) {
 			const auto vId = get(boost::vertex_index_t(), g, v);
 			if(options.collapseHydrogens && Chem::isCollapsible(v, g, depict, depict, [&depict](const auto v) {
-					return depict.hasImportantStereo(v);
-				})) continue;
+				return depict.hasImportantStereo(v);
+			}))
+				continue;
 			double x, y;
 			std::tie(x, y) = pointTransform(
 					depict.getX(v, !options.collapseHydrogens),
 					depict.getY(v, !options.collapseHydrogens),
 					options.rotation, options.mirror);
-			s << "\\coordinate[overlay] (\\modIdPrefix v-coord-" << vId << ") at (" << std::fixed << x << ", " << y << ") {};\n";
+			s << "\\coordinate[overlay] (\\modIdPrefix v-coord-" << vId << ") at (" << std::fixed << x << ", " << y
+			  << ") {};\n";
 		}
-		const std::string file = s;
+		std::string file = s;
 		if(!asInline) {
 			cache[{gId, options.collapseHydrogens, options.rotation, options.mirror}
 			] = file;
@@ -191,8 +201,9 @@ std::string coords(const lib::Graph::LabelledGraph &gLabelled, const lib::Graph:
 }
 
 std::pair<std::string, std::string>
-tikz(const lib::Graph::LabelledGraph &gLabelled, const lib::Graph::DepictionData &depict, const std::size_t gId, const Options &options,
-		bool asInline, const std::string &idPrefix) {
+tikz(const lib::Graph::LabelledGraph &gLabelled, const lib::Graph::DepictionData &depict, const std::size_t gId,
+     const Options &options,
+     bool asInline, const std::string &idPrefix) {
 	static std::set<std::pair<std::size_t, std::string> > cache;
 	std::string strOptions = options.getStringEncoding();
 	std::string file = getFilePrefix(gId, !asInline) + "_" + strOptions;
@@ -209,7 +220,9 @@ tikz(const lib::Graph::LabelledGraph &gLabelled, const lib::Graph::DepictionData
 	return std::make_pair(file, fileCoordsExt);
 }
 
-std::string pdf(const lib::Graph::LabelledGraph &gLabelled, const lib::Graph::DepictionData &depict, const std::size_t gId, const Options &options) {
+std::string
+pdf(const lib::Graph::LabelledGraph &gLabelled, const lib::Graph::DepictionData &depict, const std::size_t gId,
+    const Options &options) {
 	{ // user-specified depiction
 		static std::map<std::size_t, std::string> userCache;
 		auto iter = userCache.find(gId);
@@ -242,7 +255,9 @@ std::string pdf(const lib::Graph::LabelledGraph &gLabelled, const lib::Graph::De
 	return file;
 }
 
-std::string svg(const lib::Graph::LabelledGraph &gLabelled, const lib::Graph::DepictionData &depict, const std::size_t gId, const Options &options) {
+std::string
+svg(const lib::Graph::LabelledGraph &gLabelled, const lib::Graph::DepictionData &depict, const std::size_t gId,
+    const Options &options) {
 	static std::set<std::pair<std::size_t, std::string> > cache;
 	std::string strOptions = options.getStringEncoding();
 	std::string fileNoExt = getFilePrefix(gId, true) + "_" + strOptions;
@@ -260,10 +275,10 @@ std::pair<std::string, std::string> summary(const lib::Graph::Single &g, const O
 	std::string graphLike = pdf(g, first);
 	std::string molLike = first == second ? "" : pdf(g, second);
 	IO::post() << "summaryGraph \"" << g.getName() << "\" \""
-			<< std::string(begin(graphLike), end(graphLike) - 4) << "\" \"";
+	           << std::string(begin(graphLike), end(graphLike) - 4) << "\" \"";
 	if(!molLike.empty())
 		IO::post() << std::string(begin(molLike), end(molLike) - 4);
-	IO::post() << "\"\n";
+	IO::post() << "\"" << std::endl;
 	if(molLike.empty())
 		return std::make_pair(graphLike, graphLike);
 	else
@@ -289,23 +304,23 @@ void termState(const lib::Graph::Single &g) {
 			Address a{AddressType::Heap, termState[e]};
 			addrToEdge[a].insert(e);
 		}
-		lib::IO::Term::Write::wam(getMachine(termState), lib::Term::getStrings(), s, [&](Address addr, std::ostream & s) {
+		lib::IO::Term::Write::wam(getMachine(termState), lib::Term::getStrings(), s, [&](Address addr, std::ostream &s) {
 			s << "        ";
 			bool first = true;
 			for(auto v : addrToVertex[addr]) {
 				if(!first) s << ", ";
-						first = false;
-						s << "v" << get(boost::vertex_index_t(), g.getGraph(), v);
-				}
+				first = false;
+				s << "v" << get(boost::vertex_index_t(), g.getGraph(), v);
+			}
 			for(auto e : addrToEdge[addr]) {
 				if(!first) s << ", ";
-						first = false;
-						s << "e("
-						<< get(boost::vertex_index_t(), g.getGraph(), source(e, g.getGraph()))
-						<< ", "
-						<< get(boost::vertex_index_t(), g.getGraph(), target(e, g.getGraph()))
-						<< ")";
-				}
+				first = false;
+				s << "e("
+				  << get(boost::vertex_index_t(), g.getGraph(), source(e, g.getGraph()))
+				  << ", "
+				  << get(boost::vertex_index_t(), g.getGraph(), target(e, g.getGraph()))
+				  << ")";
+			}
 		});
 	} else {
 		std::string msg = "Parsing failed for graph '" + g.getName() + "'. " + termState.getParsingError();

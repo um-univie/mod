@@ -21,8 +21,8 @@ namespace dg {
 // rst-class: dg::DG::Vertex
 // rst:
 // rst:		A descriptor of either a vertex in a graph, or a null vertex.
+// rst:
 // rst-class-start:
-
 class MOD_DECL DG::Vertex {
 	friend class lib::DG::Hyper;
 	Vertex(std::shared_ptr<DG> g, std::size_t vId);
@@ -89,7 +89,6 @@ private:
 // rst:
 // rst:		A descriptor of either a hyperedge in a derivation graph, or a null edge.
 // rst-class-start:
-
 class MOD_DECL DG::HyperEdge {
 	friend class lib::DG::Hyper;
 	HyperEdge(std::shared_ptr<DG> g, std::size_t eId);
@@ -154,7 +153,8 @@ public:
 	// rst:		:throws: :class:`LogicError` if not `getDG()->isLocked()`.
 	HyperEdge getInverse() const;
 public:
-	// rst: .. function:: std::vector<std::pair<std::string, std::string> > print(const graph::Printer &printer, const std::string &nomatchColour, const std::string &matchColour) const
+	// rst: .. function:: std::vector<std::pair<std::string, std::string>> \
+	// rst:               print(const graph::Printer &printer, const std::string &nomatchColour, const std::string &matchColour) const
 	// rst:
 	// rst:		Print the derivations represented by the hyperedge.
 	// rst:		All possible Double-Pushout diagrams are printed.
@@ -165,17 +165,9 @@ public:
 	// rst:			Each element is a pair of filename prefixes, where the first entry is completed by appending ``_derL``, ``_derK``, or ``_derR``.
 	// rst:			The second entry is completed similarly by appending ``_derG``, ``_derD``, or ``_derH``.
 	// rst:		:throws: :class:`LogicError` if it is a null descriptor.
-	std::vector<std::pair<std::string, std::string> >
+	// rst:		:throws: :class:`LogicError` if it has no rules.
+	std::vector<std::pair<std::string, std::string>>
 	print(const graph::Printer &printer, const std::string &nomatchColour, const std::string &matchColour) const;
-	// rst: .. function:: void printTransitionState() const
-	// rst:               void printTransitionState(const graph::Printer &printer) const
-	// rst:
-	// rst:		Print the derivations represented by the hyperedge in style of a chemical transition state.
-	// rst:		For all possible Double-Pushout diagrams a figure printed.
-	// rst:
-	// rst:		:throws: :class:`LogicError` if it is a null descriptor.
-	void printTransitionState() const;
-	void printTransitionState(const graph::Printer &printer) const;
 private:
 	std::shared_ptr<DG> g;
 	std::size_t eId;
@@ -190,8 +182,8 @@ private:
 // rst:
 // rst:		An iterator for traversing all vertices in a derivation graph.
 // rst:		It models a forward iterator.
+// rst:
 // rst-class-start:
-
 class MOD_DECL DG::VertexIterator
 		: public boost::iterator_facade<VertexIterator, Vertex, std::forward_iterator_tag, Vertex> {
 	friend class DG;
@@ -215,8 +207,8 @@ private:
 // rst-class: dg::DG::VertexRange
 // rst:
 // rst:		A range of all vertices in a derivation graph.
+// rst:
 // rst-class-start:
-
 struct DG::VertexRange {
 	using iterator = VertexIterator;
 	using const_iterator = iterator;
@@ -239,8 +231,8 @@ private:
 // rst:
 // rst:		An iterator for traversing all edges in a graph.
 // rst:		It models a forward iterator.
+// rst:
 // rst-class-start:
-
 class MOD_DECL DG::EdgeIterator
 		: public boost::iterator_facade<EdgeIterator, HyperEdge, std::forward_iterator_tag, HyperEdge> {
 	friend class DG;
@@ -264,8 +256,8 @@ private:
 // rst-class: dg::DG::EdgeRange
 // rst:
 // rst:		A range of all edges in a derivation graph.
+// rst:
 // rst-class-start:
-
 struct DG::EdgeRange {
 	using iterator = EdgeIterator;
 	using const_iterator = iterator;
@@ -288,8 +280,8 @@ private:
 // rst:
 // rst:		An iterator for enumerating all in-edges of a vertex.
 // rst:		It models a forward iterator.
+// rst:
 // rst-class-start:
-
 class MOD_DECL DG::InEdgeIterator
 		: public boost::iterator_facade<InEdgeIterator, HyperEdge, std::forward_iterator_tag, HyperEdge> {
 	friend class InEdgeRange;
@@ -313,8 +305,8 @@ private:
 // rst-class: dg::DG::InEdgeRange
 // rst:
 // rst:		A range of all in-edges of a vertex.
+// rst:
 // rst-class-start:
-
 struct DG::InEdgeRange {
 	using iterator = InEdgeIterator;
 	using const_iterator = iterator;
@@ -330,13 +322,12 @@ private:
 };
 // rst-class-end:
 
-
 // rst-class: dg::DG::OutEdgeIterator
 // rst:
 // rst:		An iterator for enumerating all out-edges of a vertex.
 // rst:		It models a forward iterator.
+// rst:
 // rst-class-start:
-
 class MOD_DECL DG::OutEdgeIterator
 		: public boost::iterator_facade<OutEdgeIterator, HyperEdge, std::forward_iterator_tag, HyperEdge> {
 	friend class OutEdgeRange;
@@ -360,8 +351,8 @@ private:
 // rst-class: dg::DG::OutEdgeRange
 // rst:
 // rst:		A range of all out-edges of a vertex.
+// rst:
 // rst-class-start:
-
 struct DG::OutEdgeRange {
 	using iterator = OutEdgeIterator;
 	using const_iterator = iterator;
@@ -385,8 +376,8 @@ private:
 // rst:
 // rst:		An iterator for enumerating all sources of a hyperedge.
 // rst:		It models a forward iterator.
+// rst:
 // rst-class-start:
-
 class MOD_DECL DG::SourceIterator
 		: public boost::iterator_facade<SourceIterator, Vertex, std::forward_iterator_tag, Vertex> {
 	friend class SourceRange;
@@ -410,8 +401,8 @@ private:
 // rst-class: dg::DG::SourceRange
 // rst:
 // rst:		A range of all sources of a hyperedge.
+// rst:
 // rst-class-start:
-
 struct DG::SourceRange {
 	using iterator = SourceIterator;
 	using const_iterator = iterator;
@@ -432,8 +423,8 @@ private:
 // rst:
 // rst:		An iterator for enumerating all targets of a hyperedge.
 // rst:		It models a forward iterator.
+// rst:
 // rst-class-start:
-
 class MOD_DECL DG::TargetIterator
 		: public boost::iterator_facade<TargetIterator, Vertex, std::forward_iterator_tag, Vertex> {
 	friend class TargetRange;
@@ -457,8 +448,8 @@ private:
 // rst-class: dg::DG::TargetRange
 // rst:
 // rst:		A range of all sources of a hyperedge.
+// rst:
 // rst-class-start:
-
 struct DG::TargetRange {
 	using iterator = TargetIterator;
 	using const_iterator = iterator;
@@ -482,12 +473,12 @@ private:
 // rst:
 // rst:		An iterator for enumerating all rules of a hyperedge.
 // rst:		It models a forward iterator.
+// rst:
 // rst-class-start:
-
 class MOD_DECL DG::RuleIterator
 		: public boost::iterator_facade<RuleIterator, std::shared_ptr<rule::Rule>, std::forward_iterator_tag, std::shared_ptr<rule::Rule> > {
 	friend class RuleRange;
-	RuleIterator(std::shared_ptr<DG> g, std::size_t eId);
+	RuleIterator(HyperEdge e);
 public:
 	// rst:	.. function:: RuleIterator()
 	// rst:
@@ -499,29 +490,28 @@ private:
 	bool equal(const RuleIterator &iter) const;
 	void increment();
 private:
-	std::shared_ptr<DG> g;
-	std::size_t eId, i;
+	HyperEdge e;
+	std::size_t i;
 };
 // rst-class-end:
 
 // rst-class: dg::DG::RuleRange
 // rst:
 // rst:		A range of all rules of a hyperedge.
+// rst:
 // rst-class-start:
-
 struct MOD_DECL DG::RuleRange {
 	using iterator = RuleIterator;
 	using const_iterator = iterator;
 private:
 	friend class HyperEdge;
-	RuleRange(std::shared_ptr<DG> g, std::size_t eId);
+	RuleRange(HyperEdge e);
 public:
 	RuleIterator begin() const;
 	RuleIterator end() const;
 	std::size_t size() const;
 private:
-	std::shared_ptr<DG> g;
-	std::size_t eId;
+	HyperEdge e;
 };
 // rst-class-end:
 
@@ -611,10 +601,10 @@ inline DG::TargetIterator DG::TargetRange::end() const {
 // RuleRange
 //------------------------------------------------------------------------------
 
-inline DG::RuleRange::RuleRange(std::shared_ptr<DG> g, std::size_t eId) : g(g), eId(eId) {}
+inline DG::RuleRange::RuleRange(HyperEdge e) : e(e) {}
 
 inline DG::RuleIterator DG::RuleRange::begin() const {
-	return RuleIterator(g, eId);
+	return RuleIterator(e);
 }
 
 inline DG::RuleIterator DG::RuleRange::end() const {

@@ -1,7 +1,9 @@
+post("disableSummary")
+
 include("rules.py")
-for a in inputRules:
-	a.print()
-	a.printTermState()
+#for a in inputRules:
+#	a.print()
+#	a.printTermState()
 
 rc = 'dummy'
 iso = 'dummy'

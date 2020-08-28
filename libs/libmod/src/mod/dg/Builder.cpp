@@ -7,8 +7,11 @@
 #include <mod/lib/DG/Strategies/GraphState.hpp>
 #include <mod/lib/DG/Strategies/Strategy.hpp>
 #include <mod/lib/Graph/Single.hpp>
+#include <mod/lib/IO/DG.hpp>
 
 #include <boost/lexical_cast.hpp>
+
+#include <fstream>
 
 namespace mod {
 namespace dg {
@@ -48,6 +51,15 @@ DG::HyperEdge Builder::addDerivation(const Derivations &d, IsomorphismPolicy gra
 	check(p);
 	if(d.left.empty()) throw LogicError("Derivation has empty left side: " + boost::lexical_cast<std::string>(d));
 	if(d.right.empty()) throw LogicError("Derivation has empty right side: " + boost::lexical_cast<std::string>(d));
+	const auto checkPtr = [](const auto &p) {
+		return !p;
+	};
+	if(std::any_of(d.left.begin(), d.left.end(), checkPtr))
+		throw LogicError("Derivation has a nullptr in the left side: " + boost::lexical_cast<std::string>(d));
+	if(std::any_of(d.right.begin(), d.right.end(), checkPtr))
+		throw LogicError("Derivation has a nullptr in the right side: " + boost::lexical_cast<std::string>(d));
+	if(std::any_of(d.rules.begin(), d.rules.end(), checkPtr))
+		throw LogicError("Derivation has a nullptr in the rule list: " + boost::lexical_cast<std::string>(d));
 	auto innerRes = p->b.addDerivation(d, graphPolicy);
 	return p->dg_->getHyper().getInterfaceEdge(p->dg_->getNonHyper().getHyperEdge(innerRes.first));
 }
@@ -62,14 +74,59 @@ ExecuteResult Builder::execute(std::shared_ptr<Strategy> strategy, int verbosity
 
 ExecuteResult Builder::execute(std::shared_ptr<Strategy> strategy, int verbosity, bool ignoreRuleLabelTypes) {
 	check(p);
+	if(!strategy) throw LogicError("The strategy may not be a null pointer.");
 	auto res = p->b.execute(std::unique_ptr<lib::DG::Strategies::Strategy>(strategy->getStrategy().clone()),
 	                        verbosity, ignoreRuleLabelTypes);
 	return ExecuteResult(p->dg_, std::move(res));
 }
 
+std::vector<DG::HyperEdge> Builder::apply(const std::vector<std::shared_ptr<graph::Graph> > &graphs,
+                                          std::shared_ptr<rule::Rule> r) {
+	return apply(graphs, r, 0);
+}
+std::vector<DG::HyperEdge> Builder::apply(const std::vector<std::shared_ptr<graph::Graph> > &graphs,
+                                          std::shared_ptr<rule::Rule> r,
+                                          int verbosity) {
+	return apply(graphs, r, verbosity, IsomorphismPolicy::Check);
+}
+
+std::vector<DG::HyperEdge> Builder::apply(const std::vector<std::shared_ptr<graph::Graph> > &graphs,
+                                          std::shared_ptr<rule::Rule> r,
+                                          int verbosity,
+                                          IsomorphismPolicy graphPolicy) {
+	check(p);
+	if(std::any_of(graphs.begin(), graphs.end(), [](const auto &p) {
+		return !p;
+	}))
+		throw LogicError("One of the graphs is a null pointer.");
+	if(!r) throw LogicError("The rule is a null pointer.");
+	auto innerRes = p->b.apply(graphs, r, verbosity, graphPolicy);
+	std::vector<DG::HyperEdge> res;
+	const auto &nonHyper = p->dg_->getNonHyper();
+	const auto &hyper = p->dg_->getHyper();
+	for(const auto &rp : innerRes)
+		res.push_back(hyper.getInterfaceEdge(nonHyper.getHyperEdge(rp.first)));
+	return res;
+}
+
 void Builder::addAbstract(const std::string &description) {
 	check(p);
 	p->b.addAbstract(description);
+}
+
+void Builder::load(const std::vector<std::shared_ptr<rule::Rule>> &ruleDatabase,
+                   const std::string &file, int verbosity) {
+	if(std::any_of(ruleDatabase.begin(), ruleDatabase.end(), [](const auto &r) {
+		return !r;
+	}))
+		throw LogicError("Nullptr in rule database.");
+
+	std::ifstream fileStream(file.c_str());
+	if(!fileStream.is_open()) throw InputError("DG dump file not found, '" + file + "'.");
+	fileStream.close();
+	std::ostringstream err;
+	const bool res = p->b.load(ruleDatabase, file, err, verbosity);
+	if(!res) throw InputError("DG load error: " + err.str());
 }
 
 // -----------------------------------------------------------------------------

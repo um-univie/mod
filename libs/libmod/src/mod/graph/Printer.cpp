@@ -14,17 +14,25 @@ Printer::Printer() : options(new lib::IO::Graph::Write::Options()) {
 }
 
 Printer::Printer(const Printer &that)
-: options(new lib::IO::Graph::Write::Options(*that.options)) { }
+		: options(new lib::IO::Graph::Write::Options(*that.options)) {}
 
 Printer &Printer::operator=(const Printer &that) {
 	*options = *that.options;
 	return *this;
 }
 
-Printer::~Printer() { }
+Printer::~Printer() {}
 
 const lib::IO::Graph::Write::Options &Printer::getOptions() const {
 	return *options;
+}
+
+bool operator==(const Printer &a, const Printer &b) {
+	return a.getOptions() == b.getOptions();
+}
+
+bool operator!=(const Printer &a, const Printer &b) {
+	return a.getOptions() != b.getOptions();
 }
 
 void Printer::setMolDefault() {

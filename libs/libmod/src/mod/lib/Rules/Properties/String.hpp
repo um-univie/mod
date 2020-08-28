@@ -14,15 +14,11 @@ struct PropTermCore;
 struct PropStringCore : PropCore<PropStringCore, GraphType, std::string, std::string> {
 	using ConstraintPtr = std::unique_ptr<GraphMorphism::Constraints::Constraint<SideGraphType> >;
 public:
-
-	explicit PropStringCore(const GraphType &g) : PropCore(g) {
-		verify(&g);
-	}
-
+	explicit PropStringCore(const GraphType &g);
 	PropStringCore(const GraphType &g,
-			const std::vector<ConstraintPtr> &leftMatchConstraints,
-			const std::vector<ConstraintPtr> &rightMatchConstraints,
-			const PropTermCore &term, const StringStore &strings);
+	               const std::vector<ConstraintPtr> &leftMatchConstraints,
+	               const std::vector<ConstraintPtr> &rightMatchConstraints,
+	               const PropTermCore &term, const StringStore &strings);
 };
 
 } // namespace Rules

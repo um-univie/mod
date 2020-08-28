@@ -32,28 +32,11 @@ bool operator==(const Expression &, const Expression &) {
 
 } // namespace RCExp
 } // namespace rule
-} // namespace mod
-
-namespace {
-
-// https://stackoverflow.com/questions/36485840/wrap-boostoptional-using-boostpython
-template<typename T>
-struct ToPythonOptionalValue {
-	static PyObject *convert(boost::optional<T> obj) {
-		return obj
-			   ? py::incref(py::object(*obj).ptr())
-			   : py::incref(py::object().ptr());
-	}
-};
-
-} // namespace
-
-namespace mod {
 namespace Py {
 
 template<typename T>
 bool listCompare(const std::vector<T> &l, py::object r) {
-	auto er = py::extract<const std::vector<T>&>(r);
+	auto er = py::extract<const std::vector<T> &>(r);
 	if(er.check()) return l == er();
 	else {
 		std::vector<T> er;
@@ -86,10 +69,12 @@ void Collections_doExport() {
 	using PairString = std::pair<std::string, std::string>;
 	makeVector(VecPairString, PairString);
 	makeVector(VecRCExpExp, rule::RCExp::Expression);
+	makeVector(VecString, std::string);
 
 	// Pair
 	makePair<std::string, std::string>();
 	makePair<int, int>();
+	makePair<dg::DG::HyperEdge, double>();
 
 	// Optional
 	py::to_python_converter<boost::optional<int>, ToPythonOptionalValue<int>>();

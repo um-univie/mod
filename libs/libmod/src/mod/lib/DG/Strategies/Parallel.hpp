@@ -11,6 +11,7 @@ namespace DG {
 namespace Strategies {
 
 struct Parallel : Strategy {
+	// pre: !strats.empty()
 	Parallel(const std::vector<Strategy*> &strats);
 	virtual ~Parallel() override;
 	virtual Strategy *clone() const override;

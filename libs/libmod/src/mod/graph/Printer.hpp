@@ -28,6 +28,10 @@ struct MOD_DECL Printer {
 	Printer &operator=(const Printer &that);
 	~Printer();
 	const lib::IO::Graph::Write::Options &getOptions() const;
+	// rst: .. function:: friend bool operator==(const Printer &a, const Printer &b)
+	// rst:               friend bool operator!=(const Printer &a, const Printer &b)
+	MOD_DECL friend bool operator==(const Printer &a, const Printer &b);
+	MOD_DECL friend bool operator!=(const Printer &a, const Printer &b);
 	// rst: .. function:: void setMolDefault()
 	// rst:
 	// rst:		Shortcut for enabling all but thickening and index printing.

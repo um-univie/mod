@@ -56,14 +56,13 @@
 \renewcommand{\footruleskip}{.3\normalbaselineskip}
 
 \newlength{\testwd}
-\newcommand{\fitpic}[1]{
-	\settowidth{\testwd}{\includegraphics{#1}}
-	\message{#1 width=\the\testwd, page=\the\textwidth}
-	\ifthenelse{\lengthtest{\testwd>\textwidth}}{
-	\noindent\includegraphics[width=\textwidth]{#1}}{
-	\includegraphics{#1}}
+\newlength{\testht}
+\newcommand{\fitpic}[1]{%
+	\settowidth{\testwd}{\includegraphics{#1}}%
+	\settoheight{\testht}{\includegraphics{#1}}%
+	\message{#1 width=\the\testwd, hight=\the\testht, pagewidth=\the\textwidth, pageheight=\the\textheight}%
+	\noindent\includegraphics[height=.9\textheight,width=\textwidth, keepaspectratio]{#1}%
 }
-
 
 \newcommand{\summaryChapter}[1]{
 	\chapter{#1}

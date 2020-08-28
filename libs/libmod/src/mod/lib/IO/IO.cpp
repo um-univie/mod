@@ -63,12 +63,15 @@ std::string escapeForLatex(const std::string &str) {
 		case '#':
 		case '_':
 		case '{':
-		case '}': res += "\\";
+		case '}':
+			res += "\\";
 			res += c;
 			break;
-		case '*': res += "\\ensuremath{*}";
+		case '*':
+			res += "\\ensuremath{*}";
 			break;
-		default: res += c;
+		default:
+			res += c;
 		}
 	}
 	return res;
@@ -78,10 +81,12 @@ std::string asLatexMath(const std::string &str) {
 	std::string res = "$\\mathrm{";
 	for(char c : str) {
 		switch(c) {
-		case ' ': res += "\\";
+		case ' ':
+			res += "\\";
 			res += c;
 			break;
-		default: res += c;
+		default:
+			res += c;
 		}
 	}
 	res += "}$";

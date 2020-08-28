@@ -83,56 +83,26 @@ struct FunctionWrapper<R(Args...)> : mod::Function<R(Args...)>, py::wrapper<Func
 	}
 };
 
-#if BOOST_VERSION < 106300
-
-// sharedToStd* is adapted from http://stackoverflow.com/questions/6326757/conversion-from-boostshared-ptr-to-stdshared-ptr
-
-template<typename T>
-void sharedToStd_doRelease(const typename boost::shared_ptr<T> &, T*) { }
-
-template<typename T>
-std::shared_ptr<T> sharedToStd(boost::shared_ptr<T> p) {
-	return std::shared_ptr<T>(p.get(), std::bind(&sharedToStd_doRelease<T>, p, std::placeholders::_1));
-}
-
-#else
-
 // It is used in the __init__ file so just make it an identity function.
-
 template<typename T>
 std::shared_ptr<T> sharedToStd(std::shared_ptr<T> p) {
 	return p;
 }
 
-#endif
-
 } // namespace detail
 
 template<typename Sig>
 void exportFunc(const char *name) {
-	// TODO: change the held type to std::shared_ptr instead of boost::shared_ptr at some point
-	// currently boost::shared_ptr is copied into C++ with a custom deleter which holds a handle<>
-	// to the PyObject*, while the PyObject* holds a shared_ptr without this deleter.
-	// std::shared_ptr is _not_ handled this way, meaning object slicing might happen
-	// sharedToStd holds the boost::shared_ptr in the deleter of the std::shared_ptr
 	using Func = mod::Function<Sig>;
 	using Wrap = detail::FunctionWrapper<Sig>;
-#if BOOST_VERSION < 106300
-	using SharedPtr = boost::shared_ptr<Func>;
-	using StoragePtr = boost::shared_ptr<Wrap>;
-#else
 	using SharedPtr = std::shared_ptr<Func>;
 	using StoragePtr = std::shared_ptr<Wrap>;
-#endif
 	py::class_<Wrap, StoragePtr, boost::noncopyable>(name)
 			.def("clone", py::pure_virtual(&Func::clone))
 			.def("__str__", py::pure_virtual(&Func::print))
 			.def("__call__", py::pure_virtual(&Func::operator()))
 			;
 	py::implicitly_convertible<StoragePtr, SharedPtr>();
-#if BOOST_VERSION < 106300
-	py::register_ptr_to_python<std::shared_ptr<Func> >();
-#endif
 	py::def("_sharedToStd", &detail::sharedToStd<Func>);
 }
 

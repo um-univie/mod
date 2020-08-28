@@ -6,6 +6,8 @@
 #include <mod/lib/IO/Graph.hpp>
 #include <mod/lib/IO/IO.hpp>
 
+#include <nlohmann/json.hpp>
+
 #include <iosfwd>
 #include <string>
 #include <unordered_map>
@@ -32,17 +34,21 @@ public:
 	}
 };
 
-std::unique_ptr<lib::DG::NonHyper> dump(const std::vector<std::shared_ptr<graph::Graph> > &graphs,
-                                        const std::vector<std::shared_ptr<rule::Rule> > &rules,
+boost::optional<nlohmann::json> loadDump(const std::string &file, std::ostream &err);
+
+std::unique_ptr<lib::DG::NonHyper> dump(const std::vector<std::shared_ptr<graph::Graph> > &graphDatabase,
+                                        const std::vector<std::shared_ptr<rule::Rule> > &ruleDatabase,
                                         const std::string &file,
-                                        std::ostream &err);
+                                        IsomorphismPolicy graphPolicy,
+                                        std::ostream &err, int verbosity);
 boost::optional<std::vector<AbstractDerivation>> abstract(const std::string &s, std::ostream &err);
 } // namespace Read
 namespace Write {
 using Vertex = lib::DG::HyperVertex;
 using Edge = lib::DG::HyperEdge;
 
-std::string dump(const lib::DG::NonHyper &dg);
+nlohmann::json dumpToJson(const lib::DG::NonHyper &dg);
+std::string dumpToFile(const lib::DG::NonHyper &dg);
 
 std::string dotNonHyper(const lib::DG::NonHyper &nonHyper);
 std::string pdfNonHyper(const lib::DG::NonHyper &nonHyper);
@@ -54,7 +60,6 @@ std::string pdfNonHyper(const lib::DG::NonHyper &nonHyper);
 struct Options;
 
 struct SyntaxPrinter {
-
 	SyntaxPrinter(std::string file) : s(file) {}
 
 	virtual std::string getName() const = 0;
@@ -70,13 +75,11 @@ struct SyntaxPrinter {
 	virtual void tailConnector(const std::string &idVertex,
 	                           const std::string &idHyperEdge,
 	                           const std::string &colour,
-	                           unsigned int num,
-	                           unsigned int maxNum) = 0;
+	                           int num, int maxNum) = 0;
 	virtual void headConnector(const std::string &idHyperEdge,
 	                           const std::string &idVertex,
 	                           const std::string &colour,
-	                           unsigned int num,
-	                           unsigned int maxNum) = 0;
+	                           int num, int maxNum) = 0;
 	virtual void shortcutEdge(const std::string &idTail,
 	                          const std::string &idHead,
 	                          const std::string &label,
@@ -90,7 +93,6 @@ public:
 };
 
 struct TikzPrinter : SyntaxPrinter {
-
 	TikzPrinter(std::string file,
 	            std::string coords,
 	            const Options &options,
@@ -117,18 +119,15 @@ struct TikzPrinter : SyntaxPrinter {
 	void connector(const std::string &idTail,
 	               const std::string &idHead,
 	               const std::string &colour,
-	               unsigned int num,
-	               unsigned int maxNum);
+	               int num, int maxNum);
 	void tailConnector(const std::string &idVertex,
 	                   const std::string &idHyperEdge,
 	                   const std::string &colour,
-	                   unsigned int num,
-	                   unsigned int maxNum) override;
+	                   int num, int maxNum) override;
 	void headConnector(const std::string &idHyperEdge,
 	                   const std::string &idVertex,
 	                   const std::string &colour,
-	                   unsigned int num,
-	                   unsigned int maxNum) override;
+	                   int num, int maxNum) override;
 	void shortcutEdge(const std::string &idTail,
 	                  const std::string &idHead,
 	                  const std::string &label,
@@ -148,16 +147,14 @@ public:
 };
 
 struct Options {
-
 	struct DupVProp {
 		Vertex v;
-		unsigned int dupNum;
+		int dupNum;
 	};
 	using DupGraphType = boost::adjacency_list<boost::vecS, boost::vecS, boost::bidirectionalS, DupVProp>;
 	using DupVertex = boost::graph_traits<DupGraphType>::vertex_descriptor;
 	using DupEdge = boost::graph_traits<DupGraphType>::edge_descriptor;
 public:
-
 	Options() : withShortcutEdges(true), withGraphImages(true), labelsAsLatexMath(true),
 	            withShortcutEdgesAfterVisibility(false), withInlineGraphs(false) {}
 
@@ -221,8 +218,8 @@ public:
 
 	std::string getVertexLabel(const lib::DG::Hyper &dg, DupVertex vDup) const {
 		std::string label;
-		Vertex v = dupGraph[vDup].v;
-		auto dupNum = dupGraph[vDup].dupNum;
+		const auto v = dupGraph[vDup].v;
+		const auto dupNum = dupGraph[vDup].dupNum;
 		if(dupVertexLabel) label += dupVertexLabel(v, dupNum, dg);
 		if(dupVertexLabel && vertexLabel) label += ", ";
 		if(vertexLabel) label += vertexLabel(v, dg);
@@ -237,8 +234,16 @@ public:
 		return hyperedgeLabel ? hyperedgeLabel(v, dg) : "";
 	}
 
-	std::string getVertexColour(Vertex v, const lib::DG::Hyper &dg) const {
-		return vertexColour ? vertexColour(v, dg) : "";
+	std::string getVertexColour(DupVertex vDup, const lib::DG::Hyper &dg) const {
+		const auto v = dupGraph[vDup].v;
+		const auto dupNum = dupGraph[vDup].dupNum;
+		if(dupVertexColour) {
+			return dupVertexColour(v, dupNum, dg);
+		} else if(vertexColour) {
+			return vertexColour(v, dg);
+		} else {
+			return "";
+		}
 	}
 
 	std::string getHyperedgeColour(Vertex v, const lib::DG::Hyper &dg) const {
@@ -253,12 +258,11 @@ public:
 		return headColour ? headColour(e, v, dg) : "";
 	}
 
-	std::pair<unsigned int, DupVertex> inDegreeVisible(DupVertex e, const lib::DG::Hyper &dg) const;
-	std::pair<unsigned int, DupVertex> outDegreeVisible(DupVertex e, const lib::DG::Hyper &dg) const;
+	std::pair<int, DupVertex> inDegreeVisible(DupVertex e, const lib::DG::Hyper &dg) const;
+	std::pair<int, DupVertex> outDegreeVisible(DupVertex e, const lib::DG::Hyper &dg) const;
 	bool isShortcutEdge(DupVertex e,
 	                    const lib::DG::Hyper &dg,
-	                    unsigned int inDegreeVisible,
-	                    unsigned int outDegreeVisible) const;
+	                    int inDegreeVisible, int outDegreeVisible) const;
 	std::string vDupToId(DupVertex vDup, const lib::DG::Hyper &dg) const;
 public:
 	bool withShortcutEdges;
@@ -270,16 +274,19 @@ public:
 	// appearance (not giving state)
 	std::function<bool(Vertex, const lib::DG::Hyper &)> vertexVisible;
 	std::function<std::string(Vertex, const lib::DG::Hyper &)> vertexLabel;
-	std::function<std::string(Vertex, unsigned int dupNum, const lib::DG::Hyper &)> dupVertexLabel;
+	std::function<std::string(Vertex, int dupNum, const lib::DG::Hyper &)> dupVertexLabel;
 	std::function<bool(Vertex, const lib::DG::Hyper &)> hyperedgeVisible;
 	std::function<std::string(Vertex, const lib::DG::Hyper &)> hyperedgeLabel;
 	std::function<std::string(Vertex, const lib::DG::Hyper &)> vertexColour;
+	std::function<std::string(Vertex, int dupNum, const lib::DG::Hyper &)> dupVertexColour;
 	std::function<std::string(Vertex, const lib::DG::Hyper &)> hyperedgeColour;
 	std::function<std::string(Vertex, Vertex, const lib::DG::Hyper &)> tailColour, headColour;
 	std::function<void(const lib::DG::Hyper &, const Options &, SyntaxPrinter &)> auxPrinter;
 	//
 	std::function<int(std::shared_ptr<graph::Graph>)> rotationOverwrite;
 	std::function<bool(std::shared_ptr<graph::Graph>)> mirrorOverwrite;
+	// rendering engine things
+	std::string graphvizPrefix;
 	// duplication (not giving state)
 	// all vertices must be first and then all edges
 	// all incarnations must be contiguous and in increasing order
@@ -290,34 +297,32 @@ public:
 
 struct Data {
 	struct Connections {
-		Connections(unsigned int numTails, unsigned int numHeads) : tail(numTails, 0), head(numHeads, 0) {}
+		Connections(int numTails, int numHeads) : tail(numTails, 0), head(numHeads, 0) {}
 
 		// indices are offsets on the in-/out-edge iterators
 		// values are the duplicate numbers
-		std::vector<unsigned int> tail;
-		std::vector<unsigned int> head;
+		std::vector<int> tail, head;
 	};
 
-	using ConnectionsStore = std::unordered_map<Vertex, std::unordered_map<unsigned int, Connections> >;
+	using ConnectionsStore = std::unordered_map<Vertex, std::unordered_map<int, Connections>>;
 public:
 	explicit Data(const lib::DG::Hyper &dg);
 	void compile(Options &options) const;
-	void makeDuplicate(Vertex e, unsigned int eDup);
-	void removeDuplicate(Vertex e, unsigned int eDup);
-	void reconnectTail(Vertex e, unsigned int eDup, Vertex tail, unsigned int vDupTar, unsigned int vDupSrc);
-	void reconnectHead(Vertex e, unsigned int eDup, Vertex head, unsigned int vDupTar, unsigned int vDupSrc);
+	// returns: was newly created
+	bool makeDuplicate(Vertex e, int eDup);
+	// returns: was removed
+	bool removeDuplicate(Vertex e, int eDup);
+	void reconnectSource(Vertex e, int eDup, Vertex tail, int vDupTar, int vDupSrc);
+	void reconnectTarget(Vertex e, int eDup, Vertex head, int vDupTar, int vDupSrc);
 	void removeVertexIfDegreeZero(Vertex v);
-
-	const lib::DG::Hyper &getDG() const {
-		return dg;
-	}
-
-private:
+public:
 	const lib::DG::Hyper &dg;
+private:
 	ConnectionsStore connections; // hyper-edge -> dupNum -> Connections
 	std::set<Vertex> removedIfDegreeZero;
 public:
-	std::function<std::string(Vertex, unsigned int dupNum, const lib::DG::Hyper &)> dupVertexLabel;
+	std::function<std::string(Vertex, int dupNum, const lib::DG::Hyper &)> dupVertexLabel;
+	std::function<std::string(Vertex, int dupNum, const lib::DG::Hyper &)> dupVertexColour;
 };
 
 struct Printer {
@@ -327,27 +332,36 @@ struct Printer {
 	void popSuffix();
 	void pushVertexVisible(std::function<bool(Vertex, const lib::DG::Hyper &)> f); // visible(v) <=> all of pushed f(v))
 	void popVertexVisible();
+	bool hasVertexVisible() const;
 	void pushEdgeVisible(std::function<bool(Vertex, const lib::DG::Hyper &)> f); // visible(v) <=> all of pushed f(v))
 	void popEdgeVisible();
+	bool hasEdgeVisible() const;
 	void pushVertexLabel(std::function<std::string(Vertex, const lib::DG::Hyper &)> f);
 	void popVertexLabel();
+	bool hasVertexLabel() const;
 	void pushEdgeLabel(std::function<std::string(Vertex, const lib::DG::Hyper &)> f);
 	void popEdgeLabel();
+	bool hasEdgeLabel() const;
 	void pushVertexColour(std::function<std::string(Vertex, const lib::DG::Hyper &)> f,
 	                      bool extendToEdges); // colour(v) == first f(v) != ""
 	void popVertexColour();
+	bool hasVertexColour() const;
 	void pushEdgeColour(std::function<std::string(Vertex, const lib::DG::Hyper &)> f); // colour(v) == first f(v) != ""
 	void popEdgeColour();
+	bool hasEdgeColour() const;
 public:
 	void setRotationOverwrite(std::function<int(std::shared_ptr<graph::Graph>)> f);
 	void setMirrorOverwrite(std::function<bool(std::shared_ptr<graph::Graph>)> f);
+public: // rendering engine things
+	void setGraphvizPrefix(const std::string &prefix);
+	const std::string &getGraphvizPrefix() const;
 public:
 	Options prePrint(const Data &data);
 	void postPrint();
 private:
 	void setup(Options &options);
 public:
-	Options baseOptions; // only save stuff giving state, dynamically add the rest
+	Options baseOptions; // only save stuff giving state, and the rendering engine things, dynamically add the rest
 private:
 	std::vector<std::string> suffixes;
 	// not giving state

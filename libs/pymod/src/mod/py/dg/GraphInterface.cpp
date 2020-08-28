@@ -50,7 +50,7 @@ void GraphInterface_doExport() {
 					// rst:			:type: DG
 					// rst:			:raises: :class:`LogicError` if it is a null descriptor.
 			.add_property("dg", &DG::Vertex::getDG)
-					// rst:		.. py:attribute: inDegree
+					// rst:		.. py:attribute:: inDegree
 					// rst:
 					// rst:			(Read-only) The in-degree of the vertex, including multiplicity of target multisets.
 					// rst:
@@ -64,7 +64,7 @@ void GraphInterface_doExport() {
 					// rst:			:type: DGInEdgeRange
 					// rst:			:raises: :class:`LogicError` if it is a null descriptor.
 			.add_property("inEdges", &DG::Vertex::inEdges)
-					// rst:		.. py:attribute: outDegree
+					// rst:		.. py:attribute:: outDegree
 					// rst:
 					// rst:			(Read-only) The out-degree of the vertex, including multiplicity of source multisets.
 					// rst:
@@ -86,10 +86,6 @@ void GraphInterface_doExport() {
 					// rst:			:raises: :class:`LogicError` if it is a null descriptor.
 			.add_property("graph", &DG::Vertex::getGraph);
 
-	void (DG::HyperEdge::*printTransitionStateWithoutOptions)() const
-	= &DG::HyperEdge::printTransitionState;
-	void (DG::HyperEdge::*printTransitionStateWithOptions)(const graph::Printer &) const
-	= &DG::HyperEdge::printTransitionState;
 	// rst: .. py:class:: DGHyperEdge
 	// rst:
 	// rst:		A descriptor of either a hyperedge in a derivation graph, or a null edge.
@@ -182,19 +178,12 @@ void GraphInterface_doExport() {
 					// rst:				The second entry is completed similarly by appending ``_derG``, ``_derD``, or ``_derH``.
 					// rst:			:rtype: list[tuple[str, str]]
 					// rst:			:raises: :class:`LogicError` if it is a null descriptor.
-			.def("print", &DG::HyperEdge::print,
-					/*         */
-              (py::arg("printer") = graph::Printer(), py::arg("nomatchColour") = "gray", py::arg("matchColour") = ""))
-					// rst: 	.. py:method:: printTransitionState()
-					// rst:                  printTransitionState(printer)
-					// rst:
-					// rst:			Print the derivations represented by the hyperedge in style of a chemical transition state.
-					// rst:			For all possible Double-Pushout diagrams a figure printed.
-					// rst:
-					// rst:			:param GraphPrinter printer: the printer to use for the figures.
-					// rst:			:raises: :class:`LogicError` if it is a null descriptor.
-			.def("printTransitionState", printTransitionStateWithoutOptions)
-			.def("printTransitionState", printTransitionStateWithOptions);
+					// rst:			:raises: :class:`LogicError` if it has no rules.
+			.def("print", &DG::HyperEdge::print, (
+					py::arg("printer") = graph::Printer(),
+					py::arg("nomatchColour") = "gray",
+					py::arg("matchColour") = "")
+			);
 
 	py::class_<DG::VertexRange>("DGVertexRange", py::no_init)
 			.def("__iter__", py::iterator<DG::VertexRange>());

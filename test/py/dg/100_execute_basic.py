@@ -24,6 +24,9 @@ dg.calc(printInfo=False)
 assert dg.graphDatabase == [g1a, g2a]
 
 
+fail(lambda: DG().build().execute(None), "Can not convert type '{}' to DGStrat.".format(type(None)), err=TypeError)
+
+
 dg = DG()
 with dg.build() as b:
 	for verbosity in (0, 2, 4, 6, 8, 10, 48, 50, 60):

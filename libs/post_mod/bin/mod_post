@@ -544,7 +544,7 @@ BEGIN {
 		exit 0
 	} else if($0 ~ /^node/) {
 		name=$2
-		gsub(/\"/, "", name)
+		gsub(/"/, "", name)
 		x=$3
 		y=$4
 		# avoid underflow in Latex

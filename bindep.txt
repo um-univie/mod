@@ -1,0 +1,23 @@
+file
+make
+g++
+libasan                        [platform:rpm testing]
+libubsan                       [platform:rpm testing]
+cmake
+
+graphviz                       [platform:rpm]
+pdf2svg
+python3-dev                    [platform:dpkg]
+python3-devel                  [platform:rpm]
+libopenbabel-dev               [platform:dpkg]
+openbabel-devel                [platform:rpm]
+coinor-libcbc-dev              [platform:dpkg]
+coin-or-Cbc-devel              [platform:rpm]
+
+texlive-science                [platform:dpkg]
+texlive-pictures               [platform:dpkg]
+texlive-latex-extra            [platform:dpkg]
+lmodern                        [platform:dpkg]
+texlive-collection-mathscience [platform:rpm]
+texlive-collection-pictures    [platform:rpm]
+texlive-collection-latexextra  [platform:rpm]

@@ -49,6 +49,7 @@ public:
 	// rst:		:throws: :class:`LogicError` if `!isActive()`.
 	// rst:		:throws: :class:`LogicError` if `d.left.empty()`.
 	// rst:		:throws: :class:`LogicError` if `d.right.empty()`.
+	// rst:		:throws: :class:`LogicError` if a `nullptr` is in `d.left`, `d.right`, or `d.rules`.
 	// rst:		:throws: :class:`LogicError` if `graphPolicy == IsomorphismPolicy::Check` and a given graph object
 	// rst:			is different but isomorphic to another given graph object or to a graph object already
 	// rst:			in the internal graph database in the associated derivation graph.
@@ -81,12 +82,54 @@ public:
 	// rst:
 	// rst:			.. warning:: This is checked during execution, so while the basic exception guarantee is provided,
 	// rst:				there may be modifications to the underlying derivation graph.
+	// rst:		:throws: :class:`LogicError` if a dynamic "add" strategy is executed where a returned graph is a `nullptr`.
+	// rst:
+	// rst:			.. warning:: This is checked during execution, so while the basic exception guarantee is provided,
+	// rst:				there may be modifications to the underlying derivation graph.
 	// rst:		:throws: :class:`LogicError`: if `ignoreRuleLabelTypes` is `false`, which is the default,
 	// rst:			and a rule in the given strategy has an associated :enum:`LabelType` which is different from the one
 	// rst:			in the derivation graph.
 	ExecuteResult execute(std::shared_ptr<Strategy> strategy);
 	ExecuteResult execute(std::shared_ptr<Strategy> strategy, int verbosity);
 	ExecuteResult execute(std::shared_ptr<Strategy> strategy, int verbosity, bool ignoreRuleLabelTypes);
+	// rst: .. function:: std::vector<DG::HyperEdge> apply(const std::vector<std::shared_ptr<graph::Graph> > &graphs, \
+	// rst:                                                std::shared_ptr<rule::Rule> r)
+	// rst:               std::vector<DG::HyperEdge> apply(const std::vector<std::shared_ptr<graph::Graph> > &graphs, \
+	// rst:                                                std::shared_ptr<rule::Rule> r, \
+	// rst:                                                int verbosity)
+	// rst:               std::vector<DG::HyperEdge> apply(const std::vector<std::shared_ptr<graph::Graph> > &graphs, \
+	// rst:                                                std::shared_ptr<rule::Rule> r, \
+	// rst:                                                int verbosity, IsomorphismPolicy graphPolicy)
+	// rst:
+	// rst:		Compute proper direct derivations with `graphs` the left-hand side and `r` as the rule.
+	// rst:
+	// rst:		The given :var:`graphPolicy` refers to adding the graphs in :var:`graphs`,
+	// rst:		and it defaults to :enumerator:`IsomorphismPolicy::Check`.
+	// rst:
+	// rst:		The :cpp:var:`verbosity` defaults to level 0.
+	// rst:		The levels have the following meaning:
+	// rst:
+	// rst:		- 0 (or less): no information is printed.
+	// rst:		- 2: Print minimal information about graph binding.
+	//	rst:		- 10: Print information about morphism generation for rule composition.
+	//	rst:		- 20: Print rule composition information.
+	// rst:
+	// rst:		:returns: a list of hyper edges representing the found direct derivations.
+	// rst:			The list may contain duplicates if there are multiple ways of constructing
+	// rst:			the same direct derivation when ignoring the specific match morphism.
+	// rst:		:throws: :class:`LogicError` if there is a `nullptr` in `graphs`.
+	// rst:		:throws: :class:`LogicError` if `r == nullptr`.
+	// rst:		:throws: :class:`LogicError` if `graphPolicy == IsomorphismPolicy::Check` and a given graph object
+	// rst:			is different but isomorphic to another given graph object or to a graph object already
+	// rst:			in the internal graph database in the associated derivation graph.
+	std::vector<DG::HyperEdge> apply(const std::vector<std::shared_ptr<graph::Graph> > &graphs,
+	                                 std::shared_ptr<rule::Rule> r);
+	std::vector<DG::HyperEdge> apply(const std::vector<std::shared_ptr<graph::Graph> > &graphs,
+	                                 std::shared_ptr<rule::Rule> r,
+	                                 int verbosity);
+	std::vector<DG::HyperEdge> apply(const std::vector<std::shared_ptr<graph::Graph> > &graphs,
+	                                 std::shared_ptr<rule::Rule> r,
+	                                 int verbosity, IsomorphismPolicy graphPolicy);
 	// rst: .. function:: void addAbstract(const std::string &description)
 	// rst:
 	// rst:		Add vertices and hyperedges based on the given abstract description.
@@ -97,6 +140,25 @@ public:
 	// rst:
 	// rst:		:throws: :class:`InputError` if the description could not be parsed.
 	void addAbstract(const std::string &description);
+	// rst: .. function:: void load(const std::vector<std::shared_ptr<rule::Rule>> &ruleDatabase, \
+	// rst:                         const std::string &file, int verbosity)
+	// rst:
+	// rst:		Load and add a derivation graph dump.
+	// rst:		Use :cpp:func:`DG::load` to load a dump as a locked derivation graph.
+	// rst:
+	// rst:		The label settings of this DG and the ones retrieved from the dump file must match.
+	// rst:		Vertices with graphs and hyperedges with rules are then added from the dump.
+	// rst:		Any graph in the dump which is isomorphic to a graph in the internal graph database of the DG
+	// rst:		is replaced by the given graph.
+	// rst:		The same procedure is done for the rules, but compared against the given rules.
+	// rst:		If a graph/rule is not found in the given lists, a new object is instantiated and used.
+	// rst:
+	// rst:		See :cpp:func:`DG::load` for an explanation of the verbosity levels.
+	// rst:
+	// rst:		:throws: :class:`LogicError` if there is a `nullptr` in `ruleDatabase`.
+	// rst:		:throws: :class:`LogicError` if the label settings of the dump does not match those of this DG.
+	// rst: 		:throws: :class:`InputError` if the file can not be opened or its content is bad.
+	void load(const std::vector<std::shared_ptr<rule::Rule>> &ruleDatabase, const std::string &file, int verbosity);
 private:
 	struct Pimpl;
 	std::unique_ptr<Pimpl> p;

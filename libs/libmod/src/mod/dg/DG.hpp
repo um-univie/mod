@@ -100,6 +100,7 @@ public: // searching for vertices and hyperedges
 	// rst:		:returns: a vertex descriptor for which the given graph is associated,
 	// rst:			or a null descriptor if no such vertex exists.
 	// rst:		:throws: :class:`LogicError` if not `hasActiveBuilder()` or `isLocked()`.
+	// rst:		:throws: :class:`LogicError` if `g` is a `nullptr`.
 	Vertex findVertex(std::shared_ptr<graph::Graph> g) const;
 	// rst: .. function:: HyperEdge findEdge(const std::vector<Vertex> &sources, const std::vector<Vertex> &targets) const
 	// rst:               HyperEdge findEdge(const std::vector<std::shared_ptr<graph::Graph> > &sources, const std::vector<std::shared_ptr<graph::Graph> > &targets) const
@@ -110,8 +111,8 @@ public: // searching for vertices and hyperedges
 	// rst:		:throws: :class:`LogicError` if a vertex descriptor is null, or does not belong to the derivation graph.
 	// rst:		:throws: :class:`LogicError` if not `hasActiveBuilder()` or `isLocked()`.
 	HyperEdge findEdge(const std::vector<Vertex> &sources, const std::vector<Vertex> &targets) const;
-	HyperEdge findEdge(const std::vector<std::shared_ptr<graph::Graph> > &sources,
-	                   const std::vector<std::shared_ptr<graph::Graph> > &targets) const;
+	HyperEdge findEdge(const std::vector<std::shared_ptr<graph::Graph>> &sources,
+	                   const std::vector<std::shared_ptr<graph::Graph>> &targets) const;
 public:
 	// rst: .. function:: Builder build()
 	// rst:
@@ -139,7 +140,7 @@ public:
 	std::pair<std::string, std::string> print(const PrintData &data, const Printer &printer) const;
 	// rst: .. function:: std::string dump() const
 	// rst:
-	// rst:		Exports the derivation graph to a text file, which can be importetet.
+	// rst:		Exports the derivation graph to a text file, which can be imported.
 	// rst:
 	// rst:		:returns: the name of the file with the exported data.
 	// rst:		:throws: :class:`LogicError` if the DG has not been calculated.
@@ -174,18 +175,51 @@ public:
 	// rst:
 	// rst:		:throws: :class:`LogicError` if `graphPolicy == IsomorphismPolicy::Check` and two graph objects
 	// rst:			in :cpp:any:`graphDatabase` are different objects but represents isomorphic graphs.
+	// rst:		:throws: :class:`LogicError` if there is a `nullptr` in `graphDatabase`.
 	static std::shared_ptr<DG> make(LabelSettings labelSettings,
 	                                const std::vector<std::shared_ptr<graph::Graph> > &graphDatabase,
 	                                IsomorphismPolicy graphPolicy);
-	// rst: .. function:: static std::shared_ptr<DG> dumpImport(const std::vector<std::shared_ptr<graph::Graph> > &graphs, const std::vector<std::shared_ptr<rule::Rule> > &rules, const std::string &file)
+	// rst: .. function:: static std::shared_ptr<DG> load(const std::vector<std::shared_ptr<graph::Graph>> &graphDatabase, \
+	// rst:                                              const std::vector<std::shared_ptr<rule::Rule>> &ruleDatabase, \
+	// rst:                                              const std::string &file, \
+	// rst:                                              IsomorphismPolicy graphPolicy)
+	// rst:               static std::shared_ptr<DG> load(const std::vector<std::shared_ptr<graph::Graph>> &graphDatabase, \
+	// rst:                                              const std::vector<std::shared_ptr<rule::Rule>> &ruleDatabase, \
+	// rst:                                              const std::string &file, \
+	// rst:                                              IsomorphismPolicy graphPolicy, int verbosity)
 	// rst:
-	// rst: 		Load a derivation graph dump. Any graph in the dump which is isomorphic to a given graph is replaced by the given graph.
-	// rst: 		The same procedure is done for the rules, however only using the name of the rule for comparison.
+	// rst:		Load a derivation graph dump as a locked object.
+	// rst:		Use :cpp:func:`Builder::load` to load a dump into a derivation graph under construction.
 	// rst:
-	// rst: 		:throws: :class:`InputError` on bad input.
-	static std::shared_ptr<DG> dumpImport(const std::vector<std::shared_ptr<graph::Graph> > &graphs,
-	                                      const std::vector<std::shared_ptr<rule::Rule> > &rules,
-	                                      const std::string &file);
+	// rst:		This is done roughly by calling :cpp:func:`make` with the given `graphDatabase` and `graphPolicy`.
+	// rst:		The label settings are retrieved from the dump file.
+	// rst:		Vertices with graphs and hyperedges with rules are then added from the dump.
+	// rst:		Any graph in the dump which is isomorphic to a given graph is replaced by the given graph.
+	// rst:		The same procedure is done for the rules.
+	// rst:		If a graph/rule is not found in the given lists, a new object is instantiated and used.
+	// rst:		In the end the derivation graph is locked.
+	// rst:
+	// rst:		.. note:: If the dump to be loaded was made by version 0.10 or earlier, it does not contain the full rules
+	//	rst:			but only the rule name. It is then crucial that the names of the given rules match with those used to
+	//	rst:			create the dump in the first place.
+	// rst:
+	// rst:		The :cpp:var:`verbosity` defaults to level 2.
+	// rst:		The levels have the following meaning:
+	// rst:
+	// rst:		- 0: print nothing.
+	// rst:		- 2: print a message whenever a loaded graph or rule is isomorphic to an existing graph or rule.
+	// rst:
+	// rst:		:throws: the same exceptions :func:`make` throws related to `graphDatabase` and `graphPolicy`.
+	// rst:		:throws: :class:`LogicError` if there is a `nullptr` in `ruleDatabase`.
+	// rst: 		:throws: :class:`InputError` if the file can not be opened or its content is bad.
+	static std::shared_ptr<DG> load(const std::vector<std::shared_ptr<graph::Graph>> &graphDatabase,
+	                                const std::vector<std::shared_ptr<rule::Rule>> &ruleDatabase,
+	                                const std::string &file,
+	                                IsomorphismPolicy graphPolicy);
+	static std::shared_ptr<DG> load(const std::vector<std::shared_ptr<graph::Graph>> &graphDatabase,
+	                                const std::vector<std::shared_ptr<rule::Rule>> &ruleDatabase,
+	                                const std::string &file,
+	                                IsomorphismPolicy graphPolicy, int verbosity);
 	// rst: .. function:: static void diff(std::shared_ptr<DG> dg1, std::shared_ptr<DG> dg2)
 	// rst:
 	// rst: 		Compare two derivation graphs and lists the difference.

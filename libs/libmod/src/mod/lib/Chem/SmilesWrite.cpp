@@ -262,7 +262,6 @@ private:
 };
 
 struct SmilesWriter {
-
 	int getRank(int idx) {
 		return (*ranks)[idx];
 	}

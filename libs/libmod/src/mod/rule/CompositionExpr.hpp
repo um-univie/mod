@@ -9,6 +9,7 @@
 #include <boost/variant/static_visitor.hpp>
 #include <boost/variant/variant.hpp>
 
+#include <memory>
 #include <vector>
 
 namespace mod {

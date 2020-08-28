@@ -1,0 +1,4 @@
+bindep
+ipython
+networkx
+parse

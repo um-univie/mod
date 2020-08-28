@@ -2,6 +2,8 @@
 
 #include <mod/Error.hpp>
 
+#include <iostream>
+
 // see http://stackoverflow.com/questions/2261858/boostpython-export-custom-exception
 // and http://stackoverflow.com/questions/9620268/boost-python-custom-exception-class
 // and http://stackoverflow.com/questions/11448735/boostpython-export-custom-exception-and-inherit-from-pythons-exception

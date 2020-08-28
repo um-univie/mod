@@ -13,6 +13,7 @@ namespace Graph {
 class Single;
 } // namespace Graph
 namespace DG {
+struct Expanded;
 
 class HyperCreator {
 	HyperCreator(const HyperCreator &) = delete;
@@ -45,7 +46,6 @@ public:
 	using Edge = HyperEdge;
 private:
 	friend class HyperCreator;
-
 	Hyper(const NonHyper &dg);
 public:
 	static std::pair<std::unique_ptr<Hyper>, HyperCreator> makeHyper(const NonHyper &dg);
@@ -69,6 +69,8 @@ public:
 public:
 	dg::DG::Vertex getInterfaceVertex(Vertex v) const;
 	dg::DG::HyperEdge getInterfaceEdge(Vertex e) const;
+	Vertex getInternalVertex(const dg::DG::Vertex &v) const;
+	Vertex getInternalVertex(const dg::DG::HyperEdge &e) const;
 public:
 	Derivation getDerivation(Vertex v) const;
 private:

@@ -24,10 +24,10 @@ namespace IO {
 namespace Graph {
 namespace Read {
 
-Data::Data() { }
+Data::Data() {}
 
 Data::Data(Data &&other) : g(std::move(other.g)), pString(std::move(other.pString)), pStereo(std::move(other.pStereo)),
-externalToInternalIds(std::move(other.externalToInternalIds)) { }
+                           externalToInternalIds(std::move(other.externalToInternalIds)) {}
 
 Data::~Data() {
 	if(std::uncaught_exception()) return; // TODO: update to the plural version when C++17 is required
@@ -47,14 +47,14 @@ Data parseGML(std::istream &s, std::ostream &err) {
 		using namespace gml::converter::edsl;
 		auto cVertex = GML::makeVertexConverter(1);
 		auto cEdge = GML::makeEdgeConverter(1);
-		auto cGraph = list<Parent>("graph") (cVertex) (cEdge);
+		auto cGraph = list<Parent>("graph")(cVertex)(cEdge);
 		auto iterBegin = &ast;
 		auto iterEnd = iterBegin + 1;
 		res = gml::converter::convert(iterBegin, iterEnd, cGraph, err, gGML);
 		if(!res) return Data();
 	}
 
-	std::sort(begin(gGML.vertices), end(gGML.vertices), [](const GML::Vertex &v1, const GML::Vertex & v2) -> bool {
+	std::sort(begin(gGML.vertices), end(gGML.vertices), [](const GML::Vertex &v1, const GML::Vertex &v2) -> bool {
 		return v1.id < v2.id;
 	});
 	auto gPtr = std::make_unique<lib::Graph::GraphType>();
@@ -98,7 +98,8 @@ Data parseGML(std::istream &s, std::ostream &err) {
 		Vertex tar = vFromVertexId(eGML.target);
 		auto e = edge(src, tar, g);
 		if(e.second) {
-			err << "Error in graph GML. Duplicate edge with source " << eGML.source << " and target " << eGML.target << "." << std::endl;
+			err << "Error in graph GML. Duplicate edge with source " << eGML.source << " and target " << eGML.target << "."
+			    << std::endl;
 			return Data();
 		}
 		e = add_edge(src, tar, g);
@@ -135,7 +136,7 @@ Data parseGML(std::istream &s, std::ostream &err) {
 	//----------------------------------------------------------------------------
 	for(const auto &eGML : gGML.edges) {
 		Vertex vSrc = vFromVertexId(eGML.source),
-						vTar = vFromVertexId(eGML.target);
+				vTar = vFromVertexId(eGML.target);
 		auto ePair = edge(vSrc, vTar, g);
 		assert(ePair.second);
 		if(!eGML.stereo) continue;
@@ -147,7 +148,8 @@ Data parseGML(std::istream &s, std::ostream &err) {
 		}
 		lib::Stereo::EdgeCategory cat;
 		switch(s.front()) {
-		case '*': cat = lib::Stereo::EdgeCategory::Any;
+		case '*':
+			cat = lib::Stereo::EdgeCategory::Any;
 			break;
 		default:
 			err << "Error in stereo data for edge (" << eGML.source << ", " << eGML.target << "). ";
@@ -178,7 +180,8 @@ Data parseGML(std::istream &s, std::ostream &err) {
 		if(embGML.geometry) {
 			auto vGeo = gGeometry.findGeometry(*embGML.geometry);
 			if(vGeo == gGeometry.nullGeometry()) {
-				err << "Error in stereo data for vertex " << vGML.id << ". Invalid gGeometry '" << *embGML.geometry << "'." << std::endl;
+				err << "Error in stereo data for vertex " << vGML.id << ". Invalid gGeometry '" << *embGML.geometry << "'."
+				    << std::endl;
 				return atError();
 			}
 			bool res = stereoInference.assignGeometry(v, vGeo, ssErr);
@@ -195,12 +198,14 @@ Data parseGML(std::istream &s, std::ostream &err) {
 				if(const int *idPtr = boost::get<int>(&e)) {
 					int idNeighbour = *idPtr;
 					if(vMap.find(idNeighbour) == end(vMap)) {
-						err << "Error in graph GML. Neighbour vertex " << idNeighbour << " in stereo embedding for vertex " << vGML.id << " does not exist." << std::endl;
+						err << "Error in graph GML. Neighbour vertex " << idNeighbour << " in stereo embedding for vertex "
+						    << vGML.id << " does not exist." << std::endl;
 						return atError();
 					}
 					auto ePair = edge(v, vFromVertexId(idNeighbour), g);
 					if(!ePair.second) {
-						err << "Error in graph GML. Vertex " << idNeighbour << " in stereo embedding for vertex " << vGML.id << " is not a neighbour." << std::endl;
+						err << "Error in graph GML. Vertex " << idNeighbour << " in stereo embedding for vertex " << vGML.id
+						    << " is not a neighbour." << std::endl;
 						return atError();
 					}
 					stereoInference.addEdge(v, ePair.first);
@@ -235,7 +240,8 @@ Data parseGML(std::istream &s, std::ostream &err) {
 		return iter->second;
 	});
 	switch(stereoResult) {
-	case lib::Stereo::DeductionResult::Success: break;
+	case lib::Stereo::DeductionResult::Success:
+		break;
 	case lib::Stereo::DeductionResult::Warning:
 		if(!getConfig().stereo.silenceDeductionWarnings.get())
 			IO::log() << ssErr.str();
@@ -259,8 +265,8 @@ Data dfs(const std::string &dfs, std::ostream &err) {
 	return lib::Graph::DFSEncoding::parse(dfs, err);
 }
 
-Data smiles(const std::string &smiles, std::ostream &err) {
-	return lib::Chem::readSmiles(smiles, err);
+Data smiles(const std::string &smiles, std::ostream &err, const bool allowAbstract, SmilesClassPolicy classPolicy) {
+	return lib::Chem::readSmiles(smiles, err, allowAbstract, classPolicy);
 }
 
 } // namespace Read

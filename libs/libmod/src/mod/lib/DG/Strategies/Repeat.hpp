@@ -9,7 +9,8 @@ namespace DG {
 namespace Strategies {
 
 struct Repeat : Strategy {
-	Repeat(Strategy *strat, std::size_t limit);
+	// pre: limit > 0
+	Repeat(Strategy *strat, int limit);
 	virtual ~Repeat() override;
 	virtual Strategy *clone() const override;
 	virtual void preAddGraphs(std::function<void(std::shared_ptr<graph::Graph>, IsomorphismPolicy)> add) const override;
@@ -22,7 +23,7 @@ private:
 	virtual void executeImpl(PrintSettings settings, const GraphState &input) override;
 private:
 	Strategy *strat;
-	std::size_t limit;
+	int limit;
 	std::vector<Strategy *> subStrats;
 };
 

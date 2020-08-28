@@ -11,6 +11,7 @@ namespace DG {
 namespace Strategies {
 
 struct Add : Strategy {
+	// pre: no nullptrs in graphs
 	Add(const std::vector<std::shared_ptr<graph::Graph> > graphs, bool onlyUniverse, IsomorphismPolicy graphPolicy);
 	Add(const std::shared_ptr<mod::Function<std::vector<std::shared_ptr<graph::Graph> >()> > generator,
 	    bool onlyUniverse, IsomorphismPolicy graphPolicy);

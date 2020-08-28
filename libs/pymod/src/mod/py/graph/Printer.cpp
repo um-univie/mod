@@ -17,10 +17,12 @@ void Printer_doExport() {
 	// rst:			and the result may not accurately represent the underlying graph,
 	// rst:			and may make non-molecules look like molecules.
 	// rst:
+	// rst:		.. py:method:: __init__(self)
+	// rst:
+	// rst:			The default constructor enables edges as bonds, raised charges, and raised isotopes.
 	py::class_<Printer>("GraphPrinter")
-			// rst:		.. py:method:: __init__(self)
-			// rst:
-			// rst:			The default constructor enables edges as bonds, raised charges, and raised isotopes.
+			.def(py::self == py::self)
+			.def(py::self != py::self)
 			// rst:		.. py:method:: setMolDefault()
 			// rst:
 			// rst:			Shortcut for enabling all but thickening and index printing.
