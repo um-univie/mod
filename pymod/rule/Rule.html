@@ -1,0 +1,544 @@
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>3.1.9.3. rule/Rule &#8212; MØD 0.11.0 documentation</title>
+    <link rel="stylesheet" href="../../_static/bootstrap-sphinx.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/haxes.css" />
+    <script id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+    <script src="../../_static/jquery.js"></script>
+    <script src="../../_static/underscore.js"></script>
+    <script src="../../_static/doctools.js"></script>
+    <script src="../../_static/language_data.js"></script>
+    <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="3.2. Creating a Python Extension" href="../extensions.html" />
+    <link rel="prev" title="3.1.9.2. rule/GraphInterface" href="GraphInterface.html" />
+<meta charset='utf-8'>
+<meta http-equiv='X-UA-Compatible' content='IE=edge,chrome=1'>
+<meta name='viewport' content='width=device-width, initial-scale=1.0, maximum-scale=1'>
+<meta name="apple-mobile-web-app-capable" content="yes">
+<script type="text/javascript" src="../../_static/js/jquery-3.4.1.slim.min.js "></script>
+<script type="text/javascript" src="../../_static/js/jquery-fix.js "></script>
+<script type="text/javascript" src="../../_static/bootstrap-4.4.1/js/bootstrap.min.js "></script>
+<script type="text/javascript" src="../../_static/bootstrap-sphinx.js "></script>
+
+  </head><body>
+<nav id="navbar" class="navbar navbar-expand-lg navbar-light bg-light  navbar-fixed-top">
+	<div class="container">
+		<a class="navbar-brand" href="../../index.html">
+			MØD</a>
+		<span class="navbar-text navbar-version pull-left"><b>0.11.0</b></span>
+		<button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+			<span class="navbar-toggler-icon"></span>
+		</button>
+		<div class="collapse navbar-collapse" id="navbarSupportedContent">
+			<ul class="navbar-nav mr-auto">
+				
+						<li class="nav-item"><a class="nav-link" href="../../genindex.html">Index</a></li>
+				
+				
+					<li class="nav-item dropdown globaltoc-container">
+	<a class="nav-link dropdown-toggle"
+			href="../../index.html"
+			id="dLabelGlobalToc"
+			role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+		Site
+	</a>
+	<ul class="globaltoc" aria-labelledby="dLabelGlobalToc">
+		<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../../installation.html">1. Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../libmod/libmod.html">2. libMØD</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../pymod.html">3. PyMØD</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../postmod/postmod.html">4. PostMØD (<code class="docutils literal notranslate"><span class="pre">mod_post</span></code>)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../modWrapper/modWrapper.html">5. The Wrapper Script (<code class="docutils literal notranslate"><span class="pre">mod</span></code>)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../epim/epim.html">6. EpiM</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../dataDesc/dataDesc.html">7. Data Formats</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../dgStrat/dgStrat.html">8. Derivation Graph Strategies</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../examples/index.html">9. Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../knownIssues.html">10. Known Issues</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../changes.html">11. Changes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../references.html">12. References</a></li>
+</ul>
+
+	</ul>
+</li>
+					
+						<li class="nav-item dropdown localtoc-container">
+	<a class="nav-link dropdown-toggle"
+			href="../../index.html"
+			id="dLabelLocalToc"
+			role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+		Page
+	</a>
+	<ul class="localtoc" aria-labelledby="dLabelLocalToc">
+		<ul>
+<li><a class="reference internal" href="#">3.1.9.3. rule/Rule</a><ul>
+<li><a class="reference internal" href="#class-rule">3.1.9.3.1. Class <code class="docutils literal notranslate"><span class="pre">Rule</span></code></a></li>
+</ul>
+</li>
+</ul>
+
+	</ul>
+</li>
+					
+				
+				
+					
+						
+	<li class="nav-item">
+		<a class="nav-link" href="GraphInterface.html" title="Previous Chapter: 3.1.9.2. rule/GraphInterface">
+			<span class="glyphicon glyphicon-chevron-left visible-sm"></span>
+			<span class="hidden-sm hidden-tablet">
+				&laquo; 3.1.9.2. rule...
+			</span>
+		</a>
+	</li>
+	<li class="nav-item">
+		<a class="nav-link" href="../extensions.html" title="Next Chapter: 3.2. Creating a Python Extension">
+			<span class="glyphicon glyphicon-chevron-right visible-sm"></span>
+			<span class="hidden-sm hidden-tablet">3.2. Creating... &raquo;</span>
+		</a>
+	</li>
+					
+				
+				
+				
+				
+			</ul>
+			
+				
+<form class="form-inline" action="../../search.html" method="get">
+	<div class="form-group">
+		<input type="text" name="q" class="form-control" placeholder="Search" />
+	</div>
+	<input type="hidden" name="check_keywords" value="yes" />
+	<input type="hidden" name="area" value="default" />
+</form>
+			
+		</div>
+	</div>
+</nav>
+<div class="container">
+	<div class="row">
+		<div class="body col-md-12 content" role="main">
+			
+  <div class="section" id="rule-rule">
+<span id="py-rule-rule"></span><h1><span class="section-number">3.1.9.3. </span>rule/Rule<a class="headerlink" href="#rule-rule" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="class-rule">
+<h2><span class="section-number">3.1.9.3.1. </span>Class <code class="docutils literal notranslate"><span class="pre">Rule</span></code><a class="headerlink" href="#class-rule" title="Permalink to this headline">¶</a></h2>
+<dl class="py class">
+<dt id="mod.Rule">
+<em class="property">class </em><code class="sig-prename descclassname">mod.</code><code class="sig-name descname">Rule</code><a class="headerlink" href="#mod.Rule" title="Permalink to this definition">¶</a></dt>
+<dd><p>Model of a transformation rule in the Double Pushout formalism.</p>
+<dl class="py attribute">
+<dt id="mod.Rule.id">
+<code class="sig-name descname">id</code><a class="headerlink" href="#mod.Rule.id" title="Permalink to this definition">¶</a></dt>
+<dd><p>(Read-only) The unique instance id among all <a class="reference internal" href="#mod.Rule" title="mod.Rule"><code class="xref py py-class docutils literal notranslate"><span class="pre">Rule</span></code></a> instances.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)">int</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="mod.Rule.numVertices">
+<code class="sig-name descname">numVertices</code><a class="headerlink" href="#mod.Rule.numVertices" title="Permalink to this definition">¶</a></dt>
+<dd><p>(Read-only) The number of vertices in the rule.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)">int</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="mod.Rule.vertices">
+<code class="sig-name descname">vertices</code><a class="headerlink" href="#mod.Rule.vertices" title="Permalink to this definition">¶</a></dt>
+<dd><p>(Read-only) An iterable of all vertices in the rule.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>RuleVertexRange</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="mod.Rule.numEdges">
+<code class="sig-name descname">numEdges</code><a class="headerlink" href="#mod.Rule.numEdges" title="Permalink to this definition">¶</a></dt>
+<dd><p>(Read-only) The number of edges in the rule.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)">int</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="mod.Rule.edges">
+<code class="sig-name descname">edges</code><a class="headerlink" href="#mod.Rule.edges" title="Permalink to this definition">¶</a></dt>
+<dd><p>(Read-only) An iterable of all edges in the rule.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>RuleEdgeRange</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="mod.Rule.left">
+<code class="sig-name descname">left</code><a class="headerlink" href="#mod.Rule.left" title="Permalink to this definition">¶</a></dt>
+<dd><p>(Read-only) A proxy object representing the left graph of the rule.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference internal" href="GraphInterface.html#mod.RuleLeftGraph" title="mod.RuleLeftGraph">RuleLeftGraph</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="mod.Rule.context">
+<code class="sig-name descname">context</code><a class="headerlink" href="#mod.Rule.context" title="Permalink to this definition">¶</a></dt>
+<dd><p>(Read-only) A proxy object representing the context graph of the rule.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference internal" href="GraphInterface.html#mod.RuleContextGraph" title="mod.RuleContextGraph">RuleContextGraph</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="mod.Rule.right">
+<code class="sig-name descname">right</code><a class="headerlink" href="#mod.Rule.right" title="Permalink to this definition">¶</a></dt>
+<dd><p>(Read-only) A proxy object representing the right graph of the rule.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference internal" href="GraphInterface.html#mod.RuleRightGraph" title="mod.RuleRightGraph">RuleRightGraph</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="mod.Rule.makeInverse">
+<code class="sig-name descname">makeInverse</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#mod.Rule.makeInverse" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>a rule representing the inversion of this rule.</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><a class="reference internal" href="#mod.Rule" title="mod.Rule">Rule</a></p>
+</dd>
+<dt class="field-odd">Raises</dt>
+<dd class="field-odd"><p><a class="reference internal" href="../Error.html#mod.LogicError" title="mod.LogicError"><code class="xref py py-class docutils literal notranslate"><span class="pre">LogicError</span></code></a> if inversion is not possible (due to matching constraints).</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="mod.Rule.print">
+<code class="sig-name descname">print</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#mod.Rule.print" title="Permalink to this definition">¶</a></dt>
+<dt>
+<code class="sig-name descname">print</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">first</span></em>, <em class="sig-param"><span class="n">second</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span></dt>
+<dd><p>Print the rule, using either the default options or the options in <code class="docutils literal notranslate"><span class="pre">first</span></code> and <code class="docutils literal notranslate"><span class="pre">second</span></code>.
+If <code class="docutils literal notranslate"><span class="pre">first</span></code> and <code class="docutils literal notranslate"><span class="pre">second</span></code> are the same, only one depiction will be made.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>first</strong> (<a class="reference internal" href="../graph/Printer.html#mod.GraphPrinter" title="mod.GraphPrinter"><em>GraphPrinter</em></a>) – the printing options used for the first depiction.</p></li>
+<li><p><strong>second</strong> (<a class="reference internal" href="../graph/Printer.html#mod.GraphPrinter" title="mod.GraphPrinter"><em>GraphPrinter</em></a>) – the printing options used for the second depiction.
+If it is <code class="docutils literal notranslate"><span class="pre">None</span></code> then it is set to <code class="docutils literal notranslate"><span class="pre">first</span></code>.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>a pair of filename prefixes for the PDF-files that will be compiled in post-processing.
+The actual names can be obtained by appending <code class="docutils literal notranslate"><span class="pre">_L.pdf</span></code>, <code class="docutils literal notranslate"><span class="pre">_K.pdf</span></code>, and <code class="docutils literal notranslate"><span class="pre">_R.pdf</span></code> for
+respectively the left side, context, and right side graphs.
+If <code class="docutils literal notranslate"><span class="pre">first</span></code> and <code class="docutils literal notranslate"><span class="pre">second</span></code> are the same, the two file prefixes are equal.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.8)">tuple</a>[<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)">str</a>, <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)">str</a>]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="mod.Rule.printTermState">
+<code class="sig-name descname">printTermState</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#mod.Rule.printTermState" title="Permalink to this definition">¶</a></dt>
+<dd><p>Print the term state for the rule.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="mod.Rule.getGMLString">
+<code class="sig-name descname">getGMLString</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">withCoords</span><span class="o">=</span><span class="default_value">False</span></em><span class="sig-paren">)</span><a class="headerlink" href="#mod.Rule.getGMLString" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>the <a class="reference internal" href="../../dataDesc/dataDesc.html#rule-gml"><span class="std std-ref">GML</span></a> representation of the rule,
+optionally with generated 2D coordinates.</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)">str</a></p>
+</dd>
+<dt class="field-odd">Raises</dt>
+<dd class="field-odd"><p><a class="reference internal" href="../Error.html#mod.LogicError" title="mod.LogicError"><code class="xref py py-class docutils literal notranslate"><span class="pre">LogicError</span></code></a> when coordinates are requested, but
+none can be generated.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="mod.Rule.printGML">
+<code class="sig-name descname">printGML</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">withCoords</span><span class="o">=</span><span class="default_value">False</span></em><span class="sig-paren">)</span><a class="headerlink" href="#mod.Rule.printGML" title="Permalink to this definition">¶</a></dt>
+<dd><p>Print the rule in <a class="reference internal" href="../../dataDesc/dataDesc.html#rule-gml"><span class="std std-ref">GML</span></a> format,
+optionally with generated 2D coordinates.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>the filename of the printed GML file.</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)">str</a></p>
+</dd>
+<dt class="field-odd">Raises</dt>
+<dd class="field-odd"><p><a class="reference internal" href="../Error.html#mod.LogicError" title="mod.LogicError"><code class="xref py py-class docutils literal notranslate"><span class="pre">LogicError</span></code></a> when coordinates are requested, but
+none can be generated.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="mod.Rule.name">
+<code class="sig-name descname">name</code><a class="headerlink" href="#mod.Rule.name" title="Permalink to this definition">¶</a></dt>
+<dd><p>The name of the rule. The default name includes the unique instance id.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)">str</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="mod.Rule.labelType">
+<code class="sig-name descname">labelType</code><a class="headerlink" href="#mod.Rule.labelType" title="Permalink to this definition">¶</a></dt>
+<dd><p>(Read-only) The intended label type for this rule, or None if no specific label type is intended.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference internal" href="../Config.html#mod.LabelType" title="mod.LabelType">LabelType</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="mod.Rule.numLeftComponents">
+<code class="sig-name descname">numLeftComponents</code><a class="headerlink" href="#mod.Rule.numLeftComponents" title="Permalink to this definition">¶</a></dt>
+<dd><p>(Read-only) The number of connected components of the left graph.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><code class="xref cpp cpp-type docutils literal notranslate"><span class="pre">std::size_t</span></code></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="mod.Rule.numRightComponents">
+<code class="sig-name descname">numRightComponents</code><a class="headerlink" href="#mod.Rule.numRightComponents" title="Permalink to this definition">¶</a></dt>
+<dd><p>(Read-only) The number of connected components of the right graph.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><code class="xref cpp cpp-type docutils literal notranslate"><span class="pre">std::size_t</span></code></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="mod.Rule.isomorphism">
+<code class="sig-name descname">isomorphism</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">other</span></em>, <em class="sig-param"><span class="n">maxNumMatches</span><span class="o">=</span><span class="default_value">1</span></em>, <em class="sig-param"><span class="n">labelSettings</span><span class="o">=</span><span class="default_value">LabelSettings(LabelType.String, LabelRelation.Isomorphism)</span></em><span class="sig-paren">)</span><a class="headerlink" href="#mod.Rule.isomorphism" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>other</strong> (<a class="reference internal" href="#mod.Rule" title="mod.Rule"><em>Rule</em></a>) – the other <a class="reference internal" href="#mod.Rule" title="mod.Rule"><code class="xref py py-class docutils literal notranslate"><span class="pre">Rule</span></code></a> for comparison.</p></li>
+<li><p><strong>maxNumMatches</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)"><em>int</em></a>) – the maximum number of isomorphisms to search for.</p></li>
+<li><p><strong>labelSettings</strong> (<a class="reference internal" href="../Config.html#mod.LabelSettings" title="mod.LabelSettings"><em>LabelSettings</em></a>) – the label settings to use during the search.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>the number of isomorphisms found between <code class="docutils literal notranslate"><span class="pre">other</span></code> and this rule, but at most <code class="docutils literal notranslate"><span class="pre">maxNumMatches</span></code>.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)">int</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="mod.Rule.monomorphism">
+<code class="sig-name descname">monomorphism</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">host</span></em>, <em class="sig-param"><span class="n">maxNumMatches</span><span class="o">=</span><span class="default_value">1</span></em>, <em class="sig-param"><span class="n">labelSettings</span><span class="o">=</span><span class="default_value">LabelSettings(LabelType.String, LabelRelation.Isomorphism)</span></em><span class="sig-paren">)</span><a class="headerlink" href="#mod.Rule.monomorphism" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>host</strong> (<a class="reference internal" href="#mod.Rule" title="mod.Rule"><em>Rule</em></a>) – the host <a class="reference internal" href="#mod.Rule" title="mod.Rule"><code class="xref py py-class docutils literal notranslate"><span class="pre">Rule</span></code></a> to check for subgraphs.</p></li>
+<li><p><strong>maxNumMatches</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)"><em>int</em></a>) – the maximum number of morphisms to search for.</p></li>
+<li><p><strong>labelSettings</strong> (<a class="reference internal" href="../Config.html#mod.LabelSettings" title="mod.LabelSettings"><em>LabelSettings</em></a>) – the label settings to use during the search.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>the number of monomorphisms from this rule to subgraphs of <code class="docutils literal notranslate"><span class="pre">host</span></code>, though at most <code class="docutils literal notranslate"><span class="pre">maxNumMatches</span></code>.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)">int</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="mod.Rule.isomorphicLeftRight">
+<code class="sig-name descname">isomorphicLeftRight</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">other</span></em>, <em class="sig-param"><span class="n">labelSettings</span><span class="o">=</span><span class="default_value">LabelSettings(LabelType.String, LabelRelation.Isomorphism)</span></em><span class="sig-paren">)</span><a class="headerlink" href="#mod.Rule.isomorphicLeftRight" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>other</strong> (<a class="reference internal" href="#mod.Rule" title="mod.Rule"><em>Rule</em></a>) – the other <a class="reference internal" href="#mod.Rule" title="mod.Rule"><code class="xref py py-class docutils literal notranslate"><span class="pre">Rule</span></code></a> for comparison.</p></li>
+<li><p><strong>labelSettings</strong> (<a class="reference internal" href="../Config.html#mod.LabelSettings" title="mod.LabelSettings"><em>LabelSettings</em></a>) – the label settings to use during the search.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>whether the left-hand sides are isomorphic and the right-hand sides are isomorphic.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.8)">bool</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="mod.Rule.getVertexFromExternalId">
+<code class="sig-name descname">getVertexFromExternalId</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">id</span></em><span class="sig-paren">)</span><a class="headerlink" href="#mod.Rule.getVertexFromExternalId" title="Permalink to this definition">¶</a></dt>
+<dd><p>If the rule was not loaded from an external data format, then this function
+always return a null descriptor.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>In general there is no correlation between external and internal ids.</p>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>id</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)"><em>int</em></a>) – the external id to find the vertex descriptor for.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>the vertex descriptor for the given external id.
+The descriptor is null if the external id was not used.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference internal" href="GraphInterface.html#mod.RuleVertex" title="mod.RuleVertex">RuleVertex</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="mod.Rule.minExternalId">
+<code class="sig-name descname">minExternalId</code><a class="headerlink" href="#mod.Rule.minExternalId" title="Permalink to this definition">¶</a></dt>
+<dt id="mod.Rule.maxExternalId">
+<code class="sig-name descname">maxExternalId</code><a class="headerlink" href="#mod.Rule.maxExternalId" title="Permalink to this definition">¶</a></dt>
+<dd><p>If the rule was not loaded from an external data format, then these attributes
+are always return 0. Otherwise, they are the minimum/maximum external id from which
+non-null vertices can be obtained from <a class="reference internal" href="#mod.Rule.getVertexFromExternalId" title="mod.Rule.getVertexFromExternalId"><code class="xref py py-meth docutils literal notranslate"><span class="pre">getVertexFromExternalId()</span></code></a>.
+If no such minimum and maximum exists, then they are 0.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)">int</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py data">
+<dt id="mod.inputRules">
+<code class="sig-prename descclassname">mod.</code><code class="sig-name descname">inputRules</code><a class="headerlink" href="#mod.inputRules" title="Permalink to this definition">¶</a></dt>
+<dd><p>A list of rules to which explicitly loaded rules as default are appended.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.8)">list</a>[<a class="reference internal" href="#mod.Rule" title="mod.Rule">Rule</a>]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="mod.ruleGMLString">
+<code class="sig-prename descclassname">mod.</code><code class="sig-name descname">ruleGMLString</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">s</span></em>, <em class="sig-param"><span class="n">invert</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="n">add</span><span class="o">=</span><span class="default_value">True</span></em><span class="sig-paren">)</span><a class="headerlink" href="#mod.ruleGMLString" title="Permalink to this definition">¶</a></dt>
+<dd><p>Load a rule from a <a class="reference internal" href="../../dataDesc/dataDesc.html#rule-gml"><span class="std std-ref">GML</span></a> string, and maybe store it in a global list.
+The name of the rule is the one specified in the GML string, though when <code class="docutils literal notranslate"><span class="pre">invert=True</span></code>
+the string “, inverse” is appended to the name.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>If the GML string specifies matching constraints it is currently not possible to invert the rule.
+There is however a configuration option to ignore matching constraints when inverting rules.</p>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>s</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a>) – the GML string to load a rule from.</p></li>
+<li><p><strong>invert</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.8)"><em>bool</em></a>) – whether or not to invert the loaded rule.</p></li>
+<li><p><strong>add</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.8)"><em>bool</em></a>) – whether to append the rule to <a class="reference internal" href="#mod.inputRules" title="mod.inputRules"><code class="xref py py-data docutils literal notranslate"><span class="pre">inputRules</span></code></a> or not.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>the rule in the GML string, possibly inverted.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference internal" href="#mod.Rule" title="mod.Rule">Rule</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="mod.ruleGML">
+<code class="sig-prename descclassname">mod.</code><code class="sig-name descname">ruleGML</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">f</span></em>, <em class="sig-param"><span class="n">invert</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="n">add</span><span class="o">=</span><span class="default_value">True</span></em><span class="sig-paren">)</span><a class="headerlink" href="#mod.ruleGML" title="Permalink to this definition">¶</a></dt>
+<dd><p>Read <code class="docutils literal notranslate"><span class="pre">file</span></code> and pass the contents to <a class="reference internal" href="#mod.ruleGMLString" title="mod.ruleGMLString"><code class="xref py py-func docutils literal notranslate"><span class="pre">ruleGMLString()</span></code></a>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>f</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a>) – name of the GML file to be loaded.</p></li>
+<li><p><strong>invert</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.8)"><em>bool</em></a>) – whether or not to invert the loaded rule.</p></li>
+<li><p><strong>add</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.8)"><em>bool</em></a>) – whether to append the rule to <a class="reference internal" href="#mod.inputRules" title="mod.inputRules"><code class="xref py py-data docutils literal notranslate"><span class="pre">inputRules</span></code></a> or not.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>the rule in the GML file, possibly inverted.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference internal" href="#mod.Rule" title="mod.Rule">Rule</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+</div>
+</div>
+
+
+		</div>
+		  
+	</div>
+</div>
+<footer class="footer"><div class="container"><div class="row">
+	<div class="col-auto mr-auto">
+		<p>
+					&copy; Copyright 2013-2020, Jakob Lykke Andersen.<br/>
+				Created using <a href="http://sphinx-doc.org/">Sphinx</a> 4.0.0+/a8927bcd3.<br/>
+		</p>
+	</div>
+	<div class="col-auto">
+		<a href="#">Back to top</a>
+		
+			<br/>
+			
+	<div id="sourcelink">
+		<a href="../../_sources/pymod/rule/Rule.rst.txt"
+			 rel="nofollow">Source</a>
+	</div>
+		
+	</div>
+</div></div></footer>
+  </body>
+</html>

@@ -1,0 +1,58 @@
+.. _cpp-Function:
+
+**********************************************************
+Function.hpp
+**********************************************************
+.. default-domain:: cpp
+.. default-role:: cpp:expr
+
+.. py:currentmodule:: mod
+.. cpp:namespace:: mod
+
+The class template `Function` is used throughout the library to represent
+function objects.
+
+.. class:: template<typename Sig> Function
+
+Class ``template<typename R, typename ...Args> Function<R(Args...)>``
+--------------------------------------------------------------------------------------------------------------------------------
+
+.. class:: template<typename R, typename ...Args> Function<R(Args...)>
+    
+
+    Abstract base class template for fuctors used in the library.
+
+
+Synopsis
+^^^^^^^^
+
+.. code-block:: c++
+    
+    template<typename R, typename ...Args>
+    struct Function<R(Args...)> {
+        virtual ~Function() {};
+        virtual std::shared_ptr<Function<R(Args...)> > clone() const = 0;
+        virtual void print(std::ostream &s) const = 0;
+        virtual R operator()(Args ...args) const = 0;
+    };
+
+Details
+^^^^^^^
+
+.. cpp:namespace-push:: template<typename R, typename ...Args> Function<R(Args...)>
+
+.. function:: virtual std::shared_ptr<Function<R(Args...)> > clone() const = 0
+
+    Cloning function used when a copy of a given functor is needed.
+
+.. function:: virtual void print(std::ostream &s) const = 0
+
+    Printing function used for describing the function in output from algorithms.
+
+.. function:: virtual R operator()(Args ...args) const = 0
+
+    The actual function implementation of the function.
+
+
+.. cpp:namespace-pop::
+

@@ -1,0 +1,398 @@
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>2.2.2. Config.hpp &#8212; MØD 0.11.0 documentation</title>
+    <link rel="stylesheet" href="../_static/bootstrap-sphinx.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" type="text/css" href="../_static/haxes.css" />
+    <script id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+    <script src="../_static/jquery.js"></script>
+    <script src="../_static/underscore.js"></script>
+    <script src="../_static/doctools.js"></script>
+    <script src="../_static/language_data.js"></script>
+    <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="2.2.3. Derivation.hpp" href="Derivation.html" />
+    <link rel="prev" title="2.2.1. Chem.hpp" href="Chem.html" />
+<meta charset='utf-8'>
+<meta http-equiv='X-UA-Compatible' content='IE=edge,chrome=1'>
+<meta name='viewport' content='width=device-width, initial-scale=1.0, maximum-scale=1'>
+<meta name="apple-mobile-web-app-capable" content="yes">
+<script type="text/javascript" src="../_static/js/jquery-3.4.1.slim.min.js "></script>
+<script type="text/javascript" src="../_static/js/jquery-fix.js "></script>
+<script type="text/javascript" src="../_static/bootstrap-4.4.1/js/bootstrap.min.js "></script>
+<script type="text/javascript" src="../_static/bootstrap-sphinx.js "></script>
+
+  </head><body>
+<nav id="navbar" class="navbar navbar-expand-lg navbar-light bg-light  navbar-fixed-top">
+	<div class="container">
+		<a class="navbar-brand" href="../index.html">
+			MØD</a>
+		<span class="navbar-text navbar-version pull-left"><b>0.11.0</b></span>
+		<button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+			<span class="navbar-toggler-icon"></span>
+		</button>
+		<div class="collapse navbar-collapse" id="navbarSupportedContent">
+			<ul class="navbar-nav mr-auto">
+				
+						<li class="nav-item"><a class="nav-link" href="../genindex.html">Index</a></li>
+				
+				
+					<li class="nav-item dropdown globaltoc-container">
+	<a class="nav-link dropdown-toggle"
+			href="../index.html"
+			id="dLabelGlobalToc"
+			role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+		Site
+	</a>
+	<ul class="globaltoc" aria-labelledby="dLabelGlobalToc">
+		<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../installation.html">1. Installation</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="libmod.html">2. libMØD</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../pymod/pymod.html">3. PyMØD</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../postmod/postmod.html">4. PostMØD (<code class="docutils literal notranslate"><span class="pre">mod_post</span></code>)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../modWrapper/modWrapper.html">5. The Wrapper Script (<code class="docutils literal notranslate"><span class="pre">mod</span></code>)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../epim/epim.html">6. EpiM</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../dataDesc/dataDesc.html">7. Data Formats</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../dgStrat/dgStrat.html">8. Derivation Graph Strategies</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../examples/index.html">9. Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../knownIssues.html">10. Known Issues</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../changes.html">11. Changes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../references.html">12. References</a></li>
+</ul>
+
+	</ul>
+</li>
+					
+						<li class="nav-item dropdown localtoc-container">
+	<a class="nav-link dropdown-toggle"
+			href="../index.html"
+			id="dLabelLocalToc"
+			role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+		Page
+	</a>
+	<ul class="localtoc" aria-labelledby="dLabelLocalToc">
+		<ul>
+<li><a class="reference internal" href="#">2.2.2. Config.hpp</a><ul>
+<li><a class="reference internal" href="#class-template-typename-t-configsetting">2.2.2.1. Class <code class="docutils literal notranslate"><span class="pre">template&lt;typename</span> <span class="pre">T&gt;</span> <span class="pre">ConfigSetting</span></code></a><ul>
+<li><a class="reference internal" href="#synopsis">2.2.2.1.1. Synopsis</a></li>
+<li><a class="reference internal" href="#details">2.2.2.1.2. Details</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#class-config">2.2.2.2. Class <code class="docutils literal notranslate"><span class="pre">Config</span></code></a></li>
+</ul>
+</li>
+</ul>
+
+	</ul>
+</li>
+					
+				
+				
+					
+						
+	<li class="nav-item">
+		<a class="nav-link" href="Chem.html" title="Previous Chapter: 2.2.1. Chem.hpp">
+			<span class="glyphicon glyphicon-chevron-left visible-sm"></span>
+			<span class="hidden-sm hidden-tablet">
+				&laquo; 2.2.1. Chem.hpp
+			</span>
+		</a>
+	</li>
+	<li class="nav-item">
+		<a class="nav-link" href="Derivation.html" title="Next Chapter: 2.2.3. Derivation.hpp">
+			<span class="glyphicon glyphicon-chevron-right visible-sm"></span>
+			<span class="hidden-sm hidden-tablet">2.2.3. Derivation.hpp &raquo;</span>
+		</a>
+	</li>
+					
+				
+				
+				
+				
+			</ul>
+			
+				
+<form class="form-inline" action="../search.html" method="get">
+	<div class="form-group">
+		<input type="text" name="q" class="form-control" placeholder="Search" />
+	</div>
+	<input type="hidden" name="check_keywords" value="yes" />
+	<input type="hidden" name="area" value="default" />
+</form>
+			
+		</div>
+	</div>
+</nav>
+<div class="container">
+	<div class="row">
+		<div class="body col-md-12 content" role="main">
+			
+  <div class="section" id="config-hpp">
+<span id="cpp-config"></span><h1><span class="section-number">2.2.2. </span>Config.hpp<a class="headerlink" href="#config-hpp" title="Permalink to this headline">¶</a></h1>
+<p id="libmod-config">This file defines configuration options for the library.
+Many of the options control verbosity of algorithms or which data to
+output when printing figures.</p>
+<dl class="cpp enum-struct">
+<dt id="_CPPv4N3mod9LabelTypeE">
+<span id="_CPPv3N3mod9LabelTypeE"></span><span id="_CPPv2N3mod9LabelTypeE"></span><em class="property">enum struct </em><code class="sig-name descname">LabelType</code><a class="headerlink" href="#_CPPv4N3mod9LabelTypeE" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Selector for which type of label to use in algorithms.</p>
+<dl class="cpp enumerator">
+<dt id="_CPPv4N3mod9LabelType6StringE">
+<span id="_CPPv3N3mod9LabelType6StringE"></span><span id="_CPPv2N3mod9LabelType6StringE"></span><em class="property">enumerator </em><code class="sig-name descname">String</code><a class="headerlink" href="#_CPPv4N3mod9LabelType6StringE" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Vertices and edges are considered to be labelled with
+character strings. If only first-order terms are present,
+then strings are generated as a serialisation of the term.</p>
+</dd></dl>
+
+<dl class="cpp enumerator">
+<dt id="_CPPv4N3mod9LabelType4TermE">
+<span id="_CPPv3N3mod9LabelType4TermE"></span><span id="_CPPv2N3mod9LabelType4TermE"></span><em class="property">enumerator </em><code class="sig-name descname">Term</code><a class="headerlink" href="#_CPPv4N3mod9LabelType4TermE" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Vertices and edges are considered to be labelled with
+first-order terms. If only strings are present, then first-order
+terms are generated by parsing the strings. This may result
+in an <a class="reference internal" href="Error.html#_CPPv4N3mod16TermParsingErrorE" title="mod::TermParsingError"><code class="xref cpp cpp-class docutils literal notranslate"><span class="pre">TermParsingError</span></code></a> if a string can not be parsed.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="cpp enum-struct">
+<dt id="_CPPv4N3mod13LabelRelationE">
+<span id="_CPPv3N3mod13LabelRelationE"></span><span id="_CPPv2N3mod13LabelRelationE"></span><em class="property">enum struct </em><code class="sig-name descname">LabelRelation</code><a class="headerlink" href="#_CPPv4N3mod13LabelRelationE" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Selector for which type of labelled morphism to use in an algorithm.</p>
+<dl class="cpp enumerator">
+<dt id="_CPPv4N3mod13LabelRelation11IsomorphismE">
+<span id="_CPPv3N3mod13LabelRelation11IsomorphismE"></span><span id="_CPPv2N3mod13LabelRelation11IsomorphismE"></span><em class="property">enumerator </em><code class="sig-name descname">Isomorphism</code><a class="headerlink" href="#_CPPv4N3mod13LabelRelation11IsomorphismE" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Strings are considered isomorphic when they are equal.
+Terms are considered isomorphic when their most general unifier
+is a renaming.</p>
+</dd></dl>
+
+<dl class="cpp enumerator">
+<dt id="_CPPv4N3mod13LabelRelation14SpecialisationE">
+<span id="_CPPv3N3mod13LabelRelation14SpecialisationE"></span><span id="_CPPv2N3mod13LabelRelation14SpecialisationE"></span><em class="property">enumerator </em><code class="sig-name descname">Specialisation</code><a class="headerlink" href="#_CPPv4N3mod13LabelRelation14SpecialisationE" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>A term <span class="math notranslate nohighlight">\(t_2\)</span> is more special than, or isomorphic to, a term <span class="math notranslate nohighlight">\(t_1\)</span> if there is a substitution
+which can be applied to <span class="math notranslate nohighlight">\(t_1\)</span> to make the terms equal.
+This relation means that the right-hand side of a comparison is the more specialised term.</p>
+</dd></dl>
+
+<dl class="cpp enumerator">
+<dt id="_CPPv4N3mod13LabelRelation11UnificationE">
+<span id="_CPPv3N3mod13LabelRelation11UnificationE"></span><span id="_CPPv2N3mod13LabelRelation11UnificationE"></span><em class="property">enumerator </em><code class="sig-name descname">Unification</code><a class="headerlink" href="#_CPPv4N3mod13LabelRelation11UnificationE" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Strings unify if they are equal, i.e., the same as with <a class="reference internal" href="#_CPPv4N3mod13LabelRelation11IsomorphismE" title="mod::LabelRelation::Isomorphism"><code class="xref cpp cpp-any docutils literal notranslate"><span class="pre">Isomorphism</span></code></a>.
+Terms unify if a most general unifier (MGU) exists. The found MGU
+is used for substitution in some algorithms.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="cpp class">
+<dt id="_CPPv4N3mod13LabelSettingsE">
+<span id="_CPPv3N3mod13LabelSettingsE"></span><span id="_CPPv2N3mod13LabelSettingsE"></span><span id="mod::LabelSettings"></span><em class="property">class </em><code class="sig-name descname">LabelSettings</code><a class="headerlink" href="#_CPPv4N3mod13LabelSettingsE" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>A class simply for grouping label settings.</p>
+<dl class="cpp function">
+<dt id="_CPPv4N3mod13LabelSettings13LabelSettingsE9LabelType13LabelRelation">
+<span id="_CPPv3N3mod13LabelSettings13LabelSettingsE9LabelType13LabelRelation"></span><span id="_CPPv2N3mod13LabelSettings13LabelSettingsE9LabelType13LabelRelation"></span><span id="mod::LabelSettings::LabelSettings__LabelType.LabelRelation"></span><code class="sig-name descname">LabelSettings</code><span class="sig-paren">(</span><a class="reference internal" href="#_CPPv4N3mod9LabelTypeE" title="mod::LabelType">LabelType</a> <em>type</em>, <a class="reference internal" href="#_CPPv4N3mod13LabelRelationE" title="mod::LabelRelation">LabelRelation</a> <em>relation</em><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N3mod13LabelSettings13LabelSettingsE9LabelType13LabelRelation" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Construct label settings that only uses the vertex and edge labels.</p>
+</dd></dl>
+
+<dl class="cpp function">
+<dt id="_CPPv4N3mod13LabelSettings13LabelSettingsE9LabelType13LabelRelation13LabelRelation">
+<span id="_CPPv3N3mod13LabelSettings13LabelSettingsE9LabelType13LabelRelation13LabelRelation"></span><span id="_CPPv2N3mod13LabelSettings13LabelSettingsE9LabelType13LabelRelation13LabelRelation"></span><span id="mod::LabelSettings::LabelSettings__LabelType.LabelRelation.LabelRelation"></span><code class="sig-name descname">LabelSettings</code><span class="sig-paren">(</span><a class="reference internal" href="#_CPPv4N3mod9LabelTypeE" title="mod::LabelType">LabelType</a> <em>type</em>, <a class="reference internal" href="#_CPPv4N3mod13LabelRelationE" title="mod::LabelRelation">LabelRelation</a> <em>relation</em>, <a class="reference internal" href="#_CPPv4N3mod13LabelRelationE" title="mod::LabelRelation">LabelRelation</a> <em>stereoRelation</em><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N3mod13LabelSettings13LabelSettingsE9LabelType13LabelRelation13LabelRelation" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Construct label settings that include both vertex and edge labels, and stereo information.</p>
+</dd></dl>
+
+<dl class="cpp function">
+<dt id="_CPPv4N3mod13LabelSettings13LabelSettingsE9LabelType13LabelRelationb13LabelRelation">
+<span id="_CPPv3N3mod13LabelSettings13LabelSettingsE9LabelType13LabelRelationb13LabelRelation"></span><span id="_CPPv2N3mod13LabelSettings13LabelSettingsE9LabelType13LabelRelationb13LabelRelation"></span><span id="mod::LabelSettings::LabelSettings__LabelType.LabelRelation.b.LabelRelation"></span><code class="sig-name descname">LabelSettings</code><span class="sig-paren">(</span><a class="reference internal" href="#_CPPv4N3mod9LabelTypeE" title="mod::LabelType">LabelType</a> <em>type</em>, <a class="reference internal" href="#_CPPv4N3mod13LabelRelationE" title="mod::LabelRelation">LabelRelation</a> <em>relation</em>, bool <em>withStereo</em>, <a class="reference internal" href="#_CPPv4N3mod13LabelRelationE" title="mod::LabelRelation">LabelRelation</a> <em>stereoRelation</em><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N3mod13LabelSettings13LabelSettingsE9LabelType13LabelRelationb13LabelRelation" title="Permalink to this definition">¶</a><br /></dt>
+<dd></dd></dl>
+
+<dl class="cpp function">
+<dt id="_CPPv4N3mod13LabelSettingseqE13LabelSettings13LabelSettings">
+<span id="_CPPv3N3mod13LabelSettingseqE13LabelSettings13LabelSettings"></span><span id="_CPPv2N3mod13LabelSettingseqE13LabelSettings13LabelSettings"></span><span id="mod::LabelSettings::eq-operator__LabelSettings.LabelSettings"></span><em class="property">friend</em> bool <code class="sig-name descname">operator==</code><span class="sig-paren">(</span><a class="reference internal" href="#_CPPv4N3mod13LabelSettingsE" title="mod::LabelSettings">LabelSettings</a> <em>a</em>, <a class="reference internal" href="#_CPPv4N3mod13LabelSettingsE" title="mod::LabelSettings">LabelSettings</a> <em>b</em><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N3mod13LabelSettingseqE13LabelSettings13LabelSettings" title="Permalink to this definition">¶</a><br /></dt>
+<dt id="_CPPv4N3mod13LabelSettingsneE13LabelSettings13LabelSettings">
+<span id="_CPPv3N3mod13LabelSettingsneE13LabelSettings13LabelSettings"></span><span id="_CPPv2N3mod13LabelSettingsneE13LabelSettings13LabelSettings"></span><span id="mod::LabelSettings::neq-operator__LabelSettings.LabelSettings"></span><em class="property">friend</em> bool <code class="sig-name descname">operator!=</code><span class="sig-paren">(</span><a class="reference internal" href="#_CPPv4N3mod13LabelSettingsE" title="mod::LabelSettings">LabelSettings</a> <em>a</em>, <a class="reference internal" href="#_CPPv4N3mod13LabelSettingsE" title="mod::LabelSettings">LabelSettings</a> <em>b</em><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N3mod13LabelSettingsneE13LabelSettings13LabelSettings" title="Permalink to this definition">¶</a><br /></dt>
+<dd></dd></dl>
+
+<dl class="cpp function">
+<dt id="_CPPv4N3mod13LabelSettingslsERNSt7ostreamERK13LabelSettings">
+<span id="_CPPv3N3mod13LabelSettingslsERNSt7ostreamERK13LabelSettings"></span><span id="_CPPv2N3mod13LabelSettingslsERNSt7ostreamERK13LabelSettings"></span><span id="mod::LabelSettings::lshift-operator__osR.LabelSettingsCR"></span><em class="property">friend</em> std::ostream &amp;<code class="sig-name descname">operator&lt;&lt;</code><span class="sig-paren">(</span>std::ostream &amp;<em>s</em>, <em class="property">const</em> <a class="reference internal" href="#_CPPv4N3mod13LabelSettingsE" title="mod::LabelSettings">LabelSettings</a> &amp;<em>ls</em><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N3mod13LabelSettingslsERNSt7ostreamERK13LabelSettings" title="Permalink to this definition">¶</a><br /></dt>
+<dd></dd></dl>
+
+<dl class="cpp member">
+<dt id="_CPPv4N3mod13LabelSettings4typeE">
+<span id="_CPPv3N3mod13LabelSettings4typeE"></span><span id="_CPPv2N3mod13LabelSettings4typeE"></span><span id="mod::LabelSettings::type__LabelType"></span><a class="reference internal" href="#_CPPv4N3mod9LabelTypeE" title="mod::LabelType">LabelType</a> <code class="sig-name descname">type</code><a class="headerlink" href="#_CPPv4N3mod13LabelSettings4typeE" title="Permalink to this definition">¶</a><br /></dt>
+<dd></dd></dl>
+
+<dl class="cpp member">
+<dt id="_CPPv4N3mod13LabelSettings8relationE">
+<span id="_CPPv3N3mod13LabelSettings8relationE"></span><span id="_CPPv2N3mod13LabelSettings8relationE"></span><span id="mod::LabelSettings::relation__LabelRelation"></span><a class="reference internal" href="#_CPPv4N3mod13LabelRelationE" title="mod::LabelRelation">LabelRelation</a> <code class="sig-name descname">relation</code><a class="headerlink" href="#_CPPv4N3mod13LabelSettings8relationE" title="Permalink to this definition">¶</a><br /></dt>
+<dd></dd></dl>
+
+<dl class="cpp member">
+<dt id="_CPPv4N3mod13LabelSettings10withStereoE">
+<span id="_CPPv3N3mod13LabelSettings10withStereoE"></span><span id="_CPPv2N3mod13LabelSettings10withStereoE"></span><span id="mod::LabelSettings::withStereo__b"></span>bool <code class="sig-name descname">withStereo</code><a class="headerlink" href="#_CPPv4N3mod13LabelSettings10withStereoE" title="Permalink to this definition">¶</a><br /></dt>
+<dd></dd></dl>
+
+<dl class="cpp member">
+<dt id="_CPPv4N3mod13LabelSettings14stereoRelationE">
+<span id="_CPPv3N3mod13LabelSettings14stereoRelationE"></span><span id="_CPPv2N3mod13LabelSettings14stereoRelationE"></span><span id="mod::LabelSettings::stereoRelation__LabelRelation"></span><a class="reference internal" href="#_CPPv4N3mod13LabelRelationE" title="mod::LabelRelation">LabelRelation</a> <code class="sig-name descname">stereoRelation</code><a class="headerlink" href="#_CPPv4N3mod13LabelSettings14stereoRelationE" title="Permalink to this definition">¶</a><br /></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="cpp enum-struct">
+<dt id="_CPPv4N3mod17IsomorphismPolicyE">
+<span id="_CPPv3N3mod17IsomorphismPolicyE"></span><span id="_CPPv2N3mod17IsomorphismPolicyE"></span><em class="property">enum struct </em><code class="sig-name descname">IsomorphismPolicy</code><a class="headerlink" href="#_CPPv4N3mod17IsomorphismPolicyE" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>For some functions there is a choice of how to handle given arguments
+where two different objects may be isomorphic. Most notably the case is with graphs (<a class="reference internal" href="graph/Graph.html#_CPPv4N3mod5graph5GraphE" title="mod::graph::Graph"><code class="xref cpp cpp-class docutils literal notranslate"><span class="pre">graph::Graph</span></code></a>).</p>
+<dl class="cpp enumerator">
+<dt id="_CPPv4N3mod17IsomorphismPolicy5CheckE">
+<span id="_CPPv3N3mod17IsomorphismPolicy5CheckE"></span><span id="_CPPv2N3mod17IsomorphismPolicy5CheckE"></span><em class="property">enumerator </em><code class="sig-name descname">Check</code><a class="headerlink" href="#_CPPv4N3mod17IsomorphismPolicy5CheckE" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Objects are checked for isomorphism as needed and exceptions are thrown when different objects are isomorphic.
+If in doubt, use this.</p>
+</dd></dl>
+
+<dl class="cpp enumerator">
+<dt id="_CPPv4N3mod17IsomorphismPolicy7TrustMeE">
+<span id="_CPPv3N3mod17IsomorphismPolicy7TrustMeE"></span><span id="_CPPv2N3mod17IsomorphismPolicy7TrustMeE"></span><em class="property">enumerator </em><code class="sig-name descname">TrustMe</code><a class="headerlink" href="#_CPPv4N3mod17IsomorphismPolicy7TrustMeE" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>No checks are performed and the function trusts the caller to have performed the equivalent isomorphism checks.
+Only use this when you are completely sure that no exceptions would have been thrown if using <a class="reference internal" href="#_CPPv4N3mod17IsomorphismPolicy5CheckE" title="mod::IsomorphismPolicy::Check"><code class="xref cpp cpp-enumerator docutils literal notranslate"><span class="pre">Check</span></code></a>.</p>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>Generally the library has undefined behaviour if you use this option
+but an exception would have been thrown with <a class="reference internal" href="#_CPPv4N3mod17IsomorphismPolicy5CheckE" title="mod::IsomorphismPolicy::Check"><code class="xref cpp cpp-enumerator docutils literal notranslate"><span class="pre">Check</span></code></a>.</p>
+</div>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="cpp enum-struct">
+<dt id="_CPPv4N3mod17SmilesClassPolicyE">
+<span id="_CPPv3N3mod17SmilesClassPolicyE"></span><span id="_CPPv2N3mod17SmilesClassPolicyE"></span><em class="property">enum struct </em><code class="sig-name descname">SmilesClassPolicy</code><a class="headerlink" href="#_CPPv4N3mod17SmilesClassPolicyE" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>When loading SMILES strings, the class labels can be recorded and mapped into the corresponding
+vertices of the loaded graph. This policy dictates what should happen when the same class label
+is written on multiple atoms.</p>
+<dl class="cpp enumerator">
+<dt id="_CPPv4N3mod17SmilesClassPolicy15NoneOnDuplicateE">
+<span id="_CPPv3N3mod17SmilesClassPolicy15NoneOnDuplicateE"></span><span id="_CPPv2N3mod17SmilesClassPolicy15NoneOnDuplicateE"></span><em class="property">enumerator </em><code class="sig-name descname">NoneOnDuplicate</code><a class="headerlink" href="#_CPPv4N3mod17SmilesClassPolicy15NoneOnDuplicateE" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>If a class label is duplicated, then no labels are mapped to vertices.</p>
+</dd></dl>
+
+<dl class="cpp enumerator">
+<dt id="_CPPv4N3mod17SmilesClassPolicy16ThrowOnDuplicateE">
+<span id="_CPPv3N3mod17SmilesClassPolicy16ThrowOnDuplicateE"></span><span id="_CPPv2N3mod17SmilesClassPolicy16ThrowOnDuplicateE"></span><em class="property">enumerator </em><code class="sig-name descname">ThrowOnDuplicate</code><a class="headerlink" href="#_CPPv4N3mod17SmilesClassPolicy16ThrowOnDuplicateE" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>If a class label is duplicated, throw a <a class="reference internal" href="Error.html#_CPPv4N3mod10InputErrorE" title="mod::InputError"><code class="xref cpp cpp-class docutils literal notranslate"><span class="pre">InputError</span></code></a>.</p>
+</dd></dl>
+
+<dl class="cpp enumerator">
+<dt id="_CPPv4N3mod17SmilesClassPolicy9MapUniqueE">
+<span id="_CPPv3N3mod17SmilesClassPolicy9MapUniqueE"></span><span id="_CPPv2N3mod17SmilesClassPolicy9MapUniqueE"></span><em class="property">enumerator </em><code class="sig-name descname">MapUnique</code><a class="headerlink" href="#_CPPv4N3mod17SmilesClassPolicy9MapUniqueE" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Map all class labels that are unique to vertices.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="cpp function">
+<dt id="_CPPv4N3mod9getConfigEv">
+<span id="_CPPv3N3mod9getConfigEv"></span><span id="_CPPv2N3mod9getConfigEv"></span><span id="mod::getConfig"></span><a class="reference internal" href="#_CPPv4N3mod6ConfigE" title="mod::Config">Config</a> &amp;<code class="sig-name descname">getConfig</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N3mod9getConfigEv" title="Permalink to this definition">¶</a><br /></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>the singleton <a class="reference internal" href="#_CPPv4N3mod6ConfigE" title="mod::Config"><code class="xref cpp cpp-class docutils literal notranslate"><span class="pre">Config</span></code></a> instance used by the library.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<div class="section" id="class-template-typename-t-configsetting">
+<h2><span class="section-number">2.2.2.1. </span>Class <code class="docutils literal notranslate"><span class="pre">template&lt;typename</span> <span class="pre">T&gt;</span> <span class="pre">ConfigSetting</span></code><a class="headerlink" href="#class-template-typename-t-configsetting" title="Permalink to this headline">¶</a></h2>
+<dl class="cpp class">
+<dt id="_CPPv4I0EN3mod13ConfigSettingE">
+<span id="_CPPv3I0EN3mod13ConfigSettingE"></span><span id="_CPPv2I0EN3mod13ConfigSettingE"></span>template&lt;typename <code class="sig-name descname">T</code>&gt;<br /><em class="property">class </em><code class="sig-name descname">ConfigSetting</code><a class="headerlink" href="#_CPPv4I0EN3mod13ConfigSettingE" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Holds a single option of type <a class="reference internal" href="#_CPPv4I0EN3mod13ConfigSettingE" title="mod::ConfigSetting::T"><code class="xref cpp cpp-any docutils literal notranslate"><span class="pre">T</span></code></a>.</p>
+</dd></dl>
+
+<div class="section" id="synopsis">
+<h3><span class="section-number">2.2.2.1.1. </span>Synopsis<a class="headerlink" href="#synopsis" title="Permalink to this headline">¶</a></h3>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="k">template</span><span class="o">&lt;</span><span class="k">typename</span> <span class="n">T</span><span class="o">&gt;</span>
+<span class="k">struct</span> <span class="n">ConfigSetting</span> <span class="p">{</span>
+    <span class="n">ConfigSetting</span><span class="p">(</span><span class="n">T</span> <span class="n">value</span><span class="p">,</span> <span class="k">const</span> <span class="n">std</span><span class="o">::</span><span class="n">string</span> <span class="o">&amp;</span><span class="n">name</span><span class="p">)</span> <span class="o">:</span> <span class="n">value</span><span class="p">(</span><span class="n">value</span><span class="p">),</span> <span class="n">name</span><span class="p">(</span><span class="n">name</span><span class="p">)</span> <span class="p">{}</span>
+    <span class="kt">void</span> <span class="n">set</span><span class="p">(</span><span class="n">T</span> <span class="n">value</span><span class="p">)</span> <span class="p">{</span>
+        <span class="k">this</span><span class="o">-&gt;</span><span class="n">value</span> <span class="o">=</span> <span class="n">value</span><span class="p">;</span>
+    <span class="p">};</span>
+    <span class="n">T</span> <span class="nf">get</span><span class="p">()</span> <span class="k">const</span> <span class="p">{</span>
+        <span class="k">return</span> <span class="n">value</span><span class="p">;</span>
+    <span class="p">}</span>
+    <span class="n">T</span> <span class="o">&amp;</span><span class="k">operator</span><span class="p">()()</span> <span class="p">{</span>
+        <span class="k">return</span> <span class="n">value</span><span class="p">;</span>
+    <span class="p">}</span>
+    <span class="k">const</span> <span class="n">std</span><span class="o">::</span><span class="n">string</span> <span class="o">&amp;</span><span class="n">getName</span><span class="p">()</span> <span class="k">const</span> <span class="p">{</span>
+        <span class="k">return</span> <span class="n">name</span><span class="p">;</span>
+    <span class="p">}</span>
+<span class="k">private</span><span class="o">:</span>
+    <span class="n">T</span> <span class="n">value</span><span class="p">;</span>
+    <span class="k">const</span> <span class="n">std</span><span class="o">::</span><span class="n">string</span> <span class="n">name</span><span class="p">;</span>
+<span class="p">};</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="details">
+<h3><span class="section-number">2.2.2.1.2. </span>Details<a class="headerlink" href="#details" title="Permalink to this headline">¶</a></h3>
+<dl class="cpp function">
+<dt id="_CPPv4N3mod13ConfigSetting3setE1T">
+<span id="_CPPv3N3mod13ConfigSetting3setE1T"></span><span id="_CPPv2N3mod13ConfigSetting3setE1T"></span><span id="mod::ConfigSetting::set__T"></span>void <code class="sig-name descname">set</code><span class="sig-paren">(</span><a class="reference internal" href="#_CPPv4I0EN3mod13ConfigSettingE" title="mod::ConfigSetting::T">T</a> <em>value</em><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N3mod13ConfigSetting3setE1T" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Sets the configuration value.</p>
+</dd></dl>
+
+<dl class="cpp function">
+<dt id="_CPPv4NK3mod13ConfigSetting3getEv">
+<span id="_CPPv3NK3mod13ConfigSetting3getEv"></span><span id="_CPPv2NK3mod13ConfigSetting3getEv"></span><span id="mod::ConfigSetting::getC"></span><a class="reference internal" href="#_CPPv4I0EN3mod13ConfigSettingE" title="mod::ConfigSetting::T">T</a> <code class="sig-name descname">get</code><span class="sig-paren">(</span><span class="sig-paren">)</span> <em class="property">const</em><a class="headerlink" href="#_CPPv4NK3mod13ConfigSetting3getEv" title="Permalink to this definition">¶</a><br /></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>The configuration value.</p>
+</dd>
+</dl>
+</dd></dl>
+
+</div>
+</div>
+<div class="section" id="class-config">
+<h2><span class="section-number">2.2.2.2. </span>Class <code class="docutils literal notranslate"><span class="pre">Config</span></code><a class="headerlink" href="#class-config" title="Permalink to this headline">¶</a></h2>
+<dl class="cpp class">
+<dt id="_CPPv4N3mod6ConfigE">
+<span id="_CPPv3N3mod6ConfigE"></span><span id="_CPPv2N3mod6ConfigE"></span><span id="mod::Config"></span><em class="property">class </em><code class="sig-name descname">Config</code><a class="headerlink" href="#_CPPv4N3mod6ConfigE" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Holds all configuration settings.</p>
+</dd></dl>
+
+</div>
+</div>
+
+
+		</div>
+		  
+	</div>
+</div>
+<footer class="footer"><div class="container"><div class="row">
+	<div class="col-auto mr-auto">
+		<p>
+					&copy; Copyright 2013-2020, Jakob Lykke Andersen.<br/>
+				Created using <a href="http://sphinx-doc.org/">Sphinx</a> 4.0.0+/a8927bcd3.<br/>
+		</p>
+	</div>
+	<div class="col-auto">
+		<a href="#">Back to top</a>
+		
+			<br/>
+			
+	<div id="sourcelink">
+		<a href="../_sources/libmod/Config.rst.txt"
+			 rel="nofollow">Source</a>
+	</div>
+		
+	</div>
+</div></div></footer>
+  </body>
+</html>

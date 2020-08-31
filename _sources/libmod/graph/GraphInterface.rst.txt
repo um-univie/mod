@@ -1,0 +1,394 @@
+.. _cpp-graph/GraphInterface:
+
+**********************************************************
+graph/GraphInterface.hpp
+**********************************************************
+.. default-domain:: cpp
+.. default-role:: cpp:expr
+
+.. py:currentmodule:: mod
+.. cpp:namespace:: mod
+
+This header contains the definitions for the graph interface for :cpp:class:`graph::Graph`.
+
+
+Class ``graph::Graph::Vertex``
+--------------------------------------------------------------------------------------------------------------------------------
+
+.. class:: graph::Graph::Vertex
+    
+
+    A descriptor of either a vertex in a graph, or a null vertex.
+
+Synopsis
+^^^^^^^^
+
+.. code-block:: c++
+    
+    struct MOD_DECL Graph::Vertex {
+        Vertex(std::shared_ptr<Graph> g, std::size_t vId);
+    public:
+        Vertex();
+        MOD_DECL friend std::ostream &operator<<(std::ostream &s, const Vertex &v);
+        MOD_DECL friend bool operator==(const Vertex &v1, const Vertex &v2);
+        MOD_DECL friend bool operator!=(const Vertex &v1, const Vertex &v2);
+        MOD_DECL friend bool operator<(const Vertex &v1, const Vertex &v2);
+        std::size_t hash() const;
+        explicit operator bool() const;
+        bool isNull() const;
+        std::size_t getId() const;
+        std::shared_ptr<Graph> getGraph() const;
+        std::size_t getDegree() const;
+        IncidentEdgeRange incidentEdges() const;
+        const std::string &getStringLabel() const;
+        AtomId getAtomId() const;
+        Isotope getIsotope() const;
+        Charge getCharge() const;
+        bool getRadical() const;
+        std::string printStereo() const;
+        std::string printStereo(const Printer &p) const;
+    private:
+        std::shared_ptr<Graph> g;
+        std::size_t vId;
+    };
+
+Details
+^^^^^^^
+
+.. cpp:namespace-push:: graph::Graph::Vertex
+
+.. function:: Vertex()
+
+    Constructs a null descriptor.
+.. function:: explicit operator bool() const
+
+    :returns: :cpp:expr:`!isNull()`
+.. function:: bool isNull() const
+
+    :returns: whether this is a null descriptor or not.
+.. function:: std::size_t getId() const
+
+    :returns: the index of the vertex. It will be in the range :math:`[0, numVertices[`.
+    :throws: :cpp:class:`LogicError` if it is a null descriptor.
+.. function:: std::shared_ptr<Graph> getGraph() const
+
+    :returns: the graph the vertex belongs to.
+    :throws: :cpp:class:`LogicError` if it is a null descriptor.
+.. function:: std::size_t getDegree() const
+
+    :returns: the degree of the vertex.
+    :throws: :cpp:class:`LogicError` if it is a null descriptor.
+.. function:: IncidentEdgeRange incidentEdges() const
+
+    :returns: a range of incident edges to this vertex.
+    :throws: :cpp:class:`LogicError` if it is a null descriptor.
+.. function:: const std::string &getStringLabel() const
+
+    :returns: the string label of the vertex.
+    :throws: :cpp:class:`LogicError` if it is a null descriptor.
+.. function:: AtomId getAtomId() const
+
+    :returns: the atom id of the vertex.
+    :throws: :cpp:class:`LogicError` if it is a null descriptor.
+.. function:: Isotope getIsotope() const
+
+    :returns: the isotope of the vertex.
+    :throws: :cpp:class:`LogicError` if it is a null descriptor.
+.. function:: Charge getCharge() const
+
+    :returns: the charge of the vertex.
+    :throws: :cpp:class:`LogicError` if it is a null descriptor.
+.. function:: bool getRadical() const
+
+    :returns: the radical status of the vertex.
+    :throws: :cpp:class:`LogicError` if it is a null descriptor.
+.. function:: std::string printStereo() const
+              std::string printStereo(const Printer &p) const
+
+    Print the stereo configuration for the vertex.
+
+    :returns: the name of the PDF-file that will be compiled in post-processing.
+    :throws: :cpp:class:`LogicError` if it is a null descriptor.
+
+.. cpp:namespace-pop::
+
+
+Class ``graph::Graph::Edge``
+--------------------------------------------------------------------------------------------------------------------------------
+
+.. class:: graph::Graph::Edge
+    
+
+    A descriptor of either an edge in a graph, or a null edge.
+
+Synopsis
+^^^^^^^^
+
+.. code-block:: c++
+    
+    class MOD_DECL Graph::Edge {
+        friend class EdgeIterator;
+        friend class IncidentEdgeIterator;
+        Edge(std::shared_ptr<Graph> g, std::size_t vId, std::size_t eId);
+    public:
+        Edge();
+        MOD_DECL friend std::ostream &operator<<(std::ostream &s, const Edge &e);
+        MOD_DECL friend bool operator==(const Edge &e1, const Edge &e2);
+        MOD_DECL friend bool operator!=(const Edge &e1, const Edge &e2);
+        MOD_DECL friend bool operator<(const Edge &e1, const Edge &e2);
+        explicit operator bool() const;
+        bool isNull() const;
+        std::shared_ptr<Graph> getGraph() const;
+        Vertex source() const;
+        Vertex target() const;
+        const std::string &getStringLabel() const;
+        BondType getBondType() const;
+    private:
+        std::shared_ptr<Graph> g;
+        std::size_t vId, eId;
+    };
+
+Details
+^^^^^^^
+
+.. cpp:namespace-push:: graph::Graph::Edge
+
+.. function:: Edge()
+
+    Constructs a null descriptor.
+.. function:: explicit operator bool() const
+
+    :returns: :cpp:expr:`!isNull()`
+.. function:: bool isNull() const
+
+    :returns: whether this is a null descriptor or not.
+.. function:: std::shared_ptr<Graph> getGraph() const
+
+    :returns: the graph the edge belongs to.
+    :throws: :cpp:class:`LogicError` if it is a null descriptor.
+.. function:: Vertex source() const
+
+    :returns: the source vertex of the edge.
+    :throws: :cpp:class:`LogicError` if it is a null descriptor.
+.. function:: Vertex target() const
+
+    :returns: the target vertex of the edge.
+    :throws: :cpp:class:`LogicError` if it is a null descriptor.
+.. function:: const std::string &getStringLabel() const
+
+    :returns: the string label of the edge.
+    :throws: :cpp:class:`LogicError` if it is a null descriptor.
+.. function:: BondType getBondType() const
+
+    :returns: the bond type of the edge.
+    :throws: :cpp:class:`LogicError` if it is a null descriptor.
+
+.. cpp:namespace-pop::
+
+
+Class ``graph::Graph::VertexIterator``
+--------------------------------------------------------------------------------------------------------------------------------
+
+.. class:: graph::Graph::VertexIterator
+    
+
+    An iterator for traversing all vertices in a graph.
+    It models a forward iterator.
+
+Synopsis
+^^^^^^^^
+
+.. code-block:: c++
+    
+    class MOD_DECL Graph::VertexIterator
+            : public boost::iterator_facade<VertexIterator, Vertex, std::forward_iterator_tag, Vertex> {
+        friend class Graph;
+        VertexIterator(std::shared_ptr<Graph> g);
+    public:
+        VertexIterator();
+    private:
+        friend class boost::iterator_core_access;
+        Vertex dereference() const;
+        bool equal(const VertexIterator &iter) const;
+        void increment();
+    private:
+        std::shared_ptr<Graph> g;
+        std::size_t vId;
+    };
+
+Details
+^^^^^^^
+
+.. cpp:namespace-push:: graph::Graph::VertexIterator
+
+.. function:: VertexIterator()
+
+    Construct a past-the-end iterator.
+
+.. cpp:namespace-pop::
+
+
+Class ``graph::Graph::VertexRange``
+--------------------------------------------------------------------------------------------------------------------------------
+
+.. class:: graph::Graph::VertexRange
+    
+
+    A range of all vertices in a graph.
+
+Synopsis
+^^^^^^^^
+
+.. code-block:: c++
+    
+    struct Graph::VertexRange {
+        using iterator = VertexIterator;
+        using const_iterator = iterator;
+    private:
+        friend class Graph;
+        VertexRange(std::shared_ptr<Graph> g);
+    public:
+        VertexIterator begin() const;
+        VertexIterator end() const;
+        Vertex operator[](std::size_t i) const;
+    private:
+        std::shared_ptr<Graph> g;
+    };
+
+Class ``graph::Graph::EdgeIterator``
+--------------------------------------------------------------------------------------------------------------------------------
+
+.. class:: graph::Graph::EdgeIterator
+    
+
+    An iterator for traversing all edges in a graph.
+    It models a forward iterator.
+
+Synopsis
+^^^^^^^^
+
+.. code-block:: c++
+    
+    class MOD_DECL Graph::EdgeIterator
+            : public boost::iterator_facade<EdgeIterator, Edge, std::forward_iterator_tag, Edge> {
+        friend class Graph;
+        EdgeIterator(std::shared_ptr<Graph> g);
+    public:
+        EdgeIterator();
+    private:
+        friend class boost::iterator_core_access;
+        Edge dereference() const;
+        bool equal(const EdgeIterator &iter) const;
+        void increment();
+        void advanceToValid();
+    private:
+        std::shared_ptr<Graph> g;
+        std::size_t vId, eId;
+    };
+
+Details
+^^^^^^^
+
+.. cpp:namespace-push:: graph::Graph::EdgeIterator
+
+.. function:: EdgeIterator()
+
+    Construct a past-the-end iterator.
+
+.. cpp:namespace-pop::
+
+
+Class ``graph::Graph::EdgeRange``
+--------------------------------------------------------------------------------------------------------------------------------
+
+.. class:: graph::Graph::EdgeRange
+    
+
+    A range of all edges in a graph.
+
+Synopsis
+^^^^^^^^
+
+.. code-block:: c++
+    
+    struct Graph::EdgeRange {
+        using iterator = EdgeIterator;
+        using const_iterator = iterator;
+    private:
+        friend class Graph;
+        EdgeRange(std::shared_ptr<Graph> g);
+    public:
+        EdgeIterator begin() const;
+        EdgeIterator end() const;
+    private:
+        std::shared_ptr<Graph> g;
+    };
+
+Class ``graph::Graph::IncidnetEdgeIterator``
+--------------------------------------------------------------------------------------------------------------------------------
+
+.. class:: graph::Graph::IncidnetEdgeIterator
+    
+
+    An iterator for traversing all edges in a graph.
+    It models a forward iterator.
+
+Synopsis
+^^^^^^^^
+
+.. code-block:: c++
+    
+    class MOD_DECL Graph::IncidentEdgeIterator
+            : public boost::iterator_facade<IncidentEdgeIterator, Edge, std::forward_iterator_tag, Edge> {
+        friend class Graph;
+        IncidentEdgeIterator(std::shared_ptr<Graph> g, std::size_t vId);
+    public:
+        IncidentEdgeIterator();
+    private:
+        friend class boost::iterator_core_access;
+        Edge dereference() const;
+        bool equal(const IncidentEdgeIterator &iter) const;
+        void increment();
+    private:
+        std::shared_ptr<Graph> g;
+        std::size_t vId, eId;
+    };
+
+Details
+^^^^^^^
+
+.. cpp:namespace-push:: graph::Graph::IncidnetEdgeIterator
+
+.. function:: IncidentEdgeIterator()
+
+    Construct a past-the-end iterator.
+
+.. cpp:namespace-pop::
+
+
+Class ``graph::Graph::IncidentEdgeRange``
+--------------------------------------------------------------------------------------------------------------------------------
+
+.. class:: graph::Graph::IncidentEdgeRange
+    
+
+    A range of all incident edges to a vertex in a graph.
+
+Synopsis
+^^^^^^^^
+
+.. code-block:: c++
+    
+    struct Graph::IncidentEdgeRange {
+        using iterator = IncidentEdgeIterator;
+        using const_iterator = iterator;
+    private:
+        friend class Vertex;
+        IncidentEdgeRange(std::shared_ptr<Graph> g, std::size_t vId);
+    public:
+        IncidentEdgeIterator begin() const;
+        IncidentEdgeIterator end() const;
+    private:
+        std::shared_ptr<Graph> g;
+        std::size_t vId;
+    };
