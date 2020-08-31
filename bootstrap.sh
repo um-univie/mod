@@ -71,10 +71,9 @@ cat VERSION
 echo "CMakeFiles.txt"
 gen_file_lists > CMakeFiles.txt
 echo "Docs"
-doc/makeDocs.sh .
+doc/makeDocs.sh . || exit 1
 
 echo "Recursing in external/graph_canon"
 echo "---------------------------------"
 cd external/graph_canon
-./bootstrap.sh
-
+./bootstrap.sh || exit 1

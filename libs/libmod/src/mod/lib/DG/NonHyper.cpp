@@ -33,7 +33,7 @@ namespace lib {
 namespace DG {
 namespace {
 std::size_t nextDGNum = 0;
-}// namespace 
+} // namespace
 
 NonHyper::NonHyper(LabelSettings labelSettings,
                    const std::vector<std::shared_ptr<graph::Graph> > &graphDatabase, IsomorphismPolicy graphPolicy)
@@ -42,8 +42,10 @@ NonHyper::NonHyper(LabelSettings labelSettings,
 		  graphDatabase(labelSettings, getConfig().graph.isomorphismAlg.get()) {
 	switch(graphPolicy) {
 	case IsomorphismPolicy::TrustMe:
-		for(const auto gCand : graphDatabase)
+		for(const auto &gCand : graphDatabase) {
+			assert(gCand);
 			this->graphDatabase.trustInsert(gCand);
+		}
 		break;
 	case IsomorphismPolicy::Check: {
 		const auto ls = LabelSettings{this->labelSettings.type, LabelRelation::Isomorphism,
@@ -163,31 +165,16 @@ std::pair<std::shared_ptr<graph::Graph>, bool> NonHyper::checkIfNew(std::unique_
 	return {g, true};
 }
 
-void NonHyper::giveProductStatus(std::shared_ptr<graph::Graph> g) {
-	assert(graphDatabase.contains(g));
-
-	std::string name = "p_{";
-	name += boost::lexical_cast<std::string>(getId());
-	name += ",";
-	name += boost::lexical_cast<std::string>(productNum++);
-	name += "}";
-	g->setName(name);
-
-	if(productNum % getConfig().dg.printGraphProduction.get() == 0) {
-		IO::log() << "DG(" << products.size() << " p)\tnew graph\t";
-		IO::log() << g->getGraph().getName();
-		if(g->getGraph().getMoleculeState().getIsMolecule()) IO::log() << "\t" << g->getGraph().getSmiles();
-		IO::log() << std::endl;
-	}
-
-	assert(std::find(begin(products), end(products), g) == end(products));
-	products.push_back(g);
-}
-
 bool NonHyper::addProduct(std::shared_ptr<graph::Graph> g) {
 	assert(g);
-	bool isNewGraph = trustAddGraph(g);
-	if(isNewGraph) giveProductStatus(g);
+	const bool isNewGraph = trustAddGraph(g);
+	if(isNewGraph) {
+		g->setName("p_{" + boost::lexical_cast<std::string>(getId())
+		           + "," + boost::lexical_cast<std::string>(productNum++)
+		           + "}");
+		assert(std::find(begin(products), end(products), g) == end(products));
+		products.push_back(g);
+	}
 	return isNewGraph;
 }
 

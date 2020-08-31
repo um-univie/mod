@@ -11,23 +11,12 @@
 
 @import url("./basic.css");
 
-{% if theme_bootstrap_version == "3" %}
-  {% set bootstrap_version, bootstrap_additional_css = "3.3.7", "theme" %}
-{% else %}
-  {% set bootstrap_version, bootstrap_additional_css = "2.3.2", "responsive" %}
-{% endif %}
+{% set bootstrap_version = "4.4.1" %}
 
 {% if theme_bootswatch_theme and theme_bootswatch_theme != "\"\"" %}
-  {# BS2 needs "bootstrap-responsive.css". BS3 doesn't. #}
-  {% if theme_bootstrap_version == "3" %}
-    @import url("{{ './bootswatch-' + bootstrap_version + '/' + theme_bootswatch_theme + '/bootstrap.min.css' }}");
-  {% else %}
-    @import url("{{ './bootswatch-' + bootstrap_version + '/' + theme_bootswatch_theme + '/bootstrap.min.css' }}");
-    @import url("{{ './bootstrap-' + bootstrap_version + '/css/bootstrap-' + bootstrap_additional_css + '.min.css' }}");
-  {% endif %}
+	@import url("{{ './bootswatch-' + bootstrap_version + '/' + theme_bootswatch_theme + '/bootstrap.min.css' }}");
 {% else %}
     @import url("{{ './bootstrap-' + bootstrap_version + '/css/bootstrap.min.css' }}");
-    @import url("{{ './bootstrap-' + bootstrap_version + '/css/bootstrap-' + bootstrap_additional_css + '.min.css' }}");
 {% endif %}
 
 /*
@@ -63,41 +52,10 @@
 
 {% if theme_navbar_fixed_top|tobool %}
 
-{% if theme_bootstrap_version == "2" %}
-@media (min-width: 980px) {
-{% endif %}
-
-  body {
-    {% if theme_bootswatch_theme and theme_bootswatch_theme != "\"\"" %}
-      padding-top: 60px;
-    {% else %}
-      padding-top: 40px;
-    {% endif %}
-  }
-  .page-top {
-    {% if theme_bootswatch_theme and theme_bootswatch_theme != "\"\"" %}
-      top: 60px;
-    {% else %}
-      top: 40px;
-    {% endif %}
-  }
-
-{% if theme_bootstrap_version == "2" %}
-}
-{% endif %}
-
 .navbar-inner {
   padding-left:  12px !important;
   padding-right: 12px !important;
 }
-{% else %}
-{% if theme_bootstrap_version == "2" %}
-@media (min-width: 980px) {
-  .navbar .container {
-    width: 940px;
-  }
-}
-{% endif %}
 {% endif %}
 
 table {
@@ -111,10 +69,6 @@ table {
 .highlighttable .linenos pre {
     word-break: normal;
     font-size: 12px;
-}
-
-div.highlight {
-  background: none;
 }
 
 a.headerlink {

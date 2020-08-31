@@ -11,13 +11,13 @@
 
 using namespace mod;
 
-int main() {
+void testBuildRAII() {
 	auto g = graph::Graph::smiles("O");
 	auto d = Derivations{{g},
-								{},
-								{g}};
+	                     {},
+	                     {g}};
 	auto dg = mod::dg::DG::make(LabelSettings{LabelType::String, LabelRelation::Specialisation}, {},
-										 IsomorphismPolicy::Check);
+	                            IsomorphismPolicy::Check);
 	auto b = dg->build();
 	assert(b.isActive());
 	b.addDerivation(d);
@@ -31,4 +31,21 @@ int main() {
 	} catch(const LogicError &e) {
 		assert(e.what() == std::string("The builder is not active."));
 	}
+}
+
+void testExecuteNull() {
+	auto dg = mod::dg::DG::make(LabelSettings{LabelType::String,
+	                                          LabelRelation::Specialisation}, {},
+	                            IsomorphismPolicy::Check);
+	try {
+		dg->build().execute(nullptr);
+		std::exit(1);
+	} catch(const LogicError &e) {
+		assert(e.what() == std::string("The strategy may not be a null pointer."));
+	}
+}
+
+int main() {
+	testBuildRAII();
+	testExecuteNull();
 }

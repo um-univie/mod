@@ -24,7 +24,7 @@ struct FileHandle {
 	friend std::ostream &operator<<(FileHandle &s, T &&t) {
 		return s.stream << std::forward<T>(t);
 	}
-private:
+public:
 	std::ofstream stream;
 	std::string name;
 };

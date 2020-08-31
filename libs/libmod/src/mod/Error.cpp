@@ -66,8 +66,7 @@ void Stacktrace::print(unsigned int frameLimit, std::ostream &s) const {
 }
 
 const char *Exception::what() const noexcept {
-	whatString = text;
-	return whatString.c_str();
+	return text.c_str();
 }
 
 void Exception::printStacktrace(unsigned int frameLimit, std::ostream &s) const {

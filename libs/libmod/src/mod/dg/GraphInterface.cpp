@@ -15,6 +15,7 @@ namespace dg {
 //------------------------------------------------------------------------------
 
 MOD_GRAPHPIMPL_Define_Vertex(DG, dg, g->getHyper().getGraph(), g, DG)
+
 MOD_GRAPHPIMPL_Define_Vertex_Directed(DG, dg, g->getHyper().getGraph(), g)
 
 DG::InEdgeRange DG::Vertex::inEdges() const {
@@ -28,11 +29,9 @@ DG::OutEdgeRange DG::Vertex::outEdges() const {
 }
 
 std::shared_ptr<graph::Graph> DG::Vertex::getGraph() const {
-	using boost::vertices;
-	auto iter = vertices(g->getHyper().getGraph()).first + vId;
-	const auto &dg = g->getHyper().getGraph();
-	assert(dg[*iter].kind == lib::DG::HyperVertexKind::Vertex);
-	return dg[*iter].graph->getAPIReference();
+	const auto &hyper = g->getHyper();
+	const auto v = hyper.getInternalVertex(*this);
+	return hyper.getGraph()[v].graph->getAPIReference();
 }
 
 
@@ -55,7 +54,7 @@ DG::HyperEdge::HyperEdge(std::shared_ptr<DG> g, std::size_t eId) : g(g), eId(eId
 	}
 }
 
-DG::HyperEdge::HyperEdge() : eId(0) { }
+DG::HyperEdge::HyperEdge() : eId(0) {}
 
 std::ostream &operator<<(std::ostream &s, const DG::HyperEdge &e) {
 	s << "HyperEdge(";
@@ -100,7 +99,7 @@ std::size_t DG::HyperEdge::getId() const {
 	if(isNull()) throw LogicError("Can not get id on a null hyperedge.");
 	const auto &dg = g->getHyper().getGraph();
 	using boost::vertices;
-	auto v = *(vertices(dg).first + eId);
+	auto v = *std::next(vertices(dg).first, eId);
 	return get(boost::vertex_index_t(), dg, v);
 }
 
@@ -111,10 +110,9 @@ std::shared_ptr<DG> DG::HyperEdge::getDG() const {
 
 std::size_t DG::HyperEdge::numSources() const {
 	if(isNull()) throw LogicError("Can not get number of sources on a null edge.");
-	const auto &dg = g->getHyper().getGraph();
-	using boost::vertices;
-	auto v = *(vertices(dg).first + eId);
-	return in_degree(v, dg);
+	const auto &dg = g->getHyper();
+	const auto v = dg.getInternalVertex(*this);
+	return in_degree(v, dg.getGraph());
 }
 
 DG::SourceRange DG::HyperEdge::sources() const {
@@ -124,10 +122,9 @@ DG::SourceRange DG::HyperEdge::sources() const {
 
 std::size_t DG::HyperEdge::numTargets() const {
 	if(isNull()) throw LogicError("Can not get number of targets on a null edge.");
-	const auto &dg = g->getHyper().getGraph();
-	using boost::vertices;
-	auto v = *(vertices(dg).first + eId);
-	return out_degree(v, dg);
+	const auto &dg = g->getHyper();
+	const auto v = dg.getInternalVertex(*this);
+	return out_degree(v, dg.getGraph());
 }
 
 DG::TargetRange DG::HyperEdge::targets() const {
@@ -137,45 +134,25 @@ DG::TargetRange DG::HyperEdge::targets() const {
 
 DG::RuleRange DG::HyperEdge::rules() const {
 	if(isNull()) throw LogicError("Can not get rules on a null edge.");
-	return RuleRange(g, eId);
+	return RuleRange(*this);
 }
 
 DG::HyperEdge DG::HyperEdge::getInverse() const {
 	if(isNull()) throw LogicError("Can not get inverse of null edge.");
 	if(!getDG()->isLocked()) throw LogicError("Can not get inverse edge before the DG is locked.");
-	const auto &dgHyper = g->getHyper();
-	const auto &dg = dgHyper.getGraph();
-	using boost::vertices;
-	const auto v = *(vertices(dg).first + eId);
-	assert(dg[v].kind == lib::DG::HyperVertexKind::Edge);
-	return dgHyper.getInterfaceEdge(dgHyper.getReverseEdge(v));
+	const auto &dg = g->getHyper();
+	const auto v = dg.getInternalVertex(*this);
+	return dg.getInterfaceEdge(dg.getReverseEdge(v));
 }
 
 std::vector<std::pair<std::string, std::string> >
-DG::HyperEdge::print(const graph::Printer &printer, const std::string &nomatchColour, const std::string &matchColour) const {
+DG::HyperEdge::print(const graph::Printer &printer, const std::string &nomatchColour,
+                     const std::string &matchColour) const {
 	if(isNull()) throw LogicError("Can not print null edge.");
-	const auto &dgHyper = g->getHyper();
-	const auto &dg = dgHyper.getGraph();
-	using boost::vertices;
-	auto v = *(vertices(dg).first + eId);
-	assert(dg[v].kind == lib::DG::HyperVertexKind::Edge);
+	if(rules().size() == 0) throw LogicError("The edge has no rules.");
+	const auto &dg = g->getHyper();
+	const auto v = dg.getInternalVertex(*this);
 	return lib::IO::Derivation::Write::summary(g->getNonHyper(), v, printer.getOptions(), nomatchColour, matchColour);
-}
-
-void DG::HyperEdge::printTransitionState() const {
-	graph::Printer printer;
-	printTransitionState(printer);
-}
-
-void DG::HyperEdge::printTransitionState(const graph::Printer &printer) const {
-	if(isNull()) throw LogicError("Can not print null edge.");
-	const auto &dgHyper = g->getHyper();
-	const auto &dg = dgHyper.getGraph();
-	using boost::vertices;
-	auto v = *(vertices(dg).first + eId);
-	assert(dg[v].kind == lib::DG::HyperVertexKind::Edge);
-	assert(dgHyper.getRulesFromEdge(v).size() == 1);
-	lib::IO::Derivation::Write::summaryTransitionState(g->getNonHyper(), v, printer.getOptions());
 }
 
 //------------------------------------------------------------------------------
@@ -196,7 +173,7 @@ DG::VertexIterator::VertexIterator(std::shared_ptr<DG> g) : g(g), vId(0) {
 	vId = 0;
 }
 
-DG::VertexIterator::VertexIterator() : vId(0) { }
+DG::VertexIterator::VertexIterator() : vId(0) {}
 
 DG::Vertex DG::VertexIterator::dereference() const {
 	using boost::vertices;
@@ -245,7 +222,7 @@ DG::EdgeIterator::EdgeIterator(std::shared_ptr<DG> g) : g(g), eId(0) {
 	eId = 0;
 }
 
-DG::EdgeIterator::EdgeIterator() : eId(0) { }
+DG::EdgeIterator::EdgeIterator() : eId(0) {}
 
 DG::HyperEdge DG::EdgeIterator::dereference() const {
 	using boost::vertices;
@@ -288,7 +265,7 @@ DG::InEdgeIterator::InEdgeIterator(std::shared_ptr<DG> g, std::size_t vId) : g(g
 	}
 }
 
-DG::InEdgeIterator::InEdgeIterator() : vId(0), eId(0) { }
+DG::InEdgeIterator::InEdgeIterator() : vId(0), eId(0) {}
 
 DG::HyperEdge DG::InEdgeIterator::dereference() const {
 	const auto &dg = g->getHyper();
@@ -328,7 +305,7 @@ DG::OutEdgeIterator::OutEdgeIterator(std::shared_ptr<DG> g, std::size_t vId) : g
 	}
 }
 
-DG::OutEdgeIterator::OutEdgeIterator() : vId(0), eId(0) { }
+DG::OutEdgeIterator::OutEdgeIterator() : vId(0), eId(0) {}
 
 DG::HyperEdge DG::OutEdgeIterator::dereference() const {
 	const auto &dg = g->getHyper();
@@ -358,9 +335,9 @@ void DG::OutEdgeIterator::increment() {
 // SourceIterator
 //------------------------------------------------------------------------------
 
-DG::SourceIterator::SourceIterator(std::shared_ptr<DG> g, std::size_t eId) : g(g), eId(eId), vId(0) { }
+DG::SourceIterator::SourceIterator(std::shared_ptr<DG> g, std::size_t eId) : g(g), eId(eId), vId(0) {}
 
-DG::SourceIterator::SourceIterator() : eId(0), vId(0) { }
+DG::SourceIterator::SourceIterator() : eId(0), vId(0) {}
 
 DG::Vertex DG::SourceIterator::dereference() const {
 	using boost::vertices;
@@ -390,9 +367,9 @@ void DG::SourceIterator::increment() {
 // TargetIterator
 //------------------------------------------------------------------------------
 
-DG::TargetIterator::TargetIterator(std::shared_ptr<DG> g, std::size_t eId) : g(g), eId(eId), vId(0) { }
+DG::TargetIterator::TargetIterator(std::shared_ptr<DG> g, std::size_t eId) : g(g), eId(eId), vId(0) {}
 
-DG::TargetIterator::TargetIterator() : eId(0), vId(0) { }
+DG::TargetIterator::TargetIterator() : eId(0), vId(0) {}
 
 DG::Vertex DG::TargetIterator::dereference() const {
 	using boost::vertices;
@@ -422,60 +399,42 @@ void DG::TargetIterator::increment() {
 // RuleIterator
 //------------------------------------------------------------------------------
 
-DG::RuleIterator::RuleIterator(std::shared_ptr<DG> g, std::size_t eId) : g(g), eId(eId), i(0) {
-	const auto &dgHyper = g->getHyper();
-	const auto &dg = dgHyper.getGraph();
-	using boost::vertices;
-	assert(g);
-	assert(num_vertices(g->getHyper().getGraph()) > 0);
-	assert(g->getHyper().getGraph()[*(vertices(g->getHyper().getGraph()).first + eId)].kind == lib::DG::HyperVertexKind::Edge);
-	auto e = vertices(dg).first[eId];
-	const auto &rs = dgHyper.getRulesFromEdge(e);
-	if(rs.empty()) {
-		this->eId = 0;
-		this->g = nullptr;
-	}
+DG::RuleIterator::RuleIterator(HyperEdge e) : e(e), i(0) {
+	const auto &dg = e.getDG()->getHyper();
+	const auto v = dg.getInternalVertex(e);
+	const auto &rs = dg.getRulesFromEdge(v);
+	if(rs.empty()) this->e = HyperEdge();
 }
 
-DG::RuleIterator::RuleIterator() : eId(0), i(0) { }
+DG::RuleIterator::RuleIterator() : i(0) {}
 
 std::shared_ptr<rule::Rule> DG::RuleIterator::dereference() const {
-	const auto &dgHyper = g->getHyper();
-	const auto &dg = dgHyper.getGraph();
-	using boost::vertices;
-	assert(g);
-	assert(num_vertices(g->getHyper().getGraph()) > 0);
-	assert(g->getHyper().getGraph()[*(vertices(g->getHyper().getGraph()).first + eId)].kind == lib::DG::HyperVertexKind::Edge);
-	const auto e = vertices(dg).first[eId];
-	const auto &rs = dgHyper.getRulesFromEdge(e);
+	const auto &dg = e.getDG()->getHyper();
+	const auto v = dg.getInternalVertex(e);
+	const auto &rs = dg.getRulesFromEdge(v);
 	assert(i < rs.size());
 	return rs[i]->getAPIReference();
 }
 
 bool DG::RuleIterator::equal(const RuleIterator &iter) const {
-	return g == iter.g && eId == iter.eId && i == iter.i;
+	return e == iter.e && i == iter.i;
 }
 
 void DG::RuleIterator::increment() {
 	++i;
-	const auto &dgHyper = g->getHyper();
-	const auto &dg = dgHyper.getGraph();
-	using boost::vertices;
-	const auto e = vertices(dg).first[eId];
-	const auto &rs = dgHyper.getRulesFromEdge(e);
+	const auto &dg = e.getDG()->getHyper();
+	const auto v = dg.getInternalVertex(e);
+	const auto &rs = dg.getRulesFromEdge(v);
 	if(i >= rs.size()) {
-		g = nullptr;
-		eId = 0;
+		e = HyperEdge();
 		i = 0;
 	}
 }
 
 std::size_t DG::RuleRange::size() const {
-	const auto &dgHyper = g->getHyper();
-	const auto &dg = dgHyper.getGraph();
-	using boost::vertices;
-	const auto e = vertices(dg).first[eId];
-	const auto &rs = dgHyper.getRulesFromEdge(e);
+	const auto &dg = e.getDG()->getHyper();
+	const auto v = dg.getInternalVertex(e);
+	const auto &rs = dg.getRulesFromEdge(v);
 	return rs.size();
 }
 

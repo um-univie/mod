@@ -33,6 +33,7 @@ public:
 	using Vertex = NonHyperVertex;
 	using Edge = NonHyperEdge;
 protected:
+	// pre: no nullptrs in graphDatabase
 	NonHyper(LabelSettings labelSettings,
 	         const std::vector<std::shared_ptr<graph::Graph> > &graphDatabase, IsomorphismPolicy graphPolicy);
 public: // general
@@ -73,10 +74,7 @@ protected: // calculation
 	// If not found, returns the given wrapped given graph and true.
 	// Does NOT change the graphDatabse.
 	std::pair<std::shared_ptr<graph::Graph>, bool> checkIfNew(std::unique_ptr<lib::Graph::Single> g) const;
-	// Gives a graph product status, i.e., rename it,
-	// put it in the product list and maybe print a status message.
-	void giveProductStatus(std::shared_ptr<graph::Graph> g);
-	// trustAddGraph and then giveProductStatus if it was a new graph.
+	// trustAddGraph and then rename if it was a new graph.
 	// Returns the value from trustAddGraph.
 	bool addProduct(std::shared_ptr<graph::Graph> g);
 	// checks if this derivation already exists

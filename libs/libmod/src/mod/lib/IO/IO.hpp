@@ -1,5 +1,5 @@
 #ifndef MOD_LIB_IO_IO_H
-#define   MOD_LIB_IO_IO_H
+#define MOD_LIB_IO_IO_H
 
 #include <iosfwd>
 #include <string>

@@ -23,7 +23,6 @@ namespace rule {
 // rst:		graph interface for this class.
 // rst:
 // rst-class-start:
-
 struct MOD_DECL Rule {
 	class Vertex;
 	class Edge;

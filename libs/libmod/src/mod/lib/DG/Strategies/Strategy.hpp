@@ -16,7 +16,6 @@ class GraphState;
 
 struct ExecutionEnv {
 	ExecutionEnv(LabelSettings labelSettings) : labelSettings(labelSettings) {}
-
 	virtual ~ExecutionEnv() {};
 	// May throw LogicError if exists.
 	virtual void tryAddGraph(std::shared_ptr<graph::Graph> g) = 0;
@@ -28,7 +27,6 @@ struct ExecutionEnv {
 	// but here everything is defined
 	virtual bool checkRightPredicate(const mod::Derivation &d) const = 0;
 	virtual std::shared_ptr<graph::Graph> checkIfNew(std::unique_ptr<lib::Graph::Single> g) const = 0;
-	virtual void giveProductStatus(std::shared_ptr<graph::Graph> g) = 0;
 	virtual bool addProduct(std::shared_ptr<graph::Graph> g) = 0;
 	virtual bool
 	isDerivation(const GraphMultiset &gmsSrc, const GraphMultiset &gmsTar, const lib::Rules::Real *r) const = 0;
@@ -44,11 +42,8 @@ public:
 
 struct PrintSettings : IO::Logger {
 	explicit PrintSettings(std::ostream &s, bool withUniverse) : IO::Logger(s), withUniverse(withUniverse) {}
-
 	explicit PrintSettings(std::ostream &s, bool withUniverse, int verbosity)
-			: IO::Logger(s), withUniverse(withUniverse),
-			  verbosity(verbosity) {}
-
+			: IO::Logger(s), withUniverse(withUniverse), verbosity(verbosity) {}
 public:
 	bool withUniverse; // mostly used for printInfo
 	int verbosity = 2; // mostly used for execute

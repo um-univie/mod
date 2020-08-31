@@ -3,8 +3,8 @@ include("xx0_helpers.py")
 lsString = LabelSettings(LabelType.String, LabelRelation.Specialisation)
 lsTerm = LabelSettings(LabelType.Term, LabelRelation.Specialisation)
 
-def exeStrat(strat, subset=None, universe=None, ls=lsString, **kwargs):
-	dg = DG(labelSettings=ls)
+def exeStrat(strat, subset=None, universe=None, ls=lsString, graphDatabase=[], **kwargs):
+	dg = DG(labelSettings=ls, graphDatabase=graphDatabase)
 	b = dg.build()
 	res = b.execute(strat, **kwargs)
 	res.list(withUniverse=True)

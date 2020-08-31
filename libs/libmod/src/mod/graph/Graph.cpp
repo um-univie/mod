@@ -280,8 +280,12 @@ std::shared_ptr<Graph> Graph::graphDFS(const std::string &graphDFS) {
 }
 
 std::shared_ptr<Graph> Graph::smiles(const std::string &smiles) {
+	return Graph::smiles(smiles, false, SmilesClassPolicy::NoneOnDuplicate);
+}
+
+std::shared_ptr<Graph> Graph::smiles(const std::string &smiles, const bool allowAbstract, SmilesClassPolicy classPolicy) {
 	std::ostringstream err;
-	auto gData = lib::IO::Graph::Read::smiles(smiles, err);
+	auto gData = lib::IO::Graph::Read::smiles(smiles, err, allowAbstract, classPolicy);
 	return handleLoadedGraph(std::move(gData), "smiles string, '" + smiles + "'", err);
 }
 

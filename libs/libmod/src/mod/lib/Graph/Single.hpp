@@ -82,9 +82,7 @@ public:
 	static bool nameLess(const Single *g1, const Single *g2);
 	static bool canonicalCompare(const Single &g1, const Single &g2, LabelType labelType, bool withStereo);
 public:
-
 	struct IdLess {
-
 		bool operator()(const Single *g1, const Single *g2) const {
 			return g1->getId() < g2->getId();
 		}
@@ -96,7 +94,6 @@ Single makePermutation(const Single &g);
 namespace detail {
 
 struct IsomorphismPredicate {
-
 	IsomorphismPredicate(LabelType labelType, bool withStereo)
 	: settings(labelType, LabelRelation::Isomorphism, withStereo, LabelRelation::Isomorphism) { }
 

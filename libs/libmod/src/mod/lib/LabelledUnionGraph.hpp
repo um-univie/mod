@@ -17,32 +17,31 @@ public:
 	using Vertex = typename boost::graph_traits<GraphType>::vertex_descriptor;
 	using Edge = typename boost::graph_traits<GraphType>::edge_descriptor;
 public:
-
-	UnionPropBase(const std::vector<const LGraph*> &lgs) : lgs(lgs) { }
+	UnionPropBase(const std::vector<const LGraph *> &lgs) : lgs(lgs) {}
 protected:
-	const std::vector<const LGraph*> &lgs;
+	const std::vector<const LGraph *> &lgs;
 };
 
 #define MOD_MAKE_UNION_PROP(Name, Func)                                         \
-	template<typename LGraph>                                                     \
-	struct UnionProp ## Name : UnionPropBase<LGraph> {                            \
-		using Base = UnionPropBase<LGraph>;                                         \
-	public:                                                                       \
-		using Base::Base;                                                           \
-		                                                                            \
-		decltype(auto) operator[](const typename Base::Vertex v) const {            \
-			return get_ ## Func(*this->lgs[v.gIdx])[v.v];                             \
-		}                                                                           \
+   template<typename LGraph>                                                    \
+   struct UnionProp ## Name : UnionPropBase<LGraph> {                           \
+      using Base = UnionPropBase<LGraph>;                                       \
+   public:                                                                      \
+      using Base::Base;                                                         \
                                                                                 \
-		decltype(auto) operator[](const typename  Base::Edge e) const {             \
-			return get_ ## Func(*this->lgs[e.gIdx])[e.e];                             \
-		}                                                                           \
+      decltype(auto) operator[](const typename Base::Vertex v) const {          \
+         return get_ ## Func(*this->lgs[v.gIdx])[v.v];                          \
+      }                                                                         \
                                                                                 \
-		template<typename K>                                                        \
-		friend decltype(auto) get(const UnionProp ## Name &up, const K &k) {        \
-			return up[k];                                                             \
-		}                                                                           \
-	};
+      decltype(auto) operator[](const typename  Base::Edge e) const {           \
+         return get_ ## Func(*this->lgs[e.gIdx])[e.e];                          \
+      }                                                                         \
+                                                                                \
+      template<typename K>                                                      \
+      friend decltype(auto) get(const UnionProp ## Name &up, const K &k) {      \
+         return up[k];                                                          \
+      }                                                                         \
+   };
 MOD_MAKE_UNION_PROP(String, string);
 MOD_MAKE_UNION_PROP(Term, term);
 MOD_MAKE_UNION_PROP(Stereo, stereo);
@@ -61,13 +60,11 @@ public:
 	using PropStereo = detail::UnionPropStereo<LGraph>;
 	using PropMolecule = detail::UnionPropMolecule<LGraph>;
 public:
-
 	void push_back(const LGraph *lg) {
 		lgs.push_back(lg);
 		ug.push_back(&get_graph(*lg));
 	}
 public:
-
 	friend const GraphType &get_graph(const LabelledUnionGraph &lug) {
 		return lug.ug;
 	}
@@ -85,7 +82,7 @@ public:
 	}
 
 	friend bool has_stereo(const LabelledUnionGraph &lug) {
-		return std::any_of(lug.lgs.begin(), lug.lgs.end(), [](const LGraph * lg) {
+		return std::any_of(lug.lgs.begin(), lug.lgs.end(), [](const LGraph *lg) {
 			return has_stereo(*lg);
 		});
 	}
@@ -94,7 +91,7 @@ public:
 		return PropMolecule(lug.lgs);
 	}
 private:
-	std::vector<const LGraph*> lgs;
+	std::vector<const LGraph *> lgs;
 	GraphType ug;
 };
 

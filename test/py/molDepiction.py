@@ -53,12 +53,3 @@ graphDFS("[Q]C[Hest]C[Q+]")
 smiles("O[C-]C(=O)COP([O-])([O-])=O")
 smiles("O[CH-]C(=O)COP([O-])([O-])=O")
 for a in inputGraphs: a.print()
-inputGraphs[:] = []
-
-
-postSection("Formose")
-include("formoseCommon/grammar.py")
-dg = dgRuleComp(inputGraphs, addSubset(inputGraphs) >> inputRules[0] >> inputRules[2])
-dg.calc()
-for v in dg.vertices: v.graph.print()
-inputGraphs[:] = []

@@ -16,7 +16,6 @@ namespace mod {
 // rst:
 // rst:		Representation of the chemical element of an atom.
 // rst-class-start:
-
 struct MOD_DECL AtomId {
 	// rst: .. function:: constexpr AtomId()
 	// rst:
@@ -49,7 +48,6 @@ private:
 // rst:		Representation of the isotope of an atom.
 // rst:
 // rst-class-start:
-
 struct MOD_DECL Isotope {
 	// rst: .. function:: constexpr Isotope()
 	// rst:
@@ -79,7 +77,6 @@ private:
 // rst:
 // rst:		Representation of the charge of an atom.
 // rst-class-start:
-
 struct MOD_DECL Charge {
 	// rst: .. function:: constexpr Charge()
 	// rst:
@@ -106,7 +103,6 @@ private:
 // rst:
 // rst:		Representation of basic data of an atom.
 // rst-class-start:
-
 struct MOD_DECL AtomData {
 	// rst: .. function:: constexpr AtomData()
 	// rst:
@@ -167,14 +163,13 @@ private:
 // rst:
 // rst:		Representation of a bond type (see :ref:`mol-enc`).
 // rst:
-
 enum class BondType {
 	// rst:		.. enumerator:: Invalid
 	// rst:		.. enumerator:: Single
 	// rst:		.. enumerator:: Aromatic
 	// rst:		.. enumerator:: Double
 	// rst:		.. enumerator:: Triple
-			Invalid, Single, Aromatic, Double, Triple
+	Invalid, Single, Aromatic, Double, Triple
 };
 // rst:	.. function:: std::ostream &operator<<(std::ostream &s, BondType bt)
 // rst:
@@ -408,9 +403,9 @@ inline constexpr bool AtomData::getRadical() const {
 
 inline constexpr bool operator==(const AtomData &a1, const AtomData &a2) {
 	return a1.getAtomId() == a2.getAtomId()
-			 && a1.getIsotope() == a2.getIsotope()
-			 && a1.getCharge() == a2.getCharge()
-			 && a1.getRadical() == a2.getRadical();
+	       && a1.getIsotope() == a2.getIsotope()
+	       && a1.getCharge() == a2.getCharge()
+	       && a1.getRadical() == a2.getRadical();
 }
 
 } // namespace mod

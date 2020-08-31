@@ -2,13 +2,8 @@
 
 #include <mod/Config.hpp>
 #include <mod/Misc.hpp>
-#include <mod/dg/GraphInterface.hpp>
-#include <mod/lib/Graph/Single.hpp>
 
 #include <mod/py/Function.hpp>
-
-#include <boost/core/noncopyable.hpp>
-#include <boost/python/suite/indexing/vector_indexing_suite.hpp>
 
 namespace mod {
 namespace Py {
@@ -67,13 +62,13 @@ std::uintptr_t magicLibraryValue() {
 	return reinterpret_cast<std::uintptr_t> (&mod::getConfig());
 }
 
-} // namespace 
+} // namespace
 
 void Misc_doExport() {
 	// rst: .. function:: magicLibraryValue()
 	// rst:
-	// rst:		:returns: a number unique for each instantiation of libMØD. This can be used to check for the diamond problem for shared libraries.
-	// rst:
+	// rst:		:returns: a number unique for each instantiation of libMØD.
+	// rst:			This can be used to check for the diamond problem for shared libraries.
 	// rst:		:rtype: int
 	py::def("magicLibraryValue", &magicLibraryValue);
 
@@ -87,11 +82,23 @@ void Misc_doExport() {
 	// rst:
 	// rst: 		Reseed the random bit generator used in the library.
 	py::def("rngReseed", &mod::rngReseed);
+	// rst: .. function:: rngUniformReal()
+	// rst:
+	// rst: 		:returns: a uniformly random real number between 0 and 1.
+	// rst: 	 	:rtype: float
+	py::def("rngUniformReal", &mod::rngUniformReal);
 
 	py::def("post", &mod::post);
 	py::def("postChapter", &mod::postChapter);
 	py::def("postSection", &mod::postSection);
 
+	// rst: .. function:: makeUniqueFilePrefix()
+	// rst:
+	// rst:		:returns: a unique file prefix from the ``out/`` folder.
+	// rst:		:rtype: str
+	py::def("makeUniqueFilePrefix", &mod::makeUniqueFilePrefix);
+
+	py::def("showDump", &mod::showDump);
 	
 	py::def("printGeometryGraph", &mod::printGeometryGraph);
 }

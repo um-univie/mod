@@ -12,6 +12,7 @@ exacts = {
 		"rule", "rule::RCExp", "RCExp",
 		"dg",
 		"lib", "boost",
+		"causality",
 	],
 	'py': [
 		"Callable",

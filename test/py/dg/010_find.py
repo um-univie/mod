@@ -17,6 +17,12 @@ def active():
 	fail(lambda: dg.findEdge([g], []), "Source vertex descriptor is null.")
 	fail(lambda: dg.findEdge([], [g]), "Target vertex descriptor is null.")
 
+	fail(lambda: dg.findVertex(None), "The graph is a nullptr.")
+	fail(lambda: dg.findEdge([None], [g]), "Incompatible Data Type", err=TypeError)
+	fail(lambda: dg.findEdge([g], [None]), "Incompatible Data Type", err=TypeError)
+	fail(lambda: dg.findEdge([g, None], [g]), "The graph is a nullptr.")
+	fail(lambda: dg.findEdge([g], [g, None]), "The graph is a nullptr.")
+
 b = dg.build()
 # Active builder, not locked
 active()

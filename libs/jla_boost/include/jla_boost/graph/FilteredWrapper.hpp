@@ -280,7 +280,7 @@ vertex(typename boost::graph_traits<jla_boost::FilteredWrapper<Graph> >::vertice
 	for(typename boost::graph_traits<jla_boost::FilteredWrapper<Graph> >::vertex_descriptor v : asRange(vertices(g))) {
 		if(get(boost::vertex_index_t(), g, v) == n) return v;
 	}
-	assert(false);
+	MOD_ABORT;
 }
 
 template<typename Graph>

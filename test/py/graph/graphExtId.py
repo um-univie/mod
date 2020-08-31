@@ -31,5 +31,17 @@ check(a)
 a = smiles("[C:42][O:1337][U:0]")
 check(a)
 a = smiles("[C:0][C:0][C:1]")
-v = a.getVertexFromExternalId(1)
-assert v.isNull()
+assert not a.getVertexFromExternalId(0)
+assert not a.getVertexFromExternalId(1)
+a = smiles("[C:0][C:0][C:1]", classPolicy=SmilesClassPolicy.NoneOnDuplicate)
+assert not a.getVertexFromExternalId(0)
+assert not a.getVertexFromExternalId(1)
+try:
+	smiles("[C:0][C:0][C:1]", classPolicy=SmilesClassPolicy.ThrowOnDuplicate)
+	assert False
+except InputError as e:
+	msg = "Error in SMILES conversion: class label 0 is used more than once (2), and the class label policy is throwOnDuplicate."
+	assert str(e).endswith(msg)
+a = smiles("[C:0][C:0][C:1]", classPolicy=SmilesClassPolicy.MapUnique)
+assert not a.getVertexFromExternalId(0)
+assert a.getVertexFromExternalId(1)

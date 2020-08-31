@@ -1,10 +1,11 @@
-<li class="dropdown">
-  <a role="button"
-     id="dLabelLocalToc"
-     data-toggle="dropdown"
-     data-target="#"
-     href="#">{{ _(theme_navbar_pagenav_name) }} <b class="caret"></b></a>
-  <ul class="dropdown-menu localtoc"
-      role="menu"
-      aria-labelledby="dLabelLocalToc">{{ toc }}</ul>
+<li class="nav-item dropdown localtoc-container">
+	<a class="nav-link dropdown-toggle"
+			href="{{ pathto(master_doc) }}"
+			id="dLabelLocalToc"
+			role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+		{{ _(theme_navbar_pagenav_name) }}
+	</a>
+	<ul class="localtoc" aria-labelledby="dLabelLocalToc">
+		{{ toc }}
+	</ul>
 </li>

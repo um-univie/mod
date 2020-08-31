@@ -7,6 +7,7 @@
 
 #include <boost/type_traits/function_traits.hpp>
 
+#include <cassert>
 #include <functional>
 #include <iosfwd>
 #include <memory>
@@ -55,8 +56,11 @@ struct StdFunctionWrapper {
 
 template<typename R, typename ...Args>
 struct StdFunctionWrapper<R(Args...)> : public Function<R(Args...)> {
-	StdFunctionWrapper(std::string name, std::function<R(Args...)> f) : name(name), f(f) {}
-	StdFunctionWrapper(std::function<R(Args...)> f) : name("<C++ lambda>"), f(f) {}
+	StdFunctionWrapper(std::string name, std::function<R(Args...)> f) : name(name), f(f) {
+		assert(f);
+	}
+
+	StdFunctionWrapper(std::function<R(Args...)> f) : StdFunctionWrapper("<C++ lambda>", f) {}
 
 	std::shared_ptr<Function<R(Args...)> > clone() const {
 		return std::unique_ptr<Function<R(Args...)> >(new StdFunctionWrapper(*this));
@@ -81,6 +85,7 @@ struct ToStdFunctionHelper {
 template<typename R, typename ...Args>
 struct ToStdFunctionHelper<R(Args...)> {
 	static std::function<R(Args...)> get(std::shared_ptr<Function<R(Args...)> > fMod) {
+		assert(fMod);
 		return [fMod](Args ...args) -> R {
 			return (*fMod)(args...);
 		};
@@ -90,17 +95,20 @@ struct ToStdFunctionHelper<R(Args...)> {
 } // namespace detail
 
 template<typename Sig>
-std::unique_ptr<Function<Sig> > fromStdFunction(std::function<Sig> f) {
+std::unique_ptr<Function<Sig>> fromStdFunction(std::function<Sig> f) {
+	if(!f) return nullptr;
 	return std::unique_ptr<Function<Sig> >(new detail::StdFunctionWrapper<Sig>(f));
 }
 
 template<typename Sig>
-std::unique_ptr<Function<Sig> > fromStdFunction(std::string name, std::function<Sig> f) {
+std::unique_ptr<Function<Sig>> fromStdFunction(std::string name, std::function<Sig> f) {
+	if(!f) return nullptr;
 	return std::unique_ptr<Function<Sig> >(new detail::StdFunctionWrapper<Sig>(name, f));
 }
 
 template<typename Sig>
-std::function<Sig> toStdFunction(std::shared_ptr<Function<Sig> > fMod) {
+std::function<Sig> toStdFunction(std::shared_ptr<Function<Sig>> fMod) {
+	if(!fMod) return {};
 	return detail::ToStdFunctionHelper<Sig>::get(fMod);
 }
 

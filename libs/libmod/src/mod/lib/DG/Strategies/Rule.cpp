@@ -82,7 +82,7 @@ void handleBoundRulePair(PrintSettings settings, Context context, const BoundRul
 	}
 	if(settings.verbosity >= PrintSettings::V_RuleApplication)
 		settings.indent() << "Splitting " << r.getName() << " into "
-								<< rDPO.numRightComponents << " graphs:" << std::endl;
+		                  << rDPO.numRightComponents << " graphs:" << std::endl;
 	const std::vector<const lib::Graph::Single *> &educts = brp.boundGraphs;
 	d.right = splitRule(
 			rDPO, context.executionEnv.labelSettings.type, context.executionEnv.labelSettings.withStereo,
@@ -92,8 +92,8 @@ void handleBoundRulePair(PrintSettings settings, Context context, const BoundRul
 			[&settings](std::shared_ptr<graph::Graph> gWrapped, std::shared_ptr<graph::Graph> gPrev) {
 				if(settings.verbosity >= PrintSettings::V_RuleApplication)
 					settings.indent() << "Discarding product " << gWrapped->getName()
-											<< ", isomorphic to other product " << gPrev->getName()
-											<< "." << std::endl;
+					                  << ", isomorphic to other product " << gPrev->getName()
+					                  << "." << std::endl;
 			}
 	);
 
@@ -101,8 +101,8 @@ void handleBoundRulePair(PrintSettings settings, Context context, const BoundRul
 		for(std::shared_ptr<graph::Graph> g : d.right) {
 			if(!g->getIsMolecule()) {
 				IO::log() << "Error: non-molecule produced; '" << g->getName() << "'" << std::endl
-							 << "Derivation is:" << std::endl
-							 << "\tEducts:" << std::endl;
+				          << "Derivation is:" << std::endl
+				          << "\tEducts:" << std::endl;
 				for(const lib::Graph::Single *g : educts)
 					IO::log() << "\t\t'" << g->getName() << "'\t" << g->getGraphDFS().first << std::endl;
 				IO::log() << "\tProducts:" << std::endl;
@@ -123,18 +123,15 @@ void handleBoundRulePair(PrintSettings settings, Context context, const BoundRul
 	}
 	{ // now the derivation is good, so add the products to output
 		if(getConfig().dg.putAllProductsInSubset.get()) {
-			for(std::shared_ptr<graph::Graph> g : d.right)
+			for(const auto &g : d.right)
 				context.output->addToSubset(0, &g->getGraph());
 		} else {
-			for(std::shared_ptr<graph::Graph> g : d.right) {
+			for(const auto &g : d.right)
 				if(!context.output->isInUniverse(&g->getGraph()))
 					context.output->addToSubset(0, &g->getGraph());
-			}
 		}
-		for(unsigned int i = 0; i < d.right.size(); i++) {
-			auto g = d.right[i];
+		for(const auto &g : d.right)
 			context.executionEnv.addProduct(g);
-		}
 	}
 	std::vector<const lib::Graph::Single *> rightGraphs;
 	rightGraphs.reserve(d.right.size());
@@ -150,9 +147,9 @@ void handleBoundRulePair(PrintSettings settings, Context context, const BoundRul
 
 template<typename GraphRange>
 unsigned int bindGraphs(PrintSettings settings, Context context,
-								const GraphRange &graphRange,
-								const std::vector<BoundRule> &rules,
-								std::vector<BoundRule> &outputRules) {
+                        const GraphRange &graphRange,
+                        const std::vector<BoundRule> &rules,
+                        std::vector<BoundRule> &outputRules) {
 	unsigned int processedRules = 0;
 
 	for(const lib::Graph::Single *g : graphRange) {
@@ -165,9 +162,9 @@ unsigned int bindGraphs(PrintSettings settings, Context context,
 			}
 			std::vector<BoundRule> resultRules;
 			BoundRuleStorage ruleStore(settings.verbosity >= PrintSettings::V_RuleApplication,
-												settings,
-												context.executionEnv.labelSettings.type,
-												context.executionEnv.labelSettings.withStereo, resultRules, p, g);
+			                           settings,
+			                           context.executionEnv.labelSettings.type,
+			                           context.executionEnv.labelSettings.withStereo, resultRules, p, g);
 			auto reporter = [&ruleStore](std::unique_ptr<lib::Rules::Real> r) {
 				ruleStore.add(r.release());
 				return true;
@@ -239,17 +236,18 @@ void Rule::executeImpl(PrintSettings settings, const GraphState &input) {
 	const auto &universe = input.getUniverse();
 	for(unsigned int i = 1; i <= rRaw->getDPORule().numLeftComponents; i++) {
 		if(settings.verbosity >= PrintSettings::V_RuleBinding) {
-			settings.indent() << "Binding component " << i << " with ";
+			settings.indent() << "Component bind round " << i << " with ";
 			++settings.indentLevel;
 			if(i == 1) {
 				if(!getConfig().dg.ignoreSubset.get()) {
-					IO::log() << subset.size() << " input graphs" << std::endl;
+					IO::log() << subset.size() << " graphs";
 				} else {
-					IO::log() << universe.size() << " input graphs" << std::endl;
+					IO::log() << universe.size() << " graphs";
 				}
 			} else {
-				IO::log() << intermediaryRules[i - 1].size() << " intermediaries" << std::endl;
+				IO::log() << universe.size() << " graphs and " << intermediaryRules[i - 1].size() << " intermediaries";
 			}
+			IO::log() << std::endl;
 		}
 
 		std::size_t processedRules = 0;

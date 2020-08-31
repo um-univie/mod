@@ -64,3 +64,32 @@ d = Derivations()
 d.left = [gb]
 d.right = [ga1, ga2]
 fail(lambda: DG().build().addDerivation(d), "Isomorphic graphs. Candidate graph 'ga2' is isomorphic to 'ga1' in the graph database.")
+
+d = Derivations()
+d.left = [None]
+d.right = [smiles("O")]
+fail(lambda: DG().build().addDerivation(d), "Derivation has a nullptr in the left side: " + str(d))
+d.left = [smiles("O")]
+d.right = [None]
+fail(lambda: DG().build().addDerivation(d), "Derivation has a nullptr in the right side: " + str(d))
+d.left = [smiles("O")]
+d.right = [smiles("O")]
+d.rules = [None]
+fail(lambda: DG().build().addDerivation(d), "Derivation has a nullptr in the rule list: " + str(d))
+
+
+g = smiles("O")
+d = Derivation()
+d.left = [g]
+d.right = [g]
+d.rule = ruleGMLString("""rule [
+	context [ node [ id 0 label "O" ] ]
+]""", add=False)
+dg = DG()
+dg.build().addDerivation(d)
+del d
+assert dg.numEdges == 1
+e = next(iter(dg.edges))
+assert len(e.rules) == 1
+r = next(iter(e.rules))
+print(r.name)

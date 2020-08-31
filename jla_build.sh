@@ -36,6 +36,8 @@ args="-DCMAKE_BUILD_TYPE=$type"
 args+=" -DBUILD_TESTING=on"
 args+=" -DCMAKE_PREFIX_PATH=$HOME/programs"
 args+=" -DBOOST_ROOT=$HOME/programs"
+args+=" -DCMAKE_MODULE_LINKER_FLAGS='-flto=$numThreads'"
+args+="  -DCMAKE_SHARED_LINKER_FLAGS='-flto=$numThreads'"
 args+=" -DCMAKE_INSTALL_PREFIX=$prefix $@"
 
 ./bootstrap.sh                                  \

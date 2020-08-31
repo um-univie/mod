@@ -4,6 +4,187 @@
 Changes
 #######
 
+v0.11.0 (2020-08-31)
+====================
+
+Incompatible Changes
+--------------------
+
+- Bump version requirement of Boost to 1.72.
+- :cpp:func:`dg::Printer::pushVertexVisible`/:py:func:`DGPrinter.pushVertexVisible`,
+  :cpp:func:`dg::Printer::pushVertexLabel`/:py:func:`DGPrinter.pushVertexLabel`, and
+  :cpp:func:`dg::Printer::pushVertexColour`/:py:func:`DGPrinter.pushVertexColour`
+  now requies a callback taking a
+  :cpp:class:`dg::DG::Vertex`/:py:class:`DGVertex`, instead of a
+  :cpp:class:`graph::Graph`/:py:class:`Graph` and
+  :cpp:class:`dg::DG`/:py:class:`DG`.
+  The previous style is removed in libMØD and deprecated in PyMØD.
+- :cpp:func:`dg::DG::HyperEdge::print`/:py:func:`DGHyperEdge.print`
+  now throws exceptions if either no rules are associated with the hyperedge
+  or if at least one of the associated rules does not lead to a derivation.
+- :cpp:class:`dg::PrintData`/:py:class:`DGPrintData`, many interface changes,
+  including proper argument checking.
+- ``dg::DG::dumpImport()`` has been renamed to :cpp:func:`dg::DG::load`.
+- ``dgDump()`` has been renamed to :py:func:`DG.load`.
+- :cpp:func:`dg::DG::load`/:py:func:`DG.load` has additional arguments
+  and pre-conditions.
+- Do not install a pkg-config file. It was broken and there doesn't seem to be
+  an easy way to fix it.
+
+
+New Features
+------------
+
+- Added :cpp:func:`dg::Builder::apply`/:py:meth:`DGBuilder.apply`
+  as a lower-level function for computing proper direct derivations.
+- :cpp:func:`graph::Graph::smiles`/:py:meth:`smiles`:
+
+  - Generalize the parser to accept almost arbitrary strings as symbols inside
+    brackets. See :ref:`graph-smiles`.
+    This is only allowed when passing ``allowPartial=True`` to
+    :py:meth:`smiles`.
+  - Generalize the parser to accept ring-bonds and branches in mixed order.
+  - Generalize the parser to accept non-standard charges:
+    ``+++``, ``++``, ``---``, ``--``, and magnitudes larger than +/-9.
+
+- Added the PyMØD submodule :ref:`epim`.
+- Added :cpp:enum:`SmilesClassPolicy`/:py:class:`SmilesClassPolicy`
+  argument to :cpp:func:`graph::Graph::smiles`/:py:meth:`smiles`.
+- Support using either Open Babel 2 or 3 as dependency.
+- Make :py:attr:`DGPrinter.graphPrinter` writeable as well.
+- Make :cpp:class:`graph::Printer`/:py:class:`GraphPrinter` equality comparable.
+- Added :cpp:func:`dg::Printer::setGraphvizPrefix`/:cpp:func:`dg::Printer::getGraphvizPrefix`/:py:attr:`DGPrinter.graphvizPrefix`.
+- Added :cpp:func:`makeUniqueFilePrefix`/:py:func:`makeUniqueFilePrefix`.
+- Improve verbosity level 8 information from
+  :cpp:func:`dg::Builder::execute`/:py:func:`DGBuilder.execute` to the unvierse
+  size.
+- Make :cpp:class:`LabelSettings`/:py:class:`LabelSettings`
+  equality comparable.
+- Added :cpp:func:`dg::Builder::load`/:py:func:`DGBuilder.load`.
+- Added :cpp:func:`rngUniformReal`/:py:func:`rngUniformReal`.
+
+
+Bugs Fixed
+----------
+
+- Fix handling of null pointers:
+
+  - :cpp:class:`Derivation`/:py:class:`Derivation` printing.
+  - :cpp:class:`Derivations`/:py:class:`Derivations` printing.
+  - :cpp:func:`dg::Builder::addDerivation`/:py:meth:`DGBuilder.apply`.
+  - :cpp:func:`dg::Builder::execute`
+  - :cpp:func:`dg::DG::make`/:py:meth:`DG.__init__`
+  - :cpp:func:`dg::DG::findVertex`/:py:meth:`DG.findVertex`
+  - (:cpp:func:`dg::DG::findEdge`/:py:meth:`DG.findEdge`)
+  - Static and dynamic "add" strategies,
+    :cpp:func:`dg::Strategy::makeAdd`/:py:meth:`DGStrat.makeAddStatic`
+    and :py:meth:`DGStrat.makeAddDynamic`.
+  - Sequence strategies,
+    :cpp:func:`dg::Strategy::makeSequence`/:py:meth:`DGStrat.makeSequence`
+  - Rule strategies,
+    :cpp:func:`dg::Strategy::makeRule`/:py:meth:`DGStrat.makeRule`
+  - Parallel strategies,
+    :cpp:func:`dg::Strategy::makeParallel`/:py:meth:`DGStrat.makeParallel`
+  - Filter strategies,
+    :cpp:func:`dg::Strategy::makeFilter`
+  - Execute strategies,
+    :cpp:func:`dg::Strategy::makeExecute`
+  - Left/right predicate strategies,
+    :cpp:func:`dg::Strategy::makeLeftPredicate`/:py:meth:`DGStrat.makeLeftPredicate`,
+    :cpp:func:`dg::Strategy::makeRightPredicate`/:py:meth:`DGStrat.makeRightPredicate`
+  - Revive strategies,
+    :cpp:func:`dg::Strategy::makeRevive`/:py:meth:`DGStrat.makeRevive`
+  - Repeat strategies,
+    :cpp:func:`dg::Strategy::makeRepeat`/:py:meth:`DGStrat.makeRepeat`
+
+- Fix handling of empty functions given as callbacks:
+
+  - :cpp:func:`dg::Printer::pushVertexVisible`,
+  - :cpp:func:`dg::Printer::pushEdgeVisible`,
+  - :cpp:func:`dg::Printer::pushVertexLabel`,
+  - :cpp:func:`dg::Printer::pushEdgeLabel`,
+  - :cpp:func:`dg::Printer::pushVertexColour`,
+  - :cpp:func:`dg::Printer::pushEdgeColour`,
+  - :cpp:func:`dg::Printer::setRotationOverwrite`, and
+  - :cpp:func:`dg::Printer::setMirrorOverwrite`.
+
+- :cpp:func:`graph::Graph::smiles`/:py:meth:`smiles`:
+
+  - Improve parsing error messages.
+  - Fix missing external ID for bracketed wildcard atoms with class label,
+    e.g., ``[*:42]``.
+  - Fix handling of an atom which contains a ring-closure and ring-opening
+    using the same ID, e.g., ``C1CCCP11NNNN1``.
+  - When there is a bond mismatch in a ring closure (e.g., ``C-1CCCC=1``),
+    throw a :cpp:class:`InputError`/:py:class:`InputError` instead of
+    a :cpp:class:`FatalError`/:py:class:`FatalError`.
+
+- :py:class:`Isotope` and :py:class:`Charge` are now comparable with integers.
+- :cpp:func:`dg::DG::print`/:py:meth:`DG.print`, fix missing labels on shortcut
+  edges when using a :cpp:class:`dg::Printer`/:py:class:`DGPrinter` with
+  "labels as Latex math" set to false.
+- :cpp:func:`dg::Builder::addAbstract`/:py:meth:`DGBuilder.addAbstract`:
+
+  - Improve parsing error messages.
+  - Fix assertion on non-ASCII input.
+- :py:meth:`include`, read files in binary instead of ASCII.
+- PostMØD: scale figures based on height as well to avoid them being clipped.
+  Thanks to Christoph Flamm.
+- Fix :cpp:func:`rule::Rule::getGMLString`/:py:meth:`Rule.getGMLString` to not
+  perform coordinate instantiation when not needed.
+- Fix Python export of :py:class:`RuleContextGraphVertex`.
+- Properly throw exceptions from all ``pop`` functions in
+  :cpp:class:`dg::Printer`/:py:class:`DGPrinter` when there is nothing to pop.
+- PostMØD: remove extranous escape of a quote in AWK script in ``coordsFromGV``.
+- Graph printing, fix coordinate overwrite when printing the same graph
+  multiple times, but with different rotation or mirror settings,
+  the layout of the last printing would be used for all of them.
+  Those with non-zero rotaion and mirroring now have their own file name.
+- DG printing: fix bending of head/tail arrows when a tail vertex is also a
+  head vertex so arrows don't overlap.
+- `#8 <https://github.com/jakobandersen/mod/issues/8>`__:
+  remove some linker flags when AppleClang is used.
+
+
+Other
+-----
+
+- Doc, update theming again to increase readability.
+- Doc, add more formal API for the
+  :ref:`embedded strategy language for derivation graphs <dg_edsl>`.
+- Doc, fix typo resulting in missing documentation of
+
+  - :py:attr:`AtomData.atomId`
+  - :py:attr:`AtomData.isotope`
+  - :py:attr:`DGVertex.inDegree`
+  - :py:attr:`DGVertex.outDegree`
+
+- Doc, various typo fixes.
+- :ref:`mod <mod-wrapper>`, don't log output when invoked with
+  :option:`--debug <mod --debug>`.
+- Doc, clarify that
+  :py:func:`DGPrinter.pushVertexVisible`,
+  :py:func:`DGPrinter.pushEdgeVisible`,
+  :py:func:`DGPrinter.pushVertexLabel`,
+  :py:func:`DGPrinter.pushEdgeLabel`,
+  :py:func:`DGPrinter.pushVertexColour`,
+  :py:func:`DGPrinter.pushEdgeColour`,
+  :py:func:`DGPrinter.setRotationOverwrite`,
+  :py:func:`DGPrinter.setMirrorOverwrite`,
+  accepts a constant as well as a callback.
+- Doc, fix callback type for
+  :py:func:`DGPrinter.setRotationOverwrite` and
+  :py:func:`DGPrinter.setMirrorOverwrite`.
+  They must take a :py:class:`Graph`, not a :py:class:`GraphPrinter`.
+- Doc, add return type to :py:func:`DG.findEdge`.
+- Added ``bindep.txt`` and ``requirements.txt`` to make installation of
+  dependencies much easier.
+  The installation instructions are updated with a :ref:`quick-start` guide and
+  notes on the use of the dependency files.
+- CMake, default ``BUILD_EXAMPLES=on``.
+
+
+
 v0.10.0 (2020-02-05)
 ====================
 
@@ -61,6 +242,7 @@ New Features
   deprecated behaviour.
 - Added :py:func:`Rule.isomorphicLeftRight`/:cpp:func:`rule::Rule::isomorphicLeftRight`.
 
+
 Bugs Fixed
 ----------
 
@@ -82,6 +264,7 @@ Bugs Fixed
   :py:class:`IsomorphismPolicy`/:cpp:enum:`IsomorphismPolicy`.
 - Build: disallow use of experimental Boost CMake support due to a linking
   problem.
+
 
 Other
 -----
@@ -117,7 +300,7 @@ Incompatible Changes
 New Features
 ------------
 
-- :py:func:`dgDump`/:cpp:func:`dg::DG::dump` should now be much, much faster
+- ``dgDump``/``dg::DG::dump`` should now be much, much faster
   in parsing the input file and loading the contained derivation graph.
 - ``dgRuleComp``/``dg::DG::ruleComp`` should now be much faster
   during calculation.
@@ -128,7 +311,7 @@ New Features
 Bugs Fixed
 ----------
 
-- Fixed off-by-one error in DG dump loading, :py:func:`dgDump`/:cpp:func:`dg::DG::dump`.
+- Fixed off-by-one error in DG dump loading, ``dgDump``/``dg::DG::dump``.
 - Fixed issues with ``auto`` in function signatures which is not yet in the C++ standard.
 
 

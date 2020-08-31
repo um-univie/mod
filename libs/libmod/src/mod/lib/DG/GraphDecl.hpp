@@ -50,7 +50,6 @@ struct NonHyperEdgeHash {
 		boost::hash_combine(hash, get(boost::vertex_index_t(), *dg, target(e, *dg)));
 		return hash;
 	}
-
 private:
 	const NonHyperGraphType *dg;
 };

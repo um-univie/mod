@@ -41,7 +41,7 @@ struct ListWithKey {
 	auto operator()(ExprT &&expr, std::size_t lowerBound, std::size_t upperBound) const
 	-> ListWithKey<Type, AttrHandler, Expr..., decltype(asConverter(expr))> {
 		using AsConverterExpr = decltype(asConverter(expr));
-		ListElement<AsConverterExpr> newElem(lowerBound, upperBound, asConverter(expr));
+		ListElement<AsConverterExpr> newElem{lowerBound, upperBound, asConverter(expr)};
 		auto newElems = std::tuple_cat(elems, std::tuple<ListElement<AsConverterExpr> >(newElem));
 		return ListWithKey<Type, AttrHandler, Expr..., AsConverterExpr>(key, attrHandler, newElems);
 	}

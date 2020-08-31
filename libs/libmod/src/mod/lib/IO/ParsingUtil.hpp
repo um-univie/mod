@@ -49,7 +49,7 @@ template<typename TextIter, typename PosIter>
 void doParserExpectationError(const x3::expectation_failure<PosIter> &e, const TextIter &textIter, const PosIter &iterEnd, std::ostream &err) {
 	const PosIter &iter = e.where();
 	detail::doParserError(textIter, iter, iterEnd, err);
-	err << "Expected " << e.which() << ".\n";
+	err << "Expected " << e.which() << ".";
 }
 
 } // namespace detail

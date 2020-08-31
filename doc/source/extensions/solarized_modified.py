@@ -11,7 +11,7 @@ from pygments.token import Comment, Error, Generic, Keyword, Name, Number, \
 
 def make_style(colors):
     return {
-        Token:               colors['base00'],
+        Token:               colors['base01'],
 
         Comment:             'italic ' + colors['blue'],
         Comment.Hashbang:    colors['base01'],

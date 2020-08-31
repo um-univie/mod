@@ -1,5 +1,5 @@
 #ifndef MOD_LIB_RULES_PROP_MOLECULE_H
-#define	MOD_LIB_RULES_PROP_MOLECULE_H
+#define   MOD_LIB_RULES_PROP_MOLECULE_H
 
 #include <mod/lib/Chem/MoleculeUtil.hpp>
 #include <mod/lib/Rules/GraphDecl.hpp>

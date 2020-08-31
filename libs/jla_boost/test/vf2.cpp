@@ -31,22 +31,23 @@ using namespace GM;
 
 namespace {
 
-template <typename Generator>
+template<typename Generator>
 struct random_functor {
 
-	random_functor(Generator& g) : g(g) { }
+	random_functor(Generator &g) : g(g) {}
 
 	std::size_t operator()(std::size_t n) {
 		boost::uniform_int<std::size_t> distrib(0, n - 1);
-		boost::variate_generator<Generator&, boost::uniform_int<std::size_t> >
+		boost::variate_generator<Generator &, boost::uniform_int<std::size_t> >
 				x(g, distrib);
 		return x();
 	}
-	Generator& g;
+
+	Generator &g;
 };
 
 template<typename Graph1, typename Graph2>
-void randomly_permute_graph(Graph1& g1, const Graph2& g2) {
+void randomly_permute_graph(Graph1 &g1, const Graph2 &g2) {
 	BOOST_REQUIRE(num_vertices(g1) <= num_vertices(g2));
 	BOOST_REQUIRE(num_edges(g1) == 0);
 
@@ -66,7 +67,7 @@ void randomly_permute_graph(Graph1& g1, const Graph2& g2) {
 
 	std::size_t i = 0;
 	for(vertex_iterator vi = vertices(g1).first;
-			vi != vertices(g1).second; ++i, ++vi) {
+	    vi != vertices(g1).second; ++i, ++vi) {
 		vertex_map[orig_vertices[i]] = *vi;
 		put(vertex_name_t(), g1, *vi, get(vertex_name_t(), g2, orig_vertices[i]));
 	}
@@ -80,9 +81,9 @@ void randomly_permute_graph(Graph1& g1, const Graph2& g2) {
 }
 
 template<typename Graph>
-void generate_random_digraph(Graph& g, double edge_probability,
-		int max_parallel_edges, double parallel_edge_probability,
-		int max_edge_name, int max_vertex_name) {
+void generate_random_digraph(Graph &g, double edge_probability,
+                             int max_parallel_edges, double parallel_edge_probability,
+                             int max_edge_name, int max_vertex_name) {
 
 	BOOST_REQUIRE((0 <= edge_probability) && (edge_probability <= 1));
 	BOOST_REQUIRE((0 <= parallel_edge_probability) && (parallel_edge_probability <= 1));
@@ -93,7 +94,7 @@ void generate_random_digraph(Graph& g, double edge_probability,
 	typedef typename graph_traits<Graph>::vertex_iterator vertex_iterator;
 	boost::mt19937 random_gen;
 	boost::uniform_real<double> dist_real(0.0, 1.0);
-	boost::variate_generator<boost::mt19937&, boost::uniform_real<double> >
+	boost::variate_generator<boost::mt19937 &, boost::uniform_real<double> >
 			random_real_dist(random_gen, dist_real);
 
 	for(vertex_iterator u = vertices(g).first; u != vertices(g).second; ++u) {
@@ -110,14 +111,14 @@ void generate_random_digraph(Graph& g, double edge_probability,
 
 	{
 		boost::uniform_int<int> dist_int(0, max_edge_name);
-		boost::variate_generator<boost::mt19937&, boost::uniform_int<int> >
+		boost::variate_generator<boost::mt19937 &, boost::uniform_int<int> >
 				random_int_dist(random_gen, dist_int);
 		randomize_property<vertex_name_t>(g, random_int_dist);
 	}
 
 	{
 		boost::uniform_int<int> dist_int(0, max_vertex_name);
-		boost::variate_generator<boost::mt19937&, boost::uniform_int<int> >
+		boost::variate_generator<boost::mt19937 &, boost::uniform_int<int> >
 				random_int_dist(random_gen, dist_int);
 
 		randomize_property<edge_name_t>(g, random_int_dist);
@@ -129,7 +130,7 @@ template<typename EdgeEquivalencePredicate, typename VertexEquivalencePredicate>
 struct test_callback {
 
 	test_callback(EdgeEquivalencePredicate edge_comp, VertexEquivalencePredicate vertex_comp, bool output)
-	: edge_comp_(edge_comp), vertex_comp_(vertex_comp), output_(output) { }
+			: edge_comp_(edge_comp), vertex_comp_(vertex_comp), output_(output) {}
 
 	template<typename VertexMap, typename GraphDom, typename GraphCodom>
 	bool operator()(VertexMap &&m, const GraphDom &gDom, const GraphCodom &gCodom) {
@@ -143,13 +144,14 @@ struct test_callback {
 			std::cout << "Num vertices: " << num_vertices(gDom) << ' ' << num_vertices(gCodom) << std::endl;
 			for(auto v : asRange(vertices(gDom)))
 				std::cout << '(' << get(vertex_index_t(), gDom, v) << ", "
-				<< get(vertex_index_t(), gCodom, get(m, gDom, gCodom, v)) << ") ";
+				          << get(vertex_index_t(), gCodom, get(m, gDom, gCodom, v)) << ") ";
 
 			std::cout << std::endl;
 		}
 
 		return true;
 	}
+
 private:
 	EdgeEquivalencePredicate edge_comp_;
 	VertexEquivalencePredicate vertex_comp_;
@@ -159,8 +161,8 @@ private:
 } // namespace
 
 void test_vf2_sub_graph_iso(int n1, int n2, double edge_probability,
-		int max_parallel_edges, double parallel_edge_probability,
-		int max_edge_name, int max_vertex_name, bool output) {
+                            int max_parallel_edges, double parallel_edge_probability,
+                            int max_edge_name, int max_vertex_name, bool output) {
 
 	typedef property<edge_name_t, int> edge_property;
 	typedef property<vertex_name_t, int, property<vertex_index_t, int> > vertex_property;
@@ -171,12 +173,12 @@ void test_vf2_sub_graph_iso(int n1, int n2, double edge_probability,
 	graph1 g1(n1);
 	graph2 g2(n2);
 	generate_random_digraph(g2, edge_probability, max_parallel_edges, parallel_edge_probability,
-			max_edge_name, max_vertex_name);
+	                        max_edge_name, max_vertex_name);
 	randomly_permute_graph(g1, g2);
 
 	int v_idx = 0;
 	for(graph_traits<graph1>::vertex_iterator vi = vertices(g1).first;
-			vi != vertices(g1).second; ++vi) {
+	    vi != vertices(g1).second; ++vi) {
 		put(vertex_index_t(), g1, *vi, v_idx++);
 	}
 
@@ -204,7 +206,7 @@ void test_vf2_sub_graph_iso(int n1, int n2, double edge_probability,
 
 	std::cout << std::endl;
 	BOOST_CHECK(vf2_subgraph_iso(g1, g2, callback, vertex_order_by_mult(g1),
-			edges_equivalent(edge_comp).vertices_equivalent(vertex_comp)));
+	                             edges_equivalent(edge_comp).vertices_equivalent(vertex_comp)));
 
 	std::clock_t end1 = std::clock();
 	std::cout << "vf2_subgraph_iso: elapsed time (clock cycles): " << (end1 - start) << std::endl;
@@ -212,7 +214,7 @@ void test_vf2_sub_graph_iso(int n1, int n2, double edge_probability,
 	if(num_vertices(g1) == num_vertices(g2)) {
 		std::cout << std::endl;
 		BOOST_CHECK(vf2_graph_iso(g1, g2, callback, vertex_order_by_mult(g1),
-				edges_equivalent(edge_comp).vertices_equivalent(vertex_comp)));
+		                          edges_equivalent(edge_comp).vertices_equivalent(vertex_comp)));
 
 		std::clock_t end2 = std::clock();
 		std::cout << "vf2_graph_iso: elapsed time (clock cycles): " << (end2 - end1) << std::endl;
@@ -221,17 +223,17 @@ void test_vf2_sub_graph_iso(int n1, int n2, double edge_probability,
 	if(output) {
 		std::fstream file_graph1("graph1.dot", std::fstream::out);
 		boost::write_graphviz(file_graph1, g1,
-				boost::make_label_writer(get(boost::vertex_name, g1)),
-				boost::make_label_writer(get(boost::edge_name, g1)));
+		                      boost::make_label_writer(get(boost::vertex_name, g1)),
+		                      boost::make_label_writer(get(boost::edge_name, g1)));
 
 		std::fstream file_graph2("graph2.dot", std::fstream::out);
 		boost::write_graphviz(file_graph2, g2,
-				boost::make_label_writer(get(boost::vertex_name, g2)),
-				boost::make_label_writer(get(boost::edge_name, g2)));
+		                      boost::make_label_writer(get(boost::vertex_name, g2)),
+		                      boost::make_label_writer(get(boost::edge_name, g2)));
 	}
 }
 
-void test_vf2(int argc, char* argv[]) {
+void test_vf2(int argc, char *argv[]) {
 
 	int num_vertices_g1 = 10;
 	int num_vertices_g2 = 20;
@@ -275,16 +277,16 @@ void test_vf2(int argc, char* argv[]) {
 	}
 
 	test_vf2_sub_graph_iso(num_vertices_g1, num_vertices_g2, edge_probability,
-			max_parallel_edges, parallel_edge_probability,
-			max_edge_name, max_vertex_name, output);
+	                       max_parallel_edges, parallel_edge_probability,
+	                       max_edge_name, max_vertex_name, output);
 }
 
 struct test_callback_2 {
 
-	test_callback_2(bool &got_hit, bool stop) : got_hit(got_hit), stop(stop) { }
+	test_callback_2(bool &got_hit, bool stop) : got_hit(got_hit), stop(stop) {}
 
 	template<typename VertexMap, typename GraphDom, typename GraphCodom>
-	bool operator()(VertexMap&&, const GraphDom&, const GraphCodom&) {
+	bool operator()(VertexMap &&, const GraphDom &, const GraphCodom &) {
 		got_hit = true;
 		return stop;
 	}
@@ -369,7 +371,7 @@ void test_return_value() {
 			test_callback_2 callback(got_hit, true);
 			false_predicate pred;
 			bool exists = vf2_graph_iso(gLarge, gLarge, callback, vertex_order_by_mult(gLarge),
-					boost::edges_equivalent(pred).vertices_equivalent(pred));
+			                            boost::edges_equivalent(pred).vertices_equivalent(pred));
 			BOOST_CHECK(!exists);
 			BOOST_CHECK(!got_hit);
 		}
@@ -401,7 +403,7 @@ void test_return_value() {
 			test_callback_2 callback(got_hit, true);
 			false_predicate pred;
 			bool exists = vf2_subgraph_iso(gLarge, gLarge, callback, vertex_order_by_mult(gLarge),
-					boost::edges_equivalent(pred).vertices_equivalent(pred));
+			                               boost::edges_equivalent(pred).vertices_equivalent(pred));
 			BOOST_CHECK(!exists);
 			BOOST_CHECK(!got_hit);
 		}
@@ -433,7 +435,7 @@ void test_return_value() {
 			test_callback_2 callback(got_hit, true);
 			false_predicate pred;
 			bool exists = vf2_subgraph_mono(gLarge, gLarge, callback, vertex_order_by_mult(gLarge),
-					boost::edges_equivalent(pred).vertices_equivalent(pred));
+			                                boost::edges_equivalent(pred).vertices_equivalent(pred));
 			BOOST_CHECK(!exists);
 			BOOST_CHECK(!got_hit);
 		}

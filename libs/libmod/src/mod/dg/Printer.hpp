@@ -15,13 +15,26 @@ namespace dg {
 // rst:		This class is used to hold extra data about how a specific derivation graph
 // rst:		is visualised.
 // rst:
+// rst:		The idea is that in the visualized network each vertex/hyperedge is specified
+// rst:		by a pair :math:`(id, dup)` where :math:`id` is the ID of the vertex/hyperedge
+// rst:		and :math:`dup` is an versioning integer that can be specified in objects of this class.
+// rst:
+// rst:		Initially, each vertex/hyperedge has only one version: duplicate number 0.
+// rst:		The duplication is primarily specified via the hyperedges, with the duplication
+// rst:		of vertices being induced afterwards.
+// rst:		Thus hyperedge duplicates are managed by :func:`makeDuplicate` and :func:`removeDuplicate`,
+// rst:		while the vertex duplicates are managed implicitly by :func:`reconnectSource` and :func:`reconnectTarget`.
+// rst:		In the end, when the data is used for printing, it will be compiled to form the actual duplication data.
+// rst:
 // rst-class-start:
-
 struct MOD_DECL PrintData {
-	// rst: .. function:: PrintData(std::shared_ptr<DG> dg)
+	// rst: .. function:: explicit PrintData(std::shared_ptr<DG> dg)
 	// rst:
-	// rst:		Construct a data object where all derivations have a single version, 0, connected to version 0 of all heads and tails.
-	PrintData(std::shared_ptr<DG> dg);
+	// rst:		Construct a data object where all derivations have a single version, duplicate number 0,
+	// rst:		connected to version 0 of all heads and tails.
+	// rst:
+	// rst:		:throws: :class:`LogicError` if `!dg->isLocked()`.
+	explicit PrintData(std::shared_ptr<DG> dg);
 	PrintData(const PrintData &other);
 	PrintData(PrintData &&other);
 	~PrintData();
@@ -31,22 +44,47 @@ struct MOD_DECL PrintData {
 	// rst:
 	// rst:		:returns: the derivation graph the object holds data for.
 	std::shared_ptr<DG> getDG() const;
-	// rst: .. function:: void makeDuplicate(DG::HyperEdge e, unsigned int eDup)
+	// rst: .. function:: void makeDuplicate(DG::HyperEdge e, int eDup)
 	// rst:
-	// rst:		Create another version of the given derivation and give it the given duplicate number.
-	void makeDuplicate(DG::HyperEdge e, unsigned int eDup);
-	// rst: .. function:: void removeDuplicate(DG::HyperEdge e, unsigned int eDup)
+	// rst:		Create another version of the given hyperedge and give it the given duplicate number.
+	// rst:		It will connect to duplicate 0 of all head and tail vertices.
 	// rst:
-	// rst:		Remove the version of the given derivation with the given duplicate number.
-	void removeDuplicate(DG::HyperEdge e, unsigned int eDup);
-	// rst: .. function:: void reconnectTail(DG::HyperEdge e, unsigned int eDup, std::shared_ptr<graph::Graph> g, unsigned int vDupTar)
+	// rst:		:throws: :class:`LogicError` if `!e`.
+	// rst:		:throws: :class:`LogicError` if `e.getDG() != getDG()`.
+	// rst:		:throws: :class:`LogicError` if duplicate `eDup` already exists for `e`.
+	void makeDuplicate(DG::HyperEdge e, int eDup);
+	// rst: .. function:: void removeDuplicate(DG::HyperEdge e, int eDup)
 	// rst:
-	// rst:		Reconnect an arbitrary version of the tail specified by the given graph in the derivation duplicate given.
-	void reconnectTail(DG::HyperEdge e, unsigned int eDup, std::shared_ptr<graph::Graph> g, unsigned int vDupTar); // TODO: make overload with explicit source
-	// rst: .. function:: void reconnectHead(DG::HyperEdge e, unsigned int eDup, std::shared_ptr<graph::Graph> g, unsigned int vDupTar)
+	// rst:		Remove the version of the given hyperedge with the given duplicate number.
 	// rst:
-	// rst:		Reconnect an arbitrary version of the head specified by the given graph in the derivation duplicate given.
-	void reconnectHead(DG::HyperEdge e, unsigned int eDup, std::shared_ptr<graph::Graph> g, unsigned int vDupTar); // TODO: make overload with explicit source
+	// rst:		:throws: :class:`LogicError` if `!e`.
+	// rst:		:throws: :class:`LogicError` if `e.getDG() != getDG()`.
+	// rst:		:throws: :class:`LogicError` if duplicate `eDup` does not exist for `e`.
+	void removeDuplicate(DG::HyperEdge e, int eDup);
+	// rst: .. function:: void reconnectSource(DG::HyperEdge e, int eDup, DG::Vertex v, int vDupTar)
+	// rst:
+	// rst:		For the given hyperedge duplicate, reconnect the given source vertex to the given duplicate of that source.
+	// rst:		If the vertex is a source multiple times, then an arbitrary one of them is reconnected.
+	// rst:
+	// rst:		:throws: :class:`LogicError` if `!e`.
+	// rst:		:throws: :class:`LogicError` if `e.getDG() != getDG()`.
+	// rst:		:throws: :class:`LogicError` if `!v`.
+	// rst:		:throws: :class:`LogicError` if `v.getDG() != getDG()`.
+	// rst:		:throws: :class:`LogicError` if `v` is not a source vertex of `e`.
+	// rst:		:throws: :class:`LogicError` if duplicate `eDup` does not exist for `e`.
+	void reconnectSource(DG::HyperEdge e, int eDup, DG::Vertex v, int vDupTar);
+	// rst: .. function:: void reconnectTarget(DG::HyperEdge e, int eDup, DG::Vertex v, int vDupTar)
+	// rst:
+	// rst:		For the given hyperedge duplicate, reconnect the given head to the given duplicate of that head.
+	// rst:		If the vertex is a head multiple times, then an arbitrary one of them is reconnected.
+	// rst:
+	// rst:		:throws: :class:`LogicError` if `!e`.
+	// rst:		:throws: :class:`LogicError` if `e.getDG() != getDG()`.
+	// rst:		:throws: :class:`LogicError` if `!v`.
+	// rst:		:throws: :class:`LogicError` if `v.getDG() != getDG()`.
+	// rst:		:throws: :class:`LogicError` if `v` is not a target vertex of `e`.
+	// rst:		:throws: :class:`LogicError` if duplicate `eDup` does not exist for `e`.
+	void reconnectTarget(DG::HyperEdge e, int eDup, DG::Vertex v, int vDupTar);
 private:
 	std::shared_ptr<DG> dg;
 	std::unique_ptr<lib::IO::DG::Write::Data> data;
@@ -59,11 +97,10 @@ private:
 // rst:		how much is visualised and which extra properties are printed.
 // rst: 
 // rst-class-start:
-
 struct MOD_DECL Printer {
 	Printer();
-	Printer(const Printer&) = delete;
-	Printer &operator=(const Printer&) = delete;
+	Printer(const Printer &) = delete;
+	Printer &operator=(const Printer &) = delete;
 	~Printer();
 	lib::IO::DG::Write::Printer &getPrinter() const;
 	// rst: .. function:: graph::Printer &getGraphPrinter()
@@ -93,23 +130,31 @@ struct MOD_DECL Printer {
 	// rst:		``label`` with all space characters escaped.
 	void setLabelsAsLatexMath(bool value);
 	bool getLabelsAsLatexMath() const;
-	// rst: .. function:: void pushVertexVisible(std::function<bool(std::shared_ptr<graph::Graph>, std::shared_ptr<DG>)> f)
+	// rst: .. function:: void pushVertexVisible(std::function<bool(DG::Vertex)> f)
 	// rst:
 	// rst:		Add another function controlling the visibility of vertices.
 	// rst:		All visibility functions must return `true` for a vertex to be visible.
-	void pushVertexVisible(std::function<bool(std::shared_ptr<graph::Graph>, std::shared_ptr<DG>) > f);
+	// rst:
+	// rst:		:throws: :class:`LogicError` if `!f`.
+	void pushVertexVisible(std::function<bool(DG::Vertex)> f);
 	// rst: .. function:: void popVertexVisible()
 	// rst:
 	// rst:		Remove the last pushed vertex visibility function.
+	// rst:
+	// rst:		:throws: :class:`LogicError` if no callback is left to pop.
 	void popVertexVisible();
 	// rst: .. function:: void pushEdgeVisible(std::function<bool(DG::HyperEdge) > f)
 	// rst:
 	// rst:		Add another function controlling the visibility of hyperedges.
 	// rst:		All visibility functions must return `true` for a hyperedge to be visible.
-	void pushEdgeVisible(std::function<bool(DG::HyperEdge) > f);
+	// rst:
+	// rst:		:throws: :class:`LogicError` if `!f`.
+	void pushEdgeVisible(std::function<bool(DG::HyperEdge)> f);
 	// rst: .. function:: void popEdgeVisible()
 	// rst:
 	// rst:		Remove the last pushed hyperedge visibility function.
+	// rst:
+	// rst:		:throws: :class:`LogicError` if no callback is left to pop.
 	void popEdgeVisible();
 	// rst: .. function:: void setWithShortcutEdgesAfterVisibility(bool value)
 	// rst:               bool getWithShortcutEdgesAfterVisibility() const
@@ -129,21 +174,29 @@ struct MOD_DECL Printer {
 	// rst:		Set/get the string used as separator between each part of each edge label.
 	void setEdgeLabelSep(std::string sep);
 	const std::string &getEdgeLabelSep();
-	// rst: .. function:: void pushVertexLabel(std::function<std::string(std::shared_ptr<graph::Graph>, std::shared_ptr<DG>)> f)
+	// rst: .. function:: void pushVertexLabel(std::function<std::string(DG::Vertex)> f)
 	// rst:
 	// rst:		Add another function for vertex labelling. The result of this function is appended to each label.
-	void pushVertexLabel(std::function<std::string(std::shared_ptr<graph::Graph>, std::shared_ptr<DG>) > f);
+	// rst:
+	// rst:		:throws: :class:`LogicError` if `!f`.
+	void pushVertexLabel(std::function<std::string(DG::Vertex)> f);
 	// rst: .. function:: void popVertexLabel()
 	// rst:
 	// rst:		Remove the last pushed vertex labelling function.
+	// rst:
+	// rst:		:throws: :class:`LogicError` if no callback is left to pop.
 	void popVertexLabel();
 	// rst: .. function:: void pushEdgeLabel(std::function<std::string(DG::HyperEdge)> f)
 	// rst:
 	// rst:		Add another function for edge labelling. The result of this function is appended to each label.
-	void pushEdgeLabel(std::function<std::string(DG::HyperEdge) > f);
+	// rst:
+	// rst:		:throws: :class:`LogicError` if `!f`.
+	void pushEdgeLabel(std::function<std::string(DG::HyperEdge)> f);
 	// rst: .. function:: void popEdgeLabel()
 	// rst:
 	// rst:		Remove the last pushed edge labelling function.
+	// rst:
+	// rst:		:throws: :class:`LogicError` if no callback is left to pop.
 	void popEdgeLabel();
 	// rst: .. function:: void setWithGraphName(bool value)
 	// rst:               bool getWithGraphName() const
@@ -169,38 +222,58 @@ struct MOD_DECL Printer {
 	// rst:		Control whether or not graph depictions should be precompiled, or be included inline in the DG figure.
 	void setWithInlineGraphs(bool value);
 	bool getWithInlineGraphs() const;
-	// rst: .. function:: void pushVertexColour(std::function<std::string(std::shared_ptr<graph::Graph>, std::shared_ptr<DG>)> f, bool extendToEdges)
+	// rst: .. function:: void pushVertexColour(std::function<std::string(DG::Vertex)> f, bool extendToEdges)
 	// rst:
 	// rst:		Add another function for colouring vertices. The final colour of a vertex is the result of the first colour function returning a non-empty string.
 	// rst:		The functions are evaluated in the order they are pushed and the resulting string is used directly as a colour in Tikz.
 	// rst:		A hyperedge is also coloured if at least one head and one tail *can* be coloured with a colour for which `extendToEdges` is `true`.
 	// rst:		In this case, the hyperedge (and a subset of the head and tail connectors) is coloured with the first applicable colour.
 	// rst:		The edge extension of vertex colour takes lower precedence than explicitly added hyperedge colouring functions.
-	void pushVertexColour(std::function<std::string(std::shared_ptr<graph::Graph>, std::shared_ptr<DG>) > f, bool extendToEdges);
+	// rst:
+	// rst:		:throws: :class:`LogicError` if `!f`.
+	void pushVertexColour(std::function<std::string(DG::Vertex)> f, bool extendToEdges);
 	// rst: .. function:: void popVertexColour()
 	// rst:
 	// rst:		Remove the last pushed vertex colouring function.
+	// rst:
+	// rst:		:throws: :class:`LogicError` if no callback is left to pop.
 	void popVertexColour();
 	// rst: .. function:: void pushEdgeColour(std::function<std::string(DG::HyperEdge)> f)
 	// rst:
 	// rst:		Add another function for colouring hyperedges. The final colour of a hyperedge (and all of its head and tail connectors) is the result of the
 	// rst:		first colour function returning a non-empty string.
-	void pushEdgeColour(std::function<std::string(DG::HyperEdge) > f);
+	// rst:
+	// rst:		:throws: :class:`LogicError` if `!f`.
+	void pushEdgeColour(std::function<std::string(DG::HyperEdge)> f);
 	// rst: .. function:: void popEdgeColour()
 	// rst:
 	// rst:		Remove the last pushed hyperedge colouring function.
+	// rst:
+	// rst:		:throws: :class:`LogicError` if no callback is left to pop.
 	void popEdgeColour();
 public:
 	// rst: .. function:: void setRotationOverwrite(std::function<int(std::shared_ptr<graph::Graph>)> f)
 	// rst:
 	// rst:		Overwrite the rotation set in the nested :cpp:class:`graph::Printer`. The given function will be used
 	// rst:		to set the rotation of each printed graph.
-	void setRotationOverwrite(std::function<int(std::shared_ptr<graph::Graph>) > f);
+	// rst:
+	// rst:		:throws: :class:`LogicError` if `!f`.
+	void setRotationOverwrite(std::function<int(std::shared_ptr<graph::Graph>)> f);
 	// rst: .. function:: void setMirrorOverwrite(std::function<bool(std::shared_ptr<graph::Graph>) > f)
 	// rst:
 	// rst:		Overwrite the mirror set in the nested :cpp:class:`graph::Printer`. The given function will be used
 	// rst:		to set the mirror of each printed graph.
-	void setMirrorOverwrite(std::function<bool(std::shared_ptr<graph::Graph>) > f);
+	// rst:
+	// rst:		:throws: :class:`LogicError` if `!f`.
+	void setMirrorOverwrite(std::function<bool(std::shared_ptr<graph::Graph>)> f);
+public:
+	// rst: .. function:: void setGraphvizPrefix(const std::string &prefix)
+	// rst:               const std::string &getGraphvizPrefix() const
+	// rst:
+	// rst:		Access the string that will be inserted into generated DOT files,
+	// rst:		just after the graph declaration.
+	void setGraphvizPrefix(const std::string &prefix);
+	const std::string &getGraphvizPrefix() const;
 private:
 	std::unique_ptr<graph::Printer> graphPrinter;
 	std::unique_ptr<lib::IO::DG::Write::Printer> printer;

@@ -251,10 +251,15 @@ public:
 	// rst:		:throws: :class:`InputError` on bad input.
 	static std::shared_ptr<Graph> graphDFS(const std::string &graphDFS);
 	// rst: .. function:: static std::shared_ptr<Graph> smiles(const std::string &smiles)
+	// rst:               static std::shared_ptr<Graph> smiles(const std::string &smiles, bool allowAbstract, SmilesClassPolicy classPolicy)
 	// rst:
 	// rst:		:returns: a graph representing a molecule, loaded from the given :ref:`SMILES <graph-smiles>` string.
+	// rst:			The `allowAbstract` argument defaults to `false`
+	// rst:			and `classPolicy` defaults to `SmilesClassPolicy::NoneOnDuplicate`.
 	// rst:		:throws: :class:`InputError` on bad input.
+	// rst:		:throws: :class:`InputError` if `classPolicy == SmilesClassPolicy::NoneOnDuplicate` and a class label is duplicated.
 	static std::shared_ptr<Graph> smiles(const std::string &smiles);
+	static std::shared_ptr<Graph> smiles(const std::string &smiles, bool allowAbstract, SmilesClassPolicy classPolicy);
 	// rst: .. function:: static std::shared_ptr<Graph> makeGraph(std::unique_ptr<lib::Graph::Single> g)
 	// rst:               static std::shared_ptr<Graph> makeGraph(std::unique_ptr<lib::Graph::Single> g, std::map<int, std::size_t> externalToInternalIds)
 	// rst:

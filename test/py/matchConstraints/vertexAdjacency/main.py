@@ -1,3 +1,5 @@
+post("disableSummary")
+
 lString = LabelSettings(LabelType.String, LabelRelation.Unification)
 lTerm = LabelSettings(LabelType.Term, LabelRelation.Unification)
 
@@ -59,7 +61,6 @@ def doDG(name, lSettings):
 	print(name + "\n" + "="*50)
 	dg = dgRuleComp(inputGraphs, addSubset(inputGraphs) >> inputRules, labelSettings=lSettings)
 	dg.calc()
-	dg.print()
 	found = set()
 	for vDG in dg.vertices:
 		g = vDG.graph

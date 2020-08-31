@@ -107,7 +107,7 @@ void Graph_doExport() {
 					// rst:
 					// rst:			:type: str
 			.add_property("name", py::make_function(&Graph::getName, py::return_value_policy<py::copy_const_reference>()),
-							  &Graph::setName)
+			              &Graph::setName)
 					// rst:		.. py:attribute:: smiles
 					// rst:
 					// rst:			(Read-only) If the graph models a molecule, this is the canonical :ref:`SMILES string <graph-smiles>` for it.
@@ -115,7 +115,7 @@ void Graph_doExport() {
 					// rst:			:type: str
 					// rst:			:raises: :py:class:`LogicError` if the graph is not a molecule.
 			.add_property("smiles",
-							  py::make_function(&Graph::getSmiles, py::return_value_policy<py::copy_const_reference>()))
+			              py::make_function(&Graph::getSmiles, py::return_value_policy<py::copy_const_reference>()))
 					// rst:		.. py:attribute:: smilesWithIds
 					// rst:
 					// rst:			(Read-only) If the graph models a molecule, this is the canonical :ref:`SMILES string <graph-smiles>` for it,
@@ -124,14 +124,14 @@ void Graph_doExport() {
 					// rst:			:type: str
 					// rst:			:raises: :py:class:`LogicError` if the graph is not a molecule.
 			.add_property("smilesWithIds",
-							  py::make_function(&Graph::getSmilesWithIds, py::return_value_policy<py::copy_const_reference>()))
+			              py::make_function(&Graph::getSmilesWithIds, py::return_value_policy<py::copy_const_reference>()))
 					// rst:		.. py:attribute:: graphDFS
 					// rst:
 					// rst:			(Read-only) This is a :ref:`GraphDFS <graph-graphDFS>` of the graph.
 					// rst:
 					// rst:			:type: str
 			.add_property("graphDFS",
-							  py::make_function(&Graph::getGraphDFS, py::return_value_policy<py::copy_const_reference>()))
+			              py::make_function(&Graph::getGraphDFS, py::return_value_policy<py::copy_const_reference>()))
 					// rst:		.. py:attribute:: graphDFSWithIds
 					// rst:
 					// rst:			(Read-only) This is a :ref:`GraphDFS <graph-graphDFS>` of the graph, where each vertices have an explicit id,
@@ -139,14 +139,14 @@ void Graph_doExport() {
 					// rst:
 					// rst:			:type: str
 			.add_property("graphDFSWithIds", py::make_function(&Graph::getGraphDFSWithIds,
-																				py::return_value_policy<py::copy_const_reference>()))
+			                                                   py::return_value_policy<py::copy_const_reference>()))
 					// rst:		.. py:attribute:: linearEncoding
 					// rst:
 					// rst:			(Read-only) If the graph models a molecule this is the :ref:`SMILES string <graph-smiles>` string, otherwise it is the :ref:`GraphDFS <graph-graphDFS>` string.
 					// rst:
 					// rst:			:type: str
 			.add_property("linearEncoding", py::make_function(&Graph::getLinearEncoding,
-																			  py::return_value_policy<py::copy_const_reference>()))
+			                                                  py::return_value_policy<py::copy_const_reference>()))
 					// rst:		.. py:attribute:: isMolecule
 					// rst:
 					// rst:			(Read-only) Whether or not the graph models a molecule. See :ref:`mol-enc`.
@@ -296,17 +296,19 @@ void Graph_doExport() {
 	// rst:		:rtype: Graph
 	// rst:		:raises: :class:`InputError` on bad input.
 	py::def("graphDFS", &Graph::graphDFS);
-	// rst: .. py:method:: smiles(s, name=None, add=True)
+	// rst: .. py:method:: smiles(s, name=None, add=True, allowAbstract=False, classPolicy=SmilesClassPolicy.NoneOnDuplicate)
 	// rst:
 	// rst:		Load a molecule from a :ref:`SMILES <graph-smiles>` string.
 	// rst:
 	// rst:		:param str s: the :ref:`SMILES <graph-smiles>` string to parse.
 	// rst:		:param str name: the name of the graph. If none is given the default name is used.
 	// rst:		:param bool add: whether to append the graph to :data:`inputGraphs` or not.
+	// rst:		:param bool allowAbstract: whether to allow abstract vertex labels in bracketed atoms.
 	// rst:		:returns: the loaded molecule.
 	// rst:		:rtype: Graph
 	// rst:		:raises: :class:`InputError` on bad input.
-	py::def("smiles", &Graph::smiles);
+	py::def("smiles",
+	        static_cast<std::shared_ptr<Graph> (*)(const std::string &, bool, SmilesClassPolicy)>(&Graph::smiles));
 }
 
 } // namespace Py

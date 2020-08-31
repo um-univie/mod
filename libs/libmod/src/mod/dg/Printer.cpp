@@ -20,54 +20,45 @@ namespace dg {
 namespace {
 
 void printDataCheckHyperEdge(std::shared_ptr<DG> dg, DG::HyperEdge e) {
-	if(e.isNull()) throw FatalError("HyperEdge is null.", 1);
-	if(e.getDG()->getId() != dg->getId()) {
-		std::string text = "HyperEdge is from another derivation graph (id=" + boost::lexical_cast<std::string>(e.getDG()->getId());
-		text += ") than this (id=";
-		text += boost::lexical_cast<std::string>(dg->getId());
-		text += ").";
-		throw FatalError(std::move(text), 1);
-	}
+	if(!e) throw LogicError("The hyperedge is null.");
+	if(e.getDG() != dg) throw LogicError("The hyperedge does not belong to the derivation graph this data is for.");
 }
 
-void reconnectCommon(std::shared_ptr<DG> dg, DG::HyperEdge e, unsigned int eDup, std::shared_ptr<graph::Graph> g, unsigned int vDupTar, bool isTail) {
+void reconnectCommon(std::shared_ptr<DG> dg, DG::HyperEdge e, unsigned int eDup, DG::Vertex v,
+                     int vDupTar, bool isTail) {
 	printDataCheckHyperEdge(dg, e);
-	if(!dg->getHyper().isVertexGraph(&g->getGraph()))
-		throw FatalError("Graph " + boost::lexical_cast<std::string>(g->getId()) + ", '" + g->getName()
-			+ "' does not represent a vertex in this derivation graph.", 1);
+	if(!v) throw LogicError("The vertex is null.");
+	if(v.getDG() != dg) throw LogicError("The vertex does not belong to the derivation graph this data is for.");
 	const bool found = [&]() {
 		if(isTail) {
 			const auto src = e.sources();
-			return src.end() != std::find_if(src.begin(), src.end(), [&](const auto &v) {
-				return v.getGraph() == g;
-			});
+			return src.end() != std::find(src.begin(), src.end(), v);
 		} else {
 			const auto tar = e.targets();
-			return tar.end() != std::find_if(tar.begin(), tar.end(), [&](const auto &v) {
-				return v.getGraph() == g;
-			});
+			return tar.end() != std::find(tar.begin(), tar.end(), v);
 		}
 	}();
 	if(!found) {
-		std::string name = isTail ? "tail." : "head.";
-		throw FatalError("Graph " + boost::lexical_cast<std::string>(g->getId()) + ", '" + g->getName() + "' is not a " + name, 1);
+		std::string msg = "The vertex is not a ";
+		msg += isTail ? "source" : "target";
+		msg += " of the given hyperedge.";
+		throw LogicError(std::move(msg));
 	}
 }
 
 } // namespace
 
 PrintData::PrintData(std::shared_ptr<DG> dg) : dg(dg), data(nullptr) {
-	if(!dg->getNonHyper().getHasCalculated()) {
-		throw LogicError("Can not create PrintData. DG " + boost::lexical_cast<std::string>(dg->getId()) + " has not been calculated.");
-	}
+	if(!dg->isLocked())
+		throw LogicError("Can not create print data. The DG is not locked yet.");
 	data.reset(new lib::IO::DG::Write::Data(dg->getHyper()));
 }
 
-PrintData::PrintData(const PrintData &other) : dg(other.dg), data(new lib::IO::DG::Write::Data(*other.data)) { }
+PrintData::PrintData(const PrintData &other) : dg(other.dg), data(new lib::IO::DG::Write::Data(*other.data)) {}
 
-PrintData::PrintData(PrintData &&other) : dg(other.dg), data(std::move(other.data)) { }
+PrintData::PrintData(PrintData &&other) : dg(other.dg), data(std::move(other.data)) {}
 
-PrintData::~PrintData() { }
+PrintData::~PrintData() = default;
 
 lib::IO::DG::Write::Data &PrintData::getData() {
 	return *data;
@@ -81,42 +72,49 @@ std::shared_ptr<DG> PrintData::getDG() const {
 	return dg;
 }
 
-void PrintData::makeDuplicate(DG::HyperEdge e, unsigned int eDup) {
-	printDataCheckHyperEdge(getDG(), e);
-	lib::DG::Hyper::Vertex eInner = *(vertices(getDG()->getHyper().getGraph()).first + e.getId());
-	data->makeDuplicate(eInner, eDup);
+void PrintData::makeDuplicate(DG::HyperEdge e, int eDup) {
+	printDataCheckHyperEdge(dg, e);
+	const auto &dg = this->dg->getHyper();
+	const auto eInner = dg.getInternalVertex(e);
+	const bool res = data->makeDuplicate(eInner, eDup);
+	if(!res)	throw LogicError("Duplicate already exists.");
 }
 
-void PrintData::removeDuplicate(DG::HyperEdge e, unsigned int eDup) {
-	printDataCheckHyperEdge(getDG(), e);
-	lib::DG::Hyper::Vertex eInner = *(vertices(getDG()->getHyper().getGraph()).first + e.getId());
-	data->removeDuplicate(eInner, eDup);
+void PrintData::removeDuplicate(DG::HyperEdge e, int eDup) {
+	printDataCheckHyperEdge(dg, e);
+	const auto &dg = this->dg->getHyper();
+	const auto eInner = dg.getInternalVertex(e);
+	const bool res = data->removeDuplicate(eInner, eDup);
+	if(!res) throw LogicError("Duplicate does not exist.");
 }
 
-void PrintData::reconnectTail(DG::HyperEdge e, unsigned int eDup, std::shared_ptr<graph::Graph> g, unsigned int vDupTar) {
-	reconnectCommon(getDG(), e, eDup, g, vDupTar, true);
-	lib::DG::Hyper::Vertex eInner = *(vertices(getDG()->getHyper().getGraph()).first + e.getId());
-	lib::DG::Hyper::Vertex tail = getDG()->getHyper().getVertexFromGraph(&g->getGraph());
-	data->reconnectTail(eInner, eDup, tail, vDupTar, std::numeric_limits<unsigned int>::max());
+void PrintData::reconnectSource(DG::HyperEdge e, int eDup, DG::Vertex v, int vDupTar) {
+	reconnectCommon(dg, e, eDup, v, vDupTar, true);
+	const auto &dg = this->dg->getHyper();
+	const auto eInner = dg.getInternalVertex(e);
+	const auto vTail = dg.getInternalVertex(v);
+	data->reconnectSource(eInner, eDup, vTail, vDupTar, std::numeric_limits<int>::max());
 }
 
-void PrintData::reconnectHead(DG::HyperEdge e, unsigned int eDup, std::shared_ptr<graph::Graph> g, unsigned int vDupTar) {
-	reconnectCommon(getDG(), e, eDup, g, vDupTar, false);
-	lib::DG::Hyper::Vertex eInner = *(vertices(getDG()->getHyper().getGraph()).first + e.getId());
-	lib::DG::Hyper::Vertex head = getDG()->getHyper().getVertexFromGraph(&g->getGraph());
-	data->reconnectHead(eInner, eDup, head, vDupTar, std::numeric_limits<unsigned int>::max());
+void PrintData::reconnectTarget(DG::HyperEdge e, int eDup, DG::Vertex v, int vDupTar) {
+	reconnectCommon(dg, e, eDup, v, vDupTar, false);
+	const auto &dg = this->dg->getHyper();
+	const auto eInner = dg.getInternalVertex(e);
+	const auto vHead = dg.getInternalVertex(v);
+	data->reconnectTarget(eInner, eDup, vHead, vDupTar, std::numeric_limits<int>::max());
 }
 
 //------------------------------------------------------------------------------
 // Printer
 //------------------------------------------------------------------------------
 
-Printer::Printer() : graphPrinter(std::make_unique<graph::Printer>()), printer(std::make_unique<lib::IO::DG::Write::Printer>()) {
+Printer::Printer() : graphPrinter(std::make_unique<graph::Printer>()),
+                     printer(std::make_unique<lib::IO::DG::Write::Printer>()) {
 	graphPrinter->enableAll();
 	graphPrinter->setWithIndex(false);
 }
 
-Printer::~Printer() { }
+Printer::~Printer() {}
 
 lib::IO::DG::Write::Printer &Printer::getPrinter() const {
 	return *printer;
@@ -154,24 +152,30 @@ bool Printer::getLabelsAsLatexMath() const {
 	return printer->baseOptions.labelsAsLatexMath;
 }
 
-void Printer::pushVertexVisible(std::function<bool(std::shared_ptr<graph::Graph>, std::shared_ptr<DG>) > f) {
-	printer->pushVertexVisible([f](lib::DG::HyperVertex v, const lib::DG::Hyper & dg) {
-		return f(dg.getGraph()[v].graph->getAPIReference(), dg.getNonHyper().getAPIReference());
+void Printer::pushVertexVisible(std::function<bool(DG::Vertex)> f) {
+	if(!f) throw LogicError("Can not push empty callback.");
+	printer->pushVertexVisible([f](lib::DG::HyperVertex v, const lib::DG::Hyper &dg) {
+		return f(dg.getInterfaceVertex(v));
 	});
 }
 
 void Printer::popVertexVisible() {
+	if(!printer->hasVertexVisible())
+		throw LogicError("No vertex visible callback to pop.");
 	printer->popVertexVisible();
 }
 
-void Printer::pushEdgeVisible(std::function<bool(DG::HyperEdge) > f) {
-	printer->pushEdgeVisible([f](lib::DG::HyperVertex v, const lib::DG::Hyper & dg) {
+void Printer::pushEdgeVisible(std::function<bool(DG::HyperEdge)> f) {
+	if(!f) throw LogicError("Can not push empty callback.");
+	printer->pushEdgeVisible([f](lib::DG::HyperVertex v, const lib::DG::Hyper &dg) {
 		assert(dg.getGraph()[v].kind == lib::DG::HyperVertexKind::Edge);
 		return f(dg.getInterfaceEdge(v));
 	});
 }
 
 void Printer::popEdgeVisible() {
+	if(!printer->hasEdgeVisible())
+		throw LogicError("No edge visible callback to pop.");
 	printer->popEdgeVisible();
 }
 
@@ -199,24 +203,30 @@ const std::string &Printer::getEdgeLabelSep() {
 	return printer->edgeLabelSep;
 }
 
-void Printer::pushVertexLabel(std::function<std::string(std::shared_ptr<graph::Graph>, std::shared_ptr<DG>) > f) {
-	printer->pushVertexLabel([f](lib::DG::HyperVertex v, const lib::DG::Hyper & dg) {
-		return f(dg.getGraph()[v].graph->getAPIReference(), dg.getNonHyper().getAPIReference());
+void Printer::pushVertexLabel(std::function<std::string(DG::Vertex)> f) {
+	if(!f) throw LogicError("Can not push empty callback.");
+	printer->pushVertexLabel([f](lib::DG::HyperVertex v, const lib::DG::Hyper &dg) {
+		return f(dg.getInterfaceVertex(v));
 	});
 }
 
 void Printer::popVertexLabel() {
+	if(!printer->hasVertexLabel())
+		throw LogicError("No vertex label callback to pop.");
 	printer->popVertexLabel();
 }
 
-void Printer::pushEdgeLabel(std::function<std::string(DG::HyperEdge) > f) {
-	printer->pushEdgeLabel([f](lib::DG::HyperVertex v, const lib::DG::Hyper & dg) {
+void Printer::pushEdgeLabel(std::function<std::string(DG::HyperEdge)> f) {
+	if(!f) throw LogicError("Can not push empty callback.");
+	printer->pushEdgeLabel([f](lib::DG::HyperVertex v, const lib::DG::Hyper &dg) {
 		assert(dg.getGraph()[v].kind == lib::DG::HyperVertexKind::Edge);
 		return f(dg.getInterfaceEdge(v));
 	});
 }
 
 void Printer::popEdgeLabel() {
+	if(!printer->hasEdgeLabel())
+		throw LogicError("No edge label callback to pop.");
 	printer->popEdgeLabel();
 }
 
@@ -252,33 +262,49 @@ bool Printer::getWithInlineGraphs() const {
 	return printer->baseOptions.withInlineGraphs;
 }
 
-void Printer::pushVertexColour(std::function<std::string(std::shared_ptr<graph::Graph>, std::shared_ptr<DG>) > f, bool extendToEdges) {
-	printer->pushVertexColour([f](lib::DG::HyperVertex v, const lib::DG::Hyper & dg) {
-		return f(dg.getGraph()[v].graph->getAPIReference(), dg.getNonHyper().getAPIReference());
+void Printer::pushVertexColour(std::function<std::string(DG::Vertex)> f, bool extendToEdges) {
+	if(!f) throw LogicError("Can not push empty callback.");
+	printer->pushVertexColour([f](lib::DG::HyperVertex v, const lib::DG::Hyper &dg) {
+		return f(dg.getInterfaceVertex(v));
 	}, extendToEdges);
 }
 
 void Printer::popVertexColour() {
+	if(!printer->hasVertexColour())
+		throw LogicError("No vertex colour callback to pop.");
 	printer->popVertexColour();
 }
 
-void Printer::pushEdgeColour(std::function<std::string(DG::HyperEdge) > f) {
-	printer->pushEdgeColour([f](lib::DG::HyperVertex v, const lib::DG::Hyper & dg) {
+void Printer::pushEdgeColour(std::function<std::string(DG::HyperEdge)> f) {
+	if(!f) throw LogicError("Can not push empty callback.");
+	printer->pushEdgeColour([f](lib::DG::HyperVertex v, const lib::DG::Hyper &dg) {
 		assert(dg.getGraph()[v].kind == lib::DG::HyperVertexKind::Edge);
 		return f(dg.getInterfaceEdge(v));
 	});
 }
 
 void Printer::popEdgeColour() {
+	if(!printer->hasEdgeColour())
+		throw LogicError("No edge colour callback to pop.");
 	printer->popEdgeColour();
 }
 
-void Printer::setRotationOverwrite(std::function<int(std::shared_ptr<graph::Graph>) > f) {
+void Printer::setRotationOverwrite(std::function<int(std::shared_ptr<graph::Graph>)> f) {
+	if(!f) throw LogicError("Can not push empty callback.");
 	printer->setRotationOverwrite(f);
 }
 
-void Printer::setMirrorOverwrite(std::function<bool(std::shared_ptr<graph::Graph>) > f) {
+void Printer::setMirrorOverwrite(std::function<bool(std::shared_ptr<graph::Graph>)> f) {
+	if(!f) throw LogicError("Can not push empty callback.");
 	printer->setMirrorOverwrite(f);
+}
+
+void Printer::setGraphvizPrefix(const std::string &prefix) {
+	printer->setGraphvizPrefix(prefix);
+}
+
+const std::string &Printer::getGraphvizPrefix() const {
+	return printer->getGraphvizPrefix();
 }
 
 } // namespace dg

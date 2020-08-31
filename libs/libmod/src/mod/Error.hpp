@@ -115,7 +115,6 @@ struct MOD_DECL InputError : public Exception {
 // rst:		This exception is thrown when a pre-condition of a function is violated.
 // rst:
 // rst-class-start:
-
 struct MOD_DECL LogicError : public Exception {
 	LogicError(std::string &&text) : Exception(std::move(text)) {}
 
@@ -132,7 +131,6 @@ struct MOD_DECL LogicError : public Exception {
 // rst:		parsing of a string into a first-order term fails.
 // rst:
 // rst-class-start:
-
 struct MOD_DECL TermParsingError : public Exception {
 	TermParsingError(std::string &&text) : Exception(std::move(text)) {}
 
@@ -149,7 +147,6 @@ struct MOD_DECL TermParsingError : public Exception {
 // rst:		deduction failed.
 // rst:
 // rst-class-start:
-
 struct MOD_DECL StereoDeductionError : public Exception {
 	StereoDeductionError(std::string &&text) : Exception(std::move(text)) {}
 

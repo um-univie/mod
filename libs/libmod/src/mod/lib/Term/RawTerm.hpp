@@ -1,7 +1,6 @@
 #ifndef MOD_LIB_TERM_RAWTERM_H
 #define	MOD_LIB_TERM_RAWTERM_H
 
-#include <boost/mpl/bool.hpp> // TODO: remove when Boost 1.61 is required
 #include <boost/variant/recursive_wrapper.hpp>
 #include <boost/variant/variant.hpp>
 

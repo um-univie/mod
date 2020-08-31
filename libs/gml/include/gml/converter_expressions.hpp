@@ -5,56 +5,30 @@
 
 #include <boost/variant/get.hpp>
 
+#include <ostream>
+
 namespace gml {
 namespace converter {
+namespace detail {
 
-struct Unused {
-
-	template<typename T>
-	Unused operator=(T &&) const {
-		return Unused();
-	}
+struct ExpressionBase {
+	bool checkKey(const std::string &key) const;
+protected:
+	ExpressionBase(const std::string &key) : key(key) {}
+	void errorOnKey(const ast::KeyValue &kv, std::ostream &err) const;
+	bool checkAndErrorOnKey(const ast::KeyValue &kv, std::ostream &err) const;
+	bool checkAndErrorOnType(const ast::Value &value, std::ostream &err, ValueType expected) const;
+protected:
+	std::string key;
 };
 
-struct Parent {
-};
+}  // namespace detail
 
 template<typename AttrHandler>
-struct Expression {
-	bool checkKey(const std::string &key) const {
-		return key == this->key;
-	}
+struct Expression : detail::ExpressionBase {
 protected:
-
 	Expression(const std::string &key, AttrHandler attrHandler)
-			: key(key), attrHandler(attrHandler) {}
-
-	void errorOnKey(const ast::KeyValue &kv, std::ostream &err) const {
-		err << "Error at " << kv.line << ":" << kv.column << ".";
-		err << " Expected key '" << this->key << "', got key '" << kv.key << "'.";
-	}
-
-	bool checkAndErrorOnKey(const ast::KeyValue &kv, std::ostream &err) const {
-		bool res = checkKey(kv.key);
-		if(!res) errorOnKey(kv, err);
-		return res;
-	}
-
-	bool checkAndErrorOnType(const ast::Value &value, std::ostream &err, ValueType expected) const {
-		ValueType vt = boost::apply_visitor(ValueTypeVisitor(), value);
-		if(vt != expected) {
-			err << "Error at " << value.line << ":" << value.column << ".";
-			err << " Expected " << expected << " value, got " << vt << " value.";
-			return false;
-		}
-		return true;
-	}
-
-	const std::string &getKey() const {
-		return key;
-	}
-private:
-	std::string key;
+			: ExpressionBase(key), attrHandler(attrHandler) {}
 protected:
 	AttrHandler attrHandler;
 };
@@ -77,20 +51,26 @@ protected:
         }                                                                                        \
                                                                                                  \
         friend std::ostream &operator<<(std::ostream &s, const Name &expr) {                     \
-            return s << #Name << "(" << expr.getKey() << ")";                                    \
+            return s << #Name << "(" << expr.key << ")";                                         \
         }                                                                                        \
-};
+    };
 MAKE_TERMINAL(Int, int)
 MAKE_TERMINAL(Float, double)
 MAKE_TERMINAL(String, std::string)
 #undef MAKE_TERMINAL
 
+struct Unused {
+	template<typename T>
+	Unused operator=(T &&) const {
+		return Unused();
+	}
+};
+
+struct Parent {
+};
+
 template<typename Expr>
 struct ListElement {
-
-	ListElement(std::size_t lowerBound, std::size_t upperBound, const Expr &expr)
-			: lowerBound(lowerBound), upperBound(upperBound), expr(expr) {}
-
 	friend std::ostream &operator<<(std::ostream &s, const ListElement &el) {
 		return s << "[" << el.lowerBound << ", " << el.upperBound << "](" << el.expr << ")";
 	}
@@ -101,7 +81,6 @@ public:
 
 template<std::size_t I, std::size_t N, typename ...Expr>
 struct ListElementPrinter {
-
 	static void print(std::ostream &s, const std::tuple<ListElement<Expr>...> &elems) {
 		if(I > 0) s << ", ";
 		s << std::get<I>(elems);
@@ -111,16 +90,14 @@ struct ListElementPrinter {
 
 template<std::size_t N, typename ...Expr>
 struct ListElementPrinter<N, N, Expr...> {
-
 	static void print(std::ostream &s, const std::tuple<ListElement<Expr>...> &elems) {}
 };
 
 template<std::size_t I, std::size_t N, typename ...Expr>
 struct ListElementHandler {
-
 	template<typename ParentAttr>
 	static bool handle(const ast::KeyValue &kv, const std::tuple<ListElement<Expr>...> &elems,
-					   std::ostream &err, ParentAttr &parentAttr, std::array<std::size_t, N> &count) {
+	                   std::ostream &err, ParentAttr &parentAttr, std::array<std::size_t, N> &count) {
 		auto &elem = std::get<I>(elems);
 		if(!elem.expr.checkKey(kv.key)) {
 			return ListElementHandler<I + 1, N, Expr...>::handle(kv, elems, err, parentAttr, count);
@@ -140,10 +117,9 @@ struct ListElementHandler {
 
 template<std::size_t N, typename ...Expr>
 struct ListElementHandler<N, N, Expr...> {
-
 	template<typename ParentAttr>
 	static bool handle(const ast::KeyValue &kv, const std::tuple<ListElement<Expr>...> &elems,
-					   std::ostream &err, ParentAttr &parentAttr, std::array<std::size_t, N> &count) {
+	                   std::ostream &err, ParentAttr &parentAttr, std::array<std::size_t, N> &count) {
 		err << "Error at " << kv.line << ":" << kv.column << ".";
 		err << " Unexpected list element with key '" << kv.key << "'.";
 		return false;
@@ -152,7 +128,6 @@ struct ListElementHandler<N, N, Expr...> {
 
 template<std::size_t I, std::size_t N, typename ...Expr>
 struct ListElementUpperBound {
-
 	static bool
 	check(const std::tuple<ListElement<Expr>...> &elems, std::ostream &err, std::array<std::size_t, N> &count) {
 		auto &elem = std::get<I>(elems);
@@ -166,7 +141,6 @@ struct ListElementUpperBound {
 
 template<std::size_t N, typename ...Expr>
 struct ListElementUpperBound<N, N, Expr...> {
-
 	static bool
 	check(const std::tuple<ListElement<Expr>...> &elems, std::ostream &err, std::array<std::size_t, N> &count) {
 		return true;
@@ -175,7 +149,6 @@ struct ListElementUpperBound<N, N, Expr...> {
 
 template<typename Type, typename AttrHandler, typename ParentAttr>
 struct ListAttrHandler {
-
 	ListAttrHandler(const AttrHandler &attrHandler, ParentAttr &parentAttr)
 			: attrHandler(attrHandler), parentAttr(parentAttr) {}
 
@@ -194,7 +167,6 @@ private:
 
 template<typename AttrHandler, typename ParentAttr>
 struct ListAttrHandler<Unused, AttrHandler, ParentAttr> {
-
 	ListAttrHandler(const AttrHandler &, const ParentAttr &) {}
 
 	Unused &getAttr() {
@@ -208,7 +180,6 @@ private:
 
 template<typename AttrHandler, typename ParentAttr>
 struct ListAttrHandler<Parent, AttrHandler, ParentAttr> {
-
 	ListAttrHandler(const AttrHandler &attrHandler, ParentAttr &parentAttr)
 			: attrHandler(attrHandler), parentAttr(parentAttr) {}
 
@@ -233,7 +204,7 @@ struct List : Expression<AttrHandler> {
 	template<typename ParentAttr>
 	bool convert(const ast::KeyValue &kv, std::ostream &err, ParentAttr &parentAttr) const {
 		bool res = Base::checkAndErrorOnKey(kv, err)
-				   && Base::checkAndErrorOnType(kv.value, err, ValueType::List);
+		           && Base::checkAndErrorOnType(kv.value, err, ValueType::List);
 		if(!res) return res;
 		const ast::List &value = boost::get<x3::forward_ast<ast::List> >(kv.value);
 		std::array<std::size_t, sizeof...(Expr)> count;
@@ -241,7 +212,7 @@ struct List : Expression<AttrHandler> {
 		ListAttrHandler <Type, AttrHandler, ParentAttr> ourAttr(this->attrHandler, parentAttr);
 		for(const ast::KeyValue &kv : value.list) {
 			bool res = ListElementHandler<0, sizeof...(Expr), Expr...>::handle(kv, elems, err, ourAttr.getAttr(),
-																			   count);
+			                                                                   count);
 			if(!res) return false;
 		}
 		res = ListElementUpperBound<0, sizeof...(Expr), Expr...>::check(elems, err, count);
@@ -251,7 +222,7 @@ struct List : Expression<AttrHandler> {
 	}
 
 	friend std::ostream &operator<<(std::ostream &s, const List &expr) {
-		s << "List(" << expr.getKey() << ")[";
+		s << "List(" << expr.key << ")[";
 		ListElementPrinter<0, std::tuple_size<Elems>::value, Expr...>::print(s, expr.elems);
 		return s << "]";
 	}

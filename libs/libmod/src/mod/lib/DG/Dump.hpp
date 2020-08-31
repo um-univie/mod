@@ -19,7 +19,6 @@ std::unique_ptr<NonHyper> load(const std::vector<std::shared_ptr<graph::Graph> >
 										 const std::vector<std::shared_ptr<rule::Rule> > &rules,
 										 const std::string &file,
 										 std::ostream &err);
-void write(const NonHyper &dg, std::ostream &s);
 
 } // namespace Dump
 } // namespace DG

@@ -26,9 +26,7 @@ namespace dg {
 //------------------------------------------------------------------------------
 
 struct DG::Pimpl {
-
 	Pimpl(std::unique_ptr<lib::DG::NonHyper> dg) : dg(std::move(dg)) {}
-
 public:
 	const std::unique_ptr<lib::DG::NonHyper> dg;
 };
@@ -106,6 +104,7 @@ DG::EdgeRange DG::edges() const {
 DG::Vertex DG::findVertex(std::shared_ptr<graph::Graph> g) const {
 	if(!(hasActiveBuilder() || isLocked()))
 		throw LogicError("The DG neither has an active builder nor is locked yet.");
+	if(!g) throw LogicError("The graph is a nullptr.");
 	const auto &dg = getHyper();
 	const auto v = dg.getVertexOrNullFromGraph(&g->getGraph());
 	return dg.getInterfaceVertex(v);
@@ -163,11 +162,6 @@ const std::vector<std::shared_ptr<graph::Graph>> &DG::getGraphDatabase() const {
 }
 
 const std::vector<std::shared_ptr<graph::Graph> > &DG::getProducts() const {
-	if(!p->dg->getHasCalculated()) {
-		lib::IO::log() << "Notice: The set of product graphs is empty as the calculation has not been done." << std::endl;
-		static const std::vector<std::shared_ptr<graph::Graph> > empty;
-		return empty;
-	}
 	return getNonHyper().getProducts();
 }
 
@@ -184,7 +178,7 @@ std::pair<std::string, std::string> DG::print(const PrintData &data, const Print
 std::string DG::dump() const {
 	if(!p->dg->getHasCalculated())
 		throw LogicError("No dump can be done before the derivation graph it has been calculated.\n");
-	else return lib::IO::DG::Write::dump(*p->dg);
+	else return lib::IO::DG::Write::dumpToFile(*p->dg);
 }
 
 void DG::listStats() const {
@@ -210,19 +204,41 @@ std::shared_ptr<DG> wrapIt(DG *dgPtr) {
 std::shared_ptr<DG> DG::make(LabelSettings labelSettings,
                              const std::vector<std::shared_ptr<graph::Graph> > &graphDatabase,
                              IsomorphismPolicy graphPolicy) {
+	if(std::any_of(graphDatabase.begin(), graphDatabase.end(), [](const auto &g) {
+		return !g;
+	}))
+		throw LogicError("Nullptr in graph database.");
 	auto dgInternal = std::make_unique<lib::DG::NonHyperBuilder>(labelSettings, graphDatabase, graphPolicy);
 	return wrapIt(new DG(std::move(dgInternal)));
 }
 
-std::shared_ptr<DG> DG::dumpImport(const std::vector<std::shared_ptr<graph::Graph> > &graphs,
-                                   const std::vector<std::shared_ptr<rule::Rule> > &rules,
-                                   const std::string &file) {
+std::shared_ptr<DG> DG::load(const std::vector<std::shared_ptr<graph::Graph>> &graphDatabase,
+                             const std::vector<std::shared_ptr<rule::Rule>> &ruleDatabase,
+                             const std::string &file,
+                             IsomorphismPolicy graphPolicy) {
+	return load(graphDatabase, ruleDatabase, file, graphPolicy, 2);
+}
+
+std::shared_ptr<DG> DG::load(const std::vector<std::shared_ptr<graph::Graph>> &graphDatabase,
+                             const std::vector<std::shared_ptr<rule::Rule>> &ruleDatabase,
+                             const std::string &file,
+                             IsomorphismPolicy graphPolicy, int verbosity) {
+	if(std::any_of(graphDatabase.begin(), graphDatabase.end(), [](const auto &g) {
+		return !g;
+	}))
+		throw LogicError("Nullptr in graph database.");
+	if(std::any_of(ruleDatabase.begin(), ruleDatabase.end(), [](const auto &r) {
+		return !r;
+	}))
+		throw LogicError("Nullptr in rule database.");
+
 	std::ifstream fileStream(file.c_str());
-	if(!fileStream.is_open()) throw InputError("DG dump file not found, '" + file + "'\n");
+	if(!fileStream.is_open()) throw InputError("DG dump file not found, '" + file + "'.");
 	fileStream.close();
 	std::ostringstream err;
-	std::unique_ptr<lib::DG::NonHyper> dgInternal(lib::IO::DG::Read::dump(graphs, rules, file, err));
-	if(!dgInternal) throw InputError(err.str());
+	std::unique_ptr<lib::DG::NonHyper> dgInternal(
+			lib::IO::DG::Read::dump(graphDatabase, ruleDatabase, file, graphPolicy, err, verbosity));
+	if(!dgInternal) throw InputError("DG load error: " + err.str());
 	return wrapIt(new DG(std::move(dgInternal)));
 }
 

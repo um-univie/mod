@@ -80,11 +80,12 @@ struct NonHyperDump : public NonHyper {
 				auto &v = vertices[iVertices];
 				auto gCand = std::make_unique<lib::Graph::Single>(std::move(get<2>(v)), std::move(get<3>(v)), nullptr);
 				auto p = checkIfNew(std::move(gCand));
-				bool wasNew = trustAddGraphAsVertex(p.first);
+				const bool wasNew = trustAddGraphAsVertex(p.first);
 				graphMap[id] = p.first;
 				if(!p.second && printInfo)
 					IO::log() << "Graph linked: " << get<1>(v) << " -> " << p.first->getName() << std::endl;
-				if(wasNew) giveProductStatus(p.first);
+				//				if(wasNew) giveProductStatus(p.first);
+				(void) wasNew;
 				iVertices++;
 			} else if(iEdges < edges.size() && get<0>(edges[iEdges]) == id) {
 				const auto &e = edges[iEdges];
@@ -145,7 +146,7 @@ bool parse(Iter &textFirst,
            Attr &attr,
            std::ostream &err) {
 	try {
-		bool res = IO::detail::ParseDispatch<x3::space_type>::parse(first, last, p, attr, x3::space);
+		bool res = IO::detail::ParseDispatch<x3::ascii::space_type>::parse(first, last, p, attr, x3::ascii::space);
 		if(!res) {
 			err << "Error while parsing DG dump.\n";
 			IO::detail::doParserError(textFirst, first, last, lib::IO::log());
@@ -186,7 +187,7 @@ std::unique_ptr<NonHyper> load(const std::vector<std::shared_ptr<graph::Graph> >
 #define PARSE(p, a) if(!parse(textFirst, first, last, p, a, err)) return nullptr
 #define TRY_PARSE(p, a) parse(textFirst, first, last, p, a, err)
 	unsigned int version = 1;
-	TRY_PARSE("version:" >> x3::uint_, version);
+	TRY_PARSE(x3::ascii::lit("version:") >> x3::uint_, version);
 	PARSE("numVertices:" >> x3::uint_, numVertices);
 	PARSE("numEdges:" >> x3::uint_, numEdges);
 	PARSE("numRules:" >> x3::uint_, numRules);
@@ -305,72 +306,6 @@ std::unique_ptr<NonHyper> load(const std::vector<std::shared_ptr<graph::Graph> >
 	return std::make_unique<NonHyperDump>(
 			graphs,
 			ConstructionData{rules, std::move(vertices), std::move(rulesParsed), std::move(edges)});
-}
-
-void write(const NonHyper &dgNonHyper, std::ostream &s) {
-	if(dgNonHyper.getLabelSettings().withStereo) {
-		throw mod::LogicError("Can not yet dump DGs with stereo data.");
-	}
-	using Vertex = lib::DG::HyperVertex;
-	using Edge = lib::DG::HyperEdge;
-	using VertexKind = lib::DG::HyperVertexKind;
-	const auto &dgHyper = dgNonHyper.getHyper();
-	const auto &dg = dgHyper.getGraph();
-	int numVertices = 0, numEdges = 0;
-
-	for(const auto v : asRange(vertices(dg))) {
-		if(dg[v].kind == VertexKind::Vertex) numVertices++;
-		else numEdges++;
-	}
-
-	std::set<const lib::Rules::Real *, lib::Rules::LessById> rules;
-
-	for(const auto v : asRange(vertices(dg))) {
-		if(dg[v].kind != VertexKind::Edge) continue;
-		for(const auto *r : dgHyper.getRulesFromEdge(v))
-			rules.insert(r);
-	}
-
-	s << "version:\t2\n";
-	s << "numVertices:\t" << numVertices << "\n";
-	s << "numEdges:\t" << numEdges << "\n";
-	s << "numRules:\t" << rules.size() << "\n";
-
-	for(const auto v : asRange(vertices(dg))) {
-		if(dg[v].kind != VertexKind::Vertex) continue;
-		const auto id = get(boost::vertex_index_t(), dg, v);
-		const lib::Graph::Single *g = dg[v].graph;
-		assert(g);
-		s << "vertex:\t" << id << "\t\"" << g->getName() << "\"\t\"" << g->getGraphDFS().first << "\"\n";
-	}
-
-	for(const auto *r : rules) s << "rule:\t" << r->getId() << "\t\"" << r->getName() << "\"\n";
-
-	for(const auto v : asRange(vertices(dg))) {
-		if(dg[v].kind != VertexKind::Edge) continue;
-		const auto id = get(boost::vertex_index_t(), dg, v);
-		const auto &rules = dgHyper.getRulesFromEdge(v);
-		s << "edge:\t" << id << "\t" << rules.size();
-		for(const auto *r : rules)
-			s << " " << r->getId();
-		s << "\t";
-
-		std::vector<int> coefs;
-		for(const auto e : asRange(in_edges(v, dg))) {
-			const auto v = source(e, dg);
-			const auto id = 1 + get(boost::vertex_index_t(), dg, v);
-			coefs.push_back(-id);
-		}
-		for(const auto e : asRange(out_edges(v, dg))) {
-			const auto v = target(e, dg);
-			const auto id = 1 + get(boost::vertex_index_t(), dg, v);
-			coefs.push_back(id);
-		}
-		std::sort(begin(coefs), end(coefs));
-		for(int coef : coefs) s << coef << " ";
-
-		s << "\n";
-	}
 }
 
 } // namespace Dump

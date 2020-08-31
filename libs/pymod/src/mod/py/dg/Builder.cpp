@@ -11,7 +11,8 @@ namespace {
 // see https://stackoverflow.com/questions/19062657/is-there-a-way-to-wrap-the-function-return-value-object-in-python-using-move-i
 
 std::shared_ptr<ExecuteResult>
-Builder_execute(std::shared_ptr<Builder> b, std::shared_ptr<Strategy> strategy, int verbosity, bool ignoreRuleLabelTypes) {
+Builder_execute(std::shared_ptr<Builder> b, std::shared_ptr<Strategy> strategy, int verbosity,
+                bool ignoreRuleLabelTypes) {
 	return std::make_shared<ExecuteResult>(b->execute(strategy, verbosity, ignoreRuleLabelTypes));
 }
 
@@ -19,6 +20,9 @@ Builder_execute(std::shared_ptr<Builder> b, std::shared_ptr<Strategy> strategy, 
 
 void Builder_doExport() {
 	using AddDerivation = DG::HyperEdge (Builder::*)(const Derivations &, IsomorphismPolicy);
+	using Apply = std::vector<DG::HyperEdge> (Builder::*)(const std::vector<std::shared_ptr<graph::Graph> > &,
+	                                                      std::shared_ptr<rule::Rule>,
+	                                                      int, IsomorphismPolicy);
 	// rst: .. py:class:: DGBuilder
 	// rst:
 	// rst:		An RAII-style object obtained from :py:meth:`DG.build`.
@@ -46,8 +50,8 @@ void Builder_doExport() {
 			// rst:			:param IsomorphismPolicy graphPolicy: the isomorphism policy for adding the given graphs.
 			// rst:			:returns: the hyperedge corresponding to the given derivation.
 			// rst:			:rtype: DGHyperEdge
-			// rst:			:raises: :class:`LogicError` if ``d.left`` is empty.
-			// rst:			:raises: :class:`LogicError` if ``d.right`` is empty.
+			// rst:			:raises: :class:`LogicError` if ``d.left`` or ``d.right`` is empty.
+			// rst:			:raises: :class:`LogicError` if a ``None``is in ``d.left``, ``d.right``, or ``d.rules``.
 			// rst:			:raises: :class:`LogicError` if ``graphPolicy == IsomorphismPolicy.Check`` and a given graph object
 			// rst:				is different but isomorphic to another given graph object or to a graph object already
 			// rst:				in the internal graph database in the associated derivation graph.
@@ -72,10 +76,35 @@ void Builder_doExport() {
 					// rst:
 					// rst:				.. warning:: This is checked during execution, so while the basic exception guarantee is provided,
 					// rst:					there may be modifications to the underlying derivation graph.
+					// rst:			:throws: :class:`LogicError` if a dynamic "add" strategy is executed where a returned graph is ``None``.
+					// rst:
+					// rst:				.. warning:: This is checked during execution, so while the basic exception guarantee is provided,
+					// rst:					there may be modifications to the underlying derivation graph.
 					// rst:			:throws: :class:`LogicError`: if ``ignoreRuleLabelTypes`` is ``False``, which is the default,
 					// rst:				and a rule in the given strategy has an associated :class:`LabelType` which is different from the one
 					// rst:				in the derivation graph.
 			.def("execute", &Builder_execute)
+					// rst:		.. py:method:: apply(graphs, r, verbosity=0, graphPolicy=IsomorphismPolicy.Check)
+					// rst:
+					// rst:			Compute proper direct derivations.
+					// rst:
+					// rst:			:param graphs: the graphs constituting the left-hand side of the computed direct derivations.
+					// rst:			:type graphs: list[Graph]
+					// rst:			:param Rule r: the rule to use for the direct derivations.
+					// rst:			:param int verbosity: the level of verbosity of printed information during calculation.
+					// rst:				See :cpp:func:`dg::Builder::apply` for explanations of the levels.
+					// rst:			:param IsomorphismPolicy graphPolicy: the isomorphism policy for adding the given graphs.
+					// rst:
+					// rst:			:returns: a list of hyper edges representing the found direct derivations.
+					// rst:				The list may contain duplicates if there are multiple ways of constructing
+					// rst:				the same direct derivation when ignoring the specific match morphism.
+					// rst:			:rtype: list[DGHyperEdge]
+					// rst:			:raises: :class:`LogicError` if there is a ``None`` in ``graphs``.
+					// rst:			:raises: :class:`LogicError` if ``r`` is ``None``.
+					// rst:			:raises: :class:`LogicError` if ``graphPolicy == IsomorphismPolicy.Check`` and a given graph object
+					// rst:				is different but isomorphic to another given graph object or to a graph object already
+					// rst:				in the internal graph database in the associated derivation graph.
+			.def("apply", static_cast<Apply>(&Builder::apply))
 					// rst:		.. py:method:: addAbstract(description)
 					// rst:
 					// rst:			Add vertices and hyperedges based on the given abstract description.
@@ -86,7 +115,28 @@ void Builder_doExport() {
 					// rst:
 					// rst:			:param str description: the description to parse into abstract derivations.
 					// rst:			:raises: :class:`InputError` if the description could not be parsed.
-			.def("addAbstract", &Builder::addAbstract);
+			.def("addAbstract", &Builder::addAbstract)
+					// rst:		.. py:method:: load(ruleDatabase, file, verbosity=2)
+					// rst:
+					// rst:			Load and add a derivation graph dump.
+					// rst:			Use :py:func:`DG.load` to load a dump as a locked derivation graph.
+					// rst:
+					// rst:			The label settings of this DG and the ones retrieved from the dump file must match.
+					// rst:			Vertices with graphs and hyperedges with rules are then added from the dump.
+					// rst:			Any graph in the dump which is isomorphic to a graph in the internal graph database of the DG
+					// rst:			is replaced by the given graph.
+					// rst:			The same procedure is done for the rules, but compared against the given rules.
+					// rst:			If a graph/rule is not found in the given lists, a new object is instantiated and used.
+					// rst:
+					// rst:			See :cpp:func:`dg::DG::load` for an explanation of the verbosity levels.
+					// rst:
+					// rst:			:param ruleDatabase: A list of rules used as explained above.
+					// rst:			:type ruleDatabase: list[Rule]
+					// rst:			:param str file: a DG dump file to load.
+					// rst:			:raises: :class:`LogicError` if there is a ``None`` in ``ruleDatabase``.
+					// rst:			:raises: :class:`LogicError` if the label settings of the dump does not match those of this DG.
+					// rst: 			:raises: :class:`InputError` if the file can not be opened or its content is bad.
+			.def("load", &Builder::load);
 
 	// rst: .. py:class:: DGExecuteResult
 	// rst:

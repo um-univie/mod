@@ -340,9 +340,8 @@ bool Single::canonicalCompare(const Single &g1, const Single &g2, LabelType labe
 }
 
 Single makePermutation(const Single &g) {
-	if(has_stereo(g.getLabelledGraph())) {
+	if(has_stereo(g.getLabelledGraph()))
 		throw mod::FatalError("Can not (yet) permute graphs with stereo information.");
-	}
 	std::unique_ptr<PropString> pString;
 	auto gBoost = lib::makePermutedGraph(g.getGraph(),
 					[&pString](GraphType & gNew) {
@@ -356,18 +355,21 @@ Single makePermutation(const Single &g) {
 	}
 	);
 	Single gPerm(std::move(gBoost), std::move(pString), nullptr);
-	bool iso = 1 == Single::isomorphismVF2(g, gPerm, 1,{LabelType::String, LabelRelation::Isomorphism, false, LabelRelation::Isomorphism});
-	if(!iso) {
-		IO::Graph::Write::Options graphLike, molLike;
-		graphLike.EdgesAsBonds(true).RaiseCharges(true).CollapseHydrogens(true).WithIndex(true);
-		molLike.CollapseHydrogens(true).EdgesAsBonds(true).RaiseCharges(true).SimpleCarbons(true).WithColour(true).WithIndex(true);
-		IO::Graph::Write::summary(g, graphLike, molLike);
-		IO::Graph::Write::summary(gPerm, graphLike, molLike);
-		IO::Graph::Write::gml(g, false);
-		IO::Graph::Write::gml(gPerm, false);
-		IO::log() << "g:     " << g.getSmiles() << std::endl;
-		IO::log() << "gPerm: " << gPerm.getSmiles() << std::endl;
-		MOD_ABORT;
+	if(getConfig().graph.checkIsoInPermutation.get()) {
+		const bool iso = 1 == Single::isomorphismVF2(g, gPerm, 1,
+				{LabelType::String, LabelRelation::Isomorphism, false, LabelRelation::Isomorphism});
+		if(!iso) {
+			IO::Graph::Write::Options graphLike, molLike;
+			graphLike.EdgesAsBonds(true).RaiseCharges(true).CollapseHydrogens(true).WithIndex(true);
+			molLike.CollapseHydrogens(true).EdgesAsBonds(true).RaiseCharges(true).SimpleCarbons(true).WithColour(true).WithIndex(true);
+			IO::Graph::Write::summary(g, graphLike, molLike);
+			IO::Graph::Write::summary(gPerm, graphLike, molLike);
+			IO::Graph::Write::gml(g, false);
+			IO::Graph::Write::gml(gPerm, false);
+			IO::log() << "g:     " << g.getSmiles() << std::endl;
+			IO::log() << "gPerm: " << gPerm.getSmiles() << std::endl;
+			MOD_ABORT;
+		}
 	}
 	return gPerm;
 }

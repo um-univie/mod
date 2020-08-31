@@ -12,8 +12,6 @@
 #include <mod/lib/DG/Strategies/Revive.hpp>
 #include <mod/lib/DG/Strategies/Rule.hpp>
 #include <mod/lib/DG/Strategies/Sequence.hpp>
-#include <mod/lib/DG/Strategies/Sort.hpp>
-#include <mod/lib/DG/Strategies/Take.hpp>
 #include <mod/lib/IO/IO.hpp>
 
 #include <ostream>
@@ -86,6 +84,10 @@ Strategy::Pimpl::Pimpl(std::unique_ptr<lib::DG::Strategies::Strategy> strategy) 
 std::shared_ptr<Strategy>
 Strategy::makeAdd(bool onlyUniverse, const std::vector<std::shared_ptr<graph::Graph> > &graphs,
                   IsomorphismPolicy graphPolicy) {
+	if(std::any_of(graphs.begin(), graphs.end(), [](const auto &g) {
+		return !g;
+	}))
+		throw LogicError("One of the graphs is a null pointer.");
 	return std::shared_ptr<Strategy>(
 			new Strategy(std::make_unique<lib::DG::Strategies::Add>(graphs, onlyUniverse, graphPolicy)));
 }
@@ -98,73 +100,81 @@ std::shared_ptr<Strategy> Strategy::makeAdd(
 			new Strategy(std::make_unique<lib::DG::Strategies::Add>(generator, onlyUniverse, graphPolicy)));
 }
 
-std::shared_ptr<Strategy>
-Strategy::makeExecute(std::shared_ptr<mod::Function<void(const Strategy::GraphState &)> > func) {
-	return std::shared_ptr<Strategy>(new Strategy(std::make_unique<lib::DG::Strategies::Execute>(func)));
+std::shared_ptr<Strategy> Strategy::makeSequence(const std::vector<std::shared_ptr<Strategy> > &strategies) {
+	if(strategies.empty())
+		throw LogicError("Can not create an empty-length sequence strategy.");
+	if(std::any_of(strategies.begin(), strategies.end(), [](const auto &p) {
+		return !p;
+	}))
+		throw LogicError("One of the strategies is a null pointer.");
+	std::vector<lib::DG::Strategies::Strategy *> cloned;
+	for(std::shared_ptr<Strategy> strat : strategies) cloned.push_back(strat->getStrategy().clone());
+	return std::shared_ptr<Strategy>(new Strategy(std::make_unique<lib::DG::Strategies::Sequence>(cloned)));
+}
+
+std::shared_ptr<Strategy> Strategy::makeParallel(const std::vector<std::shared_ptr<Strategy> > &strategies) {
+	if(strategies.empty())
+		throw LogicError("Can not create parallel strategy without any substrategies.");
+	if(std::any_of(strategies.begin(), strategies.end(), [](const auto &p) {
+		return !p;
+	}))
+		throw LogicError("One of the strategies is a null pointer.");
+	std::vector<lib::DG::Strategies::Strategy *> cloned;
+	for(std::shared_ptr<Strategy> strat : strategies) cloned.push_back(strat->getStrategy().clone());
+	return std::shared_ptr<Strategy>(new Strategy(std::make_unique<lib::DG::Strategies::Parallel>(cloned)));
 }
 
 std::shared_ptr<Strategy> Strategy::makeFilter(bool alsoUniverse,
                                                std::shared_ptr<mod::Function<bool(std::shared_ptr<graph::Graph>,
                                                                                   const Strategy::GraphState &,
                                                                                   bool)> > filterFunc) {
+	if(!filterFunc)
+		throw LogicError("The predicate is a null pointer.");
 	return std::shared_ptr<Strategy>(
 			new Strategy(std::make_unique<lib::DG::Strategies::Filter>(filterFunc, alsoUniverse)));
 }
 
 std::shared_ptr<Strategy>
+Strategy::makeExecute(std::shared_ptr<mod::Function<void(const Strategy::GraphState &)> > func) {
+	if(!func)
+		throw LogicError("The callback is a null pointer.");
+	return std::shared_ptr<Strategy>(new Strategy(std::make_unique<lib::DG::Strategies::Execute>(func)));
+}
+
+std::shared_ptr<Strategy> Strategy::makeRule(std::shared_ptr<rule::Rule> rule) {
+	if(!rule) throw LogicError("The rule is a null pointer.");
+	return std::shared_ptr<Strategy>(new Strategy(std::make_unique<lib::DG::Strategies::Rule>(rule)));
+}
+
+std::shared_ptr<Strategy>
 Strategy::makeLeftPredicate(std::shared_ptr<mod::Function<bool(const mod::Derivation &)> > predicate,
-                            std::shared_ptr<Strategy> strat) {
-	return std::shared_ptr<Strategy>(
-			new Strategy(std::make_unique<lib::DG::Strategies::LeftPredicate>(predicate, strat->getStrategy().clone())));
-}
-
-std::shared_ptr<Strategy> Strategy::makeParallel(const std::vector<std::shared_ptr<Strategy> > &strategies) {
-	if(strategies.empty()) {
-		throw LogicError("Parallel strategy with empty list of substrategies.");
-	}
-	std::vector<lib::DG::Strategies::Strategy *> cloned;
-	for(std::shared_ptr<Strategy> strat : strategies) cloned.push_back(strat->getStrategy().clone());
-	return std::shared_ptr<Strategy>(new Strategy(std::make_unique<lib::DG::Strategies::Parallel>(cloned)));
-}
-
-std::shared_ptr<Strategy> Strategy::makeRepeat(std::size_t limit, std::shared_ptr<Strategy> strategy) {
-	return std::shared_ptr<Strategy>(
-			new Strategy(std::make_unique<lib::DG::Strategies::Repeat>(strategy->getStrategy().clone(), limit)));
-}
-
-std::shared_ptr<Strategy> Strategy::makeRevive(std::shared_ptr<Strategy> strategy) {
-	return std::shared_ptr<Strategy>(
-			new Strategy(std::make_unique<lib::DG::Strategies::Revive>(strategy->getStrategy().clone())));
+                            std::shared_ptr<Strategy> strategy) {
+	if(!predicate) throw LogicError("The predicate is a null pointer.");
+	if(!strategy) throw LogicError("The substrategy is a null pointer.");
+	return std::shared_ptr<Strategy>(new Strategy(
+			std::make_unique<lib::DG::Strategies::LeftPredicate>(predicate, strategy->getStrategy().clone())));
 }
 
 std::shared_ptr<Strategy>
 Strategy::makeRightPredicate(std::shared_ptr<mod::Function<bool(const mod::Derivation &)> > predicate,
-                             std::shared_ptr<Strategy> strat) {
+                             std::shared_ptr<Strategy> strategy) {
+	if(!predicate) throw LogicError("The predicate is a null pointer.");
+	if(!strategy) throw LogicError("The substrategy is a null pointer.");
+	return std::shared_ptr<Strategy>(new Strategy(
+			std::make_unique<lib::DG::Strategies::RightPredicate>(predicate, strategy->getStrategy().clone())));
+}
+
+std::shared_ptr<Strategy> Strategy::makeRevive(std::shared_ptr<Strategy> strategy) {
+	if(!strategy) throw LogicError("The substrategy is a null pointer.");
 	return std::shared_ptr<Strategy>(
-			new Strategy(std::make_unique<lib::DG::Strategies::RightPredicate>(predicate, strat->getStrategy().clone())));
+			new Strategy(std::make_unique<lib::DG::Strategies::Revive>(strategy->getStrategy().clone())));
 }
 
-std::shared_ptr<Strategy> Strategy::makeRule(std::shared_ptr<rule::Rule> rule) {
-	return std::shared_ptr<Strategy>(new Strategy(std::make_unique<lib::DG::Strategies::Rule>(rule)));
-}
-
-std::shared_ptr<Strategy> Strategy::makeSequence(const std::vector<std::shared_ptr<Strategy> > &strategies) {
-	if(strategies.empty())
-		throw LogicError("Can not create an empty-length sequence strategy.");
-	std::vector<lib::DG::Strategies::Strategy *> cloned;
-	for(std::shared_ptr<Strategy> strat : strategies) cloned.push_back(strat->getStrategy().clone());
-	return std::shared_ptr<Strategy>(new Strategy(std::make_unique<lib::DG::Strategies::Sequence>(cloned)));
-}
-
-std::shared_ptr<Strategy> Strategy::makeSort(bool doUniverse,
-                                             std::shared_ptr<mod::Function<bool(std::shared_ptr<graph::Graph>,
-                                                                                std::shared_ptr<graph::Graph>,
-                                                                                const Strategy::GraphState &)> > less) {
-	return std::shared_ptr<Strategy>(new Strategy(std::make_unique<lib::DG::Strategies::Sort>(less, doUniverse)));
-}
-
-std::shared_ptr<Strategy> Strategy::makeTake(bool doUniverse, unsigned int limit) {
-	return std::shared_ptr<Strategy>(new Strategy(std::make_unique<lib::DG::Strategies::Take>(limit, doUniverse)));
+std::shared_ptr<Strategy> Strategy::makeRepeat(int limit, std::shared_ptr<Strategy> strategy) {
+	if(limit <= 0) throw LogicError("Limit must be positive.");
+	if(!strategy) throw LogicError("The substrategy is a null pointer.");
+	return std::shared_ptr<Strategy>(
+			new Strategy(std::make_unique<lib::DG::Strategies::Repeat>(strategy->getStrategy().clone(), limit)));
 }
 
 } // namespace dg

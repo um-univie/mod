@@ -16,18 +16,9 @@ unsigned int calcMaxNumComponents(const std::vector<Strategy *> &strats) {
 	return res;
 }
 
-Parallel::Parallel(const std::vector<Strategy *> &strats) : Strategy::Strategy(calcMaxNumComponents(strats)),
-																				strats(strats) {
-	if(strats.size() == 0) {
-		if(getConfig().dg.disallowEmptyParallelStrategies.get()) {
-			IO::log() << "ERROR: parallel strategy is empty." << std::endl;
-			IO::log() << "Use the config variable " << getConfig().dg.disallowEmptyParallelStrategies.getName()
-						 << " to allow it." << std::endl;
-			throw std::exception();
-		} else {
-			IO::log() << "WARNING: parallel strategy is empty." << std::endl;
-		}
-	}
+Parallel::Parallel(const std::vector<Strategy *> &strats)
+		: Strategy::Strategy(calcMaxNumComponents(strats)), strats(strats) {
+	assert(!strats.empty());
 }
 
 Parallel::~Parallel() {

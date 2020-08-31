@@ -11,7 +11,6 @@ target_include_directories(gml
         $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
         ${Boost_INCLUDE_DIR}) # we only use header-only libs from Boost, right?
-target_link_libraries(gml PRIVATE -Wl,--no-undefined)
 target_compile_options(gml PRIVATE -Wall -Wextra
         -Wno-unused-parameter
         -Wno-parentheses)

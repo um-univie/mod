@@ -121,6 +121,7 @@ BEGIN {
 function getModHeaders {
 	find $topSrcDir/libs/libmod/src/mod/ -iname "*.hpp" \
 		| grep -v -e "/lib/"  \
+		| grep -v -e "/internal/"  \
 		| sed -e "s/.*\/src\/mod\///" -e "s/\.hpp$//" \
 		| sort
 }
@@ -140,6 +141,7 @@ function makeIndex {
 	pymod/pymod
 	postmod/postmod
 	modWrapper/modWrapper
+	epim/epim
 	dataDesc/dataDesc
 	dgStrat/dgStrat
 	examples/index
@@ -170,6 +172,7 @@ Overview
 ========
 
 This is the documentation for the MedØlDatschgerl (MØD) software package.
+The sources can be found in the GitHub repository: `<http://github.com/jakobandersen/mod>`_.
 For additional information see the webpage: `<http://mod.imada.sdu.dk>`_.
 
 The package contains the following components.
@@ -179,6 +182,7 @@ The package contains the following components.
 * PyMØD, Python 3 module (``mod``)
     Python bindings for the library and extra functionality for easier usage of
     many features.
+	It additionally include the submodule :ref:`epim`.
 *  PostMØD, Bash Script (``mod_post``)
     The post processor for compiling figures and summaries.
 * The wrapper script, Bash Script (``mod``)
@@ -187,6 +191,13 @@ The package contains the following components.
     The wrapper handles output and invokes the post processor.
     Additionally, it can run the chosen virtual machine through ``gdb``
     and/or ``valgrind`` (either normal memcheck or callgrind).
+
+
+Contributors
+============
+
+* `Jakob Lykke Andersen <https://imada.sdu.dk/~jlandersen>`__: main author.
+* `Nikolai Nøjgaard <https://imada.sdu.dk/~nojgaard>`__: author of :ref:`EpiM`.
 
 EOF
 cat << "EOF"

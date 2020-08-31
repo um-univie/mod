@@ -22,7 +22,10 @@ __pycache__
 /doc/source/pymod/[A-Z]*.rst
 /doc/source/libmod/[^/]*/
 /doc/source/pymod/[^/]*/
-/doc/source/examples/inc_*.rst
+/doc/source/examples/*.rst
 /doc/source/_static/examples/libmod_cmake
 /doc/source/_static/examples/pymod_extension
 /doc/source/_static/examples/py
+
+out/
+summary/

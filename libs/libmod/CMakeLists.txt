@@ -17,29 +17,45 @@ target_include_directories(libmod
         PUBLIC
         $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src>
-        $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}/include>
-        ${Boost_INCLUDE_DIR})
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}/include>)
 if(ENABLE_DEP_SYMBOL_HIDING)
     target_link_libraries(libmod PRIVATE
             $<$<CXX_COMPILER_ID:GNU>:-Wl,--exclude-libs,ALL>
             $<$<CXX_COMPILER_ID:Clang>:-Wl,--exclude-libs,ALL>
-            $<$<CXX_COMPILER_ID:AppleClang>:-Wl,--exclude-libs,ALL>)
+            #$<$<CXX_COMPILER_ID:AppleClang>:-Wl,--exclude-libs,ALL> # TODO: is a an equivalent?
+            )
 endif()
 target_link_libraries(libmod
         PUBLIC
-        JLA::boost
+            JLA::boost
         PRIVATE
-        GML::gml Threads::Threads
-        Boost::iostreams Boost::system
-        GraphCanon::graph_canon
-        $<$<BOOL:${WITH_OPENBABEL}>:OpenBabel::OpenBabel>
+            GML::gml Threads::Threads
+            Boost::graph Boost::iostreams
+            GraphCanon::graph_canon
+            nlohmann_json::nlohmann_json
+            nlohmann_json_schema_validator
+            $<$<BOOL:${WITH_OPENBABEL}>:OpenBabel::OpenBabel>
         )
+# Boost::graph needs Boost::regex which needs the RPATH of libmod to have Boost in it.
+# But because all Boost libs are linked privately the path is not exposed.
+# So if someone links against libmod, but no Boost lib, then the linking will fail.
+# Perhapse fixed in https://gitlab.kitware.com/cmake/cmake/-/merge_requests/3642
+# TODO: remove the next line with some higher CMAKE version is required?
+target_link_libraries(libmod PUBLIC Boost::iostreams)
+target_link_libraries(libmod PRIVATE
+        $<$<CXX_COMPILER_ID:GNU>:-Wl,--no-undefined>
+        $<$<CXX_COMPILER_ID:Clang>:-Wl,--no-undefined>
+        #$<$<CXX_COMPILER_ID:AppleClang>:-Wl,--no-undefined> # TODO: is there an equivalent?
+        )
+# https://stackoverflow.com/questions/52018092/how-to-set-rpath-and-runpath-with-gcc-ld
+target_link_libraries(libmod PRIVATE -Wl,--disable-new-dtags)
 target_compile_options(libmod PRIVATE -Wall -Wextra
         -Wno-unused-parameter
         -Wno-comment
         -Wno-sign-compare
         -Wno-unused-local-typedefs
-        -Wno-unused-const-variable # gives false positive in the ILP wrapper
+        -Wno-unused-const-variable
+        -Wno-error=maybe-uninitialized # gives false positive for boost::optional
         $<$<CXX_COMPILER_ID:Clang>:-Wno-unused-private-field>
         )
 target_compile_options(libmod PUBLIC
@@ -93,13 +109,4 @@ install(EXPORT PROJECT_exports
         FILE ${PROJECT_NAME}Targets.cmake)
 install(DIRECTORY ${exportDir}
         DESTINATION lib/cmake
-        COMPONENT mod_dev)
-
-
-# pkg-config file
-# -------------------------------------------------------------------------
-set(exportDir ${CMAKE_CURRENT_BINARY_DIR}/lib/pkgconfig)
-configure_file(lib/pkgconfig/mod.pc.in ${exportDir}/mod.pc @ONLY)
-install(FILES ${exportDir}/mod.pc
-        DESTINATION ${CMAKE_INSTALL_LIBDIR}/pkgconfig
         COMPONENT mod_dev)

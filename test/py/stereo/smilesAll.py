@@ -1,5 +1,4 @@
-include("../smiles/smiles_cansmi_roundtrip.py")
-include("../smiles/smiles_nci.py")
+include("../graph/smiles/mass/loadGraphs.py")
 sys.exit(0)
 for a in inputGraphs:
 	postSection(a.name)

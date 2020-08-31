@@ -107,6 +107,8 @@ def popFilePrefix():
 #----------------------------------------------------------
 
 def _wrap(C, l):
+	if type(l) is C:
+		return l
 	lcpp = C()
 	lcpp.extend(a for a in l)
 	return lcpp
@@ -156,25 +158,26 @@ def _funcWrap(F, f, resultWrap=None, module=libpymod):
 		res = Constant(f)
 	return module._sharedToStd(res)
 
-#----------------------------------------------------------
+###########################################################
 # Chem
-#----------------------------------------------------------
+###########################################################
 
 BondType.__str__ = libpymod._bondTypeToString
 
-#----------------------------------------------------------
+###########################################################
 # Config
-#----------------------------------------------------------
+###########################################################
 
 LabelType.__str__ = libpymod._LabelType__str__
 LabelRelation.__str__ = libpymod._LabelRelation__str__
 IsomorphismPolicy.__str__ = libpymod._IsomorphismPolicy__str__
+SmilesClassPolicy.__str__ = libpymod._SmilesClassPolicy__str__
 
 config = getConfig()
 
-#----------------------------------------------------------
+###########################################################
 # Derivation
-#----------------------------------------------------------
+###########################################################
 
 Derivation.__repr__ = Derivation.__str__
 
@@ -185,9 +188,6 @@ def _Derivation__setattr__(self, name, value):
 		_NoNew__setattr__(self, name, value)
 Derivation.__setattr__ = _Derivation__setattr__
 
-#----------------------------------------------------------
-# Derivations
-#----------------------------------------------------------
 
 Derivations.__repr__ = Derivations.__str__
 
@@ -200,9 +200,9 @@ def _Derivations__setattr__(self, name, value):
 		_NoNew__setattr__(self, name, value)
 Derivations.__setattr__ = _Derivations__setattr__
 
-#----------------------------------------------------------
+###########################################################
 # DG
-#----------------------------------------------------------
+###########################################################
 
 def dgDerivations(ders):
 	_deprecation("dgDerivations is deprecated. Use the new build interface.")
@@ -227,8 +227,14 @@ def dgRuleComp(graphs, strat, labelSettings=LabelSettings(LabelType.String, Labe
 	object.__setattr__(dg, "calc", types.MethodType(_DG_calc, dg))
 	return dg
 
-def dgDump(graphs, rules, f):
-	return libpymod.dgDump(_wrap(VecGraph, graphs), _wrap(VecRule, rules), prefixFilename(f))
+_DG_load_orig = DG.load
+def _DG_load(graphDatabase, ruleDatabase, file,
+	         graphPolicy=IsomorphismPolicy.Check, verbosity=2):
+	return _DG_load_orig(_wrap(VecGraph, graphDatabase),
+	                     _wrap(VecRule, ruleDatabase),
+	                     prefixFilename(file),
+	                     graphPolicy, verbosity)
+DG.load = _DG_load
 
 _DG__init__old = DG.__init__
 def _DG__init__(self, *,
@@ -314,6 +320,16 @@ class DGBuildContextManager(object):
 		self._check()
 		return self._builder.addAbstract(description)
 	
+	def apply(self, graphs, rule, verbosity=0, graphPolicy=IsomorphismPolicy.Check):
+		self._check()
+		return _unwrap(self._builder.apply(_wrap(VecGraph, graphs), rule, verbosity, graphPolicy))
+
+	def load(self, ruleDatabase, file, verbosity=2):
+		self._check()
+		return self._builder.load(
+			_wrap(VecRule, ruleDatabase),
+			prefixFilename(file), verbosity)
+
 _DG_build_orig = DG.build
 DG.build = lambda self: DGBuildContextManager(self)
 
@@ -347,25 +363,39 @@ DGHyperEdge.print = lambda self, *args, **kwargs: _unwrap(_DGHyperEdge_print_ori
 # DGPrinter
 #----------------------------------------------------------
 
+def _makeGraphToVertexCallback(orig, name, func):
+	def callback(self, f, *args, **kwargs):
+		if hasattr(f, "__call__"):
+			import inspect
+			spec = inspect.getargspec(f)
+			if len(spec.args) == 2:
+				_deprecation("The callback for {} seems to take two arguments, a graph and a derivation graph. This is deprecated, the callback should take a single DGVertex argument.".format(name))
+				fOrig = f
+				f = lambda v, fOrig=fOrig: fOrig(v.graph, v.dg)
+		return orig(self, _funcWrap(func, f), *args, **kwargs)
+	return callback
+
 _DGPrinter_pushVertexVisible_orig = DGPrinter.pushVertexVisible
-DGPrinter.pushVertexVisible = \
-	lambda self, f: _DGPrinter_pushVertexVisible_orig(self, _funcWrap(Func_BoolGraphDG, f))
+DGPrinter.pushVertexVisible = _makeGraphToVertexCallback(
+	_DGPrinter_pushVertexVisible_orig, "pushVertexVisible", Func_BoolDGVertex)
 
 _DGPrinter_pushEdgeVisible_orig = DGPrinter.pushEdgeVisible
 DGPrinter.pushEdgeVisible = \
 	lambda self, f: _DGPrinter_pushEdgeVisible_orig(self, _funcWrap(Func_BoolDGHyperEdge, f))
 
 _DGPrinter_pushVertexLabel_orig = DGPrinter.pushVertexLabel
-DGPrinter.pushVertexLabel = \
-	lambda self, f: _DGPrinter_pushVertexLabel_orig(self, _funcWrap(Func_StringGraphDG, f))
+DGPrinter.pushVertexLabel = _makeGraphToVertexCallback(
+	_DGPrinter_pushVertexLabel_orig , "pushVertexLabel", Func_StringDGVertex)
 
 _DGPrinter_pushEdgeLabel_orig = DGPrinter.pushEdgeLabel
 DGPrinter.pushEdgeLabel = \
 	lambda self, f: _DGPrinter_pushEdgeLabel_orig(self, _funcWrap(Func_StringDGHyperEdge, f))
 
 _DGPrinter_pushVertexColour_orig = DGPrinter.pushVertexColour
+_DGPrinter_pushVertexColour_inner = _makeGraphToVertexCallback(
+	_DGPrinter_pushVertexColour_orig, "pushVertexColour", Func_StringDGVertex)
 DGPrinter.pushVertexColour = \
-	lambda self, f, extendToEdges=True: _DGPrinter_pushVertexColour_orig(self, _funcWrap(Func_StringGraphDG, f), extendToEdges)
+	lambda self, f, extendToEdges=True: _DGPrinter_pushVertexColour_inner(self, f, extendToEdges)
 
 _DGPrinter_pushEdgeColour_orig = DGPrinter.pushEdgeColour
 DGPrinter.pushEdgeColour = \
@@ -403,40 +433,35 @@ def _DGStrat_makeAddDynamic(onlyUniverse, generator, graphPolicy):
 	return _DGStrat_makeAddDynamic_orig(onlyUniverse, _funcWrap(Func_VecGraph, generator, resultWrap=VecGraph), graphPolicy)
 DGStrat.makeAddDynamic = _DGStrat_makeAddDynamic
 
-_DGStrat_makeExecute_orig = DGStrat.makeExecute
-def _DGStrat_makeExecute(func):
-	return _DGStrat_makeExecute_orig(_funcWrap(Func_VoidDGStratGraphState, func))
-DGStrat.makeExecute = _DGStrat_makeExecute
-
-_DGStrat_makeFilter_orig = DGStrat.makeFilter
-def _DGStrat_makeFilter(alsoUniverse, filterFunc):
-	return _DGStrat_makeFilter_orig(alsoUniverse, _funcWrap(Func_BoolGraphDGStratGraphStateBool, filterFunc))
-DGStrat.makeFilter = _DGStrat_makeFilter
-
-_DGStrat_makeLeftPredicate_orig = DGStrat.makeLeftPredicate
-def _DGStrat_makeLeftPredicate(pred, strat):
-	return _DGStrat_makeLeftPredicate_orig(_funcWrap(Func_BoolDerivation, pred), strat)
-DGStrat.makeLeftPredicate = _DGStrat_makeLeftPredicate
+_DGStrat_makeSequence_orig = DGStrat.makeSequence
+def _DGStrat_makeSequence(l):
+	return _DGStrat_makeSequence_orig(_wrap(VecDGStrat, l))
+DGStrat.makeSequence = _DGStrat_makeSequence
 
 _DGStrat_makeParallel_orig = DGStrat.makeParallel
 def _DGStrat_makeParallel(l):
 	return _DGStrat_makeParallel_orig(_wrap(VecDGStrat, l))
 DGStrat.makeParallel = _DGStrat_makeParallel
 
+_DGStrat_makeFilter_orig = DGStrat.makeFilter
+def _DGStrat_makeFilter(alsoUniverse, filterFunc):
+	return _DGStrat_makeFilter_orig(alsoUniverse, _funcWrap(Func_BoolGraphDGStratGraphStateBool, filterFunc))
+DGStrat.makeFilter = _DGStrat_makeFilter
+
+_DGStrat_makeExecute_orig = DGStrat.makeExecute
+def _DGStrat_makeExecute(func):
+	return _DGStrat_makeExecute_orig(_funcWrap(Func_VoidDGStratGraphState, func))
+DGStrat.makeExecute = _DGStrat_makeExecute
+
+_DGStrat_makeLeftPredicate_orig = DGStrat.makeLeftPredicate
+def _DGStrat_makeLeftPredicate(pred, strat):
+	return _DGStrat_makeLeftPredicate_orig(_funcWrap(Func_BoolDerivation, pred), strat)
+DGStrat.makeLeftPredicate = _DGStrat_makeLeftPredicate
+
 _DGStrat_makeRightPredicate_orig = DGStrat.makeRightPredicate
 def _DGStrat_makeRightPredicate(pred, strat):
 	return _DGStrat_makeRightPredicate_orig(_funcWrap(Func_BoolDerivation, pred), strat)
 DGStrat.makeRightPredicate = _DGStrat_makeRightPredicate
-
-_DGStrat_makeSequence_orig = DGStrat.makeSequence
-def _DGStrat_makeSequence(l):
-	return _DGStrat_makeSequence_orig(_wrap(VecDGStrat, l))
-DGStrat.makeSequence = _DGStrat_makeSequence
-
-_DGStrat_makeSort_orig = DGStrat.makeSort
-def _DGStrat_makeSort(doUniverse, less):
-	return _DGStrat_makeSort_orig(doUniverse, _funcWrap(Func_BoolGraphGraphDGStratGraphState, less))
-DGStrat.makeSort = _DGStrat_makeSort
 
 
 #----------------------------------------------------------
@@ -479,8 +504,8 @@ def graphGML(f, name=None, add=True):
 	return _graphLoad(libpymod.graphGML(prefixFilename(f)), name, add)
 def graphDFS(s, name=None, add=True):
 	return _graphLoad(libpymod.graphDFS(s), name, add)
-def smiles(s, name=None, add=True):
-	return _graphLoad(libpymod.smiles(s), name, add)
+def smiles(s, name=None, add=True, allowAbstract=False, classPolicy=SmilesClassPolicy.NoneOnDuplicate):
+	return _graphLoad(libpymod.smiles(s, allowAbstract, classPolicy), name, add)
 
 Graph.__repr__ = lambda self: str(self) + "(" + str(self.id) + ")"
 Graph.__eq__ = lambda self, other: self.id == other.id
@@ -650,7 +675,7 @@ class _DGStrat_RepeatProxy(object):
 	def __getitem__(self, key):
 		return _DGStrat_RepeatProxyBoundHolder(key)
 	def __call__(self, strat):
-		return self[2**32-1](strat)
+		return self[2**31 - 1](strat)
 		
 repeat = _DGStrat_RepeatProxy()
 
@@ -682,29 +707,6 @@ DGStrat.__rrshift__ = lambda self, other: _DGStrat_sequence__rshift__(other, sel
 _DGStrat_sequenceProxy.__rshift__ = _DGStrat_sequence__rshift__
 Rule.__rshift__ = _DGStrat_sequence__rshift__
 
-# sort
-#----------------------------------------------------------
-
-class _DGStrat_SortProxy(object):
-	def __init__(self, doUniverse):
-		self.doUniverse = doUniverse
-	def __call__(self, less):
-		return DGStrat.makeSort(self.doUniverse, less)
-
-sortSubset = _DGStrat_SortProxy(False)
-sortUniverse = _DGStrat_SortProxy(True)
-
-# take
-#----------------------------------------------------------
-
-class _DGStrat_TakeProxy(object):
-	def __init__(self, doUniverse):
-		self.doUniverse = doUniverse
-	def __call__(self, amount):
-		return DGStrat.makeTake(self.doUniverse, amount)
-
-takeSubset = _DGStrat_TakeProxy(False)
-takeUniverse = _DGStrat_TakeProxy(True)
 
 #----------------------------------------------------------
 # RCExp prettification
@@ -823,6 +825,9 @@ rcSuper = _RCSuperOp()
 # Util
 #----------------------------------------------------------
 
+def showDump(f):
+	return libpymod.showDump(prefixFilename(f))
+
 def boltzmannFactor(temperature, energy):
 	return math.exp(-energy / temperature)
 
@@ -885,8 +890,4 @@ class BoltzmannGroupIsomers(object):
 #				self.sums[weight] += boltzmannFactor(self.temperature, a.energy)
 #		weight = int(g.weight)
 #		return boltzmannFactor(self.temperature, g.energy) / self.sums[weight]
-
-
-
-
 

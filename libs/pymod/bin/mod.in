@@ -330,7 +330,7 @@ def include(fName, checkDup=True, putDup=True, skipDup=True):
 		if not mod.config.common.quiet:
 			print("Skipping inclusion (already included)")
 	else:
-		with open(fPrefixed) as f:
+		with open(fPrefixed, 'rb') as f:
 			code = compile(f.read(), fName, 'exec')
 		exec(code, globals())
 	if t[1] != "":
@@ -398,8 +398,13 @@ EOF
 		if test "$quiet" = "false"; then
 			echo "$precommand $pythonvm $pyFile"
 		fi
-		executeVM $precommand $pythonvm $pyFile 2>&1 | tee out/log.txt
-		ret=${PIPESTATUS[0]}
+		if [ $debug = "true" ]; then
+			executeVM $precommand $pythonvm $pyFile
+			ret=${PIPESTATUS[0]}
+		else
+			executeVM $precommand $pythonvm $pyFile 2>&1 | tee out/log.txt
+			ret=${PIPESTATUS[0]}
+		fi
 	fi
 	return $ret
 }
