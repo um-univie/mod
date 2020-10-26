@@ -97,7 +97,8 @@ template<typename Iter, typename OnOutput>
 						BoundRule brOutput{r.release(), brInput.boundGraphs,
 						                   static_cast<int>(iterGraph - firstGraph)};
 						brOutput.boundGraphs.push_back(*iterGraph);
-						if(!brOutput.rule->isOnlyRightSide()) {
+						// CHANGED
+						if(false && !brOutput.rule->isOnlyRightSide()) {
 							// check if we have it already
 							brOutput.makeCanonical();
 							for(const BoundRule &brStored : outputRules) {
@@ -146,7 +147,8 @@ struct BoundRuleStorage {
 		BoundRule p{r, rule.boundGraphs, -1};
 		p.boundGraphs.push_back(graph);
 		bool found = false;
-		const bool doBoundRulesDuplicateCheck = true;
+		// CHANGED
+		const bool doBoundRulesDuplicateCheck = false;
 		// if it's only right side, we will rather split it instead
 		if(doBoundRulesDuplicateCheck && !r->isOnlyRightSide()) {
 			std::vector<const lib::Graph::Single *> &rThis = p.boundGraphs;
