@@ -14,9 +14,18 @@
 #include <mod/lib/IO/JsonUtils.hpp>
 #include <mod/lib/RC/ComposeRuleReal.hpp>
 #include <mod/lib/RC/MatchMaker/Super.hpp>
+#include <mod/lib/RC/MatchMaker/ComponentWiseUtil.hpp>
+
+#include <mod/lib/LabelledUnionGraph.hpp>
+#include <mod/lib/Rules/GraphToRule.hpp>
+#include <mod/lib/RC/ComposeRuleRealGeneric.hpp>
+
+#include <mod/lib/DG/DirectApplication.hpp>
 
 #include <boost/iostreams/device/mapped_file.hpp>
 #include <boost/lexical_cast.hpp>
+
+#include <ostream>
 
 namespace mod::lib::DG {
 
@@ -223,6 +232,172 @@ Builder::execute(std::unique_ptr<Strategies::Strategy> strategy_, int verbosity,
 	exec.strategy->execute(Strategies::PrintSettings(std::cout, false, verbosity), *exec.input);
 	dg->executions.push_back(std::move(exec));
 	return ExecuteResult(dg, dg->executions.size() - 1);
+}
+
+std::vector<std::pair<NonHyper::Edge, bool>>
+Builder::apply2(const std::vector<std::shared_ptr<graph::Graph>> &graphs,
+               std::shared_ptr<rule::Rule> rOrig,
+               int verbosity, IsomorphismPolicy graphPolicy) {
+	IO::Logger logger(std::cout);
+//	logger.indent() << "Starting apply2" << std::endl;
+	dg->rules.insert(rOrig);
+	switch(graphPolicy) {
+	case IsomorphismPolicy::Check:
+		for(const auto &g : graphs)
+			dg->tryAddGraph(g);
+		break;
+	case IsomorphismPolicy::TrustMe:
+		for(const auto &g : graphs)
+			dg->trustAddGraph(g);
+		break;
+	}
+	const auto ls = dg->getLabelSettings();
+	const auto rDerivations = directApply(graphs, rOrig, ls, verbosity, logger);
+
+	std::vector<const lib::Graph::Single *> leftGraphs;
+	leftGraphs.reserve(graphs.size());
+	for(const auto &g : graphs)
+		leftGraphs.push_back(&g->getGraph());
+
+	std::vector<std::pair<NonHyper::Edge, bool>> res;
+	for (const auto &r : rDerivations) {
+		assert(r->isOnlyRightSide());
+		auto products = splitRule(
+		        r->getDPORule(), ls.type, ls.withStereo,
+		        [this](std::unique_ptr<lib::Graph::Single> gCand) {
+		            return dg->checkIfNew(std::move(gCand)).first;
+	            },
+		        [verbosity, &logger](std::shared_ptr<graph::Graph> gWrapped, std::shared_ptr<graph::Graph> gPrev) {
+			        if(verbosity >= V_RuleApplication_Binding) {
+						++logger.indentLevel;
+						logger.indent() << "Discarding product " << gWrapped->getName()
+						                << ", isomorphic to other product " << gPrev->getName()
+						                << "." << std::endl;
+						--logger.indentLevel;
+					}
+		        }
+		);
+
+		for(const auto &p : products)
+			dg->addProduct(p);
+		std::vector<const lib::Graph::Single *> rightGraphs;
+		rightGraphs.reserve(products.size());
+		for(const auto &p : products)
+			rightGraphs.push_back(&p->getGraph());
+		lib::DG::GraphMultiset gmsLeft(leftGraphs), gmsRight(std::move(rightGraphs));
+		const auto derivationRes = dg->suggestDerivation(gmsLeft, gmsRight, &rOrig->getRule());
+		res.push_back(derivationRes);
+	}
+	return res;
+}
+
+std::vector<const Graph::Single *> Builder::getGraphs(const Rules::Real& lhs) {
+	    const auto ls = dg->getLabelSettings();
+
+		assert(lhs.isOnlyRightSide());
+		auto educts = splitRule(
+		        lhs.getDPORule(), ls.type, ls.withStereo,
+		        [this](std::unique_ptr<lib::Graph::Single> gCand) {
+		            return dg->checkIfNew(std::move(gCand)).first;
+                },
+		        [](std::shared_ptr<graph::Graph>, std::shared_ptr<graph::Graph>) {
+		        }
+		);
+		std::vector<const lib::Graph::Single *> leftGraphs;
+		leftGraphs.reserve(educts.size());
+		for(const auto &p : educts)
+			leftGraphs.push_back(&p->getGraph());
+		return leftGraphs;
+
+}
+
+NonHyper::Edge Builder::applyDerivationRule(const Rules::Real& lhs,
+                                   const Rules::Real& rDerivation,
+                                   const Rules::Real& rule) {
+	    const auto ls = dg->getLabelSettings();
+
+		assert(lhs.isOnlyRightSide());
+		assert(rDerivation.isOnlyRightSide());
+		auto educts = splitRule(
+		        lhs.getDPORule(), ls.type, ls.withStereo,
+		        [this](std::unique_ptr<lib::Graph::Single> gCand) {
+		            return dg->checkIfNew(std::move(gCand)).first;
+                },
+		        [](std::shared_ptr<graph::Graph>, std::shared_ptr<graph::Graph>) {
+		        }
+		);
+		std::vector<const lib::Graph::Single *> leftGraphs;
+		leftGraphs.reserve(educts.size());
+		for(const auto &p : educts)
+			leftGraphs.push_back(&p->getGraph());
+
+		auto products = splitRule(
+		        rDerivation.getDPORule(), ls.type, ls.withStereo,
+		        [this](std::unique_ptr<lib::Graph::Single> gCand) {
+		            return dg->checkIfNew(std::move(gCand)).first;
+                },
+		        [](std::shared_ptr<graph::Graph>, std::shared_ptr<graph::Graph>) {
+		        }
+		);
+		std::vector<const lib::Graph::Single *> rightGraphs;
+		rightGraphs.reserve(products.size());
+		for(const auto &p : products)
+			rightGraphs.push_back(&p->getGraph());
+
+		lib::DG::GraphMultiset gmsLeft(std::move(leftGraphs)), gmsRight(std::move(rightGraphs));
+		return dg->suggestDerivation(gmsLeft, gmsRight, &rule).first;
+
+}
+
+std::pair<NonHyper::Edge, std::vector<const Graph::Single *>>
+Builder::applyDerivationRule(const std::vector<const Graph::Single *>& lhs,
+                                   const Rules::Real& rDerivation,
+                                   const Rules::Real&  r) {
+	    const auto ls = dg->getLabelSettings();
+		assert(rDerivation.isOnlyRightSide());
+		auto products = splitRule(
+		        rDerivation.getDPORule(), ls.type, ls.withStereo,
+		        [this](std::unique_ptr<lib::Graph::Single> gCand) {
+		            return dg->checkIfNew(std::move(gCand)).first;
+                },
+		        [](std::shared_ptr<graph::Graph>, std::shared_ptr<graph::Graph>) {
+		        }
+		);
+
+		for(const auto &p : products)
+			dg->addProduct(p);
+		std::vector<const lib::Graph::Single *> rightGraphs;
+		rightGraphs.reserve(products.size());
+		for(const auto &p : products)
+			rightGraphs.push_back(&p->getGraph());
+		lib::DG::GraphMultiset gmsLeft(lhs), gmsRight(rightGraphs);
+		const auto derivationRes = dg->suggestDerivation(gmsLeft, gmsRight, &r);
+		return std::make_pair(derivationRes.first, rightGraphs);
+
+}
+
+std::vector<const Graph::Single *> Builder::lhs(NonHyper::Edge e)  const{
+	const auto& gHyper = dg->getHyper().getGraph();
+	auto v = dg->getHyperEdge(e);
+	assert(v != gHyper.null_vertex());
+	assert(gHyper[v].kind == HyperVertexKind::Edge);
+	std::vector<const Graph::Single *> graphs;
+	for(auto vIn : asRange(inv_adjacent_vertices(v, gHyper))) {
+		graphs.push_back(gHyper[vIn].graph);
+	}
+	return graphs;
+}
+
+std::vector<const Graph::Single *> Builder::rhs(NonHyper::Edge e) const {
+	const auto& gHyper = dg->getHyper().getGraph();
+	auto v = dg->getHyperEdge(e);
+	assert(v != gHyper.null_vertex());
+	assert(gHyper[v].kind == HyperVertexKind::Edge);
+	std::vector<const Graph::Single *> graphs;
+	for(auto vIn : asRange(adjacent_vertices(v, gHyper))) {
+		graphs.push_back(gHyper[vIn].graph);
+	}
+	return graphs;
 }
 
 std::vector<std::pair<NonHyper::Edge, bool>>

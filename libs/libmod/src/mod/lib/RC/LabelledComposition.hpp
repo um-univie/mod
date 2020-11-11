@@ -18,8 +18,9 @@ namespace RC {
 namespace detail {
 
 template<bool Verbose, typename Result, typename RuleFirst, typename RuleSecond, typename InvertibleVertexMap, typename VisitorT>
-boost::optional<Result> composeLabelledFinallyDoIt(const RuleFirst &rFirst, const RuleSecond &rSecond, InvertibleVertexMap &match, VisitorT visitor) {
-	return compose<Verbose, Result>(rFirst, rSecond, match, std::move(visitor));
+boost::optional<Result> composeLabelledFinallyDoIt(const RuleFirst &rFirst, const RuleSecond &rSecond, InvertibleVertexMap &match, VisitorT visitor,
+                                                   const std::vector<size_t>* copyVertices) {
+	return compose<Verbose, Result>(rFirst, rSecond, match, std::move(visitor), copyVertices);
 }
 
 template<LabelType T>
@@ -51,12 +52,13 @@ struct WithStereoVisitor<false> {
 } // namespace detail
 
 template<bool Verbose, typename Result, LabelType labelType, bool withStereo, typename RuleFirst, typename RuleSecond, typename InvertibleVertexMap, typename VisitorT = Visitor::Null>
-boost::optional<Result> composeLabelled(const RuleFirst &rFirst, const RuleSecond &rSecond, InvertibleVertexMap &match, VisitorT visitor = Visitor::Null()) {
+boost::optional<Result> composeLabelled(const RuleFirst &rFirst, const RuleSecond &rSecond, InvertibleVertexMap &match, VisitorT visitor = Visitor::Null(),
+                                        const std::vector<size_t>* copyVertices = nullptr) {
 	return detail::composeLabelledFinallyDoIt<Verbose, Result>(rFirst, rSecond, match, Visitor::makeVisitor(
 			std::move(visitor),
 			typename detail::LabelTypeToVisitor<labelType>::type(),
-			typename detail::WithStereoVisitor<withStereo>::type()
-			));
+	        typename detail::WithStereoVisitor<withStereo>::type()
+	        ), copyVertices);
 }
 
 } // namespace RC

@@ -147,6 +147,16 @@ DG::HyperEdge DG::findEdge(const std::vector<std::shared_ptr<graph::Graph> > &so
 
 //------------------------------------------------------------------------------
 
+lib::DG::NonHyperBuilder& DG::getNonHyperBuilder() {
+	if(isLocked())
+		throw LogicError("The DG is locked.");
+	if(hasActiveBuilder())
+		throw LogicError("Another build is already in progress.");
+	if(auto *ptr = dynamic_cast<lib::DG::NonHyperBuilder *> (p->dg.get())) {
+		return *ptr;
+	} else throw LogicError("Only DGs from DG::builder can be built\n");
+}
+
 Builder DG::build() {
 	if(isLocked())
 		throw LogicError("The DG is locked.");

@@ -20,7 +20,8 @@ template<typename R>
 using DPOTraits = jla_boost::GraphDPO::PushoutRuleTraits<R>;
 
 template<bool Verbose, typename Result, typename RuleFirst, typename RuleSecond, typename InvertibleVertexMap, typename VisitorT>
-boost::optional<Result> compose(const RuleFirst &rFirst, const RuleSecond &rSecond, const InvertibleVertexMap &match, VisitorT visitor) {
+boost::optional<Result> compose(const RuleFirst &rFirst, const RuleSecond &rSecond, const InvertibleVertexMap &match, VisitorT visitor,
+                                const std::vector<size_t>*  copyVertices) {
 	// match must be rSecond -> rFirst
 	using RuleResult = typename Result::RuleResult;
 	using WrappedVisitor = Visitor::Compound<VisitorT>;
@@ -29,7 +30,7 @@ boost::optional<Result> compose(const RuleFirst &rFirst, const RuleSecond &rSeco
 	BOOST_CONCEPT_ASSERT((jla_boost::GraphDPO::PushoutRuleConcept<RuleSecond>));
 	BOOST_CONCEPT_ASSERT((jla_boost::GraphMorphism::InvertibleVertexMapConcept<InvertibleVertexMap>));
 	return detail::CompositionHelper<Verbose, Result, RuleFirst, RuleSecond,
-			InvertibleVertexMap, WrappedVisitor>(rFirst, rSecond, match, Visitor::makeVisitor(std::move(visitor)))();
+	        InvertibleVertexMap, WrappedVisitor>(rFirst, rSecond, match, Visitor::makeVisitor(std::move(visitor)))(copyVertices);
 }
 
 } // namespace RC

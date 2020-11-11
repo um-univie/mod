@@ -134,6 +134,9 @@ public:
 	std::vector<DG::HyperEdge> apply(const std::vector<std::shared_ptr<graph::Graph> > &graphs,
 	                                 std::shared_ptr<rule::Rule> r, bool onlyProper,
 	                                 int verbosity, IsomorphismPolicy graphPolicy);
+
+	std::vector<DG::HyperEdge> apply2(const std::vector<std::shared_ptr<graph::Graph> > &graphs,
+	                                 std::shared_ptr<rule::Rule> r);
 	// rst: .. function:: void addAbstract(const std::string &description)
 	// rst:
 	// rst:		Add vertices and hyperedges based on the given abstract description.

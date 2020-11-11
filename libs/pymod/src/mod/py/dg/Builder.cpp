@@ -104,7 +104,8 @@ void Builder_doExport() {
 					// rst:				is different but isomorphic to another given graph object or to a graph object already
 					// rst:				in the internal graph database in the associated derivation graph.
 			.def("apply", static_cast<Apply>(&Builder::apply))
-					// rst:		.. method:: addAbstract(description)
+	        .def("apply2", &Builder::apply2)
+	                // rst:		.. py:method:: addAbstract(description)
 					// rst:
 					// rst:			Add vertices and hyperedges based on the given abstract description.
 					// rst:			The description must adhere to the grammar described at :ref:`dg_abstract-desc`.

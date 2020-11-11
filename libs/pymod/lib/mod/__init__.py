@@ -343,6 +343,10 @@ class DGBuildContextManager:
 		assert self._builder
 		return _unwrap(self._builder.apply(_wrap(libpymod._VecGraph, graphs), rule, onlyProper, verbosity, graphPolicy))
 
+	def apply2(self, graphs, rule, verbosity=0, graphPolicy=IsomorphismPolicy.Check) -> List[DGHyperEdge]:
+		assert self._builder
+		return _unwrap(self._builder.apply2(_wrap(libpymod._VecGraph, graphs), rule))
+
 	def addAbstract(self, description: str) -> None:
 		assert self._builder
 		return self._builder.addAbstract(description)

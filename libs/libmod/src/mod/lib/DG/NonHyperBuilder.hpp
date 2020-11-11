@@ -36,6 +36,23 @@ public:
 	apply(const std::vector<std::shared_ptr<graph::Graph>> &graphs, std::shared_ptr<rule::Rule> r,
 	      int verbosity, IsomorphismPolicy graphPolicy);
 	std::vector<std::pair<NonHyper::Edge, bool>>
+	apply2(const std::vector<std::shared_ptr<graph::Graph>> &graphs, std::shared_ptr<rule::Rule> r,
+	      int verbosity, IsomorphismPolicy graphPolicy);
+
+	std::pair<NonHyper::Edge, std::vector<const Graph::Single *>> applyDerivationRule(const std::vector<const Graph::Single *>& lhs,
+	                                   const Rules::Real& rDerivation,
+	                                   const Rules::Real& rule);
+
+	NonHyper::Edge applyDerivationRule(const Rules::Real& lhs,
+	                                   const Rules::Real& rDerivation,
+	                                   const Rules::Real& rule);
+
+	std::vector<const Graph::Single *> getGraphs(const Rules::Real& lhs);
+
+	std::vector<const Graph::Single *> lhs(NonHyper::Edge e) const;
+	std::vector<const Graph::Single *> rhs(NonHyper::Edge e) const;
+
+	std::vector<std::pair<NonHyper::Edge, bool>>
 	applyRelaxed(const std::vector<std::shared_ptr<graph::Graph>> &graphs, std::shared_ptr<rule::Rule> r,
 	             int verbosity, IsomorphismPolicy graphPolicy);
 	void addAbstract(const std::string &description);

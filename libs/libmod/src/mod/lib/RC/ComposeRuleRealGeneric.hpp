@@ -24,11 +24,12 @@ struct Super;
 template<bool verbose, LabelType labelType, bool withStereo, typename InvertibleVertexMap>
 auto composeRuleRealByMatch(const lib::Rules::Real &rFirst,
                             const lib::Rules::Real &rSecond,
-                            InvertibleVertexMap &match) {
+                            InvertibleVertexMap &match,
+                            const std::vector<size_t> *copyVertices) {
 	using Result = BaseResult<lib::Rules::LabelledRule, lib::Rules::LabelledRule, lib::Rules::LabelledRule>;
 	auto visitor = Visitor::MatchConstraints<labelType>();
 	auto res = composeLabelled<verbose, Result, labelType, withStereo>(
-			rFirst.getDPORule(), rSecond.getDPORule(), match, visitor);
+	        rFirst.getDPORule(), rSecond.getDPORule(), match, visitor, copyVertices);
 	if(res) res->rResult.initComponents(); // TODO: move to the visitor finalizer
 	return res;
 }
@@ -37,14 +38,15 @@ template<LabelType labelType, bool withStereo, typename InvertibleVertexMap>
 std::unique_ptr<lib::Rules::Real> composeRuleRealByMatch(const lib::Rules::Real &rFirst,
                                                          const lib::Rules::Real &rSecond,
                                                          InvertibleVertexMap &match,
-                                                         const bool verbose, IO::Logger logger) {
+                                                         const bool verbose, IO::Logger logger,
+                                                         const std::vector<size_t> *copyVertices = nullptr) {
 	if(verbose) {
 		logger.indent() << "Composing " << rFirst.getName() << " and " << rSecond.getName() << "\n";
 		++logger.indentLevel;
 	}
 	auto resultOpt = verbose
-	                 ? composeRuleRealByMatch<true, labelType, withStereo>(rFirst, rSecond, match)
-	                 : composeRuleRealByMatch<false, labelType, withStereo>(rFirst, rSecond, match);
+	                 ? composeRuleRealByMatch<true, labelType, withStereo>(rFirst, rSecond, match, copyVertices)
+	                 : composeRuleRealByMatch<false, labelType, withStereo>(rFirst, rSecond, match, copyVertices);
 	if(!resultOpt) {
 		if(verbose) logger.indent() << "Composition failed" << std::endl;
 		return nullptr;

@@ -59,6 +59,8 @@ public:
 	// rst:		:returns: the internal data structures of the derivation graph.
 	const lib::DG::NonHyper &getNonHyper() const;
 	const lib::DG::Hyper &getHyper() const;
+
+	lib::DG::NonHyperBuilder &getNonHyperBuilder();
 	// rst: .. function:: LabelSettings getLabelSettings() const
 	// rst:
 	// rst:		:returns: the label settings for the derivation graph.

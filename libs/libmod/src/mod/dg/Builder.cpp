@@ -79,6 +79,17 @@ ExecuteResult Builder::execute(std::shared_ptr<Strategy> strategy, int verbosity
 	return ExecuteResult(p->dg_, std::move(res));
 }
 
+std::vector<DG::HyperEdge> Builder::apply2(const std::vector<std::shared_ptr<graph::Graph> > &graphs,
+                                          std::shared_ptr<rule::Rule> r) {
+	auto innerRes = p->b.apply2(graphs, r, 0, IsomorphismPolicy::Check);
+	std::vector<DG::HyperEdge> res;
+	const auto &nonHyper = p->dg_->getNonHyper();
+	const auto &hyper = p->dg_->getHyper();
+	for(const auto &rp : innerRes)
+		res.push_back(hyper.getInterfaceEdge(nonHyper.getHyperEdge(rp.first)));
+	return res;
+}
+
 std::vector<DG::HyperEdge> Builder::apply(const std::vector<std::shared_ptr<graph::Graph> > &graphs,
                                           std::shared_ptr<rule::Rule> r) {
 	return apply(graphs, r, true, 0);
