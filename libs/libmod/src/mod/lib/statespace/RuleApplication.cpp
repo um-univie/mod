@@ -2,14 +2,18 @@
 #include <mod/lib/RC/ComposeRuleRealGeneric.hpp>
 #include <iostream>
 #include <unordered_set>
+#include <mod/lib/statespace/CanonMatch.hpp>
 
 namespace mod::lib::statespace {
 
 PartialMatch::PartialMatch(const Rules::Real& rHosts,
                            const Rules::Real& rPatterns,
+                           const std::vector<const Graph::Single *>& hosts,
+                           LabelSettings ls,
                            IO::Logger& logger) :
         rHosts(rHosts), rPatterns(rPatterns),
         map(getPatternsGraph(), getHostsGraph()),
+        canonMatch(hosts, rPatterns, ls),
         logger(logger) {}
 
 std::vector<const Graph::Single *>
@@ -35,6 +39,7 @@ bool PartialMatch::push(const ComponentMatch& cm) {
 
 	const auto &gp = get_component_graph(cm.patternId,
 	                                     get_labelled_left(rPatterns.getDPORule()));
+	bool isCanon = canonMatch.push(cm);
 	for (const auto vp : asRange(vertices(gp))) {
 		assert(get(map, gPatterns, gHosts, vp) == getHostsNullVertex());
 		const auto vh = cm[vp];
@@ -44,14 +49,16 @@ bool PartialMatch::push(const ComponentMatch& cm) {
 		}
 		put(map, gPatterns, gHosts, vp, vh);
 	}
-	return isValidComponentMap(rHosts.getDPORule(),
+	bool isValid = isValidComponentMap(rHosts.getDPORule(),
 	                           rPatterns.getDPORule(),
 	                           cm.patternId,
 	                           map,
 	                           logger);
+	return isValid && isCanon;
 }
 
 void PartialMatch::pop() {
+	assert(componentMatches.size() > 0);
 	const ComponentMatch& cm = *componentMatches.back();
 	const auto& gPatterns = getPatternsGraph();
 	const auto& gHosts = getHostsGraph();
@@ -60,7 +67,13 @@ void PartialMatch::pop() {
 	for (const auto vp : asRange(vertices(gp))) {
 		put(map, gPatterns, gHosts, vp, getHostsNullVertex());
 	}
+
 	componentMatches.pop_back();
+	canonMatch.pop();
+}
+
+bool PartialMatch::empty() const {
+	return componentMatches.size() == 0;
 }
 
 std::unique_ptr<Rules::Real> PartialMatch::apply() const {
@@ -69,17 +82,14 @@ std::unique_ptr<Rules::Real> PartialMatch::apply() const {
 		usedHostIds.insert(cm->getHostId());
 	}
 
-	std::cout << "COPY VERTICES: ";
 	std::vector<size_t> copyVertices;
 	const auto &lgHosts = get_labelled_right(rHosts.getDPORule());
 	for (size_t hid : usedHostIds)  {
 		const auto &gh = get_component_graph(hid, lgHosts);
 		for (const auto vh : asRange(vertices(gh))) {
-			std::cout << vh << ", ";
 			copyVertices.push_back(vh);
 		}
 	}
-	std::cout << std::endl;
 	using HasTerm = GraphMorphism::HasTermData<InvertibleVertexMap>;
 	using HasStereo = GraphMorphism::HasStereoData<InvertibleVertexMap>;
 	constexpr LabelType labelType = HasTerm::value ? LabelType::Term : LabelType::String;
@@ -259,5 +269,6 @@ RuleApplication::transition(const std::vector<const Graph::Single *>& graphs) {
 	}
 	return newGraphs;
 }
+
 
 }

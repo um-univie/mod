@@ -721,6 +721,15 @@ Rule.__eq__ = lambda self, other: self.id == other.id  # type: ignore
 Rule.__lt__ = lambda self, other: self.id < other.id  # type: ignore
 Rule.__hash__ = lambda self: self.id  # type: ignore
 
+#----------------------------------------------------------
+# DynamicDG
+#----------------------------------------------------------
+
+def makeDynamicDG(dg, rules):
+	return libpymod.DynamicDG.make(dg, _wrap(libpymod._VecRule, rules))
+
+_DynamicDG_apply = libpymod.DynamicDG.apply
+libpymod.DynamicDG.apply = lambda self, graphs: _unwrap(_DynamicDG_apply(self, _wrap(libpymod._VecGraph, graphs)))
 
 #----------------------------------------------------------
 # Composition

@@ -5,6 +5,7 @@
 #include <mod/lib/Graph/Single.hpp>
 #include <mod/lib/statespace/ComponentMap.hpp>
 #include <mod/lib/statespace/RuleApplication.hpp>
+#include <mod/lib/statespace/CanonRule.hpp>
 
 namespace mod::lib::statespace{
 
@@ -27,20 +28,32 @@ class DynamicDG {
 	};
 
 	struct CachedRule {
-		CachedRule(const Rules::Real *rule, DynamicDG& ddg): rule(rule), ddg(ddg) {}
+		CachedRule(const Rules::Real *rule, DynamicDG& ddg);
 
 		std::vector<std::vector<ComponentMatch>>
 		getMatches(const std::vector<const Graph::Single *>& graphs);
 
+		void storeMatches(const Graph::Single *graph);
+		bool isCanonMatch(size_t pid, const ComponentMatch::VertexMap& match,
+		                    const Graph::Single *g);
 
+		bool isValid(const std::vector<const Graph::Single *>& graphs);
+
+		const Rules::AutGroup& getAutsGroup();
+
+
+		std::vector<std::unique_ptr<Graph::Single>> lhsGraphs;
+		std::vector<std::unordered_map<const Graph::Single *, bool>> hasMatch;
 		const Rules::Real * rule;
 		DynamicDG& ddg;
 		std::map<const Graph::Single *, std::vector<std::vector<ComponentMatch::VertexMap>>> graphMatches;
+		std::unique_ptr<lib::Rules::AutGroup> rAuts = nullptr;
 	};
 
 
 public:
-	DynamicDG(lib::DG::NonHyperBuilder* builder, std::vector<const Rules::Real*> rules);
+	DynamicDG(lib::DG::Builder& builder, std::vector<const Rules::Real*> rules,
+	          LabelSettings labelSettings);
 
 
 	std::vector<DG::NonHyper::Edge> apply(const std::vector<const Graph::Single *>& graphs);
@@ -86,7 +99,7 @@ private:
 	                                      );
 
 
-	lib::DG::Builder dgBuilder;
+	lib::DG::Builder& dgBuilder;
 	std::vector<const Rules::Real*> rules;
 	std::map<DG::GraphMultiset, State> states;
 	std::map<DG::GraphMultiset, std::vector<std::vector<std::shared_ptr<RuleApplication>>>> cachedApplications;
@@ -98,6 +111,7 @@ private:
 
 	const LabelSettings labelSettings;
 	IO::Logger logger;
+	int verbosity = 0;
 };
 
 }

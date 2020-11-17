@@ -18,6 +18,7 @@
    ((Chem)) ((Collections)) ((Config)) ((Derivation))                            \
    ((dg, (Builder) (DG) (GraphInterface) (Printer) (Strategy)))                  \
    ((Error)) ((Function))                                                        \
+   ((statespace, (DynamicDG)))                                                   \
    ((graph, (Graph) (Union)))                                                    \
    ((graph, (Automorphism) (GraphInterface))) /* nested classes of Graph, so must be after */ \
    ((rule, (RC) (Rule) (GraphInterface)))                                        \

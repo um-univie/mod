@@ -140,6 +140,14 @@ void Builder::load(const std::vector<std::shared_ptr<rule::Rule>> &ruleDatabase,
 	if(!res) throw InputError("DG load error: " + err.str());
 }
 
+lib::DG::Builder& Builder::getLibBuilder() {
+	return p->b;
+}
+
+std::shared_ptr<dg::DG> Builder::getDG() {
+	return p->dg_;
+}
+
 // -----------------------------------------------------------------------------
 
 struct ExecuteResult::Pimpl {

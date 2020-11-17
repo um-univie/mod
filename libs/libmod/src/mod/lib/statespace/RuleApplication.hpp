@@ -6,6 +6,7 @@
 #include <jla_boost/graph/morphism/models/Vector.hpp>
 #include <mod/lib/statespace/ComponentMap.hpp>
 #include <mod/lib/DG/NonHyper.hpp>
+#include <mod/lib/statespace/CanonMatch.hpp>
 
 namespace mod::lib::statespace {
 class PartialMatch {
@@ -17,10 +18,13 @@ public:
 	using InvertibleVertexMap = jla_boost::GraphMorphism::InvertibleVectorVertexMap<PatternGraph, HostGraph>;
 	PartialMatch(const Rules::Real& rHosts,
 	                   const Rules::Real& rPatterns,
+	             const std::vector<const Graph::Single *>& hosts,
+	             LabelSettings ls,
 	             IO::Logger& logger);
 
 
 	bool push(const ComponentMatch& cm);
+	bool empty() const;
 	void pop();
 	std::unique_ptr<Rules::Real> apply() const;
 	std::vector<const Graph::Single *> lhs(const std::vector<const Graph::Single *>& graphs) const;
@@ -57,6 +61,7 @@ private:
 	InvertibleVertexMap map;
 
 	std::vector<const ComponentMatch *> componentMatches;
+	CanonMatch canonMatch;
 	IO::Logger& logger;
 };
 

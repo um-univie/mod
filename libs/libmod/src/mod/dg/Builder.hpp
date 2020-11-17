@@ -9,9 +9,13 @@
 
 namespace mod {
 struct Derivations;
+namespace statespace {
+struct DynamicDG;
+}
 namespace lib {
 namespace DG {
 struct ExecuteResult;
+struct Builder;
 } // namespace DG
 } // namespace lib
 } // namespace mod
@@ -30,6 +34,9 @@ class MOD_DECL Builder {
 	friend class DG;
 	explicit Builder(lib::DG::NonHyperBuilder &dg_);
 public:
+	lib::DG::Builder& getLibBuilder();
+	std::shared_ptr<dg::DG> getDG();
+
 	Builder(Builder &&other);
 	Builder &operator=(Builder &&other);
 	~Builder();
