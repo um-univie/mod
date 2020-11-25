@@ -247,7 +247,7 @@ std::vector<DerivationRule> composeRules(const std::vector<Graph::Single *>& hos
 DynamicDG::DynamicDG(DG::Builder& builder, std::vector<const Rules::Real*> rules,
                      LabelSettings labelSettings):
     dgBuilder(builder), rules(rules), labelSettings(labelSettings),
-    logger(std::cout) {
+    logger(std::cout), matchNetwork(rules, labelSettings) {
 	for (const Rules::Real *r : rules)  {
 		cachedRules.emplace_back(r, *this);
 	}
@@ -829,9 +829,13 @@ std::vector<DG::NonHyper::Edge> DynamicDG::apply(const std::vector<const Graph::
 	int tmp_i = 0;
 	int total_edges = 0;
 
-	for (CachedRule& cr : cachedRules) {
+	auto ruleIndices = matchNetwork.getValidRules(hosts);
+	for (auto ruleIdx : ruleIndices) {
+		CachedRule& cr = cachedRules[ruleIdx];
+
+	//for (CachedRule& cr : cachedRules) {
 		tmp_i += 1;
-		if (!cr.isValid(hosts)) { continue; }
+		//if (!cr.isValid(hosts)) { continue; }
 		auto compMatches = cr.getMatches(hosts);
 		const auto newEdges = findNewEdges(hosts, *rHosts, *cr.rule,
 		                                    compMatches, isNewHost);

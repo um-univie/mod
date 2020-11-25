@@ -128,7 +128,8 @@ void Printer_doExport() {
 					// rst:			:raises: :class:`LogicError` if ``v.dg != dg``.
 					// rst:			:raises: :class:`LogicError` if ``v`` is not a target vertex of ``e``.
 					// rst:			:raises: :class:`LogicError` if duplicate ``eDup`` does not exist for ``e``.
-			.def("reconnectTarget", &PrintData::reconnectTarget);
+	        .def("reconnectTarget", &PrintData::reconnectTarget)
+	        .def("removeVertexIfDegreeZero", &PrintData::removeVertexIfDegreeZero);
 
 	graph::Printer &(Printer::*Printer_getGraphPrinter)() = &Printer::getGraphPrinter;
 	void (*Printer_setGraphPrinter)(Printer &, const graph::Printer &) = [](Printer &p, const graph::Printer &gp) {

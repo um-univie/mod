@@ -103,6 +103,13 @@ void PrintData::reconnectTarget(DG::HyperEdge e, int eDup, DG::Vertex v, int vDu
 	data->reconnectTarget(eInner, eDup, vHead, vDupTar, std::numeric_limits<int>::max());
 }
 
+
+void PrintData::removeVertexIfDegreeZero(DG::Vertex v) {
+	const auto &dg = this->dg->getHyper();
+	const auto vHead = dg.getInternalVertex(v);
+	data->removeVertexIfDegreeZero(vHead);
+}
+
 //------------------------------------------------------------------------------
 // Printer
 //------------------------------------------------------------------------------

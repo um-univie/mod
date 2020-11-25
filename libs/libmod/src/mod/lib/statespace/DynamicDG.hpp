@@ -6,6 +6,7 @@
 #include <mod/lib/statespace/ComponentMap.hpp>
 #include <mod/lib/statespace/RuleApplication.hpp>
 #include <mod/lib/statespace/CanonRule.hpp>
+#include <mod/lib/statespace/MatchNetwork.hpp>
 
 namespace mod::lib::statespace{
 
@@ -112,6 +113,7 @@ private:
 	const LabelSettings labelSettings;
 	IO::Logger logger;
 	int verbosity = 0;
+	MatchNetwork matchNetwork;
 };
 
 }

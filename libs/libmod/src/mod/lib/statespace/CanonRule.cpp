@@ -53,6 +53,7 @@ GraphData makeCanonizableRule(const Real& rule) {
 		assert(v == outV);
 		std::string leftStr = "";
 		std::string rightStr = "";
+		outGraph[outV].membership = Membership::Context;
 		if (membership(rDPO, v) == Membership::Left) {
 			leftStr = rDPO.pString->getLeft()[v];
 		} else if (membership(rDPO, v) == Membership::Right) {
@@ -70,6 +71,7 @@ GraphData makeCanonizableRule(const Real& rule) {
 
 
 		auto outV = add_vertex(outGraph);
+		outGraph[outV].membership = Membership::Context;
 
 		std::string leftStr = "";
 		std::string rightStr = "";

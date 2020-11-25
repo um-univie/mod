@@ -84,6 +84,9 @@ struct MOD_DECL PrintData {
 	// rst:		:throws: :class:`LogicError` if `v` is not a target vertex of `e`.
 	// rst:		:throws: :class:`LogicError` if duplicate `eDup` does not exist for `e`.
 	void reconnectTarget(DG::HyperEdge e, int eDup, DG::Vertex v, int vDupTar);
+
+	void removeVertexIfDegreeZero(DG::Vertex v);
+
 private:
 	std::shared_ptr<DG> dg;
 	std::unique_ptr<lib::IO::DG::Write::Data> data;
