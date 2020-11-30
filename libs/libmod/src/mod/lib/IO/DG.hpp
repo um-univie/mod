@@ -292,11 +292,13 @@ public:
 
 struct Data {
 	struct Connections {
-		Connections(int numTails, int numHeads) : tail(numTails, 0), head(numHeads, 0) {}
+		Connections(int numTails, int numHeads) : tail(numTails, 0), head(numHeads, 0),
+		tailRecon(numTails, false), headRecon(numHeads, false) {}
 
 		// indices are offsets on the in-/out-edge iterators
 		// values are the duplicate numbers
 		std::vector<int> tail, head;
+		std::vector<bool> tailRecon, headRecon;
 	};
 
 	using ConnectionsStore = std::unordered_map<Vertex, std::unordered_map<int, Connections>>;

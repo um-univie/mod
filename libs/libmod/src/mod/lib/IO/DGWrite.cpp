@@ -418,19 +418,55 @@ void reconnectCommon(const lib::DG::Hyper &dgHyper,
 	const auto iterEdgeCons = iterEdgeDups->second.find(eDup);
 	if(iterEdgeCons == end(iterEdgeDups->second))
 		throw LogicError("Hyperedge duplicate does not exist.");
-	int offset = [v, headOrTail, isTail, &dg]() {
-		if(isTail) {
-			const auto vs = inv_adjacent_vertices(v, dg);
-			const auto iter = std::find(vs.first, vs.second, headOrTail);
-			return iter - vs.first;
-		} else {
-			const auto vs = adjacent_vertices(v, dg);
-			const auto iter = std::find(vs.first, vs.second, headOrTail);
-			return iter - vs.first;
-		}
-	}();
 	Data::Connections &cons = iterEdgeCons->second;
 	auto &dupNums = isTail ? cons.tail : cons.head;
+	auto getOffset = [v, headOrTail, isTail, &dg, &cons, &dupNums]() {
+		if(isTail) {
+			const auto vs = inv_adjacent_vertices(v, dg);
+			for (auto it = vs.first; it != vs.second; it++) {
+				long dist = (it - vs.first);
+				if (*it == headOrTail && !cons.tailRecon[dist]) {
+					return static_cast<int>(dist);
+				}
+			}
+			//const auto iter = std::find(vs.first, vs.second, headOrTail);
+			// return iter - vs.first;
+		} else {
+			const auto vs = adjacent_vertices(v, dg);
+			//const auto iter = std::find(vs.first, vs.second, headOrTail);
+			//return iter - vs.first;
+			for (auto it = vs.first; it != vs.second; it++) {
+				long dist = (it - vs.first);
+				if (*it == headOrTail && !cons.headRecon[dist]) {
+					return static_cast<int>(dist);
+				}
+			}
+		}
+		return static_cast<int>(dupNums.size());
+	};
+	int offset = getOffset();
+	if (offset == dupNums.size()) {
+		if(isTail) {
+			const auto vs = inv_adjacent_vertices(v, dg);
+			for (auto it = vs.first; it != vs.second; it++) {
+				long dist = (it - vs.first);
+				if (*it == headOrTail) {
+					cons.tailRecon[dist] = false;
+				}
+			}
+			//const auto iter = std::find(vs.first, vs.second, headOrTail);
+			// return iter - vs.first;
+		} else {
+			const auto vs = adjacent_vertices(v, dg);
+			for (auto it = vs.first; it != vs.second; it++) {
+				long dist = (it - vs.first);
+				if (*it == headOrTail) {
+					cons.tailRecon[dist] = false;
+				}
+			}
+		}
+		offset = getOffset();
+	}
 	if(offset == dupNums.size()) {
 		std::stringstream ss;
 		if(isTail) ss << "Tail";
@@ -438,6 +474,11 @@ void reconnectCommon(const lib::DG::Hyper &dgHyper,
 		ss << " duplicate " << vDupSrc << " does not exist. Duplicates are:";
 		ss << std::endl;
 		throw FatalError(ss.str());
+	}
+	if (isTail) {
+		cons.tailRecon[offset] = true;
+	} else {
+		cons.headRecon[offset] = true;
 	}
 	dupNums[offset] = vDupTar;
 }
