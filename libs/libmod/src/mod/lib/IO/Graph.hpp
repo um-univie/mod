@@ -1,26 +1,24 @@
-#ifndef MOD_LIB_IO_GRAPH_H
-#define MOD_LIB_IO_GRAPH_H
+#ifndef MOD_LIB_IO_GRAPH_HPP
+#define MOD_LIB_IO_GRAPH_HPP
 
 #include <mod/lib/Graph/GraphDecl.hpp>
 
-#include <istream>
 #include <memory>
 #include <ostream>
 #include <string>
+#include <string_view>
 
 namespace mod {
 enum class SmilesClassPolicy;
-namespace lib {
-namespace Graph {
+} // namespace mod
+namespace mod::lib::Graph {
 struct DepictionData;
 struct LabelledGraph;
 struct PropStereo;
 struct PropString;
 struct Single;
-} // namespace Graph
-namespace IO {
-namespace Graph {
-namespace Read {
+} // namespace mod::lib::Graph
+namespace mod::lib::IO::Graph::Read {
 
 struct Data {
 	Data();
@@ -34,11 +32,11 @@ public:
 	std::map<int, std::size_t> externalToInternalIds;
 };
 
-Data gml(std::istream &s, std::ostream &err);
+Data gml(std::string_view src, std::ostream &err);
 Data dfs(const std::string &dfs, std::ostream &err);
 Data smiles(const std::string &smiles, std::ostream &err, bool allowAbstract, SmilesClassPolicy classPolicy);
-} // namespace Read
-namespace Write {
+} // namespace mod::lib::IO::Graph::Read
+namespace mod::lib::IO::Graph::Write {
 
 enum class EdgeFake3DType {
 	None, WedgeSL, WedgeLS, HashSL, HashLS
@@ -204,11 +202,6 @@ std::string tikz(const lib::Graph::Single &g, const Options &options, bool asInl
 std::string pdf(const lib::Graph::Single &g, const Options &options);
 std::string svg(const lib::Graph::Single &g, const Options &options);
 
-} // namespace Write
-} // namespace Graph
-} // namespace IO
-} // namespace lib
-} // namespace mod
+} // namespace mod::lib::IO::Graph::Write
 
-#endif /* MOD_LIB_IO_GRAPH_H */
-
+#endif // MOD_LIB_IO_GRAPH_HPP

@@ -1,12 +1,11 @@
-#ifndef MOD_LIB_STRINGSTORE_H
-#define	MOD_LIB_STRINGSTORE_H
+#ifndef MOD_LIB_STRINGSTORE_HPP
+#define MOD_LIB_STRINGSTORE_HPP
 
 #include <map>
 #include <string>
 #include <vector>
 
-namespace mod {
-namespace lib {
+namespace mod::lib {
 
 struct StringStore {
 	StringStore() = default;
@@ -22,7 +21,6 @@ private:
 	mutable std::map<std::string, std::size_t> index;
 };
 
-} // namespace lib
-} // namespace mod
+} // namespace mod::lib
 
-#endif	/* MOD_LIB_STRINGSTORE_H */
+#endif // MOD_LIB_STRINGSTORE_HPP

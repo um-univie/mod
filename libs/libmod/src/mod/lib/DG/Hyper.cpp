@@ -267,12 +267,11 @@ void Hyper::printStats(std::ostream &s) const {
 	s << "reverse/vert:\t" << (numReverse / ((double) numVerts)) << std::endl;
 	s << "pairs/edge:\t" << (numEdgePairs / ((double) numEdges)) << std::endl;
 	s << "------------------------------------------------------------------" << std::endl;
-	typedef std::pair<unsigned int, unsigned int> P;
 	s << "numIn histogram:" << std::endl;
-	for(const P &p : countNumIn) s << p.first << "\t" << p.second << std::endl;
+	for(const auto &p : countNumIn) s << p.first << "\t" << p.second << std::endl;
 	s << "------------------------------------------------------------------" << std::endl;
 	s << "numOut histogram:" << std::endl;
-	for(const P &p : countNumIn) s << p.first << "\t" << p.second << std::endl;
+	for(const auto &p : countNumIn) s << p.first << "\t" << p.second << std::endl;
 	s << "------------------------------------------------------------------" << std::endl;
 	s << "avgInReverseRatio\t" << avgInReverseRatio << std::endl;
 	s << "avgInReverseRatioWithVirtual\t" << avgInReverseRatioWithVirtual << std::endl;

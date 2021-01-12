@@ -4,14 +4,19 @@ import ctypes
 import inspect
 import math
 import sys
+from typing import (
+	Any, Callable, cast, Generic, Iterable, List, Optional, Sequence, Tuple,
+	Type, TypeVar, Union
+)
 
 _oldFlags = sys.getdlopenflags()
 sys.setdlopenflags(_oldFlags | ctypes.RTLD_GLOBAL)
+from . import libpymod
 from .libpymod import *
 sys.setdlopenflags(_oldFlags)
 
 # from http://mail.python.org/pipermail/tutor/2003-November/026645.html
-class Unbuffered(object):
+class _Unbuffered:
 	def __init__(self, stream):
 		self.stream = stream
 	def write(self, data):
@@ -19,7 +24,7 @@ class Unbuffered(object):
 		self.stream.flush()
 	def __getattr__(self, attr):
 		return getattr(self.stream, attr)
-sys.stdout = Unbuffered(sys.stdout)
+sys.stdout = _Unbuffered(sys.stdout)  # type: ignore
 
 def _NoNew__setattr__(self, name, value):
 	if hasattr(self, "_frozen") and self._frozen:
@@ -34,11 +39,11 @@ def _NoNew__setattr__(self, name, value):
 		raise AttributeError(msg)
 
 
-def _fixClass(name, c, indent):
-	if not name.startswith("Func_"):
+def _fixClass(name, c, indent) -> None:
+	if not name.startswith("_Func_"):
 		c.__setattr__ = _NoNew__setattr__
 
-	if name.startswith("Func_") or name.startswith("Vec"):
+	if name.startswith("_Func_") or name.startswith("_Vec"):
 		c.__hash__ = None
 	elif name.endswith("Vertex"):
 		assert c.__hash__ is not None and c.__hash__ != object.__hash__
@@ -48,7 +53,7 @@ def _fixClass(name, c, indent):
 	elif c.__hash__ == object.__hash__:
 		c.__hash__ = None
 
-	if not (name.startswith("Func_") or name.startswith("Vec")):
+	if not (name.startswith("_Func_") or name.startswith("_Vec")):
 		if name.endswith("Vertex") or name.endswith("Edge"):
 			assert c.__bool__ is not None
 
@@ -56,14 +61,13 @@ def _fixClass(name, c, indent):
 		if a[0] == "__class__": continue
 		_fixClass(a[0], a[1], indent + 1)
 
-classes = inspect.getmembers(sys.modules[__name__], inspect.isclass)
+classes = inspect.getmembers(libpymod, inspect.isclass)
 for c in classes:
-	if c[1] == Unbuffered: continue
 	_fixClass(c[0], c[1], 0)
 
 #----------------------------------------------------------
 
-def _deprecation(msg):
+def _deprecation(msg) -> None:
 	if config.common.ignoreDeprecation:
 		print("WARNING: {} Use config.common.ignoreDeprecation = False to make this an exception.".format(msg))
 	else:
@@ -74,17 +78,17 @@ def _deprecation(msg):
 #----------------------------------------------------------
 
 class CWDPath:
-	def __init__(self, f):
+	def __init__(self, f) -> None:
 		self.f = f
 
-_filePrefixes = []
+_filePrefixes: List[str] = []
 
-def prefixFilename(name):
+def prefixFilename(name: str) -> str:
 	if isinstance(name, CWDPath):
 		return name.f
 	if len(name) == 0 or name[0] == '/':
 		return name
-	prefixed = []
+	prefixed: List[str] = []
 	for s in _filePrefixes:
 		if len(s) != 0 and s[0] == '/':
 			prefixed[:] = [s]
@@ -93,10 +97,10 @@ def prefixFilename(name):
 	prefixed.append(name)
 	return ''.join(prefixed)
 
-def pushFilePrefix(prefix):
+def pushFilePrefix(prefix: str) -> None:
 	_filePrefixes.append(prefix)
 
-def popFilePrefix():
+def popFilePrefix() -> None:
 	if len(_filePrefixes) == 0:
 		raise LogicError("popFilePrefix failed; the stack is empty")
 	_filePrefixes.pop()
@@ -106,33 +110,31 @@ def popFilePrefix():
 # Wrappers
 #----------------------------------------------------------
 
-def _wrap(C, l):
-	if type(l) is C:
+def _wrap(C: Type["Vec[T]"], l: Union["Vec[T]", Iterable["T"]]) -> "Vec[T]":
+	if isinstance(l, C):
 		return l
 	lcpp = C()
-	lcpp.extend(a for a in l)
+	lcpp.extend(l)
 	return lcpp
-def _unwrap(lcpp):
-	l = []
-	l.extend(a for a in lcpp)
+def _unwrap(lcpp: Iterable["T"]) -> List["T"]:
+	l: List[T] = []
+	l.extend(lcpp)
 	return l
 
-def _funcWrap(F, f, resultWrap=None, module=libpymod):
-	if isinstance(f, F):
-		res = f
-	elif hasattr(f, "__call__"):	# wrap functor
-		class FuncWrapper(F):
-			def __init__(self, f):
+def _funcWrap(F: Type["U"], f: Union["T", Callable], resultWrap: Optional[Type["Vec[T]"]] = None, module=libpymod) -> "U":
+	if hasattr(f, "__call__"):
+		class FuncWrapper(F):  # type: ignore
+			def __init__(self, f) -> None:
 				self.f = f
 				F.__init__(self)
-			def clone(self):
+			def clone(self) -> "FuncWrapper":
 				return module._sharedToStd(FuncWrapper(self.f))
-			def __str__(self):
+			def __str__(self) -> str:
 				lines, lnum = inspect.getsourcelines(self.f)
 				source = ''.join(lines)
 				filename = inspect.getfile(self.f)
 				return "FuncWrapper(%s)\nCode from %s:%d >>>>>\n%s<<<<< Code from %s:%d" % (str(self.f), filename, lnum, source, filename, lnum)
-			def __call__(self, *args):
+			def __call__(self, *args) -> Union["T", "Vec[T]"]:
 				try:
 					if resultWrap is not None:
 						return _wrap(resultWrap, self.f(*args))
@@ -145,60 +147,64 @@ def _funcWrap(F, f, resultWrap=None, module=libpymod):
 										
 		res = FuncWrapper(f)
 	else:							# assume constant
-		class Constant(F):
-			def __init__(self, c):
+		class Constant(F):  # type: ignore
+			def __init__(self, c) -> None:
 				self.c = c
 				F.__init__(self)
-			def clone(self):
+			def clone(self) -> "Constant":
 				return module._sharedToStd(Constant(self.c))
-			def __str__(self):
+			def __str__(self) -> str:
 				return "Constant(" + str(self.c) + ")"
-			def __call__(self, *args):
+			def __call__(self, *args) -> "T":
 				return self.c
 		res = Constant(f)
 	return module._sharedToStd(res)
+
 
 ###########################################################
 # Chem
 ###########################################################
 
-BondType.__str__ = libpymod._bondTypeToString
+BondType.__str__ = libpymod._bondTypeToString  # type: ignore
+
 
 ###########################################################
 # Config
 ###########################################################
 
-LabelType.__str__ = libpymod._LabelType__str__
-LabelRelation.__str__ = libpymod._LabelRelation__str__
-IsomorphismPolicy.__str__ = libpymod._IsomorphismPolicy__str__
-SmilesClassPolicy.__str__ = libpymod._SmilesClassPolicy__str__
+LabelType.__str__ = libpymod._LabelType__str__  # type: ignore
+LabelRelation.__str__ = libpymod._LabelRelation__str__  # type: ignore
+IsomorphismPolicy.__str__ = libpymod._IsomorphismPolicy__str__  # type: ignore
+SmilesClassPolicy.__str__ = libpymod._SmilesClassPolicy__str__  # type: ignore
 
 config = getConfig()
+
 
 ###########################################################
 # Derivation
 ###########################################################
 
-Derivation.__repr__ = Derivation.__str__
+Derivation.__repr__ = Derivation.__str__  # type: ignore
 
-def _Derivation__setattr__(self, name, value):
+def _Derivation__setattr__(self, name, value) -> None:
 	if name in ("left", "right"):
-		object.__setattr__(self, name, _wrap(VecGraph, value))
+		object.__setattr__(self, name, _wrap(libpymod._VecGraph, value))
 	else:
 		_NoNew__setattr__(self, name, value)
-Derivation.__setattr__ = _Derivation__setattr__
+Derivation.__setattr__ = _Derivation__setattr__  # type: ignore
 
 
-Derivations.__repr__ = Derivations.__str__
+Derivations.__repr__ = Derivations.__str__  # type: ignore
 
-def _Derivations__setattr__(self, name, value):
+def _Derivations__setattr__(self, name, value) -> None:
 	if name in ("left", "right"):
-		object.__setattr__(self, name, _wrap(VecGraph, value))
+		object.__setattr__(self, name, _wrap(libpymod._VecGraph, value))
 	elif name == "rules":
-		object.__setattr__(self, name, _wrap(VecRule, value))
+		object.__setattr__(self, name, _wrap(libpymod._VecRule, value))
 	else:
 		_NoNew__setattr__(self, name, value)
-Derivations.__setattr__ = _Derivations__setattr__
+Derivations.__setattr__ = _Derivations__setattr__  # type: ignore
+
 
 ###########################################################
 # DG
@@ -228,55 +234,71 @@ def dgRuleComp(graphs, strat, labelSettings=LabelSettings(LabelType.String, Labe
 	return dg
 
 _DG_load_orig = DG.load
-def _DG_load(graphDatabase, ruleDatabase, file,
-	         graphPolicy=IsomorphismPolicy.Check, verbosity=2):
-	return _DG_load_orig(_wrap(VecGraph, graphDatabase),
-	                     _wrap(VecRule, ruleDatabase),
-	                     prefixFilename(file),
-	                     graphPolicy, verbosity)
-DG.load = _DG_load
+def _DG_load(
+		graphDatabase: List[Graph], ruleDatabase: List[Rule], file: str,
+		graphPolicy: IsomorphismPolicy = IsomorphismPolicy.Check,
+		verbosity: int = 2) -> DG:
+	return _DG_load_orig(
+		_wrap(libpymod._VecGraph, graphDatabase),
+		_wrap(libpymod._VecRule, ruleDatabase),
+		prefixFilename(file), graphPolicy, verbosity)
+DG.load = _DG_load  # type: ignore
 
 _DG__init__old = DG.__init__
 def _DG__init__(self, *,
-	            labelSettings=LabelSettings(
-	                LabelType.String,
-	                LabelRelation.Isomorphism),
-	            graphDatabase=[],
-	            graphPolicy=IsomorphismPolicy.Check):
-	return _DG__init__old(self,
+		labelSettings: LabelSettings = LabelSettings(
+			LabelType.String,
+			LabelRelation.Isomorphism),
+		graphDatabase: List[Graph] = [],
+		graphPolicy: IsomorphismPolicy = IsomorphismPolicy.Check) -> None:
+	return _DG__init__old(self,  # type: ignore
 	                      labelSettings,
-	                      _wrap(VecGraph, graphDatabase),
+	                      _wrap(libpymod._VecGraph, graphDatabase),
 	                      graphPolicy)
-DG.__init__ = _DG__init__
+DG.__init__ = _DG__init__  # type: ignore
 
 _DG_print_orig = DG.print
-def _DG_print(self, printer=None, data=None):
+def _DG_print(self, printer: Optional[DGPrinter] = None, data: Optional[DGPrintData] = None) -> Tuple[str, str]:
 	if printer is None: printer = DGPrinter()
 	if data is None: data = DGPrintData(self)
-	return _DG_print_orig(self, data, printer)
-DG.print = _DG_print
+	return _DG_print_orig(self, printer, data)
+DG.print = _DG_print  # type: ignore
 
 _DG_findEdge_orig = DG.findEdge
-def _DG_findEdge(self, srcsI, tarsI):
-	srcs = list(srcsI)
-	tars = list(tarsI)
-	if len(srcs) == 0: s = None
-	elif isinstance(srcs[0], Graph): s = VecGraph
-	else: s = VecDGVertex
-	if len(tars) == 0: t = None
-	elif isinstance(tars[0], Graph): t = VecGraph
-	else: t = VecDGVertex
+def _DG_findEdge(self,
+		srcsI: Union[Sequence[Graph], Sequence[DGVertex]],
+		tarsI: Union[Sequence[Graph], Sequence[DGVertex]]) -> DGHyperEdge:
+	srcs = srcsI
+	tars = tarsI
+
+	s: Union[None, Type[libpymod._VecGraph], Type[libpymod._VecDGVertex]]
+	t: Union[None, Type[libpymod._VecGraph], Type[libpymod._VecDGVertex]]
+
+	if len(srcs) == 0:
+		s = None
+	elif isinstance(srcs[0], Graph):
+		s = libpymod._VecGraph
+	else:
+		s = libpymod._VecDGVertex
+
+	if len(tars) == 0:
+		t = None
+	elif isinstance(tars[0], Graph):
+		t = libpymod._VecGraph
+	else:
+		t = libpymod._VecDGVertex
+
 	if s is None and t is None:
-		s = VecDGVertex
-		t = VecDGVertex
+		s = libpymod._VecDGVertex
+		t = libpymod._VecDGVertex
 	elif s is None:
 		s = t
 	elif t is None:
 		t = s
-	return _DG_findEdge_orig(self, _wrap(s, srcs), _wrap(t, tars))
-DG.findEdge = _DG_findEdge
+	return _DG_findEdge_orig(self, _wrap(s, srcs), _wrap(t, tars))  # type: ignore
+DG.findEdge = _DG_findEdge  # type: ignore
 
-DG.__repr__ = DG.__str__
+DG.__repr__ = DG.__str__  # type: ignore
 
 def _DG__getattribute__(self, name):
 	if name == "graphDatabase":
@@ -285,53 +307,54 @@ def _DG__getattribute__(self, name):
 		return _unwrap(self._products)
 	else:
 		return object.__getattribute__(self, name)
-DG.__getattribute__ = _DG__getattribute__
+DG.__getattribute__ = _DG__getattribute__  # type: ignore
 
-DG.__eq__ = lambda self, other: self.id == other.id
-DG.__hash__ = lambda self: self.id
+DG.__eq__ = lambda self, other: self.id == other.id  # type: ignore
+DG.__hash__ = lambda self: self.id  # type: ignore
 
 
-class DGBuildContextManager(object):
-	def __init__(self, dg):
+class DGBuildContextManager:
+	dg: Optional[DG]
+	_builder: Optional[DGBuilder]
+
+	def __init__(self, dg: DG) -> None:
 		assert dg is not None
 		self.dg = dg
 		self._builder = _DG_build_orig(self.dg)
 
-	def __enter__(self):
+	def __enter__(self) -> "DGBuildContextManager":
 		return self
 
-	def __exit__(self, exc_type, exc_val, exc_tb):
+	def __exit__(self, exc_type, exc_val, exc_tb) -> None:
 		del self._builder
 		self.dg = None
 		self._builder = None
 
-	def _check(self):
+	def addDerivation(self, d: Derivations,
+			graphPolicy: IsomorphismPolicy = IsomorphismPolicy.Check) -> DGHyperEdge:
 		assert self._builder
-
-	def addDerivation(self, d, graphPolicy=IsomorphismPolicy.Check):
-		self._check()
 		return self._builder.addDerivation(d, graphPolicy)
 
-	def execute(self, strategy, *, verbosity=2, ignoreRuleLabelTypes=False):
-		self._check()
-		return self._builder.execute(dgStrat(strategy), verbosity, ignoreRuleLabelTypes)
-
-	def addAbstract(self, description):
-		self._check()
-		return self._builder.addAbstract(description)
+	def execute(self, strategy, *, verbosity=2, ignoreRuleLabelTypes=False) -> DGExecuteResult:
+		assert self._builder
+		return self._builder.execute(dgStrat(strategy), verbosity, ignoreRuleLabelTypes)  # type: ignore
 	
-	def apply(self, graphs, rule, verbosity=0, graphPolicy=IsomorphismPolicy.Check):
-		self._check()
-		return _unwrap(self._builder.apply(_wrap(VecGraph, graphs), rule, verbosity, graphPolicy))
+	def apply(self, graphs, rule, onlyProper=True, verbosity=0, graphPolicy=IsomorphismPolicy.Check) -> List[DGHyperEdge]:
+		assert self._builder
+		return _unwrap(self._builder.apply(_wrap(libpymod._VecGraph, graphs), rule, onlyProper, verbosity, graphPolicy))
 
-	def load(self, ruleDatabase, file, verbosity=2):
-		self._check()
+	def addAbstract(self, description: str) -> None:
+		assert self._builder
+		return self._builder.addAbstract(description)
+
+	def load(self, ruleDatabase: List[Rule], file: str, verbosity: int = 2) -> None:
+		assert self._builder
 		return self._builder.load(
-			_wrap(VecRule, ruleDatabase),
+			_wrap(libpymod._VecRule, ruleDatabase),
 			prefixFilename(file), verbosity)
 
 _DG_build_orig = DG.build
-DG.build = lambda self: DGBuildContextManager(self)
+DG.build = lambda self: DGBuildContextManager(self)  # type: ignore
 
 
 #----------------------------------------------------------
@@ -343,12 +366,12 @@ def _DGExecuteResult__getattribute__(self, name):
 		return _unwrap(object.__getattribute__(self, name))
 	return object.__getattribute__(self, name)
 
-DGExecuteResult.__getattribute__ = _DGExecuteResult__getattribute__
+DGExecuteResult.__getattribute__ = _DGExecuteResult__getattribute__  # type: ignore
 
 _DGExecuteResult_list_old = DGExecuteResult.list
-def _DGExecuteResult_list(self, *, withUniverse=False):
-	return _DGExecuteResult_list_old(self, withUniverse)
-DGExecuteResult.list = _DGExecuteResult_list
+def _DGExecuteResult_list(self, *, withUniverse=False) -> None:
+	return _DGExecuteResult_list_old(self, withUniverse)  # type: ignore
+DGExecuteResult.list = _DGExecuteResult_list  # type: ignore
 
 
 #----------------------------------------------------------
@@ -356,7 +379,7 @@ DGExecuteResult.list = _DGExecuteResult_list
 #----------------------------------------------------------
 
 _DGHyperEdge_print_orig = DGHyperEdge.print
-DGHyperEdge.print = lambda self, *args, **kwargs: _unwrap(_DGHyperEdge_print_orig(self, *args, **kwargs))
+DGHyperEdge.print = lambda self, *args, **kwargs: _unwrap(_DGHyperEdge_print_orig(self, *args, **kwargs))  # type: ignore
 
 
 #----------------------------------------------------------
@@ -376,42 +399,42 @@ def _makeGraphToVertexCallback(orig, name, func):
 	return callback
 
 _DGPrinter_pushVertexVisible_orig = DGPrinter.pushVertexVisible
-DGPrinter.pushVertexVisible = _makeGraphToVertexCallback(
-	_DGPrinter_pushVertexVisible_orig, "pushVertexVisible", Func_BoolDGVertex)
+DGPrinter.pushVertexVisible = _makeGraphToVertexCallback(  # type: ignore
+	_DGPrinter_pushVertexVisible_orig, "pushVertexVisible", libpymod._Func_BoolDGVertex)
 
 _DGPrinter_pushEdgeVisible_orig = DGPrinter.pushEdgeVisible
-DGPrinter.pushEdgeVisible = \
-	lambda self, f: _DGPrinter_pushEdgeVisible_orig(self, _funcWrap(Func_BoolDGHyperEdge, f))
+DGPrinter.pushEdgeVisible = (  # type: ignore
+	lambda self, f: _DGPrinter_pushEdgeVisible_orig(self, _funcWrap(libpymod._Func_BoolDGHyperEdge, f)))
 
 _DGPrinter_pushVertexLabel_orig = DGPrinter.pushVertexLabel
-DGPrinter.pushVertexLabel = _makeGraphToVertexCallback(
-	_DGPrinter_pushVertexLabel_orig , "pushVertexLabel", Func_StringDGVertex)
+DGPrinter.pushVertexLabel = _makeGraphToVertexCallback(  # type: ignore
+	_DGPrinter_pushVertexLabel_orig , "pushVertexLabel", libpymod._Func_StringDGVertex)
 
 _DGPrinter_pushEdgeLabel_orig = DGPrinter.pushEdgeLabel
-DGPrinter.pushEdgeLabel = \
-	lambda self, f: _DGPrinter_pushEdgeLabel_orig(self, _funcWrap(Func_StringDGHyperEdge, f))
+DGPrinter.pushEdgeLabel = (  # type: ignore
+	lambda self, f: _DGPrinter_pushEdgeLabel_orig(self, _funcWrap(libpymod._Func_StringDGHyperEdge, f)))
 
 _DGPrinter_pushVertexColour_orig = DGPrinter.pushVertexColour
 _DGPrinter_pushVertexColour_inner = _makeGraphToVertexCallback(
-	_DGPrinter_pushVertexColour_orig, "pushVertexColour", Func_StringDGVertex)
-DGPrinter.pushVertexColour = \
-	lambda self, f, extendToEdges=True: _DGPrinter_pushVertexColour_inner(self, f, extendToEdges)
+	_DGPrinter_pushVertexColour_orig, "pushVertexColour", libpymod._Func_StringDGVertex)
+DGPrinter.pushVertexColour = (  # type: ignore
+	lambda self, f, extendToEdges=True: _DGPrinter_pushVertexColour_inner(self, f, extendToEdges))
 
 _DGPrinter_pushEdgeColour_orig = DGPrinter.pushEdgeColour
-DGPrinter.pushEdgeColour = \
-	lambda self, f: _DGPrinter_pushEdgeColour_orig(self, _funcWrap(Func_StringDGHyperEdge, f))
+DGPrinter.pushEdgeColour = (  # type: ignore
+	lambda self, f: _DGPrinter_pushEdgeColour_orig(self, _funcWrap(libpymod._Func_StringDGHyperEdge, f)))
 
 _DGPrinter_setRotationOverwrite_orig = DGPrinter.setRotationOverwrite
-DGPrinter.setRotationOverwrite = \
-	lambda self, f: _DGPrinter_setRotationOverwrite_orig(self, _funcWrap(Func_IntGraph, f))
+DGPrinter.setRotationOverwrite = (  # type: ignore
+	lambda self, f: _DGPrinter_setRotationOverwrite_orig(self, _funcWrap(libpymod._Func_IntGraph, f)))
 
 _DGPrinter_setMirrorOverwrite_orig = DGPrinter.setMirrorOverwrite
-DGPrinter.setMirrorOverwrite = \
-	lambda self, f: _DGPrinter_setMirrorOverwrite_orig(self, _funcWrap(Func_BoolGraph, f))
+DGPrinter.setMirrorOverwrite = (  # type: ignore
+	lambda self, f: _DGPrinter_setMirrorOverwrite_orig(self, _funcWrap(libpymod._Func_BoolGraph, f)))
 
 
 #----------------------------------------------------------
-# DGStrat
+# Strategy
 #----------------------------------------------------------
 
 def _DGStratGraphState__getattribute__(self, name):
@@ -421,163 +444,48 @@ def _DGStratGraphState__getattribute__(self, name):
 		return _unwrap(self._universe)
 	else:
 		return object.__getattribute__(self, name)
-DGStratGraphState.__getattribute__ = _DGStratGraphState__getattribute__
+DGStrat.GraphState.__getattribute__ = _DGStratGraphState__getattribute__  # type: ignore
 
 _DGStrat_makeAddStatic_orig = DGStrat.makeAddStatic
-def _DGStrat_makeAddStatic(onlyUniverse, graphs, graphPolicy):
-	return _DGStrat_makeAddStatic_orig(onlyUniverse, _wrap(VecGraph, graphs), graphPolicy)
-DGStrat.makeAddStatic = _DGStrat_makeAddStatic
+def _DGStrat_makeAddStatic(onlyUniverse, graphs, graphPolicy) -> DGStrat:
+	return _DGStrat_makeAddStatic_orig(onlyUniverse, _wrap(libpymod._VecGraph, graphs), graphPolicy)
+DGStrat.makeAddStatic = _DGStrat_makeAddStatic  # type: ignore
 
 _DGStrat_makeAddDynamic_orig = DGStrat.makeAddDynamic
-def _DGStrat_makeAddDynamic(onlyUniverse, generator, graphPolicy):
-	return _DGStrat_makeAddDynamic_orig(onlyUniverse, _funcWrap(Func_VecGraph, generator, resultWrap=VecGraph), graphPolicy)
-DGStrat.makeAddDynamic = _DGStrat_makeAddDynamic
+def _DGStrat_makeAddDynamic(onlyUniverse, generator, graphPolicy) -> DGStrat:
+	return _DGStrat_makeAddDynamic_orig(onlyUniverse, _funcWrap(libpymod._Func_VecGraph, generator, resultWrap=libpymod._VecGraph), graphPolicy)
+DGStrat.makeAddDynamic = _DGStrat_makeAddDynamic  # type: ignore
 
 _DGStrat_makeSequence_orig = DGStrat.makeSequence
-def _DGStrat_makeSequence(l):
-	return _DGStrat_makeSequence_orig(_wrap(VecDGStrat, l))
-DGStrat.makeSequence = _DGStrat_makeSequence
+def _DGStrat_makeSequence(l) -> DGStrat:
+	return _DGStrat_makeSequence_orig(_wrap(libpymod._VecDGStrat, l))
+DGStrat.makeSequence = _DGStrat_makeSequence  # type: ignore
 
 _DGStrat_makeParallel_orig = DGStrat.makeParallel
-def _DGStrat_makeParallel(l):
-	return _DGStrat_makeParallel_orig(_wrap(VecDGStrat, l))
-DGStrat.makeParallel = _DGStrat_makeParallel
+def _DGStrat_makeParallel(l) -> DGStrat:
+	return _DGStrat_makeParallel_orig(_wrap(libpymod._VecDGStrat, l))
+DGStrat.makeParallel = _DGStrat_makeParallel  # type: ignore
 
 _DGStrat_makeFilter_orig = DGStrat.makeFilter
-def _DGStrat_makeFilter(alsoUniverse, filterFunc):
-	return _DGStrat_makeFilter_orig(alsoUniverse, _funcWrap(Func_BoolGraphDGStratGraphStateBool, filterFunc))
-DGStrat.makeFilter = _DGStrat_makeFilter
+def _DGStrat_makeFilter(alsoUniverse, filterFunc) -> DGStrat:
+	return _DGStrat_makeFilter_orig(alsoUniverse, _funcWrap(libpymod._Func_BoolGraphDGStratGraphStateBool, filterFunc))
+DGStrat.makeFilter = _DGStrat_makeFilter  # type: ignore
 
 _DGStrat_makeExecute_orig = DGStrat.makeExecute
-def _DGStrat_makeExecute(func):
-	return _DGStrat_makeExecute_orig(_funcWrap(Func_VoidDGStratGraphState, func))
-DGStrat.makeExecute = _DGStrat_makeExecute
+def _DGStrat_makeExecute(func) -> DGStrat:
+	return _DGStrat_makeExecute_orig(_funcWrap(libpymod._Func_VoidDGStratGraphState, func))
+DGStrat.makeExecute = _DGStrat_makeExecute  # type: ignore
 
 _DGStrat_makeLeftPredicate_orig = DGStrat.makeLeftPredicate
-def _DGStrat_makeLeftPredicate(pred, strat):
-	return _DGStrat_makeLeftPredicate_orig(_funcWrap(Func_BoolDerivation, pred), strat)
-DGStrat.makeLeftPredicate = _DGStrat_makeLeftPredicate
+def _DGStrat_makeLeftPredicate(pred, strat) -> DGStrat:
+	return _DGStrat_makeLeftPredicate_orig(_funcWrap(libpymod._Func_BoolDerivation, pred), strat)
+DGStrat.makeLeftPredicate = _DGStrat_makeLeftPredicate  # type: ignore
 
 _DGStrat_makeRightPredicate_orig = DGStrat.makeRightPredicate
-def _DGStrat_makeRightPredicate(pred, strat):
-	return _DGStrat_makeRightPredicate_orig(_funcWrap(Func_BoolDerivation, pred), strat)
-DGStrat.makeRightPredicate = _DGStrat_makeRightPredicate
+def _DGStrat_makeRightPredicate(pred, strat) -> DGStrat:
+	return _DGStrat_makeRightPredicate_orig(_funcWrap(libpymod._Func_BoolDerivation, pred), strat)
+DGStrat.makeRightPredicate = _DGStrat_makeRightPredicate  # type: ignore
 
-
-#----------------------------------------------------------
-# Graph
-#----------------------------------------------------------
-
-inputGraphs = []
-
-_Graph_print_orig = Graph.print
-def _Graph_print(self, first=None, second=None):
-	if first is None:
-		return _Graph_print_orig(self)
-	if second is None:
-		second = first
-	return _Graph_print_orig(self, first, second)
-Graph.print = _Graph_print
-
-_Graph_aut = Graph.aut
-Graph.aut = lambda self, labelSettings=LabelSettings(LabelType.String, LabelRelation.Isomorphism): _Graph_aut(self, labelSettings)
-
-_Graph_isomorphism = Graph.isomorphism
-Graph.isomorphism = lambda self, g, maxNumMatches=1, labelSettings=LabelSettings(LabelType.String, LabelRelation.Isomorphism): _Graph_isomorphism(self, g, maxNumMatches, labelSettings)
-_Graph_monomorphism = Graph.monomorphism
-Graph.monomorphism = lambda self, g, maxNumMatches=1, labelSettings=LabelSettings(LabelType.String, LabelRelation.Isomorphism): _Graph_monomorphism(self, g, maxNumMatches, labelSettings)
-
-_Graph_getGMLString = Graph.getGMLString
-Graph.getGMLString = lambda self, withCoords=False: _Graph_getGMLString(self, withCoords)
-_Graph_printGML = Graph.printGML
-Graph.printGML = lambda self, withCoords=False: _Graph_printGML(self, withCoords)
-
-def _graphLoad(a, name, add):
-	if name != None:
-		a.name = name
-	if add:
-		inputGraphs.append(a)
-	return a
-def graphGMLString(d, name=None, add=True):
-	return _graphLoad(libpymod.graphGMLString(d), name, add)
-def graphGML(f, name=None, add=True):
-	return _graphLoad(libpymod.graphGML(prefixFilename(f)), name, add)
-def graphDFS(s, name=None, add=True):
-	return _graphLoad(libpymod.graphDFS(s), name, add)
-def smiles(s, name=None, add=True, allowAbstract=False, classPolicy=SmilesClassPolicy.NoneOnDuplicate):
-	return _graphLoad(libpymod.smiles(s, allowAbstract, classPolicy), name, add)
-
-Graph.__repr__ = lambda self: str(self) + "(" + str(self.id) + ")"
-Graph.__eq__ = lambda self, other: self.id == other.id
-Graph.__lt__ = lambda self, other: self.id < other.id
-Graph.__hash__ = lambda self: self.id
-
-def _Graph__setattr__(self, name, value):
-	if name == "image":
-		object.__setattr__(self, "image", _funcWrap(Func_String, value))
-	else:
-		_NoNew__setattr__(self, name, value)
-Graph.__setattr__ = _Graph__setattr__
-
-#----------------------------------------------------------
-# RCEvaluator
-#----------------------------------------------------------
-
-def _RCEvaluator__getattribute__(self, name):
-	if name == "ruleDatabase":
-		return _unwrap(self._ruleDatabase)
-	elif name == "products":
-		return _unwrap(self._products)
-	else:
-		return object.__getattribute__(self, name)
-RCEvaluator.__getattribute__ = _RCEvaluator__getattribute__
-
-_RCEvaluator_eval = RCEvaluator.eval
-RCEvaluator.eval = lambda self, e, *, verbosity=2: _unwrap(_RCEvaluator_eval(self, e, verbosity))
-
-def rcEvaluator(rules, labelSettings=LabelSettings(LabelType.String, LabelRelation.Isomorphism)):
-	return libpymod.rcEvaluator(_wrap(VecRule, rules), labelSettings)
-
-#----------------------------------------------------------
-# Rule
-#----------------------------------------------------------
-
-inputRules = []
-
-_Rule_print_orig = Rule.print
-def _Rule_print(self, first=None, second=None):
-	if first is None:
-		return _Rule_print_orig(self)
-	if second is None:
-		second = first
-	return _Rule_print_orig(self, first, second)
-Rule.print = _Rule_print
-
-_Rule_isomorphism = Rule.isomorphism
-Rule.isomorphism = lambda self, r, maxNumMatches=1, labelSettings=LabelSettings(LabelType.String, LabelRelation.Isomorphism): _Rule_isomorphism(self, r, maxNumMatches, labelSettings)
-_Rule_monomorphism = Rule.monomorphism
-Rule.monomorphism = lambda self, r, maxNumMatches=1, labelSettings=LabelSettings(LabelType.String, LabelRelation.Isomorphism): _Rule_monomorphism(self, r, maxNumMatches, labelSettings)
-
-_Rule_getGMLString = Rule.getGMLString
-Rule.getGMLString = lambda self, withCoords=False: _Rule_getGMLString(self, withCoords)
-_Rule_printGML = Rule.printGML
-Rule.printGML = lambda self, withCoords=False: _Rule_printGML(self, withCoords)
-
-def ruleGMLString(s, invert=False, add=True):
-	a = libpymod.ruleGMLString(s, invert)
-	if add:
-		inputRules.append(a)
-	return a
-def ruleGML(f, invert=False, add=True):
-	a = libpymod.ruleGML(prefixFilename(f), invert)
-	if add:
-		inputRules.append(a)
-	return a
-
-Rule.__repr__ = lambda self: str(self) + "(" + str(self.id) + ")"
-Rule.__eq__ = lambda self, other: self.id == other.id
-Rule.__lt__ = lambda self, other: self.id < other.id
-Rule.__hash__ = lambda self: self.id
 
 #----------------------------------------------------------
 # DG Strategy Prettification
@@ -687,10 +595,6 @@ revive = lambda s: DGStrat.makeRevive(dgStrat(s))
 # sequence
 #----------------------------------------------------------
 
-class _DGStrat_sequenceProxy(object):
-	def __init__(self, strats):
-		self.strats = strats
-
 def _DGStrat_sequence__rshift__(a, b):
 	strats = []
 	if isinstance(a, _DGStrat_sequenceProxy):
@@ -702,17 +606,143 @@ def _DGStrat_sequence__rshift__(a, b):
 	else:
 		strats.append(dgStrat(b))
 	return _DGStrat_sequenceProxy(strats)
-DGStrat.__rshift__ = _DGStrat_sequence__rshift__
-DGStrat.__rrshift__ = lambda self, other: _DGStrat_sequence__rshift__(other, self)
-_DGStrat_sequenceProxy.__rshift__ = _DGStrat_sequence__rshift__
-Rule.__rshift__ = _DGStrat_sequence__rshift__
+
+
+class _DGStrat_sequenceProxy:
+	def __init__(self, strats):
+		self.strats = strats
+
+	def  __rshift__(self, other):
+		return _DGStrat_sequence__rshift__(self, other)
+
+DGStrat.__rshift__ = _DGStrat_sequence__rshift__  # type: ignore
+DGStrat.__rrshift__ = lambda self, other: _DGStrat_sequence__rshift__(other, self)  # type: ignore
+Rule.__rshift__ = _DGStrat_sequence__rshift__  # type: ignore
+
+
+###########################################################
+# Graph
+###########################################################
+
+inputGraphs = []
+
+_Graph_print_orig = Graph.print
+def _Graph_print(self, first=None, second=None) -> Tuple[str, str]:
+	if first is None:
+		return _Graph_print_orig(self)
+	if second is None:
+		second = first
+	return _Graph_print_orig(self, first, second)
+Graph.print = _Graph_print  # type: ignore
+
+_Graph_aut = Graph.aut
+Graph.aut = lambda self, labelSettings=LabelSettings(LabelType.String, LabelRelation.Isomorphism): _Graph_aut(self, labelSettings)  # type: ignore
+
+_Graph_isomorphism = Graph.isomorphism
+Graph.isomorphism = lambda self, g, maxNumMatches=1, labelSettings=LabelSettings(LabelType.String, LabelRelation.Isomorphism): _Graph_isomorphism(self, g, maxNumMatches, labelSettings)  # type: ignore
+_Graph_monomorphism = Graph.monomorphism
+Graph.monomorphism = lambda self, g, maxNumMatches=1, labelSettings=LabelSettings(LabelType.String, LabelRelation.Isomorphism): _Graph_monomorphism(self, g, maxNumMatches, labelSettings)  # type: ignore
+
+_Graph_getGMLString = Graph.getGMLString
+Graph.getGMLString = lambda self, withCoords=False: _Graph_getGMLString(self, withCoords)  # type: ignore
+_Graph_printGML = Graph.printGML
+Graph.printGML = lambda self, withCoords=False: _Graph_printGML(self, withCoords)  # type: ignore
+
+def _graphLoad(a, name, add):
+	if name != None:
+		a.name = name
+	if add:
+		inputGraphs.append(a)
+	return a
+def graphGMLString(d, name=None, add=True):
+	return _graphLoad(libpymod.graphGMLString(d), name, add)
+def graphGML(f, name=None, add=True):
+	return _graphLoad(libpymod.graphGML(prefixFilename(f)), name, add)
+def graphDFS(s, name=None, add=True):
+	return _graphLoad(libpymod.graphDFS(s), name, add)
+def smiles(s, name=None, add=True, allowAbstract=False, classPolicy=SmilesClassPolicy.NoneOnDuplicate):
+	return _graphLoad(libpymod.smiles(s, allowAbstract, classPolicy), name, add)
+
+Graph.__repr__ = lambda self: str(self) + "(" + str(self.id) + ")"  # type: ignore
+Graph.__eq__ = lambda self, other: self.id == other.id  # type: ignore
+Graph.__lt__ = lambda self, other: self.id < other.id  # type: ignore
+Graph.__hash__ = lambda self: self.id  # type: ignore
+
+def _Graph__setattr__(self, name, value) -> None:
+	if name == "image":
+		object.__setattr__(self, "image", _funcWrap(libpymod._Func_String, value))
+	else:
+		_NoNew__setattr__(self, name, value)
+Graph.__setattr__ = _Graph__setattr__  # type: ignore
+
+
+###########################################################
+# Rule
+###########################################################
+
+inputRules = []
+
+_Rule_print_orig = Rule.print
+def _Rule_print(self, first=None, second=None) -> Tuple[str, str]:
+	if first is None:
+		return _Rule_print_orig(self)
+	if second is None:
+		second = first
+	return _Rule_print_orig(self, first, second)
+Rule.print = _Rule_print  # type: ignore
+
+_Rule_isomorphism = Rule.isomorphism
+Rule.isomorphism = lambda self, r, maxNumMatches=1, labelSettings=LabelSettings(LabelType.String, LabelRelation.Isomorphism): _Rule_isomorphism(self, r, maxNumMatches, labelSettings)  # type: ignore
+_Rule_monomorphism = Rule.monomorphism
+Rule.monomorphism = lambda self, r, maxNumMatches=1, labelSettings=LabelSettings(LabelType.String, LabelRelation.Isomorphism): _Rule_monomorphism(self, r, maxNumMatches, labelSettings)  # type: ignore
+
+_Rule_getGMLString = Rule.getGMLString
+Rule.getGMLString = lambda self, withCoords=False: _Rule_getGMLString(self, withCoords)  # type: ignore
+_Rule_printGML = Rule.printGML
+Rule.printGML = lambda self, withCoords=False: _Rule_printGML(self, withCoords)  # type: ignore
+
+def ruleGMLString(s, invert=False, add=True):
+	a = libpymod.ruleGMLString(s, invert)
+	if add:
+		inputRules.append(a)
+	return a
+def ruleGML(f, invert=False, add=True):
+	a = libpymod.ruleGML(prefixFilename(f), invert)
+	if add:
+		inputRules.append(a)
+	return a
+
+Rule.__repr__ = lambda self: str(self) + "(" + str(self.id) + ")"  # type: ignore
+Rule.__eq__ = lambda self, other: self.id == other.id  # type: ignore
+Rule.__lt__ = lambda self, other: self.id < other.id  # type: ignore
+Rule.__hash__ = lambda self: self.id  # type: ignore
+
+
+#----------------------------------------------------------
+# Composition
+#----------------------------------------------------------
+
+def _RCEvaluator__getattribute__(self, name):
+	if name == "ruleDatabase":
+		return _unwrap(self._ruleDatabase)
+	elif name == "products":
+		return _unwrap(self._products)
+	else:
+		return object.__getattribute__(self, name)
+RCEvaluator.__getattribute__ = _RCEvaluator__getattribute__  # type: ignore
+
+_RCEvaluator_eval = RCEvaluator.eval
+RCEvaluator.eval = lambda self, exp, *, verbosity=2: _unwrap(_RCEvaluator_eval(self, exp, verbosity))  # type: ignore
+
+def rcEvaluator(rules, labelSettings=LabelSettings(LabelType.String, LabelRelation.Isomorphism)):
+	return libpymod.rcEvaluator(_wrap(libpymod._VecRule, rules), labelSettings)
 
 
 #----------------------------------------------------------
 # RCExp prettification
 #----------------------------------------------------------
 
-def rcExp(e):
+def rcExp(e) -> RCExpExp:
 	if isinstance(e, RCExpExp) or isinstance(e, Rule) or isinstance(e, RCExpUnion):
 		return e
 	elif isinstance(e, RCExpBind) or isinstance(e, RCExpId) or isinstance(e, RCExpUnbind):
@@ -720,174 +750,157 @@ def rcExp(e):
 	elif isinstance(e, RCExpComposeCommon) or isinstance(e, RCExpComposeParallel) or isinstance(e, RCExpComposeSub) or isinstance(e, RCExpComposeSuper):
 		return e
 	elif isinstance(e, collections.Iterable):
-		return RCExpUnion(_wrap(VecRCExpExp, [rcExp(a) for a in e]))
+		return RCExpUnion(_wrap(libpymod._VecRCExpExp, [rcExp(a) for a in e]))
 	else:
 		raise TypeError("Can not convert type '" + str(type(e)) + "' to RCExpExp")
 
-def _rcConvertGraph(g, cls, f):
+def _rcConvertGraph(g, cls, f) -> RCExpExp:
 	if isinstance(g, Graph):
 		return cls(g)
 	elif isinstance(g, collections.Iterable):
 		l = [f(a) for a in g]
 		return rcExp(l)
 	else:
-		raise TypeError("Can not convert type '" + str(type(e)) + "' to " + str(cls))
-def rcBind(g):
+		raise TypeError("Can not convert type '" + str(type(g)) + "' to " + str(cls))
+
+
+def rcBind(g) -> RCExpExp:
 	return _rcConvertGraph(g, RCExpBind, rcBind)
-def rcId(g):
+
+
+def rcId(g) -> RCExpExp:
 	return _rcConvertGraph(g, RCExpId, rcId)
-def rcUnbind(g):
+
+
+def rcUnbind(g) -> RCExpExp:
 	return _rcConvertGraph(g, RCExpUnbind, rcUnbind)
 
-class _RCCommonOpFirstBound(object):
-	def __init__(self, discardNonchemical, maximum, connected, first):
+
+class _RCCommonOpFirstBound:
+	def __init__(self, discardNonchemical, maximum, connected, first) -> None:
 		self.discardNonchemical = discardNonchemical
 		self.maximum = maximum
 		self.connected = connected
 		self.first = first
-	def __mul__(self, second):
+
+	def __mul__(self, second) -> RCExpExp:
 		return RCExpComposeCommon(rcExp(self.first), rcExp(second), self.discardNonchemical, self.maximum, self.connected)
-class _RCCommonOpArgsBound(object):
-	def __init__(self, discardNonchemical, maximum, connected):
+
+
+class _RCCommonOpArgsBound:
+	def __init__(self, discardNonchemical, maximum, connected) -> None:
 		self.discardNonchemical = discardNonchemical
 		self.maximum = maximum
 		self.connected = connected
-	def __rmul__(self, first):
+
+	def __rmul__(self, first) -> _RCCommonOpFirstBound:
 		return _RCCommonOpFirstBound(self.discardNonchemical, self.maximum, self.connected, first)
-class _RCCommonOp(object):
+
+
+class _RCCommonOp:
 	def __call__(self, discardNonchemical=True, maximum=False, connected=True):
 		return _RCCommonOpArgsBound(discardNonchemical, maximum, connected)
-	def __rmul__(self, first):
+
+	def __rmul__(self, first) -> RCExpExp:
 		return first * self()
+
+
 rcCommon = _RCCommonOp()
 
-class _RCParallelOpFirstBound(object):
-	def __init__(self, discardNonchemical, first):
+
+class _RCParallelOpFirstBound:
+	def __init__(self, discardNonchemical, first) -> None:
 		self.discardNonchemical = discardNonchemical
 		self.first = first
-	def __mul__(self, second):
+
+	def __mul__(self, second) -> RCExpExp:
 		return RCExpComposeParallel(rcExp(self.first), rcExp(second), self.discardNonchemical)
-class _RCParallelOpArgsBound(object):
-	def __init__(self, discardNonchemical):
+
+
+class _RCParallelOpArgsBound:
+	def __init__(self, discardNonchemical) -> None:
 		self.discardNonchemical = discardNonchemical
-	def __rmul__(self, first):
+
+	def __rmul__(self, first) -> _RCParallelOpFirstBound:
 		return _RCParallelOpFirstBound(self.discardNonchemical, first)
-class _RCParallelOp(object):
+
+
+class _RCParallelOp:
 	def __call__(self, discardNonchemical=True):
 		return _RCParallelOpArgsBound(discardNonchemical)
-	def __rmul__(self, first):
+
+	def __rmul__(self, first) -> RCExpExp:
 		return first * self()
+
+
 rcParallel = _RCParallelOp()
 
-class _RCSubOpFirstBound(object):
-	def __init__(self, discardNonchemical, allowPartial, first):
+
+class _RCSubOpFirstBound:
+	def __init__(self, discardNonchemical, allowPartial, first) -> None:
 		self.discardNonchemical = discardNonchemical
 		self.allowPartial = allowPartial
 		self.first = first
-	def __mul__(self, second):
+
+	def __mul__(self, second) -> RCExpExp:
 		return RCExpComposeSub(rcExp(self.first), rcExp(second), self.discardNonchemical, self.allowPartial)
-class _RCSubOpArgsBound(object):
-	def __init__(self, discardNonchemical, allowPartial):
+
+
+class _RCSubOpArgsBound:
+	def __init__(self, discardNonchemical, allowPartial) -> None:
 		self.discardNonchemical = discardNonchemical
 		self.allowPartial = allowPartial
-	def __rmul__(self, first):
+
+	def __rmul__(self, first) -> _RCSubOpFirstBound:
 		return _RCSubOpFirstBound(self.discardNonchemical, self.allowPartial, first)
-class _RCSubOp(object):
+
+
+class _RCSubOp:
 	def __call__(self, discardNonchemical=True, allowPartial=True):
 		return _RCSubOpArgsBound(discardNonchemical, allowPartial)
-	def __rmul__(self, first):
+
+	def __rmul__(self, first) -> RCExpExp:
 		return first * self()
+
+
 rcSub = _RCSubOp()
 
-class _RCSuperOpFirstBound(object):
-	def __init__(self, discardNonchemical, allowPartial, enforceConstraints, first):
+
+class _RCSuperOpFirstBound:
+	def __init__(self, discardNonchemical, allowPartial, enforceConstraints, first) -> None:
 		self.discardNonchemical = discardNonchemical
 		self.allowPartial = allowPartial
 		self.enforceConstraints = enforceConstraints
 		self.first = first
-	def __mul__(self, second):
+
+	def __mul__(self, second) -> RCExpExp:
 		return RCExpComposeSuper(rcExp(self.first), rcExp(second), self.discardNonchemical, self.allowPartial, self.enforceConstraints)
-class _RCSuperOpArgsBound(object):
-	def __init__(self, discardNonchemical, allowPartial, enforceConstraints):
+
+
+class _RCSuperOpArgsBound:
+	def __init__(self, discardNonchemical, allowPartial, enforceConstraints) -> None:
 		self.discardNonchemical = discardNonchemical
 		self.allowPartial = allowPartial
 		self.enforceConstraints = enforceConstraints
-	def __rmul__(self, first):
+
+	def __rmul__(self, first) -> _RCSuperOpFirstBound:
 		return _RCSuperOpFirstBound(self.discardNonchemical, self.allowPartial, self.enforceConstraints, first)
-class _RCSuperOp(object):
+
+
+class _RCSuperOp:
 	def __call__(self, discardNonchemical=True, allowPartial=True, enforceConstraints=False):
 		return _RCSuperOpArgsBound(discardNonchemical, allowPartial, enforceConstraints)
-	def __rmul__(self, first):
+
+	def __rmul__(self, first) -> RCExpExp:
 		return first * self()
+
+
 rcSuper = _RCSuperOp()
 
-#----------------------------------------------------------
+
+# ----------------------------------------------------------
 # Util
-#----------------------------------------------------------
+# ----------------------------------------------------------
 
 def showDump(f):
 	return libpymod.showDump(prefixFilename(f))
-
-def boltzmannFactor(temperature, energy):
-	return math.exp(-energy / temperature)
-
-class Boltzmann(object):
-	def __init__(self, temperature):
-		self.temperature = temperature
-		self.col = None
-	def __call__(self, g, col, first):
-		if first:
-			self.col = col
-			self.sumFactors = sum(boltzmannFactor(self.temperature, a.energy) for a in col)
-		return boltzmannFactor(self.temperature, g.energy) / self.sumFactors
-
-class BoltzmannGroupIsomers(object):
-	def __init__(self, temperature):
-		self.temperature = temperature
-		self.col = None
-	def __call__(self, g, col, first):
-		class Data(dict):
-			def __missing__(self, key):
-				return 0
-		class Histogram(object):
-			def __init__(self, g):
-				self.counts = {}
-				labels = ["C", "N", "H", "O", "c", "n", "O-"]
-				for l in labels:
-					self.counts[l] = g.vLabelCount(l)
-				if g.numVertices != sum(self.counts.values()):
-					print("Graph label histogram incomplete!")
-					print("Graph is", g)
-					g.print()
-					sys.exit(0)
-				self.counts = frozenset(self.counts.items())
-			def __hash__(self):
-				return hash(self.counts)
-			def __eq__(self, other):
-				return self.counts == other.counts
-		if first:
-			self.col = col
-			self.groups = Data()
-			for a in col:
-				self.groups[Histogram(a)] += boltzmannFactor(self.temperature, a.energy)
-		return boltzmannFactor(self.temperature, g.energy) / self.groups[Histogram(g)]
-
-
-#class BoltzmannGroupWeight(object):
-#	def __init__(self, temperature):
-#		self.temperature = temperature
-#		self.col = None
-#	def __call__(self, g, col, first):
-#		class Data(dict):
-#			def __missing__(self, key):
-#				assert(key == int(key))
-#				return 0
-#		if first:
-#			self.col = col
-#			self.sums = Data()
-#			for a in col:
-#				weight = int(a.weight)
-#				self.sums[weight] += boltzmannFactor(self.temperature, a.energy)
-#		weight = int(g.weight)
-#		return boltzmannFactor(self.temperature, g.energy) / self.sums[weight]
-

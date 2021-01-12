@@ -1,16 +1,14 @@
-#ifndef MOD_UNIFICATION_H
-#define	MOD_UNIFICATION_H
+#ifndef MOD_UNIFICATION_HPP
+#define MOD_UNIFICATION_HPP
 
 #include <mod/BuildConfig.hpp>
 
 #include <string>
 
-namespace mod {
-namespace Term {
+namespace mod::Term {
 
 MOD_DECL void mgu(const std::string &left, const std::string &right);
 
-} // namespace Term
-} // namespace mod
+} // namespace mod::Term
 
-#endif	/* MOD_UNIFICATION_H */
+#endif // MOD_UNIFICATION_HPP

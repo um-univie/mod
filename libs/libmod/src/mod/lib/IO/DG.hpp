@@ -1,26 +1,21 @@
-#ifndef MOD_LIB_IO_DG_H
-#define MOD_LIB_IO_DG_H
+#ifndef MOD_LIB_IO_DG_HPP
+#define MOD_LIB_IO_DG_HPP
 
+#include <mod/Post.hpp>
 #include <mod/lib/DG/Hyper.hpp>
-#include <mod/lib/IO/FileHandle.hpp>
 #include <mod/lib/IO/Graph.hpp>
 #include <mod/lib/IO/IO.hpp>
-
-#include <nlohmann/json.hpp>
+#include <mod/lib/IO/JsonUtils.hpp>
 
 #include <iosfwd>
 #include <string>
 #include <unordered_map>
 
-namespace mod {
-namespace lib {
-namespace DG {
+namespace mod::lib::DG {
 class Hyper;
 class NonHyper;
-} // namespace DG
-namespace IO {
-namespace DG {
-namespace Read {
+} // namespace mod::lib::DG
+namespace mod::lib::IO::DG::Read {
 
 struct AbstractDerivation {
 	using List = std::vector<std::pair<unsigned int, std::string>>;
@@ -42,8 +37,8 @@ std::unique_ptr<lib::DG::NonHyper> dump(const std::vector<std::shared_ptr<graph:
                                         IsomorphismPolicy graphPolicy,
                                         std::ostream &err, int verbosity);
 boost::optional<std::vector<AbstractDerivation>> abstract(const std::string &s, std::ostream &err);
-} // namespace Read
-namespace Write {
+} // namespace mod::lib::IO::DG::Read
+namespace mod::lib::IO::DG::Write {
 using Vertex = lib::DG::HyperVertex;
 using Edge = lib::DG::HyperEdge;
 
@@ -89,7 +84,7 @@ struct SyntaxPrinter {
 	                                  lib::DG::HyperVertex,
 	                                  const std::string &)> getImageCreator() = 0;
 public:
-	FileHandle s;
+	post::FileHandle s;
 };
 
 struct TikzPrinter : SyntaxPrinter {
@@ -388,11 +383,6 @@ std::pair<std::string, std::string> summary(const Data &data,
                                             Printer &printer,
                                             const IO::Graph::Write::Options &graphOptions);
 
-} // namespace Write
-} // namespace DG
-} // namespace IO
-} // namespace lib
-} // namespace mod
+} // namespace mod::lib::IO::DG::Write
 
-#endif /* MOD_LIB_IO_DG_H */
-
+#endif // MOD_LIB_IO_DG_HPP

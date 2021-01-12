@@ -1,5 +1,5 @@
-#ifndef MOD_LIB_CHEM_SMILES_H
-#define MOD_LIB_CHEM_SMILES_H
+#ifndef MOD_LIB_CHEM_SMILES_HPP
+#define MOD_LIB_CHEM_SMILES_HPP
 
 #include <mod/lib/IO/Graph.hpp>
 
@@ -7,12 +7,12 @@
 
 namespace mod {
 struct AtomId;
-namespace lib {
-namespace Graph {
+} // namespace mod
+namespace mod::lib::Graph {
 struct PropMolecule;
 struct PropString;
-} // namespace Graph
-namespace Chem {
+} // namespace mod::lib::Graph
+namespace mod::lib::Chem {
 
 std::string getSmiles(const lib::Graph::GraphType &g, const lib::Graph::PropMolecule &molState,
                       const std::vector<int> *ranks, bool withIds);
@@ -23,8 +23,7 @@ bool isInSmilesOrganicSubset(AtomId atomId);
 void addImplicitHydrogens(lib::Graph::GraphType &g, lib::Graph::PropString &pString, lib::Graph::Vertex v,
                           AtomId atomId, std::function<void(lib::Graph::GraphType &, lib::Graph::PropString &,
                                                             lib::Graph::Vertex)> hydrogenAdder);
-} // namespace Chem
-} // namespace lib
-} // namespace mod
 
-#endif   /* MOD_LIB_CHEM_SMILES_H */
+} // namespace mod::lib::Chem
+
+#endif // MOD_LIB_CHEM_SMILES_HPP

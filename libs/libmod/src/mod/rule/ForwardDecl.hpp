@@ -1,18 +1,14 @@
 #ifndef MOD_RULE_FORWARDDECL_H
 #define MOD_RULE_FORWARDDECL_H
 
-namespace mod {
-namespace rule {
+namespace mod::rule {
 struct Rule;
 namespace RCExp {
 struct Expression;
 } // namespace RCExp
-} // namespace rule
-namespace lib {
-namespace Rules {
+} // namespace mod::rule
+namespace mod::lib::Rules {
 struct Real;
-} // namespace Rules
-} // namespace lib
-} // namespace mod
+} // namespace mod::lib::Rules
 
 #endif /* MOD_RULE_FORWARDDECL_H */

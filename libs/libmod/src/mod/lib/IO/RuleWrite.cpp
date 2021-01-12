@@ -1,10 +1,10 @@
 #include "Rule.hpp"
 
 #include <mod/Config.hpp>
+#include <mod/Post.hpp>
 #include <mod/graph/Printer.hpp>
 #include <mod/lib/Chem/MoleculeUtil.hpp>
 #include <mod/lib/Chem/OBabel.hpp>
-#include <mod/lib/IO/FileHandle.hpp>
 #include <mod/lib/IO/GraphWriteDetail.hpp>
 #include <mod/lib/IO/MorphismConstraints.hpp>
 #include <mod/lib/IO/Term.hpp>
@@ -16,11 +16,7 @@
 
 #include <boost/lexical_cast.hpp>
 
-namespace mod {
-namespace lib {
-namespace IO {
-namespace Rules {
-namespace Write {
+namespace mod::lib::IO::Rules::Write {
 namespace {
 
 // returns the filename _without_ extension
@@ -160,7 +156,7 @@ void gml(const lib::Rules::Real &r, bool withCoords, std::ostream &s) {
 }
 
 std::string gml(const lib::Rules::Real &r, bool withCoords) {
-	FileHandle s(getFilePrefix(r) + ".gml");
+	post::FileHandle s(getFilePrefix(r) + ".gml");
 	gml(r, withCoords, s);
 	return s;
 }
@@ -168,7 +164,7 @@ std::string gml(const lib::Rules::Real &r, bool withCoords) {
 std::string dotCombined(const lib::Rules::Real &r) {
 	std::stringstream fileName;
 	fileName << "r_" << r.getId() << "_combined.dot";
-	FileHandle s(getUniqueFilePrefix() + fileName.str());
+	post::FileHandle s(getUniqueFilePrefix() + fileName.str());
 	std::string fileNoExt = s;
 	fileNoExt.erase(fileNoExt.end() - 4, fileNoExt.end());
 	using Vertex = lib::Rules::Vertex;
@@ -262,7 +258,7 @@ std::string dot(const lib::Rules::Real &r) {
 	const lib::Rules::GraphType &g = r.getGraph();
 	const lib::Rules::PropStringCore &labelState = r.getStringState();
 
-	FileHandle s(fileNoExt + ".dot");
+	post::FileHandle s(fileNoExt + ".dot");
 	s << "graph g {" << std::endl;
 	s << getConfig().io.dotCoordOptions.get() << std::endl;
 	for(Vertex v : asRange(vertices(g))) {
@@ -310,7 +306,6 @@ struct CoordsCacheEntry {
 	int rotation;
 	bool mirror;
 public:
-
 	friend bool operator<(const CoordsCacheEntry &a, const CoordsCacheEntry &b) {
 		return std::tie(a.id, a.collapseHydrogens, a.rotation, a.mirror)
 		       < std::tie(b.id, b.collapseHydrogens, b.rotation, b.mirror);
@@ -343,7 +338,7 @@ std::string coords(const lib::Rules::Real &r, unsigned int idOffset, const Optio
 	const auto &depict = r.getDepictionData();
 	if(!depict.getHasCoordinates()) {
 		if(idOffset != 0) {
-			IO::log() << "Blame the lazy programmer. Offset " << idOffset << " not yet supported in dot coords."
+			std::cout << "Blame the lazy programmer. Offset " << idOffset << " not yet supported in dot coords."
 			          << std::endl;
 			MOD_ABORT;
 		}
@@ -359,7 +354,7 @@ std::string coords(const lib::Rules::Real &r, unsigned int idOffset, const Optio
 		const auto &g = r.getGraph();
 		const std::string molString = options.collapseHydrogens ? "_mol" : "";
 		const std::string fileNoExt = getFilePrefix(r) + molString + "_coord";
-		FileHandle s(fileNoExt + ".tex");
+		post::FileHandle s(fileNoExt + ".tex");
 		s << "% dummy\n";
 		const bool useCollapsedCoords = [&]() {
 			if(!options.collapseHydrogens) return false;
@@ -405,7 +400,6 @@ struct AdvOptions {
 	           std::function<bool(CoreVertex)> disallowCollapse)
 			: idOffset(idOffset), changeColour(changeColourFromMembership()), r(r), args(args),
 			  disallowCollapse_(disallowCollapse) {}
-
 private:
 	static std::string changeColourFromMembership() {
 		std::string side = []() {
@@ -574,14 +568,14 @@ tikz(const std::string &fileCoordsNoExt, const lib::Rules::Real &r, unsigned int
 
 	std::string fileCoords = fileCoordsNoExt + ".tex";
 	{ // left
-		FileHandle s(fileNoExt + "_" + suffixL + ".tex");
+		post::FileHandle s(fileNoExt + "_" + suffixL + ".tex");
 		const auto &g = get_left(r.getDPORule());
 		const auto &depict = r.getDepictionData().getLeft();
 		const auto adv = AdvOptions<lib::Rules::Membership::Left>(r, idOffset, args, disallowCollapse);
 		IO::Graph::Write::tikz(s, options, g, depict, fileCoords, adv, jla_boost::Nop<>(), "");
 	}
 	{ // context
-		FileHandle s(fileNoExt + "_" + suffixK + ".tex");
+		post::FileHandle s(fileNoExt + "_" + suffixK + ".tex");
 		const auto &g = get_context(r.getDPORule());
 		const auto &depict = r.getDepictionData().getContext();
 
@@ -603,7 +597,7 @@ tikz(const std::string &fileCoordsNoExt, const lib::Rules::Real &r, unsigned int
 		IO::Graph::Write::tikz(s, options, gFiltered, depict, fileCoords, adv, jla_boost::Nop<>(), "");
 	}
 	{ // right
-		FileHandle s(fileNoExt + "_" + suffixR + ".tex");
+		post::FileHandle s(fileNoExt + "_" + suffixR + ".tex");
 		const auto &g = get_right(r.getDPORule());
 		const auto &depict = r.getDepictionData().getRight();
 		const auto adv = AdvOptions<lib::Rules::Membership::Right>(r, idOffset, args, disallowCollapse);
@@ -680,7 +674,7 @@ std::pair<std::string, std::string> summary(const lib::Rules::Real &r, const Opt
 	std::string constraints =
 			getUniqueFilePrefix() + "r_" + boost::lexical_cast<std::string>(r.getId()) + "_constraints.tex";
 	{
-		FileHandle s(constraints);
+		post::FileHandle s(constraints);
 		auto printer = lib::IO::MatchConstraint::Write::makeTexPrintVisitor(s, get_left(r.getDPORule()));
 		for(const auto &c : r.getDPORule().leftMatchConstraints) {
 			c->accept(printer);
@@ -701,7 +695,7 @@ void termState(const lib::Rules::Real &r) {
 	using Membership = lib::Rules::Membership;
 	using namespace lib::Term;
 	IO::post() << "summarySubsection \"Term State for " << r.getName() << "\"" << std::endl;
-	FileHandle s(getUniqueFilePrefix() + "termState.tex");
+	post::FileHandle s(getUniqueFilePrefix() + "termState.tex");
 	s << "\\begin{verbatim}\n";
 	const auto &termState = r.getTermState();
 	if(isValid(termState)) {
@@ -746,7 +740,6 @@ void termState(const lib::Rules::Real &r) {
 		}
 
 		struct Visitor : lib::GraphMorphism::Constraints::AllVisitor<lib::Rules::SideGraphType> {
-
 			Visitor(std::unordered_map<Address, std::set<std::string> > &addrMap, const lib::Rules::GraphType &g)
 					: addrMap(addrMap), g(g) {}
 
@@ -767,8 +760,6 @@ void termState(const lib::Rules::Real &r) {
 
 			virtual void
 			operator()(const lib::GraphMorphism::Constraints::ShortestPath<lib::Rules::SideGraphType> &c) override {}
-		private:
-			int counter = 0;
 		public:
 			std::unordered_map<Address, std::set<std::string> > &addrMap;
 			const lib::Rules::GraphType &g;
@@ -837,8 +828,4 @@ void termState(const lib::Rules::Real &r) {
 	IO::post() << "summaryInput \"" << std::string(s) << "\"" << std::endl;
 }
 
-} // namespace Write
-} // namespace Rules
-} // namespace IO
-} // namespace lib
-} // namespace mod
+} // namespace mod::lib::IO::Rules::Write

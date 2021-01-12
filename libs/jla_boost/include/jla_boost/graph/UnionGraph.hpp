@@ -13,7 +13,7 @@ namespace jla_boost {
 
 template<typename Graph>
 struct union_graph {
-	using GraphStore = std::vector<const Graph*>;
+	using GraphStore = std::vector<const Graph *>;
 	using const_iterator = typename GraphStore::const_iterator;
 
 	using base_traits = boost::graph_traits<Graph>;
@@ -59,10 +59,12 @@ public:
 	vertices_size_type get_vertex_idx_offset(std::size_t gIdx) const;
 	edges_size_type get_num_edges() const;
 	edges_size_type get_edge_idx_offset(std::size_t gIdx) const;
+	std::pair<std::size_t, vertices_size_type> get_gIdx_and_vIdx(vertices_size_type vId) const;
+	std::pair<std::size_t, edges_size_type> get_gIdx_and_eIdx(edges_size_type eId) const;
 private:
 	// idxOffset.back() is the number of vertices in the graph
 	// idxOffset.size() == graphs.size() + 1
-	std::vector<const Graph*> graphs;
+	std::vector<const Graph *> graphs;
 	std::vector<typename base_traits::vertices_size_type> vertexIdxOffset;
 	std::vector<typename base_traits::edges_size_type> edgeIdxOffset;
 };
@@ -71,7 +73,7 @@ private:
 //------------------------------------------------------------------------------
 
 template<typename Graph>
-union_graph<Graph>::union_graph() : vertexIdxOffset(1, 0), edgeIdxOffset(1, 0) { }
+union_graph<Graph>::union_graph() : vertexIdxOffset(1, 0), edgeIdxOffset(1, 0) {}
 
 template<typename Graph>
 void union_graph<Graph>::push_back(const Graph *g) {
@@ -122,12 +124,35 @@ typename union_graph<Graph>::edges_size_type union_graph<Graph>::get_edge_idx_of
 	return edgeIdxOffset[gIdx];
 }
 
+template<typename Graph>
+std::pair<std::size_t, typename union_graph<Graph>::vertices_size_type>
+union_graph<Graph>::get_gIdx_and_vIdx(vertices_size_type vId) const {
+	assert(vId <= get_num_vertices());
+	for(std::size_t gIdx = 1; gIdx <= size(); ++gIdx) {
+		const auto baseOffset = get_vertex_idx_offset(gIdx);
+		if(baseOffset > vId)
+			return {gIdx - 1, vId - get_vertex_idx_offset(gIdx - 1)};
+	}
+	return {size(), 0};
+}
+
+template<typename Graph>
+std::pair<std::size_t, typename union_graph<Graph>::edges_size_type>
+union_graph<Graph>::get_gIdx_and_eIdx(edges_size_type eId) const {
+	assert(eId <= get_num_edges());
+	for(std::size_t gIdx = 1; gIdx <= size(); ++gIdx) {
+		const auto baseOffset = get_edge_idx_offset(gIdx);
+		if(baseOffset > eId)
+			return {gIdx - 1, eId - get_edge_idx_offset(gIdx - 1)};
+	}
+	return {size(), 0};
+}
+
 // Graph
 //------------------------------------------------------------------------------
 
 template<typename Graph>
 struct union_graph<Graph>::vertex_descriptor {
-
 	friend bool operator==(const vertex_descriptor &l, const vertex_descriptor &r) {
 		return std::tie(l.gIdx, l.v) == std::tie(r.gIdx, r.v);
 	}
@@ -150,7 +175,6 @@ public:
 
 template<typename Graph>
 struct union_graph<Graph>::edge_descriptor {
-
 	friend bool operator==(const edge_descriptor &l, const edge_descriptor &r) {
 		return std::tie(l.gIdx, l.e) == std::tie(r.gIdx, r.e);
 	}
@@ -181,11 +205,10 @@ typename union_graph<Graph>::vertex_descriptor union_graph<Graph>::null_vertex()
 
 template<typename Graph>
 struct union_graph<Graph>::out_edge_iterator
-: boost::iterator_facade<typename union_graph<Graph>::out_edge_iterator, typename union_graph<Graph>::edge_descriptor,
-typename std::iterator_traits<typename base_traits::out_edge_iterator>::iterator_category, typename union_graph<Graph>::edge_descriptor> {
+		: boost::iterator_facade<typename union_graph<Graph>::out_edge_iterator, typename union_graph<Graph>::edge_descriptor,
+				typename std::iterator_traits<typename base_traits::out_edge_iterator>::iterator_category, typename union_graph<Graph>::edge_descriptor> {
 	out_edge_iterator() = default;
-
-	out_edge_iterator(std::size_t gIdx, typename base_traits::out_edge_iterator eIter) : gIdx(gIdx), eIter(eIter) { }
+	out_edge_iterator(std::size_t gIdx, typename base_traits::out_edge_iterator eIter) : gIdx(gIdx), eIter(eIter) {}
 private:
 	friend class boost::iterator_core_access;
 
@@ -200,9 +223,18 @@ private:
 	void increment() { // Incrementable Iterator
 		++eIter;
 	}
-	//a.decrement()	unused	 	Bidirectional Traversal Iterator
-	//a.advance(n)	unused	 	Random Access Traversal Iterator
-	//c.distance_to(z)	convertible to F::difference_type	equivalent to distance(c, X(z)).	Random Access Traversal Iterator
+
+	void decrement() { // Bidirectional Traversal Iterator
+		--eIter;
+	}
+
+	void advance(std::ptrdiff_t n) { // Random Access Traversal Iterator
+		eIter += n;
+	}
+
+	std::ptrdiff_t distance_to(const vertex_iterator &other) const { // Random Access Traversal Iterator
+		return other.eIter - eIter;
+	}
 private:
 	std::size_t gIdx;
 	typename base_traits::out_edge_iterator eIter;
@@ -218,17 +250,20 @@ out_edges(typename union_graph<Graph>::vertex_descriptor v, const union_graph<Gr
 }
 
 template<typename Graph>
-typename union_graph<Graph>::vertex_descriptor source(typename union_graph<Graph>::edge_descriptor e, const union_graph<Graph> &g) {
+typename union_graph<Graph>::vertex_descriptor
+source(typename union_graph<Graph>::edge_descriptor e, const union_graph<Graph> &g) {
 	return typename union_graph<Graph>::vertex_descriptor{e.gIdx, source(e.e, g[e.gIdx])};
 }
 
 template<typename Graph>
-typename union_graph<Graph>::vertex_descriptor target(typename union_graph<Graph>::edge_descriptor e, const union_graph<Graph> &g) {
+typename union_graph<Graph>::vertex_descriptor
+target(typename union_graph<Graph>::edge_descriptor e, const union_graph<Graph> &g) {
 	return typename union_graph<Graph>::vertex_descriptor{e.gIdx, target(e.e, g[e.gIdx])};
 }
 
 template<typename Graph>
-typename union_graph<Graph>::degree_size_type out_degree(typename union_graph<Graph>::vertex_descriptor v, const union_graph<Graph> &g) {
+typename union_graph<Graph>::degree_size_type
+out_degree(typename union_graph<Graph>::vertex_descriptor v, const union_graph<Graph> &g) {
 	return out_degree(v.v, g[v.gIdx]);
 }
 
@@ -237,11 +272,10 @@ typename union_graph<Graph>::degree_size_type out_degree(typename union_graph<Gr
 
 template<typename Graph>
 struct union_graph<Graph>::in_edge_iterator
-: boost::iterator_facade<typename union_graph<Graph>::in_edge_iterator, typename union_graph<Graph>::edge_descriptor,
-typename std::iterator_traits<typename base_traits::in_edge_iterator>::iterator_category, typename union_graph<Graph>::edge_descriptor> {
+		: boost::iterator_facade<typename union_graph<Graph>::in_edge_iterator, typename union_graph<Graph>::edge_descriptor,
+				typename std::iterator_traits<typename base_traits::in_edge_iterator>::iterator_category, typename union_graph<Graph>::edge_descriptor> {
 	in_edge_iterator() = default;
-
-	in_edge_iterator(std::size_t gIdx, typename base_traits::in_edge_iterator eIter) : gIdx(gIdx), eIter(eIter) { }
+	in_edge_iterator(std::size_t gIdx, typename base_traits::in_edge_iterator eIter) : gIdx(gIdx), eIter(eIter) {}
 private:
 	friend class boost::iterator_core_access;
 
@@ -274,12 +308,14 @@ in_edges(typename union_graph<Graph>::vertex_descriptor v, const union_graph<Gra
 }
 
 template<typename Graph>
-typename union_graph<Graph>::degree_size_type in_degree(typename union_graph<Graph>::vertex_descriptor v, const union_graph<Graph> &g) {
+typename union_graph<Graph>::degree_size_type
+in_degree(typename union_graph<Graph>::vertex_descriptor v, const union_graph<Graph> &g) {
 	return in_degree(v.v, g[v.gIdx]);
 }
 
 template<typename Graph>
-typename union_graph<Graph>::degree_size_type degree(typename union_graph<Graph>::vertex_descriptor v, const union_graph<Graph> &g) {
+typename union_graph<Graph>::degree_size_type
+degree(typename union_graph<Graph>::vertex_descriptor v, const union_graph<Graph> &g) {
 	return degree(v.v, g[v.gIdx]);
 }
 
@@ -289,15 +325,15 @@ typename union_graph<Graph>::degree_size_type degree(typename union_graph<Graph>
 
 template<typename Graph>
 struct union_graph<Graph>::vertex_iterator
-: boost::iterator_facade<typename union_graph<Graph>::vertex_iterator, typename union_graph<Graph>::vertex_descriptor,
-typename std::iterator_traits<typename base_traits::vertex_iterator>::iterator_category, typename union_graph<Graph>::vertex_descriptor> {
+		: boost::iterator_facade<typename union_graph<Graph>::vertex_iterator, typename union_graph<Graph>::vertex_descriptor,
+				typename std::iterator_traits<typename base_traits::vertex_iterator>::iterator_category, typename union_graph<Graph>::vertex_descriptor> {
 	vertex_iterator() = default;
 
 	explicit vertex_iterator(const union_graph<Graph> *g)
-	: g(g), gIdx(g->size()) { }
+			: g(g), gIdx(g->size()) {}
 
 	vertex_iterator(const union_graph<Graph> *g, std::size_t gIdx, typename base_traits::vertex_iterator vIter)
-	: g(g), gIdx(gIdx), vIter(vIter) { }
+			: g(g), gIdx(gIdx), vIter(vIter) {}
 private:
 	friend class boost::iterator_core_access;
 
@@ -313,16 +349,29 @@ private:
 	void increment() { // Incrementable Iterator
 		++vIter;
 		while(vIter == vertices((*g)[gIdx]).second) {
-			gIdx++;
+			++gIdx;
 			if(gIdx == g->size()) break;
 			vIter = vertices((*g)[gIdx]).first;
 		}
 	}
-	//a.decrement()	unused	 	Bidirectional Traversal Iterator
-	//a.advance(n)	unused	 	Random Access Traversal Iterator
+
+	void decrement() { // Bidirectional Traversal Iterator
+		while(vIter == vertices((*g)[gIdx]).first) {
+			--gIdx;
+			vIter = vertices((*g)[gIdx]).second;
+		}
+		--vIter;
+	}
+
+	void advance(std::ptrdiff_t n) { // Random Access Traversal Iterator
+		std::size_t idxThis = gIdx == g->size() ? g->get_num_vertices() : get(boost::vertex_index_t(), *g, **this);
+		auto[gIdxNew, vIdxNew] = g->get_gIdx_and_vIdx(idxThis + n);
+		gIdx = gIdxNew;
+		vIter = vertices((*g)[gIdx]).first + vIdxNew;
+	}
 
 	std::ptrdiff_t distance_to(const vertex_iterator &other) const { // Random Access Traversal Iterator
-		std::size_t idxThis = gIdx == g->size() ? g->get_num_vertices() : get(boost::vertex_index_t(), *g, * * this);
+		std::size_t idxThis = gIdx == g->size() ? g->get_num_vertices() : get(boost::vertex_index_t(), *g, **this);
 		std::size_t idxOther = other.gIdx == g->size() ? g->get_num_vertices() : get(boost::vertex_index_t(), *g, *other);
 		return idxOther - idxThis;
 	}
@@ -336,11 +385,12 @@ template<typename Graph>
 std::pair<typename union_graph<Graph>::vertex_iterator, typename union_graph<Graph>::vertex_iterator>
 vertices(const union_graph<Graph> &g) {
 	auto endIter = typename union_graph<Graph>::vertex_iterator(&g);
-	for(std::size_t gIdx = 0; gIdx < g.size(); gIdx++) {
-		if(num_vertices(g[gIdx]) > 0) {
-			auto iter = typename union_graph<Graph>::vertex_iterator(&g, gIdx, vertices(g[gIdx]).first);
-			return std::make_pair(iter, endIter);
-		}
+	auto[gIdx, vIdx] = g.get_gIdx_and_vIdx(0);
+	assert(vIdx == 0);
+	(void) vIdx;
+	if(gIdx != g.size()) {
+		auto iter = typename union_graph<Graph>::vertex_iterator(&g, gIdx, vertices(g[gIdx]).first);
+		return std::make_pair(iter, endIter);
 	}
 	return std::make_pair(endIter, endIter);
 }
@@ -355,15 +405,15 @@ typename union_graph<Graph>::vertices_size_type num_vertices(const union_graph<G
 
 template<typename Graph>
 struct union_graph<Graph>::edge_iterator
-: boost::iterator_facade<typename union_graph<Graph>::edge_iterator, typename union_graph<Graph>::edge_descriptor,
-typename std::iterator_traits<typename base_traits::edge_iterator>::iterator_category, typename union_graph<Graph>::edge_descriptor> {
+		: boost::iterator_facade<typename union_graph<Graph>::edge_iterator, typename union_graph<Graph>::edge_descriptor,
+				typename std::iterator_traits<typename base_traits::edge_iterator>::iterator_category, typename union_graph<Graph>::edge_descriptor> {
 	edge_iterator() = default;
 
 	explicit edge_iterator(const union_graph<Graph> *g)
-	: g(g), gIdx(g->size()) { }
+			: g(g), gIdx(g->size()) {}
 
 	edge_iterator(const union_graph<Graph> *g, std::size_t gIdx, typename base_traits::edge_iterator eIter)
-	: g(g), gIdx(gIdx), eIter(eIter) { }
+			: g(g), gIdx(gIdx), eIter(eIter) {}
 private:
 	friend class boost::iterator_core_access;
 
@@ -379,7 +429,7 @@ private:
 	void increment() { // Incrementable Iterator
 		++eIter;
 		while(eIter == edges((*g)[gIdx]).second) {
-			gIdx++;
+			++gIdx;
 			if(gIdx == g->size()) break;
 			eIter = edges((*g)[gIdx]).first;
 		}
@@ -397,11 +447,12 @@ template<typename Graph>
 std::pair<typename union_graph<Graph>::edge_iterator, typename union_graph<Graph>::edge_iterator>
 edges(const union_graph<Graph> &g) {
 	auto endIter = typename union_graph<Graph>::edge_iterator(&g);
-	for(std::size_t gIdx = 0; gIdx < g.size(); gIdx++) {
-		if(num_edges(g[gIdx]) > 0) {
-			auto iter = typename union_graph<Graph>::edge_iterator(&g, gIdx, edges(g[gIdx]).first);
-			return std::make_pair(iter, endIter);
-		}
+	auto[gIdx, eIdx] = g.get_gIdx_and_eIdx(0);
+	assert(eIdx == 0);
+	(void) eIdx;
+	if(gIdx != g.size()) {
+		auto iter = typename union_graph<Graph>::edge_iterator(&g, gIdx, edges(g[gIdx]).first);
+		return std::make_pair(iter, endIter);
 	}
 	return std::make_pair(endIter, endIter);
 }
@@ -416,7 +467,8 @@ typename union_graph<Graph>::edges_size_type num_edges(const union_graph<Graph> 
 
 template<typename Graph>
 std::pair<typename union_graph<Graph>::edge_descriptor, bool>
-edge(typename union_graph<Graph>::vertex_descriptor u, typename union_graph<Graph>::vertex_descriptor v, const union_graph<Graph> &g) {
+edge(typename union_graph<Graph>::vertex_descriptor u, typename union_graph<Graph>::vertex_descriptor v,
+     const union_graph<Graph> &g) {
 	if(u.gIdx != v.gIdx) return std::make_pair(typename union_graph<Graph>::edge_descriptor(), false);
 	auto base = edge(u.v, v.v, g[u.gIdx]);
 	return std::make_pair(typename union_graph<Graph>::edge_descriptor{u.gIdx, base.first}, base.second);
@@ -450,22 +502,22 @@ struct union_graph_property_map {
 	using key_type = typename union_graph<typename get_graph_type<G>::type>::vertex_descriptor;
 	using category = typename base_traits::category;
 public:
-
-	union_graph_property_map(UnionGraph &g) : g(g) { }
+	union_graph_property_map(UnionGraph &g) : g(g) {}
 	//private:
 	UnionGraph &g;
 };
 
 template<typename G, typename Property>
 struct property_getter {
-
 	static typename union_graph_property_map<G, Property>::value_type
-	apply(const union_graph_property_map<G, Property> &map, typename union_graph<typename get_graph_type<G>::type>::vertex_descriptor v) {
+	apply(const union_graph_property_map<G, Property> &map,
+	      typename union_graph<typename get_graph_type<G>::type>::vertex_descriptor v) {
 		return get(Property{}, map.g[v.gIdx], v.v);
 	}
 
 	static typename union_graph_property_map<G, Property>::value_type
-	apply(const union_graph_property_map<G, Property> &map, typename union_graph<typename get_graph_type<G>::type>::edge_descriptor e) {
+	apply(const union_graph_property_map<G, Property> &map,
+	      typename union_graph<typename get_graph_type<G>::type>::edge_descriptor e) {
 		return get(Property{}, map.g[e.gIdx], e.e);
 	}
 };
@@ -475,7 +527,8 @@ struct property_getter<G, boost::vertex_index_t> {
 	using Property = boost::vertex_index_t;
 
 	static typename union_graph_property_map<G, Property>::value_type
-	apply(const union_graph_property_map<G, Property> &map, typename union_graph<typename get_graph_type<G>::type>::vertex_descriptor v) {
+	apply(const union_graph_property_map<G, Property> &map,
+	      typename union_graph<typename get_graph_type<G>::type>::vertex_descriptor v) {
 		return get(boost::vertex_index_t(), map.g[v.gIdx], v.v) + map.g.get_vertex_idx_offset(v.gIdx);
 	}
 };
@@ -485,20 +538,23 @@ struct property_getter<G, boost::edge_index_t> {
 	using Property = boost::edge_index_t;
 
 	static typename union_graph_property_map<G, Property>::value_type
-	apply(const union_graph_property_map<G, Property> &map, typename union_graph<typename get_graph_type<G>::type>::edge_descriptor e) {
+	apply(const union_graph_property_map<G, Property> &map,
+	      typename union_graph<typename get_graph_type<G>::type>::edge_descriptor e) {
 		return get(boost::edge_index_t(), map.g[e.gIdx], e.e) + map.g.get_edge_idx_offset(e.gIdx);
 	}
 };
 
 template<typename G, typename Property>
 typename union_graph_property_map<G, Property>::value_type
-get(const union_graph_property_map<G, Property> &map, typename union_graph<typename get_graph_type<G>::type>::vertex_descriptor v) {
+get(const union_graph_property_map<G, Property> &map,
+    typename union_graph<typename get_graph_type<G>::type>::vertex_descriptor v) {
 	return property_getter<G, Property>::apply(map, v);
 }
 
 template<typename G, typename Property>
 typename union_graph_property_map<G, Property>::value_type
-get(const union_graph_property_map<G, Property> &map, typename union_graph<typename get_graph_type<G>::type>::edge_descriptor e) {
+get(const union_graph_property_map<G, Property> &map,
+    typename union_graph<typename get_graph_type<G>::type>::edge_descriptor e) {
 	return property_getter<G, Property>::apply(map, e);
 }
 
@@ -529,11 +585,12 @@ typename boost::property_map<union_graph<G>, Property>::type get(Property, union
 
 template<typename G, typename Property>
 typename boost::property_map<union_graph<G>, Property>::const_type get(Property, const union_graph<G> &g) {
-	return detail::union_graph_property_map<detail::const_wrapper<G>, Property>(g);
+	return detail::union_graph_property_map < detail::const_wrapper < G > , Property > (g);
 }
 
 template<typename G, typename Property, typename Key>
-typename boost::property_map<union_graph<G>, Property>::type::value_type get(const Property &p, const union_graph<G> &g, const Key &k) {
+typename boost::property_map<union_graph<G>, Property>::type::value_type
+get(const Property &p, const union_graph<G> &g, const Key &k) {
 	return get(get(p, g), k);
 }
 
@@ -543,18 +600,10 @@ typename boost::property_map<union_graph<G>, Property>::type::value_type get(con
 //------------------------------------------------------------------------------
 
 template<typename G>
-typename union_graph<G>::vertex_descriptor vertex(typename union_graph<G>::vertices_size_type vId, const union_graph<G> &g) {
-	assert(g.size() > 0);
-	assert(g.get_vertex_idx_offset(0) == 0);
-	const auto gIdx = [&]() -> std::size_t {
-		for(std::size_t gIdx = 1; gIdx < g.size(); ++gIdx) {
-			if(g.get_vertex_idx_offset(gIdx) > vId) return gIdx - 1;
-		}
-		return g.size() - 1;
-	}();
-	const auto baseOffset = g.get_vertex_idx_offset(gIdx);
-	assert(baseOffset <= vId);
-	return typename union_graph<G>::vertex_descriptor{gIdx, vertex(vId - baseOffset, g[gIdx])};
+typename union_graph<G>::vertex_descriptor
+vertex(typename union_graph<G>::vertices_size_type vId, const union_graph<G> &g) {
+	auto[gIdx, vIdx] = g.get_gIdx_and_vIdx(vId);
+	return typename union_graph<G>::vertex_descriptor{gIdx, vertex(vIdx, g[gIdx])};
 }
 
 } // namespace jla_boost

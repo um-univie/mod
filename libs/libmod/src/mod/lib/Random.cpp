@@ -3,9 +3,9 @@
 #include <mod/lib/IO/IO.hpp>
 
 #include <algorithm>
+#include <iostream>
 
-namespace mod {
-namespace lib {
+namespace mod::lib {
 
 Random::Random() {
 	reseed(std::random_device()());
@@ -18,7 +18,7 @@ std::mt19937 &Random::getEngine() {
 void Random::reseed(unsigned int seed) {
 	this->seed = seed;
 	engine.seed(this->seed);
-	IO::log() << "RNG seed: " << this->seed << std::endl;
+	std::cout << "RNG seed: " << this->seed << std::endl;
 }
 
 Random &Random::getInstance() {
@@ -47,5 +47,4 @@ std::vector<size_t> invertPermutation(const std::vector<size_t> &p) {
 	return pInverted;
 }
 
-} // namespace lib
-} // namespace mod
+} // namespace mod::lib

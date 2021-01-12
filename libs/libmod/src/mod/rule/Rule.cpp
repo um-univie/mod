@@ -10,18 +10,18 @@
 #include <mod/lib/Rules/Properties/Molecule.hpp>
 #include <mod/lib/Rules/Properties/Stereo.hpp>
 
+#include <boost/iostreams/device/mapped_file.hpp>
+
 #include <fstream>
+#include <iostream>
 #include <sstream>
 
-namespace mod {
-namespace rule {
+namespace mod::rule {
 
 struct Rule::Pimpl {
-
 	Pimpl(std::unique_ptr<lib::Rules::Real> r) : r(std::move(r)) {
 		assert(this->r);
 	}
-
 public:
 	const std::unique_ptr<lib::Rules::Real> r;
 	std::unique_ptr<const std::map<int, std::size_t> > externalToInternalIds;
@@ -80,7 +80,7 @@ std::shared_ptr<Rule> Rule::makeInverse() const {
 	if(getConfig().rule.ignoreConstraintsDuringInversion.get()) {
 		if(dpoRule.leftMatchConstraints.size() > 0
 		   || dpoRule.rightMatchConstraints.size() > 0) {
-			lib::IO::log() << "WARNING: inversion of rule strips constraints.\n";
+			std::cout << "WARNING: inversion of rule strips constraints.\n";
 		}
 	} else {
 		if(dpoRule.leftMatchConstraints.size() > 0) {
@@ -213,9 +213,9 @@ std::shared_ptr<Rule> handleLoadedRule(lib::IO::Rules::Read::Data &&data,
 	assert(data.rule->pString);
 	if(invert) {
 		if(!data.rule->leftMatchConstraints.empty()) {
-			if(getConfig().rule.ignoreConstraintsDuringInversion.get()) lib::IO::log() << "WARNING: ";
+			if(getConfig().rule.ignoreConstraintsDuringInversion.get()) std::cout << "WARNING: ";
 			bool ignore = getConfig().rule.ignoreConstraintsDuringInversion.get();
-			std::ostream &stream = ignore ? lib::IO::log() : err;
+			std::ostream &stream = ignore ? std::cout : err;
 			stream << "The rule '";
 			if(data.name) stream << data.name.get();
 			else stream << "anon";
@@ -240,16 +240,16 @@ std::shared_ptr<Rule> handleLoadedRule(lib::IO::Rules::Read::Data &&data,
 } // namespace
 
 std::shared_ptr<Rule> Rule::ruleGMLString(const std::string &data, bool invert) {
-	std::istringstream ss(data);
 	std::ostringstream err;
-	return handleLoadedRule(lib::IO::Rules::Read::gml(ss, err), invert, "<inline GML string>", err);
+	return handleLoadedRule(lib::IO::Rules::Read::gml(data, err), invert, "<inline GML string>", err);
 }
 
 std::shared_ptr<Rule> Rule::ruleGML(const std::string &file, bool invert) {
-	std::ifstream ifs(file);
+	boost::iostreams::mapped_file_source ifs(file);
 	if(!ifs) throw InputError("Could not open rule GML file '" + file + "'.\n");
 	std::ostringstream err;
-	return handleLoadedRule(lib::IO::Rules::Read::gml(ifs, err), invert, "file '" + file + "'", err);
+	return handleLoadedRule(lib::IO::Rules::Read::gml({ifs.begin(), ifs.size()}, err),
+	                        invert, "file '" + file + "'", err);
 }
 
 std::shared_ptr<Rule> Rule::makeRule(std::unique_ptr<lib::Rules::Real> r) {
@@ -267,5 +267,4 @@ std::shared_ptr<Rule> Rule::makeRule(std::unique_ptr<lib::Rules::Real> r,
 	return rWrapped;
 }
 
-} // namespace rule
-} // namespace mod
+} // namespace mod::rule

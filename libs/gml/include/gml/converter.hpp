@@ -3,8 +3,7 @@
 
 #include <gml/converter_expressions.hpp>
 
-namespace gml {
-namespace converter {
+namespace gml::converter {
 
 template<typename IterBegin, typename IterEnd, typename Expression, typename Attr>
 bool convert(IterBegin &iterBegin, const IterEnd &iterEnd, const Expression &expr, std::ostream &err, Attr &attr) {
@@ -28,7 +27,6 @@ bool convert(IterBegin &iterBegin, const IterEnd &iterEnd, const Expression &exp
 	return convert(iterBegin, iterEnd, expr, err, unused);
 }
 
-} // namespace converter
-} // namespace gml
+} // namespace gml::converter
 
 #endif /* GML_CONVERTER_HPP */

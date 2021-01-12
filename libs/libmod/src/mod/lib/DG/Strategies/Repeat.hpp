@@ -1,12 +1,9 @@
-#ifndef MOD_LIB_DG_STRATEGIES_REPEAT_H
-#define   MOD_LIB_DG_STRATEGIES_REPEAT_H
+#ifndef MOD_LIB_DG_STRATEGIES_REPEAT_HPP
+#define MOD_LIB_DG_STRATEGIES_REPEAT_HPP
 
 #include <mod/lib/DG/Strategies/Strategy.hpp>
 
-namespace mod {
-namespace lib {
-namespace DG {
-namespace Strategies {
+namespace mod::lib::DG::Strategies {
 
 struct Repeat : Strategy {
 	// pre: limit > 0
@@ -27,9 +24,6 @@ private:
 	std::vector<Strategy *> subStrats;
 };
 
-} // namespace Strategies
-} // namespace DG
-} // namespace lib
-} // namespace mod
+} // namespace mod::lib::DG::Strategies
 
-#endif   /* MOD_LIB_DG_STRATEGIES_REPEAT_H */
+#endif // MOD_LIB_DG_STRATEGIES_REPEAT_HPP

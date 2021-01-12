@@ -22,11 +22,9 @@
 #include <iomanip>
 #include <unordered_set>
 
-namespace mod {
-namespace lib {
-namespace IO {
-namespace Term {
-namespace Read {
+#include <iostream>
+
+namespace mod::lib::IO::Term::Read {
 namespace detail {
 
 struct Structure;
@@ -67,10 +65,10 @@ BOOST_SPIRIT_DEFINE(term, function, termList, variable, identifier);
 } // namespace
 
 struct Converter : public boost::static_visitor<lib::Term::RawTerm> {
-	Converter(const Converter&) = delete;
-	Converter &operator=(const Converter&) = delete;
+	Converter(const Converter &) = delete;
+	Converter &operator=(const Converter &) = delete;
 
-	Converter(const StringStore &stringStore) : stringStore(stringStore) { }
+	Converter(const StringStore &stringStore) : stringStore(stringStore) {}
 
 	lib::Term::RawTerm operator()(const Variable &var) {
 		std::size_t stringId;
@@ -102,7 +100,8 @@ private:
 
 } // namespace detail
 
-boost::optional<lib::Term::RawTerm> rawTerm(const std::string &data, const StringStore &stringStore, std::ostream &errorStream) {
+boost::optional<lib::Term::RawTerm>
+rawTerm(const std::string &data, const StringStore &stringStore, std::ostream &errorStream) {
 	detail::Term term;
 	bool res = parse(data.begin(), data.end(), detail::parser::term, term, errorStream, x3::space);
 	if(!res) return boost::none;
@@ -111,8 +110,8 @@ boost::optional<lib::Term::RawTerm> rawTerm(const std::string &data, const Strin
 	return libTerm;
 }
 
-} // namespace Read
-namespace Write {
+} // namespace mod::lib::IO::Term::Read
+namespace mod::lib::IO::Term::Write {
 namespace {
 
 std::ostream &rawVarFromCell(std::ostream &s, lib::Term::Cell cell) {
@@ -130,10 +129,8 @@ std::ostream &rawVarFromCell(std::ostream &s, lib::Term::Cell cell) {
 } // namespace
 
 std::ostream &rawTerm(const lib::Term::RawTerm &term, const StringStore &strings, std::ostream &s) {
-
 	struct Printer : public boost::static_visitor<void> {
-
-		Printer(std::ostream &s, const StringStore &strings) : s(s), strings(strings) { }
+		Printer(std::ostream &s, const StringStore &strings) : s(s), strings(strings) {}
 
 		void operator()(lib::Term::RawVariable v) const {
 			s << "_" << strings.getString(v.name);
@@ -176,12 +173,12 @@ std::ostream &element(lib::Term::Cell cell, const StringStore &strings, std::ost
 }
 
 void wam(const lib::Term::Wam &machine, const StringStore &strings, std::ostream &s) {
-	wam(machine, strings, s, [](lib::Term::Address, std::ostream&) {
+	wam(machine, strings, s, [](lib::Term::Address, std::ostream &) {
 	});
 }
 
 void wam(const lib::Term::Wam &machine, const StringStore &strings, std::ostream &s,
-		std::function<void(lib::Term::Address, std::ostream &s) > addressCallback) {
+         std::function<void(lib::Term::Address, std::ostream &s)> addressCallback) {
 	using namespace lib::Term;
 	s << "Heap:" << std::endl;
 	for(std::size_t i = 0; i < machine.getHeap().size(); i++) {
@@ -203,20 +200,23 @@ void wam(const lib::Term::Wam &machine, const StringStore &strings, std::ostream
 	s << "-------------------------------------------------" << std::endl;
 }
 
-std::ostream &term(const lib::Term::Wam &machine, lib::Term::Address addr, const StringStore &strings, std::ostream &s) {
+std::ostream &
+term(const lib::Term::Wam &machine, lib::Term::Address addr, const StringStore &strings, std::ostream &s) {
 	using namespace lib::Term;
 
 	struct Printer {
-
 		Printer(const Wam &machine, const StringStore &strings, std::ostream &s)
-		: machine(machine), strings(strings), s(s) { }
+				: machine(machine), strings(strings), s(s) {
+			occurred[0].resize(machine.getHeap().size(), 0);
+			occurred[1].resize(machine.getTemp().size(), 0);
+		}
 
 		void operator()(Address addr) {
 			Cell cell = machine.getCell(addr);
 			switch(cell.tag) {
 			case CellTag::REF:
 				if(cell.REF.addr == addr
-						|| occurred.find(cell.REF.addr) != end(occurred)
+				   || occurred[static_cast<int>(cell.REF.addr.type)][cell.REF.addr.addr] != 0
 						) {
 					rawVarFromCell(s, cell);
 				} else (*this)(cell.REF.addr);
@@ -225,10 +225,21 @@ std::ostream &term(const lib::Term::Wam &machine, lib::Term::Address addr, const
 				(*this)(cell.STR.addr);
 				break;
 			case CellTag::Structure:
-				assert(occurred.find(addr) == end(occurred));
-				occurred.insert(addr);
+				if(occurred[static_cast<int>(addr.type)][addr.addr] != 0) {
+					wam(machine, strings, std::cout);
+					std::cout << "addr.addr = " << addr.addr << std::endl;
+					std::cout << "occurred:" << std::endl;
+					for(int aType : {0, 1}) {
+						for(const auto o : occurred[aType]) {
+							if(o == 0) continue;
+							std::cout << "   [" << aType << "]: " << o << std::endl;
+						}
+					}
+				}
+				assert(occurred[static_cast<int>(addr.type)][addr.addr] == 0);
 				s << strings.getString(cell.Structure.name);
 				if(cell.Structure.arity > 0) {
+					++occurred[static_cast<int>(addr.type)][addr.addr];
 					s << "(";
 					(*this)(addr + 1);
 					for(std::size_t i = 2; i <= cell.Structure.arity; i++) {
@@ -236,6 +247,7 @@ std::ostream &term(const lib::Term::Wam &machine, lib::Term::Address addr, const
 						(*this)(addr + i);
 					}
 					s << ")";
+					--occurred[static_cast<int>(addr.type)][addr.addr];
 				}
 				break;
 			}
@@ -244,14 +256,14 @@ std::ostream &term(const lib::Term::Wam &machine, lib::Term::Address addr, const
 		const Wam &machine;
 		const StringStore &strings;
 		std::ostream &s;
-		//std::size_t occursBase;
-		std::unordered_set<Address> occurred;
+		std::array<std::vector<int>, 2> occurred;
 	};
 	Printer(machine, strings, s)(addr);
 	return s;
 }
 
-std::ostream &mgu(const lib::Term::Wam &machine, const lib::Term::MGU &mgu, const StringStore &strings, std::ostream &s) {
+std::ostream &
+mgu(const lib::Term::Wam &machine, const lib::Term::MGU &mgu, const StringStore &strings, std::ostream &s) {
 	using namespace lib::Term;
 	switch(mgu.status) {
 	case MGU::Status::Exists:
@@ -276,10 +288,8 @@ std::ostream &mgu(const lib::Term::Wam &machine, const lib::Term::MGU &mgu, cons
 	return s;
 }
 
-} // namespace Write
-} // namespace Term
-} // namespace IO
-namespace Term {
+} // namespace mod::lib::IO::Term::Write
+namespace mod::lib::Term {
 
 std::ostream &operator<<(std::ostream &s, Address addr) {
 	switch(addr.type) {
@@ -293,13 +303,10 @@ std::ostream &operator<<(std::ostream &s, Address addr) {
 	return s << "[" << addr.addr << "]";
 }
 
-} // namespace Term
-} // namespace lib
-} // namespace mod
+} // namespace mod::lib::Term
 
 BOOST_FUSION_ADAPT_STRUCT(mod::lib::IO::Term::Read::detail::Variable,
-		(std::string, name))
+                          (std::string, name))
 BOOST_FUSION_ADAPT_STRUCT(mod::lib::IO::Term::Read::detail::Structure,
-		(std::string, name)
-		(std::vector<mod::lib::IO::Term::Read::detail::Term>, arguments)
-		)
+                          (std::string, name)
+		                          (std::vector<mod::lib::IO::Term::Read::detail::Term>, arguments))

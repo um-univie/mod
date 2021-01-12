@@ -11,17 +11,14 @@
 #include <mod/lib/IO/Config.hpp>
 #include <mod/lib/IO/DG.hpp>
 #include <mod/lib/IO/IO.hpp>
+#include <mod/lib/IO/JsonUtils.hpp>
 #include <mod/lib/RC/ComposeRuleReal.hpp>
 #include <mod/lib/RC/MatchMaker/Super.hpp>
-
-#include <nlohmann/json.hpp>
 
 #include <boost/iostreams/device/mapped_file.hpp>
 #include <boost/lexical_cast.hpp>
 
-namespace mod {
-namespace lib {
-namespace DG {
+namespace mod::lib::DG {
 
 ExecuteResult::ExecuteResult(NonHyperBuilder *owner, int execution)
 		: owner(owner), execution(execution) {}
@@ -32,7 +29,8 @@ const Strategies::GraphState &ExecuteResult::getResult() const {
 
 void ExecuteResult::list(bool withUniverse) const {
 	owner->executions[execution].strategy->printInfo(
-			Strategies::PrintSettings(IO::log(), withUniverse));
+			Strategies::PrintSettings(std::cout, withUniverse));
+	std::cout << std::flush;
 }
 
 // -----------------------------------------------------------------------------
@@ -102,8 +100,8 @@ std::pair<NonHyper::Edge, bool> Builder::addDerivation(const Derivations &d, Iso
 }
 
 struct NonHyperBuilder::ExecutionEnv final : public Strategies::ExecutionEnv {
-	ExecutionEnv(NonHyperBuilder &owner, LabelSettings labelSettings)
-			: Strategies::ExecutionEnv(labelSettings), owner(owner) {}
+	ExecutionEnv(NonHyperBuilder &owner, LabelSettings labelSettings, Rules::GraphAsRuleCache &graphAsRuleCache)
+			: Strategies::ExecutionEnv(labelSettings, graphAsRuleCache), owner(owner) {}
 
 	void tryAddGraph(std::shared_ptr<graph::Graph> gCand) override {
 		owner.tryAddGraph(gCand);
@@ -184,7 +182,7 @@ private: // state for computation
 ExecuteResult
 Builder::execute(std::unique_ptr<Strategies::Strategy> strategy_, int verbosity, bool ignoreRuleLabelTypes) {
 	NonHyperBuilder::StrategyExecution exec{
-			std::make_unique<NonHyperBuilder::ExecutionEnv>(*dg, dg->getLabelSettings()),
+			std::make_unique<NonHyperBuilder::ExecutionEnv>(*dg, dg->getLabelSettings(), dg->graphAsRuleCache),
 			std::make_unique<Strategies::GraphState>(),
 			std::move(strategy_)
 	};
@@ -222,18 +220,16 @@ Builder::execute(std::unique_ptr<Strategies::Strategy> strategy_, int verbosity,
 		});
 	}
 
-	exec.strategy->execute(Strategies::PrintSettings(IO::log(), false, verbosity), *exec.input);
+	exec.strategy->execute(Strategies::PrintSettings(std::cout, false, verbosity), *exec.input);
 	dg->executions.push_back(std::move(exec));
 	return ExecuteResult(dg, dg->executions.size() - 1);
 }
 
 std::vector<std::pair<NonHyper::Edge, bool>>
-Builder::apply(const std::vector<std::shared_ptr<graph::Graph> > &graphs,
+Builder::apply(const std::vector<std::shared_ptr<graph::Graph>> &graphs,
                std::shared_ptr<rule::Rule> rOrig,
                int verbosity, IsomorphismPolicy graphPolicy) {
-	constexpr int V_RuleBinding = 2;
-	constexpr int V_RCMatchBase = 8;
-	IO::Logger logger(IO::log());
+	IO::Logger logger(std::cout);
 	dg->rules.insert(rOrig);
 	switch(graphPolicy) {
 	case IsomorphismPolicy::Check:
@@ -246,70 +242,89 @@ Builder::apply(const std::vector<std::shared_ptr<graph::Graph> > &graphs,
 		break;
 	}
 
-	std::vector<BoundRule> boundRules;
-	{
-		BoundRule p;
-		p.rule = &rOrig->getRule();
-		boundRules.push_back(p);
-	}
-	const auto ls = dg->getLabelSettings();
-	if(verbosity >= V_RuleBinding) {
+	if(verbosity >= V_RuleApplication) {
 		logger.indent() << "Binding " << graphs.size() << " graphs to rule '" << rOrig->getName() << "' with "
 		                << rOrig->getNumLeftComponents() << " left-hand components." << std::endl;
 		++logger.indentLevel;
 	}
 
-	for(const auto &g : graphs) {
-		std::vector<BoundRule> resultBoundRules;
-		for(const BoundRule &brp : boundRules) {
-			assert(brp.rule);
-			if(brp.rule->isOnlyRightSide()) continue; // no improper derivations
-			BoundRuleStorage ruleStore(
-					verbosity >= V_RuleBinding, IO::Logger(IO::log()),
-					ls.type, ls.withStereo, resultBoundRules, brp, &g->getGraph());
-			const auto reporter = [&ruleStore,
-					assumeConfluence = getConfig().dg.applyAssumeConfluence.get()
-			](std::unique_ptr<lib::Rules::Real> r) {
-				ruleStore.add(r.release());
-				return !assumeConfluence; // returns "make more matches"
-			};
-			const lib::Rules::Real &rFirst = g->getGraph().getBindRule()->getRule();
-			const lib::Rules::Real &rSecond = *brp.rule;
-			lib::RC::Super mm(
-					std::max(0, verbosity - V_RCMatchBase), IO::Logger(IO::log()),
-					true, true);
-			lib::RC::composeRuleRealByMatchMaker(rFirst, rSecond, mm, reporter, ls);
-		}
-		// we only care about proper derivations, to simply delete all intermediary results
-		for(BoundRule &p : boundRules) {
-			if(p.rule != &rOrig->getRule())
-				delete p.rule;
-		}
-		if(verbosity >= V_RuleBinding) {
-			logger.indent() << "got " << resultBoundRules.size() << " intermediary rules after binding graph '"
-			                << g->getName()
-			                << "'" << std::endl;
-			if(getConfig().dg.calculateVerbosePrint.get()) {
-				postSection("CalculateVerbose");
-				for(const auto &brp : resultBoundRules)
-					IO::Rules::Write::summary(*brp.rule);
-			}
-		}
-		boundRules = std::move(resultBoundRules);
-	}
+	if(graphs.empty()) return {};
+	std::vector<const lib::Graph::Single *> libGraphs;
+	libGraphs.reserve(graphs.size());
+	for(const auto &g : graphs)
+		libGraphs.push_back(&g->getGraph());
 
-	std::vector<std::pair<NonHyper::Edge, bool> > res;
-	for(const BoundRule &brp : boundRules) {
+	std::vector<BoundRule> resultRules;
+	const auto ls = dg->getLabelSettings();
+	{
+		// we must bind each graph, so increase the span of graphs one at a time,
+		// and only keep bound rules that still have left-hand components
+		std::vector<BoundRule> inputRules{{&rOrig->getRule(), {}, 0}};
+		const auto firstGraph = libGraphs.begin();
+		for(int round = 0; round != libGraphs.size(); ++round) {
+			const auto onOutput = [
+					isLast = round + 1 == libGraphs.size(),
+					assumeConfluence = getConfig().dg.applyAssumeConfluence.get(),
+					&resultRules]
+					(IO::Logger logger, BoundRule br) -> bool {
+				if(isLast) {
+					// save only the fully bound ones
+					if(br.rule->isOnlyRightSide()) {
+						resultRules.push_back(std::move(br));
+						return !assumeConfluence; // returns "make more matches"
+					} else return true;
+				} else {
+					// discard the fully bound ones
+					if(br.rule->isOnlyRightSide()) {
+						delete br.rule;
+						return true;
+					} else return !assumeConfluence; // returns "make more matches"
+				}
+			};
+			std::vector<BoundRule> outputRules = bindGraphs(
+					verbosity, logger,
+					round,
+					firstGraph, firstGraph + round + 1, inputRules,
+					dg->graphAsRuleCache, ls,
+					onOutput);
+			for(BoundRule &br : outputRules) {
+				// always go to the next graph
+				++br.nextGraphOffset;
+			}
+			if(round != 0) {
+				// in round 0 the inputRules is the actual original input rule, so don't delete it
+				for(auto &br : inputRules)
+					delete br.rule;
+			}
+			std::swap(inputRules, outputRules);
+			if(verbosity >= V_RuleApplication) {
+				++logger.indentLevel;
+				logger.indent() << "Result after apply filtering: " << inputRules.size() << " rules" << std::endl;
+				--logger.indentLevel;
+			}
+		} // for each round
+	} // end of binding
+
+	std::vector<std::pair<NonHyper::Edge, bool>> res;
+	for(const BoundRule &br : resultRules) {
 		if(getConfig().dg.applyLimit.get() == res.size()) break;
 
-		const auto &r = *brp.rule;
-		if(!r.isOnlyRightSide()) continue;
-		auto products = splitRule(r.getDPORule(), dg->getLabelSettings().type, dg->getLabelSettings().withStereo,
-		                          [this](std::unique_ptr<lib::Graph::Single> gCand) {
-			                          return dg->checkIfNew(std::move(gCand)).first;
-		                          },
-		                          [](auto a, auto b) {
-		                          }
+		const auto &r = *br.rule;
+		assert(r.isOnlyRightSide());
+		auto products = splitRule(
+				r.getDPORule(), ls.type, ls.withStereo,
+				[this](std::unique_ptr<lib::Graph::Single> gCand) {
+					return dg->checkIfNew(std::move(gCand)).first;
+				},
+				[verbosity, &logger](std::shared_ptr<graph::Graph> gWrapped, std::shared_ptr<graph::Graph> gPrev) {
+					if(verbosity >= V_RuleApplication_Binding) {
+						++logger.indentLevel;
+						logger.indent() << "Discarding product " << gWrapped->getName()
+						                << ", isomorphic to other product " << gPrev->getName()
+						                << "." << std::endl;
+						--logger.indentLevel;
+					}
+				}
 		);
 		for(const auto &p : products)
 			dg->addProduct(p);
@@ -317,16 +332,117 @@ Builder::apply(const std::vector<std::shared_ptr<graph::Graph> > &graphs,
 		rightGraphs.reserve(products.size());
 		for(const auto &p : products)
 			rightGraphs.push_back(&p->getGraph());
-		lib::DG::GraphMultiset gmsLeft(brp.boundGraphs), gmsRight(std::move(rightGraphs));
+		lib::DG::GraphMultiset gmsLeft(br.boundGraphs), gmsRight(std::move(rightGraphs));
 		const auto derivationRes = dg->suggestDerivation(gmsLeft, gmsRight, &rOrig->getRule());
 		res.push_back(derivationRes);
 	}
 
-	if(!graphs.empty()) { // otherwise boundRules is the original BoundRule
-		for(const BoundRule &p : boundRules)
-			delete p.rule;
+	for(const auto &br : resultRules)
+		delete br.rule;
+
+	return res;
+}
+
+std::vector<std::pair<NonHyper::Edge, bool>>
+Builder::applyRelaxed(const std::vector<std::shared_ptr<graph::Graph>> &graphs,
+                      std::shared_ptr<rule::Rule> rOrig,
+                      int verbosity, IsomorphismPolicy graphPolicy) {
+
+	IO::Logger logger(std::cout);
+	dg->rules.insert(rOrig);
+	switch(graphPolicy) {
+	case IsomorphismPolicy::Check:
+		for(const auto &g : graphs)
+			dg->tryAddGraph(g);
+		break;
+	case IsomorphismPolicy::TrustMe:
+		for(const auto &g : graphs)
+			dg->trustAddGraph(g);
+		break;
 	}
 
+	if(verbosity >= V_RuleApplication) {
+		logger.indent() << "Binding " << graphs.size() << " graphs to rule '" << rOrig->getName() << "' with "
+		                << rOrig->getNumLeftComponents() << " left-hand components." << std::endl;
+		++logger.indentLevel;
+	}
+
+	if(graphs.empty()) return {};
+	std::vector<const lib::Graph::Single *> libGraphs;
+	libGraphs.reserve(graphs.size());
+	for(const auto &g : graphs)
+		libGraphs.push_back(&g->getGraph());
+
+	const auto ls = dg->getLabelSettings();
+	// we must bind each graph, so increase the span of graphs one at a time,
+	// and only keep bound rules that still have left-hand components
+	std::vector<BoundRule> inputRules{{&rOrig->getRule(), {}, 0}};
+	std::vector<std::pair<NonHyper::Edge, bool>> res;
+	for(int round = 0; round != rOrig->getNumLeftComponents(); ++round) {
+		const auto firstGraph = libGraphs.begin();
+		const auto lastGraph = libGraphs.end();
+
+		const auto onOutput = [this, verbosity, ls, &res, rOrig]
+				(IO::Logger logger, BoundRule br) -> bool {
+			if(!br.rule->isOnlyRightSide())
+				return true;
+
+			const auto &r = *br.rule;
+			if(verbosity >= V_RuleApplication_Binding) {
+				logger.indent() << "Splitting " << r.getName() << " into "
+				                << r.getDPORule().numRightComponents << " graphs" << std::endl;
+				++logger.indentLevel;
+			}
+
+			assert(r.isOnlyRightSide());
+			auto products = splitRule(
+					r.getDPORule(), ls.type, ls.withStereo,
+					[this](std::unique_ptr<lib::Graph::Single> gCand) {
+						return dg->checkIfNew(std::move(gCand)).first;
+					},
+					[verbosity, &logger](std::shared_ptr<graph::Graph> gWrapped, std::shared_ptr<graph::Graph> gPrev) {
+						if(verbosity >= V_RuleApplication_Binding) {
+							++logger.indentLevel;
+							logger.indent() << "Discarding product " << gWrapped->getName()
+							                << ", isomorphic to other product " << gPrev->getName()
+							                << "." << std::endl;
+							--logger.indentLevel;
+						}
+					}
+			);
+			for(const auto &p : products)
+				dg->addProduct(p);
+			std::vector<const lib::Graph::Single *> rightGraphs;
+			rightGraphs.reserve(products.size());
+			for(const auto &p : products)
+				rightGraphs.push_back(&p->getGraph());
+			lib::DG::GraphMultiset gmsLeft(br.boundGraphs), gmsRight(std::move(rightGraphs));
+			const auto derivationRes = dg->suggestDerivation(gmsLeft, gmsRight, &rOrig->getRule());
+			res.push_back(derivationRes);
+
+			if(verbosity >= V_RuleApplication_Binding)
+				--logger.indentLevel;
+
+			delete br.rule;
+			return true;
+		};
+		std::vector<BoundRule> outputRules = bindGraphs
+				(verbosity, logger,
+				 round,
+				 firstGraph, lastGraph, inputRules,
+				 dg->graphAsRuleCache, ls,
+				 onOutput);
+		for(BoundRule &br : outputRules) {
+			// always go to the next graph
+			++br.nextGraphOffset;
+		}
+		if(round != 0) {
+			// in round 0 the inputRules is the actual original input rule, so don't delete it
+			for(auto &br : inputRules)
+				delete br.rule;
+		}
+		std::swap(inputRules, outputRules);
+	} // for each round based on numComponents
 	return res;
 }
 
@@ -432,8 +548,8 @@ bool Builder::trustLoadDump(nlohmann::json &&j,
 	for(auto &jv : jVertices) {
 		Vertex v;
 		v.id = jv[0].get<int>();
-		std::istringstream iss(jv[2].get<std::string>());
-		auto gData = lib::IO::Graph::Read::gml(iss, err);
+		const std::string &gml = jv[2].get<std::string>();
+		auto gData = lib::IO::Graph::Read::gml(gml, err);
 		if(!gData.g) {
 			err << "Error when loading graph GML in DG dump, for graph '";
 			err << jv[1].get<std::string>() << "', in vertex " << v.id << ".";
@@ -454,7 +570,8 @@ bool Builder::trustLoadDump(nlohmann::json &&j,
 	std::vector<std::shared_ptr<rule::Rule>> rules;
 	rules.reserve(jRules.size());
 	const auto ls = dg->getLabelSettings();
-	for(const std::string &jr : jRules) {
+	for(const auto &j : jRules) {
+		const std::string &jr = j.get<std::string>();
 		auto rCand = rule::Rule::ruleGMLString(jr, false);
 		const auto iter = std::find_if(ruleDatabase.begin(), ruleDatabase.end(), [rCand, ls](const auto &r) {
 			return r->isomorphism(rCand, 1, ls) == 1;
@@ -465,7 +582,7 @@ bool Builder::trustLoadDump(nlohmann::json &&j,
 		} else {
 			rules.push_back(*iter);
 			if(verbosity >= V_Link) {
-				IO::log() << "DG loading: loaded rule '" << rCand->getName()
+				std::cout << "DG loading: loaded rule '" << rCand->getName()
 				          << "' isomorphic to existing rule '" << (*iter)->getName() << "'." << std::endl;
 			}
 		}
@@ -484,7 +601,7 @@ bool Builder::trustLoadDump(nlohmann::json &&j,
 			const bool wasNewAsVertex = dg->trustAddGraphAsVertex(v.graph);
 			graphFromId[v.id] = &v.graph->getGraph();
 			if(verbosity >= V_Link && !v.wasNew) {
-				IO::log() << "DG loading: loaded graph '" << jVertices[iVertices][1].get<std::string>()
+				std::cout << "DG loading: loaded graph '" << jVertices[iVertices][1].get<std::string>()
 				          << "' isomorphic to existing graph '" << v.graph->getName() << "'." << std::endl;
 			}
 			//if(wasNewAsVertex) giveProductStatus(v.graph);
@@ -560,6 +677,4 @@ Builder NonHyperBuilder::build() {
 	return Builder(this);
 }
 
-} // namespace DG
-} // namespace lib
-} // namespace mod
+} // namespace mod::lib::DG

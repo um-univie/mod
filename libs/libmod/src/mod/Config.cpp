@@ -1,6 +1,6 @@
 #include "Config.hpp"
 
-#include <iostream>
+#include <ostream>
 #include <tuple>
 
 namespace mod {

@@ -3,11 +3,16 @@
 
 #include <boost/optional.hpp>
 
+// We don't control the symbol visibility of the json library and json-schema library,
+// so we need to restore the default when using their header files.
+// For example typeinfo objects for exceptions _must_ be exported.
+#pragma GCC visibility push(default)
+
 #include <nlohmann/json-schema.hpp>
 
-namespace mod {
-namespace lib {
-namespace IO {
+#pragma GCC visibility pop
+
+namespace mod::lib::IO {
 
 // returns the full filename
 std::string writeJsonFile(const std::string &name, const nlohmann::json &j);
@@ -18,8 +23,6 @@ bool validateJson(const nlohmann::json &j,
                   std::ostream &err,
                   const std::string &msg);
 
-} // namespace IO
-} // namespace lib
-} // namespace mod
+} // namespace mod::lib::IO
 
 #endif // MOD_LIB_IO_JSONUTILS_HPP

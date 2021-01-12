@@ -1,0 +1,67 @@
+{% set version = environ.get('MOD_CONDA_BUILD_VERSION') %}
+{% set pyPackages = [
+	"ipython",
+	"networkx",
+	"parse",
+	"typing_extensions",
+] %}
+{% set packages = [
+	"boost==1.74",
+	"boost-cpp==1.74",
+	"openbabel",
+	"python",
+] %}
+{% set exePackages = [
+	"make",
+	"graphviz==2.42.3.1",
+	"pdf2svg",
+] %}
+
+
+package:
+  name: mod
+  {% if version %}
+  version: {{ version }}
+  {% endif %}
+
+source:
+  {% if version %}
+  path: {{ "../build/mod-" + version + ".tar.gz" }}
+  {% endif %}
+
+build:
+  skip: True  # [win]
+
+requirements:
+  build:
+    - {{ compiler('cxx') }}
+    - make
+    - pkg-config
+    - cmake
+#    - texlive-core
+    {% for p in exePackages %}
+    - {{ p }}
+    {% endfor %}
+    {% for p in pyPackages %}
+    - {{ p }}
+    {% endfor %}
+  host:
+    {% for p in packages %}
+    - {{ p }}
+    {% endfor %}
+  run:
+    {% for p in exePackages %}
+    - {{ p }}
+    {% endfor %}
+    {% for p in packages %}
+    - {{ p }}
+    {% endfor %}
+    {% for p in pyPackages %}
+    - {{ p }}
+    {% endfor %}
+
+test:
+  commands:
+    - mod -e "smiles('O').print()"
+    - mod_post --install-format
+    - mod -e "smiles('O').print()"

@@ -1,17 +1,15 @@
-#ifndef MOD_LIB_STEREO_EDGECATEGORY_H
-#define MOD_LIB_STEREO_EDGECATEGORY_H
+#ifndef MOD_LIB_STEREO_EDGECATEGORY_HPP
+#define MOD_LIB_STEREO_EDGECATEGORY_HPP
 
 #include <mod/Chem.hpp>
 
 #include <array>
 #include <bitset>
-#include <iostream>
+#include <iosfwd>
 #include <numeric>
 #include <type_traits>
 
-namespace mod {
-namespace lib {
-namespace Stereo {
+namespace mod::lib::Stereo {
 
 enum class EdgeCategory : unsigned char {
 	// A partial order: Any is greater than all the others.
@@ -64,8 +62,6 @@ private:
 	Storage count;
 };
 
-} // namespace Stereo
-} // namespace lib
-} // namespace mod
+} // namespace mod::lib::Stereo
 
-#endif /* MOD_LIB_STEREO_EDGECATEGORY_H */
+#endif // MOD_LIB_STEREO_EDGECATEGORY_HPP

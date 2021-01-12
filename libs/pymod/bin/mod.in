@@ -224,8 +224,6 @@ done
 # Create precommand (gdb/valgrind/...)
 precommand=""
 if [ $profile = "true" -o $memcheck = "true" ]; then
-	echo "Exporting environment for memcheck: PYTHONMALLOC=malloc"
-	export PYTHONMALLOC=malloc
 	precommand="valgrind"
 fi
 if [ $profile = "true" ]; then

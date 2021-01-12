@@ -16,8 +16,7 @@
 
 #include <ostream>
 
-namespace mod {
-namespace dg {
+namespace mod::dg {
 
 //------------------------------------------------------------------------------
 // GraphState
@@ -177,5 +176,4 @@ std::shared_ptr<Strategy> Strategy::makeRepeat(int limit, std::shared_ptr<Strate
 			new Strategy(std::make_unique<lib::DG::Strategies::Repeat>(strategy->getStrategy().clone(), limit)));
 }
 
-} // namespace dg
-} // namespace mod
+} // namespace mod::dg

@@ -3,12 +3,9 @@
 #include <mod/Config.hpp>
 #include <mod/lib/DG/Strategies/GraphState.hpp>
 
-#include <iostream>
+#include <ostream>
 
-namespace mod {
-namespace lib {
-namespace DG {
-namespace Strategies {
+namespace mod::lib::DG::Strategies {
 
 Repeat::Repeat(Strategy *strat, int limit)
 		: Strategy(strat->getMaxComponents()), strat(strat), limit(limit) {
@@ -46,7 +43,7 @@ void Repeat::printInfo(PrintSettings settings) const {
 
 const GraphState &Repeat::getOutput() const {
 	assert(!subStrats.empty());
-	if(subStrats.back()->getOutput().getSubset(0).empty()) {
+	if(subStrats.back()->getOutput().getSubset().empty()) {
 		if(subStrats.size() == 1) return *input;
 		else return subStrats[subStrats.size() - 2]->getOutput();
 	} else return subStrats.back()->getOutput();
@@ -81,16 +78,14 @@ void Repeat::executeImpl(PrintSettings settings, const GraphState &input) {
 
 		if(settings.verbosity >= PrintSettings::V_Repeat) {
 			settings.indent() << "Round " << (i + 1) << ": Result subset has "
-									<< subStrat->getOutput().getSubset(0).size()
-									<< " graphs." << std::endl;
+			                  << subStrat->getOutput().getSubset().size()
+			                  << " graphs." << std::endl;
 		}
 		subStrats.push_back(subStrat);
-		if(!getConfig().dg.ignoreSubset.get()) {
-			if(subStrat->getOutput().getSubset(0).empty()) {
-				if(settings.verbosity >= PrintSettings::V_RepeatBreak)
-					settings.indent() << "Round " << (i + 1) << ": Breaking repeat due to empty subset." << std::endl;
-				break;
-			}
+		if(subStrat->getOutput().getSubset().empty()) {
+			if(settings.verbosity >= PrintSettings::V_RepeatBreak)
+				settings.indent() << "Round " << (i + 1) << ": Breaking repeat due to empty subset." << std::endl;
+			break;
 		}
 		if(!getConfig().dg.disableRepeatFixedPointCheck.get()) {
 			if(i > 0) {
@@ -104,7 +99,4 @@ void Repeat::executeImpl(PrintSettings settings, const GraphState &input) {
 	}
 }
 
-} // namespace Strategies
-} // namespace DG
-} // namespace lib
-} // namespace mod
+} // namespace mod::lib::DG::Strategies

@@ -26,11 +26,10 @@
 #include <boost/lexical_cast.hpp>
 #include <boost/make_shared.hpp>
 
+#include <iostream>
 #include <unordered_set>
 
-namespace mod {
-namespace lib {
-namespace DG {
+namespace mod::lib::DG {
 namespace {
 std::size_t nextDGNum = 0;
 } // namespace
@@ -50,7 +49,7 @@ NonHyper::NonHyper(LabelSettings labelSettings,
 	case IsomorphismPolicy::Check: {
 		const auto ls = LabelSettings{this->labelSettings.type, LabelRelation::Isomorphism,
 		                              this->labelSettings.withStereo, LabelRelation::Isomorphism};
-		for(const auto gCand : graphDatabase) {
+		for(const auto &gCand : graphDatabase) {
 			if(ls.type == LabelType::Term) {
 				const auto &term = get_term(gCand->getGraph().getLabelledGraph());
 				if(!isValid(term)) {
@@ -292,15 +291,15 @@ HyperVertex NonHyper::findHyperEdge(const std::vector<Hyper::Vertex> &sources,
 }
 
 void NonHyper::diff(const NonHyper &dg1, const NonHyper &dg2) {
-	std::ostream &s = IO::log();
 	bool headerPrinted = false;
-	const auto printHeader = [&headerPrinted, &dg1, &dg2, &s]() -> std::ostream & {
-		if(headerPrinted) return s;
+	const auto printHeader = [&headerPrinted, &dg1, &dg2]() -> std::ostream & {
+		if(headerPrinted) return std::cout;
 		else headerPrinted = true;
-		s << "--- DG " << dg1.getId() << std::endl;
-		s << "+++ DG " << dg2.getId() << std::endl;
-		return s;
+		std::cout << "--- DG " << dg1.getId() << std::endl;
+		std::cout << "+++ DG " << dg2.getId() << std::endl;
+		return std::cout;
 	};
+	std::ostream &s = std::cout;
 	// diff vertices
 	std::unordered_set<std::shared_ptr<graph::Graph> > vertexGraphsUnique;
 	for(const auto v : dg1.getAPIReference()->vertices()) vertexGraphsUnique.insert(v.getGraph());
@@ -310,7 +309,7 @@ void NonHyper::diff(const NonHyper &dg1, const NonHyper &dg2) {
 	          [](std::shared_ptr<graph::Graph> g1, std::shared_ptr<graph::Graph> g2) {
 		          return g1->getName() < g2->getName();
 	          });
-	for(const auto g : vertexGraphs) {
+	for(const auto &g : vertexGraphs) {
 		const bool in1 = dg1.getHyper().isVertexGraph(&g->getGraph());
 		const bool in2 = dg2.getHyper().isVertexGraph(&g->getGraph());
 		assert(in1 || in2);
@@ -386,6 +385,4 @@ void NonHyper::diff(const NonHyper &dg1, const NonHyper &dg2) {
 	}
 }
 
-} // namespace DG
-} // namespace lib
-} // namespace mod
+} // namespace mod::lib::DG

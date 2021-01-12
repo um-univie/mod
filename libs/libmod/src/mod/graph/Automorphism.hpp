@@ -6,15 +6,13 @@
 
 #include <boost/iterator/iterator_facade.hpp>
 
-namespace mod {
-namespace graph {
+namespace mod::graph {
 
 // rst-class: graph::Graph::Aut
 // rst:
 // rst:		A class representing an automorphism of a :class:`Graph`.
 // rst:
 // rst-class-start:
-
 struct Graph::Aut {
 	Aut(std::shared_ptr<Graph> g, LabelType lt, bool withStereo, std::size_t i);
 	// rst: .. cpp:function:: Vertex operator[](Vertex v) const
@@ -35,16 +33,13 @@ private:
 // rst:		A class representing the automorphism group of a :class:`Graph`.
 // rst:
 // rst-class-start:
-
 struct Graph::AutGroup {
 	// rst-nested: graph::Graph::AutGroup::Gens
 	// rst:
 	// rst:		A random-access range of the generators for the automorphism group.
 	// rst:
 	// rst-nested-start:
-
 	struct Gens {
-
 		class iterator : public boost::iterator_facade<iterator, Aut, std::random_access_iterator_tag, Aut> {
 			friend class Gens;
 			iterator() = default;
@@ -76,7 +71,6 @@ struct Graph::AutGroup {
 		LabelType lt;
 		bool withStereo;
 	};
-
 	// rst-nested-end:
 public:
 	// rst: .. function:: AutGroup(std::shared_ptr<const Graph> g, LabelSettings labelSettings)
@@ -94,7 +88,6 @@ private:
 };
 // rst-class-end:
 
-} // namespace graph
-} // namespace mod
+} // namespace mod::graph
 
 #endif /* MOD_GRAPH_AUTOMORPHISM_H */

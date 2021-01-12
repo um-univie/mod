@@ -58,7 +58,8 @@ exeStrat(addSubset(lambda: [g1a, g1b], graphPolicy=IsomorphismPolicy.TrustMe))
 exeStrat(addUniverse(lambda: [g1a, g1b], graphPolicy=IsomorphismPolicy.TrustMe))
 
 
-
-
-
-
+# test verbose print
+inputGraphs[:] = []
+for i in range(42):
+	smiles("C"*(i + 1))
+exeStrat(addSubset(inputGraphs) >> addUniverse(inputGraphs) >> addSubset(lambda: inputGraphs) >> addUniverse(lambda: inputGraphs), verbosity=10)

@@ -1,5 +1,5 @@
-#ifndef MOD_LIB_DG_DUMP_H
-#define MOD_LIB_DG_DUMP_H
+#ifndef MOD_LIB_DG_DUMP_HPP
+#define MOD_LIB_DG_DUMP_HPP
 
 #include <mod/graph/ForwardDecl.hpp>
 #include <mod/rule/ForwardDecl.hpp>
@@ -9,20 +9,16 @@
 #include <string>
 #include <vector>
 
-namespace mod {
-namespace lib {
-namespace DG {
+namespace mod::lib::DG {
 class NonHyper;
-namespace Dump {
+} // namespace mod::lib::DG
+namespace mod::lib::DG::Dump {
 
 std::unique_ptr<NonHyper> load(const std::vector<std::shared_ptr<graph::Graph> > &graphs,
-										 const std::vector<std::shared_ptr<rule::Rule> > &rules,
-										 const std::string &file,
-										 std::ostream &err);
+                               const std::vector<std::shared_ptr<rule::Rule> > &rules,
+                               const std::string &file,
+                               std::ostream &err);
 
-} // namespace Dump
-} // namespace DG
-} // namespace lib
-} // namespace mod
+} // namespace mod::lib::DG::Dump
 
-#endif   /* MOD_LIB_DG_DUMP_H */
+#endif // MOD_LIB_DG_DUMP_HPP

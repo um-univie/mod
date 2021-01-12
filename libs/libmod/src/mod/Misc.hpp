@@ -24,17 +24,7 @@ MOD_DECL void rngReseed(unsigned int seed);
 // rst:		:returns: a uniformly random real number between 0 and 1.
 MOD_DECL double rngUniformReal();
 
-MOD_DECL void post(const std::string &text);
-MOD_DECL void postChapter(const std::string &chapterTitle);
-MOD_DECL void postSection(const std::string &sectionTitle);
-
-// rst: .. function:: std::string makeUniqueFilePrefix()
-// rst:
-// rst:		:returns: a unique file prefix from the ``out/`` folder.
-MOD_DECL std::string makeUniqueFilePrefix();
-
 MOD_DECL void showDump(const std::string &file);
-
 
 MOD_DECL void printGeometryGraph();
 

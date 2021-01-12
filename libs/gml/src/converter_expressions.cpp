@@ -1,8 +1,6 @@
 #include <gml/converter_expressions.hpp>
 
-namespace gml {
-namespace converter {
-namespace detail {
+namespace gml::converter::detail {
 
 bool ExpressionBase::checkKey(const std::string &key) const {
 	return key == this->key;
@@ -30,6 +28,4 @@ bool ExpressionBase::checkAndErrorOnType(const ast::Value &value, std::ostream &
 	return true;
 }
 
-}  // namespace detail
-} // namespace converter
-} // namespace gml
+} // namespace gml::converter::detail

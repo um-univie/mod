@@ -1,7 +1,8 @@
-import networkx as nx
-from networkx.drawing.nx_agraph import to_agraph
+import networkx as nx  # type: ignore
+from networkx.drawing.nx_agraph import to_agraph  # type: ignore
+from parse import parse  # type: ignore
+
 import mod
-from parse import parse
 
 class GraphInterface:
     def __init__(self):

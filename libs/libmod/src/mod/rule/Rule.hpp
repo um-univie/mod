@@ -1,5 +1,5 @@
-#ifndef MOD_RULE_RULE_H
-#define MOD_RULE_RULE_H
+#ifndef MOD_RULE_RULE_HPP
+#define MOD_RULE_RULE_HPP
 
 #include <mod/BuildConfig.hpp>
 #include <mod/Config.hpp>
@@ -13,8 +13,7 @@
 #include <memory>
 #include <string>
 
-namespace mod {
-namespace rule {
+namespace mod::rule {
 
 // rst-class: rule::Rule
 // rst:
@@ -37,8 +36,8 @@ public:
 	class ContextGraph;
 	class RightGraph;
 private:
-	Rule(Rule&&) = delete;
-	Rule &operator=(Rule&&) = delete;
+	Rule(Rule &&) = delete;
+	Rule &operator=(Rule &&) = delete;
 private:
 	Rule(std::unique_ptr<lib::Rules::Real> r);
 public:
@@ -192,7 +191,8 @@ public:
 	// rst:
 	// rst:		:returns: a rule wrapping the given internal rule object. If an id mapping is given, it will be used for the :cpp:func:`getVertexFromExternalId` function.
 	static std::shared_ptr<Rule> makeRule(std::unique_ptr<lib::Rules::Real> r);
-	static std::shared_ptr<Rule> makeRule(std::unique_ptr<lib::Rules::Real> r, std::map<int, std::size_t> externalToInternalIds);
+	static std::shared_ptr<Rule>
+	makeRule(std::unique_ptr<lib::Rules::Real> r, std::map<int, std::size_t> externalToInternalIds);
 private:
 	struct Pimpl;
 	std::unique_ptr<Pimpl> p;
@@ -200,13 +200,11 @@ private:
 // rst-class-end:
 
 struct RuleLess {
-
 	bool operator()(std::shared_ptr<Rule> r1, std::shared_ptr<Rule> r2) const {
 		return r1->getId() < r2->getId();
 	}
 };
 
-} // namespace rule
-} // namespace mod
+} // namespace mod::rule
 
-#endif /* MOD_RULE_RULE_H */
+#endif // MOD_RULE_RULE_HPP

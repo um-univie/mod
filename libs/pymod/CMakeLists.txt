@@ -17,7 +17,12 @@ target_include_directories(pymod
         $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src>)
 target_link_libraries(pymod PUBLIC mod::libmod Boost::${PYTHON_TARGET} Python3::Python)
-target_link_libraries(pymod PRIVATE -Wl,--no-undefined)
+target_link_libraries(pymod PRIVATE
+        $<$<CXX_COMPILER_ID:GNU>:-Wl,--no-undefined>
+        $<$<CXX_COMPILER_ID:Clang>:-Wl,--no-undefined>
+        #$<$<CXX_COMPILER_ID:AppleClang>:-Wl,--no-undefined> # TODO: is there an equivalent?
+        )
+set_target_properties(pymod PROPERTIES INSTALL_RPATH "${CMAKE_INSTALL_FULL_LIBDIR}")
 target_compile_options(pymod PRIVATE -Wall -Wextra
         -Wno-unused-parameter
         -Wno-comment
@@ -56,7 +61,7 @@ install(FILES ${exportDir}/00_mod.in
 install(DIRECTORY lib/mod
         DESTINATION ${CMAKE_INSTALL_LIBDIR}
         COMPONENT pymod_run
-        FILES_MATCHING PATTERN "*.py")
+        FILES_MATCHING PATTERN "*.py" PATTERN "*.pyi")
 
 
 # mod

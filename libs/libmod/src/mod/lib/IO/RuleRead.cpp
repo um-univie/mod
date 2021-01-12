@@ -14,11 +14,7 @@
 #include <unordered_map>
 #include <unordered_set>
 
-namespace mod {
-namespace lib {
-namespace IO {
-namespace Rules {
-namespace Read {
+namespace mod::lib::IO::Rules::Read {
 namespace {
 
 template<typename T>
@@ -26,35 +22,34 @@ struct Label {
 	boost::optional<T> left, context, right;
 };
 
-Data parseGML(std::istream &s, std::ostream &err) {
+} // namespace
+
+Data gml(std::string_view src, std::ostream &err) {
 	GML::Rule rule;
 	{
 		gml::ast::KeyValue ast;
-		bool res = gml::parser::parse(s, ast, err);
+		bool res = gml::parser::parse(src, ast, err);
 		if(!res) return Data();
 		using namespace gml::converter::edsl;
 		auto cVertex = GML::makeVertexConverter(0);
 		auto cEdge = GML::makeEdgeConverter(0);
 		auto nodeLabels = list<Parent>("nodeLabels")
-				(string("label", &GML::AdjacencyConstraint::nodeLabels))
-				;
+				(string("label", &GML::AdjacencyConstraint::nodeLabels));
 		auto edgeLabels = list<Parent>("edgeLabels")
-				(string("label", &GML::AdjacencyConstraint::edgeLabels))
-				;
+				(string("label", &GML::AdjacencyConstraint::edgeLabels));
 		auto constrainAdj = list<GML::AdjacencyConstraint>("constrainAdj", &GML::Rule::matchConstraints)
 				(int_("id", &GML::AdjacencyConstraint::id), 1, 1)
 				(string("op", &GML::AdjacencyConstraint::op), 1, 1)
 				(int_("count", &GML::AdjacencyConstraint::count), 1, 1)
-				(nodeLabels) (edgeLabels)
-				;
-		auto constrainShortestPath = list<GML::ShortestPathConstraint>("constrainShortestPath", &GML::Rule::matchConstraints)
+				(nodeLabels)(edgeLabels);
+		auto constrainShortestPath = list<GML::ShortestPathConstraint>("constrainShortestPath",
+		                                                               &GML::Rule::matchConstraints)
 				(int_("source", &GML::ShortestPathConstraint::source), 1, 1)
 				(int_("target", &GML::ShortestPathConstraint::target), 1, 1)
 				(string("op", &GML::ShortestPathConstraint::op), 1, 1)
-				(int_("length", &GML::ShortestPathConstraint::length), 1, 1)
-				;
+				(int_("length", &GML::ShortestPathConstraint::length), 1, 1);
 		auto makeSide = [&](std::string name, GML::Graph GML::Rule::*side) {
-			return list<GML::Graph>(name, side)(cVertex) (cEdge);
+			return list<GML::Graph>(name, side)(cVertex)(cEdge);
 		};
 		auto cRule = list<Parent>("rule")
 				(string("ruleID", &GML::Rule::id), 0, 1)
@@ -62,8 +57,7 @@ Data parseGML(std::istream &s, std::ostream &err) {
 				(makeSide("left", &GML::Rule::left), 0, 1)
 				(makeSide("context", &GML::Rule::context), 0, 1)
 				(makeSide("right", &GML::Rule::right), 0, 1)
-				(constrainAdj) (constrainShortestPath)
-				;
+				(constrainAdj)(constrainShortestPath);
 		auto iterBegin = &ast;
 		auto iterEnd = iterBegin + 1;
 		res = gml::converter::convert(iterBegin, iterEnd, cRule, err, rule);
@@ -238,11 +232,13 @@ Data parseGML(std::istream &s, std::ostream &err) {
 		int src = p.first.first;
 		int tar = p.first.second;
 		if(idMapVertex.find(src) == end(idMapVertex)) {
-			err << "Error in rule GML. Edge endpoint '" << src << "' does not exist for edge (" << src << ", " << tar << ").";
+			err << "Error in rule GML. Edge endpoint '" << src << "' does not exist for edge (" << src << ", " << tar
+			    << ").";
 			return Data();
 		}
 		if(idMapVertex.find(tar) == end(idMapVertex)) {
-			err << "Error in rule GML. Edge endpoint '" << tar << "' does not exist for edge (" << src << ", " << tar << ").";
+			err << "Error in rule GML. Edge endpoint '" << tar << "' does not exist for edge (" << src << ", " << tar
+			    << ").";
 			return Data();
 		}
 		Vertex vSrc = idMapVertex[src].v, vTar = idMapVertex[tar].v;
@@ -308,8 +304,9 @@ Data parseGML(std::istream &s, std::ostream &err) {
 
 		struct MatchConstraintConverter : boost::static_visitor<bool> {
 
-			MatchConstraintConverter(lib::Rules::LabelledRule &dpoResult, const std::map<int, VertexLabels> &idMapVertex, std::ostream &err)
-			: dpoResult(dpoResult), idMapVertex(idMapVertex), err(err) { }
+			MatchConstraintConverter(lib::Rules::LabelledRule &dpoResult, const std::map<int, VertexLabels> &idMapVertex,
+			                         std::ostream &err)
+					: dpoResult(dpoResult), idMapVertex(idMapVertex), err(err) {}
 
 			bool operator()(const GML::AdjacencyConstraint &cGML) {
 				auto iter = idMapVertex.find(cGML.id);
@@ -332,8 +329,9 @@ Data parseGML(std::istream &s, std::ostream &err) {
 						return false;
 					}
 				}
-				auto c = std::make_unique<lib::GraphMorphism::Constraints::VertexAdjacency<lib::Rules::LabelledRule::LeftGraphType> >(
-						vConstrained, op, cGML.count);
+				auto c = std::make_unique<
+						lib::GraphMorphism::Constraints::VertexAdjacency < lib::Rules::LabelledRule::LeftGraphType> > (
+						         vConstrained, op, cGML.count);
 				for(const auto &s : cGML.nodeLabels) c->vertexLabels.insert(s);
 				for(const auto &s : cGML.edgeLabels) c->edgeLabels.insert(s);
 				dpoResult.leftMatchConstraints.push_back(std::move(c));
@@ -370,12 +368,14 @@ Data parseGML(std::istream &s, std::ostream &err) {
 				auto compSrc = dpoResult.leftComponents[get(boost::vertex_index_t(), get_graph(dpoResult), vSrc)];
 				auto compTar = dpoResult.leftComponents[get(boost::vertex_index_t(), get_graph(dpoResult), vTar)];
 				if(compSrc != compTar) {
-					err << "Error in rule GML. Vertex " << cGML.source << " and " << cGML.target << " are in different connected components of the left graph. "
-							<< "This is currently not supported for the shortest path constraint." << std::endl;
+					err << "Error in rule GML. Vertex " << cGML.source << " and " << cGML.target
+					    << " are in different connected components of the left graph. "
+					    << "This is currently not supported for the shortest path constraint." << std::endl;
 					return false;
 				}
-				auto c = std::make_unique<lib::GraphMorphism::Constraints::ShortestPath<lib::Rules::LabelledRule::LeftGraphType> >(
-						vSrc, vTar, op, cGML.length);
+				auto c = std::make_unique<
+						lib::GraphMorphism::Constraints::ShortestPath < lib::Rules::LabelledRule::LeftGraphType> > (
+						         vSrc, vTar, op, cGML.length);
 				dpoResult.leftMatchConstraints.push_back(std::move(c));
 				return true;
 			}
@@ -414,26 +414,31 @@ Data parseGML(std::istream &s, std::ostream &err) {
 	// Set the explicitly defined edge categories.
 	//----------------------------------------------------------------------------
 	for(const auto &p : idMapEdge) {
-		const auto handleSide = [&err, &ssErr, &p](const boost::optional<std::string> &os, const std::string &side, auto &inference) {
+		const auto handleSide = [&err, &ssErr, &p](const boost::optional<std::string> &os, const std::string &side,
+		                                           auto &inference) {
 			if(!os) return true;
 			const std::string &s = *os;
 			if(s.size() != 1) {
-				err << "Error in stereo data for edge (" << p.first.first << ", " << p.first.second << ") in " << side << ". ";
+				err << "Error in stereo data for edge (" << p.first.first << ", " << p.first.second << ") in " << side
+				    << ". ";
 				err << "Parsing error in stereo data '" << s << "'.";
 				return false;
 			}
 			lib::Stereo::EdgeCategory cat;
 			switch(s.front()) {
-			case '*': cat = lib::Stereo::EdgeCategory::Any;
+			case '*':
+				cat = lib::Stereo::EdgeCategory::Any;
 				break;
 			default:
-				err << "Error in stereo data for edge (" << p.first.first << ", " << p.first.second << ") in " << side << ". ";
+				err << "Error in stereo data for edge (" << p.first.first << ", " << p.first.second << ") in " << side
+				    << ". ";
 				err << "Parsing error in stereo data '" << s << "'.";
 				return false;
 			}
 			bool res = inference.assignEdgeCategory(p.second.e, cat, ssErr);
 			if(!res) {
-				err << "Error in stereo data for edge (" << p.first.first << ", " << p.first.second << ") in " << side << ". ";
+				err << "Error in stereo data for edge (" << p.first.first << ", " << p.first.second << ") in " << side
+				    << ". ";
 				err << ssErr.str();
 				return false;
 			}
@@ -445,7 +450,8 @@ Data parseGML(std::istream &s, std::ostream &err) {
 	// Set the explicitly stereo data.
 	//----------------------------------------------------------------------------
 	for(auto &p : idMapVertex) {
-		const auto handleSide = [&](const boost::optional<std::string> &os, const std::string &side, auto &inference, auto &parsedEmbedding, const auto &gSide) {
+		const auto handleSide = [&](const boost::optional<std::string> &os, const std::string &side, auto &inference,
+		                            auto &parsedEmbedding, const auto &gSide) {
 			if(!os) return true;
 			const auto &v = p.second.v;
 			parsedEmbedding = lib::IO::Stereo::Read::parseEmbedding(os.get(), ssErr);
@@ -460,7 +466,8 @@ Data parseGML(std::istream &s, std::ostream &err) {
 			if(embGML.geometry) {
 				auto vGeo = gGeometry.findGeometry(*embGML.geometry);
 				if(vGeo == gGeometry.nullGeometry()) {
-					err << "Error in stereo data for vertex " << p.first << " in " << side << ". Invalid gGeometry '" << *embGML.geometry << "'." << std::endl;
+					err << "Error in stereo data for vertex " << p.first << " in " << side << ". Invalid gGeometry '"
+					    << *embGML.geometry << "'." << std::endl;
 					return false;
 				}
 				bool res = inference.assignGeometry(v, vGeo, ssErr);
@@ -477,12 +484,14 @@ Data parseGML(std::istream &s, std::ostream &err) {
 					if(const int *idPtr = boost::get<int>(&e)) {
 						int idNeighbour = *idPtr;
 						if(idMapVertex.find(idNeighbour) == end(idMapVertex)) {
-							err << "Error in graph GML. Neighbour vertex " << idNeighbour << " in stereo embedding for vertex " << p.first << " in " << side << " does not exist." << std::endl;
+							err << "Error in graph GML. Neighbour vertex " << idNeighbour << " in stereo embedding for vertex "
+							    << p.first << " in " << side << " does not exist." << std::endl;
 							return false;
 						}
 						auto ePair = edge(v, vFromVertexId(idNeighbour), gSide);
 						if(!ePair.second) {
-							err << "Error in graph GML. Vertex " << idNeighbour << " in stereo embedding for vertex " << p.first << " in " << side << " is not a neighbour." << std::endl;
+							err << "Error in graph GML. Vertex " << idNeighbour << " in stereo embedding for vertex "
+							    << p.first << " in " << side << " is not a neighbour." << std::endl;
 							return false;
 						}
 						inference.addEdge(v, ePair.first);
@@ -512,16 +521,17 @@ Data parseGML(std::istream &s, std::ostream &err) {
 		if(!handleSide(p.second.stereo.right, "R", rightInference, p.second.parsedEmbeddingRight, gRight)) return Data();
 	} // for each vertex
 
-	auto finalize = [&err, &ssErr, &vertexMapId](auto &inference, const std::string & side) {
+	auto finalize = [&err, &ssErr, &vertexMapId](auto &inference, const std::string &side) {
 		auto stereoResult = inference.finalize(ssErr, [&vertexMapId, &side](Vertex v) {
 			auto iter = vertexMapId.find(v);
 			assert(iter != vertexMapId.end());
 			return std::to_string(iter->second) + " in " + side;
 		});
 		switch(stereoResult) {
-		case lib::Stereo::DeductionResult::Success: return true;
+		case lib::Stereo::DeductionResult::Success:
+			return true;
 		case lib::Stereo::DeductionResult::Warning:
-			IO::log() << ssErr.str();
+			std::cout << ssErr.str();
 			return true;
 		case lib::Stereo::DeductionResult::Error:
 			err << ssErr.str();
@@ -564,18 +574,10 @@ Data parseGML(std::istream &s, std::ostream &err) {
 		else // otherwise, default to be in context
 			return true;
 	};
-	dpoResult.pStereo = std::make_unique<lib::Rules::PropStereoCore>(g, std::move(leftInference), std::move(rightInference), vertexInContext, edgeInContext);
+	dpoResult.pStereo = std::make_unique<lib::Rules::PropStereoCore>(g, std::move(leftInference),
+	                                                                 std::move(rightInference), vertexInContext,
+	                                                                 edgeInContext);
 	return data;
 }
 
-} // namespace
-
-Data gml(std::istream &s, std::ostream &err) {
-	return parseGML(s, err);
-}
-
-} // namespace Read
-} // namespace Rules
-} // namespace IO
-} // namespace lib
-} // namespace mod
+} // namespace mod::lib::IO::Rules::Read

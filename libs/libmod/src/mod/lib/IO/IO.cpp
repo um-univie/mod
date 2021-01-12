@@ -1,22 +1,17 @@
 #include "IO.hpp"
 
-#include <mod/Error.hpp>
-
 #include <boost/lexical_cast.hpp>
 
 #include <cmath>
 #include <fstream>
 #include <iostream>
 
-namespace mod {
-namespace lib {
-namespace IO {
+namespace mod::lib::IO {
 namespace {
 
 const std::string prefix = "out/";
 
 struct PostStream {
-
 	PostStream() {
 		std::string postFile = prefix + "post.sh";
 		s.open(postFile.c_str());
@@ -25,16 +20,24 @@ struct PostStream {
 
 	~PostStream() {}
 
+	void resetStream() {
+		std::string postFile = prefix + "post.sh";
+		s.close();
+		s.open(postFile.c_str());
+		enabled = s.is_open();
+	}
+
 	std::ofstream &getStream() {
 		if(enabled) return s;
 		std::cerr << "ERROR: can not write to '" << prefix + "post.sh'" << std::endl;
 		std::cerr << "Does '" << prefix << "' exist?" << std::endl;
 		std::exit(1);
 	}
-
 private:
 	bool enabled;
 	std::ofstream s;
+public:
+	bool dynamicallyEnabled = true;
 };
 
 PostStream postStream;
@@ -94,18 +97,30 @@ std::string asLatexMath(const std::string &str) {
 }
 
 std::ostream &nullStream() {
-	static std::ofstream s("/dev/null");
+	// https://stackoverflow.com/questions/11826554/standard-no-op-output-stream/11826787
+	struct NullBuffer : public std::streambuf {
+		int overflow(int c) { return c; }
+	};
+	struct NullStream : public std::ostream {
+		NullStream() : std::ostream(&buffer) {}
+	private:
+		NullBuffer buffer;
+	};
+	static NullStream s;
 	return s;
 }
 
 std::ostream &post() {
+	if(!postStream.dynamicallyEnabled) return nullStream();
 	return postStream.getStream();
 }
 
-std::ostream &log() {
-	std::cout.flush();
-	bool log = true;
-	return log ? std::cout : nullStream();
+void postReset() {
+	postStream.resetStream();
+}
+
+void postDisable() {
+	postStream.dynamicallyEnabled = false;
 }
 
 std::ostream &Logger::indent() const {
@@ -118,6 +133,4 @@ std::ostream &Logger::sep(char c) const {
 	return s << std::string(std::max(10, 80 - indentLevel * 2), c) << '\n';
 }
 
-} // namespace IO
-} // namespace lib
-} // namespace mod
+} // namespace mod::lib::IO

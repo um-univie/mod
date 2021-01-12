@@ -1,16 +1,13 @@
-#ifndef MOD_LIB_GRAPH_PROP_LABEL_H
-#define MOD_LIB_GRAPH_PROP_LABEL_H
+#ifndef MOD_LIB_GRAPH_PROP_LABEL_HPP
+#define MOD_LIB_GRAPH_PROP_LABEL_HPP
 
 #include <mod/lib/Graph/Properties/Property.hpp>
 
-namespace mod {
-namespace lib {
-namespace Graph {
+namespace mod::lib::Graph {
 
 struct PropString : Prop<PropString, std::string, std::string> {
 	using Base = Prop<PropString, std::string, std::string>;
 public:
-
 	explicit PropString(const GraphType &g) : Base(g) {
 		Base::verify(&g);
 	}
@@ -20,8 +17,6 @@ public:
 	}
 };
 
-} // namespace Graph
-} // namespace lib
-} // namespace mod
+} // namespace mod::lib::Graph
 
-#endif /* MOD_LIB_GRAPH_PROP_LABEL_H */
+#endif // MOD_LIB_GRAPH_PROP_LABEL_HPP

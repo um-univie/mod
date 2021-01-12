@@ -9,8 +9,7 @@
 #include <memory>
 #include <unordered_set>
 
-namespace mod {
-namespace rule {
+namespace mod::rule {
 
 // rst-class: rule::Composer
 // rst:
@@ -25,7 +24,6 @@ namespace rule {
 // rst:		hyperedge vertices are labelled with 1 and 2.
 // rst:
 // rst-class-start:
-
 class MOD_DECL Composer {
 	Composer(const std::unordered_set<std::shared_ptr<Rule> > &database, LabelSettings labelSettings);
 	Composer(Composer &&) = delete;
@@ -40,9 +38,12 @@ public:
 	// rst:
 	// rst:		:returns: the set of unique rules this evaluator has constructed.
 	const std::unordered_set<std::shared_ptr<Rule>> &getProducts() const;
-	// rst: .. function:: std::unordered_set<std::shared_ptr<Rule> > eval(const RCExp::Expression &exp, int verbosity)
+	// rst: .. function:: std::vector<std::shared_ptr<Rule>> eval(const RCExp::Expression &exp, int verbosity)
 	// rst:
-	// rst:		Evaluates a rule composition expression. Any created rule is replaced by a rule in the database if they are isomorphic.
+	// rst:		Evaluates a rule composition expression.
+	// rst:		Any created rule is replaced by a rule in the database if they are isomorphic.
+	// rst:
+	// rst:		A rule may appear multiple times in the result if multiple overlaps resulted in the same composed rule.
 	// rst:
 	// rst:		The :var:`verbosity` has the following meaning:
 	// rst:
@@ -51,7 +52,7 @@ public:
 	// rst:		- 20: Print rule composition information.
 	// rst:
 	// rst:		:returns: the result of the expression.
-	std::unordered_set<std::shared_ptr<Rule>> eval(const RCExp::Expression &exp, int verbosity);
+	std::vector<std::shared_ptr<Rule>> eval(const RCExp::Expression &exp, int verbosity);
 	// rst: .. function:: void print() const
 	// rst:
 	// rst:		Print the graph representing all expressions evaluated so far.
@@ -70,7 +71,6 @@ public:
 };
 // rst-class-end:
 
-} // namespace rule
-} // namespace mod
+} // namespace mod::rule
 
 #endif /* MOD_RULE_COMPOSITION_H */

@@ -23,14 +23,7 @@ BEGIN {
 	lastNested = ""
 }
 {
-	if($0 ~ /^[\t]*\/\/ rst: .. py:class::/) {
-		sub(/^[\t]*\/\/ rst: .. py:class:: /, "")
-		print ""
-		print "Class ``" $0 "``"
-		print "--------------------------------------------------------------------------------------------------------------------------------"
-		print ""
-		print ".. py:class:: " $0
-	} else if($0 ~ /^[\t]*\/\/ rst:/) {
+	if($0 ~ /^[\t]*\/\/ rst:/) {
 		sub(/^[\t]*\/\/ rst:[ 	]?/, "")
 		if(inClass)
 			if(inNested)
@@ -119,7 +112,7 @@ BEGIN {
 }
 
 function getModHeaders {
-	find $topSrcDir/libs/libmod/src/mod/ -iname "*.hpp" \
+	find $topSrcDir/libs/libmod/src/mod -iname "*.hpp" \
 		| grep -v -e "/lib/"  \
 		| grep -v -e "/internal/"  \
 		| sed -e "s/.*\/src\/mod\///" -e "s/\.hpp$//" \
@@ -127,16 +120,27 @@ function getModHeaders {
 }
 
 function getPyModCPPs {
-	find $topSrcDir/libs/pymod/src/mod/py -iname "*.cpp" \
-		| sed -e "s!.*/libs/pymod/src/mod/py/!!" -e "s/\.cpp$//" \
-		| sort \
-		| grep -v Module | grep -v Collections | grep -v Function
+	function raw {
+		find $topSrcDir/libs/pymod/src/mod/py -iname "*.cpp" \
+			| sed -e "s!.*/libs/pymod/src/mod/py/!!" -e "s/\.cpp$//" \
+			| sort \
+			| grep -v Module | grep -v Collections | grep -v Function
+	}
+	raw | while read f; do
+		fFull=$topSrcDir/libs/pymod/src/mod/py/$f.cpp
+		grep "rst:" $fFull &> /dev/null
+		if [ $? -ne 0 ]; then
+			continue
+		fi
+		echo $f
+	done;
 }
 
 function makeIndex {
 	function indexFiles {
 		cat << "EOF"
 	installation
+	compiling
 	libmod/libmod
 	pymod/pymod
 	postmod/postmod
@@ -321,6 +325,7 @@ EOF
 		echo ".. toctree::"
 		echo "   :maxdepth: 1"
 		echo ""
+		echo "   protocols"
 		getPyModCPPs | grep -v "/" | sed 's/^/   /'
 		echo ""
 		echo ".. toctree::"

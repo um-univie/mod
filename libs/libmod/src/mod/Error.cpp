@@ -7,7 +7,7 @@
 
 #include <cassert>
 #include <cstdlib>
-#include <iostream>
+#include <ostream>
 #include <vector>
 
 namespace mod {

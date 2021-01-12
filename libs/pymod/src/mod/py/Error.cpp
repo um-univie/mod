@@ -2,14 +2,13 @@
 
 #include <mod/Error.hpp>
 
-#include <iostream>
+#include <ostream>
 
 // see http://stackoverflow.com/questions/2261858/boostpython-export-custom-exception
 // and http://stackoverflow.com/questions/9620268/boost-python-custom-exception-class
 // and http://stackoverflow.com/questions/11448735/boostpython-export-custom-exception-and-inherit-from-pythons-exception
 
-namespace mod {
-namespace Py {
+namespace mod::Py {
 namespace {
 
 PyObject *exportException(const std::string &name) {
@@ -37,27 +36,26 @@ PyObject *exportException(const std::string &name) {
 } // namespace
 
 void Error_doExport() {
-	// rst: .. py:exception:: FatalError
+	// rst: .. exception:: FatalError
 	// rst:
 	// rst:		See :cpp:class:`FatalError`.
 	MOD_PY_ExportException(FatalError);
-	// rst: .. py:exception:: InputError
+	// rst: .. exception:: InputError
 	// rst:
 	// rst:		See :cpp:class:`InputError`.
 	MOD_PY_ExportException(InputError);
-	// rst: .. py:exception:: LogicError
+	// rst: .. exception:: LogicError
 	// rst:
 	// rst:		See :cpp:class:`LogicError`.
 	MOD_PY_ExportException(LogicError);
-	// rst: .. py:exception:: TermParsingError
+	// rst: .. exception:: TermParsingError
 	// rst:
 	// rst:		See :cpp:class:`TermParsingError`.
 	MOD_PY_ExportException(TermParsingError);
-	// rst: .. py:exception:: StereoDeductionError
+	// rst: .. exception:: StereoDeductionError
 	// rst:
 	// rst:		See :cpp:class:`StereoDeductionError`.
 	MOD_PY_ExportException(StereoDeductionError);
 }
 
-} // namespace Py
-} // namespace mod
+} // namespace mod::Py

@@ -2,6 +2,7 @@
 
 #include <mod/Config.hpp>
 #include <mod/Function.hpp>
+#include <mod/Post.hpp>
 #include <mod/graph/Graph.hpp>
 #include <mod/rule/Rule.hpp>
 #include <mod/lib/Algorithm.hpp>
@@ -117,7 +118,8 @@ std::string dumpToFile(const lib::DG::NonHyper &dg) {
 }
 
 std::string dotNonHyper(const lib::DG::NonHyper &nonHyper) {
-	FileHandle s(getUniqueFilePrefix() + "dgNonHyper_" + boost::lexical_cast<std::string>(nonHyper.getId()) + ".dot");
+	post::FileHandle s(
+			getUniqueFilePrefix() + "dgNonHyper_" + boost::lexical_cast<std::string>(nonHyper.getId()) + ".dot");
 	{ // printing
 		using Vertex = lib::DG::NonHyperVertex;
 		using Edge = lib::DG::NonHyperEdge;
@@ -680,8 +682,7 @@ Options Printer::prePrint(const Data &data) {
 	}
 	if(withRuleId) { // we want the rule id before its name
 		pushEdgeLabel([this](Vertex v, const lib::DG::Hyper &dg) -> std::string {
-			const auto &g = dg.getGraph();
-			assert(g[v].kind == lib::DG::HyperVertexKind::Edge);
+			assert(dg.getGraph()[v].kind == lib::DG::HyperVertexKind::Edge);
 			std::string res;
 			bool first = true;
 			for(auto *r : dg.getRulesFromEdge(v)) {
@@ -696,8 +697,7 @@ Options Printer::prePrint(const Data &data) {
 	}
 	if(withRuleName) {
 		pushEdgeLabel([this](Vertex v, const lib::DG::Hyper &dg) -> std::string {
-			const auto &g = dg.getGraph();
-			assert(g[v].kind == lib::DG::HyperVertexKind::Edge);
+			assert(dg.getGraph()[v].kind == lib::DG::HyperVertexKind::Edge);
 			std::string res;
 			bool first = true;
 			for(auto *r : dg.getRulesFromEdge(v)) {

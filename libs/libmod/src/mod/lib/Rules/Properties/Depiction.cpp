@@ -11,18 +11,17 @@
 
 #include <jla_boost/graph/PairToRangeAdaptor.hpp>
 
+#include <iostream>
 #include <map>
 
-namespace mod {
-namespace lib {
-namespace Rules {
+namespace mod::lib::Rules {
 
 //------------------------------------------------------------------------------
 // template<Membership> DepictionData
 //------------------------------------------------------------------------------
 
 template<Membership membership>
-DepictionDataCore::DepictionData<membership>::DepictionData(const DepictionDataCore &depict) : depict(depict) { }
+DepictionDataCore::DepictionData<membership>::DepictionData(const DepictionDataCore &depict) : depict(depict) {}
 
 template<Membership membership>
 AtomId DepictionDataCore::DepictionData<membership>::getAtomId(Vertex v) const {
@@ -111,17 +110,16 @@ std::string DepictionDataCore::DepictionData<membership>::getVertexLabelNoIsotop
 		return Chem::symbolFromAtomId(atomId);
 	switch(membership) {
 	case Membership::Left:
-	case Membership::Right:
-	{
-		const auto &nonAtomToPhonyAtom = membership == Membership::Left ? depict.nonAtomToPhonyAtomLeft : depict.nonAtomToPhonyAtomRight;
+	case Membership::Right: {
+		const auto &nonAtomToPhonyAtom =
+				membership == Membership::Left ? depict.nonAtomToPhonyAtomLeft : depict.nonAtomToPhonyAtomRight;
 		auto nonAtomIter = nonAtomToPhonyAtom.find(v);
 		assert(nonAtomIter != end(nonAtomToPhonyAtom));
 		auto labelIter = depict.phonyAtomToString.find(nonAtomIter->second.getAtomId());
 		assert(labelIter != end(depict.phonyAtomToString));
 		return labelIter->second;
 	}
-	case Membership::Context:
-	{
+	case Membership::Context: {
 		const auto &pMol = get_molecule(depict.lr);
 		auto nonAtomIterLeft = depict.nonAtomToPhonyAtomLeft.find(v);
 		auto nonAtomIterRight = depict.nonAtomToPhonyAtomRight.find(v);
@@ -155,16 +153,14 @@ std::string DepictionDataCore::DepictionData<membership>::getEdgeLabel(Edge e) c
 		return std::string(1, Chem::bondToChar(bt));
 	switch(membership) {
 	case Membership::Left:
-	case Membership::Right:
-	{
+	case Membership::Right: {
 		const auto &nonBondEdges = membership == Membership::Left ? depict.nonBondEdgesLeft : depict.nonBondEdgesRight;
 		auto iter = nonBondEdges.find(e);
-		if(iter == end(nonBondEdges)) IO::log() << "WTF: " << e << std::endl;
+		if(iter == end(nonBondEdges)) std::cout << "WTF: " << e << std::endl;
 		assert(iter != end(nonBondEdges));
 		return iter->second;
 	}
-	case Membership::Context:
-	{
+	case Membership::Context: {
 		std::string left, right;
 		auto iterLeft = depict.nonBondEdgesLeft.find(e);
 		auto iterRight = depict.nonBondEdgesRight.find(e);
@@ -212,14 +208,12 @@ template<Membership membership>
 bool DepictionDataCore::DepictionData<membership>::hasImportantStereo(Vertex v) const {
 	const auto &lr = depict.lr;
 	switch(membership) {
-	case Membership::Left:
-	{
+	case Membership::Left: {
 		const auto &lg = get_labelled_left(lr);
 		if(!has_stereo(lg)) return false;
 		return !get_stereo(lg)[v]->morphismDynamicOk();
 	}
-	case Membership::Right:
-	{
+	case Membership::Right: {
 		const auto &lg = get_labelled_right(lr);
 		if(!has_stereo(lg)) return false;
 		return !get_stereo(lg)[v]->morphismDynamicOk();
@@ -246,7 +240,8 @@ double DepictionDataCore::DepictionData<membership>::getY(Vertex v, bool withHyd
 }
 
 template<Membership membership>
-lib::IO::Graph::Write::EdgeFake3DType DepictionDataCore::DepictionData<membership>::getEdgeFake3DType(Edge e, bool withHydrogen) const {
+lib::IO::Graph::Write::EdgeFake3DType
+DepictionDataCore::DepictionData<membership>::getEdgeFake3DType(Edge e, bool withHydrogen) const {
 #ifndef MOD_HAVE_OPENBABEL
 	MOD_NO_OPENBABEL_ERROR
 #else
@@ -296,14 +291,15 @@ lib::IO::Graph::Write::EdgeFake3DType DepictionDataCore::DepictionData<membershi
 // DepictionDataCore
 //------------------------------------------------------------------------------
 
-DepictionDataCore::DepictionDataCore(const LabelledRule &lr) : lr(lr), hasMoleculeEncoding(true), hasCoordinates(false) {
+DepictionDataCore::DepictionDataCore(const LabelledRule &lr)
+		: lr(lr), hasMoleculeEncoding(true), hasCoordinates(false) {
 	const auto &g = get_graph(lr);
 	const auto &pString = get_string(lr);
 	const auto &pMol = get_molecule(lr);
 	{ // vertexData
 		std::vector<bool> atomUsed(AtomIds::Max + 1, false);
 		Chem::markSpecialAtomsUsed(atomUsed);
-		std::vector < std::pair<Vertex, Membership> > verticesToProcess; // vertex x {Left, Right}
+		std::vector<std::pair<Vertex, Membership>> verticesToProcess; // vertex x {Left, Right}
 		for(Vertex v : asRange(vertices(g))) {
 			auto m = g[v].membership;
 			if(m != Membership::Right) {
@@ -325,7 +321,7 @@ DepictionDataCore::DepictionDataCore(const LabelledRule &lr) : lr(lr), hasMolecu
 			assert(m != Membership::Context);
 			std::string label = std::get<0>(Chem::extractIsotopeChargeRadical(
 					m == Membership::Left ? pString.getLeft()[v] : pString.getRight()[v]
-					));
+			));
 			auto iter = labelToAtomId.find(label);
 			if(iter == end(labelToAtomId)) {
 				unsigned char atomId = 1;
@@ -369,9 +365,12 @@ DepictionDataCore::DepictionDataCore(const LabelledRule &lr) : lr(lr), hasMolecu
 
 	if(hasMoleculeEncoding) {
 #ifdef MOD_HAVE_OPENBABEL
-		const auto doIt = [&](CoordData & cData, const bool withHydrogen) {
+		const auto doIt = [&](CoordData &cData, const bool withHydrogen) {
 			std::tie(cData.obMol, cData.obMolLeft, cData.obMolRight)
-					= Chem::makeOBMol(lr, std::cref(*this), std::cref(*this), getLeft(), getLeft(), getRight(), getRight(), withHydrogen);
+					= Chem::makeOBMol(lr, std::cref(*this), std::cref(*this),
+					                  getLeft(), getLeft(),
+					                  getRight(), getRight(),
+					                  withHydrogen);
 			cData.x.resize(num_vertices(g));
 			cData.y.resize(num_vertices(g));
 			for(const auto v : asRange(vertices(g))) {
@@ -420,19 +419,16 @@ const AtomData &DepictionDataCore::operator()(Vertex v) const {
 BondType DepictionDataCore::operator()(Edge e) const {
 	const auto &g = get_graph(lr);
 	const auto &pMol = get_molecule(lr);
-	// if there is agreement, return that, otherwise prefer single bonds
+	// if there is agreement, return that, otherwise prefer invalid bonds
 	// this should give a bit more freedom in bond angles
 	const auto m = g[e].membership;
 	BondType l = BondType::Single, r = BondType::Single;
-	if(m != Membership::Right) {
-		const auto bt = pMol.getLeft()[e];
-		l = bt == BondType::Invalid ? BondType::Single : bt;
-	} else {
-		const auto bt = pMol.getRight()[e];
-		r = bt == BondType::Invalid ? BondType::Single : bt;
-	}
+	if(m != Membership::Right)
+		l = pMol.getLeft()[e];
+	if(m != Membership::Left)
+		r = pMol.getRight()[e];
 	if(l == r) return l;
-	else return BondType::Single;
+	else return BondType::Invalid;
 }
 
 bool DepictionDataCore::hasImportantStereo(Vertex v) const {
@@ -451,7 +447,7 @@ bool DepictionDataCore::getHasCoordinates() const {
 	else return false;
 #else
 	return false;
-#endif 
+#endif
 }
 
 double DepictionDataCore::getX(Vertex v, bool withHydrogen) const {
@@ -474,7 +470,7 @@ double DepictionDataCore::getY(Vertex v, bool withHydrogen) const {
 
 void DepictionDataCore::copyCoords(const DepictionDataCore &other, const std::map<Vertex, Vertex> &vMap) {
 	if(!other.getHasCoordinates()) {
-		IO::log() << "Can not copy coordinates from depiction without coordinates." << std::endl;
+		std::cout << "Can not copy coordinates from depiction without coordinates." << std::endl;
 		MOD_ABORT;
 	}
 	const auto &g = get_graph(lr);
@@ -484,11 +480,12 @@ void DepictionDataCore::copyCoords(const DepictionDataCore &other, const std::ma
 		for(const Vertex v : asRange(vertices(g))) {
 			const auto iter = vMap.find(v);
 			if(iter == end(vMap)) {
-				IO::log() << "Vertex " << v << " (id=" << get(boost::vertex_index_t(), g, v) << ") not mapped." << std::endl;
-				IO::log() << "Map:" << std::endl;
-				for(auto p : vMap) IO::log() << "\t" << p.first << " => " << p.second << std::endl;
-				IO::log() << "num_vertices: " << num_vertices(g) << std::endl;
-				IO::log() << "other.num_vertices: " << num_vertices(get_graph(other.lr)) << std::endl;
+				std::cout << "Vertex " << v << " (id=" << get(boost::vertex_index_t(), g, v) << ") not mapped."
+				          << std::endl;
+				std::cout << "Map:" << std::endl;
+				for(auto p : vMap) std::cout << "\t" << p.first << " => " << p.second << std::endl;
+				std::cout << "num_vertices: " << num_vertices(g) << std::endl;
+				std::cout << "other.num_vertices: " << num_vertices(get_graph(other.lr)) << std::endl;
 				MOD_ABORT;
 			}
 			const Vertex vOther = iter->second;
@@ -524,10 +521,11 @@ DepictionDataCore::DepictionData<Membership::Right> DepictionDataCore::getRight(
 	return DepictionData<Membership::Right>(*this);
 }
 
-template struct DepictionDataCore::DepictionData<Membership::Left>;
-template struct DepictionDataCore::DepictionData<Membership::Context>;
-template struct DepictionDataCore::DepictionData<Membership::Right>;
+template
+struct DepictionDataCore::DepictionData<Membership::Left>;
+template
+struct DepictionDataCore::DepictionData<Membership::Context>;
+template
+struct DepictionDataCore::DepictionData<Membership::Right>;
 
-} // namespace Rules
-} // namespace lib
-} // namespace mod
+} // namespace mod::lib::Rules

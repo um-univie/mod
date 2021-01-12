@@ -10,8 +10,7 @@
 
 #include <boost/lexical_cast.hpp>
 
-namespace mod {
-namespace dg {
+namespace mod::dg {
 
 //------------------------------------------------------------------------------
 // PrintData
@@ -307,5 +306,4 @@ const std::string &Printer::getGraphvizPrefix() const {
 	return printer->getGraphvizPrefix();
 }
 
-} // namespace dg
-} // namespace mod
+} // namespace mod::dg

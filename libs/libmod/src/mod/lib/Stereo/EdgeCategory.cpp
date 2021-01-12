@@ -2,11 +2,9 @@
 
 #include <mod/Error.hpp>
 
-#include <iostream>
+#include <ostream>
 
-namespace mod {
-namespace lib {
-namespace Stereo {
+namespace mod::lib::Stereo {
 
 bool carriesPlane(EdgeCategory cat) {
 	switch(cat) {
@@ -156,6 +154,4 @@ bool componentWiseLEQ(const EdgeCategoryCount &lhs, const EdgeCategoryCount &rhs
 	return true;
 }
 
-} // namespace Stereo
-} // namespace lib
-} // namespace mod
+} // namespace mod::lib::Stereo

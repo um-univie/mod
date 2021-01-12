@@ -18,11 +18,9 @@
 
 #include <boost/graph/copy.hpp>
 
-namespace mod {
-namespace lib {
-namespace IO {
-namespace Graph {
-namespace Read {
+#include <iostream>
+
+namespace mod::lib::IO::Graph::Read {
 
 Data::Data() {}
 
@@ -30,19 +28,17 @@ Data::Data(Data &&other) : g(std::move(other.g)), pString(std::move(other.pStrin
                            externalToInternalIds(std::move(other.externalToInternalIds)) {}
 
 Data::~Data() {
-	if(std::uncaught_exception()) return; // TODO: update to the plural version when C++17 is required
+	if(std::uncaught_exceptions() != 0) return;
 	if(g) MOD_ABORT;
 	if(pString) MOD_ABORT;
 	if(pStereo) MOD_ABORT;
 }
 
-namespace {
-
-Data parseGML(std::istream &s, std::ostream &err) {
+Data gml(std::string_view src, std::ostream &err) {
 	GML::Graph gGML;
 	{
 		gml::ast::KeyValue ast;
-		bool res = gml::parser::parse(s, ast, err);
+		bool res = gml::parser::parse(src, ast, err);
 		if(!res) return Data();
 		using namespace gml::converter::edsl;
 		auto cVertex = GML::makeVertexConverter(1);
@@ -244,7 +240,7 @@ Data parseGML(std::istream &s, std::ostream &err) {
 		break;
 	case lib::Stereo::DeductionResult::Warning:
 		if(!getConfig().stereo.silenceDeductionWarnings.get())
-			IO::log() << ssErr.str();
+			std::cout << ssErr.str();
 		break;
 	case lib::Stereo::DeductionResult::Error:
 		err << ssErr.str();
@@ -255,12 +251,6 @@ Data parseGML(std::istream &s, std::ostream &err) {
 	return data;
 }
 
-} // namespace
-
-Data gml(std::istream &s, std::ostream &err) {
-	return parseGML(s, err);
-}
-
 Data dfs(const std::string &dfs, std::ostream &err) {
 	return lib::Graph::DFSEncoding::parse(dfs, err);
 }
@@ -269,8 +259,4 @@ Data smiles(const std::string &smiles, std::ostream &err, const bool allowAbstra
 	return lib::Chem::readSmiles(smiles, err, allowAbstract, classPolicy);
 }
 
-} // namespace Read
-} // namespace Graph
-} // namespace IO
-} // namespace lib
-} // namespace mod
+} // namespace mod::lib::IO::Graph::Read

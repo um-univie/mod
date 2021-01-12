@@ -4,8 +4,8 @@
 #include <gml/attr_handler.hpp>
 #include <gml/converter_expressions.hpp>
 
-namespace gml {
-namespace converter {
+namespace gml::converter {
+// TODO: C++20, merge the two namespace decls
 inline namespace edsl {
 // such that 'using namespace gml::converter::edsl;' gives Parent as well
 using gml::converter::Parent;
@@ -75,7 +75,6 @@ list(const std::string &key, AttrHandlerData attrHandlerData = Unused()) {
 }
 
 } // inline namespace edsl
-} // namespace converter
-} // namespace gml
+} // namespace gml::converter
 
 #endif /* GML_CONVERTER_EDSL_HPP */

@@ -3,9 +3,7 @@
 #include <mod/lib/Rules/LabelledRule.hpp>
 #include <mod/lib/Rules/Real.hpp>
 
-namespace mod {
-namespace rule {
-namespace internal {
+namespace mod::rule::internal {
 
 lib::Rules::LabelledRule makeLabelledRule() {
 	return lib::Rules::LabelledRule();
@@ -44,6 +42,4 @@ std::shared_ptr<Rule> makeRule(lib::Rules::LabelledRule &&r) {
 	return mod::rule::Rule::makeRule(std::move(rLib));
 }
 
-} // namespace internal
-} // namespace rule
-} // namespace mod
+} // namespace mod::rule::internal

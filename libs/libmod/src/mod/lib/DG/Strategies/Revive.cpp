@@ -4,12 +4,9 @@
 #include <mod/lib/DG/Strategies/GraphState.hpp>
 #include <mod/lib/Graph/Single.hpp>
 
-#include <iostream>
+#include <ostream>
 
-namespace mod {
-namespace lib {
-namespace DG {
-namespace Strategies {
+namespace mod::lib::DG::Strategies {
 
 Revive::Revive(Strategy *strat) : Strategy(strat->getMaxComponents()), strat(strat) {}
 
@@ -56,15 +53,12 @@ void Revive::executeImpl(PrintSettings settings, const GraphState &input) {
 	strat->execute(settings, input);
 	output = new GraphState(strat->getOutput());
 
-	for(const auto *g : input.getSubset(0)) {
+	for(const auto *g : input.getSubset()) {
 		if(!strat->isConsumed(g) && output->isInUniverse(g)) {
-			output->addToSubset(0, g);
+			output->addToSubset(g);
 			revivedGraphs.push_back(g);
 		}
 	}
 }
 
-} // namespace Strategies
-} // namespace DG
-} // namespace lib
-} // namespace mod
+} // namespace mod::lib::DG::Strategies

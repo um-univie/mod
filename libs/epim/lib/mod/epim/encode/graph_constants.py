@@ -1,5 +1,5 @@
-from .graph_interface import GraphInterface
-from . import graph_terms as term
+from mod.epim.encode import graph_terms as term
+from mod.epim.encode.graph_interface import GraphInterface
 
 def ccall(name, args):
     g = GraphInterface()

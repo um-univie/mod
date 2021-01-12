@@ -6,11 +6,6 @@
 #include <boost/graph/random.hpp>
 #include <boost/lexical_cast.hpp>
 #include <boost/property_map/property_map.hpp>
-#include <boost/random.hpp>
-#include <boost/random/mersenne_twister.hpp>
-#include <boost/random/uniform_real.hpp>
-#include <boost/random/uniform_int.hpp>
-#include <boost/random/variate_generator.hpp>
 
 #include <boost/graph/mcgregor_common_subgraphs.hpp>
 
@@ -22,6 +17,7 @@
 #include <fstream>
 #include <iostream>
 #include <map>
+#include <random>
 
 namespace jla_boost {
 namespace test {
@@ -30,21 +26,6 @@ namespace GM = jla_boost::GraphMorphism;
 using namespace GM;
 
 namespace {
-
-template<typename Generator>
-struct random_functor {
-
-	random_functor(Generator &g) : g(g) {}
-
-	std::size_t operator()(std::size_t n) {
-		boost::uniform_int<std::size_t> distrib(0, n - 1);
-		boost::variate_generator<Generator &, boost::uniform_int<std::size_t> >
-				x(g, distrib);
-		return x();
-	}
-
-	Generator &g;
-};
 
 template<typename Graph1, typename Graph2>
 void randomly_permute_graph(Graph1 &g1, const Graph2 &g2) {
@@ -56,13 +37,12 @@ void randomly_permute_graph(Graph1 &g1, const Graph2 &g2) {
 	typedef typename graph_traits<Graph1>::vertex_iterator vertex_iterator;
 	typedef typename graph_traits<Graph2>::edge_iterator edge_iterator;
 
-	boost::mt19937 gen;
-	random_functor<boost::mt19937> rand_fun(gen);
+	std::mt19937 gen;
 
 	// Decide new order
 	std::vector<vertex2> orig_vertices;
 	std::copy(vertices(g2).first, vertices(g2).second, std::back_inserter(orig_vertices));
-	std::random_shuffle(orig_vertices.begin(), orig_vertices.end(), rand_fun);
+	std::shuffle(orig_vertices.begin(), orig_vertices.end(), gen);
 	std::map<vertex2, vertex1> vertex_map;
 
 	std::size_t i = 0;
@@ -92,17 +72,15 @@ void generate_random_digraph(Graph &g, double edge_probability,
 	BOOST_REQUIRE(0 <= max_vertex_name);
 
 	typedef typename graph_traits<Graph>::vertex_iterator vertex_iterator;
-	boost::mt19937 random_gen;
-	boost::uniform_real<double> dist_real(0.0, 1.0);
-	boost::variate_generator<boost::mt19937 &, boost::uniform_real<double> >
-			random_real_dist(random_gen, dist_real);
+	std::mt19937 gen;
+	std::uniform_real_distribution<double> dist_real(0.0, 1.0);
 
 	for(vertex_iterator u = vertices(g).first; u != vertices(g).second; ++u) {
 		for(vertex_iterator v = vertices(g).first; v != vertices(g).second; ++v) {
-			if(random_real_dist() <= edge_probability) {
+			if(dist_real(gen) <= edge_probability) {
 				add_edge(*u, *v, g);
 				for(int i = 0; i < max_parallel_edges; ++i) {
-					if(random_real_dist() <= parallel_edge_probability)
+					if(dist_real(gen) <= parallel_edge_probability)
 						add_edge(*u, *v, g);
 				}
 			}
@@ -110,17 +88,18 @@ void generate_random_digraph(Graph &g, double edge_probability,
 	}
 
 	{
-		boost::uniform_int<int> dist_int(0, max_edge_name);
-		boost::variate_generator<boost::mt19937 &, boost::uniform_int<int> >
-				random_int_dist(random_gen, dist_int);
+		std::uniform_int_distribution<int> dist_int(0, max_edge_name);
+		const auto random_int_dist = [&dist_int, &gen]() {
+			return dist_int(gen);
+		};
 		randomize_property<vertex_name_t>(g, random_int_dist);
 	}
 
 	{
-		boost::uniform_int<int> dist_int(0, max_vertex_name);
-		boost::variate_generator<boost::mt19937 &, boost::uniform_int<int> >
-				random_int_dist(random_gen, dist_int);
-
+		std::uniform_int_distribution<int> dist_int(0, max_vertex_name);
+		const auto random_int_dist = [&dist_int, &gen]() {
+			return dist_int(gen);
+		};
 		randomize_property<edge_name_t>(g, random_int_dist);
 	}
 

@@ -15,26 +15,16 @@
 #
 # See Misc/README.valgrind for more information.
 
-# these first ones have been manually added and may not be correct
-{
-   # https://bugzilla.redhat.com/show_bug.cgi?id=1538073
-   # https://sourceware.org/bugzilla/show_bug.cgi?id=23711
-   <insert_a_suppression_name_here>
-   Memcheck:Cond
-   ...
-   fun:wcsrtombs
-}
-
-
-# end of manually added ones
-
-
-
 # all tool names: Addrcheck,Memcheck,cachegrind,helgrind,massif
 {
    ADDRESS_IN_RANGE/Invalid read of size 4
    Memcheck:Addr4
    fun:address_in_range
+}
+{
+   ADDRESS_IN_RANGE/Invalid read of size 4, unknown inlined, v3.8
+   Memcheck:Addr4
+   src:obmalloc.c:1401
 }
 
 {
@@ -48,11 +38,21 @@
    Memcheck:Value8
    fun:address_in_range
 }
+{
+   ADDRESS_IN_RANGE/Invalid read of size 8 (x86_64 aka amd64), unknown inlined, v3.8
+   Memcheck:Value8
+   src:obmalloc.c:1403
+}
 
 {
    ADDRESS_IN_RANGE/Conditional jump or move depends on uninitialised value
    Memcheck:Cond
    fun:address_in_range
+}
+{
+   ADDRESS_IN_RANGE/Conditional jump or move depends on uninitialised value, unknown inlined, v3.8
+   Memcheck:Cond
+   src:obmalloc.c:1403
 }
 
 #
@@ -97,9 +97,10 @@
 {
    Handle PyMalloc confusing valgrind (possibly leaked)
    Memcheck:Leak
-   fun:realloc
+   fun:malloc
+   ...
    fun:_PyObject_GC_Resize
-   fun:COMMENT_THIS_LINE_TO_DISABLE_LEAK_WARNING
+   #fun:COMMENT_THIS_LINE_TO_DISABLE_LEAK_WARNING
 }
 
 {
@@ -114,8 +115,9 @@
    Handle PyMalloc confusing valgrind (possibly leaked)
    Memcheck:Leak
    fun:malloc
+   ...
    fun:_PyObject_GC_NewVar
-   fun:COMMENT_THIS_LINE_TO_DISABLE_LEAK_WARNING
+   #fun:COMMENT_THIS_LINE_TO_DISABLE_LEAK_WARNING
 }
 
 #
@@ -276,6 +278,14 @@
    fun:write
    fun:gdbm_open
 
+}
+
+{
+   Uninitialised byte(s) false alarm, see bpo-35561
+   Memcheck:Param
+   epoll_ctl(event)
+   fun:epoll_ctl
+   fun:pyepoll_internal_ctl
 }
 
 {

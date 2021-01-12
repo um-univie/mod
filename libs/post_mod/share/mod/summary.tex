@@ -293,6 +293,43 @@
 	\end{figure}
 }
 
+
+
+% ruleLabel
+\newcommand\rcMatchArrow[1]{%
+	\begin{tikzpicture}[node distance=20pt, baseline={(A.center)}]
+		\node (A) {};
+		\node (B) [right=of A] {};
+		\draw[->, >=stealth] (A) to node[above] {#1} (B);
+	\end{tikzpicture}%
+}%
+% filePrefixFirst ruleIdFirst
+% mapping
+% filePrefixSecond ruleIdSecond
+% filePrefixNew ruleIdNew
+\newcommand\rcMatchFig[7]{%
+	\newpage%
+	\subsection{RC Match, $r_{#2} \bullet r_{#5} = r_{#7}$}
+	\input{\modInputPrefix/#1_L.tex}%
+	\rcMatchArrow{$r_{#2}$}%
+	\input{\modInputPrefix/#1_R.tex}%
+	\\
+	\mbox{}\hfill%
+	\input{\modInputPrefix/#4_L.tex}%
+	\begin{tikzpicture}[remember picture, overlay]
+	\foreach \s/\t in {#3}
+		\path[modRCMatchEdge] (v-\s) to[modRCMatchEdgeTo] (v-\t);
+	\end{tikzpicture}%
+	\rcMatchArrow{$r_{#5}$}%
+	\input{\modInputPrefix/#4_R.tex}%
+	\\
+	\input{\modInputPrefix/#6_L.tex}%
+	\rcMatchArrow{$r_{#7}$}%
+	\input{\modInputPrefix/#6_R.tex}%
+	\\
+}%
+
+
 \lstdefinelanguage{pseudo}{morekeywords={function,return,for,if,while,end,each,in,add,to,else,do,length}}
 \lstset{basicstyle=\small,tabsize=2,breaklines=true,numbers=left}
 %\lstinputlisting{fil}

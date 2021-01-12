@@ -85,7 +85,7 @@ public:
 			auto &data = vData[vResultId];
 			const auto &conf = *get_stereo(glSide)[vInput];
 			data.vGeometry = conf.getGeometryVertex();
-			if(Verbose) IO::log() << "\tGeometry: " << getGeoName(data.vGeometry) << "\n";
+			if(Verbose) std::cout << "\tGeometry: " << getGeoName(data.vGeometry) << "\n";
 			for(const auto &emb : conf) {
 				switch(emb.type) {
 				case lib::Stereo::EmbeddingEdge::Type::LonePair:
@@ -101,7 +101,7 @@ public:
 					const auto eInput = emb.getEdge(vInput, get_graph(glSide));
 					const auto vAdjInput = target(eInput, gInput);
 					if(Verbose) {
-						IO::log() << "\tmapping edge: ("
+						std::cout << "\tmapping edge: ("
 								<< get(boost::vertex_index_t(), gInput, vInput) << ", "
 								<< get(boost::vertex_index_t(), gInput, vAdjInput) << ")\n";
 					}
@@ -109,7 +109,7 @@ public:
 					if(safe) assert(vAdjResult != NullVertex(gResult));
 					else if(vAdjResult == NullVertex(gResult)) {
 						// the vertex is deleted, so let's skip it
-						if(Verbose) IO::log() << "\tdeleted\n";
+						if(Verbose) std::cout << "\tdeleted\n";
 						partial = true;
 						break; // the case statement
 					}
@@ -123,7 +123,7 @@ public:
 						return std::distance(oeResult.first, oeIter);
 					}();
 					if(Verbose) {
-						IO::log() << "\tto edge: ("
+						std::cout << "\tto edge: ("
 								<< get(boost::vertex_index_t(), gResult, vResult) << ", "
 								<< get(boost::vertex_index_t(), gResult, vAdjResult) << "), offset = "
 								<< eResultOffset << " (of " << out_degree(vResult, gResultSide) << ")\n";
@@ -139,10 +139,10 @@ public:
 			if(partial) { // let it remain free
 				MOD_ABORT; // TODO
 				assert(data.fix == lib::Stereo::Fixation::free());
-				if(Verbose) IO::log() << "\tfix: remain free (" << data.fix << ")\n";
+				if(Verbose) std::cout << "\tfix: remain free (" << data.fix << ")\n";
 			} else { // copy from conf
 				data.fix = conf.getFixation();
-				if(Verbose) IO::log() << "\tfix: copy (" << data.fix << ")\n";
+				if(Verbose) std::cout << "\tfix: copy (" << data.fix << ")\n";
 			}
 			return partial;
 		};
@@ -152,14 +152,14 @@ public:
 			const auto m = membership(result.rResult, vResult);
 			if(m != Membership::Right) {
 				// copy left
-				if(Verbose) IO::log() << "\tLeft:\n";
+				if(Verbose) std::cout << "\tLeft:\n";
 				const bool partial = copyAllFromSide(std::true_type(), get_labelled_left(rInput), vInput, gInput, mInputToResult, vResult, get_left(result.rResult), vDataLeft, eDataLeft);
 				(void) partial;
 				assert(!partial);
 			}
 			if(m != Membership::Left) {
 				// copy right
-				if(Verbose) IO::log() << "\tRight:\n";
+				if(Verbose) std::cout << "\tRight:\n";
 				const bool partial = copyAllFromSide(std::true_type(), get_labelled_right(rInput), vInput, gInput, mInputToResult, vResult, get_right(result.rResult), vDataRight, eDataRight);
                 (void) partial;
 				assert(!partial);
@@ -223,36 +223,36 @@ public:
 				const auto &confL1 = *get_stereo(get_labelled_left(rFirst))[vFirst];
 				const auto geoL1 = confL1.getGeometryVertex();
 				if(Verbose)
-					IO::log() << "\tHandling L\n"
+					std::cout << "\tHandling L\n"
 					<< "\t\tGeo L1: " << getGeoName(geoL1) << "\n"
 					<< "\t\tGeo R1: " << getGeoName(geoR1) << "\n"
 					<< "\t\tGeo L2: " << getGeoName(geoL2) << "\n";
 				if(firstInContext) {
-					if(Verbose) IO::log() << "\t\tFirst stereo in context\n";
+					if(Verbose) std::cout << "\t\tFirst stereo in context\n";
 					if(secondToFirstSubgraph) {
-						if(Verbose) IO::log() << "\t\tSecond-to-first subgraph: copy and map L1/R1 to L\n";
+						if(Verbose) std::cout << "\t\tSecond-to-first subgraph: copy and map L1/R1 to L\n";
 						const bool partial = copyAllFromSide(std::true_type(), get_labelled_left(rFirst), vFirst, gFirst, result.mFirstToResult, vResult, get_left(result.rResult), vDataLeft, eDataLeft);
 						(void) partial;
 						assert(!partial);
 					} else if(firstToSecondSubgraph) {
-						if(Verbose) IO::log() << "\t\tFirst-to-second subgraph: copy and map L2 to L\n";
+						if(Verbose) std::cout << "\t\tFirst-to-second subgraph: copy and map L2 to L\n";
 						MOD_ABORT;
 					} else {
-						if(Verbose) IO::log() << "\t\tNon-subgraph: do a merge\n";
+						if(Verbose) std::cout << "\t\tNon-subgraph: do a merge\n";
 						MOD_ABORT;
 					}
 				} else { // !firstInContext
-					if(Verbose) IO::log() << "\t\tFirst stereo changes\n";
+					if(Verbose) std::cout << "\t\tFirst stereo changes\n";
 					if(secondToFirstSubgraph) {
-						if(Verbose) IO::log() << "\t\tSecond-to-first subgraph: copy and map L1 to L\n";
+						if(Verbose) std::cout << "\t\tSecond-to-first subgraph: copy and map L1 to L\n";
 						const bool partial = copyAllFromSide(std::true_type(), get_labelled_left(rFirst), vFirst, gFirst, result.mFirstToResult, vResult, get_left(result.rResult), vDataLeft, eDataLeft);
 						(void) partial;
 						assert(!partial);
 					} else if(firstToSecondSubgraph) {
-						if(Verbose) IO::log() << "\t\tFirst-to-second subgraph: hmm\n";
+						if(Verbose) std::cout << "\t\tFirst-to-second subgraph: hmm\n";
 						MOD_ABORT;
 					} else {
-						if(Verbose) IO::log() << "\t\tNon-subgraph: do a merge\n";
+						if(Verbose) std::cout << "\t\tNon-subgraph: do a merge\n";
 						MOD_ABORT;
 					}
 				}
@@ -265,41 +265,41 @@ public:
 				const auto &confR2 = *get_stereo(get_labelled_right(rSecond))[vSecond];
 				const auto geoR2 = confR2.getGeometryVertex();
 				if(Verbose)
-					IO::log() << "\tHandling R\n"
+					std::cout << "\tHandling R\n"
 					<< "\t\tGeo R1: " << getGeoName(geoR1) << "\n"
 					<< "\t\tGeo L2: " << getGeoName(geoL2) << "\n"
 					<< "\t\tGeo R2: " << getGeoName(geoR2) << "\n";
 				if(secondInContext) {
-					if(Verbose) IO::log() << "\t\tSecond stereo in context\n";
+					if(Verbose) std::cout << "\t\tSecond stereo in context\n";
 					if(firstToSecondSubgraph) {
-						if(Verbose) IO::log() << "\t\tFirst-to-second subgraph: copy and map L2/R2 to R\n";
+						if(Verbose) std::cout << "\t\tFirst-to-second subgraph: copy and map L2/R2 to R\n";
 						const bool partial = copyAllFromSide(std::true_type(), get_labelled_right(rSecond), vSecond, gSecond, result.mSecondToResult, vResult, get_right(result.rResult), vDataRight, eDataRight);
 						(void) partial;
 						assert(!partial);
 					} else if(secondToFirstSubgraph) {
-						if(Verbose) IO::log() << "\t\tSecond-to-first subgraph: copy and map R1 to R\n";
+						if(Verbose) std::cout << "\t\tSecond-to-first subgraph: copy and map R1 to R\n";
 						const bool partial = copyAllFromSide(std::true_type(), get_labelled_right(rFirst), vFirst, gFirst, result.mFirstToResult, vResult, get_right(result.rResult), vDataRight, eDataRight);
                         (void) partial;
 						assert(!partial);
 					} else {
-						if(Verbose) IO::log() << "\t\tNon-subgraph: do a merge\n";
+						if(Verbose) std::cout << "\t\tNon-subgraph: do a merge\n";
 						MOD_ABORT;
 					}
 				} else { // !secondInContext
-					if(Verbose) IO::log() << "\t\tSecond stereo changes\n";
+					if(Verbose) std::cout << "\t\tSecond stereo changes\n";
 					if(firstToSecondSubgraph) {
-						if(Verbose) IO::log() << "\t\tFirst-to-second subgraph: copy and map R2 to R\n";
+						if(Verbose) std::cout << "\t\tFirst-to-second subgraph: copy and map R2 to R\n";
 						const bool partial = copyAllFromSide(std::true_type(), get_labelled_right(rSecond), vSecond, gSecond, result.mSecondToResult, vResult, get_right(result.rResult), vDataRight, eDataRight);
                         (void) partial;
 						assert(!partial);
 					} else if(secondToFirstSubgraph) {
 						if(Verbose) {
-							IO::log() << "\t\tSecond-to-first subgraph:\n"
+							std::cout << "\t\tSecond-to-first subgraph:\n"
 									<< "\t\t\t- Copy all from R2.\n"
 									<< "\t\t\t- Copy unmatched from R1.\n"
 									<< "\t\t\t- Match R2 stereo onto the result and check if the pushout is valid.\n"
 									;
-							IO::log() << "\tCopying all from R2\n";
+							std::cout << "\tCopying all from R2\n";
 						}
 						const bool partial = copyAllFromSide(std::true_type(), get_labelled_right(rSecond), vSecond, gSecond, result.mSecondToResult, vResult, get_right(result.rResult), vDataRight, eDataRight);
 						(void) partial;
@@ -307,7 +307,7 @@ public:
 						const auto sizeAfterR2 = data.edges.size();
 						(void) sizeAfterR2;
 						{ // copy unmatched from R1
-							if(Verbose) IO::log() << "\tCopying unmatched from R1\n";
+							if(Verbose) std::cout << "\tCopying unmatched from R1\n";
 							const auto vInput = vFirst;
 							const auto &gBaseInput = get_graph(rFirst);
 							const auto &glSide = get_labelled_right(rFirst);
@@ -332,14 +332,14 @@ public:
 									const auto eInput = emb.getEdge(vInput, gInput);
 									const auto vAdjInput = target(eInput, gInput);
 									if(Verbose) {
-										IO::log() << "\tmapping edge: ("
+										std::cout << "\tmapping edge: ("
 												<< get(boost::vertex_index_t(), gInput, vInput) << ", "
 												<< get(boost::vertex_index_t(), gInput, vAdjInput) << ")\n";
 									}
 									const auto vAdjResult = get(mInputToResult, gBaseInput, gResult, vAdjInput);
 									if(vAdjResult == NullVertex(gResult)) {
 										// the vertex is deleted, so let's skip it
-										if(Verbose) IO::log() << "\tdeleted\n";
+										if(Verbose) std::cout << "\tdeleted\n";
 										break; // the case statement
 									}
 									// is it mapped?
@@ -347,35 +347,35 @@ public:
 									const auto vAdjInputOther = mapToOtherInput(vAdjInput);
 									const bool isMatched = [&]() {
 										if(vInputOther == NullVertex(gInput)) {
-											if(Verbose) IO::log() << "\tnot matched, due to vInputOther = null\n";
+											if(Verbose) std::cout << "\tnot matched, due to vInputOther = null\n";
 											return false;
 										}
 										if(vAdjInputOther == NullVertex(gInput)) {
-											if(Verbose) IO::log() << "\tnot matched, due to vAdjInputOther = null\n";
+											if(Verbose) std::cout << "\tnot matched, due to vAdjInputOther = null\n";
 											return false;
 										}
 										for(auto eInputOther : asRange(out_edges(vInputOther, gInputOther))) {
 											if(target(eInputOther, gInputOther) != vAdjInputOther) {
 												if(Verbose) {
-													IO::log() << "\tcand = ("
+													std::cout << "\tcand = ("
 															<< get(boost::vertex_index_t(), gInputOther, vInputOther) << ", "
 															<< get(boost::vertex_index_t(), gInputOther, vAdjInputOther) << ") not it\n";
 												}
 												continue;
 											}
 											if(Verbose) {
-												IO::log() << "\tcand = ("
+												std::cout << "\tcand = ("
 														<< get(boost::vertex_index_t(), gInputOther, vInputOther) << ", "
 														<< get(boost::vertex_index_t(), gInputOther, vAdjInputOther) << ") is it\n";
 											}
 											// TODO: shouldn't we check the membership as well?
 											return true;
 										}
-										if(Verbose) IO::log() << "\tnot matched, due to no edge found\n";
+										if(Verbose) std::cout << "\tnot matched, due to no edge found\n";
 										return false;
 									}();
 									if(isMatched) {
-										if(Verbose) IO::log() << "\tmatched\n";
+										if(Verbose) std::cout << "\tmatched\n";
 										break;
 									}
 
@@ -389,7 +389,7 @@ public:
 										return std::distance(oeResult.first, oeIter);
 									}();
 									if(Verbose) {
-										IO::log() << "\tto edge: ("
+										std::cout << "\tto edge: ("
 												<< get(boost::vertex_index_t(), gResult, vResult) << ", "
 												<< get(boost::vertex_index_t(), gResult, vAdjResult) << "), offset = "
 												<< eResultOffset << " (of " << out_degree(vResult, gResultSide) << ")\n";
@@ -408,7 +408,7 @@ public:
 							MOD_ABORT; // bah, we need to do something, or reject the pushout
 						}
 					} else {
-						if(Verbose) IO::log() << "\t\tNon-subgraph: do a merge\n";
+						if(Verbose) std::cout << "\t\tNon-subgraph: do a merge\n";
 						MOD_ABORT;
 					}
 				}
@@ -418,18 +418,18 @@ public:
 
 					if(data.edges.size() > prevEmbSize) {
 						// we the fixation must be free
-						if(Verbose) IO::log() << "\tfix: data.edges.size() = " << data.edges.size() << " > " << prevEmbSize << " = prevEmbSize, so set free (was " << data.fix << ")\n";
+						if(Verbose) std::cout << "\tfix: data.edges.size() = " << data.edges.size() << " > " << prevEmbSize << " = prevEmbSize, so set free (was " << data.fix << ")\n";
 						data.fix = lib::Stereo::Fixation::free();
 					} else {
-						if(Verbose) IO::log() << "\tfix: not changing it (" << data.fix << ")\n";
+						if(Verbose) std::cout << "\tfix: not changing it (" << data.fix << ")\n";
 					}
 				} // if false, old code
 			} // if vResult in R
 		}; // handleBoth()
-		if(Verbose) IO::log() << "Stereo Finalization\n" << std::string(80, '-') << '\n';
+		if(Verbose) std::cout << "Stereo Finalization\n" << std::string(80, '-') << '\n';
 		const auto &gGeometry = lib::Stereo::getGeometryGraph().getGraph();
 		for(auto vResult : asRange(vertices(gResult))) {
-			if(Verbose) IO::log() << "Result vertex: " << get(boost::vertex_index_t(), gResult, vResult) << "\n";
+			if(Verbose) std::cout << "Result vertex: " << get(boost::vertex_index_t(), gResult, vResult) << "\n";
 			const auto m = membership(result.rResult, vResult);
 			const auto vResultId = get(boost::vertex_index_t(), gResult, vResult);
 			// If vResult is in only first or only second, we should be able to just copy the embedding.
@@ -438,15 +438,15 @@ public:
 			assert(vFirst != NullVertex<GraphFirst>() || vSecond != NullVertex<GraphSecond>());
 			std::stringstream ssErr;
 			const auto instantiateConfs = [&]() {
-				if(Verbose) IO::log() << "\tinstantiating configurations\n";
+				if(Verbose) std::cout << "\tinstantiating configurations\n";
 				// TODO: we should probably correct LonePair and Radical offsets here
 				if(m != Membership::Right) {
 					auto &data = vDataLeft[vResultId];
 					data.configuration = gGeometry[data.vGeometry].constructor(
 							data.edges.data(), data.edges.data() + data.edges.size(), data.fix, ssErr);
 					if(!data.configuration) {
-						IO::log() << "Error in configuration construction in L.\n";
-						IO::log() << ssErr.str();
+						std::cout << "Error in configuration construction in L.\n";
+						std::cout << ssErr.str();
 						MOD_ABORT;
 					}
 				}
@@ -455,22 +455,22 @@ public:
 					data.configuration = gGeometry[data.vGeometry].constructor(
 							data.edges.data(), data.edges.data() + data.edges.size(), data.fix, ssErr);
 					if(!data.configuration) {
-						IO::log() << "Error in configuration construction in R.\n";
-						IO::log() << ssErr.str();
+						std::cout << "Error in configuration construction in R.\n";
+						std::cout << ssErr.str();
 						MOD_ABORT;
 					}
 				}
 			};
 			if(vFirst == NullVertex<GraphFirst>()) {
-				if(Verbose) IO::log() << "\tnot in First, copy only from Second\n";
+				if(Verbose) std::cout << "\tnot in First, copy only from Second\n";
 				handleOnly(vResult, vSecond, rSecond, result.mSecondToResult);
 				instantiateConfs();
 			} else if(vSecond == NullVertex<GraphSecond>()) {
-				if(Verbose) IO::log() << "\tnot in Second, copy only from First\n";
+				if(Verbose) std::cout << "\tnot in Second, copy only from First\n";
 				handleOnly(vResult, vFirst, rFirst, result.mFirstToResult);
 				instantiateConfs();
 			} else {
-				if(Verbose) IO::log() << "\tin both\n";
+				if(Verbose) std::cout << "\tin both\n";
 				handleBoth(vResult, vFirst, vSecond);
 				instantiateConfs();
 			}

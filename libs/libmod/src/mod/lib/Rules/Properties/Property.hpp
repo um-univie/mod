@@ -1,5 +1,5 @@
-#ifndef MOD_LIB_RULES_PROP_H
-#define MOD_LIB_RULES_PROP_H
+#ifndef MOD_LIB_RULES_PROP_HPP
+#define MOD_LIB_RULES_PROP_HPP
 
 #include <mod/Error.hpp>
 #include <mod/lib/LabelledGraph.hpp>
@@ -13,9 +13,7 @@
 
 #include <vector>
 
-namespace mod {
-namespace lib {
-namespace Rules {
+namespace mod::lib::Rules {
 using jla_boost::GraphDPO::Membership;
 
 #define MOD_RULE_STATE_TEMPLATE_PARAMS                                           \
@@ -193,24 +191,15 @@ auto get(const RightState<MOD_RULE_STATE_TEMPLATE_ARGS> &p, const VertexOrEdge &
 // Implementation
 //------------------------------------------------------------------------------
 
+namespace detail {
+void PropVerify(const void *g, const void *gOther,
+                std::size_t nGraph, std::size_t nOther,
+                std::size_t mGraph, std::size_t mOther);
+} // namespace detail
+
 MOD_RULE_STATE_TEMPLATE_PARAMS
 void PropCore<MOD_RULE_STATE_TEMPLATE_ARGS>::verify(const Graph *g) const {
-	if(g != &this->g) {
-		IO::log() << "Different graphs (" << reinterpret_cast<std::intptr_t> (this) << "): g = "
-		          << static_cast<const void *> (g) << ", &this->g = " << static_cast<const void *> (&this->g)
-		          << std::endl;
-		MOD_ABORT;
-	}
-	if(num_vertices(this->g) != vertexState.size()) {
-		IO::log() << "Different sizes (" << reinterpret_cast<std::uintptr_t> (this) << "): num_vertices(this->g) = "
-		          << num_vertices(this->g) << ", vertexState.size() = " << vertexState.size() << std::endl;
-		MOD_ABORT;
-	}
-	if(num_edges(this->g) != edgeState.size()) {
-		IO::log() << "Different sizes (" << reinterpret_cast<std::uintptr_t> (this) << "): num_edges(this->g) = "
-		          << num_edges(this->g) << ", edgeState.size() = " << edgeState.size() << std::endl;
-		MOD_ABORT;
-	}
+	detail::PropVerify(g, &this->g, num_vertices(*g), vertexState.size(), num_edges(*g), edgeState.size());
 }
 
 MOD_RULE_STATE_TEMPLATE_PARAMS
@@ -356,8 +345,6 @@ const Derived &PropCore<MOD_RULE_STATE_TEMPLATE_ARGS>::getDerived() const {
 	return static_cast<const Derived &> (*this);
 }
 
-} // namespace Rules
-} // namespace lib
-} // namespace mod
+} // namespace mod::lib::Rules
 
-#endif /* MOD_LIB_RULES_PROP_H */
+#endif // MOD_LIB_RULES_PROP_HPP

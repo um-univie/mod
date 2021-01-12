@@ -1,5 +1,5 @@
-#ifndef MOD_LIB_TERM_WAM_H
-#define MOD_LIB_TERM_WAM_H
+#ifndef MOD_LIB_TERM_WAM_HPP
+#define MOD_LIB_TERM_WAM_HPP
 
 #include <mod/Error.hpp>
 
@@ -11,10 +11,10 @@
 
 // see http://wambook.sourceforge.net/
 
-namespace mod {
-namespace lib {
+namespace mod::lib {
 struct StringStore;
-namespace Term {
+} // namespace mod::lib
+namespace mod::lib::Term {
 
 const StringStore &getStrings();
 
@@ -25,14 +25,13 @@ enum class CellTag : int {
 };
 
 enum class AddressType : int { // order matters, used in operator<
-	Heap, Temp
+	Heap = 0, Temp = 1
 };
 
 struct Address {
 	AddressType type;
 	std::size_t addr;
 public:
-
 	friend bool operator==(Address lhs, Address rhs) {
 		return lhs.type == rhs.type && lhs.addr == rhs.addr;
 	}
@@ -56,9 +55,7 @@ public:
 
 struct Cell {
 	CellTag tag;
-
 	union {
-
 		struct {
 			Address addr;
 		} STR;
@@ -73,7 +70,6 @@ struct Cell {
 		} Structure;
 	};
 public:
-
 	static Cell makeSTR(Address addr) {
 		Cell cell;
 		cell.tag = CellTag::STR;
@@ -100,14 +96,12 @@ public:
 struct Wam;
 
 struct MGU {
-
-	MGU(std::size_t preHeapSize) : preHeapSize(preHeapSize) { }
+	MGU(std::size_t preHeapSize) : preHeapSize(preHeapSize) {}
 	bool isRenaming(const Wam &machine) const;
 	bool isSpecialisation(const Wam &machine) const;
 public:
 	std::size_t preHeapSize;
 	std::vector<Address> bindings; // stack of addresses of REFs that were self-references before
-
 	enum class Status {
 		Exists, Fail
 	} status = Status::Exists;
@@ -217,25 +211,32 @@ struct Wam {
 	Address deref(Address addr) const {
 		Cell cell = getCell(addr);
 		switch(cell.tag) {
-		case CellTag::STR: return deref(cell.STR.addr);
-		case CellTag::REF: return cell.REF.addr == addr ? addr: deref(cell.REF.addr);
-		case CellTag::Structure: return addr;
+		case CellTag::STR:
+			return deref(cell.STR.addr);
+		case CellTag::REF:
+			return cell.REF.addr == addr ? addr : deref(cell.REF.addr);
+		case CellTag::Structure:
+			return addr;
 		}
 		MOD_ABORT;
 	}
 
 	Cell &getCell(Address addr) {
 		switch(addr.type) {
-		case AddressType::Heap: return heap[addr.addr];
-		case AddressType::Temp: return temp[addr.addr];
+		case AddressType::Heap:
+			return heap[addr.addr];
+		case AddressType::Temp:
+			return temp[addr.addr];
 		}
 		MOD_ABORT;
 	}
 
 	const Cell &getCell(Address addr) const {
 		switch(addr.type) {
-		case AddressType::Heap: return heap[addr.addr];
-		case AddressType::Temp: return temp[addr.addr];
+		case AddressType::Heap:
+			return heap[addr.addr];
+		case AddressType::Temp:
+			return temp[addr.addr];
 		}
 		MOD_ABORT;
 	}
@@ -260,7 +261,8 @@ struct Wam {
 				assert(cell.STR.addr.type == AddressType::Heap);
 				cell.STR.addr.type = AddressType::Temp;
 				break;
-			case CellTag::Structure: break;
+			case CellTag::Structure:
+				break;
 			}
 		}
 	}
@@ -358,7 +360,7 @@ inline void Wam::unifyHeapHeap(std::size_t lhs, std::size_t rhs, MGU &mgu) {
 			assert(leftCell.tag == CellTag::Structure);
 			assert(rightCell.tag == CellTag::Structure);
 			if(leftCell.Structure.name != rightCell.Structure.name
-					|| leftCell.Structure.arity != rightCell.Structure.arity) {
+			   || leftCell.Structure.arity != rightCell.Structure.arity) {
 				mgu.status = MGU::Status::Fail;
 				mgu.errorLeft = Address{AddressType::Heap, lhs};
 				mgu.errorRight = Address{AddressType::Heap, rhs};
@@ -439,7 +441,7 @@ inline void Wam::unifyHeapTemp(std::size_t lhsIndex, std::size_t rhsIndex, MGU &
 					}
 				} else if(lhsCell.tag == CellTag::Structure) {
 					if(lhsCell.Structure.name == rhsCell.Structure.name &&
-							lhsCell.Structure.arity == rhsCell.Structure.arity) {
+					   lhsCell.Structure.arity == rhsCell.Structure.arity) {
 						for(std::size_t i = lhsCell.Structure.arity; i > 0; i--)
 							stack.emplace(lhsAddr + i, rhsAddr + i);
 						// overwrite rhs to point to heap
@@ -451,26 +453,22 @@ inline void Wam::unifyHeapTemp(std::size_t lhsIndex, std::size_t rhsIndex, MGU &
 						mgu.errorRight = rhsAddr;
 						return;
 					}
-				} else MOD_ABORT;
-			} else MOD_ABORT;
+				} else
+					MOD_ABORT;
+			} else
+				MOD_ABORT;
 		}
 	}
 	verify();
 }
 
-} // namespace Term
-} // namespace lib
-} // namespace mod
-namespace std {
+} // namespace mod::lib::Term
 
 template<>
-struct hash<mod::lib::Term::Address> {
-
+struct std::hash<mod::lib::Term::Address> {
 	std::size_t operator()(mod::lib::Term::Address addr) const {
 		return addr.addr; // probably good enough
 	}
 };
 
-} // namespace std
-
-#endif /* MOD_LIB_TERM_WAM_H */
+#endif // MOD_LIB_TERM_WAM_HPP

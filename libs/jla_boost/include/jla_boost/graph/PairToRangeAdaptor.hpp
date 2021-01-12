@@ -22,6 +22,10 @@ struct range : std::pair<Iter, Iter> {
 	Iter end() const {
 		return this->second;
 	}
+
+	decltype(auto) operator[](int i) const {
+		return begin()[i];
+	}
 };
 
 template<typename Iter>

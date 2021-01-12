@@ -1,12 +1,11 @@
-#ifndef MOD_LIB_LABELLEDUNIONGRAPH_H
-#define MOD_LIB_LABELLEDUNIONGRAPH_H
+#ifndef MOD_LIB_LABELLEDUNIONGRAPH_HPP
+#define MOD_LIB_LABELLEDUNIONGRAPH_HPP
 
 #include <mod/lib/LabelledGraph.hpp>
 
 #include <jla_boost/graph/UnionGraph.hpp>
 
-namespace mod {
-namespace lib {
+namespace mod::lib {
 namespace detail {
 
 template<typename LGraph>
@@ -95,7 +94,6 @@ private:
 	GraphType ug;
 };
 
-} // namesapce lib
-} // namespace mod
+} // namesapce mod::lib
 
-#endif /* MOD_LIB_LABELLEDUNIONGRAPH_H */
+#endif // MOD_LIB_LABELLEDUNIONGRAPH_HPP

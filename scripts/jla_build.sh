@@ -1,6 +1,7 @@
 #!/bin/bash
 export AS_RLIMIT=300000000
-root_PWD=$(pwd)
+root=$(git rev-parse --show-toplevel)
+cd $root
 numThreads=2
 prefix="../stage"
 type="OptDebug"
@@ -37,7 +38,7 @@ args+=" -DBUILD_TESTING=on"
 args+=" -DCMAKE_PREFIX_PATH=$HOME/programs"
 args+=" -DBOOST_ROOT=$HOME/programs"
 args+=" -DCMAKE_MODULE_LINKER_FLAGS='-flto=$numThreads'"
-args+="  -DCMAKE_SHARED_LINKER_FLAGS='-flto=$numThreads'"
+args+=" -DCMAKE_SHARED_LINKER_FLAGS='-flto=$numThreads'"
 args+=" -DCMAKE_INSTALL_PREFIX=$prefix $@"
 
 ./bootstrap.sh                                  \

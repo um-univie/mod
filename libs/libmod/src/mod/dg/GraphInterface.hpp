@@ -12,8 +12,7 @@
 
 #include <functional>
 
-namespace mod {
-namespace dg {
+namespace mod::dg {
 
 // Graph
 // -----------------------------------------------------------------------------
@@ -611,8 +610,7 @@ inline DG::RuleIterator DG::RuleRange::end() const {
 	return RuleIterator();
 }
 
-} // namespace dg
-} // namespace mod
+} // namespace mod::dg
 
 template<>
 struct std::hash<mod::dg::DG::Vertex> {

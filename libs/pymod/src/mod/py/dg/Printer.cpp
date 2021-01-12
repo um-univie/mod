@@ -6,9 +6,7 @@
 #include <mod/dg/Printer.hpp>
 #include <mod/graph/Printer.hpp>
 
-namespace mod {
-namespace dg {
-namespace Py {
+namespace mod::dg::Py {
 namespace {
 
 void Printer_pushVertexVisible(Printer &printer, std::shared_ptr<mod::Function<bool(DG::Vertex)>> f) {
@@ -49,7 +47,7 @@ Printer_setMirrorOverwrite(Printer &printer, std::shared_ptr<mod::Function<bool(
 } // namespace
 
 void Printer_doExport() {
-	// rst: .. py:class:: DGPrintData
+	// rst: .. class:: DGPrintData
 	// rst:
 	// rst:		This class is used to hold extra data about how a specific derivation graph
 	// rst:		is visualised.
@@ -66,7 +64,7 @@ void Printer_doExport() {
 	// rst:		In the end, when the data is used for printing, it will be compiled to form the actual duplication data.
 	// rst:
 	py::class_<PrintData>("DGPrintData", py::no_init)
-			// rst:		.. py:method:: __init__(self, dg)
+			// rst:		.. method:: __init__(dg)
 			// rst:
 			// rst:			Construct a data object where all derivations have a single version, duplicate number 0,
 			// rst:			connected to version 0 of all heads and tails.
@@ -74,11 +72,11 @@ void Printer_doExport() {
 			// rst:			:param DG dg: the derivation graph to hold data for.
 			// rst:			:raises: :class:`LogicError` if ``not dg.isLocked``.
 			.def(py::init<std::shared_ptr<DG> >())
-					// rst:		.. py:attribute:: dg
+					// rst:		.. attribute:: dg
 					// rst:
 					// rst:			(Read-only) The derivation graph the object holds data for.
 			.add_property("dg", &PrintData::getDG)
-					// rst:		.. py:method:: makeDuplicate(e, eDup)
+					// rst:		.. method:: makeDuplicate(e, eDup)
 					// rst:
 					// rst:			Create another version of the given hyperedge and give it the given duplicate number.
 					// rst:			It will connect to duplicate 0 of all head and tail vertices.
@@ -89,7 +87,7 @@ void Printer_doExport() {
 					// rst:			:raises: :class:`LogicError` if ``e.dg != dg``.
 					// rst:			:raises: :class:`LogicError` if duplicate ``eDup`` already exists for ``e``.
 			.def("makeDuplicate", &PrintData::makeDuplicate)
-					// rst:		.. py:method:: removeDuplicate(e, eDup)
+					// rst:		.. method:: removeDuplicate(e, eDup)
 					// rst:
 					// rst:			Remove the version of the given hyperedge with the given duplicate number.
 					// rst:
@@ -99,7 +97,7 @@ void Printer_doExport() {
 					// rst:			:raises: :class:`LogicError` if ``e.dg != dg``.
 					// rst:			:raises: :class:`LogicError` if duplicate ``eDup`` does not exist for ``e``.
 			.def("removeDuplicate", &PrintData::removeDuplicate)
-					// rst:		.. py:method:: reconnectSource(e, eDup, v, vDupTar)
+					// rst:		.. method:: reconnectSource(e, eDup, v, vDupTar)
 					// rst:
 					// rst:			For the given hyperedge duplicate, reconnect the given source vertex to the given duplicate of that source.
 					// rst:			If the vertex is a source multiple times, then an arbitrary one of them is reconnected.
@@ -115,7 +113,7 @@ void Printer_doExport() {
 					// rst:			:raises: :class:`LogicError` if ``v`` is not a source vertex of ``e``.
 					// rst:			:raises: :class:`LogicError` if duplicate ``eDup`` does not exist for ``e``.
 			.def("reconnectSource", &PrintData::reconnectSource)
-					// rst:		.. py:method:: reconnectTarget(e, eDup, v, vDupTar)
+					// rst:		.. method:: reconnectTarget(e, eDup, v, vDupTar)
 					// rst:
 					// rst:			For the given hyperedge duplicate, reconnect the given head to the given duplicate of that head.
 					// rst:			If the vertex is a head multiple times, then an arbitrary one of them is reconnected.
@@ -136,13 +134,13 @@ void Printer_doExport() {
 	void (*Printer_setGraphPrinter)(Printer &, const graph::Printer &) = [](Printer &p, const graph::Printer &gp) {
 		p.getGraphPrinter() = gp;
 	};
-	// rst: .. py:class:: DGPrinter
+	// rst: .. class:: DGPrinter
 	// rst:
 	// rst:		This class is used to configure how derivation graphs are visualised,
 	// rst:		how much is visualised and which extra properties are printed.
 	// rst:
 	py::class_<Printer, boost::noncopyable>("DGPrinter")
-			// rst:		.. py:attribute:: graphPrinter
+			// rst:		.. attribute:: graphPrinter
 			// rst:
 			// rst:			Access the :class:`GraphPrinter` used when printing images of graphs.
 			// rst:			Note that assignment to the property copies the argument.
@@ -151,20 +149,20 @@ void Printer_doExport() {
 			.add_property("graphPrinter",
 			              py::make_function(Printer_getGraphPrinter, py::return_internal_reference<1>()),
 			              Printer_setGraphPrinter)
-					// rst:		.. py:attribute:: withShortcutEdges
+					// rst:		.. attribute:: withShortcutEdges
 					// rst:
 					// rst:			Control whether or not hyperedges :math:`(T, H)` with :math:`|T| = |H| = 1`
 					// rst:			are printed as a simple arrow without the usual rectangle.
 					// rst:
 					// rst:			:type: bool
 			.add_property("withShortcutEdges", &Printer::getWithShortcutEdges, &Printer::setWithShortcutEdges)
-					// rst:		.. py:attribute:: withGraphImages
+					// rst:		.. attribute:: withGraphImages
 					// rst:
 					// rst:			Control whether or not each vertex is printed with a image of its graph in it.
 					// rst:
 					// rst:			:type: bool
 			.add_property("withGraphImages", &Printer::getWithGraphImages, &Printer::setWithGraphImages)
-					// rst:		.. py:attribute:: labelsAsLatexMath
+					// rst:		.. attribute:: labelsAsLatexMath
 					// rst:
 					// rst:			Control whether or not labels on vertices and hyperedges are put inline :math:`\LaTeX` math.
 					// rst:			Specifically, a label ``label`` is written as ``$\mathrm{label'}$``, with ``label'`` being
@@ -172,7 +170,7 @@ void Printer_doExport() {
 					// rst:
 					// rst:			:type: bool
 			.add_property("labelsAsLatexMath", &Printer::getLabelsAsLatexMath, &Printer::setLabelsAsLatexMath)
-					// rst:		.. py:method:: pushVertexVisible(f)
+					// rst:		.. method:: pushVertexVisible(f)
 					// rst:
 					// rst:			Add another function or constant controlling the visibility of vertices.
 					// rst:			All visibility functions must return ``true`` for a vertex to be visible.
@@ -180,13 +178,13 @@ void Printer_doExport() {
 					// rst:			:param f: the function or constant to push for specifying vertex visibility.
 					// rst:			:type f: Callable[[DGVertex], bool] or bool
 			.def("pushVertexVisible", &Printer_pushVertexVisible)
-					// rst:		.. py:method:: popVertexVisible()
+					// rst:		.. method:: popVertexVisible()
 					// rst:
 					// rst:			Remove the last pushed vertex visibility function.
 					// rst:
 					// rst:			:raises: :class:`LogicError` if no callback is left to pop.
 			.def("popVertexVisible", &Printer::popVertexVisible)
-					// rst:		.. py:method:: pushEdgeVisible(f)
+					// rst:		.. method:: pushEdgeVisible(f)
 					// rst:
 					// rst:			Add another function or constant controlling the visibility of hyperedges.
 					// rst:			All visibility functions must return ``true`` for a hyperedge to be visible.
@@ -194,20 +192,20 @@ void Printer_doExport() {
 					// rst:			:param f: the function or constant to push for specifying hyperedge visibility.
 					// rst:			:type f: Callable[[DGHyperEdge], bool] or bool
 			.def("pushEdgeVisible", &Printer_pushEdgeVisible)
-					// rst:		.. py:method:: popEdgeVisible()
+					// rst:		.. method:: popEdgeVisible()
 					// rst:
 					// rst:			Remove the last pushed hyperedge visibility function.
 					// rst:
 					// rst:			:raises: :class:`LogicError` if no callback is left to pop.
 			.def("popEdgeVisible", &Printer::popEdgeVisible)
-					// rst:		.. py:attribute:: withShortcutEdgesAfterVisibility
+					// rst:		.. attribute:: withShortcutEdgesAfterVisibility
 					// rst:
 					// rst:			Control whether or not hyperedges are depicted as simple arrows when all but 1 head and tail are hidden.
 					// rst:
 					// rst:			:type: bool
 			.add_property("withShortcutEdgesAfterVisibility", &Printer::getWithShortcutEdgesAfterVisibility,
 			              &Printer::setWithShortcutEdgesAfterVisibility)
-					// rst:		.. py:attribute:: vertexLabelSep
+					// rst:		.. attribute:: vertexLabelSep
 					// rst:
 					// rst:			The string used as separator between each part of each vertex label.
 					// rst:
@@ -216,7 +214,7 @@ void Printer_doExport() {
 			              py::make_function(&Printer::getVertexLabelSep,
 			                                py::return_value_policy<py::copy_const_reference>()),
 			              &Printer::setVertexLabelSep)
-					// rst:		.. py:attribute:: edgeLabelSep
+					// rst:		.. attribute:: edgeLabelSep
 					// rst:
 					// rst:			The string used as separator between each part of each edge label.
 					// rst:
@@ -225,7 +223,7 @@ void Printer_doExport() {
 			              py::make_function(&Printer::getEdgeLabelSep,
 			                                py::return_value_policy<py::copy_const_reference>()),
 			              &Printer::setEdgeLabelSep)
-					// rst:		.. py:method:: pushVertexLabel(f)
+					// rst:		.. method:: pushVertexLabel(f)
 					// rst:
 					// rst:			Add another function or constant for vertex labelling.
 					// rst:			The result of this function is added to the end of each label.
@@ -233,50 +231,50 @@ void Printer_doExport() {
 					// rst:			:param f: the function or constant to push for labelling vertices.
 					// rst:			:type f: Callable[[DGVertex], str] or str
 			.def("pushVertexLabel", &Printer_pushVertexLabel)
-					// rst:		.. py:method:: popVertexLabel()
+					// rst:		.. method:: popVertexLabel()
 					// rst:
 					// rst:			Remove the last pushed vertex labelling function.
 					// rst:
 					// rst:			:raises: :class:`LogicError` if no callback is left to pop.
 			.def("popVertexLabel", &Printer::popVertexLabel)
-					// rst:		.. py:method:: pushEdgeLabel(f)
+					// rst:		.. method:: pushEdgeLabel(f)
 					// rst:
 					// rst:			Add another function or constant for edge labelling. The result of this function is appended to each label.
 					// rst:
 					// rst:			:param f: the function or constant to push for labelling edges.
 					// rst:			:type f: Callable[[DGHyperEdge], str] or str
 			.def("pushEdgeLabel", &Printer_pushEdgeLabel)
-					// rst:		.. py:method:: popEdgeLabel()
+					// rst:		.. method:: popEdgeLabel()
 					// rst:
 					// rst:			Remove the last pushed edge labelling function.
 					// rst:
 					// rst:			:raises: :class:`LogicError` if no callback is left to pop.
 			.def("popEdgeLabel", &Printer::popEdgeLabel)
-					// rst:		.. py:attribute:: withGraphName
+					// rst:		.. attribute:: withGraphName
 					// rst:
 					// rst:			Control whether or not graph names are appended to the vertex labels (see also :meth:`DGPrinter.pushVertexLabel`).
 					// rst:
 					// rst:			:type: bool
 			.add_property("withGraphName", &Printer::getWithGraphName, &Printer::setWithGraphName)
-					// rst:		.. py:attribute:: withRuleName
+					// rst:		.. attribute:: withRuleName
 					// rst:
 					// rst:			Control whether or not rule names are appended to the edge labels (see also :meth:`DGPrinter.pushEdgeLabel`).
 					// rst:
 					// rst:			:type: bool
 			.add_property("withRuleName", &Printer::getWithRuleName, &Printer::setWithRuleName)
-					// rst:		.. py:attribute:: withRuleId
+					// rst:		.. attribute:: withRuleId
 					// rst:
 					// rst:			Control whether or not rule IDs are appended to the edge labels (see also :meth:`DGPrinter.pushEdgeLabel`).
 					// rst:
 					// rst:			:type: bool
 			.add_property("withRuleId", &Printer::getWithRuleId, &Printer::setWithRuleId)
-					// rst:		.. py:attribute:: withInlineGraphs
+					// rst:		.. attribute:: withInlineGraphs
 					// rst:
 					// rst:			Control whether or not graph depictions should be precompiled, or be included inline in the DG figure.
 					// rst:
 					// rst:			:type: bool
 			.add_property("withInlineGraphs", &Printer::getWithInlineGraphs, &Printer::setWithInlineGraphs)
-					// rst:		.. py:method:: pushVertexColour(f, extendToEdges=True)
+					// rst:		.. method:: pushVertexColour(f, extendToEdges=True)
 					// rst:
 					// rst:			Add another function or constant for colouring vertices. The final colour of a vertex is the result of the first colour function returning a non-empty string.
 					// rst:			The functions are evaluated in the order they are pushed and the resulting string is used directly as a colour in Tikz.
@@ -288,13 +286,13 @@ void Printer_doExport() {
 					// rst:			:type f: Callable[[DGVertex], str] or str
 					// rst:			:param bool extendToEdges: whether or not some hyperedges are coloured as well (see above).
 			.def("pushVertexColour", &Printer_pushVertexColour)
-					// rst:		.. py:method:: popVertexColour()
+					// rst:		.. method:: popVertexColour()
 					// rst:
 					// rst:			Remove the last pushed vertex colouring function.
 					// rst:
 					// rst:			:raises: :class:`LogicError` if no callback is left to pop.
 			.def("popVertexColour", &Printer::popVertexColour)
-					// rst:		.. py:method:: pushEdgeColour(f)
+					// rst:		.. method:: pushEdgeColour(f)
 					// rst:
 					// rst:			Add another function or constant for colouring hyperedges. The final colour of a hyperedge (and all of its head and tail connectors) is the result of the
 					// rst:			first colour function returning a non-empty string.
@@ -302,29 +300,29 @@ void Printer_doExport() {
 					// rst:			:param f: the function or constant to push for colouring hyperedges.
 					// rst:			:type f: Callable[[DGHyperEdge], str] or str
 			.def("pushEdgeColour", &Printer_pushEdgeColour)
-					// rst:		.. py:method:: popEdgeColour()
+					// rst:		.. method:: popEdgeColour()
 					// rst:
 					// rst:			Remove the last pushed hyperedge colouring function.
 					// rst:
 					// rst:			:raises: :class:`LogicError` if no callback is left to pop.
 			.def("popEdgeColour", &Printer::popEdgeColour)
-					// rst:		.. py:method:: setRotationOverwrite(f)
+					// rst:		.. method:: setRotationOverwrite(f)
 					// rst:
-					// rst:			Overwrite the rotation set in the nested :py:class:`GraphPrinter`. The given function will be used
+					// rst:			Overwrite the rotation set in the nested :class:`GraphPrinter`. The given function will be used
 					// rst:			to set the rotation of each printed graph.
 					// rst:
 					// rst:			:param f: the constant or the function called on each graph to retrieve the rotation to render it with.
 					// rst:			:type f: Callable[[Graph], int] or int
 			.def("setRotationOverwrite", &Printer_setRotationOverwrite)
-					// rst:		.. py:method:: setMirrorOverwrite(f)
+					// rst:		.. method:: setMirrorOverwrite(f)
 					// rst:
-					// rst:			Overwrite the mirror set in the nested :py:class:`GraphPrinter`. The given function will be used
+					// rst:			Overwrite the mirror set in the nested :class:`GraphPrinter`. The given function will be used
 					// rst:			to set the mirror of each printed graph.
 					// rst:
 					// rst:			:param f: the function called on each graph to retrieve the mirror to render it with.
 					// rst:			:type f: Callable[[Graph], bool] or bool
 			.def("setMirrorOverwrite", &Printer_setMirrorOverwrite)
-					// rst:		.. py:attribute:: graphvizPrefix
+					// rst:		.. attribute:: graphvizPrefix
 					// rst:
 					// rst:			The string that will be inserted into generated DOT files,
 					// rst:			just after the graph declaration.
@@ -336,6 +334,4 @@ void Printer_doExport() {
 			              &Printer::setGraphvizPrefix);
 }
 
-} // namespace Py
-} // namespace dg
-} // namespace mod
+} // namespace mod::dg::Py

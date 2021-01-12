@@ -21,9 +21,7 @@
 
 #include <boost/lexical_cast.hpp>
 
-namespace mod {
-namespace lib {
-namespace Rules {
+namespace mod::lib::Rules {
 BOOST_CONCEPT_ASSERT((LabelledGraphConcept<LabelledRule>));
 BOOST_CONCEPT_ASSERT((LabelledGraphConcept<LabelledRule::LabelledLeftType>));
 BOOST_CONCEPT_ASSERT((LabelledGraphConcept<LabelledRule::LabelledRightType>));
@@ -84,8 +82,8 @@ Real::Real(LabelledRule &&rule, boost::optional<LabelType> labelType)
 	// only one of propString and propTerm should be defined
 	assert(this->dpoRule.pString || this->dpoRule.pTerm);
 	assert(!this->dpoRule.pString || !this->dpoRule.pTerm);
-	if(!sanityChecks(getGraph(), getStringState(), IO::log())) {
-		IO::log() << "Rule::sanityCheck\tfailed in rule '" << getName() << "'" << std::endl;
+	if(!sanityChecks(getGraph(), getStringState(), std::cout)) {
+		std::cout << "Rule::sanityCheck\tfailed in rule '" << getName() << "'" << std::endl;
 		MOD_ABORT;
 	}
 }
@@ -228,6 +226,4 @@ bool Real::isomorphicLeftRight(const Real &rDom, const Real &rCodom, LabelSettin
 	return mrRight.getNumHits() == 1;
 }
 
-} // namespace Rules
-} // namespace lib
-} // namespace mod
+} // namespace mod::lib::Rules

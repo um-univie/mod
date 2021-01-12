@@ -33,8 +33,12 @@ function doDir {
 	echo ")"
 	echo ""
 	if test -d test; then
-		echo "set(mod_$1_TEST_FILES"
+		echo "set(mod_$1_TEST_CPP_FILES"
 		find test -iname "*.cpp" | sed "s/^test\/\(.*\)\.cpp$/\1/" | indent
+		echo ")"
+		echo ""
+		echo "set(mod_$1_TEST_PY_FILES"
+		find test -iname "*.py" | sed "s/^test\/\(.*\)\.py$/\1/" | indent
 		echo ")"
 		echo ""
 	fi

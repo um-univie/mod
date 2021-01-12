@@ -1,5 +1,5 @@
-#ifndef MOD_LIB_GRAPH_PROPERTY_H
-#define MOD_LIB_GRAPH_PROPERTY_H
+#ifndef MOD_LIB_GRAPH_PROPERTY_HPP
+#define MOD_LIB_GRAPH_PROPERTY_HPP
 
 #include <mod/Error.hpp>
 #include <mod/lib/Graph/GraphDecl.hpp>
@@ -8,9 +8,7 @@
 
 #include <vector>
 
-namespace mod {
-namespace lib {
-namespace Graph {
+namespace mod::lib::Graph {
 
 template<typename Derived, typename VertexType, typename EdgeType>
 struct Prop {
@@ -48,23 +46,15 @@ auto get(const Prop<Derived, VertexType, EdgeType> &p, VertexOrEdge ve) -> declt
 // Implementation
 //------------------------------------------------------------------------------
 
+namespace detail {
+void PropVerify(const GraphType *g, const GraphType *gOther,
+                std::size_t nGraph, std::size_t nOther,
+                std::size_t mGraph, std::size_t mOther);
+} // namespace detail
+
 template<typename Derived, typename VertexType, typename EdgeType>
 void Prop<Derived, VertexType, EdgeType>::verify(const GraphType *g) const {
-	if(g != &this->g) {
-		IO::log() << "Different graphs: g = " << (std::uintptr_t) g << ", &this->g = " << (std::uintptr_t) &this->g
-		          << std::endl;
-		MOD_ABORT;
-	}
-	if(num_vertices(this->g) != vertexState.size()) {
-		IO::log() << "Different sizes: num_vertices(this->g) = " << num_vertices(this->g) << ", vertexLabels.size() = "
-		          << vertexState.size() << std::endl;
-		MOD_ABORT;
-	}
-	if(num_edges(this->g) != edgeState.size()) {
-		IO::log() << "Different sizes: num_edges(this->g) = " << num_edges(this->g) << ", edgeLabels.size() = "
-		          << edgeState.size() << std::endl;
-		MOD_ABORT;
-	}
+	detail::PropVerify(g, &this->g, num_vertices(*g), vertexState.size(), num_edges(*g), edgeState.size());
 }
 
 template<typename Derived, typename VertexType, typename EdgeType>
@@ -111,8 +101,6 @@ const Derived &Prop<Derived, VertexType, EdgeType>::getDerived() const {
 	return static_cast<const Derived &> (*this);
 }
 
-} // namespace Graph
-} // namespace lib
-} // namespace mod
+} // namespace mod::lib::Graph
 
-#endif /* MOD_LIB_GRAPH_PROPERTY_H */
+#endif // MOD_LIB_GRAPH_PROPERTY_HPP

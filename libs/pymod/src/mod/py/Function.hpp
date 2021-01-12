@@ -11,14 +11,12 @@
 
 #include <iostream>
 
-namespace mod {
-namespace Py {
+namespace mod::Py {
 namespace py = boost::python;
 namespace detail {
 
 template<typename T>
 struct ArgWrap {
-
 	static T wrap(T t) {
 		return t;
 	}
@@ -33,7 +31,6 @@ struct ArgWrap<T&> {
 
 template<typename R>
 struct Returner {
-
 	static R doReturn(decltype((*static_cast<py::override*> (nullptr))()) r) {
 		return r;
 	}
@@ -41,7 +38,6 @@ struct Returner {
 
 template<>
 struct Returner<void> {
-
 	static void doReturn(decltype((*static_cast<py::override*> (nullptr))())) { }
 };
 
@@ -51,7 +47,6 @@ struct FunctionWrapper {
 
 template<typename R, typename ...Args>
 struct FunctionWrapper<R(Args...)> : mod::Function<R(Args...)>, py::wrapper<FunctionWrapper<R(Args...)> > {
-
 	std::shared_ptr < mod::Function < R(Args...)> > clone() const {
 		if(py::override f = this->get_override("clone")) {
 			return f();
@@ -106,7 +101,6 @@ void exportFunc(const char *name) {
 	py::def("_sharedToStd", &detail::sharedToStd<Func>);
 }
 
-} // namespace Py
-} // namespace mod
+} // namespace mod::Py
 
 #endif /* MOD_PY_FUNCTION_H */

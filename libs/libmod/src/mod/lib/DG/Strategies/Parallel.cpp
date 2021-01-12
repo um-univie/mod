@@ -81,8 +81,7 @@ void Parallel::executeImpl(PrintSettings settings, const GraphState &input) {
 		outputs.push_back(&strat->getOutput());
 	output = new GraphState(outputs);
 	output->sortUniverse(Graph::Single::nameLess);
-	for(const GraphState::SubsetStore::value_type &vt : output->getSubsets())
-		output->sortSubset(vt.first, Graph::Single::nameLess);
+	output->sortSubset(Graph::Single::nameLess);
 }
 
 } // namespace Strategies

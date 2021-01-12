@@ -1,6 +1,6 @@
 from mod import *
-from .process import Process
-from .encode import graph_terms as term
+from mod.epim.process import Process
+from mod.epim.encode import graph_terms as term
 
 def make_call_rule(name, args, p):
     g = p.encode()

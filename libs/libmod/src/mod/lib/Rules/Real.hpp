@@ -1,5 +1,5 @@
-#ifndef MOD_LIB_RULES_REAL_H
-#define MOD_LIB_RULES_REAL_H
+#ifndef MOD_LIB_RULES_REAL_HPP
+#define MOD_LIB_RULES_REAL_HPP
 
 #include <mod/BuildConfig.hpp>
 #include <mod/Config.hpp>
@@ -11,14 +11,12 @@
 
 #include <boost/optional/optional.hpp>
 
-namespace mod {
-namespace lib {
-namespace Graph {
+namespace mod::lib::Graph {
 struct PropStereo;
 struct PropString;
 struct Single;
-} // namespace Graph
-namespace Rules {
+} // namespace mod::lib::Graph
+namespace mod::lib::Rules {
 struct PropStringCore;
 struct PropMoleculeCore;
 struct DepictionDataCore;
@@ -106,8 +104,6 @@ struct MembershipPredWrapper {
 	}
 };
 
-} // namespace Rules
-} // namespace lib
-} // namespace mod
+} // namespace mod::lib::Rules
 
-#endif /* MOD_LIB_RULES_REAL_H */
+#endif // MOD_LIB_RULES_REAL_HPP

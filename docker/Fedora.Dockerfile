@@ -1,4 +1,4 @@
-FROM fedora:32
+FROM fedora:33
 ARG j=7
 
 WORKDIR /opt/mod
@@ -12,23 +12,6 @@ RUN dnf install -y                                          \
     $(bindep -b | tr '\n' ' ')                              \
  && dnf clean all                                           \
  && rm -rf /var/cache/yum
-
-# Boost
-# the folder can apparently not be called just 'boost', therefore 'boostDir'
-WORKDIR /opt/boostDir
-#RUN wget                                                                   \
-# https://dl.bintray.com/boostorg/release/1.74.0/source/boost_1_74_0.tar.gz \
-# -O boost.tar.gz
-COPY build/boost.tar.gz ./
-RUN \
- tar -xf boost.tar.gz --one-top-level=boostSrc --strip-components=1     \
- && cd boostSrc                                                            \
- && ./bootstrap.sh --with-python=python3                                   \
- && ./b2 --with-python --with-graph --with-iostreams -j $j                 \
- && ./b2 install                                                           \
- && cd ..                                                                  \
- && rm -rf /opt/boostDir
-
 
 
 WORKDIR /opt/mod/build

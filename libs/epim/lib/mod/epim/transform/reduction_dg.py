@@ -1,8 +1,8 @@
 from mod import *
-from .util import apply_confluent_gts, merge, get_go_graphs
-from ..process import Process
-from ..gen_image import setImage
-from ..recursive_process import RecursiveProcess
+from mod.epim.transform.util import apply_confluent_gts, merge, get_go_graphs
+from mod.epim.process import Process
+from mod.epim.gen_image import setImage
+from mod.epim.recursive_process import RecursiveProcess
 
 reduction_rules =[ ruleGMLString("""rule [
     ruleID "reduction rule"

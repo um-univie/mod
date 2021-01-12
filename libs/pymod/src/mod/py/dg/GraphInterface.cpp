@@ -5,19 +5,17 @@
 #include <mod/graph/Printer.hpp>
 #include <mod/rule/Rule.hpp>
 
-#include <iostream>
+#include <ostream>
 
-namespace mod {
-namespace dg {
-namespace Py {
+namespace mod::dg::Py {
 
 void GraphInterface_doExport() {
-	// rst: .. py:class:: DGVertex
+	// rst: .. class:: DGVertex
 	// rst:
 	// rst:		A descriptor of either a vertex in a derivation graph, or a null vertex.
 	// rst:
 	py::class_<DG::Vertex>("DGVertex", py::no_init)
-			// rst:		.. py:function:: __init__(self)
+			// rst:		.. method:: __init__()
 			// rst: 
 			// rst:			Constructs a null descriptor.
 			.def(py::init<>())
@@ -26,59 +24,59 @@ void GraphInterface_doExport() {
 			.def(py::self != py::self)
 			.def(py::self < py::self)
 			.def("__hash__", &DG::Vertex::hash)
-					// rst:		.. py::method:: __bool__(self)
+					// rst:		.. :method:: __bool__()
 					// rst:
 					// rst:			:returns: ``not isNull()``
 					// rst:			:rtype: bool
 			.def("__bool__", &DG::Vertex::operator bool)
-					// rst:		.. py:method:: isNull()
+					// rst:		.. method:: isNull()
 					// rst:
 					// rst:			:returns: whether this is a null descriptor or not.
 					// rst:			:rtype: bool
 			.def("isNull", &DG::Vertex::isNull)
-					// rst:		.. py:attribute:: id
+					// rst:		.. attribute:: id
 					// rst:
 					// rst:			(Read-only) The index of the vertex. It will be in the range :math:`[0, numVertices + numEdges[`.
 					// rst:
 					// rst:			:type: int
 					// rst:			:raises: :class:`LogicError` if it is a null descriptor.
 			.add_property("id", &DG::Vertex::getId)
-					// rst:		.. py:attribute:: dg
+					// rst:		.. attribute:: dg
 					// rst:
 					// rst:			(Read-only) The derivation graph the vertex belongs to.
 					// rst:
 					// rst:			:type: DG
 					// rst:			:raises: :class:`LogicError` if it is a null descriptor.
 			.add_property("dg", &DG::Vertex::getDG)
-					// rst:		.. py:attribute:: inDegree
+					// rst:		.. attribute:: inDegree
 					// rst:
 					// rst:			(Read-only) The in-degree of the vertex, including multiplicity of target multisets.
 					// rst:
 					// rst:			:type: int
 					// rst:			:raises: :class:`LogicError` if it is a null descriptor.
 			.add_property("inDegree", &DG::Vertex::inDegree)
-					// rst:		.. py:attribute:: inEdges
+					// rst:		.. attribute:: inEdges
 					// rst:
 					// rst:			(Read-only) A range of in-hyperedges for this vertex.
 					// rst:
 					// rst:			:type: DGInEdgeRange
 					// rst:			:raises: :class:`LogicError` if it is a null descriptor.
 			.add_property("inEdges", &DG::Vertex::inEdges)
-					// rst:		.. py:attribute:: outDegree
+					// rst:		.. attribute:: outDegree
 					// rst:
 					// rst:			(Read-only) The out-degree of the vertex, including multiplicity of source multisets.
 					// rst:
 					// rst:			:type: int
 					// rst:			:raises: :class:`LogicError` if it is a null descriptor.
 			.add_property("outDegree", &DG::Vertex::outDegree)
-					// rst:		.. py:attribute:: outEdges
+					// rst:		.. attribute:: outEdges
 					// rst:
 					// rst:			(Read-only) A range of out-hyperedges for this vertex.
 					// rst:
 					// rst:			:type: DGOutEdgeRange
 					// rst:			:raises: :class:`LogicError` if it is a null descriptor.
 			.add_property("outEdges", &DG::Vertex::outEdges)
-					// rst:		.. py:attribute:: graph
+					// rst:		.. attribute:: graph
 					// rst:
 					// rst:			(Read-only) The graph label of the vertex.
 					// rst:
@@ -86,12 +84,12 @@ void GraphInterface_doExport() {
 					// rst:			:raises: :class:`LogicError` if it is a null descriptor.
 			.add_property("graph", &DG::Vertex::getGraph);
 
-	// rst: .. py:class:: DGHyperEdge
+	// rst: .. class:: DGHyperEdge
 	// rst:
 	// rst:		A descriptor of either a hyperedge in a derivation graph, or a null edge.
 	// rst:
 	py::class_<DG::HyperEdge>("DGHyperEdge", py::no_init)
-			// rst:		.. py:function:: __init__(self)
+			// rst:		.. method:: __init__()
 			// rst:
 			// rst:			Constructs a null descriptor.
 			.def(py::init<>())
@@ -100,44 +98,44 @@ void GraphInterface_doExport() {
 			.def(py::self != py::self)
 			.def(py::self < py::self)
 			.def("__hash__", &DG::HyperEdge::hash)
-					// rst:		.. py::method:: __bool__(self)
+					// rst:		.. :method:: __bool__()
 					// rst:
 					// rst:			:returns: ``not isNull()``
 					// rst:			:rtype: bool
 			.def("__bool__", &DG::HyperEdge::operator bool)
-					// rst:		.. py:method:: isNull()
+					// rst:		.. method:: isNull()
 					// rst:
 					// rst:			:returns: whether this is a null descriptor or not.
 					// rst:			:rtype: bool
 			.def("isNull", &DG::HyperEdge::isNull)
-					// rst:		.. py:attribute:: id
+					// rst:		.. attribute:: id
 					// rst:
 					// rst:			(Read-only) The index of the hyperedge. It will be in the range :math:`[0, numVertices + numEdges[`.
 					// rst:
 					// rst:			:type: int
 					// rst:			:raises: :class:`LogicError` if it is a null descriptor.
 			.add_property("id", &DG::HyperEdge::getId)
-					// rst:		.. py:attribute:: dg
+					// rst:		.. attribute:: dg
 					// rst:
 					// rst:			(Read-only) The derivation graph the edge belongs to.
 					// rst:
 					// rst:			:type: DG
 					// rst:			:raises: :class:`LogicError` if it is a null descriptor.
 			.add_property("dg", &DG::HyperEdge::getDG)
-					// rst:		.. py:attribute:: numSources
+					// rst:		.. attribute:: numSources
 					// rst:
 					// rst:			(Read-only) The number of sources of the hyperedge.
 					// rst:
 					// rst:			:type: int
 			.add_property("numSources", &DG::HyperEdge::numSources)
-					// rst:		.. py:attribute:: sources
+					// rst:		.. attribute:: sources
 					// rst:
 					// rst:			(Read-only) The sources of the hyperedge.
 					// rst:
 					// rst:			:type: DGSourceRange
 					// rst: 		:raises: :class:`LogicError` if it is a null descriptor.
 			.add_property("sources", &DG::HyperEdge::sources)
-					// rst:		.. py:attribute:: numTargets
+					// rst:		.. attribute:: numTargets
 					// rst:
 					// rst:			(Read-only) The number of targerts of the hyperedge.
 					// rst:
@@ -150,14 +148,14 @@ void GraphInterface_doExport() {
 					// rst:			:type: DGTargetRange
 					// rst: 		:raises: :class:`LogicError` if it is a null descriptor.
 			.add_property("targets", &DG::HyperEdge::targets)
-					// rst:		.. py:attribute:: rules
+					// rst:		.. attribute:: rules
 					// rst:
 					// rst:			(Read-only) The rules associated with the hyperedge.
 					// rst:
 					// rst:			:type: DGRuleRange
 					// rst:			:raises: :class:`LogicError` if it is a null descriptor.
 			.add_property("rules", &DG::HyperEdge::rules)
-					// rst:		.. py:attribute:: inverse
+					// rst:		.. attribute:: inverse
 					// rst:
 					// rst:			(Read-only) A descriptor for the inverse hyperedge of this one, if it exists.
 					// rst:			Otherwise a null descriptor is returned.
@@ -166,7 +164,7 @@ void GraphInterface_doExport() {
 					// rst:			:raises: :class:`LogicError` if it is a null descriptor.
 					// rst:			:raises: :class:`LogicError` if not ``dg.locked``.
 			.add_property("inverse", &DG::HyperEdge::getInverse)
-					// rst:		.. py:method:: print(printer=GraphPrinter(), nomatchColour="gray", matchColour="")
+					// rst:		.. method:: print(printer=GraphPrinter(), nomatchColour="gray", matchColour="")
 					// rst:
 					// rst:			Print the derivations represented by the hyperedge.
 					// rst:			All possible Double-Pushout diagrams are printed.
@@ -202,6 +200,4 @@ void GraphInterface_doExport() {
 			.def("__len__", &DG::RuleRange::size);
 }
 
-} // namespace Py
-} // namespace dg
-} // namespace mod
+} // namespace mod::dg::Py

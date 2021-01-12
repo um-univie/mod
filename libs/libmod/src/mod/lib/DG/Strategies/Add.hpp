@@ -1,14 +1,13 @@
-#ifndef MOD_LIB_DG_STRATEGIES_ADD_H
-#define MOD_LIB_DG_STRATEGIES_ADD_H
+#ifndef MOD_LIB_DG_STRATEGIES_ADD_HPP
+#define MOD_LIB_DG_STRATEGIES_ADD_HPP
 
 #include <mod/lib/DG/Strategies/Strategy.hpp>
 
 namespace mod {
 template<typename Sig>
 class Function;
-namespace lib {
-namespace DG {
-namespace Strategies {
+} // namespace mod
+namespace mod::lib::DG::Strategies {
 
 struct Add : Strategy {
 	// pre: no nullptrs in graphs
@@ -30,10 +29,6 @@ private:
 	const IsomorphismPolicy graphPolicy;
 };
 
-} // namespace Strategies
-} // namespace DG
-} // namespace lib
-} // namespace mod
+} // namespace mod::lib::DG::Strategies
 
-#endif /* MOD_LIB_DG_STRATEGIES_ADD_H */
-
+#endif // MOD_LIB_DG_STRATEGIES_ADD_HPP

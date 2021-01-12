@@ -3,12 +3,12 @@
 
 #include <gml/ast.hpp>
 
-namespace gml {
-namespace parser {
+#include <string_view>
 
-bool parse(std::istream &s, ast::KeyValue &ast, std::ostream &err);
+namespace gml::parser {
 
-} // namespace parser
-} // namespace gml
+bool parse(std::string_view src, ast::KeyValue &ast, std::ostream &err);
 
-#endif /* GML_PARSER_HPP */
+} // namespace gml::parser
+
+#endif // GML_PARSER_HPP

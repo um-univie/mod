@@ -1,5 +1,5 @@
-#ifndef MOD_LIB_CHEM_OBABEL_H
-#define MOD_LIB_CHEM_OBABEL_H
+#ifndef MOD_LIB_CHEM_OBABEL_HPP
+#define MOD_LIB_CHEM_OBABEL_HPP
 
 #include <mod/BuildConfig.hpp>
 #include <mod/lib/Graph/GraphDecl.hpp>
@@ -14,27 +14,23 @@
 namespace mod {
 struct AtomData;
 enum class BondType;
-namespace lib {
-namespace IO {
-namespace Graph {
-namespace Write {
+} // namespace mod
+namespace mod::lib::IO::Graph::Write {
 enum class EdgeFake3DType;
-} // namespace Write
-} // namespace Graph
-} // namespace IO
-namespace Graph {
+} // namespace mod::lib::IO::Graph::Write
+namespace mod::lib::Graph {
 struct PropStereo;
 struct Single;
-} // namespace Graph
-namespace Rules {
+} // namespace mod::lib::Graph
+namespace mod::lib::Rules {
 struct PropStereoCore;
-} // namespace Rules
-namespace Chem {
+} // namespace mod::lib::Rules
+namespace mod::lib::Chem {
 
 #ifndef MOD_HAVE_OPENBABEL
 #define MOD_NO_OPENBABEL_ERROR            \
-	IO::log() << "Call to '" << __FUNCTION__ << "' failed." << std::endl; \
-	IO::log() << "Open Babel features are not available. Rebuild with Open Babel enabled." << std::endl;
+	std::cout << "Call to '" << __FUNCTION__ << "' failed." << std::endl; \
+	std::cout << "Open Babel features are not available. Rebuild with Open Babel enabled." << std::endl;
 #else
 
 struct OBMolHandle {
@@ -77,8 +73,6 @@ std::tuple<OBMolHandle, OBMolHandle, OBMolHandle> makeOBMol(const lib::Rules::La
 		const bool withHydrogen);
 #endif
 
-} // namespace Chem
-} // namespace lib
-} // namespace mod
+} // namespace mod::lib::Chem
 
-#endif /* MOD_LIB_CHEM_OBABEL_H */
+#endif // MOD_LIB_CHEM_OBABEL_HPP

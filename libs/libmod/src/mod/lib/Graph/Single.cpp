@@ -2,7 +2,6 @@
 
 #include <mod/Misc.hpp>
 #include <mod/graph/Graph.hpp>
-#include <mod/rule/Rule.hpp>
 #include <mod/lib/Chem/MoleculeUtil.hpp>
 #include <mod/lib/Chem/OBabel.hpp>
 #include <mod/lib/Chem/Smiles.hpp>
@@ -19,8 +18,6 @@
 #include <mod/lib/IO/Graph.hpp>
 #include <mod/lib/LabelledGraph.hpp>
 #include <mod/lib/Random.hpp>
-#include <mod/lib/Rules/GraphToRule.hpp>
-#include <mod/lib/Rules/Real.hpp>
 #include <mod/lib/Term/WAM.hpp>
 
 #include <jla_boost/graph/morphism/callbacks/Limit.hpp>
@@ -55,7 +52,7 @@ bool sanityCheck(const GraphType &g, const PropString &pString, std::ostream &s)
 		// check loop
 		if(e.first == e.second) {
 			s << "Graph::sanityCheck:\tloop edge found on vertex "
-							<< get(boost::vertex_index_t(), g, e.first) << "('" << pString[e.first] << "')" << std::endl;
+			  << get(boost::vertex_index_t(), g, e.first) << "('" << pString[e.first] << "')" << std::endl;
 			return false;
 		}
 		// check parallelness
@@ -63,8 +60,9 @@ bool sanityCheck(const GraphType &g, const PropString &pString, std::ostream &s)
 			auto ep = edgesSorted[i - 1];
 			if(e == ep) {
 				s << "Graph::sanityCheck:\tparallel edges found between "
-								<< get(boost::vertex_index_t(), g, e.first) << "('" << pString[e.first]
-								<< "') and " << get(boost::vertex_index_t(), g, e.second) << " ('" << pString[e.second] << "')" << std::endl;
+				  << get(boost::vertex_index_t(), g, e.first) << "('" << pString[e.first]
+				  << "') and " << get(boost::vertex_index_t(), g, e.second) << " ('" << pString[e.second] << "')"
+				  << std::endl;
 				return false;
 			}
 		}
@@ -82,15 +80,15 @@ bool sanityCheck(const GraphType &g, const PropString &pString, std::ostream &s)
 } // namespace
 
 Single::Single(std::unique_ptr<GraphType> g, std::unique_ptr<PropString> pString, std::unique_ptr<PropStereo> pStereo)
-: g(std::move(g), std::move(pString), std::move(pStereo)),
-id(nextGraphNum++), name(getGraphName(id)) {
-	if(!sanityCheck(getGraph(), getStringState(), IO::log())) {
-		IO::log() << "Graph::sanityCheck\tfailed in graph '" << getName() << "'" << std::endl;
+		: g(std::move(g), std::move(pString), std::move(pStereo)),
+		  id(nextGraphNum++), name(getGraphName(id)) {
+	if(!sanityCheck(getGraph(), getStringState(), std::cout)) {
+		std::cout << "Graph::sanityCheck\tfailed in graph '" << getName() << "'" << std::endl;
 		MOD_ABORT;
 	}
 }
 
-Single::~Single() { }
+Single::~Single() {}
 
 const LabelledGraph &Single::getLabelledGraph() const {
 	return g;
@@ -119,9 +117,9 @@ void Single::setName(std::string name) {
 	this->name = name;
 }
 
-const std::pair<const std::string&, bool> Single::getGraphDFS() const {
+const std::pair<const std::string &, bool> Single::getGraphDFS() const {
 	if(!dfs) std::tie(dfs, dfsHasNonSmilesRingClosure) = DFSEncoding::write(getGraph(), getStringState(), false);
-	return std::pair<const std::string&, bool>(*dfs, dfsHasNonSmilesRingClosure);
+	return std::pair<const std::string &, bool>(*dfs, dfsHasNonSmilesRingClosure);
 }
 
 const std::string &Single::getGraphDFSWithIds() const {
@@ -142,7 +140,8 @@ const std::string &Single::getSmiles() const {
 		return *smiles;
 	} else {
 		std::string text;
-		text += "Graph " + boost::lexical_cast<std::string>(getId()) + " with name '" + getName() + "' is not a molecule.\n";
+		text += "Graph " + boost::lexical_cast<std::string>(getId()) + " with name '" + getName() +
+		        "' is not a molecule.\n";
 		text += "Can not generate SMILES string. GraphDFS is\n\t" + getGraphDFS().first + "\n";
 		throw LogicError(std::move(text));
 	}
@@ -161,25 +160,11 @@ const std::string &Single::getSmilesWithIds() const {
 		return *smilesWithIds;
 	} else {
 		std::string text;
-		text += "Graph " + boost::lexical_cast<std::string>(getId()) + " with name '" + getName() + "' is not a molecule.\n";
+		text += "Graph " + boost::lexical_cast<std::string>(getId()) + " with name '" + getName() +
+		        "' is not a molecule.\n";
 		text += "Can not generate SMILES string. GraphDFS is\n\t" + getGraphDFS().first + "\n";
 		throw LogicError(std::move(text));
 	}
-}
-
-std::shared_ptr<rule::Rule> Single::getBindRule() const {
-	if(!bindRule) bindRule = rule::Rule::makeRule(lib::Rules::graphToRule(g, lib::Rules::Membership::Right, getName()));
-	return bindRule;
-}
-
-std::shared_ptr<rule::Rule> Single::getIdRule() const {
-	if(!idRule) idRule = rule::Rule::makeRule(lib::Rules::graphToRule(g, lib::Rules::Membership::Context, getName()));
-	return idRule;
-}
-
-std::shared_ptr<rule::Rule> Single::getUnbindRule() const {
-	if(!unbindRule) unbindRule = rule::Rule::makeRule(lib::Rules::graphToRule(g, lib::Rules::Membership::Left, getName()));
-	return unbindRule;
 }
 
 unsigned int Single::getVertexLabelCount(const std::string &label) const {
@@ -235,7 +220,8 @@ const Single::CanonForm &Single::getCanonForm(LabelType labelType, bool withSter
 		throw LogicError("Can not canonicalise stereo.");
 	if(!canon_form_string) {
 		assert(!aut_group_string);
-		std::tie(canon_perm_string, canon_form_string, aut_group_string) = lib::Graph::getCanonForm(*this, labelType, withStereo);
+		std::tie(canon_perm_string, canon_form_string, aut_group_string) = lib::Graph::getCanonForm(*this, labelType,
+		                                                                                            withStereo);
 	}
 	assert(canon_form_string);
 	assert(aut_group_string);
@@ -257,9 +243,12 @@ namespace GM = jla_boost::GraphMorphism;
 namespace GM_MOD = lib::GraphMorphism;
 
 template<typename Finder>
-std::size_t morphism(const Single &gDomain, const Single &gCodomain, std::size_t maxNumMatches, LabelSettings labelSettings, Finder finder) {
+std::size_t
+morphism(const Single &gDomain, const Single &gCodomain, std::size_t maxNumMatches, LabelSettings labelSettings,
+         Finder finder) {
 	auto mr = GM::makeLimit(maxNumMatches);
-	lib::GraphMorphism::morphismSelectByLabelSettings(gDomain.getLabelledGraph(), gCodomain.getLabelledGraph(), labelSettings, finder, std::ref(mr));
+	lib::GraphMorphism::morphismSelectByLabelSettings(gDomain.getLabelledGraph(), gCodomain.getLabelledGraph(),
+	                                                  labelSettings, finder, std::ref(mr));
 	return mr.getNumHits();
 }
 
@@ -267,7 +256,8 @@ std::size_t isomorphismSmilesOrCanonOrVF2(const Single &gDom, const Single &gCod
 	const auto &ggDom = gDom.getLabelledGraph();
 	const auto &ggCodom = gCodom.getLabelledGraph();
 	// first try if we can compare canonical SMILES strings
-	if(get_molecule(ggDom).getIsMolecule() && get_molecule(ggCodom).getIsMolecule() && !getConfig().graph.useWrongSmilesCanonAlg.get())
+	if(get_molecule(ggDom).getIsMolecule() && get_molecule(ggCodom).getIsMolecule() &&
+	   !getConfig().graph.useWrongSmilesCanonAlg.get())
 		return gDom.getSmiles() == gCodom.getSmiles() ? 1 : 0;
 
 	// otherwise maybe we can still do canonical form comparison
@@ -281,7 +271,8 @@ std::size_t isomorphismSmilesOrCanonOrVF2(const Single &gDom, const Single &gCod
 
 } // namespace
 
-std::size_t Single::isomorphismVF2(const Single &gDom, const Single &gCodom, std::size_t maxNumMatches, LabelSettings labelSettings) {
+std::size_t Single::isomorphismVF2(const Single &gDom, const Single &gCodom, std::size_t maxNumMatches,
+                                   LabelSettings labelSettings) {
 	return morphism(gDom, gCodom, maxNumMatches, labelSettings, GM_MOD::VF2Isomorphism());
 }
 
@@ -310,7 +301,8 @@ bool Single::isomorphic(const Single &gDom, const Single &gCodom, LabelSettings 
 	MOD_ABORT;
 }
 
-std::size_t Single::isomorphism(const Single &gDom, const Single &gCodom, std::size_t maxNumMatches, LabelSettings labelSettings) {
+std::size_t
+Single::isomorphism(const Single &gDom, const Single &gCodom, std::size_t maxNumMatches, LabelSettings labelSettings) {
 	++getConfig().graph.numIsomorphismCalls();
 	if(maxNumMatches == 1)
 		return isomorphic(gDom, gCodom, labelSettings) ? 1 : 0;
@@ -324,7 +316,8 @@ std::size_t Single::isomorphism(const Single &gDom, const Single &gCodom, std::s
 	return isomorphismVF2(gDom, gCodom, maxNumMatches, labelSettings);
 }
 
-std::size_t Single::monomorphism(const Single &gDom, const Single &gCodom, std::size_t maxNumMatches, LabelSettings labelSettings) {
+std::size_t
+Single::monomorphism(const Single &gDom, const Single &gCodom, std::size_t maxNumMatches, LabelSettings labelSettings) {
 	return morphism(gDom, gCodom, maxNumMatches, labelSettings, GM_MOD::VF2Monomorphism());
 }
 
@@ -344,30 +337,33 @@ Single makePermutation(const Single &g) {
 		throw mod::FatalError("Can not (yet) permute graphs with stereo information.");
 	std::unique_ptr<PropString> pString;
 	auto gBoost = lib::makePermutedGraph(g.getGraph(),
-					[&pString](GraphType & gNew) {
-						pString.reset(new PropString(gNew));
-					},
-	[&g, &pString](Vertex vOld, const GraphType &gOld, Vertex vNew, GraphType & gNew) {
-		pString->addVertex(vNew, g.getStringState()[vOld]);
-	},
-	[&g, &pString](Edge eOld, const GraphType &gOld, Edge eNew, GraphType & gNew) {
-		pString->addEdge(eNew, g.getStringState()[eOld]);
-	}
+	                                     [&pString](GraphType &gNew) {
+		                                     pString.reset(new PropString(gNew));
+	                                     },
+	                                     [&g, &pString](Vertex vOld, const GraphType &gOld, Vertex vNew,
+	                                                    GraphType &gNew) {
+		                                     pString->addVertex(vNew, g.getStringState()[vOld]);
+	                                     },
+	                                     [&g, &pString](Edge eOld, const GraphType &gOld, Edge eNew, GraphType &gNew) {
+		                                     pString->addEdge(eNew, g.getStringState()[eOld]);
+	                                     }
 	);
 	Single gPerm(std::move(gBoost), std::move(pString), nullptr);
 	if(getConfig().graph.checkIsoInPermutation.get()) {
 		const bool iso = 1 == Single::isomorphismVF2(g, gPerm, 1,
-				{LabelType::String, LabelRelation::Isomorphism, false, LabelRelation::Isomorphism});
+		                                             {LabelType::String, LabelRelation::Isomorphism, false,
+		                                              LabelRelation::Isomorphism});
 		if(!iso) {
 			IO::Graph::Write::Options graphLike, molLike;
 			graphLike.EdgesAsBonds(true).RaiseCharges(true).CollapseHydrogens(true).WithIndex(true);
-			molLike.CollapseHydrogens(true).EdgesAsBonds(true).RaiseCharges(true).SimpleCarbons(true).WithColour(true).WithIndex(true);
+			molLike.CollapseHydrogens(true).EdgesAsBonds(true).RaiseCharges(true).SimpleCarbons(true).WithColour(
+					true).WithIndex(true);
 			IO::Graph::Write::summary(g, graphLike, molLike);
 			IO::Graph::Write::summary(gPerm, graphLike, molLike);
 			IO::Graph::Write::gml(g, false);
 			IO::Graph::Write::gml(gPerm, false);
-			IO::log() << "g:     " << g.getSmiles() << std::endl;
-			IO::log() << "gPerm: " << gPerm.getSmiles() << std::endl;
+			std::cout << "g:     " << g.getSmiles() << std::endl;
+			std::cout << "gPerm: " << gPerm.getSmiles() << std::endl;
 			MOD_ABORT;
 		}
 	}

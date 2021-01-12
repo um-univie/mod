@@ -13,7 +13,7 @@ def check(exp, checks, resSize=1):
 	global checkNum
 	print("Check", checkNum, exp)
 	checkNum += 1
-	res = rc.eval(exp)
+	res = list(set(rc.eval(exp)))
 	def redo():
 		rc.eval(exp, verbosity=20)
 	if len(rc.products) != 0:

@@ -6,10 +6,7 @@
 
 #include <ostream>
 
-namespace mod {
-namespace rule {
-
-namespace RCExp {
+namespace mod::rule::RCExp {
 
 // Parallel
 //------------------------------------------------------------------------------
@@ -207,7 +204,4 @@ std::ostream &ComposeSuper::print(std::ostream &s) const {
 	return s << "rcSuper(allowPartial=" << std::boolalpha << allowPartial << ", enforceConstraints=" << enforceConstraints << ", ";
 }
 
-} // namespace RCExp
-
-} // namespace rule
-} // namespace mod
+} // namespace mod::rule::RCExp

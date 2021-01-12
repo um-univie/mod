@@ -4,9 +4,7 @@
 #include <mod/rule/GraphInterface.hpp>
 #include <mod/rule/Rule.hpp>
 
-namespace mod {
-namespace rule {
-namespace Py {
+namespace mod::rule::Py {
 namespace {
 
 py::object getLabelType(std::shared_ptr<Rule> r) {
@@ -22,12 +20,22 @@ void Rule_doExport() {
 	std::pair<std::string, std::string>(Rule::*
 	printWithOptions)(const graph::Printer&, const graph::Printer&) const = &Rule::print;
 
-	// rst: .. py:class:: Rule
+	// rst: .. class:: Rule
 	// rst:
-	// rst:		Model of a transformation rule in the Double Pushout formalism.
+	// rst:		Model of a transformation rule in the Double Pushout formalism,
+	// rst:		as the span :math:`L \leftarrow K \rightarrow R`.
+	// rst:		The three graphs are referred to as respectively
+	// rst:		the "left", "context", and "right" graphs of the rule.
+	// rst:
+	// rst:		The class implements the :class:`protocols.Graph` protocol,
+	// rst:		which gives access to a graph view of the rule which has the left, context, and right graphs
+	// rst:		combined into a single graph, called the core graph.
+	// rst:		In addition to the combined graph view that this claas offers,
+	// rst:		there are also three graph views representing the :attr:`left`, :attr:`context`
+	// rst:		See :ref:`py-Rule/GraphInterface` for details of how to use these four graph interfaces.
 	// rst:
 	py::class_<Rule, std::shared_ptr<Rule>, boost::noncopyable>("Rule", py::no_init)
-			// rst:		.. py:attribute:: id
+			// rst:		.. attribute:: id
 			// rst:
 			// rst:			(Read-only) The unique instance id among all :class:`Rule` instances.
 			// rst:
@@ -35,56 +43,37 @@ void Rule_doExport() {
 			.add_property("id", &Rule::getId)
 			.def(str(py::self))
 					//------------------------------------------------------------------
-					// rst:		.. py:attribute:: numVertices
-					// rst:
-					// rst:			(Read-only) The number of vertices in the rule.
-					// rst:
-					// rst:			:type: int
+					// Graph
 			.add_property("numVertices", &Rule::numVertices)
-					// rst:		.. py:attribute:: vertices
-					// rst:
-					// rst:			(Read-only) An iterable of all vertices in the rule.
-					// rst:
-					// rst:			:type: RuleVertexRange
 			.add_property("vertices", &Rule::vertices)
-					// rst:		.. py:attribute:: numEdges
-					// rst:
-					// rst:			(Read-only) The number of edges in the rule.
-					// rst:
-					// rst:			:type: int
 			.add_property("numEdges", &Rule::numEdges)
-					// rst:		.. py:attribute:: edges
-					// rst:
-					// rst:			(Read-only) An iterable of all edges in the rule.
-					// rst:
-					// rst:			:type: RuleEdgeRange
 			.add_property("edges", &Rule::edges)
-					// rst:		.. py:attribute:: left
+					// rst:		.. attribute:: left
 					// rst:
 					// rst:			(Read-only) A proxy object representing the left graph of the rule.
 					// rst:
-					// rst:			:type: RuleLeftGraph
+					// rst:			:type: LeftGraph
 			.add_property("left", &Rule::getLeft)
-					// rst:		.. py:attribute:: context
+					// rst:		.. attribute:: context
 					// rst:
 					// rst:			(Read-only) A proxy object representing the context graph of the rule.
 					// rst:
-					// rst:			:type: RuleContextGraph
+					// rst:			:type: ContextGraph
 			.add_property("context", &Rule::getContext)
-					// rst:		.. py:attribute:: right
+					// rst:		.. attribute:: right
 					// rst:
 					// rst:			(Read-only) A proxy object representing the right graph of the rule.
 					// rst:
-					// rst:			:type: RuleRightGraph
+					// rst:			:type: RightGraph
 			.add_property("right", &Rule::getRight)
 					//------------------------------------------------------------------
-					// rst:		.. py:method:: makeInverse()
+					// rst:		.. method:: makeInverse()
 					// rst:
 					// rst:			:returns: a rule representing the inversion of this rule.
 					// rst:			:rtype: Rule
 					// rst:			:raises: :class:`LogicError` if inversion is not possible (due to matching constraints).
 			.def("makeInverse", &Rule::makeInverse)
-					// rst:		.. py:method:: print()
+					// rst:		.. method:: print()
 					// rst:		               print(first, second=None)
 					// rst:
 					// rst:			Print the rule, using either the default options or the options in ``first`` and ``second``.
@@ -100,54 +89,54 @@ void Rule_doExport() {
 					// rst:			:rtype: tuple[str, str]
 			.def("print", printWithoutOptions)
 			.def("print", printWithOptions)
-					// rst:		.. py:method:: printTermState
+					// rst:		.. method:: printTermState
 					// rst:
 					// rst:			Print the term state for the rule.
 			.def("printTermState", &Rule::printTermState)
-					// rst:		.. py:method:: getGMLString(withCoords=False)
+					// rst:		.. method:: getGMLString(withCoords=False)
 					// rst:
 					// rst:			:returns: the :ref:`GML <rule-gml>` representation of the rule,
 					// rst:			          optionally with generated 2D coordinates.
 					// rst:			:rtype: str
-					// rst:			:raises: :py:class:`LogicError` when coordinates are requested, but
+					// rst:			:raises: :class:`LogicError` when coordinates are requested, but
 					// rst:			         none can be generated.
 			.def("getGMLString", &Rule::getGMLString)
-					// rst:		.. py:method:: printGML(withCoords=False)
+					// rst:		.. method:: printGML(withCoords=False)
 					// rst:
 					// rst:			Print the rule in :ref:`GML <rule-gml>` format,
 					// rst:			optionally with generated 2D coordinates.
 					// rst:
 					// rst:			:returns: the filename of the printed GML file.
 					// rst:			:rtype: str
-					// rst:			:raises: :py:class:`LogicError` when coordinates are requested, but
+					// rst:			:raises: :class:`LogicError` when coordinates are requested, but
 					// rst:			         none can be generated.
 			.def("printGML", &Rule::printGML)
-					// rst:		.. py:attribute:: name
+					// rst:		.. attribute:: name
 					// rst:
 					// rst:			The name of the rule. The default name includes the unique instance id.
 					// rst:
 					// rst:			:type: str
 			.add_property("name", py::make_function(&Rule::getName,
 			                                        py::return_value_policy<py::copy_const_reference>()), &Rule::setName)
-					// rst:		.. py:attribute:: labelType
+					// rst:		.. attribute:: labelType
 					// rst:
 					// rst:			(Read-only) The intended label type for this rule, or None if no specific label type is intended.
 					// rst:
 					// rst:			:type: LabelType
 			.add_property("labelType", &getLabelType)
-					// rst:		.. py:attribute:: numLeftComponents
+					// rst:		.. attribute:: numLeftComponents
 					// rst:
 					// rst:			(Read-only) The number of connected components of the left graph.
 					// rst:
 					// rst:			:type: :cpp:type:`std::size_t`
 			.add_property("numLeftComponents", &Rule::getNumLeftComponents)
-					// rst:		.. py:attribute:: numRightComponents
+					// rst:		.. attribute:: numRightComponents
 					// rst:
 					// rst:			(Read-only) The number of connected components of the right graph.
 					// rst:
 					// rst:			:type: :cpp:type:`std::size_t`
 			.add_property("numRightComponents", &Rule::getNumRightComponents)
-					// rst:		.. py:method:: isomorphism(other, maxNumMatches=1, labelSettings=LabelSettings(LabelType.String, LabelRelation.Isomorphism))
+					// rst:		.. method:: isomorphism(other, maxNumMatches=1, labelSettings=LabelSettings(LabelType.String, LabelRelation.Isomorphism))
 					// rst:
 					// rst:			:param Rule other: the other :class:`Rule` for comparison.
 					// rst:			:param int maxNumMatches: the maximum number of isomorphisms to search for.
@@ -155,7 +144,7 @@ void Rule_doExport() {
 					// rst:			:returns: the number of isomorphisms found between ``other`` and this rule, but at most ``maxNumMatches``.
 					// rst:			:rtype: int
 			.def("isomorphism", &Rule::isomorphism)
-					// rst:		.. py:method:: monomorphism(host, maxNumMatches=1, labelSettings=LabelSettings(LabelType.String, LabelRelation.Isomorphism))
+					// rst:		.. method:: monomorphism(host, maxNumMatches=1, labelSettings=LabelSettings(LabelType.String, LabelRelation.Isomorphism))
 					// rst:
 					// rst:			:param Rule host: the host :class:`Rule` to check for subgraphs.
 					// rst:			:param int maxNumMatches: the maximum number of morphisms to search for.
@@ -163,7 +152,7 @@ void Rule_doExport() {
 					// rst:			:returns: the number of monomorphisms from this rule to subgraphs of ``host``, though at most ``maxNumMatches``.
 					// rst:			:rtype: int
 			.def("monomorphism", &Rule::monomorphism)
-					// rst:		.. py:method:: isomorphicLeftRight(other, labelSettings=LabelSettings(LabelType.String, LabelRelation.Isomorphism))
+					// rst:		.. method:: isomorphicLeftRight(other, labelSettings=LabelSettings(LabelType.String, LabelRelation.Isomorphism))
 					// rst:
 					// rst:			:param Rule other: the other :class:`Rule` for comparison.
 					// rst:			:param LabelSettings labelSettings: the label settings to use during the search.
@@ -171,7 +160,7 @@ void Rule_doExport() {
 					// rst:			:rtype: bool
 			.def("isomorphicLeftRight", &Rule::isomorphicLeftRight,
 			     (py::arg("labelSettings") = LabelSettings(LabelType::String, LabelRelation::Isomorphism)))
-					// rst:		.. py:method:: getVertexFromExternalId(id)
+					// rst:		.. method:: getVertexFromExternalId(id)
 					// rst:
 					// rst:			If the rule was not loaded from an external data format, then this function
 					// rst:			always return a null descriptor.
@@ -181,28 +170,28 @@ void Rule_doExport() {
 					// rst:			:param int id: the external id to find the vertex descriptor for.
 					// rst:			:returns: the vertex descriptor for the given external id.
 					// rst:		            The descriptor is null if the external id was not used.
-					// rst:			:rtype: RuleVertex
+					// rst:			:rtype: Vertex
 			.def("getVertexFromExternalId", &Rule::getVertexFromExternalId)
-					// rst:		.. py:attribute:: minExternalId
+					// rst:		.. attribute:: minExternalId
 					// rst:		                  maxExternalId
 					// rst:
 					// rst:			If the rule was not loaded from an external data format, then these attributes
 					// rst:			are always return 0. Otherwise, they are the minimum/maximum external id from which
-					// rst:			non-null vertices can be obtained from :py:meth:`getVertexFromExternalId`.
+					// rst:			non-null vertices can be obtained from :meth:`getVertexFromExternalId`.
 					// rst:			If no such minimum and maximum exists, then they are 0.
 					// rst:
 					// rst:			:type: int
 			.add_property("minExternalId", &Rule::getMinExternalId)
 			.add_property("maxExternalId", &Rule::getMaxExternalId);
 
-	// rst: .. py:data:: inputRules
+	// rst: .. data:: inputRules
 	// rst:
 	// rst:		A list of rules to which explicitly loaded rules as default are appended.
 	// rst:
 	// rst:		:type: list[Rule]
 	// rst:
 
-	// rst: .. py:method:: ruleGMLString(s, invert=False, add=True)
+	// rst: .. method:: ruleGMLString(s, invert=False, add=True)
 	// rst:
 	// rst:		Load a rule from a :ref:`GML <rule-gml>` string, and maybe store it in a global list.
 	// rst:		The name of the rule is the one specified in the GML string, though when ``invert=True``
@@ -219,9 +208,9 @@ void Rule_doExport() {
 	// rst:		:returns: the rule in the GML string, possibly inverted.
 	// rst:		:rtype: Rule
 	py::def("ruleGMLString", &Rule::ruleGMLString);
-	// rst: .. py:method:: ruleGML(f, invert=False, add=True)
+	// rst: .. method:: ruleGML(f, invert=False, add=True)
 	// rst:		
-	// rst:		Read ``file`` and pass the contents to :py:func:`ruleGMLString`.
+	// rst:		Read ``file`` and pass the contents to :func:`ruleGMLString`.
 	// rst:
 	// rst:		:param str f: name of the GML file to be loaded.
 	// rst:		:param bool invert: whether or not to invert the loaded rule.
@@ -231,6 +220,4 @@ void Rule_doExport() {
 	py::def("ruleGML", &Rule::ruleGML);
 }
 
-} // namespace Py
-} // namespace rule
-} // namespace mod
+} // namespace mod::rule::Py

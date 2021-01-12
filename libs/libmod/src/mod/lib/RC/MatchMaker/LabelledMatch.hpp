@@ -1,5 +1,5 @@
-#ifndef MOD_LIB_RC_MATCH_MAKER_LABELLED_MATCH_H
-#define MOD_LIB_RC_MATCH_MAKER_LABELLED_MATCH_H
+#ifndef MOD_LIB_RC_MATCH_MAKER_LABELLED_MATCH_HPP
+#define MOD_LIB_RC_MATCH_MAKER_LABELLED_MATCH_HPP
 
 #include <mod/Config.hpp>
 #include <mod/Error.hpp>
@@ -11,9 +11,7 @@
 
 #include <jla_boost/graph/morphism/models/PropertyVertexMap.hpp>
 
-namespace mod {
-namespace lib {
-namespace RC {
+namespace mod::lib::RC {
 constexpr int V_MorphismGen = 2;
 constexpr int V_Composition = 12;
 namespace detail {
@@ -141,8 +139,8 @@ bool handleMapToTerm(const RFirst &rFirst, const RSecond &rSecond,
 	machine.verify();
 	//		lib::IO::Rules::Write::termState(rFirst);
 	//		lib::IO::Rules::Write::termState(rSecond);
-	//		lib::IO::Term::Write::wam(termFirst.getMachine(), lib::Term::getStrings(), lib::IO::log() << "MachineFirst:\n");
-	//		lib::IO::Term::Write::wam(termSecond.getMachine(), lib::Term::getStrings(), lib::IO::log() << "MachineSecond:\n");
+	//		lib::IO::Term::Write::wam(termFirst.getMachine(), lib::Term::getStrings(), std::cout << "MachineFirst:\n");
+	//		lib::IO::Term::Write::wam(termSecond.getMachine(), lib::Term::getStrings(), std::cout << "MachineSecond:\n");
 	lib::GraphMorphism::TermData data{std::move(machine), std::move(mgu)};
 	auto mTerm = GM::addProp(std::move(m), lib::GraphMorphism::TermDataT(), std::move(data));
 	return handleMapToStereo(rFirst, rSecond, std::move(mTerm), mr, labelSettings, verbosity, logger);
@@ -173,8 +171,6 @@ bool handleMapByLabelSettings(const RFirst &rFirst, const RSecond &rSecond,
 														labelSettings, verbosity, logger);
 }
 
-} // namespace RC
-} // namespace lib
-} // namespace mod
+} // namespace mod::lib::RC
 
-#endif /* MOD_LIB_RC_MATCH_MAKER_LABELLED_MATCH_H */
+#endif // MOD_LIB_RC_MATCH_MAKER_LABELLED_MATCH_HPP

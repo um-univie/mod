@@ -1,24 +1,21 @@
-#ifndef MOD_GRAPH_FORWARDDECL_H
-#define MOD_GRAPH_FORWARDDECL_H
+#ifndef MOD_GRAPH_FORWARDDECL_HPP
+#define MOD_GRAPH_FORWARDDECL_HPP
 
-namespace mod {
-namespace graph {
+namespace mod::graph {
 struct Graph;
 struct GraphLess;
 struct Printer;
-} // namespace graph
-namespace lib {
-namespace Graph {
+} // namespace mod::graph
+namespace mod::lib {
+template<typename LGraph>
+struct LabelledUnionGraph;
+} // namespace mod::lib
+namespace mod::lib::Graph {
+struct LabelledGraph;
 struct Single;
-} // namespace Graph
-namespace IO {
-namespace Graph {
-namespace Write {
+} // namespace mod::lib::Graph
+namespace mod::lib::IO::Graph::Write {
 struct Options;
-} // namespace Write
-} // namespace Graph
-} // namespace IO
-} // namespace lib
-} // namespace mod
+} // namespace mod::lib::IO::Graph::Write
 
-#endif /* MOD_GRAPH_FORWARDDECL_H */
+#endif // MOD_GRAPH_FORWARDDECL_HPP

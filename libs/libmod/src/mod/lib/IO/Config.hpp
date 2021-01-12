@@ -2,8 +2,7 @@
 #define MOD_LIB_IO_CONFIG_HPP
 
 #include <mod/Config.hpp>
-
-#include <nlohmann/json.hpp>
+#include <mod/lib/IO/JsonUtils.hpp>
 
 namespace mod {
 

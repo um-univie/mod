@@ -1,14 +1,12 @@
-#ifndef MOD_LIB_RULES_GRAPHTORULE_H
-#define MOD_LIB_RULES_GRAPHTORULE_H
+#ifndef MOD_LIB_RULES_GRAPHTORULE_HPP
+#define MOD_LIB_RULES_GRAPHTORULE_HPP
 
 #include <mod/lib/Rules/Real.hpp>
 #include <mod/lib/Stereo/CloneUtil.hpp>
 
-#include <iostream>
+#include <ostream>
 
-namespace mod {
-namespace lib {
-namespace Rules {
+namespace mod::lib::Rules {
 
 template<typename LGraph>
 std::unique_ptr<Real> graphToRule(const LGraph &lg, Membership membership, const std::string &name) {
@@ -84,7 +82,8 @@ std::unique_ptr<Real> graphToRule(const LGraph &lg, Membership membership, const
 			return e;
 		};
 		const auto inf = Stereo::makeCloner(lg, gCore, vertexMap, edgeMap);
-		rule.pStereo = std::make_unique<PropStereoCore>(gCore, inf, inf, jla_boost::AlwaysTrue(), jla_boost::AlwaysTrue());
+		rule.pStereo = std::make_unique<PropStereoCore>(gCore, inf, inf, jla_boost::AlwaysTrue(),
+		                                                jla_boost::AlwaysTrue());
 	}
 
 	rule.initComponents();
@@ -111,8 +110,6 @@ std::unique_ptr<Real> graphToRule(const LGraph &lg, Membership membership, const
 	return res;
 }
 
-} // namespace Rules
-} // namespace lib
-} // namespace mod
+} // namespace mod::lib::Rules
 
-#endif /* MOD_LIB_RULES_GRAPHTORULE_H */
+#endif // MOD_LIB_RULES_GRAPHTORULE_HPP

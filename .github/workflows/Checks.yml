@@ -1,0 +1,23 @@
+name: CI
+on: [push, pull_request]
+jobs:
+  Checks:
+    runs-on: ubuntu-18.04
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v2
+      with:
+        fetch-depth: 0
+        submodules: 'recursive'
+    - name: Set PATH
+      run: echo "${HOME}/.local/bin" >> $GITHUB_PATH
+    - name: Install pip dependencies
+      run: |
+        sudo apt install python3-setuptools python3-wheel
+        pip3 install -r requirements_dev.txt
+    - name: Python, mypy
+      run: ./scripts/mypy.sh
+    - name: Python, flake8
+      run: ./scripts/flake8.sh
+    - name: Symbol Visibility, json
+      run: ./scripts/checkJsonVisibility.sh

@@ -1,7 +1,6 @@
 #include "DG.hpp"
 
 #include <mod/Error.hpp>
-#include <mod/Misc.hpp>
 #include <mod/dg/Builder.hpp>
 #include <mod/dg/GraphInterface.hpp>
 #include <mod/dg/Printer.hpp>
@@ -18,8 +17,9 @@
 
 #include <boost/lexical_cast.hpp>
 
-namespace mod {
-namespace dg {
+#include <iostream>
+
+namespace mod::dg {
 
 //------------------------------------------------------------------------------
 // DG
@@ -165,7 +165,7 @@ const std::vector<std::shared_ptr<graph::Graph> > &DG::getProducts() const {
 	return getNonHyper().getProducts();
 }
 
-std::pair<std::string, std::string> DG::print(const PrintData &data, const Printer &printer) const {
+std::pair<std::string, std::string> DG::print(const Printer &printer, const PrintData &data) const {
 	if(data.getDG() != getNonHyper().getAPIReference()) {
 		std::ostringstream err;
 		err << "PrintData is for another derivation graph (id=" << data.getDG()->getId()
@@ -183,7 +183,7 @@ std::string DG::dump() const {
 
 void DG::listStats() const {
 	if(!p->dg->getHasCalculated()) throw LogicError("No stats can be printed before calculation.\n");
-	else p->dg->getHyper().printStats(lib::IO::log());
+	else p->dg->getHyper().printStats(std::cout);
 }
 
 //------------------------------------------------------------------------------
@@ -246,5 +246,4 @@ void DG::diff(std::shared_ptr<DG> dg1, std::shared_ptr<DG> dg2) {
 	lib::DG::NonHyper::diff(dg1->getNonHyper(), dg2->getNonHyper());
 }
 
-} // namespace dg
-} // namespace mod
+} // namespace mod::dg

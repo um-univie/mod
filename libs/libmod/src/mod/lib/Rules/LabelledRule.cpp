@@ -7,14 +7,14 @@
 
 #include <boost/graph/connected_components.hpp>
 
-namespace mod {
-namespace lib {
-namespace Rules {
+#include <iostream>
+
+namespace mod::lib::Rules {
 
 // LabelledRule
 //------------------------------------------------------------------------------
 
-LabelledRule::LabelledRule() : g(new GraphType()) { }
+LabelledRule::LabelledRule() : g(new GraphType()) {}
 
 LabelledRule::LabelledRule(const LabelledRule &other, bool withConstraints) : LabelledRule() {
 	auto &g = *this->g;
@@ -124,7 +124,7 @@ const LabelledRule::PropTermType &get_term(const LabelledRule &r) {
 		r.pTerm.reset(new LabelledRule::PropTermType(
 				get_graph(r), r.leftMatchConstraints, r.rightMatchConstraints,
 				get_string(r), lib::Term::getStrings()
-				));
+		));
 	}
 	return *r.pTerm;
 }
@@ -146,10 +146,11 @@ const LabelledRule::PropStereoType &get_stereo(const LabelledRule &r) {
 			return std::to_string(get(boost::vertex_index_t(), get_graph(r), v)) + " left";
 		});
 		switch(leftResult) {
-		case Stereo::DeductionResult::Success: break;
+		case Stereo::DeductionResult::Success:
+			break;
 		case Stereo::DeductionResult::Warning:
 			if(!getConfig().stereo.silenceDeductionWarnings.get())
-				IO::log() << ssErr.str();
+				std::cout << ssErr.str();
 			break;
 		case Stereo::DeductionResult::Error:
 			throw StereoDeductionError(ssErr.str());
@@ -159,16 +160,18 @@ const LabelledRule::PropStereoType &get_stereo(const LabelledRule &r) {
 			return std::to_string(get(boost::vertex_index_t(), get_graph(r), v)) + " right";
 		});
 		switch(rightResult) {
-		case Stereo::DeductionResult::Success: break;
+		case Stereo::DeductionResult::Success:
+			break;
 		case Stereo::DeductionResult::Warning:
 			if(!getConfig().stereo.silenceDeductionWarnings.get())
-				IO::log() << ssErr.str();
+				std::cout << ssErr.str();
 			break;
 		case Stereo::DeductionResult::Error:
 			throw StereoDeductionError(ssErr.str());
 		}
 		r.pStereo.reset(new PropStereoCore(get_graph(r),
-				std::move(leftInference), std::move(rightInference), jla_boost::AlwaysTrue(), jla_boost::AlwaysTrue()));
+		                                   std::move(leftInference), std::move(rightInference), jla_boost::AlwaysTrue(),
+		                                   jla_boost::AlwaysTrue()));
 	}
 	return *r.pStereo;
 }
@@ -220,9 +223,9 @@ LabelledRule::LabelledRightType get_labelled_right(const LabelledRule &r) {
 }
 
 LabelledRule::Projections::Projections(const LabelledRule &r)
-: left(get_graph(r), Membership::Left),
-context(get_graph(r), Membership::Context),
-right(get_graph(r), Membership::Right) { }
+		: left(get_graph(r), Membership::Left),
+		  context(get_graph(r), Membership::Context),
+		  right(get_graph(r), Membership::Right) {}
 
 
 // LabelledSideGraph
@@ -231,7 +234,7 @@ right(get_graph(r), Membership::Right) { }
 namespace detail {
 
 LabelledSideGraph::LabelledSideGraph(const LabelledRule &r, jla_boost::GraphDPO::Membership m)
-: r(r), m(m) { }
+		: r(r), m(m) {}
 
 } // namespace detail
 
@@ -239,7 +242,7 @@ LabelledSideGraph::LabelledSideGraph(const LabelledRule &r, jla_boost::GraphDPO:
 //------------------------------------------------------------------------------
 
 LabelledLeftGraph::LabelledLeftGraph(const LabelledRule &r)
-: Base(r, jla_boost::GraphDPO::Membership::Left) { }
+		: Base(r, jla_boost::GraphDPO::Membership::Left) {}
 
 const LabelledLeftGraph::GraphType &get_graph(const LabelledLeftGraph &g) {
 	return get_left(g.r);
@@ -281,7 +284,7 @@ get_component_graph(std::size_t i, const LabelledLeftGraph &g) {
 	return LabelledLeftGraph::Base::ComponentGraph(get_graph(g), filter, filter);
 }
 
-const std::vector<boost::graph_traits<GraphType>::vertex_descriptor>&
+const std::vector<boost::graph_traits<GraphType>::vertex_descriptor> &
 get_vertex_order_component(std::size_t i, const LabelledLeftGraph &g) {
 	assert(i < get_num_connected_components(g));
 	// the number of connected components is initialized externally after construction, so we have this annoying hax
@@ -296,7 +299,7 @@ get_vertex_order_component(std::size_t i, const LabelledLeftGraph &g) {
 //------------------------------------------------------------------------------
 
 LabelledRightGraph::LabelledRightGraph(const LabelledRule &r)
-: Base(r, jla_boost::GraphDPO::Membership::Right) { }
+		: Base(r, jla_boost::GraphDPO::Membership::Right) {}
 
 const LabelledRightGraph::GraphType &get_graph(const LabelledRightGraph &g) {
 	return get_right(g.r);
@@ -338,7 +341,7 @@ LabelledRightGraph::PropMoleculeType get_molecule(const LabelledRightGraph &g) {
 	return get_molecule(g.r).getRight();
 }
 
-const std::vector<boost::graph_traits<GraphType>::vertex_descriptor>&
+const std::vector<boost::graph_traits<GraphType>::vertex_descriptor> &
 get_vertex_order_component(std::size_t i, const LabelledRightGraph &g) {
 	assert(i < get_num_connected_components(g));
 	// the number of connected components is initialized externally after construction, so we have this annoying hax
@@ -349,6 +352,4 @@ get_vertex_order_component(std::size_t i, const LabelledRightGraph &g) {
 	return g.vertex_orders[i];
 }
 
-} // namespace Rules
-} // namespace lib
-} // namespace mod
+} // namespace mod::lib::Rules

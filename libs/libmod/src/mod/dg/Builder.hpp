@@ -14,7 +14,8 @@ namespace DG {
 struct ExecuteResult;
 } // namespace DG
 } // namespace lib
-namespace dg {
+} // namespace mod
+namespace mod::dg {
 
 // rst-class: dg::Builder
 // rst:
@@ -95,13 +96,16 @@ public:
 	// rst: .. function:: std::vector<DG::HyperEdge> apply(const std::vector<std::shared_ptr<graph::Graph> > &graphs, \
 	// rst:                                                std::shared_ptr<rule::Rule> r)
 	// rst:               std::vector<DG::HyperEdge> apply(const std::vector<std::shared_ptr<graph::Graph> > &graphs, \
-	// rst:                                                std::shared_ptr<rule::Rule> r, \
+	// rst:                                                std::shared_ptr<rule::Rule> r, bool onlyProper, \
 	// rst:                                                int verbosity)
 	// rst:               std::vector<DG::HyperEdge> apply(const std::vector<std::shared_ptr<graph::Graph> > &graphs, \
-	// rst:                                                std::shared_ptr<rule::Rule> r, \
+	// rst:                                                std::shared_ptr<rule::Rule> r, bool onlyProper, \
 	// rst:                                                int verbosity, IsomorphismPolicy graphPolicy)
 	// rst:
-	// rst:		Compute proper direct derivations with `graphs` the left-hand side and `r` as the rule.
+	// rst:		Compute direct derivations using `graphs` for the left-hand side and `r` as the rule.
+	// rst:
+	// rst:		When `onlyProper` is `true`, then all of `graphs` must be used in each direct derivation.
+	// rst:		The default is `true`.
 	// rst:
 	// rst:		The given :var:`graphPolicy` refers to adding the graphs in :var:`graphs`,
 	// rst:		and it defaults to :enumerator:`IsomorphismPolicy::Check`.
@@ -111,8 +115,8 @@ public:
 	// rst:
 	// rst:		- 0 (or less): no information is printed.
 	// rst:		- 2: Print minimal information about graph binding.
-	//	rst:		- 10: Print information about morphism generation for rule composition.
-	//	rst:		- 20: Print rule composition information.
+	// rst:		- 10: Print information about morphism generation for rule composition.
+	// rst:		- 20: Print rule composition information.
 	// rst:
 	// rst:		:returns: a list of hyper edges representing the found direct derivations.
 	// rst:			The list may contain duplicates if there are multiple ways of constructing
@@ -125,10 +129,10 @@ public:
 	std::vector<DG::HyperEdge> apply(const std::vector<std::shared_ptr<graph::Graph> > &graphs,
 	                                 std::shared_ptr<rule::Rule> r);
 	std::vector<DG::HyperEdge> apply(const std::vector<std::shared_ptr<graph::Graph> > &graphs,
-	                                 std::shared_ptr<rule::Rule> r,
+	                                 std::shared_ptr<rule::Rule> r, bool onlyProper,
 	                                 int verbosity);
 	std::vector<DG::HyperEdge> apply(const std::vector<std::shared_ptr<graph::Graph> > &graphs,
-	                                 std::shared_ptr<rule::Rule> r,
+	                                 std::shared_ptr<rule::Rule> r, bool onlyProper,
 	                                 int verbosity, IsomorphismPolicy graphPolicy);
 	// rst: .. function:: void addAbstract(const std::string &description)
 	// rst:
@@ -194,7 +198,6 @@ private:
 };
 // rst-class-end:
 
-} // namespace dg
-} // namespace mod
+} // namespace mod::dg
 
 #endif /* MOD_DG_BUILDER_H */

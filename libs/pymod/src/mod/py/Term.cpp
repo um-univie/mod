@@ -2,12 +2,10 @@
 
 #include <mod/Term.hpp>
 
-namespace mod {
-namespace Py {
+namespace mod::Py {
 
 void Term_doExport() {
 	py::def("mgu", &mod::Term::mgu);
 }
 
-} // namespace Py
-} // namespace mod
+} // namespace mod::Py

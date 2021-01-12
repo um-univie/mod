@@ -1,5 +1,5 @@
-#ifndef MOD_LIB_IO_RC_H
-#define MOD_LIB_IO_RC_H
+#ifndef MOD_LIB_IO_RC_HPP
+#define MOD_LIB_IO_RC_HPP
 
 #include <mod/lib/Rules/Real.hpp>
 
@@ -7,16 +7,10 @@
 
 #include <string>
 
-namespace mod {
-namespace lib {
-namespace RC {
-class Evaluator;
-} // namespace RC
-namespace IO {
-namespace RC {
-namespace Read {
-} // namespace Read
-namespace Write {
+namespace mod::lib::RC {
+struct Evaluator;
+} // namespace mod::lib::RC
+namespace mod::lib::IO::RC::Write {
 std::string dot(const lib::RC::Evaluator &rc);
 std::string svg(const lib::RC::Evaluator &rc);
 std::string pdf(const lib::RC::Evaluator &rc);
@@ -39,10 +33,6 @@ void test(const lib::Rules::Real &rFirst, const lib::Rules::Real &rSecond, const
 	test(rFirst, rSecond, match, rNew);
 }
 
-} // namespace Write
-} // namespace RC
-} // namespace IO
-} // namespace lib
-} // namespace mod
+} // namespace mod::lib::IO::RC::Write
 
-#endif /* MOD_LIB_IO_RC_H */
+#endif // MOD_LIB_IO_RC_HPP

@@ -1,5 +1,5 @@
-#ifndef MOD_LIB_RULE_PROP_STEREO_H
-#define MOD_LIB_RULE_PROP_STEREO_H
+#ifndef MOD_LIB_RULE_PROP_STEREO_HPP
+#define MOD_LIB_RULE_PROP_STEREO_HPP
 
 #include <mod/lib/Stereo/Configuration/Configuration.hpp>
 #include <mod/lib/Stereo/EdgeCategory.hpp>
@@ -7,9 +7,7 @@
 
 #include <tuple>
 
-namespace mod {
-namespace lib {
-namespace Rules {
+namespace mod::lib::Rules {
 
 struct PropStereoCore
 		: private PropCore<PropStereoCore, GraphType, std::unique_ptr<const lib::Stereo::Configuration>, lib::Stereo::EdgeCategory> {
@@ -50,13 +48,12 @@ public:
 			if(g[v].membership != Membership::Right) l = leftInference.extractConfiguration(v);
 			if(g[v].membership != Membership::Left) r = rightInference.extractConfiguration(v);
 			{ // verify
-				const auto verify = [&g, &v](const lib::Stereo::Configuration &conf, const auto m) {
 #ifndef NDEBUG
+				const auto verify = [&g, &v](const lib::Stereo::Configuration &conf, const auto m) {
 					const auto oe = out_edges(v, g);
 					const auto d = std::count_if(oe.first, oe.second, [&g, m](const auto &e) {
 						return g[e].membership != m;
 					});
-#endif
 					int dConf = 0;
 					for(const auto &emb : conf) {
 						if(emb.type != lib::Stereo::EmbeddingEdge::Type::Edge) {
@@ -71,12 +68,13 @@ public:
 				if(l) verify(*l, Membership::Right);
 				if(r) verify(*r, Membership::Left);
 				assert(bool(l) || bool(r));
+#endif
 			} // end verify
 			vertexState.emplace_back(std::move(l), std::move(r));
 			const bool inContext = [&]() {
 				if(g[v].membership != Membership::Context) return false;
 				if(!vCallback(v)) return false;
-				for(const auto &eOut : asRange(out_edges(v, g))) {
+				for(const auto eOut : asRange(out_edges(v, g))) {
 					if(g[eOut].membership != Membership::Context) return false;
 				}
 				assert(bool(vertexState.back().left));
@@ -192,8 +190,6 @@ auto get(const PropStereoCore &p, const VertexOrEdge &ve) -> decltype(p[ve]) {
 	return p[ve];
 }
 
-} // namespace Rules
-} // namespace lib
-} // namespace mod
+} // namespace mod::lib::Rules
 
-#endif /* MOD_LIB_RULE_PROP_STEREO_H */
+#endif // MOD_LIB_RULE_PROP_STEREO_HPP

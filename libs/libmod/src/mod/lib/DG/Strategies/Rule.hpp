@@ -1,14 +1,11 @@
-#ifndef MOD_LIB_DG_STRATEGIES_RULE_H
-#define	MOD_LIB_DG_STRATEGIES_RULE_H
+#ifndef MOD_LIB_DG_STRATEGIES_RULE_HPP
+#define MOD_LIB_DG_STRATEGIES_RULE_HPP
 
 #include <mod/lib/DG/Strategies/Strategy.hpp>
 
 #include <unordered_set>
 
-namespace mod {
-namespace lib {
-namespace DG {
-namespace Strategies {
+namespace mod::lib::DG::Strategies {
 
 struct Rule : Strategy {
 	Rule(std::shared_ptr<rule::Rule> r);
@@ -26,9 +23,6 @@ private:
 	std::unordered_set<const lib::Graph::Single*> consumedGraphs; // all those from lhs of derivations
 };
 
-} // namespace Strategies
-} // namespace DG
-} // namespace lib
-} // namespace mod
+} // namespace mod::lib::DG::Strategies
 
-#endif	/* MOD_LIB_DG_STRATEGIES_RULE_H */
+#endif // MOD_LIB_DG_STRATEGIES_RULE_HPP

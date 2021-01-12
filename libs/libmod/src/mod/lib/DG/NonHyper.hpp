@@ -1,5 +1,5 @@
-#ifndef MOD_LIB_DG_NONHYPER_H
-#define MOD_LIB_DG_NONHYPER_H
+#ifndef MOD_LIB_DG_NONHYPER_HPP
+#define MOD_LIB_DG_NONHYPER_HPP
 
 #include <mod/dg/ForwardDecl.hpp>
 #include <mod/dg/DG.hpp>
@@ -18,12 +18,10 @@
 #include <utility>
 #include <vector>
 
-namespace mod {
-namespace lib {
-namespace Graph {
+namespace mod::lib::Graph {
 struct PropString;
-} // namespace Graph
-namespace DG {
+} // namespace mod::lib::Graph
+namespace mod::lib::DG {
 class HyperCreator;
 
 class NonHyper {
@@ -121,8 +119,6 @@ public:
 	static void diff(const NonHyper &dg1, const NonHyper &dg2);
 };
 
-} // namespace DG
-} // namespace lib
-} // namespace mod
+} // namespace mod::lib::DG
 
-#endif /* MOD_LIB_DG_NONHYPER_H */
+#endif // MOD_LIB_DG_NONHYPER_HPP

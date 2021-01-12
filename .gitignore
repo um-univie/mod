@@ -7,6 +7,7 @@ __pycache__
 /VERSION
 
 /.idea
+/conda/conda-bld
 /build
 /stage
 /test/py/**/out/

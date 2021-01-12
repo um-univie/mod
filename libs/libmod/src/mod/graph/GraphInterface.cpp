@@ -9,15 +9,15 @@
 #include <mod/lib/Graph/Properties/Term.hpp>
 #include <mod/lib/IO/Stereo.hpp>
 
-namespace mod {
-namespace graph {
+namespace mod::graph {
 
 //------------------------------------------------------------------------------
 // Vertex
 //------------------------------------------------------------------------------
 
-MOD_GRAPHPIMPL_Define_Vertex(Graph, graph, g->getGraph().getGraph(), g, Graph)
-MOD_GRAPHPIMPL_Define_Vertex_Undirected(Graph, graph, g->getGraph().getGraph(), g)
+MOD_GRAPHPIMPL_Define_Vertex(Graph, Graph, std::shared_ptr<Graph>,
+                             g->getGraph().getGraph(), g, Graph)
+MOD_GRAPHPIMPL_Define_Vertex_Undirected(Graph, g->getGraph().getGraph(), g)
 
 const std::string &Graph::Vertex::getStringLabel() const {
 	if(!g) throw LogicError("Can not get string label on a null vertex.");
@@ -77,18 +77,14 @@ std::string Graph::Vertex::printStereo(const Printer &p) const {
 	using boost::vertices;
 	auto v = *(vertices(graph).first + vId);
 	const auto &conf = get_stereo(gLabelled)[v];
-	return lib::IO::Stereo::Write::summary(g->getGraph(), v, *conf, p.getOptions());
+	return lib::IO::Stereo::Write::summary(g->getGraph(), v, *conf, p.getOptions(), 0, "");
 }
 
 //------------------------------------------------------------------------------
 // Edge
 //------------------------------------------------------------------------------
 
-MOD_GRAPHPIMPL_Define_Indices(Graph, graph, g->getGraph().getGraph(), g, getGraph, Graph)
-
-BOOST_CONCEPT_ASSERT((boost::ForwardIterator<Graph::VertexIterator>));
-BOOST_CONCEPT_ASSERT((boost::ForwardIterator<Graph::EdgeIterator>));
-BOOST_CONCEPT_ASSERT((boost::ForwardIterator<Graph::IncidentEdgeIterator>));
+MOD_GRAPHPIMPL_Define_Indices(Graph, Graph, std::shared_ptr<Graph>, g->getGraph().getGraph(), g, Graph)
 
 const std::string &Graph::Edge::getStringLabel() const {
 	if(!g) throw LogicError("Can not get string label on a null edge.");
@@ -108,5 +104,4 @@ BondType Graph::Edge::getBondType() const {
 	return g->getGraph().getMoleculeState()[e];
 }
 
-} // namespace graph
-} // namespace mod
+} // namespace mod::graph
