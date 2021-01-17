@@ -14,11 +14,9 @@ std::ostream &operator<<(std::ostream &s, const std::vector<T> &v) {
 }
 
 struct T {
-
 	friend std::ostream &operator<<(std::ostream &s, const T &t) {
 		return s << "i = " << t.i << ", d = " << t.d << ", s = '" << t.s << "'";
 	}
-
 public:
 	int i = 0;
 	double d = 0;
@@ -26,18 +24,16 @@ public:
 };
 
 struct V {
-
 	friend std::ostream &operator<<(std::ostream &s, const V &v) {
 		return s << "vi = " << v.vi << ", vd = " << v.vd << ", vs = " << v.vs;
 	}
-
 public:
 	std::vector<int> vi;
 	std::vector<double> vd;
 	std::vector<std::string> vs;
 };
 
-void print(std::ostream &) { }
+void print(std::ostream &) {}
 
 template<typename Attr>
 void print(std::ostream &s, const Attr &attr) {
@@ -45,14 +41,12 @@ void print(std::ostream &s, const Attr &attr) {
 }
 
 template<typename Expression, typename ...Attr>
-void test(std::string str, const Expression &expr, Attr &...attr) {
-	std::cout << "Testing: '" << str << "' with '" << asConverter(expr) << "'" << std::endl << std::string(70, '-')
-			  << std::endl;
-	std::stringstream ss;
-	ss << str;
+void test(std::string src, const Expression &expr, Attr &...attr) {
+	std::cout << "Testing: '" << src << "' with '" << asConverter(expr) << "'" << std::endl << std::string(70, '-')
+	          << std::endl;
 	std::stringstream err;
 	gml::ast::KeyValue ast;
-	bool res = gml::parser::parse(ss, ast, err);
+	bool res = gml::parser::parse(src, ast, err);
 	if(!res) {
 		std::cout << err.str() << std::endl;
 		std::cout << "Parsing failed." << std::endl;
@@ -71,14 +65,12 @@ void test(std::string str, const Expression &expr, Attr &...attr) {
 }
 
 template<typename Expression, typename ...Attr>
-void fail(std::string str, const Expression &expr, Attr &...attr) {
-	std::cout << "Testing for fail: '" << str << "' with '" << asConverter(expr) << "'" << std::endl
-			  << std::string(70, '-') << std::endl;
-	std::stringstream ss;
-	ss << str;
+void fail(std::string src, const Expression &expr, Attr &...attr) {
+	std::cout << "Testing for fail: '" << src << "' with '" << asConverter(expr) << "'" << std::endl
+	          << std::string(70, '-') << std::endl;
 	std::stringstream err;
 	gml::ast::KeyValue ast;
-	bool res = gml::parser::parse(ss, ast, err);
+	bool res = gml::parser::parse(src, ast, err);
 	if(!res) {
 		std::cout << err.str() << std::endl;
 		std::cout << "Parsing failed." << std::endl;

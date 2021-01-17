@@ -1,5 +1,5 @@
-#ifndef MOD_LIB_IO_GRAPHWRITEDETAIL_H
-#define MOD_LIB_IO_GRAPHWRITEDETAIL_H
+#ifndef MOD_LIB_IO_GRAPHWRITEDETAIL_HPP
+#define MOD_LIB_IO_GRAPHWRITEDETAIL_HPP
 
 #include <mod/Error.hpp>
 #include <mod/lib/Chem/MoleculeUtil.hpp>
@@ -46,9 +46,7 @@ static constexpr unsigned int
 } // namespace Loc
 } // namespace
 
-namespace mod {
-namespace lib {
-namespace IO {
+namespace mod::lib::IO {
 
 constexpr double pi = 3.14159265358979323846;
 
@@ -66,8 +64,8 @@ inline std::pair<double, double> pointTransform(double xRaw, double yRaw, int ro
 	return pointRotation(xRaw, yRaw, rotation);
 }
 
-namespace Graph {
-namespace Write {
+} // mod::lib::IO
+namespace mod::lib::IO::Graph::Write {
 
 template<typename Graph, typename Depict, typename AdvOptions, typename BonusWriter>
 void tikz(std::ostream &s, const Options &options, const Graph &g, const Depict &depict,
@@ -747,11 +745,6 @@ void tikz(std::ostream &s, const Options &options, const Graph &g, const Depict 
 	}, idPrefix);
 }
 
-} // namespace Write
-} // namespace Graph
-} // namespace IO
-} // namespace lib
-} // namespace mod
+} // namespace mod::lib::IO::Graph::Write
 
-#endif /* MOD_LIB_IO_GRAPHWRITEDETAIL_H */
-
+#endif // MOD_LIB_IO_GRAPHWRITEDETAIL_HPP

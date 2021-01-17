@@ -33,7 +33,6 @@ void Strategy::execute(PrintSettings settings, const GraphState &input) {
 
 const GraphState &Strategy::getOutput() const {
 	assert(output);
-	assert(output->hasSubset(0));
 	return *output;
 }
 
@@ -47,12 +46,10 @@ void Strategy::printBaseInfo(PrintSettings settings) const {
 	++settings.indentLevel;
 	std::ostream &s = settings.s;
 	assert(input);
-	for(const auto &subset : input->getSubsets()) {
-		settings.indent() << "subset " << subset.first << " =";
-		for(const auto *g : subset.second)
-			s << " " << g->getName();
-		s << '\n';
-	}
+	settings.indent() << "subset =";
+	for(const auto *g : input->getSubset())
+		s << " " << g->getName();
+	s << '\n';
 	settings.indent() << "universe =";
 	if(settings.withUniverse)
 		for(const auto *g : input->getUniverse())
@@ -63,13 +60,10 @@ void Strategy::printBaseInfo(PrintSettings settings) const {
 	settings.indent() << "output:\n";
 	++settings.indentLevel;
 	// important to use getOutput(), it might be overwritten
-
-	for(const auto &subset : getOutput().getSubsets()) {
-		settings.indent() << "subset " << subset.first << " =";
-		for(const auto *g : subset.second)
-			s << " " << g->getName();
-		s << '\n';
-	}
+	settings.indent() << "subset =";
+	for(const auto *g : getOutput().getSubset())
+		s << " " << g->getName();
+	s << '\n';
 	settings.indent() << "universe =";
 	if(settings.withUniverse)
 		for(const auto *g : getOutput().getUniverse())

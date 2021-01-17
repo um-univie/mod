@@ -1,5 +1,5 @@
-#ifndef MOD_LIB_RULES_LABELLED_RULE_H
-#define MOD_LIB_RULES_LABELLED_RULE_H
+#ifndef MOD_LIB_RULES_LABELLED_RULE_HPP
+#define MOD_LIB_RULES_LABELLED_RULE_HPP
 
 #include <mod/lib/GraphMorphism/Constraints/Constraint.hpp>
 #include <mod/lib/Rules/ConnectedComponent.hpp>
@@ -11,9 +11,7 @@
 
 #include <vector>
 
-namespace mod {
-namespace lib {
-namespace Rules {
+namespace mod::lib::Rules {
 struct LabelledLeftGraph;
 struct LabelledRightGraph;
 
@@ -63,7 +61,6 @@ public:
 	friend LabelledLeftType get_labelled_left(const LabelledRule &r);
 	friend LabelledRightType get_labelled_right(const LabelledRule &r);
 private:
-
 	struct Projections {
 		Projections(const LabelledRule &r);
 	public:
@@ -78,7 +75,7 @@ public:
 	mutable std::unique_ptr<PropTermType> pTerm;
 	mutable std::unique_ptr<PropStereoType> pStereo;
 	std::vector<std::unique_ptr<LeftMatchConstraint> > leftMatchConstraints;
-	std::vector<std::unique_ptr<RightMatchConstraint> >rightMatchConstraints;
+	std::vector<std::unique_ptr<RightMatchConstraint> > rightMatchConstraints;
 private:
 	mutable std::unique_ptr<PropMoleculeType> pMolecule;
 public:
@@ -127,7 +124,7 @@ public:
 public:
 	friend PropMoleculeType get_molecule(const LabelledLeftGraph &g);
 public:
-	friend const std::vector<boost::graph_traits<GraphType>::vertex_descriptor>&
+	friend const std::vector<boost::graph_traits<GraphType>::vertex_descriptor> &
 	get_vertex_order_component(std::size_t i, const LabelledLeftGraph &g);
 };
 
@@ -154,12 +151,10 @@ public:
 public:
 	friend PropMoleculeType get_molecule(const LabelledRightGraph &g);
 public:
-	friend const std::vector<boost::graph_traits<GraphType>::vertex_descriptor>&
+	friend const std::vector<boost::graph_traits<GraphType>::vertex_descriptor> &
 	get_vertex_order_component(std::size_t i, const LabelledRightGraph &g);
 };
 
-} // namespace Rules
-} // namespace lib
-} // namespace mod
+} // namespace mod::lib::Rules
 
-#endif /* MOD_LIB_RULES_LABELLED_RULE_H */
+#endif // MOD_LIB_RULES_LABELLED_RULE_HPP

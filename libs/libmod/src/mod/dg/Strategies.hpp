@@ -15,7 +15,8 @@ namespace mod {
 struct Derivation;
 template<typename Sig>
 class Function;
-namespace dg {
+} // namespace mod
+namespace mod::dg {
 
 // rst-class: dg::Strategy
 // rst:
@@ -140,7 +141,6 @@ public:
 };
 // rst-class-end:
 
-} // namespace dg
-} // namespace mod
+} // namespace mod::dg
 
 #endif /* MOD_DG_STRATEGIES_H */

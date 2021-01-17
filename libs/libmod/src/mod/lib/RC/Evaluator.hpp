@@ -1,8 +1,9 @@
-#ifndef MOD_LIB_RC_EVALCONTEXT_H
-#define   MOD_LIB_RC_EVALCONTEXT_H
+#ifndef MOD_LIB_RC_EVALCONTEXT_HPP
+#define MOD_LIB_RC_EVALCONTEXT_HPP
 
 #include <mod/Config.hpp>
 #include <mod/rule/ForwardDecl.hpp>
+#include <mod/lib/Rules/GraphAsRuleCache.hpp>
 
 #include <boost/graph/adjacency_list.hpp>
 
@@ -10,12 +11,9 @@
 #include <unordered_map>
 #include <unordered_set>
 
-namespace mod {
-namespace lib {
-namespace RC {
+namespace mod::lib::RC {
 
 struct Evaluator {
-
 	enum class VertexKind {
 		Rule, Composition
 	};
@@ -40,7 +38,7 @@ public:
 	Evaluator(std::unordered_set<std::shared_ptr<rule::Rule>> database, LabelSettings labelSettings);
 	const std::unordered_set<std::shared_ptr<rule::Rule>> &getRuleDatabase() const;
 	const std::unordered_set<std::shared_ptr<rule::Rule>> &getProducts() const;
-	std::unordered_set<std::shared_ptr<rule::Rule>> eval(const rule::RCExp::Expression &exp, int verbosity);
+	std::vector<std::shared_ptr<rule::Rule>> eval(const rule::RCExp::Expression &exp, int verbosity);
 	void print() const;
 	const GraphType &getGraph() const;
 public: // evalutation interface
@@ -55,13 +53,14 @@ public: // evalutation interface
 	std::shared_ptr<rule::Rule> checkIfNew(lib::Rules::Real *rCand) const;
 	// records a composition
 	void suggestComposition(const lib::Rules::Real *rFirst,
-									const lib::Rules::Real *rSecond,
-									const lib::Rules::Real *rResult);
+	                        const lib::Rules::Real *rSecond,
+	                        const lib::Rules::Real *rResult);
 private: // graph interface
 	Vertex getVertexFromRule(const lib::Rules::Real *r);
 	Vertex getVertexFromArgs(const lib::Rules::Real *rFirst, const lib::Rules::Real *rSecond);
 public:
 	const LabelSettings labelSettings;
+	Rules::GraphAsRuleCache graphAsRuleCache;
 private:
 	std::unordered_set<std::shared_ptr<rule::Rule> > database, products;
 private:
@@ -70,8 +69,6 @@ private:
 	std::map<std::pair<const lib::Rules::Real *, const lib::Rules::Real *>, Vertex> argsToVertex;
 };
 
-} // namespace RC
-} // namespace lib
-} // namespace mod
+} // namespace mod::lib::RC
 
-#endif   /* MOD_LIB_RC_EVALCONTEXT_H */
+#endif // MOD_LIB_RC_EVALCONTEXT_HPP

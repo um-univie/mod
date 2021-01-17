@@ -1,3 +1,5 @@
+.. _mod_post:
+
 ****************************
 PostMØD (``mod_post``)
 ****************************
@@ -37,6 +39,17 @@ Options
 
   When running ``make``, use ``-j <N>`` as additional arguments.
   This parameter defaults to 2.
+
+.. option:: --install-format
+            --install-format-sudo
+
+  Compile the common Latex preamble used for figure generation
+  and install it. Use the ``-sudo`` version to install using ``sudo``.
+  This may be useful to do if you encounter the issue about the format being
+  :ref:`made by different executable version <issue-fmt>`,
+  or if MØD was configured to not install the format file
+  (``-DBUILD_POST_MOD_FMT=off``).
+
 
 
 Environtment Variables

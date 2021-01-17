@@ -1,5 +1,5 @@
-#ifndef MOD_LIB_RANDOM_H
-#define	MOD_LIB_RANDOM_H
+#ifndef MOD_LIB_RANDOM_HPP
+#define MOD_LIB_RANDOM_HPP
 
 #include <jla_boost/graph/PairToRangeAdaptor.hpp>
 
@@ -10,11 +10,9 @@
 #include <map>
 #include <random>
 
-namespace mod {
-namespace lib {
+namespace mod::lib {
 
-class Random {
-public:
+struct Random {
 	using Engine = std::mt19937;
 private:
 	Random();
@@ -73,7 +71,6 @@ std::unique_ptr<Graph> makePermutedGraph(const Graph &g, Initialiser initialize,
 	return gPermutedPtr;
 }
 
-} // namespace lib
-} // namespace mod
+} // namespace mnod::lib
 
-#endif	/* MOD_LIB_RANDOM_H */
+#endif // MOD_LIB_RANDOM_HPP

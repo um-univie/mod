@@ -7,16 +7,21 @@
 #include <mod/lib/IO/Derivation.hpp>
 #include <mod/lib/Rules/Real.hpp>
 
-namespace mod {
-namespace dg {
+namespace mod::dg {
 
 //------------------------------------------------------------------------------
 // Vertex
 //------------------------------------------------------------------------------
 
-MOD_GRAPHPIMPL_Define_Vertex(DG, dg, g->getHyper().getGraph(), g, DG)
+MOD_GRAPHPIMPL_Define_Vertex_noGraph(DG, DG,
+                                     g->getHyper().getGraph(), g, DG)
 
-MOD_GRAPHPIMPL_Define_Vertex_Directed(DG, dg, g->getHyper().getGraph(), g)
+std::shared_ptr<DG> DG::Vertex::getDG() const {
+	if(!g) throw LogicError("Can not get DG on a null vertex.");
+	return g;
+}
+
+MOD_GRAPHPIMPL_Define_Vertex_Directed(DG, g->getHyper().getGraph(), g)
 
 DG::InEdgeRange DG::Vertex::inEdges() const {
 	if(!g) throw LogicError("Can not get in-edges on a null vertex.");
@@ -438,5 +443,4 @@ std::size_t DG::RuleRange::size() const {
 	return rs.size();
 }
 
-} // namespace dg
-} // namespace mod
+} // namespace mod::dg

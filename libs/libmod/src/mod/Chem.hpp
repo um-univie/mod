@@ -1,10 +1,12 @@
-#ifndef MOD_CHEM_H
-#define MOD_CHEM_H
+#ifndef MOD_CHEM_HPP
+#define MOD_CHEM_HPP
 
 #include <mod/BuildConfig.hpp>
 
 #include <cassert>
 #include <iosfwd>
+#include <tuple>
+#include <string>
 
 #include <boost/preprocessor/seq/elem.hpp>
 #include <boost/preprocessor/seq/for_each.hpp>
@@ -142,6 +144,8 @@ struct MOD_DECL AtomData {
 	// rst:		Retrieve the radical status.
 	constexpr bool getRadical() const;
 	friend constexpr bool operator==(const AtomData &a1, const AtomData &a2);
+	friend constexpr bool operator!=(const AtomData &a1, const AtomData &a2);
+	friend constexpr bool operator<(const AtomData &a1, const AtomData &a2);
 	// rst: .. function:: friend std::ostream &operator<<(std::ostream &s, const AtomData &data)
 	// rst:
 	// rst:		Format the atom data adhering to the string encoding of atoms (see :ref:`mol-enc`).
@@ -408,6 +412,15 @@ inline constexpr bool operator==(const AtomData &a1, const AtomData &a2) {
 	       && a1.getRadical() == a2.getRadical();
 }
 
+inline constexpr bool operator!=(const AtomData &a1, const AtomData &a2) {
+	return !(a1 == a2);
+}
+
+inline constexpr bool operator<(const AtomData &a1, const AtomData &a2) {
+	return std::make_tuple(a1.getAtomId(), a1.getIsotope(), a1.getCharge(), a1.getRadical())
+	       < std::make_tuple(a2.getAtomId(), a2.getIsotope(), a2.getCharge(), a2.getRadical());
+}
+
 } // namespace mod
 
-#endif /* MOD_CHEM_H */
+#endif // MOD_CHEM_HPP

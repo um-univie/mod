@@ -1,6 +1,7 @@
 cmake_minimum_required(VERSION 3.10)
 list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_LIST_DIR}/cmake)
 include(FindPythonModule)
+include(MODUtils)
 
 ###########################################################################
 # Package Properties
@@ -31,6 +32,7 @@ endif()
 ###########################################################################
 option(BUILD_DOC "Enable documentation building." ON)
 option(BUILD_POST_MOD "Enable building of the post processor." ON)
+option(BUILD_POST_MOD_FMT "Enable building of the post processor Latex format files." ON)
 option(BUILD_PY_MOD "Enable building of the Python bindings." ON)
 option(BUILD_EPIM "Enable building of the EpiM extension (requires PyMØD)." ON)
 
@@ -73,7 +75,10 @@ enable_testing()  # should be included here to add the targets in the top-level 
 ###########################################################################
 # Individual checks
 ###########################################################################
-set(CMAKE_CXX_STANDARD 14)
+if(NOT CMAKE_CXX_STANDARD)
+    set(CMAKE_CXX_STANDARD 17)
+    set(CMAKE_CXX_STANDARD_REQUIRED ON)
+endif()
 
 set(libmod_config_dependencies "")
 set(libmod_config_find_files "FindPackageHandleStandardArgs.cmake;FindPackageMessage.cmake;FindPkgConfig.cmake;SelectLibraryConfigurations.cmake")
@@ -81,14 +86,7 @@ set(libmod_config_find_files "FindPackageHandleStandardArgs.cmake;FindPackageMes
 
 # Boost
 # -------------------------------------------------------------------------
-# TODO: at Boost 1.70-1.72 there is a strange error with Boost.Pyton where the build yields:
-#    libs/pymod/CMakeFiles/pymod.dir/build.make:473: *** target pattern contains no '%'. Stop.
-#    CMakeFiles/Makefile2:681: recipe for target 'libs/pymod/CMakeFiles/pymod.dir/all' failed
-# and that line has
-#    libs/pymod/libpymod.so: Boost::python-NOTFOUND
-# so we use the CMake module only for now.
-set(Boost_NO_BOOST_CMAKE ON)
-set(v 1.72.0)
+set(v 1.73.0)
 if(BUILD_PY_MOD)
     foreach(PY 3 34 35 36 37 38 39)
         set(lib "python${PY}")
@@ -109,12 +107,11 @@ message(STATUS "(Boost include dir is ${Boost_INCLUDE_DIRS})")
 string(APPEND libmod_config_dependencies "set(Boost_NO_BOOST_CMAKE ON)\n")
 string(APPEND libmod_config_dependencies "set(BOOST_FOUND 0)\n") # TODO: remove when CMake 3.15 is required https://gitlab.kitware.com/cmake/cmake/issues/18590
 string(APPEND libmod_config_dependencies "find_dependency(Boost ${v} COMPONENTS graph iostreams)\n")
-list(APPEND libmod_config_find_files "FindBoost.cmake")
 
 
 # GraphCanon
 # -------------------------------------------------------------------------
-set(v 0.4)
+set(v 0.5)
 if(USE_NESTED_GRAPH_CANON)
     message(STATUS "GraphCanon: using external/graph_canon")
     add_subdirectory(external/graph_canon)
@@ -284,8 +281,10 @@ if(NOT hasParent)
     # https://gitlab.kitware.com/cmake/community/wikis/doc/cmake/RPATH-handling
     set(CMAKE_SKIP_BUILD_RPATH FALSE)                  # use RPATH in the build tree
     set(CMAKE_BUILD_WITH_INSTALL_RPATH FALSE)          # but not the RPATH used in installation
-    set(CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_FULL_LIBDIR}:${CMAKE_INSTALL_FULL_LIBDIR}/mod") # instead, add this one
     set(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)        # in addition to those deduced automatically
+    # use
+    # set_target_properties(theTarget PROPERTIES INSTALL_RPATH "theRPATH")
+    # on each target that needs it
 endif()
 
 add_subdirectory(libs/epim)
@@ -342,14 +341,17 @@ if(NOT hasParent)
             "${PNAME_FILE}-${CPACK_PACKAGE_VERSION}")
     set(CPACK_SOURCE_GENERATOR "TGZ")
     set(CPACK_SOURCE_IGNORE_FILES
-            ".swp$"
+            "\.swp$"
             "~$"
             "/__pycache__/"
-            ".pyc$"
-            "/.git/"
-            "/.idea/"
+            "\.pyc$"
+            "/\.git(/|$)"
+            "/\.gitmodules$"
+            "/\.idea/"
+            "/\.mypy_cache/"
             "/build/"
             "/stage/"
+            "/conda/conda-bld/"
             "/test/py/out/"
             "/test/py/summary/"
             "/test/py/.gdb_history$"

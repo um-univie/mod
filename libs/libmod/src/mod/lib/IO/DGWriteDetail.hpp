@@ -1,5 +1,5 @@
-#ifndef MOD_LIB_IO_DGWRITEDETAIL_H
-#define   MOD_LIB_IO_DGWRITEDETAIL_H
+#ifndef MOD_LIB_IO_DGWRITEDETAIL_HPP
+#define MOD_LIB_IO_DGWRITEDETAIL_HPP
 
 #include <mod/lib/Graph/Single.hpp>
 #include <mod/lib/IO/DG.hpp>
@@ -8,11 +8,7 @@
 
 #include <boost/lexical_cast.hpp>
 
-namespace mod {
-namespace lib {
-namespace IO {
-namespace DG {
-namespace Write {
+namespace mod::lib::IO::DG::Write {
 
 template<typename T>
 std::string toStr(const T &t) {
@@ -33,8 +29,8 @@ forEachVertex(const lib::DG::Hyper &dg, const Options &options, SyntaxPrinter &p
 	const auto &g = dg.getGraph();
 	const auto &dupGraph = options.dupGraph;
 	DupVertex prevVertex = dupGraph.null_vertex();
-	for(DupVertex vDup : asRange(vertices(dupGraph))) {
-		Vertex v = dupGraph[vDup].v;
+	for(const DupVertex vDup : asRange(vertices(dupGraph))) {
+		const Vertex v = dupGraph[vDup].v;
 		if(g[v].kind != lib::DG::HyperVertexKind::Vertex) continue;
 		unsigned int vId = get(boost::vertex_index_t(), g, v);
 		const auto &graph = *g[v].graph;
@@ -57,8 +53,8 @@ void forEachExplicitHyperEdge(const lib::DG::Hyper &dg, const Options &options, 
 	const auto &g = dg.getGraph();
 	const auto &dupGraph = options.dupGraph;
 	DupVertex prevVertex = dupGraph.null_vertex();
-	for(DupVertex vDup : asRange(vertices(dupGraph))) {
-		Vertex v = dupGraph[vDup].v;
+	for(const DupVertex vDup : asRange(vertices(dupGraph))) {
+		const Vertex v = dupGraph[vDup].v;
 		if(g[v].kind != lib::DG::HyperVertexKind::Edge) continue;
 		if(!options.isHyperedgeVisible(v, dg)) continue;
 		unsigned int inDegreeVisible = options.inDegreeVisible(vDup, dg).first;
@@ -67,7 +63,7 @@ void forEachExplicitHyperEdge(const lib::DG::Hyper &dg, const Options &options, 
 		// if all sources and targets are hidden, then hide this edge
 		if(inDegreeVisible == 0 && outDegreeVisible == 0) continue;
 
-		bool isShortcutEdge = options.isShortcutEdge(vDup, dg, inDegreeVisible, outDegreeVisible);
+		const bool isShortcutEdge = options.isShortcutEdge(vDup, dg, inDegreeVisible, outDegreeVisible);
 		if(!isShortcutEdge) {
 			if(prevVertex == dupGraph.null_vertex() || dupGraph[prevVertex].v != dupGraph[vDup].v) {
 				print.comment(hyperEdgeComment(dg, v));
@@ -85,8 +81,8 @@ void forEachConnector(const lib::DG::Hyper &dg, const Options &options, SyntaxPr
 	const auto &g = dg.getGraph();
 	const auto &dupGraph = options.dupGraph;
 	DupVertex prevVertex = dupGraph.null_vertex();
-	for(DupVertex vDup : asRange(vertices(dupGraph))) {
-		Vertex v = dupGraph[vDup].v;
+	for(const DupVertex vDup : asRange(vertices(dupGraph))) {
+		const Vertex v = dupGraph[vDup].v;
 		if(g[v].kind != lib::DG::HyperVertexKind::Edge) continue;
 		if(prevVertex == dupGraph.null_vertex() || dupGraph[prevVertex].v != dupGraph[vDup].v) {
 			print.comment(detail::hyperEdgeComment(dg, v));
@@ -105,43 +101,41 @@ void forEachConnector(const lib::DG::Hyper &dg, const Options &options, SyntaxPr
 		// if all sources and targets are hidden, then hide this edge
 		if(inDegreeVisible == 0 && outDegreeVisible == 0) continue;
 
-		bool isShortcutEdge = options.isShortcutEdge(vDup, dg, inDegreeVisible, outDegreeVisible);
+		const bool isShortcutEdge = options.isShortcutEdge(vDup, dg, inDegreeVisible, outDegreeVisible);
 		if(!isShortcutEdge) {
 			// dupVertex -> count
 			std::map<DupVertex, int> tailCount, headCount;
-			for(DupVertex vDupIn : asRange(inv_adjacent_vertices(vDup, dupGraph))) {
+			for(const DupVertex vDupIn : asRange(inv_adjacent_vertices(vDup, dupGraph))) {
 				auto iter = tailCount.find(vDupIn);
 				if(iter == end(tailCount)) tailCount[vDupIn] = 1;
 				else iter->second++;
 			}
-			for(DupVertex vDupOut : asRange(adjacent_vertices(vDup, dupGraph))) {
+			for(const DupVertex vDupOut : asRange(adjacent_vertices(vDup, dupGraph))) {
 				auto iter = headCount.find(vDupOut);
 				if(iter == end(headCount)) headCount[vDupOut] = 1;
 				else iter->second++;
 			}
 
-			for(const auto p : tailCount) {
-				DupVertex vDupAdj = p.first;
-				Vertex vAdj = options.dupGraph[vDupAdj].v;
+			for(const auto[vDupAdj, count] : tailCount) {
+				const Vertex vAdj = options.dupGraph[vDupAdj].v;
 				if(!options.isVertexVisible(vAdj, dg)) continue;
 				const auto invIter = headCount.find(vDupAdj);
-				int maxCount = p.second;
+				int maxCount = count;
 				if(invIter != end(headCount)) maxCount += invIter->second;
-				tailBody(vDup, vDupAdj, p.second, maxCount);
+				tailBody(vDup, vDupAdj, count, maxCount);
 			}
-			for(const auto p : headCount) {
-				DupVertex vDupAdj = p.first;
-				Vertex vAdj = options.dupGraph[vDupAdj].v;
+			for(const auto[vDupAdj, count] : headCount) {
+				const Vertex vAdj = options.dupGraph[vDupAdj].v;
 				if(!options.isVertexVisible(vAdj, dg)) continue;
 				const auto invIter = tailCount.find(vDupAdj);
-				int maxCount = p.second;
+				int maxCount = count;
 				if(invIter != end(tailCount)) maxCount += invIter->second;
-				headBody(vDup, vDupAdj, p.second, maxCount);
+				headBody(vDup, vDupAdj, count, maxCount);
 			}
 		} else {
 			const auto vReverse = dg.getReverseEdge(v);
-			bool hasReverse = vReverse != g.null_vertex()
-			                  && options.isHyperedgeVisible(vReverse, dg);
+			const bool hasReverse = vReverse != g.null_vertex()
+			                        && options.isHyperedgeVisible(vReverse, dg);
 			if(hasReverse) {
 				// check if the reverse goes between the same vertex incarnations
 				// TODO
@@ -152,10 +146,6 @@ void forEachConnector(const lib::DG::Hyper &dg, const Options &options, SyntaxPr
 }
 
 } // namespace detail
-} // namespace Write
-} // namespace DG
-} // namespace IO
-} // namespace lib
-} // namespace mod
+} // namespace namespace mod::lib::IO::DG::Write
 
-#endif   /* MOD_LIB_IO_DGWRITEDETAIL_H */
+#endif // MOD_LIB_IO_DGWRITEDETAIL_HPP

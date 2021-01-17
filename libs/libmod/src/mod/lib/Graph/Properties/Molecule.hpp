@@ -1,5 +1,5 @@
-#ifndef MOD_LIB_GRAPH_PROP_MOLECULE_H
-#define	MOD_LIB_GRAPH_PROP_MOLECULE_H
+#ifndef MOD_LIB_GRAPH_PROP_MOLECULE_HPP
+#define MOD_LIB_GRAPH_PROP_MOLECULE_HPP
 
 #include <mod/BuildConfig.hpp>
 #include <mod/Chem.hpp>
@@ -8,9 +8,7 @@
 
 #include <boost/optional.hpp>
 
-namespace mod {
-namespace lib {
-namespace Graph {
+namespace mod::lib::Graph {
 struct PropString;
 
 struct PropMolecule : Prop<PropMolecule, AtomData, BondType> {
@@ -33,8 +31,6 @@ private:
 	mutable boost::optional<double> energy;
 };
 
-} // namespace Graph
-} // namespace lib
-} // namespace mod
+} // namespace mod::lib::Graph
 
-#endif	/* MOD_LIB_GRAPH_PROP_MOLECULE_H */
+#endif // MOD_LIB_GRAPH_PROP_MOLECULE_HPP

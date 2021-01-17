@@ -8,9 +8,9 @@
 
 #include <jla_boost/graph/PairToRangeAdaptor.hpp>
 
-namespace mod {
-namespace lib {
-namespace Graph {
+#include <iostream>
+
+namespace mod::lib::Graph {
 
 PropMolecule::PropMolecule(const GraphType &g, const PropString &pString) : Base(g), isMolecule(true) {
 	// atomData
@@ -21,7 +21,7 @@ PropMolecule::PropMolecule(const GraphType &g, const PropString &pString) : Base
 		Charge charge;
 		bool radical;
 		std::tie(atomId, isotope, charge, radical) = Chem::decodeVertexLabel(pString[v]);
-		//		IO::log() << "Decode(" << pString[v] << "): " << atomId << ", " << isotope << ", " << charge << ", " << radical << std::endl;
+		//		std::cout << "Decode(" << pString[v] << "): " << atomId << ", " << isotope << ", " << charge << ", " << radical << std::endl;
 		this->vertexState[get(boost::vertex_index_t(), g, v)] = AtomData(atomId, isotope, charge, radical);
 		if(atomId == AtomIds::Invalid) isMolecule = false;
 	}
@@ -46,12 +46,12 @@ bool PropMolecule::getIsMolecule() const {
 
 const lib::Chem::OBMolHandle &PropMolecule::getOBMol() const {
 	if(!isMolecule) {
-		IO::log() << "MoleculeState: Trying to create OpenBabel::OBMol from non-molecule." << std::endl
-				<< "Should DepictionData be used instead?" << std::endl;
+		std::cout << "MoleculeState: Trying to create OpenBabel::OBMol from non-molecule." << std::endl
+		          << "Should DepictionData be used instead?" << std::endl;
 		MOD_ABORT;
 	}
 	if(!obMol) {
-		obMol = Chem::makeOBMol(this->g, [this](Vertex v) -> const AtomData& {
+		obMol = Chem::makeOBMol(this->g, [this](Vertex v) -> const AtomData & {
 			return (*this)[v];
 		}, [this](Edge e) {
 			return (*this)[e];
@@ -78,8 +78,8 @@ double PropMolecule::getEnergy() const {
 	if(!energy) {
 #ifndef MOD_HAVE_OPENBABEL
 		MOD_NO_OPENBABEL_ERROR
-		IO::log() << "Energy calculation is not possible without Open Babel." << std::endl;
-		IO::log() << "Energy values can be manually cached on graphs if calculation is not desired." << std::endl;
+		std::cout << "Energy calculation is not possible without Open Babel." << std::endl;
+		std::cout << "Energy values can be manually cached on graphs if calculation is not desired." << std::endl;
 		std::exit(1);
 #else
 		energy = getOBMol().getEnergy();
@@ -90,12 +90,10 @@ double PropMolecule::getEnergy() const {
 
 void PropMolecule::cacheEnergy(double value) const {
 	if(energy) {
-		IO::log() << "Can not cache energy on graph already with energy." << std::endl;
+		std::cout << "Can not cache energy on graph already with energy." << std::endl;
 		MOD_ABORT;
 	}
 	energy = value;
 }
 
-} // namespace Graph
-} // namespace lib
-} // namespace mod
+} // namespace mod::lib::Graph

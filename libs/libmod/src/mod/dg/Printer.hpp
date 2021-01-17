@@ -7,8 +7,7 @@
 #include <functional>
 #include <memory>
 
-namespace mod {
-namespace dg {
+namespace mod::dg {
 
 // rst-class: dg::PrintData
 // rst:
@@ -280,7 +279,6 @@ private:
 };
 // rst-class-end:
 
-} // namespace dg
-} // namespace mod
+} // namespace mod::dg
 
 #endif /* MOD_DG_PRINTER_H */

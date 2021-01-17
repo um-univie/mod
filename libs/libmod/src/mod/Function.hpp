@@ -1,5 +1,5 @@
-#ifndef MOD_FUNCTION_H
-#define MOD_FUNCTION_H
+#ifndef MOD_FUNCTION_HPP
+#define MOD_FUNCTION_HPP
 
 // rst: The class template `Function` is used throughout the library to represent
 // rst: function objects.
@@ -11,6 +11,7 @@
 #include <functional>
 #include <iosfwd>
 #include <memory>
+#include <ostream>
 #include <string>
 
 namespace mod {
@@ -114,4 +115,4 @@ std::function<Sig> toStdFunction(std::shared_ptr<Function<Sig>> fMod) {
 
 } // namespace mod
 
-#endif    /* MOD_FUNCTION_H */
+#endif // MOD_FUNCTION_HPP

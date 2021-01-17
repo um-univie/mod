@@ -1,5 +1,5 @@
-#ifndef MOD_LIB_RULES_STATE_DEPICTION_H
-#define MOD_LIB_RULES_STATE_DEPICTION_H
+#ifndef MOD_LIB_RULES_STATE_DEPICTION_HPP
+#define MOD_LIB_RULES_STATE_DEPICTION_HPP
 
 #include <mod/BuildConfig.hpp>
 #include <mod/lib/Chem/OBabel.hpp>
@@ -14,8 +14,8 @@ struct AtomId;
 struct Charge;
 struct AtomData;
 enum class BondType;
-namespace lib {
-namespace Rules {
+} // namespace mod
+namespace mod::lib::Rules {
 struct PropStringCore;
 struct PropMoleculeCore;
 
@@ -75,8 +75,6 @@ private:
 	} cDataAll, cDataNoHydrogen;
 };
 
-} // namespace Rules
-} // namespace lib
-} // namespace mod
+} // namespace mod::lib::Rules
 
-#endif /* MOD_LIB_RULES_STATE_DEPICTION_H */
+#endif // MOD_LIB_RULES_STATE_DEPICTION_HPP

@@ -1,6 +1,6 @@
 #include "JsonUtils.hpp"
 
-#include <mod/lib/IO/FileHandle.hpp>
+#include <mod/Post.hpp>
 #include <mod/lib/IO/IO.hpp>
 
 #include <boost/crc.hpp>
@@ -16,7 +16,7 @@ std::string writeJsonFile(const std::string &name, const nlohmann::json &j) {
 	const std::uint32_t checksum = result.checksum();
 	const char version = 1;
 
-	FileHandle s(getUniqueFilePrefix() + name);
+	post::FileHandle s(getUniqueFilePrefix() + name);
 	s.stream.write(reinterpret_cast<const char *>(bytes.data()), bytes.size());
 	s.stream.write(reinterpret_cast<const char *>(&checksum), sizeof(checksum));
 	s.stream.write(&version, 1);

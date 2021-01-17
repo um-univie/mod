@@ -13,22 +13,21 @@
 #include <boost/spirit/home/x3/operator/difference.hpp>
 #include <boost/spirit/home/x3/operator/kleene.hpp>
 #include <boost/spirit/home/x3/operator/sequence.hpp>
-#include <boost/spirit/include/classic_position_iterator.hpp>
-#include <boost/spirit/include/support_multi_pass.hpp>
+#include <boost/spirit/include/support_line_pos_iterator.hpp>
 
 namespace spirit = boost::spirit;
 namespace x3 = boost::spirit::x3;
 
-namespace gml {
-namespace parser {
+namespace gml::parser {
+namespace {
+constexpr int SpacesPerTabs = 4;
+} // namespace
 
 struct LocationHandler {
-
 	template<typename Iterator, typename Context>
-	void on_success(const Iterator &first, const Iterator &last, ast::LocationInfo &locInfo, const Context&) {
-		const auto &pos = first.get_position();
-		locInfo.line = pos.line;
-		locInfo.column = pos.column;
+	void on_success(const Iterator &first, const Iterator &last, ast::LocationInfo &locInfo, const Context &) {
+		locInfo.line = get_line(first);
+		locInfo.column = get_column(first, last, SpacesPerTabs);
 	}
 };
 
@@ -41,7 +40,7 @@ struct value_class : LocationHandler {
 const x3::rule<struct skipper> skipper = "skipper";
 const x3::rule<struct gml, ast::KeyValue> gml = "gml";
 const x3::rule<struct list, ast::List> list = "list";
-const x3::rule<struct listInner, std::vector<ast::KeyValue> > listInner = "key or ']'";
+const x3::rule<struct listInner, std::vector<ast::KeyValue>> listInner = "key or ']'";
 const x3::rule<struct keyValue_class, ast::KeyValue> keyValue = "keyValue";
 const x3::rule<struct key, std::string> key = "key";
 const x3::rule<struct value_class, ast::Value> value = "value";
@@ -70,34 +69,32 @@ const auto tab_def = 't' >> x3::attr('\t');
 const auto explicitBackslash_def = '\\' >> x3::attr('\\');
 const auto implicitBackslash_def = x3::attr('\\');
 
-BOOST_SPIRIT_DEFINE(skipper, gml, list, listInner, keyValue, key, value, valueInner, string, escaped, plain, tab, explicitBackslash, implicitBackslash);
+BOOST_SPIRIT_DEFINE(skipper, gml, list, listInner, keyValue, key, value, valueInner, string, escaped, plain, tab,
+                    explicitBackslash, implicitBackslash);
 
-template<typename TextIter>
-bool parse(TextIter &textIter, const TextIter &textIterEnd, ast::KeyValue &ast, std::ostream &err) {
-	using Iter = spirit::classic::position_iterator2<TextIter>;
-	Iter iter(textIter, textIterEnd), iterEnd;
+bool parse(std::string_view src, ast::KeyValue &ast, std::ostream &err) {
+	using PosIter = spirit::line_pos_iterator<std::string_view::const_iterator>;
+	PosIter iter(src.begin()); // referenced in doError
 	auto doError = [&]() {
-		const auto &pos = iter.get_position();
-		auto lineNumber = pos.line;
-		auto column = pos.column;
-		std::string line = iter.get_currentline();
+		const auto lineNumber = iter.position();
+		const auto lineRange = get_current_line(PosIter(src.begin()), iter, PosIter(src.end()));
+		const auto column = get_column(lineRange.begin(), iter, SpacesPerTabs);
 		err << "Parsing failed at " << lineNumber << ":" << column << ":\n";
-		// each tab is 4 in the position iterator
-		for(const char c : line) {
-			if(c == '\t') err << "    ";
+		for(const char c : lineRange) {
+			if(c == '\t') err << std::string(SpacesPerTabs, ' ');
 			else err << c;
 		}
 		err << "\n";
 		err << std::string(column - 1, '-') << "^\n";
 	};
 	try {
-		bool res = x3::phrase_parse(iter, iterEnd, gml, skipper, ast);
-		if(!res || iter != iterEnd) {
+		bool res = x3::phrase_parse(iter, PosIter(src.end()), gml, skipper, ast);
+		if(!res || iter != PosIter(src.end())) {
 			doError();
 			err << "End of x3 error.\n";
 			return false;
 		}
-	} catch(const x3::expectation_failure<Iter> &e) {
+	} catch(const x3::expectation_failure<PosIter> &e) {
 		iter = e.where();
 		doError();
 		err << "Expected " << e.which() << ".\n";
@@ -107,25 +104,4 @@ bool parse(TextIter &textIter, const TextIter &textIterEnd, ast::KeyValue &ast, 
 	return true;
 }
 
-bool parse(std::istream &s, ast::KeyValue &ast, std::ostream &err) {
-
-	struct FlagsHolder {
-
-		FlagsHolder(std::istream &s) : s(s), flags(s.flags()) { }
-
-		~FlagsHolder() {
-			s.flags(flags);
-		}
-	private:
-		std::istream &s;
-		std::ios::fmtflags flags;
-	} flagsHolder(s);
-	s.unsetf(std::ios::skipws);
-
-	using Iter = spirit::multi_pass<std::istream_iterator<char> >;
-	Iter iterBegin(s), iterEnd;
-	return parse(iterBegin, iterEnd, ast, err);
-}
-
-} // namespace parser
-} // namespace gml
+} // namespace gml::parser

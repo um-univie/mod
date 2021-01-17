@@ -5,9 +5,7 @@
 #include <mod/rule/Rule.hpp>
 #include <mod/lib/Rules/LabelledRule.hpp>
 
-namespace mod {
-namespace rule {
-namespace internal {
+namespace mod::rule::internal {
 
 MOD_DECL lib::Rules::LabelledRule makeLabelledRule();
 MOD_DECL lib::Rules::GraphType &getGraph(lib::Rules::LabelledRule &r);
@@ -24,8 +22,6 @@ makePropMoleculeCore(const lib::Rules::GraphType &g, const lib::Rules::PropStrin
 
 MOD_DECL std::shared_ptr<Rule> makeRule(lib::Rules::LabelledRule &&r);
 
-} // namespace internal
-} // namespace rule
-} // namespace mod
+} // namespace mod::rule::internal
 
 #endif // MOD_RULE_INTERNAL_RULE_HPP

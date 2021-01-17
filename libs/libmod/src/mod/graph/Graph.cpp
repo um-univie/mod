@@ -1,7 +1,6 @@
 #include "Graph.hpp"
 
 #include <mod/Error.hpp>
-#include <mod/Misc.hpp>
 #include <mod/graph/Automorphism.hpp>
 #include <mod/graph/GraphInterface.hpp>
 #include <mod/graph/Printer.hpp>
@@ -14,18 +13,17 @@
 #include <mod/lib/IO/Graph.hpp>
 
 #include <boost/graph/connected_components.hpp>
+#include <boost/iostreams/device/mapped_file.hpp>
 
 #include <cassert>
 #include <fstream>
 
-namespace mod {
-namespace graph {
+namespace mod::graph {
 
 // Graph
 //------------------------------------------------------------------------------
 
 struct Graph::Pimpl {
-
 	Pimpl(std::unique_ptr<lib::Graph::Single> g) : g(std::move(g)) {
 		assert(this->g);
 	}
@@ -34,9 +32,9 @@ public:
 	std::unique_ptr<const std::map<int, std::size_t> > externalToInternalIds;
 };
 
-Graph::Graph(std::unique_ptr<lib::Graph::Single> g) : p(new Pimpl(std::move(g))) { }
+Graph::Graph(std::unique_ptr<lib::Graph::Single> g) : p(new Pimpl(std::move(g))) {}
 
-Graph::~Graph() { }
+Graph::~Graph() {}
 
 std::size_t Graph::getId() const {
 	return p->g->getId();
@@ -175,13 +173,15 @@ void checkTermParsing(const lib::Graph::Single &g, LabelSettings ls) {
 
 } // namespace
 
-std::size_t Graph::isomorphism(std::shared_ptr<graph::Graph> g, std::size_t maxNumMatches, LabelSettings labelSettings) const {
+std::size_t
+Graph::isomorphism(std::shared_ptr<graph::Graph> g, std::size_t maxNumMatches, LabelSettings labelSettings) const {
 	checkTermParsing(this->getGraph(), labelSettings);
 	checkTermParsing(g->getGraph(), labelSettings);
 	return lib::Graph::Single::isomorphism(getGraph(), g->getGraph(), maxNumMatches, labelSettings);
 }
 
-std::size_t Graph::monomorphism(std::shared_ptr<graph::Graph> g, std::size_t maxNumMatches, LabelSettings labelSettings) const {
+std::size_t
+Graph::monomorphism(std::shared_ptr<graph::Graph> g, std::size_t maxNumMatches, LabelSettings labelSettings) const {
 	checkTermParsing(this->getGraph(), labelSettings);
 	checkTermParsing(g->getGraph(), labelSettings);
 	return lib::Graph::Single::monomorphism(getGraph(), g->getGraph(), maxNumMatches, labelSettings);
@@ -236,7 +236,8 @@ void Graph::instantiateStereo() const {
 
 namespace {
 
-std::shared_ptr<Graph> handleLoadedGraph(lib::IO::Graph::Read::Data data, const std::string &source, std::ostringstream &err) {
+std::shared_ptr<Graph>
+handleLoadedGraph(lib::IO::Graph::Read::Data data, const std::string &source, std::ostringstream &err) {
 	if(!data.g) {
 		throw InputError("Error in graph loading from " + source + ".\n" + err.str());
 	}
@@ -245,10 +246,11 @@ std::shared_ptr<Graph> handleLoadedGraph(lib::IO::Graph::Read::Data data, const 
 		auto numComponents = boost::connected_components(*data.g, cMap.data());
 		if(numComponents > 1) {
 			throw InputError("Error in graph loading from " + source
-							+ ".\nThe graph is not connected (" + std::to_string(numComponents) + " components).");
+			                 + ".\nThe graph is not connected (" + std::to_string(numComponents) + " components).");
 		}
 	}
-	auto gInternal = std::make_unique<lib::Graph::Single>(std::move(data.g), std::move(data.pString), std::move(data.pStereo));
+	auto gInternal = std::make_unique<lib::Graph::Single>(std::move(data.g), std::move(data.pString),
+	                                                      std::move(data.pStereo));
 	std::shared_ptr<Graph> g = Graph::makeGraph(std::move(gInternal), std::move(data.externalToInternalIds));
 	return g;
 }
@@ -256,20 +258,19 @@ std::shared_ptr<Graph> handleLoadedGraph(lib::IO::Graph::Read::Data data, const 
 } // namespace
 
 std::shared_ptr<Graph> Graph::graphGMLString(const std::string &data) {
-	std::istringstream ss(data);
 	std::ostringstream err;
-	auto gData = lib::IO::Graph::Read::gml(ss, err);
+	auto gData = lib::IO::Graph::Read::gml(data, err);
 	return handleLoadedGraph(std::move(gData), "inline GML string", err);
 }
 
 std::shared_ptr<Graph> Graph::graphGML(const std::string &file) {
-	std::ifstream ifs(file);
+	boost::iostreams::mapped_file_source ifs(file);
 	std::ostringstream err;
 	if(!ifs) {
 		err << "Could not open graph GML file '" << file << "'.\n";
 		throw InputError(err.str());
 	}
-	auto gData = lib::IO::Graph::Read::gml(ifs, err);
+	auto gData = lib::IO::Graph::Read::gml({ifs.begin(), ifs.size()}, err);
 	return handleLoadedGraph(std::move(gData), "file, '" + file + "'", err);
 }
 
@@ -283,25 +284,27 @@ std::shared_ptr<Graph> Graph::smiles(const std::string &smiles) {
 	return Graph::smiles(smiles, false, SmilesClassPolicy::NoneOnDuplicate);
 }
 
-std::shared_ptr<Graph> Graph::smiles(const std::string &smiles, const bool allowAbstract, SmilesClassPolicy classPolicy) {
+std::shared_ptr<Graph>
+Graph::smiles(const std::string &smiles, const bool allowAbstract, SmilesClassPolicy classPolicy) {
 	std::ostringstream err;
 	auto gData = lib::IO::Graph::Read::smiles(smiles, err, allowAbstract, classPolicy);
 	return handleLoadedGraph(std::move(gData), "smiles string, '" + smiles + "'", err);
 }
 
 std::shared_ptr<Graph> Graph::makeGraph(std::unique_ptr<lib::Graph::Single> g) {
-	return makeGraph(std::move(g),{});
+	return makeGraph(std::move(g), {});
 }
 
-std::shared_ptr<Graph> Graph::makeGraph(std::unique_ptr<lib::Graph::Single> g, std::map<int, std::size_t> externalToInternalIds) {
+std::shared_ptr<Graph>
+Graph::makeGraph(std::unique_ptr<lib::Graph::Single> g, std::map<int, std::size_t> externalToInternalIds) {
 	if(!g) MOD_ABORT;
-	std::shared_ptr<Graph> wrapped = std::shared_ptr<Graph > (new Graph(std::move(g)));
+	std::shared_ptr<Graph> wrapped = std::shared_ptr<Graph>(new Graph(std::move(g)));
 	wrapped->p->g->setAPIReference(wrapped);
 	if(!externalToInternalIds.empty()) {
-		wrapped->p->externalToInternalIds = std::make_unique<std::map<int, std::size_t> >(std::move(externalToInternalIds));
+		wrapped->p->externalToInternalIds = std::make_unique<std::map<int, std::size_t> >(
+				std::move(externalToInternalIds));
 	}
 	return wrapped;
 }
 
-} // namespace graph
-} // namespace mod
+} // namespace mod::graph

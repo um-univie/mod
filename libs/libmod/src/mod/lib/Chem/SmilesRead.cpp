@@ -32,10 +32,9 @@
 #include <boost/spirit/home/x3/string/literal_string.hpp>
 #include <boost/spirit/home/x3/string/symbols.hpp>
 
-namespace mod {
-namespace lib {
-namespace Chem {
-namespace Smiles {
+#include <iostream>
+
+namespace mod::lib::Chem::Smiles {
 using Vertex = lib::Graph::Vertex;
 using Edge = lib::Graph::Edge;
 
@@ -297,11 +296,11 @@ const auto abstractSymbol = x3::rule<struct abstractSymbol, std::string>{"abstra
 const auto realAtom = x3::rule<struct realAtom, Atom>{"realAtom"}
 		                      = isotope >> symbol >> chiral >> hcount >> charge >> radical >> class_;
 const auto wildcardAtom = x3::rule<struct wildcardAtom, Atom>{"wildcardAtom"}
-		                          = x3::attr(0) >> x3::string("*")
+		                          = (x3::attr(0) >> x3::string("*"))
 		                            > x3::attr(Chiral()) > hcount > x3::attr(Charge())
 		                            > x3::attr(false) > class_;
 // See https://github.com/boostorg/spirit/issues/523
-// We must reset the attribute, using a semnatic action, but that means the attribute
+// We must reset the attribute, using a semantic action, but that means the attribute
 // writing gets disabled, so use semantic actions for that as well.
 const auto clearAtom = [](auto &ctx) {
 	_val(ctx) = Atom();
@@ -372,7 +371,7 @@ bool addBond(lib::Graph::GraphType &g,
 	case '/': // note: fall-through to make / and \ implicit
 	case '\\':
 		if(getConfig().graph.printSmilesParsingWarnings.get())
-			IO::log() << "WARNING: up/down bonds are not supported, converted to '-' instead." << std::endl;
+			std::cout << "WARNING: up/down bonds are not supported, converted to '-' instead." << std::endl;
 		[[fallthrough]];
 	case 0:
 		if(p.isAromatic && v.isAromatic) edgeLabel += ':';
@@ -393,9 +392,9 @@ bool addBond(lib::Graph::GraphType &g,
 		err << "Error in SMILES conversion: bond type '$' is not supported." << std::endl;
 		return false;
 	default:
-		IO::log() << "Internal error, unknown bond '" << bond << "' (" << (int) bond << ")" << std::endl;
-		IO::log() << "p = '" << pString[p.vertex] << "'(" << p.vertex << ")" << std::endl;
-		IO::log() << "v = '" << pString[v.vertex] << "'(" << v.vertex << ")" << std::endl;
+		std::cout << "Internal error, unknown bond '" << bond << "' (" << (int) bond << ")" << std::endl;
+		std::cout << "p = '" << pString[p.vertex] << "'(" << p.vertex << ")" << std::endl;
+		std::cout << "v = '" << pString[v.vertex] << "'(" << v.vertex << ")" << std::endl;
 		MOD_ABORT;
 	}
 	const auto ePair = add_edge(v.vertex, p.vertex, g);
@@ -656,14 +655,14 @@ struct StereoConverter {
 			if(!ch.specifier.empty()) {
 				if(getConfig().graph.ignoreStereoInSmiles.get()) {
 					if(getConfig().graph.printSmilesParsingWarnings.get())
-						IO::log() << "WARNING: ignoring stereochemical information (" << ch
+						std::cout << "WARNING: ignoring stereochemical information (" << ch
 						          << ") in SMILES, requested by user." << std::endl;
 				} else {
 					if(ch.specifier == "@" || ch.specifier == "@@") {
 						assignTetrahedral(ch.specifier, bAtom, prev, next);
 					} else { // not @ or @@
 						if(getConfig().graph.printSmilesParsingWarnings.get())
-							IO::log() << "WARNING: stereochemical information (" << ch << ") in SMILES string ignored."
+							std::cout << "WARNING: stereochemical information (" << ch << ") in SMILES string ignored."
 							          << std::endl;
 					}
 				}
@@ -679,7 +678,7 @@ private:
 		const std::vector<Edge> oes(out_edges(v, g).first, out_edges(v, g).second);
 		if(oes.size() != 4) {
 			if(getConfig().graph.printSmilesParsingWarnings.get())
-				IO::log() << "WARNING: Ignoring stereo information in SMILES. Can not add tetrahedral geometry to vertex ("
+				std::cout << "WARNING: Ignoring stereo information in SMILES. Can not add tetrahedral geometry to vertex ("
 				          << bAtom.atom << ") with degree " << oes.size() << ". Must be 4." << std::endl;
 			return;
 		}
@@ -745,18 +744,18 @@ lib::IO::Graph::Read::Data parseSmiles(const std::string &smiles, std::ostream &
 		std::stringstream astStr;
 		astStr << ast;
 		if(smiles != astStr.str()) {
-			IO::log() << "Converting: >>>" << smiles << "<<< " << smiles.size() << std::endl;
-			IO::log() << "Ast:        >>>" << astStr.str() << "<<< " << astStr.str().size() << std::endl;
+			std::cout << "Converting: >>>" << smiles << "<<< " << smiles.size() << std::endl;
+			std::cout << "Ast:        >>>" << astStr.str() << "<<< " << astStr.str().size() << std::endl;
 			for(auto c : smiles) {
-				if(std::isprint(c)) IO::log() << c << ' ';
-				else IO::log() << int(c) << ' ';
+				if(std::isprint(c)) std::cout << c << ' ';
+				else std::cout << int(c) << ' ';
 			}
-			IO::log() << std::endl;
+			std::cout << std::endl;
 			for(auto c : astStr.str()) {
-				if(std::isprint(c)) IO::log() << c << ' ';
-				else IO::log() << int(c) << ' ';
+				if(std::isprint(c)) std::cout << c << ' ';
+				else std::cout << int(c) << ' ';
 			}
-			IO::log() << std::endl;
+			std::cout << std::endl;
 			MOD_ABORT;
 		}
 	}
@@ -825,7 +824,7 @@ lib::IO::Graph::Read::Data parseSmiles(const std::string &smiles, std::ostream &
 				break;
 			case lib::Stereo::DeductionResult::Warning:
 				if(!getConfig().stereo.silenceDeductionWarnings.get())
-					IO::log() << finalizeErr.str();
+					std::cout << finalizeErr.str();
 				break;
 			case lib::Stereo::DeductionResult::Error:
 				err << finalizeErr.str();
@@ -840,16 +839,15 @@ lib::IO::Graph::Read::Data parseSmiles(const std::string &smiles, std::ostream &
 }
 
 } // namespace
-} // namespace Smiles
+} // namespace mod::lib::Chem::Smiles
+namespace mod::lib::Chem {
 
 lib::IO::Graph::Read::Data
 readSmiles(const std::string &smiles, std::ostream &err, const bool allowAbstract, SmilesClassPolicy classPolicy) {
 	return Smiles::parseSmiles(smiles, err, allowAbstract, classPolicy);
 }
 
-} // namespace Chem
-} // namespace lib
-} // namespace mod
+} // namespace mod::lib::Chem
 
 BOOST_FUSION_ADAPT_STRUCT(mod::lib::Chem::Smiles::Chiral,
                           (std::string, specifier)

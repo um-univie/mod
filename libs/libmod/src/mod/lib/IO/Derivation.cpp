@@ -1,6 +1,7 @@
 #include "Derivation.hpp"
 
 #include <mod/Config.hpp>
+#include <mod/Post.hpp>
 #include <mod/rule/Rule.hpp>
 #include <mod/lib/Algorithm.hpp>
 #include <mod/lib/DG/Hyper.hpp>
@@ -9,7 +10,6 @@
 #include <mod/lib/Graph/Properties/String.hpp>
 #include <mod/lib/GraphMorphism/LabelledMorphism.hpp>
 #include <mod/lib/GraphMorphism/VF2Finder.hpp>
-#include <mod/lib/IO/FileHandle.hpp>
 #include <mod/lib/IO/IO.hpp>
 #include <mod/lib/IO/MorphismConstraints.hpp>
 #include <mod/lib/IO/Rule.hpp>
@@ -53,10 +53,10 @@ std::vector<lib::Rules::Real *> findCompleteRules(const lib::DG::NonHyper &dg,
 		std::vector<lib::Rules::Real *> matchingL;
 		{
 			if(getConfig().dg.derivationDebugOutput.get()) {
-				IO::log() << "Derivation: compose identifyL -> rReal" << std::endl;
-				IO::log() << "Derivation: eductUnion:" << std::endl;
+				std::cout << "Derivation: compose identifyL -> rReal" << std::endl;
+				std::cout << "Derivation: eductUnion:" << std::endl;
 				for(const auto vAdj : asRange(inv_adjacent_vertices(v, dgGraph)))
-					IO::log() << "Derivation: " << dgGraph[vAdj].graph->getName() << std::endl;
+					std::cout << "Derivation: " << dgGraph[vAdj].graph->getName() << std::endl;
 			}
 			auto reporter = [&matchingL, &dg](std::unique_ptr<lib::Rules::Real> r) {
 				auto *rPtr = r.release();
@@ -69,29 +69,29 @@ std::vector<lib::Rules::Real *> findCompleteRules(const lib::DG::NonHyper &dg,
 			if(getConfig().dg.derivationDebugOutput.get())
 				lib::IO::Rules::Write::termState(rReal);
 			lib::RC::Super mm(
-					getConfig().dg.derivationVerbosity.get(), IO::Logger(IO::log()),
+					getConfig().dg.derivationVerbosity.get(), IO::Logger(std::cout),
 					false, true);
 			lib::RC::composeRuleRealByMatchMaker(*identifyL, rReal, mm, reporter, dg.getLabelSettings());
 		}
 		for(auto *r : matchingL) {
 			if(getConfig().dg.derivationDebugOutput.get())
-				IO::log() << "Derivation: compose matchingL -> identifyR" << std::endl;
+				std::cout << "Derivation: compose matchingL -> identifyR" << std::endl;
 			auto reporter = [&matchingLR, &dg](std::unique_ptr<lib::Rules::Real> r) {
 				if(getConfig().dg.derivationDebugOutput.get())
-					IO::log() << "Derivation: got result" << std::endl;
+					std::cout << "Derivation: got result" << std::endl;
 				auto *rPtr = r.release();
 				auto labelType = dg.getLabelSettings().type;
 				auto withStereo = dg.getLabelSettings().withStereo;
 				auto p = findAndInsert(matchingLR, rPtr, lib::Rules::makeIsomorphismPredicate(labelType, withStereo));
 				if(getConfig().dg.derivationDebugOutput.get())
-					IO::log() << "Derivation: findAndInsert = " << std::boolalpha << p.second << std::endl;
+					std::cout << "Derivation: findAndInsert = " << std::boolalpha << p.second << std::endl;
 				if(!p.second) delete rPtr;
 				return true;
 			};
 			assert(r);
 			// TODO: we should do isomorphism here instead
 			lib::RC::Sub mm(
-					getConfig().dg.derivationVerbosity.get(), IO::Logger(IO::log()),
+					getConfig().dg.derivationVerbosity.get(), IO::Logger(std::cout),
 					false);
 			lib::RC::composeRuleRealByMatchMaker(*r, *identifyR, mm, reporter, dg.getLabelSettings());
 			delete r;
@@ -122,11 +122,11 @@ void forEachMatch(const lib::DG::NonHyper &dg, lib::DG::HyperVertex v, const lib
 		//		options.withIndex = true;
 		//		lib::IO::Rules::Write::summary(rReal, options, options);
 		//		lib::IO::Rules::Write::summary(*rLower, options, options);
-		//		IO::log() << "morphismSelectByLabelSettings: " << dg.getLabelSettings() << std::endl;
+		//		std::cout << "morphismSelectByLabelSettings: " << dg.getLabelSettings() << std::endl;
 		lib::GraphMorphism::morphismSelectByLabelSettings(rReal.getDPORule(), rLower->getDPORule(), dg.getLabelSettings(),
 		                                                  lib::GraphMorphism::VF2Monomorphism(), std::ref(mr),
 		                                                  lib::Rules::MembershipPredWrapper());
-		//		IO::log() << "morphismSelectByLabelSettings done" << std::endl;
+		//		std::cout << "morphismSelectByLabelSettings done" << std::endl;
 		delete rLower;
 	}
 	if(!derivationFound) {
@@ -170,7 +170,7 @@ summary(const lib::DG::NonHyper &dg,
 			IO::post() << "\\}\"" << std::endl;
 			{
 				std::string file = getUniqueFilePrefix() + "der_constraints.tex";
-				FileHandle s(file);
+				post::FileHandle s(file);
 				auto vis = lib::IO::MatchConstraint::Write::makeTexPrintVisitor(s, get_left(rReal.getDPORule()));
 				for(const auto &c : rReal.getDPORule().leftMatchConstraints) {
 					c->accept(vis);

@@ -1,11 +1,9 @@
-#ifndef MOD_LIB_GRAPH_LABELLED_GRAPH_H
-#define MOD_LIB_GRAPH_LABELLED_GRAPH_H
+#ifndef MOD_LIB_GRAPH_LABELLED_GRAPH_HPP
+#define MOD_LIB_GRAPH_LABELLED_GRAPH_HPP
 
 #include <mod/lib/Graph/GraphDecl.hpp>
 
-namespace mod {
-namespace lib {
-namespace Graph {
+namespace mod::lib::Graph {
 struct PropMolecule;
 struct PropStereo;
 struct PropString;
@@ -19,7 +17,8 @@ struct LabelledGraph { // models a mod::lib::LabelledGraphConcept
 public:
 	using PropMoleculeType = PropMolecule;
 public:
-	LabelledGraph(std::unique_ptr<GraphType> g, std::unique_ptr<PropStringType> pString, std::unique_ptr<PropStereoType> pStereo);
+	LabelledGraph(std::unique_ptr<GraphType> g, std::unique_ptr<PropStringType> pString,
+	              std::unique_ptr<PropStereoType> pStereo);
 	LabelledGraph(const LabelledGraph &other);
 	~LabelledGraph();
 	friend GraphType &get_graph(LabelledGraph &g);
@@ -32,7 +31,7 @@ public:
 	friend const PropStereoType &get_stereo(const LabelledGraph &g);
 	friend const PropMoleculeType &get_molecule(const LabelledGraph &g);
 public:
-	friend const std::vector<typename boost::graph_traits<GraphType>::vertex_descriptor>&
+	friend const std::vector<typename boost::graph_traits<GraphType>::vertex_descriptor> &
 	get_vertex_order(const LabelledGraph &g);
 private: // intrinsic data
 	std::unique_ptr<GraphType> g;
@@ -45,8 +44,6 @@ private: // optimisation
 	mutable std::vector<typename boost::graph_traits<GraphType>::vertex_descriptor> vertex_order;
 };
 
-} // namespace Graph
-} // namespace lib
-} // namespace mod
+} // namespace mod::lib::Graph
 
-#endif /* MOD_LIB_GRAPH_LABELLED_GRAPH_H */
+#endif // MOD_LIB_GRAPH_LABELLED_GRAPH_HPP

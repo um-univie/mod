@@ -18,8 +18,10 @@
    ((Chem)) ((Collections)) ((Config)) ((Derivation))                            \
    ((dg, (Builder) (DG) (GraphInterface) (Printer) (Strategy)))                  \
    ((Error)) ((Function))                                                        \
-   ((graph, (Automorphism) (Graph) (GraphInterface)))                            \
+   ((graph, (Graph) (Union)))                                                    \
+   ((graph, (Automorphism) (GraphInterface))) /* nested classes of Graph, so must be after */ \
    ((rule, (RC) (Rule) (GraphInterface)))                                        \
+   ((post, (Post)))                                                              \
    ((Misc)) ((Term))
 
 namespace mod {

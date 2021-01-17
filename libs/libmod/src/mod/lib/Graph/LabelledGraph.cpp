@@ -9,13 +9,13 @@
 #include <mod/lib/Stereo/Inference.hpp>
 
 #include <cassert>
+#include <iostream>
 
-namespace mod {
-namespace lib {
-namespace Graph {
+namespace mod::lib::Graph {
 
-LabelledGraph::LabelledGraph(std::unique_ptr<GraphType> g, std::unique_ptr<PropStringType> pString, std::unique_ptr<PropStereoType> pStereo)
-: g(std::move(g)), pString(std::move(pString)), pStereo(std::move(pStereo)) {
+LabelledGraph::LabelledGraph(std::unique_ptr<GraphType> g, std::unique_ptr<PropStringType> pString,
+                             std::unique_ptr<PropStereoType> pStereo)
+		: g(std::move(g)), pString(std::move(pString)), pStereo(std::move(pStereo)) {
 	assert(this->g);
 	assert(this->pString);
 	this->pString->verify(this->g.get());
@@ -26,11 +26,11 @@ LabelledGraph::LabelledGraph(const LabelledGraph &other) {
 	g = std::make_unique<GraphType>(get_graph(other));
 	pString = std::make_unique<PropStringType>(get_string(other), *g);
 	if(other.pStereo) {
-		IO::log() << "WARNING: missing copying of stereo info in LabelledGraph copy ctor" << std::endl;
+		std::cout << "WARNING: missing copying of stereo info in LabelledGraph copy ctor" << std::endl;
 	}
 }
 
-LabelledGraph::~LabelledGraph() { }
+LabelledGraph::~LabelledGraph() {}
 
 GraphType &get_graph(LabelledGraph &g) {
 	return *g.g;
@@ -74,10 +74,11 @@ const LabelledGraph::PropStereoType &get_stereo(const LabelledGraph &g) {
 			return get(boost::vertex_index_t(), get_graph(g), v);
 		});
 		switch(result) {
-		case Stereo::DeductionResult::Success: break;
+		case Stereo::DeductionResult::Success:
+			break;
 		case Stereo::DeductionResult::Warning:
 			if(!getConfig().stereo.silenceDeductionWarnings.get())
-				IO::log() << ssErr.str();
+				std::cout << ssErr.str();
 			break;
 		case Stereo::DeductionResult::Error:
 			throw StereoDeductionError(ssErr.str());
@@ -95,7 +96,7 @@ const LabelledGraph::PropMoleculeType &get_molecule(const LabelledGraph &g) {
 	return *g.pMolecule;
 }
 
-const std::vector<typename boost::graph_traits<GraphType>::vertex_descriptor>&
+const std::vector<typename boost::graph_traits<GraphType>::vertex_descriptor> &
 get_vertex_order(const LabelledGraph &g) {
 	if(g.vertex_order.empty()) {
 		g.vertex_order = get_vertex_order(mod::lib::GraphMorphism::DefaultFinderArgsProvider(), get_graph(g));
@@ -103,6 +104,4 @@ get_vertex_order(const LabelledGraph &g) {
 	return g.vertex_order;
 }
 
-} // namespace Graph
-} // namespace lib
-} // namespace mod
+} // namespace mod::lib::Graph

@@ -32,6 +32,9 @@ function printHelp {
 	echo "Options:"
 	echo "  --help, -h  Show this message."
 	echo "  -j <N>      Use '-j <N>' as argument when calling make."
+	echo "  --install-format, --install-format-sudo"
+	echo "              Compile the common Latex preamble and install it."
+	echo "              The '-sudo' version will run the copying through with sudo."
 	echo "  --mode ...  Enter a magic mode for data conversion."
 }
 
@@ -62,9 +65,26 @@ fi
 
 
 
-if test "x$1" == "xclean"; then
+if test "x$1" = xclean; then
 	$this --mode clean
 	exit $?
+elif test "x$1" = "x--install-format" -o "x$1" = "x--install-format-sudo"; then
+	echo "Compiling common Latex preamble into format file: "
+	mkdir -p out
+	rm -f out/commonPreamble.fmt
+	$this --mode compileFmt
+	res=$?
+	echo ""
+	if [ $res -ne 0 ]; then
+		exit $res
+	fi
+	p=$MOD_PREFIX/share/mod/
+	echo "Installing out/commonPreamble.fmt in $p"
+	if [ "x$1" = "x--install-format" ]; then
+		cp out/commonPreamble.fmt $p
+	else
+		sudo cp out/commonPreamble.fmt $p
+	fi
 elif test "x$1" != "x--mode"; then
 	echo "PostMØD ------------------------------------------------------------"
 	echo "Prefix: $MOD_PREFIX"
@@ -162,6 +182,15 @@ else # $1 == --mode
 				echo "include $makefileClean" >> $makefile
 			}
 			function initMakefileImpl {
+				local p=$MOD_PREFIX/share/mod/commonPreamble
+				if [ -f $p.fmt ]; then
+					if [ ! -f out/commonPreamble.fmt ]; then
+						ln -s $p.fmt out/commonPreamble.fmt
+					fi
+				else
+					echo "out/commonPreamble.fmt: $p.tex"
+					echo "	$this --mode compileFmt"
+				fi
 				echo ""
 			}
 			function initMakefileDep {
@@ -382,6 +411,7 @@ else # $1 == --mode
 				echo -n "$fileNoExt.pdf:" >> $makefileImpl
 				echo -n  " $fileCoordNoExt.tex" >> $makefileImpl
 				echo -n  " $fileNoExt.tex" >> $makefileImpl
+				echo -n  " out/commonPreamble.fmt" >> $makefileImpl
 				echo "" >> $makefileImpl
 				echo "	$this --mode compileTikz \"$fileNoExt\" \"$fileCoordNoExt\" $repeats" >> $makefileImpl
 				echo -n " $fileNoExt.pdf" >> $makefileDep
@@ -450,6 +480,15 @@ else # $1 == --mode
 			echo '' || $latexCmd
 	}
 
+	function compileFmt {
+		printStatus "$FUNCNAME"
+		local texArgs="-interaction=nonstopmode -halt-on-error -ini"
+		texArgs="$texArgs -output-directory out/ -jobname commonPreamble"
+		local texContent="&pdflatex \\input{$MOD_PREFIX/share/mod/commonPreamble.tex}\\usepackage{$MOD_PREFIX/share/mod/mod}\\dump"
+		latexCmd="pdflatex $texArgs $texContent"
+		$latexCmd &> /dev/null || $latexCmd
+	}
+
 	dimensionTooLargeString="\\dontUseTooLargeCoords"
 
 	# fileNoExt fileCoordsNoExt [compilation repetitions]
@@ -468,7 +507,7 @@ else # $1 == --mode
 			fi
 		fi
 		local latexArgs="-interaction=nonstopmode -halt-on-error"
-		latexArgs="$latexArgs -jobname $fileNoExt -fmt $MOD_PREFIX/share/mod/commonPreamble.fmt \"\\newcommand{\modPrefix}{$MOD_PREFIX}\\newcommand{\modFigureInput}{$fileNoExt.tex}\input{\modPrefix/share/mod/$texFigureTemplateFile}\""
+		latexArgs="$latexArgs -jobname $fileNoExt -fmt out/commonPreamble.fmt \"\\newcommand{\modPrefix}{$MOD_PREFIX}\\newcommand{\modFigureInput}{$fileNoExt.tex}\input{\modPrefix/share/mod/$texFigureTemplateFile}\""
 		local latexCmd="pdflatex $latexArgs"
 		for i in $(seq $repeats); do
 			$latexCmd &> /dev/null

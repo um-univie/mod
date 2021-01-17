@@ -12,4 +12,4 @@ rSplit = ruleGMLString("""rule [
 ]""")
 g1 = graphDFS("[Q][Q]", "QQ")
 g2 = graphDFS("[Q]", "Q")
-exeStrat(addSubset(g1) >> rSplit, [g2], [g1, g2], graphDatabase=[g1, g2])
+exeStrat(addSubset(g1) >> rSplit, [g2], [g1, g2], graphDatabase=[g1, g2], verbosity=10)

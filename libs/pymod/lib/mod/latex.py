@@ -2,22 +2,28 @@ import mod
 import os
 import sys
 
+from typing import List
+
 _texFile = None
 _figFolder = None
-_graphs = []
-_rules = []
-_ls = mod.LabelSettings(mod.LabelType.String, mod.LabelRelation.Isomorphism, mod.LabelRelation.Isomorphism)
+_graphs: List[mod.Graph] = []
+_rules: List[mod.Rule] = []
+_ls = mod.LabelSettings(mod.LabelType.String, mod.LabelRelation.Isomorphism,
+	mod.LabelRelation.Isomorphism)
+
 
 def setTexFile(fName):
 	global _texFile
 	_texFile = open(fName, "w")
 	mod.post("disableSummary")
 
+
 def setFigFolder(fName):
 	global _figFolder
 	_figFolder = fName
 	_checkSettings()
 	mod.post("post \"mkdir -p '%s'\"" % _figFolder)
+
 
 def _checkSettings():
 	if _texFile is None:
@@ -27,14 +33,16 @@ def _checkSettings():
 		print("Error: no figure folder set, or empty name")
 		sys.exit(1)
 
+
 def outputFile(f, inline=False):
 	_checkSettings()
 	assert f.endswith(".pdf")
 	f = f[:-4]
 	f += ".tex" if inline else ".pdf"
 	mod.post("post \"cp '%s' '%s/'\"" % (f, _figFolder))
-	res = _figFolder + "/" +  os.path.basename(f)
+	res = _figFolder + "/" + os.path.basename(f)
 	return res[:-4]
+
 
 def texDefine(id, value):
 	_checkSettings()
@@ -42,9 +50,10 @@ def texDefine(id, value):
 		% (str(id), str(value)))
 	_texFile.write("\n")
 
-#------------------------------------------------------------------------------
+
+# ------------------------------------------------------------------------------
 # Grpahs
-#------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
 
 def graph(id, g, p, inline):
 	_checkSettings()
@@ -54,23 +63,27 @@ def graph(id, g, p, inline):
 			break
 	else:
 		_graphs.append(g)
-	f = g.print(p, p)	
+	f = g.print(p, p)
 	f = f[0]
 	f = outputFile(f, inline)
 	texDefine("graph-" + str(id), f)
 
+
 def graphGML(id, data, printer, inline=False):
 	graph(id, mod.graphGML(data), printer, inline)
+
 
 def smiles(id, data, printer, inline=False):
 	graph(id, mod.smiles(data.replace('##', '#')), printer, inline)
 
+
 def graphDFS(id, data, printer, inline=False):
 	graph(id, mod.graphDFS(data.replace('##', '#')), printer, inline)
 
-#------------------------------------------------------------------------------
+
+# ------------------------------------------------------------------------------
 # Rules
-#------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
 
 def rule(id, r, p):
 	_checkSettings()
@@ -86,6 +99,7 @@ def rule(id, r, p):
 	fK = outputFile(f + "_K.pdf")
 	fR = outputFile(f + "_R.pdf")
 	texDefine("rule-" + str(id), "{%s}{%s}{%s}" % (fL, fK, fR))
+
 
 def ruleGML(id, data, printer):
 	rule(id, mod.ruleGML(data), printer)

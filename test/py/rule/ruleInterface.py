@@ -1,3 +1,5 @@
+include("../xxx_graphInterface.py")
+
 a = ruleGMLString("""rule [
 	left [
 		node [ id 0 label "C+." ]
@@ -13,6 +15,22 @@ a = ruleGMLString("""rule [
 		edge [ source 100 target 1 label "=" ]
 	]
 ]""")
+
+
+checkGraph(a, string="'{}'".format(a.name),
+	vertexString="RuleVertex", edgeString="RuleEdge")
+checkLabelledGraph(a.left, string="RuleLeftGraph('{}')".format(a.name),
+	vertexString="RuleLeftGraphVertex", edgeString="RuleLeftGraphEdge",
+	graphNameInElements=str(a), vIdFull=False)
+checkGraph(a.context, string="RuleContextGraph('{}')".format(a.name),
+	vertexString="RuleContextGraphVertex", edgeString="RuleContextGraphEdge",
+	graphNameInElements=str(a), vIdFull=False)
+checkLabelledGraph(a.right, string="RuleRightGraph('{}')".format(a.name),
+	vertexString="RuleRightGraphVertex", edgeString="RuleRightGraphEdge",
+	graphNameInElements=str(a), vIdFull=False)
+
+
+
 
 print("Core\n" + "="*80)
 print("numVertices:", a.numVertices)

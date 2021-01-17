@@ -10,10 +10,7 @@
 #include <mod/lib/RC/ComposeRuleReal.hpp>
 #include <mod/lib/RC/MatchMaker/Super.hpp>
 
-namespace mod {
-namespace lib {
-namespace DG {
-namespace Strategies {
+namespace mod::lib::DG::Strategies {
 
 Rule::Rule(std::shared_ptr<rule::Rule> r)
 		: Strategy(std::max(r->getRule().getDPORule().numLeftComponents, r->getRule().getDPORule().numRightComponents)),
@@ -62,73 +59,61 @@ struct Context {
 	std::unordered_set<const lib::Graph::Single *> &consumedGraphs;
 };
 
-void handleBoundRulePair(PrintSettings settings, Context context, const BoundRule &brp) {
+void handleBoundRulePair(int verbosity, IO::Logger logger, Context context, const BoundRule &brp) {
 	assert(brp.rule);
-	// use a smart pointer so the rule for sure is deallocated, even though we do a 'continue'
+	// TODO: use a smart pointer so the rule for sure is deallocated, even though we do a 'continue'
 	const lib::Rules::Real &r = *brp.rule;
 	const auto &rDPO = r.getDPORule();
-	assert(
-			r.isOnlyRightSide()); // otherwise, it should have been deallocated. All max component results should be only right side
+	assert(r.isOnlyRightSide()); // otherwise, it should have been deallocated.
+	// All max component results should be only right side
 	mod::Derivation d;
 	d.r = context.r;
 	for(const lib::Graph::Single *g : brp.boundGraphs) d.left.push_back(g->getAPIReference());
 	{ // left predicate
 		bool result = context.executionEnv.checkLeftPredicate(d);
 		if(!result) {
-			if(settings.verbosity >= PrintSettings::V_DerivationPredicatesFail)
-				settings.indent() << "Skipping " << r.getName() << " due to leftPredicate" << std::endl;
+			if(verbosity >= PrintSettings::V_DerivationPredicatesFail)
+				logger.indent() << "Skipping " << r.getName() << " due to leftPredicate" << std::endl;
 			return;
 		}
 	}
-	if(settings.verbosity >= PrintSettings::V_RuleApplication)
-		settings.indent() << "Splitting " << r.getName() << " into "
-		                  << rDPO.numRightComponents << " graphs:" << std::endl;
+	if(verbosity >= PrintSettings::V_RuleApplication) {
+		logger.indent() << "Splitting " << r.getName() << " into "
+		                << rDPO.numRightComponents << " graphs" << std::endl;
+		++logger.indentLevel;
+	}
 	const std::vector<const lib::Graph::Single *> &educts = brp.boundGraphs;
 	d.right = splitRule(
 			rDPO, context.executionEnv.labelSettings.type, context.executionEnv.labelSettings.withStereo,
 			[&context](std::unique_ptr<lib::Graph::Single> gCand) {
 				return context.executionEnv.checkIfNew(std::move(gCand));
 			},
-			[&settings](std::shared_ptr<graph::Graph> gWrapped, std::shared_ptr<graph::Graph> gPrev) {
-				if(settings.verbosity >= PrintSettings::V_RuleApplication)
-					settings.indent() << "Discarding product " << gWrapped->getName()
-					                  << ", isomorphic to other product " << gPrev->getName()
-					                  << "." << std::endl;
+			[verbosity, &logger](std::shared_ptr<graph::Graph> gWrapped, std::shared_ptr<graph::Graph> gPrev) {
+				if(verbosity >= PrintSettings::V_RuleApplication)
+					logger.indent() << "Discarding product " << gWrapped->getName()
+					                << ", isomorphic to other product " << gPrev->getName()
+					                << "." << std::endl;
 			}
 	);
+	if(verbosity >= PrintSettings::V_RuleApplication)
+		--logger.indentLevel;
 
-	if(getConfig().dg.onlyProduceMolecules.get()) {
-		for(std::shared_ptr<graph::Graph> g : d.right) {
-			if(!g->getIsMolecule()) {
-				IO::log() << "Error: non-molecule produced; '" << g->getName() << "'" << std::endl
-				          << "Derivation is:" << std::endl
-				          << "\tEducts:" << std::endl;
-				for(const lib::Graph::Single *g : educts)
-					IO::log() << "\t\t'" << g->getName() << "'\t" << g->getGraphDFS().first << std::endl;
-				IO::log() << "\tProducts:" << std::endl;
-				for(std::shared_ptr<graph::Graph> g : d.right)
-					IO::log() << "\t\t'" << g->getName() << "'\t" << g->getGraphDFS() << std::endl;
-				IO::log() << "Rule is '" << context.r->getName() << "'" << std::endl;
-				std::exit(1);
-			}
-		}
-	}
 	{ // right predicates
 		bool result = context.executionEnv.checkRightPredicate(d);
 		if(!result) {
-			if(settings.verbosity >= PrintSettings::V_DerivationPredicatesFail)
-				settings.indent() << "Skipping " << r.getName() << " due to rightPredicate" << std::endl;
+			if(verbosity >= PrintSettings::V_DerivationPredicatesFail)
+				logger.indent() << "Skipping " << r.getName() << " due to rightPredicate" << std::endl;
 			return;
 		}
 	}
 	{ // now the derivation is good, so add the products to output
 		if(getConfig().dg.putAllProductsInSubset.get()) {
 			for(const auto &g : d.right)
-				context.output->addToSubset(0, &g->getGraph());
+				context.output->addToSubset(&g->getGraph());
 		} else {
 			for(const auto &g : d.right)
 				if(!context.output->isInUniverse(&g->getGraph()))
-					context.output->addToSubset(0, &g->getGraph());
+					context.output->addToSubset(&g->getGraph());
 		}
 		for(const auto &g : d.right)
 			context.executionEnv.addProduct(g);
@@ -149,7 +134,8 @@ template<typename GraphRange>
 unsigned int bindGraphs(PrintSettings settings, Context context,
                         const GraphRange &graphRange,
                         const std::vector<BoundRule> &rules,
-                        std::vector<BoundRule> &outputRules) {
+                        std::vector<BoundRule> &outputRules,
+                        Rules::GraphAsRuleCache &graphAsRuleCache) {
 	unsigned int processedRules = 0;
 
 	for(const lib::Graph::Single *g : graphRange) {
@@ -170,7 +156,7 @@ unsigned int bindGraphs(PrintSettings settings, Context context,
 				return true;
 			};
 			assert(p.rule);
-			const lib::Rules::Real &rFirst = g->getBindRule()->getRule();
+			const lib::Rules::Real &rFirst = graphAsRuleCache.getBindRule(g)->getRule();
 			const lib::Rules::Real &rSecond = *p.rule;
 			lib::RC::Super mm(
 					std::max(0, settings.verbosity - PrintSettings::V_RCMorphismGenBase),
@@ -181,7 +167,7 @@ unsigned int bindGraphs(PrintSettings settings, Context context,
 				processedRules++;
 				if(context.executionEnv.doExit()) delete brp.rule;
 				else if(brp.rule->isOnlyRightSide()) {
-					handleBoundRulePair(settings, context, brp);
+					handleBoundRulePair(settings.verbosity, settings, context, brp);
 					delete brp.rule;
 				} else outputRules.push_back(brp);
 			}
@@ -222,58 +208,104 @@ void Rule::executeImpl(PrintSettings settings, const GraphState &input) {
 	output = new GraphState(input.getUniverse());
 	if(getExecutionEnv().doExit()) {
 		if(settings.verbosity >= PrintSettings::V_Rule)
-			settings.indent() << "Exit requrested, skipping." << std::endl;
+			settings.indent() << "Exit requested, skipping." << std::endl;
 		return;
 	}
-	std::vector<std::vector<BoundRule> > intermediaryRules(rRaw->getDPORule().numLeftComponents + 1);
-	{
-		BoundRule p;
-		p.rule = rRaw;
-		intermediaryRules[0].push_back(p);
-	}
-	Context context{r, getExecutionEnv(), output, consumedGraphs};
-	const auto &subset = input.getSubset(0);
-	const auto &universe = input.getUniverse();
-	for(unsigned int i = 1; i <= rRaw->getDPORule().numLeftComponents; i++) {
-		if(settings.verbosity >= PrintSettings::V_RuleBinding) {
-			settings.indent() << "Component bind round " << i << " with ";
-			++settings.indentLevel;
-			if(i == 1) {
-				if(!getConfig().dg.ignoreSubset.get()) {
-					IO::log() << subset.size() << " graphs";
-				} else {
-					IO::log() << universe.size() << " graphs";
-				}
-			} else {
-				IO::log() << universe.size() << " graphs and " << intermediaryRules[i - 1].size() << " intermediaries";
-			}
-			IO::log() << std::endl;
-		}
 
-		std::size_t processedRules = 0;
-		if(i == 1) {
-			if(!getConfig().dg.ignoreSubset.get()) {
-				processedRules = bindGraphs(settings, context, subset, intermediaryRules[0], intermediaryRules[1]);
+	if(getConfig().dg.useOldRuleApplication.get()) {
+		std::vector<std::vector<BoundRule>> intermediaryRules(rRaw->getDPORule().numLeftComponents + 1);
+		{
+			BoundRule p;
+			p.rule = rRaw;
+			intermediaryRules[0].push_back(p);
+		}
+		Context context{r, getExecutionEnv(), output, consumedGraphs};
+		const auto &subset = input.getSubset();
+		const auto &universe = input.getUniverse();
+		for(unsigned int i = 1; i <= rRaw->getDPORule().numLeftComponents; i++) {
+			if(settings.verbosity >= PrintSettings::V_RuleBinding) {
+				settings.indent() << "Component bind round " << i << " with ";
+				++settings.indentLevel;
+				if(i == 1) {
+					std::cout << subset.size() << " graphs";
+				} else {
+					std::cout << universe.size() << " graphs and " << intermediaryRules[i - 1].size() << " intermediaries";
+				}
+				std::cout << std::endl;
+			}
+
+			std::size_t processedRules = 0;
+			if(i == 1) {
+				processedRules = bindGraphs(settings, context, subset, intermediaryRules[0], intermediaryRules[1],
+				                            getExecutionEnv().graphAsRuleCache);
 			} else {
-				processedRules = bindGraphs(settings, context, universe, intermediaryRules[0], intermediaryRules[1]);
+				processedRules = bindGraphs(settings, context, universe, intermediaryRules[i - 1], intermediaryRules[i],
+				                            getExecutionEnv().graphAsRuleCache);
+				for(BoundRule &p : intermediaryRules[i - 1]) {
+					delete p.rule;
+					p.rule = nullptr;
+				}
 			}
-		} else {
-			processedRules = bindGraphs(settings, context, universe, intermediaryRules[i - 1], intermediaryRules[i]);
-			for(BoundRule &p : intermediaryRules[i - 1]) {
-				delete p.rule;
-				p.rule = nullptr;
+			if(settings.verbosity >= PrintSettings::V_RuleBinding) {
+				settings.indent() << "Processing of " << processedRules << " intermediary rules done" << std::endl;
+				--settings.indentLevel;
+			}
+			if(context.executionEnv.doExit()) break;
+		}
+		assert(intermediaryRules.back().empty());
+	} else { // new implementation
+		const auto &subset = input.getSubset();
+		const auto &universe = input.getUniverse();
+
+		// partition such that the subset is first
+		for(int i = 0; i != subset.size(); ++i)
+			assert(subset.begin()[i] == universe[subset.getIndices()[i]]);
+
+		std::vector<bool> inSubset(universe.size(), false);
+		for(int idx : subset.getIndices())
+			inSubset[idx] = true;
+
+		std::vector<const lib::Graph::Single *> graphs = universe;
+		auto subsetEnd = graphs.begin();
+		for(auto iter = graphs.begin(); iter != graphs.end(); ++iter) {
+			const auto offset = iter - graphs.begin();
+			if(inSubset[offset]) {
+				std::iter_swap(subsetEnd, iter);
+				++subsetEnd;
 			}
 		}
-		if(settings.verbosity >= PrintSettings::V_RuleBinding) {
-			settings.indent() << "Processing of " << processedRules << " intermediary rules done" << std::endl;
-			--settings.indentLevel;
-		}
-		if(context.executionEnv.doExit()) break;
-	}
-	assert(intermediaryRules.back().empty());
+		assert(subsetEnd - graphs.begin() == subset.size());
+
+		Context context{r, getExecutionEnv(), output, consumedGraphs};
+		std::vector<BoundRule> inputRules{{rRaw, {}, 0}};
+		for(int round = 0; round != rRaw->getDPORule().numLeftComponents; ++round) {
+			const auto firstGraph = graphs.begin();
+			const auto lastGraph = round == 0 ? subsetEnd : graphs.end();
+
+			const auto onOutput = [verbosity = settings.verbosity, context]
+					(IO::Logger logger, BoundRule br) -> bool {
+				if(br.rule->isOnlyRightSide()) {
+					handleBoundRulePair(verbosity, logger, context, br);
+					delete br.rule;
+				}
+				return true;
+			};
+			std::vector<BoundRule> outputRules = bindGraphs(
+					settings.ruleApplicationVerbosity(), settings,
+					round,
+					firstGraph, lastGraph, inputRules,
+					getExecutionEnv().graphAsRuleCache,
+					getExecutionEnv().labelSettings,
+					onOutput);
+			if(round != 0) {
+				// in round 0 the inputRules is the actual original input rule, so don't delete it
+				for(auto &br : inputRules)
+					delete br.rule;
+			}
+			std::swap(inputRules, outputRules);
+		} // for each round based on numComponents
+		assert(inputRules.empty());
+	} // if(getConfig().dg.useOldRuleApplication.get())
 }
 
-} // namespace Strategies
-} // namespace DG
-} // namespace lib
-} // namespace mod
+} // namespace mod::lib::DG::Strategies

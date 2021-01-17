@@ -5,29 +5,28 @@
 
 #include <mod/py/Function.hpp>
 
-namespace mod {
-namespace Py {
+namespace mod::Py {
 
 // rst:
 // rst: .. function:: prefixFilename(name)
 // rst:
 // rst: 	Utility function for converting script-relative paths to current-working-directory-relative paths
-// rst: 	(see also :py:func:`include`).
+// rst: 	(see also :func:`include`).
 // rst: 	This function is used in all PyMØD functions that takes a filename as argument.
-// rst: 	To circumvent this prefixing use the :py:class:`CWDPath` class.
+// rst: 	To circumvent this prefixing use the :class:`CWDPath` class.
 // rst:
-// rst: 	:returns: `name` prefixed with all strings pushed with :py:func:`pushFilePrefix`
+// rst: 	:returns: `name` prefixed with all strings pushed with :func:`pushFilePrefix`
 // rst: 		and popped yet.
 // rst: 	:rtype: str
 // rst:
 // rst: .. function:: pushFilePrefix(s)
 // rst:
-// rst: 	Push another prefix used in :py:func:`prefixFilename`.
+// rst: 	Push another prefix used in :func:`prefixFilename`.
 // rst: 	The prefixes are concatenated in the order they are pushed.
 // rst: 	No directory delimiters are inserted, so they must explicitly be part of the pushed prefixes.
 // rst: 	If the argument starts with ``/``, then during concatenation all previously pushed prefixes are ignored.
 // rst:
-// rst: 	:param str s: the string to push as a prefix to be concatenated in :py:func:`prefixFilename`.
+// rst: 	:param str s: the string to push as a prefix to be concatenated in :func:`prefixFilename`.
 // rst:
 // rst: .. function:: popFilePrefix()
 // rst:
@@ -35,25 +34,25 @@ namespace Py {
 // rst:
 // rst: .. class:: CWDPath
 // rst:
-// rst: 	A dummy class to wrap a filename in to disable prefixing.
+// rst:		A dummy class to wrap a filename in to disable prefixing.
 // rst:
-// rst: 	For example, if a graph GML file is to be loaded relative to the current file
-// rst: 	(assuming :py:func:`include` is used for script inclusion), then it can be done with
+// rst:		For example, if a graph GML file is to be loaded relative to the current file
+// rst:		(assuming :func:`include` is used for script inclusion), then it can be done with
 // rst:
-// rst: 	.. code-block:: python
+// rst:		.. code-block:: python
 // rst:
-// rst: 		g = graphGML(f)
+// rst:			g = graphGML(f)
 // rst:
-// rst: 	If the file is located relative to the current working directory
-// rst: 	(i.e., where the :any:`mod` wrapper script were invoked from), then the graph loading should be done as
+// rst:		If the file is located relative to the current working directory
+// rst:		(i.e., where the :any:`mod` wrapper script were invoked from), then the graph loading should be done as
 // rst:
-// rst: 	.. code-block:: python
+// rst:		.. code-block:: python
 // rst:
-// rst: 		g = graphGML(CWDPath(f))
+// rst:			g = graphGML(CWDPath(f))
 // rst:
-// rst: 	.. function:: __init__(self, f)
+// rst:		.. method:: __init__(f)
 // rst:
-// rst: 		Wrap a filename.
+// rst:			Wrap a filename.
 // rst:
 
 namespace {
@@ -88,20 +87,9 @@ void Misc_doExport() {
 	// rst: 	 	:rtype: float
 	py::def("rngUniformReal", &mod::rngUniformReal);
 
-	py::def("post", &mod::post);
-	py::def("postChapter", &mod::postChapter);
-	py::def("postSection", &mod::postSection);
-
-	// rst: .. function:: makeUniqueFilePrefix()
-	// rst:
-	// rst:		:returns: a unique file prefix from the ``out/`` folder.
-	// rst:		:rtype: str
-	py::def("makeUniqueFilePrefix", &mod::makeUniqueFilePrefix);
-
 	py::def("showDump", &mod::showDump);
 	
 	py::def("printGeometryGraph", &mod::printGeometryGraph);
 }
 
-} // namespace Py
-} // namespace mod
+} // namespace mod::Py

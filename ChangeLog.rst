@@ -4,6 +4,116 @@
 Changes
 #######
 
+
+v0.12.0 (2021-01-18)
+====================
+
+Incompatible Changes
+--------------------
+
+- Require C++17.
+- Require Boost 1.73 to avoid CMake issue in 1.72.
+- Require GraphCanon 0.5.
+- Require Sphinx 3.4.
+- Moved compilation instructions from :ref:`installation` to :ref:`compiling`.
+- Renamed ``DGStratGraphState`` to :py:class:`DGStrat.GraphState`.
+- Swap parameters for :cpp:func:`dg::DG::print` to be consistent with
+  :py:func:`DG.print`.
+- The function ``mod::makeUniqueFilePrefix()`` has been renamed to
+  :cpp:func:`mod::post::makeUniqueFilePrefix`.
+- Names for the left, context, and right graph of :py:class:`Rule`
+  has been moved and renamed to be nested types of :py:class:`Rule`.
+- Names for graph interface types for
+  :py:class:`Graph`,
+  :py:class:`Rule`,
+  :py:class:`Rule.LeftGraph`,
+  :py:class:`Rule.ContextGraph`, and
+  :py:class:`Rule.RightGraph`
+  have been moved and renamed to be nested types of their graph class.
+- Names for graph automorphism types for :py:class:`Graph`
+  have been moved and renamed to be nested types of :py:class:`Graph`.
+- :cpp:func:`rule::Composer::eval`/:py:func:`RCEvaluator.eval` now returns a list
+  of results, possibly with duplicates, instead of only a collection of unique rules.
+
+
+New Features
+------------
+
+- A pre-compiled Conda installation is now available on Linux,
+  see :ref:`installation` and https://anaconda.org/jakobandersen/mod.
+- Added new higher-level installation instructions at :ref:`installation`,
+  with documentation for how to install via Conda and using the Docker image.
+- Update ``bindep.txt`` and :ref:`quick-start` guide for Arch.
+- Add ``Brewfile`` to to make installation of dependencies much easier on macOS.
+- Improved verbose output from "add" strategies during
+  :cpp:func:`dg::Builder::execute`/:py:func:`DGBuilder.execute`.
+- Improved rule application performance when evaluating
+  :ref:`rule strategies <strat-rule>` and executing
+  :cpp:func:`dg::Builder::apply`/:py:meth:`DGBuilder.apply`.
+- Added a relaxed mode to 
+  :cpp:func:`dg::Builder::apply`/:py:meth:`DGBuilder.apply`
+  via the ``onlyProper`` parameter.
+- Add missing ``graph`` attributes to vertices and edges of the
+  four graph interfaces of :py:class:`Rule`.
+- Add new class :cpp:class:`graph::Union`/:py:class:`UnionGraph`.
+- Improve handling of pre-compiled Latex format files used in the
+  post-processor (thanks also to Nikolai Nøjgaard):
+
+  - Add build option to not install the file during normal installation.
+    See ``-DBUILD_POST_MOD_FMT`` in :ref:`installation`.
+  - Teach the post-processor to dynamically compile the format file if it is
+    not installed.
+  - Add options :option:`mod_post --install-format`
+    and :option:`mod_post --install-format-sudo`
+    for installing/updating the pre-compiled format file after MØD was
+    installed. This can be used on an installation configured with
+    ``-DBUILD_POST_MOD_FMT=off`` or for resolving a
+    :ref:`known issue <issue-fmt>`.
+
+- Make :cpp:class:`AtomData`/:py:class:`AtomData` LessThanComparable.
+- Make build work on macOS and add installation instructions.
+- Rule composition: when using ``rcCommon``, skip duplicate overlaps yielded by
+  the underlying enumeration algorithm.
+
+
+Bugs Fixed
+----------
+
+- Flush stdout in the end of
+  :cpp:func:`dg::ExecuteResult::list`/:py:func:`DGExecuteResult.list`.
+- Fix printing/stringification of a null vertices for
+  :cpp:class:`graph::Graph`/:py:class:`Graph`,
+  :cpp:class:`rule::Rule`/:py:class:`Rule`,
+  :cpp:class:`rule::Rule::LeftGraph`/:py:class:`Rule.LeftGraph`,
+  :cpp:class:`rule::Rule::ContextGraph`/:py:class:`Rule.ContextGraph`,
+  :cpp:class:`rule::Rule::RightGraph`/:py:class:`Rule.ContextGraph`.
+- Fix conversion of :py:class:`Graph.Edge` to ``bool``.
+- Fix rule printing when hydrogens are collapsed to prevent occasional
+  Latex errors on the form
+  ``! Package pgf Error: No shape named `v-coord-<num>' is known.``.
+- Add missing ``operator!=`` for :cpp:class:`AtomData`.
+- macOS build fixes:
+
+  - Infinite recursion in doc building, due to missing toctrees.
+  - Disable leak sanitizer when using AppleClang as compiler.
+  - Disable more compiler/link options not in AppleClang.
+
+Other
+-----
+
+- Doc, rearrange and deduplicate documentation for graph interfaces
+  in PyMØD.
+  Introduce the :ref:`py-protocols` section which documents common protocols
+  that several classes implement.
+  The documentation of the following classes has been simplified by mostly
+  referring to these protocols:
+
+  - :py:class:`Graph`
+  - :py:class:`Rule`
+
+- Doc, improve documentation of the graph interfaces of :py:class:`Rule`.
+
+
 v0.11.0 (2020-08-31)
 ====================
 
@@ -56,7 +166,7 @@ New Features
 - Added :cpp:func:`dg::Printer::setGraphvizPrefix`/:cpp:func:`dg::Printer::getGraphvizPrefix`/:py:attr:`DGPrinter.graphvizPrefix`.
 - Added :cpp:func:`makeUniqueFilePrefix`/:py:func:`makeUniqueFilePrefix`.
 - Improve verbosity level 8 information from
-  :cpp:func:`dg::Builder::execute`/:py:func:`DGBuilder.execute` to the unvierse
+  :cpp:func:`dg::Builder::execute`/:py:func:`DGBuilder.execute` to the universe
   size.
 - Make :cpp:class:`LabelSettings`/:py:class:`LabelSettings`
   equality comparable.
@@ -139,7 +249,7 @@ Bugs Fixed
 - Graph printing, fix coordinate overwrite when printing the same graph
   multiple times, but with different rotation or mirror settings,
   the layout of the last printing would be used for all of them.
-  Those with non-zero rotaion and mirroring now have their own file name.
+  Those with non-zero rotation and mirroring now have their own file name.
 - DG printing: fix bending of head/tail arrows when a tail vertex is also a
   head vertex so arrows don't overlap.
 - `#8 <https://github.com/jakobandersen/mod/issues/8>`__:
@@ -170,7 +280,7 @@ Other
   :py:func:`DGPrinter.pushVertexColour`,
   :py:func:`DGPrinter.pushEdgeColour`,
   :py:func:`DGPrinter.setRotationOverwrite`,
-  :py:func:`DGPrinter.setMirrorOverwrite`,
+  :py:func:`DGPrinter.setMirrorOverwrite`
   accepts a constant as well as a callback.
 - Doc, fix callback type for
   :py:func:`DGPrinter.setRotationOverwrite` and
@@ -374,16 +484,16 @@ New Features
 - :cpp:func:`dg::DG::HyperEdge::print`/:py:func:`DGHyperEdge.print` now returns a list of file data.
 - The vertices and edges of all graph interfaces now have a conversion to bool:
 
-  - :cpp:class:`graph::Graph::Vertex`/:py:class:`GraphVertex`,
-    :cpp:class:`graph::Graph::Edge`/:py:class:`GraphEdge`
-  - :cpp:class:`rule::Rule::Vertex`/:py:class:`RuleVertex`,
-    :cpp:class:`rule::Rule::Edge`/:py:class:`RuleEdge`
-  - :cpp:class:`rule::Rule::LeftGraph::Vertex`/:py:class:`RuleLeftGraphVertex`,
-    :cpp:class:`rule::Rule::LeftGraph::Edge`/:py:class:`RuleLeftGraphEdge`
-  - :cpp:class:`rule::Rule::ContextGraph::Vertex`/:py:class:`RuleContextGraphVertex`,
-    :cpp:class:`rule::Rule::ContextGraph::Edge`/:py:class:`RuleContextGraphEdge`
-  - :cpp:class:`rule::Rule::RightGraph::Vertex`/:py:class:`RuleRightGraphVertex`,
-    :cpp:class:`rule::Rule::RightGraph::Edge`/:py:class:`RuleRightGraphEdge`
+  - :cpp:class:`graph::Graph::Vertex`/:py:class:`Graph.Vertex`,
+    :cpp:class:`graph::Graph::Edge`/:py:class:`Graph.Edge`
+  - :cpp:class:`rule::Rule::Vertex`/:py:class:`Rule.Vertex`,
+    :cpp:class:`rule::Rule::Edge`/:py:class:`Rule.Edge`
+  - :cpp:class:`rule::Rule::LeftGraph::Vertex`/:py:class:`Rule.LeftGraph.Vertex`,
+    :cpp:class:`rule::Rule::LeftGraph::Edge`/:py:class:`Rule.LeftGraph.Edge`
+  - :cpp:class:`rule::Rule::ContextGraph::Vertex`/:py:class:`Rule.ContextGraph.Vertex`,
+    :cpp:class:`rule::Rule::ContextGraph::Edge`/:py:class:`Rule.ContextGraph.Edge`
+  - :cpp:class:`rule::Rule::RightGraph::Vertex`/:py:class:`Rule.RightGraph.Vertex`,
+    :cpp:class:`rule::Rule::RightGraph::Edge`/:py:class:`Rule.RightGraph.Edge`
   - :cpp:class:`dg::DG::Vertex`/:py:class:`DGVertex`,
     :cpp:class:`dg::DG::HyperEdge`/:py:class:`DGHyperEdge`
 

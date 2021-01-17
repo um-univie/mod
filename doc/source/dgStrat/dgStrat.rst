@@ -112,12 +112,12 @@ Rule
 ####
 
 A rule (:cpp:class:`C++ <rule::Rule>`/:py:class:`Python <Rule>`) can be used directly as a strategy.
-It will search for proper derivations using a multiset of graphhs drawn from the input unvierse.
+It will search for proper derivations using a multiset of graphs drawn from the input unvierse.
 However, each candidate multiset will have at least one graph from the active subset.
-Newly discovered graphs will be the active subset of the output.
+The active subset of the output will be comprised of the newly discovered graphs.
 That is, if :math:`D = \{G\Rightarrow^{p} H\mid G\subseteq \mathcal{U} \wedge G\cap \mathcal{S} \neq \emptyset\}`
 is the set of all proper derivations using at least one graph from the active input subset,
-then the resutl is :math:`F' = (\mathcal{U}', \mathcal{S}')` with
+then the result is :math:`F' = (\mathcal{U}', \mathcal{S}')` with
 :math:`\mathcal{S}' = \bigcup_{G\Rightarrow^{p} H\in D} H\backslash \mathcal{U}`,
 and :math:`\mathcal{U}' = \mathcal{U}\cup \mathcal{S}'`.
 

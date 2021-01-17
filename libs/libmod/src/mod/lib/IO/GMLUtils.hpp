@@ -1,5 +1,5 @@
-#ifndef MOD_LIB_IO_GMLUTILS_H
-#define MOD_LIB_IO_GMLUTILS_H
+#ifndef MOD_LIB_IO_GMLUTILS_HPP
+#define MOD_LIB_IO_GMLUTILS_HPP
 
 #include <mod/lib/IO/Stereo.hpp>
 
@@ -12,10 +12,7 @@
 
 #include <string>
 
-namespace mod {
-namespace lib {
-namespace IO {
-namespace GML {
+namespace mod::lib::IO::GML {
 
 struct Vertex {
 	int id;
@@ -68,8 +65,7 @@ static const auto makeVertexConverter = [](std::size_t lowerBound) {
 	return list<Vertex>("node", &Graph::vertices)
 			(int_("id", &Vertex::id), 1, 1)
 			(string("label", &Vertex::label), lowerBound, 1)
-			(cStereo, 0, 1)
-			;
+			(cStereo, 0, 1);
 };
 
 static const auto makeEdgeConverter = [](std::size_t lowerBound) {
@@ -79,13 +75,9 @@ static const auto makeEdgeConverter = [](std::size_t lowerBound) {
 			(int_("source", &Edge::source), 1, 1)
 			(int_("target", &Edge::target), 1, 1)
 			(string("label", &Edge::label), lowerBound, 1)
-			(cStereo, 0, 1)
-			;
+			(cStereo, 0, 1);
 };
 
-} // namespace GML
-} // namespace IO
-} // namespace lib
-} // namespace mod
+} // namespace mod::lib::IO::GML
 
-#endif /* MOD_LIB_IO_GMLUTILS_H */
+#endif // MOD_LIB_IO_GMLUTILS_HPP

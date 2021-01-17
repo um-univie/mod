@@ -2,8 +2,7 @@
 
 #include <mod/lib/IO/Graph.hpp>
 
-namespace mod {
-namespace graph {
+namespace mod::graph {
 
 //------------------------------------------------------------------------------
 // Printer
@@ -147,5 +146,4 @@ bool Printer::getMirror() const {
 	return options->mirror;
 }
 
-} // namespace graph
-} // namespace mod
+} // namespace mod::graph

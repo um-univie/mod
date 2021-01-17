@@ -1,7 +1,7 @@
 #include "RC.hpp"
 
 #include <mod/Config.hpp>
-#include <mod/lib/IO/FileHandle.hpp>
+#include <mod/Post.hpp>
 #include <mod/lib/IO/IO.hpp>
 #include <mod/lib/IO/Rule.hpp>
 #include <mod/lib/RC/Evaluator.hpp>
@@ -9,19 +9,13 @@
 #include <mod/lib/Rules/Properties/Depiction.hpp>
 #include <mod/lib/Rules/Properties/String.hpp>
 
-namespace mod {
-namespace lib {
-namespace IO {
-namespace RC {
-namespace Read {
-} // namespace Read
-namespace Write {
+namespace mod::lib::IO::RC::Write {
 
 std::string dot(const lib::RC::Evaluator &rc) {
 	typedef lib::RC::Evaluator::Vertex Vertex;
 	typedef lib::RC::Evaluator::Edge Edge;
 	const lib::RC::Evaluator::GraphType &rcg = rc.getGraph();
-	FileHandle s(getUniqueFilePrefix() + "rc.dot");
+	post::FileHandle s(getUniqueFilePrefix() + "rc.dot");
 	std::string fileNoExt = s;
 	fileNoExt.erase(end(fileNoExt) - 4, end(fileNoExt));
 	s << "digraph g {" << std::endl;
@@ -41,7 +35,7 @@ std::string dot(const lib::RC::Evaluator &rc) {
 
 	for(Edge e : asRange(edges(rcg))) {
 		s << "\t" << get(boost::vertex_index_t(), rcg, source(e, rcg))
-				<< " -> " << get(boost::vertex_index_t(), rcg, target(e, rcg)) << " [";
+		  << " -> " << get(boost::vertex_index_t(), rcg, target(e, rcg)) << " [";
 		switch(rcg[e].kind) {
 		case lib::RC::Evaluator::EdgeKind::First:
 			s << " label=1";
@@ -70,7 +64,47 @@ std::string pdf(const lib::RC::Evaluator &rc) {
 	return fileNoExt;
 }
 
-void test(const lib::Rules::Real &rFirst, const lib::Rules::Real &rSecond, const CoreCoreMap &match, const lib::Rules::Real &rNew) {
+void test(const lib::Rules::Real &rFirst, const lib::Rules::Real &rSecond, const CoreCoreMap &match,
+          const lib::Rules::Real &rNew) {
+	if(getConfig().rc.printMatchesOnlyHaxChem.get()) {
+		const auto &lg = get_labelled_left(rNew.getDPORule());
+		const auto &g = get_graph(lg);
+		const auto &mol = get_molecule(lg);
+		for(const auto v : asRange(vertices(g))) {
+			const auto ad = mol[v];
+			if(ad.getRadical()) continue;
+			if(ad.getCharge() != 0) continue;
+			if(ad.getIsotope() != Isotope()) continue;
+			int valence = 0;
+			for(const auto e : asRange(out_edges(v, g))) {
+				switch(mol[e]) {
+				case BondType::Single:
+					valence += 1;
+					break;
+				case BondType::Double:
+					valence += 2;
+					break;
+				case BondType::Triple:
+					valence += 3;
+					break;
+				default:
+					valence -= 100;
+					break;
+				}
+			}
+			switch(ad.getAtomId()) {
+			case AtomIds::H:
+				if(valence > 1) return;
+				break;
+			case AtomIds::C:
+				if(valence > 4) return;
+				break;
+			case AtomIds::O:
+				if(valence > 2) return;
+				break;
+			}
+		}
+	}
 	using CoreVertex = lib::Rules::Vertex;
 	using CoreEdge = lib::Rules::Edge;
 	IO::Rules::Write::Options options;
@@ -78,13 +112,13 @@ void test(const lib::Rules::Real &rFirst, const lib::Rules::Real &rSecond, const
 	options.EdgesAsBonds(true);
 	if(getConfig().rc.matchesWithIndex.get())
 		options.WithIndex(true);
-	auto visible = [](CoreVertex) {
+	const auto visible = [](CoreVertex) {
 		return true;
 	};
-	auto vColour = [](CoreVertex) {
+	const auto vColour = [](CoreVertex) {
 		return std::string();
 	};
-	auto eColour = [](CoreEdge) {
+	const auto eColour = [](CoreEdge) {
 		return std::string();
 	};
 	// make a fake rule with all the vertices and edges, just for coords
@@ -92,41 +126,43 @@ void test(const lib::Rules::Real &rFirst, const lib::Rules::Real &rSecond, const
 	lib::Rules::LabelledRule dpoCommon(rFirst.getDPORule(), false);
 	lib::Rules::GraphType &gComon = get_graph(dpoCommon);
 	lib::Rules::PropStringCore &pStringCommon = *dpoCommon.pString;
-	for(CoreVertex v : asRange(vertices(rFirst.getGraph()))) vFirstToCommon[v] = v;
+	for(const CoreVertex v : asRange(vertices(rFirst.getGraph())))
+		vFirstToCommon[v] = v;
 	// TODO: this will completely break if vertices are deleted in the composed rule
-	for(CoreVertex v : asRange(vertices(rNew.getGraph())))
+	for(const CoreVertex v : asRange(vertices(rNew.getGraph())))
 		vNewToCommon[v] = v;
 	// copy rSecond vertices
-	for(CoreVertex v : asRange(vertices(rSecond.getGraph()))) {
-		auto rightIter = match.right.find(v);
-		if(rightIter != match.right.end()) vSecondToCommon[v] = rightIter->second;
-		else {
-			CoreVertex vCommon = add_vertex(gComon);
+	for(const CoreVertex v : asRange(vertices(rSecond.getGraph()))) {
+		const auto rightIter = match.right.find(v);
+		if(rightIter != match.right.end()) {
+			vSecondToCommon[v] = rightIter->second;
+		} else {
+			const CoreVertex vCommon = add_vertex(gComon);
 			vSecondToCommon[v] = vCommon;
 			gComon[vCommon].membership = lib::Rules::Membership::Context;
 			const std::string &label = rSecond.getGraph()[v].membership == lib::Rules::Membership::Left
-					? rSecond.getStringState().getLeft()[v]
-					: rSecond.getStringState().getRight()[v];
+			                           ? rSecond.getStringState().getLeft()[v]
+			                           : rSecond.getStringState().getRight()[v];
 			pStringCommon.add(vCommon, label, label);
 		}
 	}
 	// copy rSecond edges
-	for(CoreEdge e : asRange(edges(rSecond.getGraph()))) {
-		CoreVertex vSrcSecond = source(e, rSecond.getGraph());
-		CoreVertex vTarSecond = target(e, rSecond.getGraph());
-		auto iterSrc = vSecondToCommon.find(vSrcSecond);
-		auto iterTar = vSecondToCommon.find(vTarSecond);
+	for(const CoreEdge e : asRange(edges(rSecond.getGraph()))) {
+		const CoreVertex vSrcSecond = source(e, rSecond.getGraph());
+		const CoreVertex vTarSecond = target(e, rSecond.getGraph());
+		const auto iterSrc = vSecondToCommon.find(vSrcSecond);
+		const auto iterTar = vSecondToCommon.find(vTarSecond);
 		assert(iterSrc != end(vSecondToCommon));
 		assert(iterTar != end(vSecondToCommon));
-		CoreVertex vSrc = iterSrc->second;
-		CoreVertex vTar = iterTar->second;
+		const CoreVertex vSrc = iterSrc->second;
+		const CoreVertex vTar = iterTar->second;
 		auto pEdge = edge(vSrc, vTar, gComon);
 		if(pEdge.second) continue;
 		pEdge = add_edge(vSrc, vTar, gComon);
 		gComon[pEdge.first].membership = lib::Rules::Membership::Context;
 		const std::string &label = rSecond.getGraph()[e].membership == lib::Rules::Membership::Left
-				? rSecond.getStringState().getLeft()[e]
-				: rSecond.getStringState().getRight()[e];
+		                           ? rSecond.getStringState().getLeft()[e]
+		                           : rSecond.getStringState().getRight()[e];
 		pStringCommon.add(pEdge.first, label, label);
 	}
 	lib::Rules::Real rCommon(std::move(dpoCommon), rFirst.getLabelType());
@@ -137,98 +173,80 @@ void test(const lib::Rules::Real &rFirst, const lib::Rules::Real &rSecond, const
 	rSecondCopy.getDepictionData().copyCoords(rCommon.getDepictionData(), vSecondToCommon);
 	rNewCopy.getDepictionData().copyCoords(rCommon.getDepictionData(), vNewToCommon);
 
-	unsigned int secondIdOffset = num_vertices(rFirst.getGraph());
+	const auto secondIdOffset = num_vertices(rFirst.getGraph());
 	std::set<CoreVertex> matchVerticesInCommon;
-	for(CoreVertex v : asRange(vertices(rFirst.getGraph()))) {
+	for(const CoreVertex v : asRange(vertices(rFirst.getGraph()))) {
 		if(match.left.find(v) == match.left.end()) continue;
-		auto iter = vFirstToCommon.find(v);
+		const auto iter = vFirstToCommon.find(v);
 		assert(iter != end(vFirstToCommon));
 		matchVerticesInCommon.insert(iter->second);
 	}
-	auto disallowCollapseFirst = [&matchVerticesInCommon, &vFirstToCommon](CoreVertex v) {
-		auto iter = vFirstToCommon.find(v);
+	const auto disallowCollapseFirst = [&matchVerticesInCommon, &vFirstToCommon](CoreVertex v) {
+		const auto iter = vFirstToCommon.find(v);
 		assert(iter != end(vFirstToCommon));
 		return matchVerticesInCommon.find(iter->second) != end(matchVerticesInCommon);
 	};
-	auto disallowCollapseSecond = [&matchVerticesInCommon, &vSecondToCommon](CoreVertex v) {
-		auto iter = vSecondToCommon.find(v);
+	const auto disallowCollapseSecond = [&matchVerticesInCommon, &vSecondToCommon](CoreVertex v) {
+		const auto iter = vSecondToCommon.find(v);
 		assert(iter != end(vSecondToCommon));
 		return matchVerticesInCommon.find(iter->second) != end(matchVerticesInCommon);
 	};
-	auto disallowCollapseNew = [&matchVerticesInCommon, &vNewToCommon](CoreVertex v) {
-		auto iter = vNewToCommon.find(v);
+	const auto disallowCollapseNew = [&matchVerticesInCommon, &vNewToCommon](CoreVertex v) {
+		const auto iter = vNewToCommon.find(v);
 		assert(iter != end(vNewToCommon));
 		return matchVerticesInCommon.find(iter->second) != end(matchVerticesInCommon);
 	};
-	auto rawFilesFirst = IO::Rules::Write::tikz(rFirstCopy, 0, options, "L", "K", "R",
-			IO::Rules::Write::BaseArgs{visible, vColour, eColour}, disallowCollapseFirst);
-	auto rawFilesSecond = IO::Rules::Write::tikz(rSecondCopy, secondIdOffset, options, "L", "K", "R",
-			IO::Rules::Write::BaseArgs{visible, vColour, eColour}, disallowCollapseSecond);
-	auto rawFilesNew = IO::Rules::Write::tikz(rNewCopy, 0, options, "L", "K", "R",
-			IO::Rules::Write::BaseArgs{visible, vColour, eColour}, disallowCollapseNew);
-	FileHandle s(getUniqueFilePrefix() + "rcMatch.tex");
-	//	IO::log() << "rFirstFiles: " << rawFilesFirst.first << ", " << rawFilesFirst.second << std::endl;
-	//	IO::log() << "rSecondFiles: " << rawFilesSecond.first << ", " << rawFilesSecond.second << std::endl;
+	const auto rawFilesFirst = IO::Rules::Write::tikz(rFirstCopy, 0, options, "L", "K", "R",
+	                                                  IO::Rules::Write::BaseArgs{visible, vColour, eColour},
+	                                                  disallowCollapseFirst);
+	const auto rawFilesSecond = IO::Rules::Write::tikz(rSecondCopy, secondIdOffset, options, "L", "K", "R",
+	                                                   IO::Rules::Write::BaseArgs{visible, vColour, eColour},
+	                                                   disallowCollapseSecond);
+	const auto rawFilesNew = IO::Rules::Write::tikz(rNewCopy, 0, options, "L", "K", "R",
+	                                                IO::Rules::Write::BaseArgs{visible, vColour, eColour},
+	                                                disallowCollapseNew);
+	post::FileHandle s(getUniqueFilePrefix() + "rcMatch.tex");
 	{
-		s << "\\newpage" << std::endl;
-		s << "\\subsection{RC Match}" << std::endl;
-		s << "{\\centering" << std::endl;
-		auto arrow = [](std::string edgeLabel) -> std::string {
-			return R"XXX(\begin{tikzpicture}[node distance=20pt,
-				baseline={([yshift={-\ht\strutbox}]A.center)}]
-				\node (A) {};
-				\node (B) [right=of A] {};
-				\draw[->, >=triangle 45] (A) to node[above] {)XXX" + edgeLabel + R"XXX(} (B);
-				\end{tikzpicture})XXX";
-		};
-		s << "\\input{\\modInputPrefix/" << rawFilesFirst.first << "_L.tex}" << std::endl;
-		s << arrow("$r_1$") << std::endl;
-		s << "\\input{\\modInputPrefix/" << rawFilesFirst.first << "_R.tex}" << std::endl;
-		s << "\\\\" << std::endl;
-		s << "\\mbox{}\\hfill";
-		s << "\\input{\\modInputPrefix/" << rawFilesSecond.first << "_L.tex}" << std::endl;
-		{ // the match lines
-			s << "\\begin{tikzpicture}[remember picture, overlay]" << std::endl;
-			for(auto m : match.left) {
-				CoreVertex vFirst = m.first;
-				CoreVertex vSecond = m.second;
-				unsigned int vIdFirst = get(boost::vertex_index_t(), rFirst.getGraph(), vFirst);
-				unsigned int vIdSecond = get(boost::vertex_index_t(), rSecond.getGraph(), vSecond);
-				vIdSecond += num_vertices(rFirst.getGraph());
-				s << "\\path[modRCMatchEdge] (v-" << vIdFirst << ") to[modRCMatchEdgeTo] (v-" << vIdSecond << ");" << std::endl;
-			}
-			s << "\\end{tikzpicture}" << std::endl;
-		}
-		s << arrow("$r_2$") << std::endl;
-		s << "\\input{\\modInputPrefix/" << rawFilesSecond.first << "_R.tex}" << std::endl;
-		s << "\\\\" << std::endl;
-		s << "\\input{\\modInputPrefix/" << rawFilesNew.first << "_L.tex}" << std::endl;
-		s << arrow("$r$") << std::endl;
-		s << "\\input{\\modInputPrefix/" << rawFilesNew.first << "_R.tex}" << std::endl;
-		s << "}" << std::endl;
-	}
-	FileHandle sAux(getUniqueFilePrefix() + "rcMatch_aux.tex");
-	{
-		sAux << "\\\\" << std::endl;
-		sAux << "Files: \\texttt{" << IO::escapeForLatex(rawFilesFirst.first)
-				<< "}, \\texttt{" << IO::escapeForLatex(rawFilesSecond.first)
-				<< "}, \\texttt{" << IO::escapeForLatex(s)
-				<< "}, \\texttt{" << IO::escapeForLatex(sAux) << "}" << std::endl;
-		sAux << "\\\\" << std::endl;
-		sAux << "Match: " << std::endl;
+		s << "\\rcMatchFig";
+		s << '{' << rawFilesFirst.first << '}'
+		  << '{' << rFirst.getId() << '}';
+		s << '{';
 		bool first = true;
-		for(auto m : match.left) {
+		for(const auto[vFirst, vSecond] : match.left) {
+			const auto vIdFirst = get(boost::vertex_index_t(), rFirst.getGraph(), vFirst);
+			auto vIdSecond = get(boost::vertex_index_t(), rSecond.getGraph(), vSecond);
+			vIdSecond += num_vertices(rFirst.getGraph());
+			if(first) first = false;
+			else s << ", ";
+			s << vIdFirst << "/" << vIdSecond;
+		}
+		s << '}';
+		s << '{' << rawFilesSecond.first << '}'
+		  << '{' << rSecond.getId() << '}';
+		s << '{' << rawFilesNew.first << '}'
+		  << '{' << rNew.getId() << '}';
+		s << '\n';
+	}
+	post::FileHandle sAux(getUniqueFilePrefix() + "rcMatch_aux.tex");
+	{
+		sAux << "\\\\\n";
+		sAux << "Files:\\\\\n \\texttt{" << IO::escapeForLatex(rawFilesFirst.first)
+		     << "},\\\\\n \\texttt{" << IO::escapeForLatex(rawFilesSecond.first)
+		     << "},\\\\\n \\texttt{" << IO::escapeForLatex(rawFilesNew.first)
+		     << "},\\\\\n \\texttt{" << IO::escapeForLatex(s)
+		     << "},\\\\\n \\texttt{" << IO::escapeForLatex(sAux)
+		     << "}\\\\\n";
+		sAux << "Match: \n";
+		bool first = true;
+		for(const auto[vFirst, vSecond] : match.left) {
 			if(!first) sAux << ", ";
-			sAux << "$" << m.first << "\\rightarrow " << m.second << "$" << std::endl;
+			sAux << "$" << vFirst << "\\rightarrow " << vSecond << "$\n";
 			first = false;
 		}
 	}
-	IO::post() << "summaryInput \"" << std::string(s) << "\"" << std::endl;
-	IO::post() << "summaryInput \"" << std::string(sAux) << "\"" << std::endl;
+	IO::post() << "summaryInput \"" << std::string(s) << "\"\n";
+	IO::post() << "summaryInput \"" << std::string(sAux) << "\"\n";
+	IO::post() << std::flush;
 }
 
-} // namespace Write
-} // namespace RC
-} // namespace IO
-} // namespace lib
-} // namespace mod
+} // namespace mod::lib::IO::RC::Write

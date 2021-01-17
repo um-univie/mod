@@ -2,13 +2,13 @@
 
 #include <mod/Config.hpp>
 #include <mod/Function.hpp>
+#include <mod/Post.hpp>
 #include <mod/lib/Chem/MoleculeUtil.hpp>
 #include <mod/lib/Graph/DFSEncoding.hpp>
 #include <mod/lib/Graph/Single.hpp>
 #include <mod/lib/Graph/Properties/Depiction.hpp>
 #include <mod/lib/Graph/Properties/String.hpp>
 #include <mod/lib/Graph/Properties/Term.hpp>
-#include <mod/lib/IO/FileHandle.hpp>
 #include <mod/lib/IO/GraphWriteDetail.hpp>
 #include <mod/lib/IO/IO.hpp>
 #include <mod/lib/IO/Term.hpp>
@@ -18,11 +18,9 @@
 
 #include <boost/lexical_cast.hpp>
 
-namespace mod {
-namespace lib {
-namespace IO {
-namespace Graph {
-namespace Write {
+#include <iostream>
+
+namespace mod::lib::IO::Graph::Write {
 namespace {
 
 // returns the filename _without_ extension
@@ -89,7 +87,7 @@ std::string gml(const lib::Graph::Single &g, bool withCoords) {
 	std::string fileNoExt = getFilePrefix(g.getId(), true);
 	if(iter != end(cache)) return fileNoExt;
 	cache.emplace(g.getId(), withCoords);
-	FileHandle s(fileNoExt + ".gml");
+	post::FileHandle s(fileNoExt + ".gml");
 	gml(g.getLabelledGraph(), g.getDepictionData(), g.getId(), withCoords, s);
 	return s;
 }
@@ -100,7 +98,7 @@ std::string dot(const lib::Graph::LabelledGraph &gLabelled, const std::size_t gI
 	std::string file = getFilePrefix(gId, true) + ".dot";
 	if(iter != end(cache)) return file;
 	cache.insert(gId);
-	FileHandle s(file);
+	post::FileHandle s(file);
 	const auto &g = get_graph(gLabelled);
 	const auto &pString = get_string(gLabelled);
 	{
@@ -175,7 +173,7 @@ std::string coords(const lib::Graph::LabelledGraph &gLabelled, const lib::Graph:
 		if(options.rotation != 0) f += "_r" + std::to_string(options.rotation);
 		if(options.mirror) f += "_m" + std::to_string(options.mirror);
 		if(asInline) f += "i";
-		FileHandle s(f + "_coord.tex");
+		post::FileHandle s(f + "_coord.tex");
 		s << "% dummy\n";
 		for(const auto v : asRange(vertices(g))) {
 			const auto vId = get(boost::vertex_index_t(), g, v);
@@ -215,7 +213,7 @@ tikz(const lib::Graph::LabelledGraph &gLabelled, const lib::Graph::DepictionData
 		if(iter != end(cache)) return std::make_pair(file, fileCoordsExt);
 		cache.insert(std::make_pair(gId, strOptions));
 	}
-	FileHandle s(file);
+	post::FileHandle s(file);
 	tikz(s, options, get_graph(gLabelled), depict, fileCoordsExt, asInline, idPrefix);
 	return std::make_pair(file, fileCoordsExt);
 }
@@ -231,7 +229,7 @@ pdf(const lib::Graph::LabelledGraph &gLabelled, const lib::Graph::DepictionData 
 		if(image) {
 			std::string imageNoExt = (*image)();
 			if(imageNoExt.empty()) {
-				IO::log() << "User-specified depiction file for graph with id " << gId << " can not be empty." << std::endl;
+				std::cout << "User-specified depiction file for graph with id " << gId << " can not be empty." << std::endl;
 				throw 0;
 			}
 			std::string cmd = depict.getImageCommand();
@@ -290,7 +288,7 @@ void termState(const lib::Graph::Single &g) {
 	using Edge = lib::Graph::Edge;
 	using namespace lib::Term;
 	IO::post() << "summarySubsection \"Term State for " << g.getName() << "\"" << std::endl;
-	FileHandle s(getUniqueFilePrefix() + "termState.tex");
+	post::FileHandle s(getUniqueFilePrefix() + "termState.tex");
 	s << "\\begin{verbatim}\n";
 	const auto &termState = get_term(g.getLabelledGraph());
 	if(isValid(termState)) {
@@ -351,8 +349,4 @@ std::string svg(const lib::Graph::Single &g, const Options &options) {
 	return svg(g.getLabelledGraph(), g.getDepictionData(), g.getId(), options);
 }
 
-} // namespace Write
-} // namespace Graph
-} // namespace IO
-} // namespace lib
-} // namespace mod
+} // namespace mod::lib::IO::Graph::Write

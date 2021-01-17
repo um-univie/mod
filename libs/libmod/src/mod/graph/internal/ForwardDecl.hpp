@@ -3,12 +3,14 @@
 
 #include <mod/internal/ForwardDecl.hpp>
 
-namespace mod {
-namespace lib {
-namespace Graph {
+namespace mod::graph {
+struct Graph;
+} // namespace mod::graph
+namespace mod::lib::Graph {
 struct Single;
-} // namespace Graph
-} // namespace lib
-} // namespace mod
+} // namespace mod::lib::Graph
+namespace mod::lib::IO::Graph::Write {
+struct Options;
+} // namespace mod::lib::IO::Graph::Write
 
 #endif // MOD_GRAPH_INTERNAL_FORWARDDECL_HPP

@@ -8,8 +8,7 @@
 #undef BOOST_BIND_GLOBAL_PLACEHOLDERS
 
 namespace py = boost::python;
-namespace mod {
-namespace Py {
+namespace mod::Py {
 
 struct AttributeIsNotReadable {
 };
@@ -34,7 +33,6 @@ struct ToPythonOptionalValue {
 	}
 };
 
-} // namespace Py
-} // namespace mod
+} // namespace mod::Py
 
 #endif /* MOD_PY_COMMON_H */

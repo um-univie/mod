@@ -9,11 +9,11 @@ add_library(GML::gml ALIAS gml)
 target_include_directories(gml
         PUBLIC
         $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>
-        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
-        ${Boost_INCLUDE_DIR}) # we only use header-only libs from Boost, right?
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>)
 target_compile_options(gml PRIVATE -Wall -Wextra
         -Wno-unused-parameter
         -Wno-parentheses)
+target_link_libraries(gml PUBLIC Boost::boost)
 set_target_properties(gml PROPERTIES
         POSITION_INDEPENDENT_CODE ON
         CXX_VISIBILITY_PRESET hidden
@@ -41,10 +41,14 @@ if(BUILD_TESTING)
     if(NOT TARGET tests)
         add_custom_target(tests)
     endif()
-    add_dependencies(tests ${mod_gml_TEST_FILES})
+    add_dependencies(tests ${mod_gml_TEST_CPP_FILES})
 
-    set(sanFlags -g -fsanitize=undefined -fsanitize=address -fsanitize=leak)
-    foreach(testName ${mod_gml_TEST_FILES})
+    if("x${CMAKE_CXX_COMPILER_ID}" STREQUAL "xAppleClang")
+        set(sanFlags -g -fsanitize=undefined -fsanitize=address)
+    else()
+        set(sanFlags -g -fsanitize=undefined -fsanitize=address -fsanitize=leak)
+    endif()
+    foreach(testName ${mod_gml_TEST_CPP_FILES})
         add_executable(${testName} EXCLUDE_FROM_ALL test/${testName}.cpp)
         target_compile_options(${testName} PRIVATE -Wall -Wextra -Werror -pedantic
                 -Wno-unused-parameter

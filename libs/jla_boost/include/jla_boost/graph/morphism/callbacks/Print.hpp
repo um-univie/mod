@@ -11,7 +11,6 @@ namespace GraphMorphism {
 
 template<typename Next>
 struct PrintCallback {
-
 	PrintCallback(Next next) : next(next) { }
 
 	template<typename VertexMap>

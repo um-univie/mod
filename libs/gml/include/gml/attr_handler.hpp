@@ -3,8 +3,7 @@
 
 #include <gml/converter_expressions.hpp>
 
-namespace gml {
-namespace converter {
+namespace gml::converter {
 
 template<typename Data>
 struct AttrHandler {
@@ -44,7 +43,6 @@ private:
 	T C::*m;
 };
 
-} // namespace converter
-} // namespace gml
+} // namespace gml::converter
 
 #endif /* ATTR_HANDLER_HPP */

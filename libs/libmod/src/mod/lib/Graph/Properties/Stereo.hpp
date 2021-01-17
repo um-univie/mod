@@ -1,5 +1,5 @@
-#ifndef MOD_LIB_GRAPH_STATE_STEREO_H
-#define MOD_LIB_GRAPH_STATE_STEREO_H
+#ifndef MOD_LIB_GRAPH_STATE_STEREO_HPP
+#define MOD_LIB_GRAPH_STATE_STEREO_HPP
 
 #include <mod/lib/Graph/Properties/Property.hpp>
 #include <mod/lib/Stereo/EdgeCategory.hpp>
@@ -7,14 +7,11 @@
 
 #include <jla_boost/graph/PairToRangeAdaptor.hpp>
 
-namespace mod {
-namespace lib {
-namespace Graph {
+namespace mod::lib::Graph {
 
 struct PropStereo : Prop<PropStereo, std::unique_ptr<const lib::Stereo::Configuration>, Stereo::EdgeCategory> {
 	using Base = Prop<PropStereo, std::unique_ptr<const lib::Stereo::Configuration>, Stereo::EdgeCategory>;
 public:
-
 	template<typename Inference>
 	explicit PropStereo(const GraphType &g, Inference &&inference) : Base(g) {
 		vertexState.reserve(num_vertices(g));
@@ -31,8 +28,6 @@ public:
 	}
 };
 
-} // namespace Graph
-} // namespace lib
-} // namespace mod
+} // namespace mod::lib::Graph
 
-#endif /* MOD_LIB_GRAPH_STATE_STEREO_H */
+#endif // MOD_LIB_GRAPH_STATE_STEREO_HPP

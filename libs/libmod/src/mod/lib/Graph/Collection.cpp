@@ -35,8 +35,8 @@ struct Collection::Store {
 			if(iso) return gCand->getAPIReference();
 			// if iso:
 			//			if(getConfig().dg.calculateDetailsVerbose.get()) {
-			//				IO::log() << "Discarding product " << gCand->getName() << ", isomorphic to " << g->getName() << std::endl;
-			//				IO::log() << "\tLabelSettings: withStereo=" << std::boolalpha << this->labelSettings.withStereo << std::endl;
+			//				std::cout << "Discarding product " << gCand->getName() << ", isomorphic to " << g->getName() << std::endl;
+			//				std::cout << "\tLabelSettings: withStereo=" << std::boolalpha << this->labelSettings.withStereo << std::endl;
 			//				mod::postSection("Discarded");
 			//				mod::lib::IO::Graph::Write::Options opts, optsGraph;
 			//				opts.edgesAsBonds = opts.withIndex = true;

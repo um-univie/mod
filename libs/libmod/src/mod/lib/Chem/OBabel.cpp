@@ -7,7 +7,6 @@
 
 #include <mod/lib/Chem/MoleculeUtil.hpp>
 #include <mod/lib/Graph/Properties/Stereo.hpp>
-#include <mod/lib/Graph/Single.hpp>
 #include <mod/lib/IO/Graph.hpp>
 #include <mod/lib/IO/IO.hpp>
 #include <mod/lib/Stereo/Configuration/Tetrahedral.hpp>
@@ -31,9 +30,7 @@
 
 #include <map>
 
-namespace mod {
-namespace lib {
-namespace Chem {
+namespace mod::lib::Chem {
 
 struct OBMolHandle::Pimpl {
 	std::unique_ptr<OpenBabel::OBMol> m;
@@ -82,9 +79,9 @@ double OBMolHandle::getMolarMass() const {
 double OBMolHandle::getEnergy() const {
 	auto &mol = const_cast<OpenBabel::OBMol &> (*p->m); // becuase bah
 	if(getConfig().obabel.verbose.get())
-		IO::log() << "OBabel energy: '" << mol.GetTitle() << "'"
-					 << "\t" << mol.NumAtoms() << " atoms\t" << mol.NumBonds() << " bonds"
-					 << std::endl;
+		std::cout << "OBabel energy: '" << mol.GetTitle() << "'"
+		          << "\t" << mol.NumAtoms() << " atoms\t" << mol.NumBonds() << " bonds"
+		          << std::endl;
 	// code originally from GGL
 
 	OpenBabel::OBForceField *pFF = nullptr;
@@ -93,7 +90,7 @@ double OBMolHandle::getEnergy() const {
 	unsigned int geomSteps = 100;
 
 	{ // gen3D stuff
-		if(getConfig().obabel.verbose.get()) IO::log() << "\tgen 3D" << std::endl;
+		if(getConfig().obabel.verbose.get()) std::cout << "\tgen 3D" << std::endl;
 		pFF = OpenBabel::OBForceField::FindForceField("MMFF94");
 		assert(pFF);
 		OpenBabel::OBBuilder builder;
@@ -102,7 +99,7 @@ double OBMolHandle::getEnergy() const {
 
 		const bool setupOK = pFF->Setup(mol);
 		if(!setupOK) {
-			IO::log() << "ERROR: Setup of Open Babel forcefield failed, using 0 as energy." << std::endl;
+			std::cout << "ERROR: Setup of Open Babel forcefield failed, using 0 as energy." << std::endl;
 			return 0;
 		}
 
@@ -119,7 +116,7 @@ double OBMolHandle::getEnergy() const {
 	}
 
 	{ // conformer stuff
-		if(getConfig().obabel.verbose.get()) IO::log() << "\tconformer" << std::endl;
+		if(getConfig().obabel.verbose.get()) std::cout << "\tconformer" << std::endl;
 		pFF = OpenBabel::OBForceField::FindForceField("MMFF94");
 		assert(pFF);
 		const bool setupOK = pFF->Setup(mol);
@@ -132,7 +129,7 @@ double OBMolHandle::getEnergy() const {
 	}
 
 	// calculate energy
-	if(getConfig().obabel.verbose.get()) IO::log() << "\tenergy" << std::endl;
+	if(getConfig().obabel.verbose.get()) std::cout << "\tenergy" << std::endl;
 	double energy = pFF->Energy(false);
 
 	// calculate appropriate unit scaling
@@ -152,7 +149,7 @@ void OBMolHandle::print2Dsvg(std::ostream &s) const {
 	conv.AddOption("h");
 	conv.Write(p->m.get(), &s);
 	//	conv.SetOutFormat("smi");
-	//	conv.Write(&mol, &IO::log());
+	//	conv.Write(&mol, &std::cout);
 }
 
 double OBMolHandle::getCoordScaling() const {
@@ -208,12 +205,12 @@ void generateCoordinates(OpenBabel::OBMol &mol) {
 	OpenBabel::OBOp *op = OpenBabel::OBOp::FindType("gen2D");
 	if(!op) {
 		std::cerr << "MØD Error: Could not load Open Babel gen2D operation."
-						 " This can happen if the MØD library or an extension library was loaded with dlopen,"
-						 " but without the RTLD_GLOBAL flag. If you are executing from Python then you can insert\n"
-						 "\timport ctypes\n"
-						 "\timport sys\n"
-						 "\tsys.setdlopenflags(sys.getdlopenflags() | ctypes.RTLD_GLOBAL)\n"
-						 "before importing any modules. If this does not work, please open an issue.\n";
+		             " This can happen if the MØD library or an extension library was loaded with dlopen,"
+		             " but without the RTLD_GLOBAL flag. If you are executing from Python then you can insert\n"
+		             "\timport ctypes\n"
+		             "\timport sys\n"
+		             "\tsys.setdlopenflags(sys.getdlopenflags() | ctypes.RTLD_GLOBAL)\n"
+		             "before importing any modules. If this does not work, please open an issue.\n";
 		std::exit(1);
 	}
 	bool res = op->Do(&mol);
@@ -222,10 +219,11 @@ void generateCoordinates(OpenBabel::OBMol &mol) {
 
 template<typename Graph, typename MayCollapse, typename Callback>
 OBMolHandle makeOBMolImpl(const Graph &g,
-								  std::function<const AtomData &(typename boost::graph_traits<Graph>::vertex_descriptor)> atomData,
-								  std::function<BondType(typename boost::graph_traits<Graph>::edge_descriptor)> bondData,
-								  MayCollapse mayCollapse,
-								  const bool ignoreDuplicateBonds, const bool withCoordinates, Callback callback) {
+                          std::function<const AtomData &(
+		                          typename boost::graph_traits<Graph>::vertex_descriptor)> atomData,
+                          std::function<BondType(typename boost::graph_traits<Graph>::edge_descriptor)> bondData,
+                          MayCollapse mayCollapse,
+                          const bool ignoreDuplicateBonds, const bool withCoordinates, Callback callback) {
 	std::unique_ptr<OpenBabel::OBMol> mol(new OpenBabel::OBMol());
 	mol->BeginModify();
 
@@ -254,15 +252,20 @@ OBMolHandle makeOBMolImpl(const Graph &g,
 		int order;
 		switch(bondData(e)) {
 		case BondType::Invalid:
-		case BondType::Single: order = 1;
+		case BondType::Single:
+			order = 1;
 			break;
-		case BondType::Aromatic: order = 5;
+		case BondType::Aromatic:
+			order = 5;
 			break;
-		case BondType::Double: order = 2;
+		case BondType::Double:
+			order = 2;
 			break;
-		case BondType::Triple: order = 3;
+		case BondType::Triple:
+			order = 3;
 			break;
-		default: std::abort();
+		default:
+			std::abort();
 		}
 		OpenBabel::OBBond *bond = mol->GetBond(src, tar);
 		if(!ignoreDuplicateBonds && bond) MOD_ABORT;
@@ -289,10 +292,10 @@ OBMolHandle makeOBMolImpl(const Graph &g,
 
 template<typename Graph, typename Stereo>
 void convertStereo(const Graph &g,
-						 std::function<const AtomData &(typename boost::graph_traits<Graph>::vertex_descriptor)> atomData,
-						 std::function<BondType(typename boost::graph_traits<Graph>::edge_descriptor)> bondData,
-						 std::function<bool(typename boost::graph_traits<Graph>::vertex_descriptor)> hasImportantStereo,
-						 const bool withHydrogen, const Stereo &pStereo, OpenBabel::OBMol &mol) {
+                   std::function<const AtomData &(typename boost::graph_traits<Graph>::vertex_descriptor)> atomData,
+                   std::function<BondType(typename boost::graph_traits<Graph>::edge_descriptor)> bondData,
+                   std::function<bool(typename boost::graph_traits<Graph>::vertex_descriptor)> hasImportantStereo,
+                   const bool withHydrogen, const Stereo &pStereo, OpenBabel::OBMol &mol) {
 	using Emb = lib::Stereo::EmbeddingEdge;
 	for(const auto v : asRange(vertices(g))) {
 		const auto vId = get(boost::vertex_index_t(), g, v);
@@ -330,10 +333,14 @@ void convertStereo(const Graph &g,
 				return ref == OpenBabel::OBStereo::ImplicitRef;
 			});
 			switch(numImplicit) {
-			case 0: break; // Ok
-			case 1: break; // hmm, does OpenBabel like this?
-			case 2: continue; // otherwise OpenBabel seg. faults (GetVector on a nullptr Atom)
-			case 3: continue; // otherwise OpenBabel loops infinitely
+			case 0:
+				break; // Ok
+			case 1:
+				break; // hmm, does OpenBabel like this?
+			case 2:
+				continue; // otherwise OpenBabel seg. faults (GetVector on a nullptr Atom)
+			case 3:
+				continue; // otherwise OpenBabel loops infinitely
 			}
 			//							{ // debug
 			//								std::cout << "OBabelTetra(" << config.center << "): " << config.from;
@@ -356,10 +363,10 @@ OBMolHandle copyOBMol(const OBMolHandle &mol) {
 }
 
 OBMolHandle makeOBMol(const lib::Graph::GraphType &g,
-							 std::function<const AtomData &(lib::Graph::Vertex)> atomData,
-							 std::function<BondType(lib::Graph::Edge)> bondData,
-							 std::function<bool(lib::Graph::Vertex)> hasImportantStereo,
-							 const bool withHydrogen, const lib::Graph::PropStereo *pStereo) {
+                      std::function<const AtomData &(lib::Graph::Vertex)> atomData,
+                      std::function<BondType(lib::Graph::Edge)> bondData,
+                      std::function<bool(lib::Graph::Vertex)> hasImportantStereo,
+                      const bool withHydrogen, const lib::Graph::PropStereo *pStereo) {
 	const auto mayCollapse = [&](const auto v, const auto &g, const auto &atomData, const auto &bondData) {
 		if(withHydrogen) return false;
 		return isCollapsible(v, g, atomData, bondData, hasImportantStereo);
@@ -398,8 +405,8 @@ std::tuple<OBMolHandle, OBMolHandle, OBMolHandle> makeOBMol(
 		}
 		return isCollapsible(v, g, atomData, bondData, hasImportantStereo);
 	};
-	obMol = makeOBMolImpl(get_graph(lr), atomData, bondData, mayCollapse, true, true, [](OpenBabel::OBMol &mol) {
-	});
+	obMol = makeOBMolImpl(get_graph(lr), atomData, bondData, mayCollapse, true, true,
+	                      [](OpenBabel::OBMol &mol) {});
 	const auto &lgLeft = get_labelled_left(lr);
 	const auto &lgRight = get_labelled_right(lr);
 	const auto hasImportantStereoLeft = [&](const auto v) {
@@ -418,7 +425,7 @@ std::tuple<OBMolHandle, OBMolHandle, OBMolHandle> makeOBMol(
 				const auto &g = get_graph(lgLeft);
 				if(has_stereo(lr))
 					convertStereo(g, atomDataLeft, bondDataLeft, hasImportantStereoLeft, true,
-									  get_stereo(lgLeft), mol);
+					              get_stereo(lgLeft), mol);
 				for(const auto v : asRange(vertices(g))) {
 					const auto vId = get(boost::vertex_index_t(), g, v);
 					const auto *aBase = obMol.p->m->GetAtomById(vId);
@@ -435,7 +442,7 @@ std::tuple<OBMolHandle, OBMolHandle, OBMolHandle> makeOBMol(
 				const auto &g = get_graph(lgRight);
 				if(has_stereo(lr))
 					convertStereo(g, atomDataRight, bondDataRight, hasImportantStereoRight, true,
-									  get_stereo(lgRight), mol);
+					              get_stereo(lgRight), mol);
 				for(const auto v : asRange(vertices(g))) {
 					const auto vId = get(boost::vertex_index_t(), g, v);
 					const auto *aBase = obMol.p->m->GetAtomById(vId);
@@ -449,8 +456,6 @@ std::tuple<OBMolHandle, OBMolHandle, OBMolHandle> makeOBMol(
 	return std::make_tuple(std::move(obMol), std::move(obMolLeft), std::move(obMolRight));
 }
 
-} // namespace Chem
-} // namespace lib
-} // namespace mod
+} // namespace mod::lib::Chem
 
 #endif // MOD_HAVE_OPENBABEL

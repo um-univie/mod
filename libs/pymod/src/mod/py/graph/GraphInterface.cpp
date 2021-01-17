@@ -4,186 +4,90 @@
 #include <mod/graph/GraphInterface.hpp>
 #include <mod/graph/Printer.hpp>
 
-namespace mod {
-namespace graph {
-namespace Py {
+namespace mod::graph::Py {
 
 void GraphInterface_doExport() {
-	std::string(Graph::Vertex::*printStereoWithoutOptions)() const = &Graph::Vertex::printStereo;
-	std::string(Graph::Vertex::*printStereoWithOptions)(const graph::Printer&) const = &Graph::Vertex::printStereo;
+	std::string(Graph::Vertex::*
+	printStereoWithoutOptions)() const = &Graph::Vertex::printStereo;
+	std::string(Graph::Vertex::*
+	printStereoWithOptions)(const graph::Printer&) const = &Graph::Vertex::printStereo;
 
-	// rst: .. py:class:: GraphVertex
+	py::object graphObj = py::scope().attr("Graph");
+	py::scope graphScope = graphObj;
+
+	// rst: The :class:`Graph` class implements the :class:`protocols.LabelledGraph` protocol,
+	// rst: and thus have the following nested types.
 	// rst:
-	// rst:		A descriptor of either a vertex in a graph, or a null vertex.
+	// rst: .. class:: Graph.Vertex
 	// rst:
-	py::class_<Graph::Vertex>("GraphVertex", py::no_init)
-			// rst:		.. py:function:: __init__(self)
-			// rst: 
-			// rst:			Constructs a null descriptor.
+	// rst:		Implements the :class:`protocols.LabelledGraph.Vertex` protocol.
+	// rst:		Additionally, the :attr:`id <protocols.Graph.Vertex.id>` is in the range :math:`[0, numVertices[`.
+	// rst:
+	py::class_<Graph::Vertex>("Vertex", py::no_init)
 			.def(py::init<>())
 			.def(str(py::self))
 			.def(py::self == py::self)
 			.def(py::self != py::self)
 			.def(py::self < py::self)
 			.def("__hash__", &Graph::Vertex::hash)
-			// rst:		.. py::method:: __bool__(self)
-			// rst:
-			// rst:			:returns: ``not isNull()``
-			// rst:			:rtype: bool
 			.def("__bool__", &Graph::Vertex::operator bool)
-			// rst:		.. py:method:: isNull()
-			// rst:
-			// rst:			:returns: whether this is a null descriptor or not.
-			// rst:			:rtype: bool
 			.def("isNull", &Graph::Vertex::isNull)
-			// rst:		.. py:attribute:: id
-			// rst:
-			// rst:			(Read-only) The index of the vertex. It will be in the range :math:`[0, numVertices[`.
-			// rst:
-			// rst:			:type: int
-			// rst:			:raises: :py:class:`LogicError` if it is a null descriptor.
 			.add_property("id", &Graph::Vertex::getId)
-			// rst:		.. py:attribute:: graph
-			// rst:
-			// rst:			(Read-only) The graph the vertex belongs to.
-			// rst:
-			// rst:			:type: Graph
-			// rst:			:raises: :py:class:`LogicError` if it is a null descriptor.
 			.add_property("graph", &Graph::Vertex::getGraph)
-			// rst:		.. py:attribute:: degree
-			// rst:
-			// rst:			(Read-only) The degree of the vertex.
-			// rst:
-			// rst:			:type: int
-			// rst:			:raises: :py:class:`LogicError` if it is a null descriptor.
 			.add_property("degree", &Graph::Vertex::getDegree)
-			// rst:		.. py:attribute:: incidentEdges
-			// rst:
-			// rst:			(Read-only) A range of incident edges to this vertex.
-			// rst:
-			// rst:			:type: GraphIncidentEdgeRange
-			// rst:			:raises: :py:class:`LogicError` if it is a null descriptor.
 			.add_property("incidentEdges", &Graph::Vertex::incidentEdges)
-			// rst:		.. py:attribute:: stringLabel
-			// rst:
-			// rst:			(Read-only) The string label of the vertex.
-			// rst:
-			// rst:			:type: str
-			// rst:			:raises: :py:class:`LogicError` if it is a null descriptor.
-			.add_property("stringLabel", py::make_function(&Graph::Vertex::getStringLabel, py::return_value_policy<py::copy_const_reference>()))
-			// rst:		.. py:attribute:: atomId
-			// rst:
-			// rst:			(Read-only) The atom id of the vertex.
-			// rst:
-			// rst:			:type: AtomId
-			// rst:			:raises: :py:class:`LogicError` if it is a null descriptor.
+			.add_property("stringLabel", py::make_function(&Graph::Vertex::getStringLabel,
+			                                               py::return_value_policy<py::copy_const_reference>()))
 			.add_property("atomId", &Graph::Vertex::getAtomId)
-			// rst:		.. py:attribute:: isotope
-			// rst:
-			// rst:			(Read-only) The isotope of the vertex.
-			// rst:
-			// rst:			:type: Isotope
-			// rst:			:raises: :py:class:`LogicError` if it is a null descriptor.
 			.add_property("isotope", &Graph::Vertex::getIsotope)
-			// rst:		.. py:attribute:: charge
-			// rst:
-			// rst:			(Read-only) The charge of the vertex.
-			// rst:
-			// rst:			:type: Charge
-			// rst:			:raises: :py:class:`LogicError` if it is a null descriptor.
 			.add_property("charge", &Graph::Vertex::getCharge)
-			// rst:		.. py:attribute:: radical
-			// rst:
-			// rst:			(Read-only) The radical status of the vertex.
-			// rst:
-			// rst:			:type: bool
-			// rst:			:raises: :py:class:`LogicError` if it is a null descriptor.
 			.add_property("radical", &Graph::Vertex::getRadical)
-			// rst:		.. py:method:: printStereo()
-			// rst:                  printStereo(p)
-			// rst:
-			// rst:			Print the stereo configuration for the vertex.
-			// rst:
-			// rst:			:param GraphPrinter p: the printing options used for the depiction.
-			// rst:			:returns: the name of the PDF-file that will be compiled in post-processing.
-			// rst:			:rtype: str
-			// rst:			:raises: :py:class:`LogicError` if it is a null descriptor.
 			.def("printStereo", printStereoWithoutOptions)
-			.def("printStereo", printStereoWithOptions)
-			;
+			.def("printStereo", printStereoWithOptions);
 
-	// rst: .. py:class:: GraphEdge
+	// rst: .. class:: Graph.Edge
 	// rst:
-	// rst:		A descriptor of either an edge in a graph, or a null edge.
+	// rst:		Implements the :class:`protocols.LabelledGraph.Edge` protocol.
 	// rst:
-	py::class_<Graph::Edge>("GraphEdge", py::no_init)
-			// rst:		.. py:function:: __init__(self)
-			// rst:
-			// rst:			Constructs a null descriptor.
+	py::class_<Graph::Edge>("Edge", py::no_init)
 			.def(py::init<>())
 			.def(str(py::self))
 			.def(py::self == py::self)
 			.def(py::self != py::self)
 			.def(py::self < py::self)
-			// rst:		.. py::method:: __bool__(self)
-			// rst:
-			// rst:			:returns: ``not isNull()``
-			// rst:			:rtype: bool
-			.def("__bool__", &Graph::Vertex::operator bool)
-			// rst:		.. py:method:: isNull()
-			// rst:
-			// rst:			:returns: whether this is a null descriptor or not.
-			// rst:			:rtype: bool
+			.def("__bool__", &Graph::Edge::operator bool)
 			.def("isNull", &Graph::Edge::isNull)
-			// rst:		.. py:attribute:: graph
-			// rst:
-			// rst:			(Read-only) The graph the edge belongs to.
-			// rst:
-			// rst:			:type: Graph
-			// rst:			:raises: :py:class:`LogicError` if it is a null descriptor.
 			.add_property("graph", &Graph::Edge::getGraph)
-			// rst:		.. py:attribute:: source
-			// rst:
-			// rst:			(Read-only) The source vertex of the edge.
-			// rst:
-			// rst:			:type: GraphVertex
-			// rst: 		:raises: :py:class:`LogicError` if it is a null descriptor.
 			.add_property("source", &Graph::Edge::source)
-			// rst:		.. attribute:: target
-			// rst:
-			// rst:			(Read-only) The target vertex of the edge.
-			// rst:
-			// rst:			:type: GraphVertex
-			// rst: 		:raises: :py:class:`LogicError` if it is a null descriptor.
 			.add_property("target", &Graph::Edge::target)
-			// rst:		.. py:attribute:: stringLabel
-			// rst:
-			// rst:			(Read-only) The string label of the edge.
-			// rst:
-			// rst:			:type: str
-			// rst:			:raises: :py:class:`LogicError` if it is a null descriptor.
-			.add_property("stringLabel", py::make_function(&Graph::Edge::getStringLabel, py::return_value_policy<py::copy_const_reference>()))
-			// rst:		.. py:attribute:: bondType
-			// rst:
-			// rst:			(Read-only) The bond type of the edge.
-			// rst:
-			// rst:			:type: BondType
-			// rst:			:raises: :py:class:`LogicError` if it is a null descriptor.
-			.add_property("bondType", &Graph::Edge::getBondType)
-			;
+			.add_property("stringLabel", py::make_function(&Graph::Edge::getStringLabel,
+			                                               py::return_value_policy<py::copy_const_reference>()))
+			.add_property("bondType", &Graph::Edge::getBondType);
 
-	py::class_<Graph::VertexRange>("GraphVertexRange", py::no_init)
+	// rst: .. class:: Graph.VertexRange
+	// rst:
+	// rst:		Implements the :class:`protocols.Graph.VertexRange` protocol,
+	// rst:		in addition to the following functionality.
+	// rst:
+	py::class_<Graph::VertexRange>("VertexRange", py::no_init)
 			.def("__iter__", py::iterator<Graph::VertexRange>())
-			.def("__getitem__", &Graph::VertexRange::operator[])
-			;
-	py::class_<Graph::EdgeRange>("GraphEdgeRange", py::no_init)
-			.def("__iter__", py::iterator<Graph::EdgeRange>())
-			;
-	py::class_<Graph::IncidentEdgeRange>("GraphIncidentEdgeRange", py::no_init)
-			.def("__iter__", py::iterator<Graph::IncidentEdgeRange>())
-			;
+			// rst:		.. method:: __getitem__(i)
+			// rst:
+			// rst:			:returns: the ``i``\ th vertex of the graph.
+			// rst:			:rtype: Graph.Vertex
+			.def("__getitem__", &Graph::VertexRange::operator[]);
+	// rst: .. class:: Graph.EdgeRange
+	// rst:
+	// rst:		Implements the :class:`protocols.Graph.EdgeRange` protocol.
+	// rst:
+	py::class_<Graph::EdgeRange>("EdgeRange", py::no_init)
+			.def("__iter__", py::iterator<Graph::EdgeRange>());
+	// rst: .. class:: Graph.IncidentEdgeRange
+	// rst:
+	// rst:		Implements the :class:`protocols.Graph.IncidentEdgeRange` protocol.
+	// rst:
+	py::class_<Graph::IncidentEdgeRange>("IncidentEdgeRange", py::no_init)
+			.def("__iter__", py::iterator<Graph::IncidentEdgeRange>());
 }
 
-} // namespace Py
-} // namespace graph
-} // namespace mod
+} // namespace mod::graph::Py

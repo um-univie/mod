@@ -1,5 +1,5 @@
-#ifndef MOD_CONFIG_H
-#define MOD_CONFIG_H
+#ifndef MOD_CONFIG_HPP
+#define MOD_CONFIG_HPP
 
 // rst: .. _libmod-config:
 // rst:
@@ -217,13 +217,13 @@ struct Config {
 	Config(Config &&) = delete;
 	Config &operator=(Config &&) = delete;
 
-	// BOOST_PP_SEQ(
-	//	BOOST_PP_TUPLE(NamespaceClass, NamespaceName, 
-	//		BOOST_PP_SEQ(
-	//			BOOST_PP_TUPLE(Type, Name, DefaultValue)
-	//		)
-	//	)
-	// )
+// BOOST_PP_SEQ(
+//	BOOST_PP_TUPLE(NamespaceClass, NamespaceName,
+//		BOOST_PP_SEQ(
+//			BOOST_PP_TUPLE(Type, Name, DefaultValue)
+//		)
+//	)
+// )
 
 #define MOD_CONFIG_DATA_NS_SIZE() 3
 #define MOD_CONFIG_DATA_SETTING_SIZE() 3
@@ -238,12 +238,11 @@ struct Config {
         ((unsigned int, numThreads, 1))                                             \
     ))                                                                              \
     ((DG, dg,                                                                       \
+        ((bool, useOldRuleApplication, false))                                      \
         ((bool, calculateVerbosePrint, false))                                      \
-        ((bool, onlyProduceMolecules, false))                                       \
         ((bool, putAllProductsInSubset, false))                                     \
         ((bool, dryDerivationPrinting, false))                                      \
         ((bool, derivationDebugOutput, false))                                      \
-        ((bool, ignoreSubset, false))                                               \
         ((bool, disableRepeatFixedPointCheck, false))                               \
         ((std::string, tikzPictureOption, "scale=\\modDGHyperScale"))               \
         ((bool, printNonHyper, false))                                              \
@@ -282,6 +281,8 @@ struct Config {
         ((bool, composeConstraints, true))                                          \
         ((bool, printMatches, false))                                               \
         ((bool, matchesWithIndex, false))                                           \
+        ((bool, printMatchesOnlyHaxChem, false))                                    \
+        ((int, componentWiseMorphismLimit, 0))                                      \
     ))                                                                              \
     ((Stereo, stereo,                                                               \
         ((bool, silenceDeductionWarnings, false))                                   \
@@ -321,7 +322,7 @@ struct Config {
 #define MOD_toString(s) MOD_toString1(s)
 #define MOD_toString1(s) #s
 
-	BOOST_PP_SEQ_FOR_EACH(MOD_CONFIG_nsIter, ~, MOD_CONFIG_DATA())
+BOOST_PP_SEQ_FOR_EACH(MOD_CONFIG_nsIter, ~, MOD_CONFIG_DATA())
 
 #undef MOD_CONFIG_settingIterCons
 #undef MOD_CONFIG_settingIter
@@ -330,4 +331,4 @@ struct Config {
 
 } // namespace mod
 
-#endif /* MOD_CONFIG_H */
+#endif // MOD_CONFIG_HPP

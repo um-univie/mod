@@ -1,10 +1,9 @@
-#ifndef MOD_LIB_LABELLEDGRAPH_H
-#define MOD_LIB_LABELLEDGRAPH_H
+#ifndef MOD_LIB_LABELLEDGRAPH_HPP
+#define MOD_LIB_LABELLEDGRAPH_HPP
 
 #include <boost/concept_check.hpp>
 
-namespace mod {
-namespace lib {
+namespace mod::lib {
 
 template<typename G>
 struct LabelledGraphTraits {
@@ -19,7 +18,6 @@ struct LabelledGraphConcept {
 	using PropStringType = typename LabelledGraphTraits<G>::PropStringType;
 	using PropTermType = typename LabelledGraphTraits<G>::PropTermType;
 public:
-
 	BOOST_CONCEPT_USAGE(LabelledGraphConcept) {
 		const G &gOuterConst = gOuter;
 
@@ -47,7 +45,6 @@ private:
 //};
 
 struct IdentityPropertyHandler {
-
 	template<typename VEProp, typename LabGraphDom, typename LabGraphCodom, typename F, typename ...Args>
 	static auto fmap2(const VEProp &l, const VEProp &r, const LabGraphDom &gDom, const LabGraphCodom &gCodom, F &&f, Args&&... args) {
 		return f(l, r, gDom, gCodom, std::forward<Args>(args)...);
@@ -59,7 +56,6 @@ struct IdentityPropertyHandler {
 	}
 };
 
-} // namespace lib
-} // namespace mod
+} // namespace mod::lib
 
-#endif /* MOD_LIB_LABELLEDGRAPH_H */
+#endif // MOD_LIB_LABELLEDGRAPH_HPP

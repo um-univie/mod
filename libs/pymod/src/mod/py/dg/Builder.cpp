@@ -3,9 +3,7 @@
 #include <mod/Derivation.hpp>
 #include <mod/dg/Builder.hpp>
 
-namespace mod {
-namespace dg {
-namespace Py {
+namespace mod::dg::Py {
 namespace {
 
 // see https://stackoverflow.com/questions/19062657/is-there-a-way-to-wrap-the-function-return-value-object-in-python-using-move-i
@@ -21,12 +19,12 @@ Builder_execute(std::shared_ptr<Builder> b, std::shared_ptr<Strategy> strategy, 
 void Builder_doExport() {
 	using AddDerivation = DG::HyperEdge (Builder::*)(const Derivations &, IsomorphismPolicy);
 	using Apply = std::vector<DG::HyperEdge> (Builder::*)(const std::vector<std::shared_ptr<graph::Graph> > &,
-	                                                      std::shared_ptr<rule::Rule>,
+	                                                      std::shared_ptr<rule::Rule>, bool,
 	                                                      int, IsomorphismPolicy);
-	// rst: .. py:class:: DGBuilder
+	// rst: .. class:: DGBuilder
 	// rst:
-	// rst:		An RAII-style object obtained from :py:meth:`DG.build`.
-	// rst:		On destruction of an active builder object the owning :py:class:`DG` will be locked
+	// rst:		An RAII-style object obtained from :meth:`DG.build`.
+	// rst:		On destruction of an active builder object the owning :class:`DG` will be locked
 	// rst:		for further modifications.
 	// rst:
 	// rst:		The object can be used as a context manager:
@@ -41,7 +39,7 @@ void Builder_doExport() {
 	// rst:		Otherwise one can manually use ``del`` on the obtained builder to trigger the destruction.
 	// rst:
 	py::class_<Builder, std::shared_ptr<Builder>, boost::noncopyable>("DGBuilder", py::no_init)
-			// rst:		.. py:method:: addDerivation(d, graphPolicy=IsomorphismPolicy.Check)
+			// rst:		.. method:: addDerivation(d, graphPolicy=IsomorphismPolicy.Check)
 			// rst:
 			// rst:			Adds a hyperedge corresponding to the given derivation to the associated :class:`DG`.
 			// rst:			If it already exists, only add the given rules to the edge.
@@ -56,7 +54,7 @@ void Builder_doExport() {
 			// rst:				is different but isomorphic to another given graph object or to a graph object already
 			// rst:				in the internal graph database in the associated derivation graph.
 			.def("addDerivation", static_cast<AddDerivation>(&Builder::addDerivation))
-					// rst:		.. py:method:: execute(strategy, *, verbosity=2, ignoreRuleLabelTypes=False)
+					// rst:		.. method:: execute(strategy, *, verbosity=2, ignoreRuleLabelTypes=False)
 					// rst:
 					// rst:			Execute the given strategy (:ref:`dgStrat`) and as a side-effect add
 					// rst:			vertices and hyperedges to the underlying derivation graph.
@@ -84,12 +82,13 @@ void Builder_doExport() {
 					// rst:				and a rule in the given strategy has an associated :class:`LabelType` which is different from the one
 					// rst:				in the derivation graph.
 			.def("execute", &Builder_execute)
-					// rst:		.. py:method:: apply(graphs, r, verbosity=0, graphPolicy=IsomorphismPolicy.Check)
+					// rst:		.. method:: apply(graphs, r, onlyProper=True, verbosity=0, graphPolicy=IsomorphismPolicy.Check)
 					// rst:
-					// rst:			Compute proper direct derivations.
+					// rst:			Compute direct derivations.
 					// rst:
 					// rst:			:param graphs: the graphs constituting the left-hand side of the computed direct derivations.
 					// rst:			:type graphs: list[Graph]
+					// rst:			:param bool onlyProper: when ``True``, then all of ``graphs`` must be used in each direct derivation.
 					// rst:			:param Rule r: the rule to use for the direct derivations.
 					// rst:			:param int verbosity: the level of verbosity of printed information during calculation.
 					// rst:				See :cpp:func:`dg::Builder::apply` for explanations of the levels.
@@ -105,7 +104,7 @@ void Builder_doExport() {
 					// rst:				is different but isomorphic to another given graph object or to a graph object already
 					// rst:				in the internal graph database in the associated derivation graph.
 			.def("apply", static_cast<Apply>(&Builder::apply))
-					// rst:		.. py:method:: addAbstract(description)
+					// rst:		.. method:: addAbstract(description)
 					// rst:
 					// rst:			Add vertices and hyperedges based on the given abstract description.
 					// rst:			The description must adhere to the grammar described at :ref:`dg_abstract-desc`.
@@ -116,10 +115,10 @@ void Builder_doExport() {
 					// rst:			:param str description: the description to parse into abstract derivations.
 					// rst:			:raises: :class:`InputError` if the description could not be parsed.
 			.def("addAbstract", &Builder::addAbstract)
-					// rst:		.. py:method:: load(ruleDatabase, file, verbosity=2)
+					// rst:		.. method:: load(ruleDatabase, file, verbosity=2)
 					// rst:
 					// rst:			Load and add a derivation graph dump.
-					// rst:			Use :py:func:`DG.load` to load a dump as a locked derivation graph.
+					// rst:			Use :func:`DG.load` to load a dump as a locked derivation graph.
 					// rst:
 					// rst:			The label settings of this DG and the ones retrieved from the dump file must match.
 					// rst:			Vertices with graphs and hyperedges with rules are then added from the dump.
@@ -138,12 +137,12 @@ void Builder_doExport() {
 					// rst: 			:raises: :class:`InputError` if the file can not be opened or its content is bad.
 			.def("load", &Builder::load);
 
-	// rst: .. py:class:: DGExecuteResult
+	// rst: .. class:: DGExecuteResult
 	// rst:
 	// rst:		The result from calling :func:`DGBuilder.execute`.
 	// rst:
 	py::class_<ExecuteResult, std::shared_ptr<ExecuteResult>, boost::noncopyable>("DGExecuteResult", py::no_init)
-			// rst:		.. py:attribute:: subset
+			// rst:		.. attribute:: subset
 			// rst:		                  universe
 			// rst:
 			// rst:			(Read-only) Respectively the subset and the universe computed
@@ -162,6 +161,4 @@ void Builder_doExport() {
 			.def("list", &ExecuteResult::list);
 }
 
-} // namespace Py
-} // namespace dg
-} // namespace mod
+} // namespace mod::dg::Py

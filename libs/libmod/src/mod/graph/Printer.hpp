@@ -6,8 +6,7 @@
 
 #include <memory>
 
-namespace mod {
-namespace graph {
+namespace mod::graph {
 
 // rst-class: graph::Printer
 // rst:
@@ -18,7 +17,6 @@ namespace graph {
 // rst: 		and may make non-molecules look like molecules.
 // rst:
 // rst-class-start:
-
 struct MOD_DECL Printer {
 	// rst: .. function Printer()
 	// rst:
@@ -125,7 +123,6 @@ private:
 };
 // rst-class-end:
 
-} // namespace graph
-} // namespace mod
+} // namespace mod::graph
 
 #endif /* MOD_GRAPH_PRINTER_H */

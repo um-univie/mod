@@ -1,9 +1,9 @@
 #include "Stereo.hpp"
 
+#include <mod/Post.hpp>
 #include <mod/lib/Graph/Single.hpp>
 #include <mod/lib/Graph/Properties/Depiction.hpp>
 #include <mod/lib/Graph/Properties/Stereo.hpp>
-#include <mod/lib/IO/FileHandle.hpp>
 #include <mod/lib/IO/GraphWriteDetail.hpp>
 #include <mod/lib/Rules/Real.hpp>
 #include <mod/lib/Rules/Properties/Depiction.hpp>
@@ -16,18 +16,16 @@
 
 #include <boost/lexical_cast.hpp>
 
-namespace mod {
-namespace lib {
-namespace Stereo {
+namespace mod::lib::Stereo {
 namespace {
 
 #define MOD_anyPrintCoords()                                                    \
-	Configuration::printCoords(s, vIds);                                          \
-	if(vIds.size() == 1) return;                                                  \
-	auto centerId = vIds.back();                                                  \
-	double angle = 360.0 / (vIds.size() - 1);                                     \
-	for(std::size_t i = 0; i < vIds.size() - 1; i++)                              \
-		printSateliteCoord(s, centerId, angle * i + 90, vIds[i]);
+   Configuration::printCoords(s, vIds);                                          \
+   if(vIds.size() == 1) return;                                                  \
+   auto centerId = vIds.back();                                                  \
+   double angle = 360.0 / (vIds.size() - 1);                                     \
+   for(std::size_t i = 0; i < vIds.size() - 1; i++)                              \
+      printSateliteCoord(s, centerId, angle * i + 90, vIds[i]);
 
 void printSateliteCoord(std::ostream &s, std::size_t centerId, double angle, std::size_t id) {
 	s << "\\coordinate[overlay, at=($(v-coord-" << centerId << ")+(" << angle << ":1)";
@@ -90,10 +88,14 @@ std::string TrigonalPlanar::getEdgeAnnotation(std::size_t i) const {
 IO::Graph::Write::EdgeFake3DType Tetrahedral::getEdgeDepiction(std::size_t i) const {
 	switch(i) {
 	case 0:
-	case 1: return lib::IO::Graph::Write::EdgeFake3DType::None;
-	case 2: return lib::IO::Graph::Write::EdgeFake3DType::WedgeSL;
-	case 3: return lib::IO::Graph::Write::EdgeFake3DType::HashSL;
-	default: MOD_ABORT;
+	case 1:
+		return lib::IO::Graph::Write::EdgeFake3DType::None;
+	case 2:
+		return lib::IO::Graph::Write::EdgeFake3DType::WedgeSL;
+	case 3:
+		return lib::IO::Graph::Write::EdgeFake3DType::HashSL;
+	default:
+		MOD_ABORT;
 	}
 }
 
@@ -110,18 +112,16 @@ std::string Tetrahedral::getEdgeAnnotation(std::size_t i) const {
 	else return "?";
 }
 
-} // namespace Stereo
-namespace IO {
-namespace Stereo {
-namespace Read {
-} // namesapce Read
-namespace Write {
+} // namespace mod::lib::Stereo
+namespace mod::lib::IO::Stereo::Read {
+} // namesapce mod::lib::IO::Stereo::Read
+namespace mod::lib::IO::Stereo::Write {
 namespace {
 
 template<typename GraphInner>
 std::string coords(const GraphInner &gStereo, const lib::Stereo::Configuration &conf, const std::string &name,
-		std::map<typename boost::graph_traits<GraphInner>::vertex_descriptor, int> &vMap) {
-	FileHandle s(getUniqueFilePrefix() + name + "_coord.tex");
+                   std::map<typename boost::graph_traits<GraphInner>::vertex_descriptor, int> &vMap) {
+	post::FileHandle s(getUniqueFilePrefix() + name + "_coord.tex");
 	std::vector<std::size_t> vIds(num_vertices(gStereo));
 	using SVertex = typename boost::graph_traits<GraphInner>::vertex_descriptor;
 	for(SVertex vStereo : asRange(vertices(gStereo))) {
@@ -135,9 +135,11 @@ std::string coords(const GraphInner &gStereo, const lib::Stereo::Configuration &
 	return s;
 }
 
-template<typename GraphPrint, typename Depict>
-std::pair<std::string, std::string> tikz(const GraphPrint &g, typename boost::graph_traits<GraphPrint>::vertex_descriptor v,
-		const lib::Stereo::Configuration &conf, const std::string &name, const Depict &depict, const IO::Graph::Write::Options &options) {
+template<typename GraphPrint, typename Depict, typename ShownId>
+std::pair<std::string, std::string>
+tikz(const GraphPrint &g, typename boost::graph_traits<GraphPrint>::vertex_descriptor v,
+     const lib::Stereo::Configuration &conf, const std::string &name, const Depict &depict,
+     const IO::Graph::Write::Options &options, ShownId shownId) {
 	const bool printLonePairs = true;
 	using GVertex = typename boost::graph_traits<GraphPrint>::vertex_descriptor;
 	using GEdge = typename boost::graph_traits<GraphPrint>::edge_descriptor;
@@ -161,16 +163,18 @@ std::pair<std::string, std::string> tikz(const GraphPrint &g, typename boost::gr
 	}
 
 	std::string coordFile = coords(gStereo, conf, name, vMap);
-	FileHandle s(getUniqueFilePrefix() + name + ".tex");
+	post::FileHandle s(getUniqueFilePrefix() + name + ".tex");
 
 	struct DepictorAndAdvOptions {
-
 		DepictorAndAdvOptions(const GraphPrint &gOuter, GVertex vOuterCenter, const lib::Graph::GraphType &g,
-				const Depict &depict, bool printLonePairs, const std::map<SVertex, int> &vMap,
-				const lib::Stereo::Configuration &conf,
-				const std::map<std::pair<SVertex, SVertex>, IO::Graph::Write::EdgeFake3DType> &edgeDepiction)
-		: gOuter(gOuter), vOuterCenter(vOuterCenter), nullVertexOuter(boost::graph_traits<GraphPrint>::null_vertex()), gInner(g),
-		depict(depict), printLonePairs(printLonePairs), vMap(vMap), conf(conf), edgeDepiction(edgeDepiction) { }
+		                      const Depict &depict, bool printLonePairs, const std::map<SVertex, int> &vMap,
+		                      const lib::Stereo::Configuration &conf,
+		                      const std::map<std::pair<SVertex, SVertex>, IO::Graph::Write::EdgeFake3DType> &edgeDepiction,
+		                      ShownId shownId)
+				: gOuter(gOuter), vOuterCenter(vOuterCenter),
+				  nullVertexOuter(boost::graph_traits<GraphPrint>::null_vertex()), gInner(g),
+				  depict(depict), printLonePairs(printLonePairs), vMap(vMap), conf(conf), edgeDepiction(edgeDepiction),
+				  shownId(shownId) {}
 
 		GVertex getOuterVertexFromInnerVertex(SVertex vInner) const {
 			auto iter = vMap.find(vInner);
@@ -244,9 +248,12 @@ std::pair<std::string, std::string> tikz(const GraphPrint &g, typename boost::gr
 			assert(iter->second != -1);
 			const auto &emb = conf.begin()[iter->second];
 			switch(emb.type) {
-			case lib::Stereo::EmbeddingEdge::Type::Edge: MOD_ABORT;
-			case lib::Stereo::EmbeddingEdge::Type::LonePair: return "e";
-			case lib::Stereo::EmbeddingEdge::Type::Radical: return "r";
+			case lib::Stereo::EmbeddingEdge::Type::Edge:
+				MOD_ABORT;
+			case lib::Stereo::EmbeddingEdge::Type::LonePair:
+				return "e";
+			case lib::Stereo::EmbeddingEdge::Type::Radical:
+				return "r";
 			}
 			MOD_ABORT;
 		}
@@ -276,7 +283,8 @@ std::pair<std::string, std::string> tikz(const GraphPrint &g, typename boost::gr
 
 		bool isVisible(SVertex v) const {
 			if(printLonePairs) return true;
-			else MOD_ABORT;
+			else
+				MOD_ABORT;
 			return true;
 		}
 
@@ -291,7 +299,7 @@ std::pair<std::string, std::string> tikz(const GraphPrint &g, typename boost::gr
 		std::string getShownId(SVertex vInner) const {
 			GVertex vOuter = getOuterVertexFromInnerVertex(vInner);
 			if(vOuter == nullVertexOuter) MOD_ABORT;
-			else return boost::lexical_cast<std::string>(get(boost::vertex_index_t(), gOuter, vOuter));
+			else return boost::lexical_cast<std::string>(shownId(gOuter, vOuter));
 		}
 
 		bool overwriteWithIndex(SVertex vInner) const {
@@ -375,17 +383,20 @@ std::pair<std::string, std::string> tikz(const GraphPrint &g, typename boost::gr
 		const std::map<SVertex, int> &vMap;
 		const lib::Stereo::Configuration &conf;
 		const std::map<std::pair<SVertex, SVertex>, IO::Graph::Write::EdgeFake3DType> &edgeDepiction;
-	} depictAndAdvOptions(g, v, gStereo, depict, printLonePairs, vMap, conf, edgeDepiction);
-	auto bonusWriter = [&](std::ostream & s) {
+		ShownId shownId;
+	} depictAndAdvOptions(g, v, gStereo, depict, printLonePairs, vMap, conf, edgeDepiction, shownId);
+	auto bonusWriter = [&](std::ostream &s) {
 	};
-	lib::IO::Graph::Write::tikz(s, options, gStereo, depictAndAdvOptions, coordFile, depictAndAdvOptions, bonusWriter, "");
+	lib::IO::Graph::Write::tikz(s, options, gStereo, depictAndAdvOptions, coordFile, depictAndAdvOptions, bonusWriter,
+	                            "");
 	return std::pair<std::string, std::string>(s, coordFile);
 }
 
-template<typename Graph, typename Depict>
+template<typename Graph, typename Depict, typename ShownId>
 std::string pdf(const Graph &g, typename boost::graph_traits<Graph>::vertex_descriptor v,
-		const lib::Stereo::Configuration &conf, const std::string &name, const Depict &depict, const IO::Graph::Write::Options &options) {
-	auto p = tikz(g, v, conf, name, depict, options);
+                const lib::Stereo::Configuration &conf, const std::string &name, const Depict &depict,
+                const IO::Graph::Write::Options &options, ShownId shownId) {
+	const auto p = tikz(g, v, conf, name, depict, options, shownId);
 	std::string fileTikz = p.first, fileCoords = p.second;
 	std::string fileNoExt = fileTikz.substr(0, fileTikz.size() - 4);
 	std::string fileCoordsNoExt = fileCoords.substr(0, fileCoords.size() - 4);
@@ -395,12 +406,18 @@ std::string pdf(const Graph &g, typename boost::graph_traits<Graph>::vertex_desc
 
 } // namespace
 
-std::string summary(const lib::Graph::Single &gLib, lib::Graph::Vertex v, const lib::Stereo::Configuration &conf, const IO::Graph::Write::Options &options) {
+std::string summary(const lib::Graph::Single &gLib, lib::Graph::Vertex v, const lib::Stereo::Configuration &conf,
+                    const IO::Graph::Write::Options &options, int shownIdOffset, const std::string &nameSuffix) {
 	const auto &g = gLib.getGraph();
-	std::string name = "g_" + boost::lexical_cast<std::string>(gLib.getId()) + "_stereo_" + boost::lexical_cast<std::string>(get(boost::vertex_index_t(), g, v));
-	IO::post() << "summarySubsection \"Stereo, g " << gLib.getId() << ", v " << get(boost::vertex_index_t(), g, v) << "\"\n";
-	std::string f = pdf(g, v, conf, name, gLib.getDepictionData(), options);
-	FileHandle s(getUniqueFilePrefix() + "stereo.tex");
+	const auto vId = get(boost::vertex_index_t(), g, v);
+	std::string name = "g_" + boost::lexical_cast<std::string>(gLib.getId()) + "_stereo_" +
+	                   boost::lexical_cast<std::string>(vId);
+	IO::post() << "summarySubsection \"Stereo, g " << gLib.getId() << ", v " << vId
+	           << nameSuffix << "\"\n";
+	std::string f = pdf(g, v, conf, name, gLib.getDepictionData(), options, [shownIdOffset](const auto &g, const auto v) {
+		return get(boost::vertex_index_t(), g, v) + shownIdOffset;
+	});
+	post::FileHandle s(getUniqueFilePrefix() + "stereo.tex");
 	s << "\\begin{center}\n";
 	s << "\\includegraphics{" << f << "}\\\\\n";
 	s << "File: \\texttt{" << escapeForLatex(f) << "}\n";
@@ -409,22 +426,27 @@ std::string summary(const lib::Graph::Single &gLib, lib::Graph::Vertex v, const 
 	return f;
 }
 
-std::string summary(const lib::Rules::Real &r, lib::Rules::Vertex v, lib::Rules::Membership m, const IO::Graph::Write::Options &options) {
+std::string summary(const lib::Rules::Real &r, lib::Rules::Vertex v, lib::Rules::Membership m,
+                    const IO::Graph::Write::Options &options) {
 	assert(m != lib::Rules::Membership::Context);
 	if(m == lib::Rules::Membership::Left) assert(membership(r.getDPORule(), v) != lib::Rules::Membership::Right);
 	if(m == lib::Rules::Membership::Right) assert(membership(r.getDPORule(), v) != lib::Rules::Membership::Left);
 	const std::string side = m == lib::Rules::Membership::Left ? "L" : "R";
 	const auto &g = get_graph(r.getDPORule());
-	std::string name = "r_" + std::to_string(r.getId()) + "_" + side + "_stereo_" + std::to_string(get(boost::vertex_index_t(), g, v));
-	IO::post() << "summarySubsection \"Stereo, r " << r.getId() << ", v " << get(boost::vertex_index_t(), g, v) << " " << side << "\"" << std::endl;
+	std::string name = "r_" + std::to_string(r.getId()) + "_" + side + "_stereo_" +
+	                   std::to_string(get(boost::vertex_index_t(), g, v));
+	IO::post() << "summarySubsection \"Stereo, r " << r.getId() << ", v " << get(boost::vertex_index_t(), g, v) << " "
+	           << side << "\"" << std::endl;
 	const auto handler = [&](const auto &gLabelled, const auto &depict) {
 		const auto &g = get_graph(gLabelled);
-		return pdf(g, v, *get_stereo(gLabelled)[v], name, depict, options);
+		return pdf(g, v, *get_stereo(gLabelled)[v], name, depict, options, [](const auto &g, const auto v) {
+			return get(boost::vertex_index_t(), g, v);
+		});
 	};
 	std::string f = m == lib::Rules::Membership::Left
-			? handler(get_labelled_left(r.getDPORule()), r.getDepictionData().getLeft())
-			: handler(get_labelled_right(r.getDPORule()), r.getDepictionData().getRight());
-	FileHandle s(getUniqueFilePrefix() + "stereo.tex");
+	                ? handler(get_labelled_left(r.getDPORule()), r.getDepictionData().getLeft())
+	                : handler(get_labelled_right(r.getDPORule()), r.getDepictionData().getRight());
+	post::FileHandle s(getUniqueFilePrefix() + "stereo.tex");
 	s << "\\begin{center}\n";
 	s << "\\includegraphics{" << f << "}\\\\\n";
 	s << "File: \\texttt{" << escapeForLatex(f) << "}\n";
@@ -439,7 +461,7 @@ void summary(const lib::Stereo::GeometryGraph &graph) {
 	const auto &g = graph.getGraph();
 	const auto n = num_vertices(g);
 	std::string fileDot = [&]() {
-		FileHandle s(IO::getUniqueFilePrefix() + "geometryGraph.dot");
+		post::FileHandle s(IO::getUniqueFilePrefix() + "geometryGraph.dot");
 		s << "digraph g {\nrankdir=LR;\n";
 		for(auto v : asRange(vertices(g))) {
 			s << get(boost::vertex_index_t(), g, v) << " [ label=\"" << g[v].name << "\" ];\n";
@@ -470,7 +492,7 @@ void summary(const lib::Stereo::GeometryGraph &graph) {
 	IO::post() << "coordsFromGV dgHyperDot \"" << fileDot << "\"\n";
 	std::string fileCoords = fileDot + "_coord";
 	std::string fileFig = [&]() {
-		FileHandle s(IO::getUniqueFilePrefix() + "geometryGraph.tex");
+		post::FileHandle s(IO::getUniqueFilePrefix() + "geometryGraph.tex");
 		s << "\\begin{tikzpicture}[scale=\\modDGHyperScale]\n";
 		s << "\\input{" << fileCoords << ".tex}\n";
 		for(auto v : asRange(vertices(g))) {
@@ -483,8 +505,8 @@ void summary(const lib::Stereo::GeometryGraph &graph) {
 			auto vSrc = source(e, g);
 			auto vTar = target(e, g);
 			s << "\\path[draw, ->, >=stealth] (v-" << get(boost::vertex_index_t(), g, vSrc)
-					<< ") to (v-" << get(boost::vertex_index_t(), g, vTar)
-					<< ");\n";
+			  << ") to (v-" << get(boost::vertex_index_t(), g, vTar)
+			  << ");\n";
 		}
 		for(std::size_t i = 0; i < graph.chemValids.size(); ++i) {
 			auto &cv = graph.chemValids[i];
@@ -510,7 +532,7 @@ void summary(const lib::Stereo::GeometryGraph &graph) {
 		return std::string(f.begin(), f.end() - 4);
 	}();
 	std::string fileTex = [&]() {
-		FileHandle s(IO::getUniqueFilePrefix() + "geometryGraphSummary.tex");
+		post::FileHandle s(IO::getUniqueFilePrefix() + "geometryGraphSummary.tex");
 		s
 				<< "\\begin{center}\n"
 				<< "\\includegraphics{" << fileFig << "}\n\n"
@@ -533,7 +555,8 @@ void summary(const lib::Stereo::GeometryGraph &graph) {
 				if(std::abs(cv.charge) != 1) s << std::abs(cv.charge);
 				s << "}$";
 			}
-			for(auto cat :{lib::Stereo::EdgeCategory::Single, lib::Stereo::EdgeCategory::Double, lib::Stereo::EdgeCategory::Triple, lib::Stereo::EdgeCategory::Aromatic}) {
+			for(auto cat :{lib::Stereo::EdgeCategory::Single, lib::Stereo::EdgeCategory::Double,
+			               lib::Stereo::EdgeCategory::Triple, lib::Stereo::EdgeCategory::Aromatic}) {
 				s << "	& ";
 				if(auto count = cv.catCount[cat]) {
 					s << int(count);
@@ -546,8 +569,7 @@ void summary(const lib::Stereo::GeometryGraph &graph) {
 		s
 				<< "\\bottomrule\n"
 				<< "\\end{longtable}\n"
-				<< "\\end{center}\n"
-				;
+				<< "\\end{center}\n";
 		return std::string(s);
 	}();
 
@@ -556,8 +578,4 @@ void summary(const lib::Stereo::GeometryGraph &graph) {
 	IO::post() << "summaryInput \"" << fileTex << "\"" << std::endl;
 }
 
-} // namesapce Write
-} // namesapce Stereo
-} // namesapce IO
-} // namesapce lib
-} // namesapce mod
+} // namesapce mod::lib::IO::Stereo::Write

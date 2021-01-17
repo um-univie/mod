@@ -48,7 +48,7 @@ struct ConvertFirst : public ConstraintVisitor<// GraphFirstLeft
 		auto vResult = get(result.mFirstToResult, get_graph(rFirst), get_graph(result.rResult), vFirst);
 		assert(vResult != boost::graph_traits<GraphResult>::null_vertex());
 		cResult->vConstrained = vResult;
-		// IO::log() << "WARNING: check transfered constraint for " << rFirst.getName() << " -> " << rSecond.getName() << std::endl;
+		// std::cout << "WARNING: check transfered constraint for " << rFirst.getName() << " -> " << rSecond.getName() << std::endl;
 		this->cResult = std::move(cResult);
 	}
 
@@ -84,18 +84,18 @@ struct ConvertSecond : public ConstraintVisitor<// GraphSecondLeft
 		const auto vResult = get(result.mSecondToResult, get_graph(rSecond), get_graph(result.rResult), vSecond);
 		// vResult may be null_vertex
 		if(vResult == boost::graph_traits<GraphResult>::null_vertex()) {
-			// IO::log() << "WARNING: constrained vertex " << vSecondId << " deleted in " << rFirst.getName() << " -> " << rSecond.getName() << std::endl;
+			// std::cout << "WARNING: constrained vertex " << vSecondId << " deleted in " << rFirst.getName() << " -> " << rSecond.getName() << std::endl;
 			return;
 		}
 
 		auto mResult = membership(result.rResult, vResult);
 		if(mResult == jla_boost::GraphDPO::Membership::Right) {
-			// IO::log() << "WARNING: constrained vertex " << vSecondId << " changed to right side in " << rFirst.getName() << " -> " << rSecond.getName() << std::endl;
+			// std::cout << "WARNING: constrained vertex " << vSecondId << " changed to right side in " << rFirst.getName() << " -> " << rSecond.getName() << std::endl;
 			return;
 		}
 
 		if(get(match, get_graph(get_labelled_left(rSecond)), get_graph(get_labelled_right(rFirst)), vSecond) != boost::graph_traits<GraphFirst>::null_vertex()) {
-			// IO::log() << "WARNING: maybe missing constraint on " << vNew << " for " << rFirst.getName() << " -> " << rSecond.getName() << std::endl;
+			// std::cout << "WARNING: maybe missing constraint on " << vNew << " for " << rFirst.getName() << " -> " << rSecond.getName() << std::endl;
 			return;
 		}
 
@@ -119,9 +119,9 @@ struct ConvertSecond : public ConstraintVisitor<// GraphSecondLeft
 			auto &m = getMachine(*result.rResult.pTerm);
 			const auto handleTerm = [&m](const auto tSecond) {
 				m.verify();
-				//			lib::IO::Term::Write::wam(m, lib::Term::getStrings(), lib::IO::log() << "Copy " << addr << "\n");
+				//			lib::IO::Term::Write::wam(m, lib::Term::getStrings(), std::cout << "Copy " << addr << "\n");
 				auto res = m.copyFromTemp(tSecond);
-				//			lib::IO::Term::Write::wam(m, lib::Term::getStrings(), lib::IO::log() << "After copy " << addr << "\n");
+				//			lib::IO::Term::Write::wam(m, lib::Term::getStrings(), std::cout << "After copy " << addr << "\n");
 				m.verify();
 				return res.addr;
 			};
@@ -131,9 +131,8 @@ struct ConvertSecond : public ConstraintVisitor<// GraphSecondLeft
 		}
 		}
 		this->cResult = std::move(cResult);
-		// IO::log() << "WARNING: check converted constraint on vertex " << vNew << " for " << rFirst.getName() << " -> " << rSecond.getName() << std::endl;
+		// std::cout << "WARNING: check converted constraint on vertex " << vNew << " for " << rFirst.getName() << " -> " << rSecond.getName() << std::endl;
 	}
-private:
 public:
 
 	virtual void operator()(const ConstraintSP<GraphSecondLeft> &c) override {

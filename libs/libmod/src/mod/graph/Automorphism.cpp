@@ -5,8 +5,7 @@
 
 #include <perm_group/permutation/io.hpp>
 
-namespace mod {
-namespace graph {
+namespace mod::graph {
 
 //==============================================================================
 // Aut
@@ -102,5 +101,4 @@ std::ostream &operator<<(std::ostream &s, const Graph::AutGroup &a) {
 	return s;
 }
 
-} // namespace graph
-} // namespace mod
+} // namespace mod::graph

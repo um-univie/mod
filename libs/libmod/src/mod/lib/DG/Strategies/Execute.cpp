@@ -40,10 +40,12 @@ void Execute::executeImpl(PrintSettings settings, const GraphState &input) {
 		printInfo(settings);
 	dg::Strategy::GraphState gs(
 			[&input](std::vector<std::shared_ptr<graph::Graph> > &subset) {
-				for(const lib::Graph::Single *g : input.getSubset(0)) subset.push_back(g->getAPIReference());
+				for(const lib::Graph::Single *g : input.getSubset())
+					subset.push_back(g->getAPIReference());
 			},
 			[&input](std::vector<std::shared_ptr<graph::Graph> > &universe) {
-				for(const lib::Graph::Single *g : input.getUniverse()) universe.push_back(g->getAPIReference());
+				for(const lib::Graph::Single *g : input.getUniverse())
+					universe.push_back(g->getAPIReference());
 			});
 	(*func)(gs);
 }

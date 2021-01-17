@@ -22,16 +22,14 @@ bool operator==(const Derivation &, const Derivation &) {
 	std::exit(1);
 }
 
-namespace rule {
-namespace RCExp {
+namespace rule::RCExp {
 
 bool operator==(const Expression &, const Expression &) {
 	std::cerr << "RCExpExp does not support ==" << std::endl;
 	std::exit(1);
 }
 
-} // namespace RCExp
-} // namespace rule
+} // namespace rule::RCExp
 namespace Py {
 
 template<typename T>
@@ -49,7 +47,7 @@ bool listCompare(const std::vector<T> &l, py::object r) {
 
 #define makeVector(Name, Type)                        \
    using Name = std::vector<Type>;                    \
-   py::class_<Name>(#Name)                            \
+   py::class_<Name>("_" #Name)                        \
       .def(py::vector_indexing_suite<Name, true>())   \
       .def("__eq__", &listCompare<Type>)
 

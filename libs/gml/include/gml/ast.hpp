@@ -11,8 +11,7 @@
 namespace spirit = boost::spirit;
 namespace x3 = boost::spirit::x3;
 
-namespace gml {
-namespace ast {
+namespace gml::ast {
 
 struct LocationInfo {
 	std::size_t line, column;
@@ -20,7 +19,7 @@ struct LocationInfo {
 
 struct List;
 
-struct Value : x3::variant<int, double, std::string, x3::forward_ast<List> >, LocationInfo {
+struct Value : x3::variant<int, double, std::string, x3::forward_ast<List>>, LocationInfo {
 	using base_type::base_type;
 	using base_type::operator=;
 };
@@ -34,15 +33,14 @@ struct List {
 	std::vector<KeyValue> list;
 };
 
-} // namespace ast
-} // namespace gml
+} // namespace gml::ast
 
 BOOST_FUSION_ADAPT_STRUCT(gml::ast::KeyValue,
-		(std::string, key)
-		(gml::ast::Value, value)
-		)
+                          (std::string, key)
+		                          (gml::ast::Value, value)
+)
 BOOST_FUSION_ADAPT_STRUCT(gml::ast::List,
-		(std::vector<gml::ast::KeyValue>, list)
-		)
+                          (std::vector<gml::ast::KeyValue>, list)
+)
 
 #endif /* GML_AST_HPP */

@@ -8,42 +8,41 @@
 #include <mod/dg/GraphInterface.hpp>
 #include <mod/dg/Strategies.hpp>
 
-namespace mod {
-namespace Py {
+namespace mod::Py {
 
 void Function_doExport() {
 	// () -> X
-	exportFunc<std::vector<std::shared_ptr<graph::Graph> >()>("Func_VecGraph");
-	exportFunc<std::string()>("Func_String");
+	exportFunc<std::vector<std::shared_ptr<graph::Graph> >()>("_Func_VecGraph");
+	exportFunc<std::string()>("_Func_String");
 	// Derivation -> X
-	exportFunc<bool(const Derivation &)>("Func_BoolDerivation");
-	exportFunc<std::string(const Derivation &)>("Func_StringDerivation");
+	exportFunc<bool(const Derivation &)>("_Func_BoolDerivation");
+	exportFunc<std::string(const Derivation &)>("_Func_StringDerivation");
 	// DG::Vertex -> X
-	exportFunc<bool(dg::DG::Vertex)>("Func_BoolDGVertex");
-	exportFunc<std::string(dg::DG::Vertex)>("Func_StringDGVertex");
+	exportFunc<bool(dg::DG::Vertex)>("_Func_BoolDGVertex");
+	exportFunc<std::string(dg::DG::Vertex)>("_Func_StringDGVertex");
 	// DG::HyperEdge -> X
-	exportFunc<bool(dg::DG::HyperEdge)>("Func_BoolDGHyperEdge");
-	exportFunc<std::string(dg::DG::HyperEdge)>("Func_StringDGHyperEdge");
-	exportFunc<double(dg::DG::HyperEdge)>("Func_DoubleDGHyperEdge");
+	exportFunc<bool(dg::DG::HyperEdge)>("_Func_BoolDGHyperEdge");
+	exportFunc<std::string(dg::DG::HyperEdge)>("_Func_StringDGHyperEdge");
+	exportFunc<double(dg::DG::HyperEdge)>("_Func_DoubleDGHyperEdge");
 	// Graph -> X
-	exportFunc<bool(std::shared_ptr<graph::Graph>)>("Func_BoolGraph");
-	exportFunc<int(std::shared_ptr<graph::Graph>)>("Func_IntGraph");
-	exportFunc<std::string(std::shared_ptr<graph::Graph>)>("Func_StringGraph");
+	exportFunc<bool(std::shared_ptr<graph::Graph>)>("_Func_BoolGraph");
+	exportFunc<int(std::shared_ptr<graph::Graph>)>("_Func_IntGraph");
+	exportFunc<std::string(std::shared_ptr<graph::Graph>)>("_Func_StringGraph");
 	// Graph x DG -> X
-	exportFunc<std::string(std::shared_ptr<graph::Graph>, std::shared_ptr<dg::DG>)>("Func_StringGraphDG");
+	exportFunc<std::string(std::shared_ptr<graph::Graph>, std::shared_ptr<dg::DG>)>("_Func_StringGraphDG");
 	// Graph x DG x bool -> X
-	exportFunc<std::string(std::shared_ptr<graph::Graph>, std::shared_ptr<dg::DG>, bool)>("Func_StringGraphDGBool");
+	exportFunc<std::string(std::shared_ptr<graph::Graph>, std::shared_ptr<dg::DG>, bool)>("_Func_StringGraphDGBool");
 	// Graph x Strategy::GraphState -> X
-	exportFunc<bool(std::shared_ptr<graph::Graph>, const dg::Strategy::GraphState &)>("Func_BoolGraphDGStratGraphState");
+	exportFunc<bool(std::shared_ptr<graph::Graph>, const dg::Strategy::GraphState &)>(
+			"_Func_BoolGraphDGStratGraphState");
 	// Graph x Strategy::GraphState x bool -> X
 	exportFunc<bool(std::shared_ptr<graph::Graph>, const dg::Strategy::GraphState &, bool)>(
-			"Func_BoolGraphDGStratGraphStateBool");
+			"_Func_BoolGraphDGStratGraphStateBool");
 	// Graph x Graph x Strategy::GraphState -> X
 	exportFunc<bool(std::shared_ptr<graph::Graph>, std::shared_ptr<graph::Graph>, const dg::Strategy::GraphState &)>(
-			"Func_BoolGraphGraphDGStratGraphState");
+			"_Func_BoolGraphGraphDGStratGraphState");
 	// Strategy::GraphState -> X
-	exportFunc<void(const dg::Strategy::GraphState &)>("Func_VoidDGStratGraphState");
+	exportFunc<void(const dg::Strategy::GraphState &)>("_Func_VoidDGStratGraphState");
 }
 
-} // namespace Py
-} // namespace mod
+} // namespace mod::Py

@@ -29,8 +29,8 @@ public:
 		machine.verify();
 		result.rResult.pTerm = std::make_unique<typename Result::RuleResult::PropTermType > (get_graph(result.rResult), std::move(machine));
 		if(Verbose) {
-			lib::IO::log() << "New machine:\n";
-			lib::IO::Term::Write::wam(getMachine(*result.rResult.pTerm), lib::Term::getStrings(), lib::IO::log());
+			std::cout << "New machine:\n";
+			lib::IO::Term::Write::wam(getMachine(*result.rResult.pTerm), lib::Term::getStrings(), std::cout);
 		}
 		return true;
 	}
@@ -63,8 +63,8 @@ public:
 			break;
 		}
 		if(Verbose) {
-			lib::IO::log() << "Cur machine:\n";
-			lib::IO::Term::Write::wam(getMachine(*result.rResult.pTerm), lib::Term::getStrings(), lib::IO::log());
+			std::cout << "Cur machine:\n";
+			lib::IO::Term::Write::wam(getMachine(*result.rResult.pTerm), lib::Term::getStrings(), std::cout);
 		}
 	}
 
@@ -91,8 +91,8 @@ public:
 			break;
 		}
 		if(Verbose) {
-			lib::IO::log() << "Cur machine:\n";
-			lib::IO::Term::Write::wam(getMachine(*result.rResult.pTerm), lib::Term::getStrings(), lib::IO::log());
+			std::cout << "Cur machine:\n";
+			lib::IO::Term::Write::wam(getMachine(*result.rResult.pTerm), lib::Term::getStrings(), std::cout);
 		}
 	}
 
@@ -117,8 +117,8 @@ public:
 			break;
 		}
 		if(Verbose) {
-			lib::IO::log() << "Cur machine:\n";
-			lib::IO::Term::Write::wam(getMachine(*result.rResult.pTerm), lib::Term::getStrings(), lib::IO::log());
+			std::cout << "Cur machine:\n";
+			lib::IO::Term::Write::wam(getMachine(*result.rResult.pTerm), lib::Term::getStrings(), std::cout);
 		}
 	}
 
@@ -145,8 +145,8 @@ public:
 			break;
 		}
 		if(Verbose) {
-			lib::IO::log() << "Cur machine:\n";
-			lib::IO::Term::Write::wam(getMachine(*result.rResult.pTerm), lib::Term::getStrings(), lib::IO::log());
+			std::cout << "Cur machine:\n";
+			lib::IO::Term::Write::wam(getMachine(*result.rResult.pTerm), lib::Term::getStrings(), std::cout);
 		}
 	}
 public:
@@ -236,10 +236,10 @@ private:
 		auto &m = getMachine(*result.rResult.pTerm);
 		m.verify();
 		if(Verbose)
-			lib::IO::Term::Write::wam(m, lib::Term::getStrings(), lib::IO::log() << "Copy " << addr << "\n");
+			lib::IO::Term::Write::wam(m, lib::Term::getStrings(), std::cout << "Copy " << addr << "\n");
 		m.copyFromTemp(addr);
 		if(Verbose)
-			lib::IO::Term::Write::wam(m, lib::Term::getStrings(), lib::IO::log() << "After copy " << addr << "\n");
+			lib::IO::Term::Write::wam(m, lib::Term::getStrings(), std::cout << "After copy " << addr << "\n");
 		m.verify();
 	}
 

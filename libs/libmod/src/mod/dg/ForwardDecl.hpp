@@ -1,16 +1,15 @@
 #ifndef MOD_DG_FORWARDDECL_H
 #define MOD_DG_FORWARDDECL_H
 
-namespace mod {
-namespace dg {
+namespace mod::dg {
 struct Builder;
 struct DG;
 struct ExecuteResult;
 struct PrintData;
 struct Printer;
 struct Strategy;
-} // namespace dg
-namespace lib {
+} // namespace mod::dg
+namespace mod::lib {
 namespace DG {
 struct Hyper;
 struct NonHyper;
@@ -19,15 +18,10 @@ namespace Strategies {
 struct Strategy;
 } // namespace Strategies
 } // namespace DG
-namespace IO {
-namespace DG {
-namespace Write {
+namespace IO::DG::Write {
 struct Data;
 struct Printer;
-} // namespace Write
-} // namespace DG
-} // namespace IO
-} // namespace lib
-} // namespace mod
+} // namespace IO::DG::Write
+} // namespace mod::lib
 
 #endif /* MOD_DG_FORWARDDECL_H */

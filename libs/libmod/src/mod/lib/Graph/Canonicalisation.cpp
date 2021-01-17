@@ -559,7 +559,7 @@ auto getCanonForm(const Single &g, EdgeHandler eHandler, LabelType labelType, bo
 		//		canon_permutation = can(getGraph(), idx, vLess,
 		//				graph_canonicalization::make_visitor(visitor, std::ref(stats)),
 		//				eInv);
-		lib::IO::log() << stats;
+		std::cout << stats;
 	}
 
 	auto eLess = [&str](Edge lhs, Edge rhs) {

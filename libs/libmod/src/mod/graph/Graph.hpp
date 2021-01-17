@@ -12,8 +12,10 @@
 #include <vector>
 
 namespace mod {
-template<typename Sig> struct Function;
-namespace graph {
+template<typename Sig>
+struct Function;
+} // namespace mod
+namespace mod::graph {
 
 // rst-class: graph::Graph
 // rst:
@@ -25,7 +27,6 @@ namespace graph {
 // rst:		graph interface for this class.
 // rst:
 // rst-class-start:
-
 struct MOD_DECL Graph {
 	class Vertex;
 	class Edge;
@@ -38,14 +39,6 @@ struct MOD_DECL Graph {
 public:
 	struct Aut;
 	struct AutGroup;
-	// rst:	.. function:: std::string printStereo() const
-	// rst:	              std::string printStereo(const Printer &p) const
-	// rst:
-	// rst:		Print the stereo configuration for the vertex.
-	// rst:
-	// rst:		:returns: the name of the PDF-file that will be compiled in post-processing.
-	std::string printStereo() const;
-	std::string printStereo(const Printer &p) const;
 private: // The actual class interface
 	Graph(std::unique_ptr<lib::Graph::Single> g);
 	Graph(const Graph&) = delete;
@@ -270,13 +263,11 @@ public:
 // rst-class-end:
 
 struct GraphLess {
-
 	bool operator()(std::shared_ptr<Graph> g1, std::shared_ptr<Graph> g2) const {
 		return g1->getId() < g2->getId();
 	}
 };
 
-} // namespace graph
-} // namespace mod
+} // namespace mod::graph
 
 #endif /* MOD_GRAPH_GRAPH_H */

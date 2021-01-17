@@ -24,10 +24,9 @@
 #include <boost/spirit/home/x3/operator/difference.hpp>
 #include <boost/spirit/home/x3/operator/kleene.hpp>
 
-namespace mod {
-namespace lib {
-namespace DG {
-namespace Dump {
+#include <iostream>
+
+namespace mod::lib::DG::Dump {
 namespace {
 
 struct ConstructionData {
@@ -67,7 +66,7 @@ struct NonHyperDump : public NonHyper {
 			}
 			std::shared_ptr<rule::Rule> r = *iter;
 			if(printInfo)
-				IO::log() << "Rule linked: " << r->getName() << std::endl;
+				std::cout << "Rule linked: " << r->getName() << std::endl;
 			this->rules.push_back(r);
 			ruleMap[get<0>(t)] = r;
 		}
@@ -83,7 +82,7 @@ struct NonHyperDump : public NonHyper {
 				const bool wasNew = trustAddGraphAsVertex(p.first);
 				graphMap[id] = p.first;
 				if(!p.second && printInfo)
-					IO::log() << "Graph linked: " << get<1>(v) << " -> " << p.first->getName() << std::endl;
+					std::cout << "Graph linked: " << get<1>(v) << " -> " << p.first->getName() << std::endl;
 				//				if(wasNew) giveProductStatus(p.first);
 				(void) wasNew;
 				iVertices++;
@@ -149,7 +148,7 @@ bool parse(Iter &textFirst,
 		bool res = IO::detail::ParseDispatch<x3::ascii::space_type>::parse(first, last, p, attr, x3::ascii::space);
 		if(!res) {
 			err << "Error while parsing DG dump.\n";
-			IO::detail::doParserError(textFirst, first, last, lib::IO::log());
+			IO::detail::doParserError(textFirst, first, last, std::cout);
 			return false;
 		}
 		return res;
@@ -308,7 +307,4 @@ std::unique_ptr<NonHyper> load(const std::vector<std::shared_ptr<graph::Graph> >
 			ConstructionData{rules, std::move(vertices), std::move(rulesParsed), std::move(edges)});
 }
 
-} // namespace Dump
-} // namespace DG
-} // namespace lib
-} // namespace mod
+} // namespace mod::lib::DG::Dump

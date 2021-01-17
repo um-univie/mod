@@ -1,7 +1,7 @@
 #include "String.hpp"
 
 #include <mod/lib/GraphMorphism/Constraints/AllVisitor.hpp>
-#include <mod/lib//IO/Term.hpp>
+#include <mod/lib/IO/Term.hpp>
 #include <mod/lib/Rules/Properties/Term.hpp>
 #include <mod/lib/StringStore.hpp>
 

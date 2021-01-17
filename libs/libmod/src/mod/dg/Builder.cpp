@@ -13,8 +13,7 @@
 
 #include <fstream>
 
-namespace mod {
-namespace dg {
+namespace mod::dg {
 
 struct Builder::Pimpl {
 	Pimpl(std::shared_ptr<DG> dg_, lib::DG::NonHyperBuilder &dgLib) : dg_(dg_), b(dgLib.build()) {}
@@ -82,25 +81,26 @@ ExecuteResult Builder::execute(std::shared_ptr<Strategy> strategy, int verbosity
 
 std::vector<DG::HyperEdge> Builder::apply(const std::vector<std::shared_ptr<graph::Graph> > &graphs,
                                           std::shared_ptr<rule::Rule> r) {
-	return apply(graphs, r, 0);
+	return apply(graphs, r, true, 0);
 }
 std::vector<DG::HyperEdge> Builder::apply(const std::vector<std::shared_ptr<graph::Graph> > &graphs,
-                                          std::shared_ptr<rule::Rule> r,
+                                          std::shared_ptr<rule::Rule> r, bool onlyProper,
                                           int verbosity) {
-	return apply(graphs, r, verbosity, IsomorphismPolicy::Check);
+	return apply(graphs, r, onlyProper, verbosity, IsomorphismPolicy::Check);
 }
 
 std::vector<DG::HyperEdge> Builder::apply(const std::vector<std::shared_ptr<graph::Graph> > &graphs,
-                                          std::shared_ptr<rule::Rule> r,
-                                          int verbosity,
-                                          IsomorphismPolicy graphPolicy) {
+                                          std::shared_ptr<rule::Rule> r, bool onlyProper,
+                                          int verbosity, IsomorphismPolicy graphPolicy) {
 	check(p);
 	if(std::any_of(graphs.begin(), graphs.end(), [](const auto &p) {
 		return !p;
 	}))
 		throw LogicError("One of the graphs is a null pointer.");
 	if(!r) throw LogicError("The rule is a null pointer.");
-	auto innerRes = p->b.apply(graphs, r, verbosity, graphPolicy);
+	auto innerRes = onlyProper
+			? p->b.apply(graphs, r, verbosity, graphPolicy)
+			: p->b.applyRelaxed(graphs, r, verbosity, graphPolicy);
 	std::vector<DG::HyperEdge> res;
 	const auto &nonHyper = p->dg_->getNonHyper();
 	const auto &hyper = p->dg_->getHyper();
@@ -149,7 +149,7 @@ ExecuteResult::~ExecuteResult() = default;
 
 const std::vector<std::shared_ptr<graph::Graph>> &ExecuteResult::getSubset() const {
 	if(p->subset.empty()) {
-		const auto &inner = p->res.getResult().getSubset(0);
+		const auto &inner = p->res.getResult().getSubset();
 		p->subset.reserve(inner.size());
 		for(const auto *g : inner)
 			p->subset.push_back(g->getAPIReference());
@@ -170,5 +170,4 @@ void ExecuteResult::list(bool withUniverse) const {
 	p->res.list(withUniverse);
 }
 
-} // namespace dg
-} // namespace mod
+} // namespace mod::dg

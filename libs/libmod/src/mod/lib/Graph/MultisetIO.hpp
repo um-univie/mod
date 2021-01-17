@@ -1,13 +1,11 @@
-#ifndef MOD_LIB_GRAPH_MULTISETIO_H
-#define MOD_LIB_GRAPH_MULTISETIO_H
+#ifndef MOD_LIB_GRAPH_MULTISETIO_HPP
+#define MOD_LIB_GRAPH_MULTISETIO_HPP
 
 #include <mod/lib/Graph/Multiset.hpp>
 
-#include <iostream>
+#include <ostream>
 
-namespace mod {
-namespace lib {
-namespace Graph {
+namespace mod::lib::Graph {
 
 template<typename GraphType>
 std::ostream &operator<<(std::ostream &s, const Multiset<GraphType> &ms) {
@@ -17,8 +15,6 @@ std::ostream &operator<<(std::ostream &s, const Multiset<GraphType> &ms) {
 	return s << "}";
 }
 
-} // namespace Graph
-} // namespace lib
-} // namespace mod
+} // namespace mod::lib::Graph
 
-#endif /* MOD_LIB_GRAPH_MULTISETIO_H */
+#endif // MOD_LIB_GRAPH_MULTISETIO_HPP

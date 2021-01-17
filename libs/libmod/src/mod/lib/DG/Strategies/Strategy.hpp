@@ -1,21 +1,20 @@
-#ifndef MOD_LIB_DG_STRATEGIES_STRATEGY_H
-#define MOD_LIB_DG_STRATEGIES_STRATEGY_H
+#ifndef MOD_LIB_DG_STRATEGIES_STRATEGY_HPP
+#define MOD_LIB_DG_STRATEGIES_STRATEGY_HPP
 
 #include <mod/dg/Strategies.hpp>
 #include <mod/lib/DG/NonHyper.hpp>
 #include <mod/lib/IO/IO.hpp>
+#include <mod/lib/Rules/GraphAsRuleCache.hpp>
 
 #include <iosfwd>
 #include <vector>
 
-namespace mod {
-namespace lib {
-namespace DG {
-namespace Strategies {
+namespace mod::lib::DG::Strategies {
 class GraphState;
 
 struct ExecutionEnv {
-	ExecutionEnv(LabelSettings labelSettings) : labelSettings(labelSettings) {}
+	ExecutionEnv(LabelSettings labelSettings, Rules::GraphAsRuleCache &graphAsRuleCache)
+			: labelSettings(labelSettings), graphAsRuleCache(graphAsRuleCache) {}
 	virtual ~ExecutionEnv() {};
 	// May throw LogicError if exists.
 	virtual void tryAddGraph(std::shared_ptr<graph::Graph> g) = 0;
@@ -38,12 +37,16 @@ struct ExecutionEnv {
 	virtual void popRightPredicate() = 0;
 public:
 	const LabelSettings labelSettings;
+	Rules::GraphAsRuleCache &graphAsRuleCache;
 };
 
 struct PrintSettings : IO::Logger {
 	explicit PrintSettings(std::ostream &s, bool withUniverse) : IO::Logger(s), withUniverse(withUniverse) {}
 	explicit PrintSettings(std::ostream &s, bool withUniverse, int verbosity)
 			: IO::Logger(s), withUniverse(withUniverse), verbosity(verbosity) {}
+	int ruleApplicationVerbosity() const {
+		return std::max(0, verbosity - V_DerivationPredicatesPred);
+	}
 public:
 	bool withUniverse; // mostly used for printInfo
 	int verbosity = 2; // mostly used for execute
@@ -61,7 +64,8 @@ public: // constants for verbosity 'levels'
 			V_Execute = V_RepeatBreak,
 			V_DerivationPredicatesPred = V_DerivationPredicates + 2,
 			V_FilterPred = V_DerivationPredicatesPred,
-			V_RuleBinding = V_DerivationPredicatesPred + 2,
+	// The rest should be moved to RuleApplicationUtils
+	V_RuleBinding = V_DerivationPredicatesPred + 2,
 			V_RuleApplication = V_RuleBinding + 2,
 			V_DerivationPredicatesFail = V_RuleApplication,
 			V_RCMorphismGenBase = 48 /* meaning 48 is no info, 50 is gen info, and 60 is rc info */;
@@ -97,9 +101,6 @@ protected:
 	static unsigned int calcMaxNumComponents(const std::vector<Strategy *> &strats);
 };
 
-} // namespace Strategies
-} // namespace DG
-} // namespace lib
-} // namespace mod
+} // namespace mod::lib::DG::Strategies
 
-#endif /* MOD_LIB_DG_STRATEGIES_STRATEGY_H */
+#endif // MOD_LIB_DG_STRATEGIES_STRATEGY_HPP

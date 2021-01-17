@@ -1,8 +1,8 @@
-from .encode.graph_constants import *
-from .transform.normalform import normalform
-from .gen_image import setImage
+from parse import parse  # type: ignore
 
-from parse import parse
+from mod.epim.encode.graph_constants import *
+from mod.epim.gen_image import setImage
+from mod.epim.transform.normalform import normalform
 
 class ProcessConfig:
     def __init__(self):

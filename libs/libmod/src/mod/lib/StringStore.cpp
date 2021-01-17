@@ -3,18 +3,15 @@
 #include <cassert>
 #include <iostream>
 
-namespace mod {
-namespace lib {
+namespace mod::lib {
 
 bool StringStore::hasString(const std::string &s) const {
 	return index.find(s) != end(index);
 }
 
 std::size_t StringStore::getIndex(const std::string &s) const {
-
 	struct DoPrint {
-
-		DoPrint(const StringStore &store, const std::string &s) : store(store), s(s) { }
+		DoPrint(const StringStore &store, const std::string &s) : store(store), s(s) {}
 
 		~DoPrint() {
 			std::cout << "StringStore getIndex(" << s << ")" << std::endl;
@@ -39,5 +36,4 @@ const std::string &StringStore::getString(std::size_t index) const {
 	return strings[index];
 }
 
-} // namespace lib
-} // namespace mod
+} // namespace mod::lib

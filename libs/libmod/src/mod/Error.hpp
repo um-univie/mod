@@ -1,5 +1,5 @@
-#ifndef MOD_ERROR_H
-#define MOD_ERROR_H
+#ifndef MOD_ERROR_HPP
+#define MOD_ERROR_HPP
 
 #include <mod/BuildConfig.hpp>
 
@@ -158,9 +158,9 @@ struct MOD_DECL StereoDeductionError : public Exception {
 
 MOD_DECL
 void fatal(std::string function, std::string file,
-		   std::size_t line) __attribute__((__noreturn__)); // TODO: change to C++11 syntax at some point
+           std::size_t line) __attribute__((__noreturn__)); // TODO: change to C++11 syntax at some point
 #define MOD_ABORT mod::fatal(__func__, __FILE__, __LINE__)
 
 } // namespace mod
 
-#endif /* MOD_ERROR_H */
+#endif // MOD_ERROR_HPP

@@ -12,10 +12,7 @@
 #include <memory>
 #include <vector>
 
-namespace mod {
-namespace rule {
-
-namespace RCExp {
+namespace mod::rule::RCExp {
 // rst: RCExp
 // rst: ---------------------------
 // rst:
@@ -32,7 +29,6 @@ namespace RCExp {
 // rst:		Return the union of the subexpressions. I.e., flatten the subresult lists into a single list.
 // rst:
 // rst-class-start:
-
 struct MOD_DECL Union {
 	Union(std::vector<Expression> exps);
 	MOD_DECL friend std::ostream &operator<<(std::ostream &s, const Union &par);
@@ -47,7 +43,6 @@ private:
 // rst:		Return the singleton list with the rule :math:`(\emptyset, \emptyset, G)` for the given graph :math:`G`.
 // rst:
 // rst-class-start:
-
 struct MOD_DECL Bind {
 	Bind(std::shared_ptr<graph::Graph> g);
 	MOD_DECL friend std::ostream &operator<<(std::ostream &s, const Bind &b);
@@ -62,7 +57,6 @@ private:
 // rst:		Return the singleton list with the rule :math:`(G, G, G)` for the given graph :math:`G`.
 // rst:
 // rst-class-start:
-
 struct MOD_DECL Id {
 	Id(std::shared_ptr<graph::Graph> g);
 	MOD_DECL friend std::ostream &operator<<(std::ostream &s, const Id &i);
@@ -77,7 +71,6 @@ private:
 // rst:		Return the singleton list with the rule :math:`(G, \emptyset, \emptyset)` for the given graph :math:`G`.
 // rst:
 // rst-class-start:
-
 struct MOD_DECL Unbind {
 	Unbind(std::shared_ptr<graph::Graph> g);
 	MOD_DECL friend std::ostream &operator<<(std::ostream &s, const Unbind &u);
@@ -91,11 +84,8 @@ private:
 //------------------------------------------------------------------------------
 
 class ComposeCommon;
-
 class ComposeParallel;
-
 class ComposeSub;
-
 class ComposeSuper;
 
 // rst-class: rule::RCExp::Expression
@@ -103,7 +93,6 @@ class ComposeSuper;
 // rst:		A generic rule composition expression.
 // rst:
 // rst-class-start:
-
 struct MOD_DECL Expression {
 	Expression(std::shared_ptr<Rule> r);
 	Expression(Union u);
@@ -140,7 +129,6 @@ private:
 // rst:		The base class for the composition of two rule :math:`(L_1, K_1, R_1)` and :math:`(L_2, K_2, R_2)`.
 // rst:
 // rst-class-start:
-
 class MOD_DECL ComposeBase {
 protected:
 	ComposeBase(Expression first, Expression second, bool discardNonchemical);
@@ -164,7 +152,6 @@ private:
 // rst:		possibly limited to connected subgraphs or to the subgraphs of maximum size.
 // rst:
 // rst-class-start:
-
 struct MOD_DECL ComposeCommon : public ComposeBase {
 	ComposeCommon(Expression first, Expression second, bool discardNonchemical, bool maximum, bool connected);
 	bool getMaxmimum() const;
@@ -181,7 +168,6 @@ private:
 // rst:		Compose the rules by the empty graph, i.e., create a rule representing the parallel application of two input rules.
 // rst:
 // rst-class-start:
-
 struct MOD_DECL ComposeParallel : public ComposeBase {
 	ComposeParallel(Expression first, Expression second, bool discardNonchemical);
 private:
@@ -195,7 +181,6 @@ private:
 // rst:		The overlap is *partial* if not every connected component of :math:`L_2` is participating in the common subgraph.
 // rst:
 // rst-class-start:
-
 struct MOD_DECL ComposeSub : public ComposeBase {
 	ComposeSub(Expression first, Expression second, bool discardNonchemical, bool allowPartial);
 	bool getAllowPartial() const;
@@ -212,13 +197,9 @@ private:
 // rst:		The overlap is *partial* if not every connected component of :math:`R_1` is participating in the common subgraph.
 // rst:
 // rst-class-start:
-
 struct MOD_DECL ComposeSuper : public ComposeBase {
-	ComposeSuper(Expression first,
-				 Expression second,
-				 bool discardNonchemical,
-				 bool allowPartial,
-				 bool enforceConstraints);
+	ComposeSuper(Expression first, Expression second,
+	             bool discardNonchemical, bool allowPartial, bool enforceConstraints);
 	bool getAllowPartial() const;
 	bool getEnforceConstraints() const;
 private:
@@ -228,10 +209,7 @@ private:
 };
 // rst-class-end:
 
-} // namespace RCExp
-
-} // namespace rule
-} // namespace mod
+} // namespace mod::rule::RCExp
 
 #endif /* MOD_RULE_COMPOSITIONEXPR_H */
 

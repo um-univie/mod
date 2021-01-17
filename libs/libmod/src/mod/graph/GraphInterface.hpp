@@ -1,5 +1,5 @@
-#ifndef MOD_GRAPH_GRAPHINTERFACE_H
-#define MOD_GRAPH_GRAPHINTERFACE_H
+#ifndef MOD_GRAPH_GRAPHINTERFACE_HPP
+#define MOD_GRAPH_GRAPHINTERFACE_HPP
 
 // rst: This header contains the definitions for the graph interface for :cpp:class:`graph::Graph`.
 // rst:
@@ -16,7 +16,8 @@ struct AtomId;
 struct Isotope;
 struct Charge;
 enum class BondType;
-namespace graph {
+} // namespace mod
+namespace mod::graph {
 
 // Graph
 // -----------------------------------------------------------------------------
@@ -25,7 +26,6 @@ namespace graph {
 // rst:
 // rst:		A descriptor of either a vertex in a graph, or a null vertex.
 // rst-class-start:
-
 struct MOD_DECL Graph::Vertex {
 	Vertex(std::shared_ptr<Graph> g, std::size_t vId);
 public:
@@ -110,12 +110,7 @@ private:
 // rst:
 // rst:		A descriptor of either an edge in a graph, or a null edge.
 // rst-class-start:
-
-class MOD_DECL Graph::Edge {
-	friend class EdgeIterator;
-
-	friend class IncidentEdgeIterator;
-
+struct MOD_DECL Graph::Edge {
 	Edge(std::shared_ptr<Graph> g, std::size_t vId, std::size_t eId);
 public:
 	// rst:	.. function:: Edge()
@@ -174,11 +169,9 @@ private:
 // rst:		An iterator for traversing all vertices in a graph.
 // rst:		It models a forward iterator.
 // rst-class-start:
-
 class MOD_DECL Graph::VertexIterator
 		: public boost::iterator_facade<VertexIterator, Vertex, std::forward_iterator_tag, Vertex> {
 	friend class Graph;
-
 	VertexIterator(std::shared_ptr<Graph> g);
 public:
 	// rst:	.. function:: VertexIterator()
@@ -201,13 +194,11 @@ private:
 // rst:
 // rst:		A range of all vertices in a graph.
 // rst-class-start:
-
 struct Graph::VertexRange {
 	using iterator = VertexIterator;
 	using const_iterator = iterator;
 private:
 	friend class Graph;
-
 	VertexRange(std::shared_ptr<Graph> g);
 public:
 	VertexIterator begin() const;
@@ -227,11 +218,9 @@ private:
 // rst:		An iterator for traversing all edges in a graph.
 // rst:		It models a forward iterator.
 // rst-class-start:
-
 class MOD_DECL Graph::EdgeIterator
 		: public boost::iterator_facade<EdgeIterator, Edge, std::forward_iterator_tag, Edge> {
 	friend class Graph;
-
 	EdgeIterator(std::shared_ptr<Graph> g);
 public:
 	// rst:	.. function:: EdgeIterator()
@@ -240,7 +229,6 @@ public:
 	EdgeIterator();
 private:
 	friend class boost::iterator_core_access;
-
 	Edge dereference() const;
 	bool equal(const EdgeIterator &iter) const;
 	void increment();
@@ -255,13 +243,11 @@ private:
 // rst:
 // rst:		A range of all edges in a graph.
 // rst-class-start:
-
 struct Graph::EdgeRange {
 	using iterator = EdgeIterator;
 	using const_iterator = iterator;
 private:
 	friend class Graph;
-
 	EdgeRange(std::shared_ptr<Graph> g);
 public:
 	EdgeIterator begin() const;
@@ -280,11 +266,9 @@ private:
 // rst:		An iterator for traversing all edges in a graph.
 // rst:		It models a forward iterator.
 // rst-class-start:
-
 class MOD_DECL Graph::IncidentEdgeIterator
 		: public boost::iterator_facade<IncidentEdgeIterator, Edge, std::forward_iterator_tag, Edge> {
 	friend class Graph;
-
 	IncidentEdgeIterator(std::shared_ptr<Graph> g, std::size_t vId);
 public:
 	// rst:	.. function:: IncidentEdgeIterator()
@@ -293,7 +277,6 @@ public:
 	IncidentEdgeIterator();
 private:
 	friend class boost::iterator_core_access;
-
 	Edge dereference() const;
 	bool equal(const IncidentEdgeIterator &iter) const;
 	void increment();
@@ -307,13 +290,11 @@ private:
 // rst:
 // rst:		A range of all incident edges to a vertex in a graph.
 // rst-class-start:
-
 struct Graph::IncidentEdgeRange {
 	using iterator = IncidentEdgeIterator;
 	using const_iterator = iterator;
 private:
 	friend class Vertex;
-
 	IncidentEdgeRange(std::shared_ptr<Graph> g, std::size_t vId);
 public:
 	IncidentEdgeIterator begin() const;
@@ -372,18 +353,13 @@ inline Graph::IncidentEdgeIterator Graph::IncidentEdgeRange::end() const {
 	return IncidentEdgeIterator();
 }
 
-} // namespace graph
-} // namespace mod
-namespace std {
+} // namespace mod::graph
 
 template<>
-struct hash<mod::graph::Graph::Vertex> {
-
+struct std::hash<mod::graph::Graph::Vertex> {
 	std::size_t operator()(const mod::graph::Graph::Vertex &v) const {
 		return v.hash();
 	}
 };
 
-} // namespace std
-
-#endif /* MOD_GRAPH_GRAPHINTERFACE_H */
+#endif // MOD_GRAPH_GRAPHINTERFACE_HPP

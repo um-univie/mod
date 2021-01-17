@@ -43,10 +43,9 @@ RUN \
 # Boost
 # the folder can apparently not be called just 'boost', therefore 'boostDir'
 WORKDIR /opt/boostDir
-#RUN wget                                                                   \
-# https://dl.bintray.com/boostorg/release/1.74.0/source/boost_1_74_0.tar.gz \
-# -O boost.tar.gz
-COPY build/boost.tar.gz ./
+RUN wget                                                                   \
+ https://dl.bintray.com/boostorg/release/1.74.0/source/boost_1_74_0.tar.gz \
+ -O boost.tar.gz
 RUN \
  tar -xf boost.tar.gz --one-top-level=boostSrc --strip-components=1     \
  && cd boostSrc                                                            \
@@ -66,7 +65,9 @@ RUN cmake ../ -DBUILD_DOC=no                                                   \
  && make -j $j                                \
  && make tests -j $j                          \
  && make install                              \
+ && cp -a ../examples/py /examples            \
  && ctest -j $j --output-on-failure -E cmake_ \
  && rm -rf /opt/mod
 
 WORKDIR /workdir
+RUN chmod og+rwX .

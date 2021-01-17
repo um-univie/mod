@@ -1,6 +1,6 @@
 from mod import *
-from .util import *
-from ..encode import graph_terms as term
+from mod.epim.transform.util import *
+from mod.epim.encode import graph_terms as term
 
 def biop_str(op, t):
     return """rule [

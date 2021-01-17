@@ -1,4 +1,5 @@
 bindep
 ipython
-networkx
-parse
+networkx  # epim
+parse     # epim
+typing_extensions # remove when Python 3.7 can be assumed

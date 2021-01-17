@@ -48,17 +48,20 @@ target_link_libraries(libmod PRIVATE
         #$<$<CXX_COMPILER_ID:AppleClang>:-Wl,--no-undefined> # TODO: is there an equivalent?
         )
 # https://stackoverflow.com/questions/52018092/how-to-set-rpath-and-runpath-with-gcc-ld
-target_link_libraries(libmod PRIVATE -Wl,--disable-new-dtags)
+target_link_libraries(libmod PRIVATE
+        $<$<CXX_COMPILER_ID:GNU>:-Wl,--disable-new-dtags>
+        $<$<CXX_COMPILER_ID:Clang>:-Wl,--disable-new-dtags>
+        )
 target_compile_options(libmod PRIVATE -Wall -Wextra
         -Wno-unused-parameter
         -Wno-comment
         -Wno-sign-compare
         -Wno-unused-local-typedefs
-        -Wno-unused-const-variable
-        -Wno-error=maybe-uninitialized # gives false positive for boost::optional
-        $<$<CXX_COMPILER_ID:Clang>:-Wno-unused-private-field>
+        # gives false positive for boost::optional
+        $<$<CXX_COMPILER_ID:GNU>:-Wno-error=maybe-uninitialized>
         )
 target_compile_options(libmod PUBLIC
+        -DBOOST_ALLOW_DEPRECATED_HEADERS # until Boost stops using include/boost/detail/iterator.hpp
         $<$<CXX_COMPILER_ID:Clang>:-Wno-mismatched-tags>
         $<$<CXX_COMPILER_ID:AppleClang>:-Wno-mismatched-tags>)
 set_target_properties(libmod PROPERTIES OUTPUT_NAME "mod")

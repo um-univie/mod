@@ -1,5 +1,5 @@
-#ifndef MOD_DG_DG_H
-#define MOD_DG_DG_H
+#ifndef MOD_DG_DG_HPP
+#define MOD_DG_DG_HPP
 
 #include <mod/BuildConfig.hpp>
 #include <mod/Config.hpp>
@@ -11,8 +11,7 @@
 #include <unordered_set>
 #include <vector>
 
-namespace mod {
-namespace dg {
+namespace mod::dg {
 
 // rst-class: dg::DG
 // rst:
@@ -131,13 +130,13 @@ public:
 	// rst:
 	// rst:		:returns: the list of new graphs discovered by the derivation graph.
 	const std::vector<std::shared_ptr<graph::Graph> > &getProducts() const;
-	// rst: .. function:: std::pair<std::string, std::string> print(const PrintData &data, const Printer &printer) const
+	// rst: .. function:: std::pair<std::string, std::string> print(const Printer &printer, const PrintData &data) const
 	// rst:
 	// rst:		Print the derivation graph in style of a hypergraph.
 	// rst:
 	// rst:		:returns: the name of the PDF-file that will be compiled in post-processing and the name of the coordinate tex-file used.
 	// rst:		:throws: :class:`LogicError` if the print data is not for this DG.
-	std::pair<std::string, std::string> print(const PrintData &data, const Printer &printer) const;
+	std::pair<std::string, std::string> print(const Printer &printer, const PrintData &data) const;
 	// rst: .. function:: std::string dump() const
 	// rst:
 	// rst:		Exports the derivation graph to a text file, which can be imported.
@@ -200,8 +199,8 @@ public:
 	// rst:		In the end the derivation graph is locked.
 	// rst:
 	// rst:		.. note:: If the dump to be loaded was made by version 0.10 or earlier, it does not contain the full rules
-	//	rst:			but only the rule name. It is then crucial that the names of the given rules match with those used to
-	//	rst:			create the dump in the first place.
+	// rst:			but only the rule name. It is then crucial that the names of the given rules match with those used to
+	// rst:			create the dump in the first place.
 	// rst:
 	// rst:		The :cpp:var:`verbosity` defaults to level 2.
 	// rst:		The levels have the following meaning:
@@ -230,7 +229,6 @@ public:
 };
 // rst-class-end:
 
-} // namespace dg
-} // namespace mod
+} // namespace mod::dg
 
-#endif /* MOD_DG_DG_H */
+#endif // MOD_DG_DG_HPP

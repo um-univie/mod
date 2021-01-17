@@ -7,8 +7,7 @@
 
 #include <ostream>
 
-namespace gml {
-namespace converter {
+namespace gml::converter {
 namespace detail {
 
 struct ExpressionBase {
@@ -235,7 +234,6 @@ Expression asConverter(const Expression &expr) {
 	return expr;
 }
 
-} // namespace converter
-} // namespace gml
+} // namespace gml::converter
 
 #endif /* GML_CONVERTER_EXPRESSIONS_HPP */

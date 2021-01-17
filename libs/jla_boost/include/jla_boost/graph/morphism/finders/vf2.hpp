@@ -19,8 +19,6 @@
 #include <boost/tuple/tuple.hpp>
 #include <boost/utility/enable_if.hpp>
 
-#include <iostream>
-#include <iomanip>
 #include <iterator>
 #include <vector>
 #include <utility>

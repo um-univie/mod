@@ -2,13 +2,11 @@
 
 #include <mod/lib/RC/Evaluator.hpp>
 
-namespace mod {
-namespace rule {
+namespace mod::rule {
 
 struct Composer::Pimpl {
 	Pimpl(const std::unordered_set<std::shared_ptr<rule::Rule>> &database, LabelSettings labelSettings)
 			: evaluator(database, labelSettings) {}
-
 public:
 	lib::RC::Evaluator evaluator;
 };
@@ -26,7 +24,7 @@ const std::unordered_set<std::shared_ptr<rule::Rule>> &Composer::getProducts() c
 	return p->evaluator.getProducts();
 }
 
-std::unordered_set<std::shared_ptr<rule::Rule>> Composer::eval(const RCExp::Expression &exp, int verbosity) {
+std::vector<std::shared_ptr<rule::Rule>> Composer::eval(const RCExp::Expression &exp, int verbosity) {
 	return p->evaluator.eval(exp, verbosity);
 }
 
@@ -38,9 +36,8 @@ void Composer::print() const {
 //------------------------------------------------------------------------------
 
 std::shared_ptr<Composer> Composer::create(const std::unordered_set<std::shared_ptr<rule::Rule> > &database,
-														 LabelSettings labelSettings) {
+                                           LabelSettings labelSettings) {
 	return std::shared_ptr<Composer>(new Composer(database, labelSettings));
 }
 
-} // namespace rule
-} // namespace mod
+} // namespace mod::rule

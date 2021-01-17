@@ -32,6 +32,9 @@ assert v.isotope == a.isotope
 assert v.charge == a.charge
 assert v.radical == a.radical
 
+assert AtomData() < AtomData(AtomId(1))
+assert AtomData(AtomId(1)) > AtomData()
+
 print("BondType\n----------")
 for a in [BondType.Invalid, BondType.Single, BondType.Aromatic, BondType.Double, BondType.Triple]:
 	print(repr(a))

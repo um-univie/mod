@@ -1,14 +1,12 @@
-#ifndef MOD_LIB_DG_NONHYPERBUILDER_H
-#define MOD_LIB_DG_NONHYPERBUILDER_H
+#ifndef MOD_LIB_DG_NONHYPERBUILDER_HPP
+#define MOD_LIB_DG_NONHYPERBUILDER_HPP
 
 #include <mod/Derivation.hpp>
 #include <mod/lib/DG/NonHyper.hpp>
+#include <mod/lib/IO/JsonUtils.hpp>
+#include <mod/lib/Rules/GraphAsRuleCache.hpp>
 
-#include <nlohmann/json.hpp>
-
-namespace mod {
-namespace lib {
-namespace DG {
+namespace mod::lib::DG {
 namespace Strategies {
 struct GraphState;
 } // namespace Strategies
@@ -35,8 +33,11 @@ public:
 	// pre: strategy must not have been executed before (i.e., a newly constructed strategy, or a clone)
 	ExecuteResult execute(std::unique_ptr<Strategies::Strategy> strategy, int verbosity, bool ignoreRuleLabelTypes);
 	std::vector<std::pair<NonHyper::Edge, bool>>
-	apply(const std::vector<std::shared_ptr<graph::Graph> > &graphs, std::shared_ptr<rule::Rule> r,
+	apply(const std::vector<std::shared_ptr<graph::Graph>> &graphs, std::shared_ptr<rule::Rule> r,
 	      int verbosity, IsomorphismPolicy graphPolicy);
+	std::vector<std::pair<NonHyper::Edge, bool>>
+	applyRelaxed(const std::vector<std::shared_ptr<graph::Graph>> &graphs, std::shared_ptr<rule::Rule> r,
+	             int verbosity, IsomorphismPolicy graphPolicy);
 	void addAbstract(const std::string &description);
 	bool load(const std::vector<std::shared_ptr<rule::Rule>> &ruleDatabase,
 	          const std::string &file, std::ostream &err, int verbosity);
@@ -68,10 +69,9 @@ private:
 		std::unique_ptr<Strategies::Strategy> strategy;
 	};
 	std::vector<StrategyExecution> executions;
+	Rules::GraphAsRuleCache graphAsRuleCache; // referenced by the ExecutionEnvs
 };
 
-} // namespace DG
-} // namespace lib
-} // namespace mod
+} // namespace mod::lib::DG
 
-#endif /* MOD_LIB_DG_NONHYPERBUILDER_H */
+#endif // MOD_LIB_DG_NONHYPERBUILDER_HPP

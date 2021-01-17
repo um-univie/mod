@@ -5,10 +5,9 @@
 #include <mod/graph/Graph.hpp>
 #include <mod/lib/DG/Strategies/GraphState.hpp>
 
-namespace mod {
-namespace lib {
-namespace DG {
-namespace Strategies {
+#include <ostream>
+
+namespace mod::lib::DG::Strategies {
 
 Add::Add(const std::vector<std::shared_ptr<graph::Graph> > graphs, bool onlyUniverse, IsomorphismPolicy graphPolicy)
 		: Strategy::Strategy(0),
@@ -60,11 +59,15 @@ bool Add::isConsumed(const lib::Graph::Single *g) const {
 void Add::executeImpl(PrintSettings settings, const GraphState &input) {
 	if(settings.verbosity >= PrintSettings::V_Add) {
 		if(onlyUniverse)
-			settings.indent() << "AddUniverse:" << std::endl;
+			settings.indent() << "AddUniverse";
 		else
-			settings.indent() << "AddSubset:" << std::endl;
+			settings.indent() << "AddSubset";
+		if(generator)
+			settings.s << " (dynamic):" << std::endl;
+		else
+			settings.s << " (static):" << std::endl;
 	}
-	std::vector<std::shared_ptr<graph::Graph> > graphsToAdd;
+	std::vector<std::shared_ptr<graph::Graph>> graphsToAdd;
 	if(generator) {
 		graphsToAdd = (*generator)();
 		if(std::any_of(graphsToAdd.begin(), graphsToAdd.end(), [](const auto &g) {
@@ -74,9 +77,21 @@ void Add::executeImpl(PrintSettings settings, const GraphState &input) {
 	} else {
 		graphsToAdd = graphs;
 	}
+	if(settings.verbosity >= PrintSettings::V_Add) {
+		++settings.indentLevel;
+		// print the graphs, 5 per line
+		for(int i = 0; i != graphsToAdd.size(); ++i) {
+			if(i % 5 == 0 && i != 0) settings.s << std::endl;
+			if(i % 5 == 0) settings.indent();
+			else settings.s << " ";
+			settings.s << graphsToAdd[i]->getName();
+		}
+		settings.s << std::endl;
+		--settings.indentLevel;
+	}
 	switch(graphPolicy) {
 	case IsomorphismPolicy::Check:
-		for(const std::shared_ptr<graph::Graph> g : graphsToAdd) {
+		for(const std::shared_ptr<graph::Graph> &g : graphsToAdd) {
 			// TODO: we need to add it as a vertex for backwards compatibility,
 			//       do this more elegantly
 			// TODO: actually, if this is a static add strategy, the graphs are probably already added,
@@ -86,21 +101,18 @@ void Add::executeImpl(PrintSettings settings, const GraphState &input) {
 		}
 		break;
 	case IsomorphismPolicy::TrustMe:
-		for(const std::shared_ptr<graph::Graph> g : graphsToAdd)
+		for(const auto &g : graphsToAdd)
 			getExecutionEnv().trustAddGraphAsVertex(g);
 		break;
 	}
 	output = new GraphState(input);
 	if(onlyUniverse) {
-		for(const std::shared_ptr<graph::Graph> g : graphsToAdd)
+		for(const auto &g : graphsToAdd)
 			output->addToUniverse(&g->getGraph());
 	} else {
-		for(const std::shared_ptr<graph::Graph> g : graphsToAdd)
-			output->addToSubset(0, &g->getGraph());
+		for(const auto &g : graphsToAdd)
+			output->addToSubset(&g->getGraph());
 	}
 }
 
-} // namespace Strategies
-} // namespace DG
-} // namespace lib
-} // namespace mod
+} // namespace mod::lib::DG::Strategies
