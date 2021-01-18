@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>3.2.12.1. rule/Composer.hpp &#8212; MØD 0.12.0 documentation</title>
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/bootstrap-sphinx.css" type="text/css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/haxes.css" />
+    <script id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+    <script src="../../_static/jquery.js"></script>
+    <script src="../../_static/underscore.js"></script>
+    <script src="../../_static/doctools.js"></script>
+    <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="3.2.12.2. rule/CompositionExpr.hpp" href="CompositionExpr.html" />
+    <link rel="prev" title="3.2.12. rule" href="index.html" />
+<meta charset='utf-8'>
+<meta http-equiv='X-UA-Compatible' content='IE=edge,chrome=1'>
+<meta name='viewport' content='width=device-width, initial-scale=1.0, maximum-scale=1'>
+<meta name="apple-mobile-web-app-capable" content="yes">
+<script type="text/javascript" src="../../_static/js/jquery-3.4.1.slim.min.js "></script>
+<script type="text/javascript" src="../../_static/js/jquery-fix.js "></script>
+<script type="text/javascript" src="../../_static/bootstrap-4.4.1/js/bootstrap.min.js "></script>
+<script type="text/javascript" src="../../_static/bootstrap-sphinx.js "></script>
+
+  </head><body>
+<nav id="navbar" class="navbar navbar-expand-lg navbar-light bg-light  navbar-fixed-top">
+	<div class="container">
+		<a class="navbar-brand" href="../../index.html">
+			MØD</a>
+		<span class="navbar-text navbar-version pull-left"><b>0.12.0</b></span>
+		<button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+			<span class="navbar-toggler-icon"></span>
+		</button>
+		<div class="collapse navbar-collapse" id="navbarSupportedContent">
+			<ul class="navbar-nav mr-auto">
+				
+						<li class="nav-item"><a class="nav-link" href="../../genindex.html">Index</a></li>
+				
+				
+					<li class="nav-item dropdown globaltoc-container">
+	<a class="nav-link dropdown-toggle"
+			href="../../index.html"
+			id="dLabelGlobalToc"
+			role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+		Site
+	</a>
+	<ul class="globaltoc" aria-labelledby="dLabelGlobalToc">
+		<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../../installation.html">1. Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../compiling.html">2. Compiling from Source</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../libmod.html">3. libMØD</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../pymod/pymod.html">4. PyMØD</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../postmod/postmod.html">5. PostMØD (<code class="docutils literal notranslate"><span class="pre">mod_post</span></code>)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../modWrapper/modWrapper.html">6. The Wrapper Script (<code class="docutils literal notranslate"><span class="pre">mod</span></code>)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../epim/epim.html">7. EpiM</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../dataDesc/dataDesc.html">8. Data Formats</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../dgStrat/dgStrat.html">9. Derivation Graph Strategies</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../examples/index.html">10. Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../knownIssues.html">11. Known Issues</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../changes.html">12. Changes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../references.html">13. References</a></li>
+</ul>
+
+	</ul>
+</li>
+					
+						<li class="nav-item dropdown localtoc-container">
+	<a class="nav-link dropdown-toggle"
+			href="../../index.html"
+			id="dLabelLocalToc"
+			role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+		Page
+	</a>
+	<ul class="localtoc" aria-labelledby="dLabelLocalToc">
+		<ul>
+<li><a class="reference internal" href="#">3.2.12.1. rule/Composer.hpp</a><ul>
+<li><a class="reference internal" href="#class-rule-composer">3.2.12.1.1. Class <code class="docutils literal notranslate"><span class="pre">rule::Composer</span></code></a><ul>
+<li><a class="reference internal" href="#synopsis">3.2.12.1.1.1. Synopsis</a></li>
+<li><a class="reference internal" href="#details">3.2.12.1.1.2. Details</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+	</ul>
+</li>
+					
+				
+				
+					
+						
+	<li class="nav-item">
+		<a class="nav-link" href="index.html" title="Previous Chapter: 3.2.12. rule">
+			<span class="glyphicon glyphicon-chevron-left visible-sm"></span>
+			<span class="hidden-sm hidden-tablet">
+				&laquo; 3.2.12. rule
+			</span>
+		</a>
+	</li>
+	<li class="nav-item">
+		<a class="nav-link" href="CompositionExpr.html" title="Next Chapter: 3.2.12.2. rule/CompositionExpr.hpp">
+			<span class="glyphicon glyphicon-chevron-right visible-sm"></span>
+			<span class="hidden-sm hidden-tablet">3.2.12.2. rul... &raquo;</span>
+		</a>
+	</li>
+					
+				
+				
+				
+				
+			</ul>
+			
+				
+<form class="form-inline" action="../../search.html" method="get">
+	<div class="form-group">
+		<input type="text" name="q" class="form-control" placeholder="Search" />
+	</div>
+	<input type="hidden" name="check_keywords" value="yes" />
+	<input type="hidden" name="area" value="default" />
+</form>
+			
+		</div>
+	</div>
+</nav>
+<div class="container">
+	<div class="row">
+		<div class="body col-md-12 content" role="main">
+			
+  <div class="section" id="rule-composer-hpp">
+<span id="cpp-rule-composer"></span><h1><span class="section-number">3.2.12.1. </span>rule/Composer.hpp<a class="headerlink" href="#rule-composer-hpp" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="class-rule-composer">
+<h2><span class="section-number">3.2.12.1.1. </span>Class <code class="docutils literal notranslate"><span class="pre">rule::Composer</span></code><a class="headerlink" href="#class-rule-composer" title="Permalink to this headline">¶</a></h2>
+<dl class="cpp class">
+<dt id="_CPPv4N3mod4rule8ComposerE">
+<span id="_CPPv3N3mod4rule8ComposerE"></span><span id="_CPPv2N3mod4rule8ComposerE"></span><span id="mod::rule::Composer"></span><em class="property">class </em><code class="sig-prename descclassname">rule<code class="sig-prename descclassname">::</code></code><code class="sig-name descname">Composer</code><a class="headerlink" href="#_CPPv4N3mod4rule8ComposerE" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>This class can evaluate rule composition expressions. During evaluation an expression graph is recorded.</p>
+<p>The expression graph is a directed hypergraph <span class="math notranslate nohighlight">\((V, E)\)</span>, with each vertex representing a rule.
+Each edge represent all compositions calculated for a unique input. That is every edge <span class="math notranslate nohighlight">\(e\in E\)</span> is on the form
+<span class="math notranslate nohighlight">\(((u, v), R_e)\)</span> with <span class="math notranslate nohighlight">\((u, v)\in V\times V\)</span> as an <em>ordered</em> pair of rules and <span class="math notranslate nohighlight">\(R_e\subseteq V\)</span> is the set
+of all resulting rules found.</p>
+<p>The graph is visualised as a bipartite graph with point-shaped vertices representing the hyperedges. The in-edges to these
+hyperedge vertices are labelled with 1 and 2.</p>
+</dd></dl>
+
+<div class="section" id="synopsis">
+<h3><span class="section-number">3.2.12.1.1.1. </span>Synopsis<a class="headerlink" href="#synopsis" title="Permalink to this headline">¶</a></h3>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">MOD_DECL</span> <span class="n">Composer</span> <span class="p">{</span>
+    <span class="n">Composer</span><span class="p">(</span><span class="k">const</span> <span class="n">std</span><span class="o">::</span><span class="n">unordered_set</span><span class="o">&lt;</span><span class="n">std</span><span class="o">::</span><span class="n">shared_ptr</span><span class="o">&lt;</span><span class="n">Rule</span><span class="o">&gt;</span> <span class="o">&gt;</span> <span class="o">&amp;</span><span class="n">database</span><span class="p">,</span> <span class="n">LabelSettings</span> <span class="n">labelSettings</span><span class="p">);</span>
+    <span class="n">Composer</span><span class="p">(</span><span class="n">Composer</span> <span class="o">&amp;&amp;</span><span class="p">)</span> <span class="o">=</span> <span class="k">delete</span><span class="p">;</span>
+    <span class="n">Composer</span> <span class="o">&amp;</span><span class="k">operator</span><span class="o">=</span><span class="p">(</span><span class="n">Composer</span> <span class="o">&amp;&amp;</span><span class="p">)</span> <span class="o">=</span> <span class="k">delete</span><span class="p">;</span>
+<span class="k">public</span><span class="o">:</span>
+    <span class="o">~</span><span class="n">Composer</span><span class="p">();</span>
+    <span class="k">const</span> <span class="n">std</span><span class="o">::</span><span class="n">unordered_set</span><span class="o">&lt;</span><span class="n">std</span><span class="o">::</span><span class="n">shared_ptr</span><span class="o">&lt;</span><span class="n">Rule</span><span class="o">&gt;&gt;</span> <span class="o">&amp;</span><span class="n">getRuleDatabase</span><span class="p">()</span> <span class="k">const</span><span class="p">;</span>
+    <span class="k">const</span> <span class="n">std</span><span class="o">::</span><span class="n">unordered_set</span><span class="o">&lt;</span><span class="n">std</span><span class="o">::</span><span class="n">shared_ptr</span><span class="o">&lt;</span><span class="n">Rule</span><span class="o">&gt;&gt;</span> <span class="o">&amp;</span><span class="n">getProducts</span><span class="p">()</span> <span class="k">const</span><span class="p">;</span>
+    <span class="n">std</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;</span><span class="n">std</span><span class="o">::</span><span class="n">shared_ptr</span><span class="o">&lt;</span><span class="n">Rule</span><span class="o">&gt;&gt;</span> <span class="n">eval</span><span class="p">(</span><span class="k">const</span> <span class="n">RCExp</span><span class="o">::</span><span class="n">Expression</span> <span class="o">&amp;</span><span class="n">exp</span><span class="p">,</span> <span class="kt">int</span> <span class="n">verbosity</span><span class="p">);</span>
+    <span class="kt">void</span> <span class="nf">print</span><span class="p">()</span> <span class="k">const</span><span class="p">;</span>
+<span class="k">private</span><span class="o">:</span>
+    <span class="k">struct</span> <span class="nc">Pimpl</span><span class="p">;</span>
+    <span class="n">std</span><span class="o">::</span><span class="n">unique_ptr</span><span class="o">&lt;</span><span class="n">Pimpl</span><span class="o">&gt;</span> <span class="n">p</span><span class="p">;</span>
+<span class="k">public</span><span class="o">:</span>
+    <span class="k">static</span> <span class="n">std</span><span class="o">::</span><span class="n">shared_ptr</span><span class="o">&lt;</span><span class="n">Composer</span><span class="o">&gt;</span> <span class="n">create</span><span class="p">(</span><span class="k">const</span> <span class="n">std</span><span class="o">::</span><span class="n">unordered_set</span><span class="o">&lt;</span><span class="n">std</span><span class="o">::</span><span class="n">shared_ptr</span><span class="o">&lt;</span><span class="n">Rule</span><span class="o">&gt;</span> <span class="o">&gt;</span> <span class="o">&amp;</span><span class="n">database</span><span class="p">,</span>
+                                                         <span class="n">LabelSettings</span> <span class="n">labelSettings</span><span class="p">);</span>
+<span class="p">};</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="details">
+<h3><span class="section-number">3.2.12.1.1.2. </span>Details<a class="headerlink" href="#details" title="Permalink to this headline">¶</a></h3>
+<dl class="cpp function">
+<dt id="_CPPv4NK3mod4rule8Composer15getRuleDatabaseEv">
+<span id="_CPPv3NK3mod4rule8Composer15getRuleDatabaseEv"></span><span id="_CPPv2NK3mod4rule8Composer15getRuleDatabaseEv"></span><span id="mod::rule::Composer::getRuleDatabaseC"></span><em class="property">const</em> std::unordered_set&lt;std::shared_ptr&lt;<a class="reference internal" href="Rule.html#_CPPv4N3mod4rule4RuleE" title="mod::rule::Rule">Rule</a>&gt;&gt; &amp;<code class="sig-name descname">getRuleDatabase</code><span class="sig-paren">(</span><span class="sig-paren">)</span> <em class="property">const</em><a class="headerlink" href="#_CPPv4NK3mod4rule8Composer15getRuleDatabaseEv" title="Permalink to this definition">¶</a><br /></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>the set of unique rules known by the evaluator.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="cpp function">
+<dt id="_CPPv4NK3mod4rule8Composer11getProductsEv">
+<span id="_CPPv3NK3mod4rule8Composer11getProductsEv"></span><span id="_CPPv2NK3mod4rule8Composer11getProductsEv"></span><span id="mod::rule::Composer::getProductsC"></span><em class="property">const</em> std::unordered_set&lt;std::shared_ptr&lt;<a class="reference internal" href="Rule.html#_CPPv4N3mod4rule4RuleE" title="mod::rule::Rule">Rule</a>&gt;&gt; &amp;<code class="sig-name descname">getProducts</code><span class="sig-paren">(</span><span class="sig-paren">)</span> <em class="property">const</em><a class="headerlink" href="#_CPPv4NK3mod4rule8Composer11getProductsEv" title="Permalink to this definition">¶</a><br /></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>the set of unique rules this evaluator has constructed.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="cpp function">
+<dt id="_CPPv4N3mod4rule8Composer4evalERKN5RCExp10ExpressionEi">
+<span id="_CPPv3N3mod4rule8Composer4evalERKN5RCExp10ExpressionEi"></span><span id="_CPPv2N3mod4rule8Composer4evalERKN5RCExp10ExpressionEi"></span><span id="mod::rule::Composer::eval__RCExp::ExpressionCR.i"></span>std::vector&lt;std::shared_ptr&lt;<a class="reference internal" href="Rule.html#_CPPv4N3mod4rule4RuleE" title="mod::rule::Rule">Rule</a>&gt;&gt; <code class="sig-name descname">eval</code><span class="sig-paren">(</span><em class="property">const</em> RCExp::<a class="reference internal" href="CompositionExpr.html#_CPPv4N3mod4rule5RCExp10ExpressionE" title="mod::rule::RCExp::Expression">Expression</a> &amp;<em>exp</em>, int <em>verbosity</em><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N3mod4rule8Composer4evalERKN5RCExp10ExpressionEi" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Evaluates a rule composition expression.
+Any created rule is replaced by a rule in the database if they are isomorphic.</p>
+<p>A rule may appear multiple times in the result if multiple overlaps resulted in the same composed rule.</p>
+<p>The <a class="reference internal" href="#_CPPv4N3mod4rule8Composer4evalERKN5RCExp10ExpressionEi" title="mod::rule::Composer::eval::verbosity"><code class="xref cpp cpp-var docutils literal notranslate"><span class="pre">verbosity</span></code></a> has the following meaning:</p>
+<ul class="simple">
+<li><p>0 (or less): no information is printed.</p></li>
+<li><p>10: Print information about morphism generation for rule composition.</p></li>
+<li><p>20: Print rule composition information.</p></li>
+</ul>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>the result of the expression.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="cpp function">
+<dt id="_CPPv4NK3mod4rule8Composer5printEv">
+<span id="_CPPv3NK3mod4rule8Composer5printEv"></span><span id="_CPPv2NK3mod4rule8Composer5printEv"></span><span id="mod::rule::Composer::printC"></span>void <code class="sig-name descname">print</code><span class="sig-paren">(</span><span class="sig-paren">)</span> <em class="property">const</em><a class="headerlink" href="#_CPPv4NK3mod4rule8Composer5printEv" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Print the graph representing all expressions evaluated so far.</p>
+</dd></dl>
+
+<dl class="cpp function">
+<dt id="_CPPv4N3mod4rule8Composer6createERKNSt13unordered_setINSt10shared_ptrI4RuleEEEE13LabelSettings">
+<span id="_CPPv3N3mod4rule8Composer6createERKNSt13unordered_setINSt10shared_ptrI4RuleEEEE13LabelSettings"></span><span id="_CPPv2N3mod4rule8Composer6createERKNSt13unordered_setINSt10shared_ptrI4RuleEEEE13LabelSettings"></span><span id="mod::rule::Composer::create__std::unordered_set:std::shared_ptr:Rule::CR.LabelSettings"></span><em class="property">static</em> std::shared_ptr&lt;<a class="reference internal" href="#_CPPv4N3mod4rule8ComposerE" title="mod::rule::Composer">Composer</a>&gt; <code class="sig-name descname">create</code><span class="sig-paren">(</span><em class="property">const</em> std::unordered_set&lt;std::shared_ptr&lt;<a class="reference internal" href="Rule.html#_CPPv4N3mod4rule4RuleE" title="mod::rule::Rule">Rule</a>&gt;&gt; &amp;<em>database</em>, <a class="reference internal" href="../Config.html#_CPPv4N3mod13LabelSettingsE" title="mod::LabelSettings">LabelSettings</a> <em>labelSettings</em><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N3mod4rule8Composer6createERKNSt13unordered_setINSt10shared_ptrI4RuleEEEE13LabelSettings" title="Permalink to this definition">¶</a><br /></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>a new instance of an evaluator with its database initialised with the given rules.</p>
+</dd>
+</dl>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>The caller is responsible for ensuring the given rules are unique.</p>
+</div>
+</dd></dl>
+
+</div>
+</div>
+</div>
+
+
+		</div>
+		  
+	</div>
+</div>
+<footer class="footer"><div class="container"><div class="row">
+	<div class="col-auto mr-auto">
+		<p>
+					&copy; Copyright 2013-2020, Jakob Lykke Andersen.<br/>
+				Created using <a href="http://sphinx-doc.org/">Sphinx</a> 3.5.0+/8382a0bc3.<br/>
+		</p>
+	</div>
+	<div class="col-auto">
+		<a href="#">Back to top</a>
+		
+			<br/>
+			
+	<div id="sourcelink">
+		<a href="../../_sources/libmod/rule/Composer.rst.txt"
+			 rel="nofollow">Source</a>
+	</div>
+		
+	</div>
+</div></div></footer>
+  </body>
+</html>

@@ -1,0 +1,525 @@
+.. _cpp-graph/Union:
+
+**********************************************************
+graph/Union.hpp
+**********************************************************
+.. default-domain:: cpp
+.. default-role:: cpp:expr
+
+.. py:currentmodule:: mod
+.. cpp:namespace:: mod
+
+
+Class ``graph::Union``
+--------------------------------------------------------------------------------------------------------------------------------
+
+.. class:: graph::Union
+    
+
+    An adaptor for a multiset of :class:`Graph`\ s to present them
+    as their disjoint union.
+
+Synopsis
+^^^^^^^^
+
+.. code-block:: c++
+    
+    struct MOD_DECL Union {
+        class Vertex;
+        class Edge;
+        class VertexIterator;
+        class VertexRange;
+        class EdgeIterator;
+        class EdgeRange;
+        class IncidentEdgeIterator;
+        class IncidentEdgeRange;
+    private:
+        struct Pimpl;
+        Union(std::shared_ptr<const Pimpl> p);
+    public:
+        using const_iterator = std::vector<std::shared_ptr<Graph>>::const_iterator;
+        using iterator = const_iterator;
+    public:
+        Union();
+        explicit Union(std::vector<std::shared_ptr<Graph>> graphs);
+        Union(const Union &other);
+        Union &operator=(const Union &other);
+        Union(Union &&other);
+        Union &operator=(Union &&other);
+        MOD_DECL friend bool operator==(const Union &a, const Union &b);
+        MOD_DECL friend bool operator!=(const Union &a, const Union &b);
+        MOD_DECL friend std::ostream &operator<<(std::ostream &s, const Union &ug);
+        std::size_t size() const;
+        const_iterator begin() const;
+        const_iterator end() const;
+        std::shared_ptr<Graph> operator[](std::size_t i) const;
+    public:
+        std::size_t numVertices() const;
+        VertexRange vertices() const;
+        std::size_t numEdges() const;
+        EdgeRange edges() const;
+    private:
+        std::shared_ptr<const Pimpl> p;
+    };
+
+Details
+^^^^^^^
+
+.. cpp:namespace-push:: graph::Union
+
+.. type:: const_iterator
+          iterator = const_iterator
+
+    A random-access iterator over the :class:`Graph`\ s adapted by this object.
+.. function:: Union()
+
+    Construct an empty graph.
+.. function:: explicit Union(std::vector<std::shared_ptr<Graph>> graphs)
+
+    Construct a graph representing the disjoint union of `graphs`.
+.. function:: friend std::ostream &operator<<(std::ostream &s, const Union &ug)
+.. function:: std::size_t size() const
+
+    :returns: the number of adapted graphs.
+.. function:: const_iterator begin() const
+              const_iterator end() const
+
+    :returns: the range of graphs adapted by this object.
+.. function:: std::shared_ptr<Graph> operator[](std::size_t i) const
+
+    :returns: the `i`\ th adapted graph.
+    :throws: :class:`LogicError` if `i` is out of range.
+.. function:: std::size_t numVertices() const
+
+    :returns: the number of vertices in the graph.
+.. function:: VertexRange vertices() const
+
+    :returns: a range of all vertices in the graph.
+.. function:: std::size_t numEdges() const
+
+    :returns: the number of edges in the graph.
+.. function:: EdgeRange edges() const
+
+    :returns: a range of all edges in the graph.
+
+.. cpp:namespace-pop::
+
+
+Class ``graph::Union::Vertex``
+--------------------------------------------------------------------------------------------------------------------------------
+
+.. class:: graph::Union::Vertex
+    
+
+    A descriptor of either a vertex in a union graph, or a null vertex.
+
+Synopsis
+^^^^^^^^
+
+.. code-block:: c++
+    
+    struct MOD_DECL Union::Vertex {
+        Vertex(std::shared_ptr<const Pimpl> p, std::size_t vId);
+    public:
+        Vertex();
+        MOD_DECL friend std::ostream &operator<<(std::ostream &s, const Vertex &v);
+        MOD_DECL friend bool operator==(const Vertex &v1, const Vertex &v2);
+        MOD_DECL friend bool operator!=(const Vertex &v1, const Vertex &v2);
+        MOD_DECL friend bool operator<(const Vertex &v1, const Vertex &v2);
+        std::size_t hash() const;
+        explicit operator bool() const;
+        bool isNull() const;
+        std::size_t getId() const;
+        Union getGraph() const;
+        std::size_t getDegree() const;
+        IncidentEdgeRange incidentEdges() const;
+        const std::string &getStringLabel() const;
+        AtomId getAtomId() const;
+        Isotope getIsotope() const;
+        Charge getCharge() const;
+        bool getRadical() const;
+        std::string printStereo() const;
+        std::string printStereo(const Printer &p) const;
+        int getGraphIndex() const;
+        Graph::Vertex getVertex() const;
+    private:
+        std::shared_ptr<const Pimpl> p;
+        std::size_t vId;
+    };
+
+Details
+^^^^^^^
+
+.. cpp:namespace-push:: graph::Union::Vertex
+
+.. function:: Vertex()
+
+    Constructs a null descriptor.
+.. function:: explicit operator bool() const
+
+    :returns: :cpp:expr:`!isNull()`
+.. function:: bool isNull() const
+
+    :returns: whether this is a null descriptor or not.
+.. function:: std::size_t getId() const
+
+    :returns: the index of the vertex. It will be in the range :math:`[0, numVertices[`.
+    :throws: :cpp:class:`LogicError` if it is a null descriptor.
+.. function:: Union getGraph() const
+
+    :returns: the union graph the vertex belongs to.
+    :throws: :cpp:class:`LogicError` if it is a null descriptor.
+.. function:: std::size_t getDegree() const
+
+    :returns: the degree of the vertex.
+    :throws: :cpp:class:`LogicError` if it is a null descriptor.
+.. function:: IncidentEdgeRange incidentEdges() const
+
+    :returns: a range of incident edges to this vertex.
+    :throws: :cpp:class:`LogicError` if it is a null descriptor.
+.. function:: const std::string &getStringLabel() const
+
+    :returns: the string label of the vertex.
+    :throws: :cpp:class:`LogicError` if it is a null descriptor.
+.. function:: AtomId getAtomId() const
+
+    :returns: the atom id of the vertex.
+    :throws: :cpp:class:`LogicError` if it is a null descriptor.
+.. function:: Isotope getIsotope() const
+
+    :returns: the isotope of the vertex.
+    :throws: :cpp:class:`LogicError` if it is a null descriptor.
+.. function:: Charge getCharge() const
+
+    :returns: the charge of the vertex.
+    :throws: :cpp:class:`LogicError` if it is a null descriptor.
+.. function:: bool getRadical() const
+
+    :returns: the radical status of the vertex.
+    :throws: :cpp:class:`LogicError` if it is a null descriptor.
+.. function:: std::string printStereo() const
+              std::string printStereo(const Printer &p) const
+
+    Print the stereo configuration for the vertex.
+
+    :returns: the name of the PDF-file that will be compiled in post-processing.
+    :throws: :cpp:class:`LogicError` if it is a null descriptor.
+.. function:: int getGraphIndex() const
+
+    :returns: The index of the graph in the owning :class:`Union` graph this vertex
+        is from. The index is thus in the range :math:`[0, len(getGraph())[`.
+
+        We can obtain the underlying :class:`Graph` this vertex
+        is from both directly via `getVertex()` as `getVertex().getGraph()`,
+        or via the graph index as ``getGraph()[getGraphIndex()]``.
+    :throws: :cpp:class:`LogicError` if it is a null descriptor.
+.. function:: int getVertex() const
+
+    :returns: The underlying :class:`Graph::Vertex` this vertex represents.
+
+        We can obtain the underlying :class:`Graph` this vertex
+        is from both directly via `getVertex()` as `getVertex().getGraph()`,
+        or via the graph index as ``getGraph()[getGraphIndex()]``.
+    :throws: :cpp:class:`LogicError` if it is a null descriptor.
+
+.. cpp:namespace-pop::
+
+
+Class ``graph::Union::Edge``
+--------------------------------------------------------------------------------------------------------------------------------
+
+.. class:: graph::Union::Edge
+    
+
+    A descriptor of either an edge in a union graph, or a null edge.
+
+Synopsis
+^^^^^^^^
+
+.. code-block:: c++
+    
+    class MOD_DECL Union::Edge {
+        friend class EdgeIterator;
+        friend class IncidentEdgeIterator;
+        Edge(std::shared_ptr<const Pimpl> p, std::size_t vId, std::size_t eId);
+    public:
+        Edge();
+        MOD_DECL friend std::ostream &operator<<(std::ostream &s, const Edge &e);
+        MOD_DECL friend bool operator==(const Edge &e1, const Edge &e2);
+        MOD_DECL friend bool operator!=(const Edge &e1, const Edge &e2);
+        MOD_DECL friend bool operator<(const Edge &e1, const Edge &e2);
+        explicit operator bool() const;
+        bool isNull() const;
+        Union getGraph() const;
+        Vertex source() const;
+        Vertex target() const;
+        const std::string &getStringLabel() const;
+        BondType getBondType() const;
+        int getGraphIndex() const;
+        Graph::Edge getEdge() const;
+    private:
+        std::shared_ptr<const Pimpl> p;
+        std::size_t vId, eId;
+    };
+
+Details
+^^^^^^^
+
+.. cpp:namespace-push:: graph::Union::Edge
+
+.. function:: Edge()
+
+    Constructs a null descriptor.
+.. function:: explicit operator bool() const
+
+    :returns: :cpp:expr:`!isNull()`
+.. function:: bool isNull() const
+
+    :returns: whether this is a null descriptor or not.
+.. function:: Union getGraph() const
+
+    :returns: the graph the edge belongs to.
+    :throws: :cpp:class:`LogicError` if it is a null descriptor.
+.. function:: Vertex source() const
+
+    :returns: the source vertex of the edge.
+    :throws: :cpp:class:`LogicError` if it is a null descriptor.
+.. function:: Vertex target() const
+
+    :returns: the target vertex of the edge.
+    :throws: :cpp:class:`LogicError` if it is a null descriptor.
+.. function:: const std::string &getStringLabel() const
+
+    :returns: the string label of the edge.
+    :throws: :cpp:class:`LogicError` if it is a null descriptor.
+.. function:: BondType getBondType() const
+
+    :returns: the bond type of the edge.
+    :throws: :cpp:class:`LogicError` if it is a null descriptor.
+.. function:: int getGraphIndex() const
+
+    :returns: The index of the graph in the owning :class:`Union` graph this e
+        is from. The index is thus in the range :math:`[0, len(getGraph())[`.
+
+        We can obtain the underlying :class:`Graph` this edge
+        is from both directly via `getEdge()` as `getEdge().getGraph()`,
+        or via the graph index as ``getGraph()[getGraphIndex()]``.
+    :throws: :cpp:class:`LogicError` if it is a null descriptor.
+.. function:: int getEdge() const
+
+    :returns: The underlying :class:`Graph::Vertex` this vertex represents.
+
+        We can obtain the underlying :class:`Graph` this edge
+        is from both directly via `getEdge()` as `getEdge().getGraph()`,
+        or via the graph index as ``getGraph()[getGraphIndex()]``.
+    :throws: :cpp:class:`LogicError` if it is a null descriptor.
+
+.. cpp:namespace-pop::
+
+
+Class ``graph::Union::VertexIterator``
+--------------------------------------------------------------------------------------------------------------------------------
+
+.. class:: graph::Union::VertexIterator
+    
+
+    An iterator for traversing all vertices in a union graph.
+    It models a forward iterator.
+
+Synopsis
+^^^^^^^^
+
+.. code-block:: c++
+    
+    class MOD_DECL Union::VertexIterator
+            : public boost::iterator_facade<VertexIterator, Vertex, std::forward_iterator_tag, Vertex> {
+        friend class Union;
+        VertexIterator(std::shared_ptr<const Pimpl> p);
+    public:
+        VertexIterator();
+    private:
+        friend class boost::iterator_core_access;
+        Vertex dereference() const;
+        bool equal(const VertexIterator &iter) const;
+        void increment();
+    private:
+        std::shared_ptr<const Pimpl> p;
+        std::size_t vId;
+    };
+
+Details
+^^^^^^^
+
+.. cpp:namespace-push:: graph::Union::VertexIterator
+
+.. function:: VertexIterator()
+
+    Construct a past-the-end iterator.
+
+.. cpp:namespace-pop::
+
+
+Class ``graph::Union::VertexRange``
+--------------------------------------------------------------------------------------------------------------------------------
+
+.. class:: graph::Union::VertexRange
+    
+
+    A range of all vertices in a union graph.
+
+Synopsis
+^^^^^^^^
+
+.. code-block:: c++
+    
+    struct Union::VertexRange {
+        using iterator = VertexIterator;
+        using const_iterator = iterator;
+    private:
+        friend class Union;
+        VertexRange(std::shared_ptr<const Pimpl> p);
+    public:
+        VertexIterator begin() const;
+        VertexIterator end() const;
+        Vertex operator[](std::size_t i) const;
+    private:
+        std::shared_ptr<const Pimpl> p;
+    };
+
+Class ``graph::Union::EdgeIterator``
+--------------------------------------------------------------------------------------------------------------------------------
+
+.. class:: graph::Union::EdgeIterator
+    
+
+    An iterator for traversing all edges in a union graph.
+    It models a forward iterator.
+
+Synopsis
+^^^^^^^^
+
+.. code-block:: c++
+    
+    class MOD_DECL Union::EdgeIterator
+            : public boost::iterator_facade<EdgeIterator, Edge, std::forward_iterator_tag, Edge> {
+        friend class Union;
+        EdgeIterator(std::shared_ptr<const Pimpl> p);
+    public:
+        EdgeIterator();
+    private:
+        friend class boost::iterator_core_access;
+        Edge dereference() const;
+        bool equal(const EdgeIterator &iter) const;
+        void increment();
+        void advanceToValid();
+    private:
+        std::shared_ptr<const Pimpl> p;
+        std::size_t vId, eId;
+    };
+
+Details
+^^^^^^^
+
+.. cpp:namespace-push:: graph::Union::EdgeIterator
+
+.. function:: EdgeIterator()
+
+    Construct a past-the-end iterator.
+
+.. cpp:namespace-pop::
+
+
+Class ``graph::Union::EdgeRange``
+--------------------------------------------------------------------------------------------------------------------------------
+
+.. class:: graph::Union::EdgeRange
+    
+
+    A range of all edges in a union graph.
+
+Synopsis
+^^^^^^^^
+
+.. code-block:: c++
+    
+    struct Union::EdgeRange {
+        using iterator = EdgeIterator;
+        using const_iterator = iterator;
+    private:
+        friend class Union;
+        EdgeRange(std::shared_ptr<const Pimpl> p);
+    public:
+        EdgeIterator begin() const;
+        EdgeIterator end() const;
+    private:
+        std::shared_ptr<const Pimpl> p;
+    };
+
+Class ``graph::Union::IncidnetEdgeIterator``
+--------------------------------------------------------------------------------------------------------------------------------
+
+.. class:: graph::Union::IncidnetEdgeIterator
+    
+
+    An iterator for traversing all edges in a union graph.
+    It models a forward iterator.
+
+Synopsis
+^^^^^^^^
+
+.. code-block:: c++
+    
+    class MOD_DECL Union::IncidentEdgeIterator
+            : public boost::iterator_facade<IncidentEdgeIterator, Edge, std::forward_iterator_tag, Edge> {
+        friend class Union;
+        IncidentEdgeIterator(std::shared_ptr<const Pimpl> p, std::size_t vId);
+    public:
+        IncidentEdgeIterator();
+    private:
+        friend class boost::iterator_core_access;
+        Edge dereference() const;
+        bool equal(const IncidentEdgeIterator &iter) const;
+        void increment();
+    private:
+        std::shared_ptr<const Pimpl> p;
+        std::size_t vId, eId;
+    };
+
+Details
+^^^^^^^
+
+.. cpp:namespace-push:: graph::Union::IncidnetEdgeIterator
+
+.. function:: IncidentEdgeIterator()
+
+    Construct a past-the-end iterator.
+
+.. cpp:namespace-pop::
+
+
+Class ``graph::Union::IncidentEdgeRange``
+--------------------------------------------------------------------------------------------------------------------------------
+
+.. class:: graph::Union::IncidentEdgeRange
+    
+
+    A range of all incident edges to a vertex in a union graph.
+
+Synopsis
+^^^^^^^^
+
+.. code-block:: c++
+    
+    struct Union::IncidentEdgeRange {
+        using iterator = IncidentEdgeIterator;
+        using const_iterator = iterator;
+    private:
+        friend class Vertex;
+        IncidentEdgeRange(std::shared_ptr<const Pimpl> p, std::size_t vId);
+    public:
+        IncidentEdgeIterator begin() const;
+        IncidentEdgeIterator end() const;
+    private:
+        std::shared_ptr<const Pimpl> p;
+        std::size_t vId;
+    };

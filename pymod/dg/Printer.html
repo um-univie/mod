@@ -1,0 +1,621 @@
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>4.1.8.4. dg/Printer &#8212; MØD 0.12.0 documentation</title>
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/bootstrap-sphinx.css" type="text/css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/haxes.css" />
+    <script id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+    <script src="../../_static/jquery.js"></script>
+    <script src="../../_static/underscore.js"></script>
+    <script src="../../_static/doctools.js"></script>
+    <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="4.1.8.5. dg/Strategies" href="Strategies.html" />
+    <link rel="prev" title="4.1.8.3. dg/GraphInterface" href="GraphInterface.html" />
+<meta charset='utf-8'>
+<meta http-equiv='X-UA-Compatible' content='IE=edge,chrome=1'>
+<meta name='viewport' content='width=device-width, initial-scale=1.0, maximum-scale=1'>
+<meta name="apple-mobile-web-app-capable" content="yes">
+<script type="text/javascript" src="../../_static/js/jquery-3.4.1.slim.min.js "></script>
+<script type="text/javascript" src="../../_static/js/jquery-fix.js "></script>
+<script type="text/javascript" src="../../_static/bootstrap-4.4.1/js/bootstrap.min.js "></script>
+<script type="text/javascript" src="../../_static/bootstrap-sphinx.js "></script>
+
+  </head><body>
+<nav id="navbar" class="navbar navbar-expand-lg navbar-light bg-light  navbar-fixed-top">
+	<div class="container">
+		<a class="navbar-brand" href="../../index.html">
+			MØD</a>
+		<span class="navbar-text navbar-version pull-left"><b>0.12.0</b></span>
+		<button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+			<span class="navbar-toggler-icon"></span>
+		</button>
+		<div class="collapse navbar-collapse" id="navbarSupportedContent">
+			<ul class="navbar-nav mr-auto">
+				
+						<li class="nav-item"><a class="nav-link" href="../../genindex.html">Index</a></li>
+				
+				
+					<li class="nav-item dropdown globaltoc-container">
+	<a class="nav-link dropdown-toggle"
+			href="../../index.html"
+			id="dLabelGlobalToc"
+			role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+		Site
+	</a>
+	<ul class="globaltoc" aria-labelledby="dLabelGlobalToc">
+		<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../../installation.html">1. Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../compiling.html">2. Compiling from Source</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../libmod/libmod.html">3. libMØD</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../pymod.html">4. PyMØD</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../postmod/postmod.html">5. PostMØD (<code class="docutils literal notranslate"><span class="pre">mod_post</span></code>)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../modWrapper/modWrapper.html">6. The Wrapper Script (<code class="docutils literal notranslate"><span class="pre">mod</span></code>)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../epim/epim.html">7. EpiM</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../dataDesc/dataDesc.html">8. Data Formats</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../dgStrat/dgStrat.html">9. Derivation Graph Strategies</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../examples/index.html">10. Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../knownIssues.html">11. Known Issues</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../changes.html">12. Changes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../references.html">13. References</a></li>
+</ul>
+
+	</ul>
+</li>
+					
+						<li class="nav-item dropdown localtoc-container">
+	<a class="nav-link dropdown-toggle"
+			href="../../index.html"
+			id="dLabelLocalToc"
+			role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+		Page
+	</a>
+	<ul class="localtoc" aria-labelledby="dLabelLocalToc">
+		<ul>
+<li><a class="reference internal" href="#">4.1.8.4. dg/Printer</a></li>
+</ul>
+
+	</ul>
+</li>
+					
+				
+				
+					
+						
+	<li class="nav-item">
+		<a class="nav-link" href="GraphInterface.html" title="Previous Chapter: 4.1.8.3. dg/GraphInterface">
+			<span class="glyphicon glyphicon-chevron-left visible-sm"></span>
+			<span class="hidden-sm hidden-tablet">
+				&laquo; 4.1.8.3. dg/G...
+			</span>
+		</a>
+	</li>
+	<li class="nav-item">
+		<a class="nav-link" href="Strategies.html" title="Next Chapter: 4.1.8.5. dg/Strategies">
+			<span class="glyphicon glyphicon-chevron-right visible-sm"></span>
+			<span class="hidden-sm hidden-tablet">4.1.8.5. dg/S... &raquo;</span>
+		</a>
+	</li>
+					
+				
+				
+				
+				
+			</ul>
+			
+				
+<form class="form-inline" action="../../search.html" method="get">
+	<div class="form-group">
+		<input type="text" name="q" class="form-control" placeholder="Search" />
+	</div>
+	<input type="hidden" name="check_keywords" value="yes" />
+	<input type="hidden" name="area" value="default" />
+</form>
+			
+		</div>
+	</div>
+</nav>
+<div class="container">
+	<div class="row">
+		<div class="body col-md-12 content" role="main">
+			
+  <div class="section" id="dg-printer">
+<span id="py-dg-printer"></span><h1><span class="section-number">4.1.8.4. </span>dg/Printer<a class="headerlink" href="#dg-printer" title="Permalink to this headline">¶</a></h1>
+<dl class="py class">
+<dt id="mod.DGPrintData">
+<em class="property">class </em><code class="sig-prename descclassname">mod.</code><code class="sig-name descname">DGPrintData</code><a class="headerlink" href="#mod.DGPrintData" title="Permalink to this definition">¶</a></dt>
+<dd><p>This class is used to hold extra data about how a specific derivation graph
+is visualised.</p>
+<p>The idea is that in the visualized network each vertex/hyperedge is specified
+by a pair <span class="math notranslate nohighlight">\((id, dup)\)</span> where <span class="math notranslate nohighlight">\(id\)</span> is the ID of the vertex/hyperedge
+and <span class="math notranslate nohighlight">\(dup\)</span> is an versioning integer that can be specified in objects of this class.</p>
+<p>Initially, each vertex/hyperedge has only one version: duplicate number 0.
+The duplication is primarily specified via the hyperedges, with the duplication
+of vertices being induced afterwards.
+Thus hyperedge duplicates are managed by <a class="reference internal" href="#mod.DGPrintData.makeDuplicate" title="mod.DGPrintData.makeDuplicate"><code class="xref py py-func docutils literal notranslate"><span class="pre">makeDuplicate()</span></code></a> and <a class="reference internal" href="#mod.DGPrintData.removeDuplicate" title="mod.DGPrintData.removeDuplicate"><code class="xref py py-func docutils literal notranslate"><span class="pre">removeDuplicate()</span></code></a>,
+while the vertex duplicates are managed implicitly by <a class="reference internal" href="#mod.DGPrintData.reconnectSource" title="mod.DGPrintData.reconnectSource"><code class="xref py py-func docutils literal notranslate"><span class="pre">reconnectSource()</span></code></a> and <a class="reference internal" href="#mod.DGPrintData.reconnectTarget" title="mod.DGPrintData.reconnectTarget"><code class="xref py py-func docutils literal notranslate"><span class="pre">reconnectTarget()</span></code></a>.
+In the end, when the data is used for printing, it will be compiled to form the actual duplication data.</p>
+<dl class="py method">
+<dt id="mod.DGPrintData.__init__">
+<code class="sig-name descname">__init__</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">dg</span></em><span class="sig-paren">)</span><a class="headerlink" href="#mod.DGPrintData.__init__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Construct a data object where all derivations have a single version, duplicate number 0,
+connected to version 0 of all heads and tails.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>dg</strong> (<a class="reference internal" href="DG.html#mod.DG" title="mod.DG"><em>DG</em></a>) – the derivation graph to hold data for.</p>
+</dd>
+<dt class="field-even">Raises</dt>
+<dd class="field-even"><p><a class="reference internal" href="../Error.html#mod.LogicError" title="mod.LogicError"><code class="xref py py-class docutils literal notranslate"><span class="pre">LogicError</span></code></a> if <code class="docutils literal notranslate"><span class="pre">not</span> <span class="pre">dg.isLocked</span></code>.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="mod.DGPrintData.dg">
+<code class="sig-name descname">dg</code><a class="headerlink" href="#mod.DGPrintData.dg" title="Permalink to this definition">¶</a></dt>
+<dd><p>(Read-only) The derivation graph the object holds data for.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="mod.DGPrintData.makeDuplicate">
+<code class="sig-name descname">makeDuplicate</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">e</span></em>, <em class="sig-param"><span class="n">eDup</span></em><span class="sig-paren">)</span><a class="headerlink" href="#mod.DGPrintData.makeDuplicate" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create another version of the given hyperedge and give it the given duplicate number.
+It will connect to duplicate 0 of all head and tail vertices.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>e</strong> (<a class="reference internal" href="GraphInterface.html#mod.DGHyperEdge" title="mod.DGHyperEdge"><em>DGHyperEdge</em></a>) – a reference to the derivation to duplicate.</p></li>
+<li><p><strong>eDup</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)"><em>int</em></a>) – the duplicate number for the new version of the derivation.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Raises</dt>
+<dd class="field-even"><p><a class="reference internal" href="../Error.html#mod.LogicError" title="mod.LogicError"><code class="xref py py-class docutils literal notranslate"><span class="pre">LogicError</span></code></a> if <code class="docutils literal notranslate"><span class="pre">not</span> <span class="pre">e</span></code>.</p>
+</dd>
+<dt class="field-odd">Raises</dt>
+<dd class="field-odd"><p><a class="reference internal" href="../Error.html#mod.LogicError" title="mod.LogicError"><code class="xref py py-class docutils literal notranslate"><span class="pre">LogicError</span></code></a> if <code class="docutils literal notranslate"><span class="pre">e.dg</span> <span class="pre">!=</span> <span class="pre">dg</span></code>.</p>
+</dd>
+<dt class="field-even">Raises</dt>
+<dd class="field-even"><p><a class="reference internal" href="../Error.html#mod.LogicError" title="mod.LogicError"><code class="xref py py-class docutils literal notranslate"><span class="pre">LogicError</span></code></a> if duplicate <code class="docutils literal notranslate"><span class="pre">eDup</span></code> already exists for <code class="docutils literal notranslate"><span class="pre">e</span></code>.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="mod.DGPrintData.removeDuplicate">
+<code class="sig-name descname">removeDuplicate</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">e</span></em>, <em class="sig-param"><span class="n">eDup</span></em><span class="sig-paren">)</span><a class="headerlink" href="#mod.DGPrintData.removeDuplicate" title="Permalink to this definition">¶</a></dt>
+<dd><p>Remove the version of the given hyperedge with the given duplicate number.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>e</strong> (<a class="reference internal" href="GraphInterface.html#mod.DGHyperEdge" title="mod.DGHyperEdge"><em>DGHyperEdge</em></a>) – a reference to the derivation to duplicate.</p></li>
+<li><p><strong>eDup</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)"><em>int</em></a>) – the duplicate number for the version of the derivation to remove.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Raises</dt>
+<dd class="field-even"><p><a class="reference internal" href="../Error.html#mod.LogicError" title="mod.LogicError"><code class="xref py py-class docutils literal notranslate"><span class="pre">LogicError</span></code></a> if <code class="docutils literal notranslate"><span class="pre">not</span> <span class="pre">e</span></code>.</p>
+</dd>
+<dt class="field-odd">Raises</dt>
+<dd class="field-odd"><p><a class="reference internal" href="../Error.html#mod.LogicError" title="mod.LogicError"><code class="xref py py-class docutils literal notranslate"><span class="pre">LogicError</span></code></a> if <code class="docutils literal notranslate"><span class="pre">e.dg</span> <span class="pre">!=</span> <span class="pre">dg</span></code>.</p>
+</dd>
+<dt class="field-even">Raises</dt>
+<dd class="field-even"><p><a class="reference internal" href="../Error.html#mod.LogicError" title="mod.LogicError"><code class="xref py py-class docutils literal notranslate"><span class="pre">LogicError</span></code></a> if duplicate <code class="docutils literal notranslate"><span class="pre">eDup</span></code> does not exist for <code class="docutils literal notranslate"><span class="pre">e</span></code>.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="mod.DGPrintData.reconnectSource">
+<code class="sig-name descname">reconnectSource</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">e</span></em>, <em class="sig-param"><span class="n">eDup</span></em>, <em class="sig-param"><span class="n">v</span></em>, <em class="sig-param"><span class="n">vDupTar</span></em><span class="sig-paren">)</span><a class="headerlink" href="#mod.DGPrintData.reconnectSource" title="Permalink to this definition">¶</a></dt>
+<dd><p>For the given hyperedge duplicate, reconnect the given source vertex to the given duplicate of that source.
+If the vertex is a source multiple times, then an arbitrary one of them is reconnected.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>e</strong> (<a class="reference internal" href="GraphInterface.html#mod.DGHyperEdge" title="mod.DGHyperEdge"><em>DGHyperEdge</em></a>) – a reference to the derivation to reconnect.</p></li>
+<li><p><strong>eDup</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)"><em>int</em></a>) – the duplicate number of the derivation to reconnect.</p></li>
+<li><p><strong>v</strong> (<a class="reference internal" href="GraphInterface.html#mod.DGVertex" title="mod.DGVertex"><em>DGVertex</em></a>) – a source vertex to reconnect.</p></li>
+<li><p><strong>vDupTar</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)"><em>int</em></a>) – the new duplicate number for the source vertex.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Raises</dt>
+<dd class="field-even"><p><a class="reference internal" href="../Error.html#mod.LogicError" title="mod.LogicError"><code class="xref py py-class docutils literal notranslate"><span class="pre">LogicError</span></code></a> if <code class="docutils literal notranslate"><span class="pre">not</span> <span class="pre">e</span></code>.</p>
+</dd>
+<dt class="field-odd">Raises</dt>
+<dd class="field-odd"><p><a class="reference internal" href="../Error.html#mod.LogicError" title="mod.LogicError"><code class="xref py py-class docutils literal notranslate"><span class="pre">LogicError</span></code></a> if <code class="docutils literal notranslate"><span class="pre">e.dg</span> <span class="pre">!=</span> <span class="pre">dg</span></code>.</p>
+</dd>
+<dt class="field-even">Raises</dt>
+<dd class="field-even"><p><a class="reference internal" href="../Error.html#mod.LogicError" title="mod.LogicError"><code class="xref py py-class docutils literal notranslate"><span class="pre">LogicError</span></code></a> if <code class="docutils literal notranslate"><span class="pre">not</span> <span class="pre">v</span></code>.</p>
+</dd>
+<dt class="field-odd">Raises</dt>
+<dd class="field-odd"><p><a class="reference internal" href="../Error.html#mod.LogicError" title="mod.LogicError"><code class="xref py py-class docutils literal notranslate"><span class="pre">LogicError</span></code></a> if <code class="docutils literal notranslate"><span class="pre">v.dg</span> <span class="pre">!=</span> <span class="pre">dg</span></code>.</p>
+</dd>
+<dt class="field-even">Raises</dt>
+<dd class="field-even"><p><a class="reference internal" href="../Error.html#mod.LogicError" title="mod.LogicError"><code class="xref py py-class docutils literal notranslate"><span class="pre">LogicError</span></code></a> if <code class="docutils literal notranslate"><span class="pre">v</span></code> is not a source vertex of <code class="docutils literal notranslate"><span class="pre">e</span></code>.</p>
+</dd>
+<dt class="field-odd">Raises</dt>
+<dd class="field-odd"><p><a class="reference internal" href="../Error.html#mod.LogicError" title="mod.LogicError"><code class="xref py py-class docutils literal notranslate"><span class="pre">LogicError</span></code></a> if duplicate <code class="docutils literal notranslate"><span class="pre">eDup</span></code> does not exist for <code class="docutils literal notranslate"><span class="pre">e</span></code>.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="mod.DGPrintData.reconnectTarget">
+<code class="sig-name descname">reconnectTarget</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">e</span></em>, <em class="sig-param"><span class="n">eDup</span></em>, <em class="sig-param"><span class="n">v</span></em>, <em class="sig-param"><span class="n">vDupTar</span></em><span class="sig-paren">)</span><a class="headerlink" href="#mod.DGPrintData.reconnectTarget" title="Permalink to this definition">¶</a></dt>
+<dd><p>For the given hyperedge duplicate, reconnect the given head to the given duplicate of that head.
+If the vertex is a head multiple times, then an arbitrary one of them is reconnected.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>e</strong> (<a class="reference internal" href="GraphInterface.html#mod.DGHyperEdge" title="mod.DGHyperEdge"><em>DGHyperEdge</em></a>) – a reference to the derivation to reconnect.</p></li>
+<li><p><strong>eDup</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)"><em>int</em></a>) – the duplicate number of the derivation to reconnect.</p></li>
+<li><p><strong>v</strong> (<a class="reference internal" href="GraphInterface.html#mod.DGVertex" title="mod.DGVertex"><em>DGVertex</em></a>) – a target vertex to reconnect.</p></li>
+<li><p><strong>vDupTar</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)"><em>int</em></a>) – the new duplicate number for the target vertex.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Raises</dt>
+<dd class="field-even"><p><a class="reference internal" href="../Error.html#mod.LogicError" title="mod.LogicError"><code class="xref py py-class docutils literal notranslate"><span class="pre">LogicError</span></code></a> if <code class="docutils literal notranslate"><span class="pre">not</span> <span class="pre">e</span></code>.</p>
+</dd>
+<dt class="field-odd">Raises</dt>
+<dd class="field-odd"><p><a class="reference internal" href="../Error.html#mod.LogicError" title="mod.LogicError"><code class="xref py py-class docutils literal notranslate"><span class="pre">LogicError</span></code></a> if <code class="docutils literal notranslate"><span class="pre">e.dg</span> <span class="pre">!=</span> <span class="pre">dg</span></code>.</p>
+</dd>
+<dt class="field-even">Raises</dt>
+<dd class="field-even"><p><a class="reference internal" href="../Error.html#mod.LogicError" title="mod.LogicError"><code class="xref py py-class docutils literal notranslate"><span class="pre">LogicError</span></code></a> if <code class="docutils literal notranslate"><span class="pre">not</span> <span class="pre">v</span></code>.</p>
+</dd>
+<dt class="field-odd">Raises</dt>
+<dd class="field-odd"><p><a class="reference internal" href="../Error.html#mod.LogicError" title="mod.LogicError"><code class="xref py py-class docutils literal notranslate"><span class="pre">LogicError</span></code></a> if <code class="docutils literal notranslate"><span class="pre">v.dg</span> <span class="pre">!=</span> <span class="pre">dg</span></code>.</p>
+</dd>
+<dt class="field-even">Raises</dt>
+<dd class="field-even"><p><a class="reference internal" href="../Error.html#mod.LogicError" title="mod.LogicError"><code class="xref py py-class docutils literal notranslate"><span class="pre">LogicError</span></code></a> if <code class="docutils literal notranslate"><span class="pre">v</span></code> is not a target vertex of <code class="docutils literal notranslate"><span class="pre">e</span></code>.</p>
+</dd>
+<dt class="field-odd">Raises</dt>
+<dd class="field-odd"><p><a class="reference internal" href="../Error.html#mod.LogicError" title="mod.LogicError"><code class="xref py py-class docutils literal notranslate"><span class="pre">LogicError</span></code></a> if duplicate <code class="docutils literal notranslate"><span class="pre">eDup</span></code> does not exist for <code class="docutils literal notranslate"><span class="pre">e</span></code>.</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt id="mod.DGPrinter">
+<em class="property">class </em><code class="sig-prename descclassname">mod.</code><code class="sig-name descname">DGPrinter</code><a class="headerlink" href="#mod.DGPrinter" title="Permalink to this definition">¶</a></dt>
+<dd><p>This class is used to configure how derivation graphs are visualised,
+how much is visualised and which extra properties are printed.</p>
+<dl class="py attribute">
+<dt id="mod.DGPrinter.graphPrinter">
+<code class="sig-name descname">graphPrinter</code><a class="headerlink" href="#mod.DGPrinter.graphPrinter" title="Permalink to this definition">¶</a></dt>
+<dd><p>Access the <a class="reference internal" href="../graph/Printer.html#mod.GraphPrinter" title="mod.GraphPrinter"><code class="xref py py-class docutils literal notranslate"><span class="pre">GraphPrinter</span></code></a> used when printing images of graphs.
+Note that assignment to the property copies the argument.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference internal" href="../graph/Printer.html#mod.GraphPrinter" title="mod.GraphPrinter">GraphPrinter</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="mod.DGPrinter.withShortcutEdges">
+<code class="sig-name descname">withShortcutEdges</code><a class="headerlink" href="#mod.DGPrinter.withShortcutEdges" title="Permalink to this definition">¶</a></dt>
+<dd><p>Control whether or not hyperedges <span class="math notranslate nohighlight">\((T, H)\)</span> with <span class="math notranslate nohighlight">\(|T| = |H| = 1\)</span>
+are printed as a simple arrow without the usual rectangle.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.9)">bool</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="mod.DGPrinter.withGraphImages">
+<code class="sig-name descname">withGraphImages</code><a class="headerlink" href="#mod.DGPrinter.withGraphImages" title="Permalink to this definition">¶</a></dt>
+<dd><p>Control whether or not each vertex is printed with a image of its graph in it.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.9)">bool</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="mod.DGPrinter.labelsAsLatexMath">
+<code class="sig-name descname">labelsAsLatexMath</code><a class="headerlink" href="#mod.DGPrinter.labelsAsLatexMath" title="Permalink to this definition">¶</a></dt>
+<dd><p>Control whether or not labels on vertices and hyperedges are put inline <span class="math notranslate nohighlight">\(\LaTeX\)</span> math.
+Specifically, a label <code class="docutils literal notranslate"><span class="pre">label</span></code> is written as <code class="docutils literal notranslate"><span class="pre">$\mathrm{label'}$</span></code>, with <code class="docutils literal notranslate"><span class="pre">label'</span></code> being
+<code class="docutils literal notranslate"><span class="pre">label</span></code> with all space characters escaped.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.9)">bool</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="mod.DGPrinter.pushVertexVisible">
+<code class="sig-name descname">pushVertexVisible</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">f</span></em><span class="sig-paren">)</span><a class="headerlink" href="#mod.DGPrinter.pushVertexVisible" title="Permalink to this definition">¶</a></dt>
+<dd><p>Add another function or constant controlling the visibility of vertices.
+All visibility functions must return <code class="docutils literal notranslate"><span class="pre">true</span></code> for a vertex to be visible.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>f</strong> (<em>Callable</em><em>[</em><em>[</em><a class="reference internal" href="GraphInterface.html#mod.DGVertex" title="mod.DGVertex"><em>DGVertex</em></a><em>]</em><em>, </em><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.9)"><em>bool</em></a><em>] or </em><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.9)"><em>bool</em></a>) – the function or constant to push for specifying vertex visibility.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="mod.DGPrinter.popVertexVisible">
+<code class="sig-name descname">popVertexVisible</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#mod.DGPrinter.popVertexVisible" title="Permalink to this definition">¶</a></dt>
+<dd><p>Remove the last pushed vertex visibility function.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Raises</dt>
+<dd class="field-odd"><p><a class="reference internal" href="../Error.html#mod.LogicError" title="mod.LogicError"><code class="xref py py-class docutils literal notranslate"><span class="pre">LogicError</span></code></a> if no callback is left to pop.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="mod.DGPrinter.pushEdgeVisible">
+<code class="sig-name descname">pushEdgeVisible</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">f</span></em><span class="sig-paren">)</span><a class="headerlink" href="#mod.DGPrinter.pushEdgeVisible" title="Permalink to this definition">¶</a></dt>
+<dd><p>Add another function or constant controlling the visibility of hyperedges.
+All visibility functions must return <code class="docutils literal notranslate"><span class="pre">true</span></code> for a hyperedge to be visible.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>f</strong> (<em>Callable</em><em>[</em><em>[</em><a class="reference internal" href="GraphInterface.html#mod.DGHyperEdge" title="mod.DGHyperEdge"><em>DGHyperEdge</em></a><em>]</em><em>, </em><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.9)"><em>bool</em></a><em>] or </em><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.9)"><em>bool</em></a>) – the function or constant to push for specifying hyperedge visibility.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="mod.DGPrinter.popEdgeVisible">
+<code class="sig-name descname">popEdgeVisible</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#mod.DGPrinter.popEdgeVisible" title="Permalink to this definition">¶</a></dt>
+<dd><p>Remove the last pushed hyperedge visibility function.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Raises</dt>
+<dd class="field-odd"><p><a class="reference internal" href="../Error.html#mod.LogicError" title="mod.LogicError"><code class="xref py py-class docutils literal notranslate"><span class="pre">LogicError</span></code></a> if no callback is left to pop.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="mod.DGPrinter.withShortcutEdgesAfterVisibility">
+<code class="sig-name descname">withShortcutEdgesAfterVisibility</code><a class="headerlink" href="#mod.DGPrinter.withShortcutEdgesAfterVisibility" title="Permalink to this definition">¶</a></dt>
+<dd><p>Control whether or not hyperedges are depicted as simple arrows when all but 1 head and tail are hidden.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.9)">bool</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="mod.DGPrinter.vertexLabelSep">
+<code class="sig-name descname">vertexLabelSep</code><a class="headerlink" href="#mod.DGPrinter.vertexLabelSep" title="Permalink to this definition">¶</a></dt>
+<dd><p>The string used as separator between each part of each vertex label.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)">str</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="mod.DGPrinter.edgeLabelSep">
+<code class="sig-name descname">edgeLabelSep</code><a class="headerlink" href="#mod.DGPrinter.edgeLabelSep" title="Permalink to this definition">¶</a></dt>
+<dd><p>The string used as separator between each part of each edge label.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)">str</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="mod.DGPrinter.pushVertexLabel">
+<code class="sig-name descname">pushVertexLabel</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">f</span></em><span class="sig-paren">)</span><a class="headerlink" href="#mod.DGPrinter.pushVertexLabel" title="Permalink to this definition">¶</a></dt>
+<dd><p>Add another function or constant for vertex labelling.
+The result of this function is added to the end of each label.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>f</strong> (<em>Callable</em><em>[</em><em>[</em><a class="reference internal" href="GraphInterface.html#mod.DGVertex" title="mod.DGVertex"><em>DGVertex</em></a><em>]</em><em>, </em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a><em>] or </em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a>) – the function or constant to push for labelling vertices.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="mod.DGPrinter.popVertexLabel">
+<code class="sig-name descname">popVertexLabel</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#mod.DGPrinter.popVertexLabel" title="Permalink to this definition">¶</a></dt>
+<dd><p>Remove the last pushed vertex labelling function.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Raises</dt>
+<dd class="field-odd"><p><a class="reference internal" href="../Error.html#mod.LogicError" title="mod.LogicError"><code class="xref py py-class docutils literal notranslate"><span class="pre">LogicError</span></code></a> if no callback is left to pop.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="mod.DGPrinter.pushEdgeLabel">
+<code class="sig-name descname">pushEdgeLabel</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">f</span></em><span class="sig-paren">)</span><a class="headerlink" href="#mod.DGPrinter.pushEdgeLabel" title="Permalink to this definition">¶</a></dt>
+<dd><p>Add another function or constant for edge labelling. The result of this function is appended to each label.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>f</strong> (<em>Callable</em><em>[</em><em>[</em><a class="reference internal" href="GraphInterface.html#mod.DGHyperEdge" title="mod.DGHyperEdge"><em>DGHyperEdge</em></a><em>]</em><em>, </em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a><em>] or </em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a>) – the function or constant to push for labelling edges.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="mod.DGPrinter.popEdgeLabel">
+<code class="sig-name descname">popEdgeLabel</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#mod.DGPrinter.popEdgeLabel" title="Permalink to this definition">¶</a></dt>
+<dd><p>Remove the last pushed edge labelling function.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Raises</dt>
+<dd class="field-odd"><p><a class="reference internal" href="../Error.html#mod.LogicError" title="mod.LogicError"><code class="xref py py-class docutils literal notranslate"><span class="pre">LogicError</span></code></a> if no callback is left to pop.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="mod.DGPrinter.withGraphName">
+<code class="sig-name descname">withGraphName</code><a class="headerlink" href="#mod.DGPrinter.withGraphName" title="Permalink to this definition">¶</a></dt>
+<dd><p>Control whether or not graph names are appended to the vertex labels (see also <a class="reference internal" href="#mod.DGPrinter.pushVertexLabel" title="mod.DGPrinter.pushVertexLabel"><code class="xref py py-meth docutils literal notranslate"><span class="pre">DGPrinter.pushVertexLabel()</span></code></a>).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.9)">bool</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="mod.DGPrinter.withRuleName">
+<code class="sig-name descname">withRuleName</code><a class="headerlink" href="#mod.DGPrinter.withRuleName" title="Permalink to this definition">¶</a></dt>
+<dd><p>Control whether or not rule names are appended to the edge labels (see also <a class="reference internal" href="#mod.DGPrinter.pushEdgeLabel" title="mod.DGPrinter.pushEdgeLabel"><code class="xref py py-meth docutils literal notranslate"><span class="pre">DGPrinter.pushEdgeLabel()</span></code></a>).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.9)">bool</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="mod.DGPrinter.withRuleId">
+<code class="sig-name descname">withRuleId</code><a class="headerlink" href="#mod.DGPrinter.withRuleId" title="Permalink to this definition">¶</a></dt>
+<dd><p>Control whether or not rule IDs are appended to the edge labels (see also <a class="reference internal" href="#mod.DGPrinter.pushEdgeLabel" title="mod.DGPrinter.pushEdgeLabel"><code class="xref py py-meth docutils literal notranslate"><span class="pre">DGPrinter.pushEdgeLabel()</span></code></a>).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.9)">bool</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="mod.DGPrinter.withInlineGraphs">
+<code class="sig-name descname">withInlineGraphs</code><a class="headerlink" href="#mod.DGPrinter.withInlineGraphs" title="Permalink to this definition">¶</a></dt>
+<dd><p>Control whether or not graph depictions should be precompiled, or be included inline in the DG figure.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.9)">bool</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="mod.DGPrinter.pushVertexColour">
+<code class="sig-name descname">pushVertexColour</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">f</span></em>, <em class="sig-param"><span class="n">extendToEdges</span><span class="o">=</span><span class="default_value">True</span></em><span class="sig-paren">)</span><a class="headerlink" href="#mod.DGPrinter.pushVertexColour" title="Permalink to this definition">¶</a></dt>
+<dd><p>Add another function or constant for colouring vertices. The final colour of a vertex is the result of the first colour function returning a non-empty string.
+The functions are evaluated in the order they are pushed and the resulting string is used directly as a colour in Tikz.
+A hyperedge is also coloured if at least one head and one tail <em>can</em> be coloured with a colour for which <code class="docutils literal notranslate"><span class="pre">extendToEdges</span></code> is <code class="docutils literal notranslate"><span class="pre">True</span></code>.
+In this case, the hyperedge (and a subset of the head and tail connectors) is coloured with the first applicable colour.
+The edge extension of vertex colour takes lower precedence than explicitly added hyperedge colouring functions.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>f</strong> (<em>Callable</em><em>[</em><em>[</em><a class="reference internal" href="GraphInterface.html#mod.DGVertex" title="mod.DGVertex"><em>DGVertex</em></a><em>]</em><em>, </em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a><em>] or </em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a>) – the function to push for colouring vertices.</p></li>
+<li><p><strong>extendToEdges</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.9)"><em>bool</em></a>) – whether or not some hyperedges are coloured as well (see above).</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="mod.DGPrinter.popVertexColour">
+<code class="sig-name descname">popVertexColour</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#mod.DGPrinter.popVertexColour" title="Permalink to this definition">¶</a></dt>
+<dd><p>Remove the last pushed vertex colouring function.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Raises</dt>
+<dd class="field-odd"><p><a class="reference internal" href="../Error.html#mod.LogicError" title="mod.LogicError"><code class="xref py py-class docutils literal notranslate"><span class="pre">LogicError</span></code></a> if no callback is left to pop.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="mod.DGPrinter.pushEdgeColour">
+<code class="sig-name descname">pushEdgeColour</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">f</span></em><span class="sig-paren">)</span><a class="headerlink" href="#mod.DGPrinter.pushEdgeColour" title="Permalink to this definition">¶</a></dt>
+<dd><p>Add another function or constant for colouring hyperedges. The final colour of a hyperedge (and all of its head and tail connectors) is the result of the
+first colour function returning a non-empty string.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>f</strong> (<em>Callable</em><em>[</em><em>[</em><a class="reference internal" href="GraphInterface.html#mod.DGHyperEdge" title="mod.DGHyperEdge"><em>DGHyperEdge</em></a><em>]</em><em>, </em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a><em>] or </em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a>) – the function or constant to push for colouring hyperedges.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="mod.DGPrinter.popEdgeColour">
+<code class="sig-name descname">popEdgeColour</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#mod.DGPrinter.popEdgeColour" title="Permalink to this definition">¶</a></dt>
+<dd><p>Remove the last pushed hyperedge colouring function.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Raises</dt>
+<dd class="field-odd"><p><a class="reference internal" href="../Error.html#mod.LogicError" title="mod.LogicError"><code class="xref py py-class docutils literal notranslate"><span class="pre">LogicError</span></code></a> if no callback is left to pop.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="mod.DGPrinter.setRotationOverwrite">
+<code class="sig-name descname">setRotationOverwrite</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">f</span></em><span class="sig-paren">)</span><a class="headerlink" href="#mod.DGPrinter.setRotationOverwrite" title="Permalink to this definition">¶</a></dt>
+<dd><p>Overwrite the rotation set in the nested <a class="reference internal" href="../graph/Printer.html#mod.GraphPrinter" title="mod.GraphPrinter"><code class="xref py py-class docutils literal notranslate"><span class="pre">GraphPrinter</span></code></a>. The given function will be used
+to set the rotation of each printed graph.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>f</strong> (<em>Callable</em><em>[</em><em>[</em><a class="reference internal" href="../graph/Graph.html#mod.Graph" title="mod.Graph"><em>Graph</em></a><em>]</em><em>, </em><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)"><em>int</em></a><em>] or </em><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)"><em>int</em></a>) – the constant or the function called on each graph to retrieve the rotation to render it with.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="mod.DGPrinter.setMirrorOverwrite">
+<code class="sig-name descname">setMirrorOverwrite</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">f</span></em><span class="sig-paren">)</span><a class="headerlink" href="#mod.DGPrinter.setMirrorOverwrite" title="Permalink to this definition">¶</a></dt>
+<dd><p>Overwrite the mirror set in the nested <a class="reference internal" href="../graph/Printer.html#mod.GraphPrinter" title="mod.GraphPrinter"><code class="xref py py-class docutils literal notranslate"><span class="pre">GraphPrinter</span></code></a>. The given function will be used
+to set the mirror of each printed graph.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>f</strong> (<em>Callable</em><em>[</em><em>[</em><a class="reference internal" href="../graph/Graph.html#mod.Graph" title="mod.Graph"><em>Graph</em></a><em>]</em><em>, </em><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.9)"><em>bool</em></a><em>] or </em><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.9)"><em>bool</em></a>) – the function called on each graph to retrieve the mirror to render it with.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="mod.DGPrinter.graphvizPrefix">
+<code class="sig-name descname">graphvizPrefix</code><a class="headerlink" href="#mod.DGPrinter.graphvizPrefix" title="Permalink to this definition">¶</a></dt>
+<dd><p>The string that will be inserted into generated DOT files,
+just after the graph declaration.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)">str</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+
+
+		</div>
+		  
+	</div>
+</div>
+<footer class="footer"><div class="container"><div class="row">
+	<div class="col-auto mr-auto">
+		<p>
+					&copy; Copyright 2013-2020, Jakob Lykke Andersen.<br/>
+				Created using <a href="http://sphinx-doc.org/">Sphinx</a> 3.5.0+/8382a0bc3.<br/>
+		</p>
+	</div>
+	<div class="col-auto">
+		<a href="#">Back to top</a>
+		
+			<br/>
+			
+	<div id="sourcelink">
+		<a href="../../_sources/pymod/dg/Printer.rst.txt"
+			 rel="nofollow">Source</a>
+	</div>
+		
+	</div>
+</div></div></footer>
+  </body>
+</html>

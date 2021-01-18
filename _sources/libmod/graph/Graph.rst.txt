@@ -1,0 +1,273 @@
+.. _cpp-graph/Graph:
+
+**********************************************************
+graph/Graph.hpp
+**********************************************************
+.. default-domain:: cpp
+.. default-role:: cpp:expr
+
+.. py:currentmodule:: mod
+.. cpp:namespace:: mod
+
+
+Class ``graph::Graph``
+--------------------------------------------------------------------------------------------------------------------------------
+
+.. class:: graph::Graph
+    
+
+    This class models an undirected graph with labels on vertices and edges,
+    without loops and without parallel edges.
+    Certain labels are regarded as models of chemical atoms and bonds.
+    See :ref:`mol-enc` for more information on this.
+    See also :ref:`cpp-graph/GraphInterface` for the documentation for the
+    graph interface for this class.
+
+
+Synopsis
+^^^^^^^^
+
+.. code-block:: c++
+    
+    struct MOD_DECL Graph {
+        class Vertex;
+        class Edge;
+        class VertexIterator;
+        class VertexRange;
+        class EdgeIterator;
+        class EdgeRange;
+        class IncidentEdgeIterator;
+        class IncidentEdgeRange;
+    public:
+        struct Aut;
+        struct AutGroup;
+    private: // The actual class interface
+        Graph(std::unique_ptr<lib::Graph::Single> g);
+        Graph(const Graph&) = delete;
+        Graph &operator=(const Graph&) = delete;
+    public:
+        ~Graph();
+        std::size_t getId() const;
+        MOD_DECL friend std::ostream &operator<<(std::ostream &s, const Graph &g);
+        lib::Graph::Single &getGraph() const;
+    public: // graph interface
+        std::size_t numVertices() const;
+        VertexRange vertices() const;
+        std::size_t numEdges() const;
+        EdgeRange edges() const;
+    public:
+        AutGroup aut(LabelSettings labelSettings) const;
+    public:
+        std::pair<std::string, std::string> print() const;
+        std::pair<std::string, std::string> print(const Printer &first, const Printer &second) const;
+        void printTermState() const;
+        std::string getGMLString(bool withCoords = false) const;
+        std::string printGML(bool withCoords = false) const;
+        const std::string &getName() const;
+        void setName(std::string name) const;
+        const std::string &getSmiles() const;
+        const std::string &getSmilesWithIds() const;
+        const std::string &getGraphDFS() const;
+        const std::string &getGraphDFSWithIds() const;
+        const std::string &getLinearEncoding() const;
+        bool getIsMolecule() const;
+        double getEnergy() const;
+        void cacheEnergy(double value) const;
+        double getExactMass() const;
+        unsigned int vLabelCount(const std::string &label) const;
+        unsigned int eLabelCount(const std::string &label) const;
+        std::size_t isomorphism(std::shared_ptr<Graph> g, std::size_t maxNumMatches, LabelSettings labelSettings) const;
+        std::size_t monomorphism(std::shared_ptr<Graph> g, std::size_t maxNumMatches, LabelSettings labelSettings) const;
+        std::shared_ptr<Graph> makePermutation() const;
+        void setImage(std::shared_ptr<Function<std::string()> > image);
+        std::shared_ptr<Function<std::string()> > getImage() const;
+        void setImageCommand(std::string cmd);
+        std::string getImageCommand() const;
+        Vertex getVertexFromExternalId(int id) const;
+        int getMinExternalId() const;
+        int getMaxExternalId() const;
+        void instantiateStereo() const;
+    private:
+        struct Pimpl;
+        std::unique_ptr<Pimpl> p;
+    public:
+        static std::shared_ptr<Graph> graphGMLString(const std::string &data);
+        static std::shared_ptr<Graph> graphGML(const std::string &file);
+        static std::shared_ptr<Graph> graphDFS(const std::string &graphDFS);
+        static std::shared_ptr<Graph> smiles(const std::string &smiles);
+        static std::shared_ptr<Graph> smiles(const std::string &smiles, bool allowAbstract, SmilesClassPolicy classPolicy);
+        static std::shared_ptr<Graph> makeGraph(std::unique_ptr<lib::Graph::Single> g);
+        static std::shared_ptr<Graph> makeGraph(std::unique_ptr<lib::Graph::Single> g, std::map<int, std::size_t> externalToInternalIds);
+    };
+
+Details
+^^^^^^^
+
+.. cpp:namespace-push:: graph::Graph
+
+.. function:: std::size_t getId() const
+
+    :returns: the unique instance id among :class:`Graph` objects.
+.. function:: std::size_t numVertices() const
+
+    :returns: the number of vertices in the graph.
+.. function:: VertexRange vertices() const
+
+    :returns: a range of all vertices in the graph.
+.. function:: std::size_t numEdges() const
+
+    :returns: the number of edges in the graph.
+.. function:: EdgeRange edges() const
+
+    :returns: a range of all edges in the graph.
+.. function:: AutGroup aut(LabelSettings labelSettings) const
+
+    :returns: an object representing the automorphism group of the graph.
+.. function:: std::pair<std::string, std::string> print() const
+              std::pair<std::string, std::string> print(const Printer &first, const Printer &second) const
+
+    Print the graph, using either the default options or the options in `first` and `second`.
+    If `first` and `second` are the same, only one depiction will be made.
+
+    :returns: a pair of names for the PDF-files that will be compiled in post-processing.
+        If `first` and `second` are the same, the two file prefixes are equal.
+.. function:: void printTermState() const
+
+    Print the term state for the graph.
+.. function:: std::string getGMLString(bool withCoords = false) const
+
+    :returns: the :ref:`GML <graph-gml>` representation of the graph,
+              optionally with generated 2D coordinates.
+    :throws: :any:`LogicError` when coordinates are requested, but
+             none can be generated.
+.. function:: std::string printGML(bool withCoords = false) const
+
+    Print the :ref:`GML <graph-gml>` representation of the graph,
+    optionally with generated 2D coordinates.
+
+    :returns: the filename of the printed GML file.
+    :throws: :any:`LogicError` when coordinates are requested, but
+             none can be generated.
+.. function:: const std::string &getName() const
+              void setName(std::string name) const
+
+    Access the name of the graph.
+.. function:: const std::string &getSmiles() const
+
+    :returns: the canonical :ref:`SMILES string <graph-smiles>` of the graph, if it's a molecule.
+    :throws: :any:`LogicError` if the graph is not a molecule.
+.. function:: const std::string &getSmilesWithIds() const
+
+    :returns: the canonical :ref:`SMILES string <graph-smiles>` of the graph,
+        that includes the internal vertex id as a class label on each atom, if it's a molecule.
+    :throws: :any:`LogicError` if the graph is not a molecule.
+.. function:: const std::string &getGraphDFS() const
+
+    :returns: a :ref:`GraphDFS <graph-graphDFS>` string of the graph.
+.. function:: const std::string &getGraphDFSWithIds() const
+
+    :returns: a :ref:`GraphDFS <graph-graphDFS>` string of the graph, where each vertices have an explicit id,
+        corresponding to its internal vertex id.
+.. function:: const std::string &getLinearEncoding() const
+
+    :returns: the :ref:`SMILES <graph-smiles>` string if the graph is a molecule, otherwise the :ref:`GraphDFS <graph-graphDFS>` string.
+.. function:: bool getIsMolecule() const
+
+    :returns: whether or not the graph models a molecule. See :ref:`mol-enc`.
+.. function:: double getEnergy() const
+
+    :returns: some energy value if the graph is a molecule.
+        The energy is calculated using Open Babel, unless already calculated or cached by :cpp:func:`Graph::cacheEnergy`.
+.. function:: void cacheEnergy(double value) const
+
+    If the graph models a molecule, sets the energy to a given value.
+
+    :throws: :class:`LogicError` if the graph is not a molecule.
+.. function:: double getExactMass() const
+
+    :returns: the exact mass of the graph, if it is a molecule.
+        It is the sum of the exact mass of each atom, with the mass of electrons subtracted corresponding to the integer charge.
+        That is, the mass is :math:`\sum_a (mass(a) - mass(e)\cdot charge(a))`.
+        If an atom has no specified isotope, then the most abundant is used.
+    :throws: :class:`LogicError` if it is not a molecule, including if some isotope has not been tabulated.
+.. function:: unsigned int vLabelCount(const std::string &label) const
+
+    :returns: the number of vertices in the graph with the given label.
+.. function:: unsigned int eLabelCount(const std::string &label) const
+
+    :returns: the number of edges in the graph with the given label.
+.. function:: std::size_t isomorphism(std::shared_ptr<Graph> g, std::size_t maxNumMatches, LabelSettings labelSettings) const
+
+    :returns: the number of isomorphisms found from this graph to `g`, but at most `maxNumMatches`.
+.. function:: std::size_t monomorphism(std::shared_ptr<Graph> g, std::size_t maxNumMatches, LabelSettings labelSettings) const
+
+    :returns: the number of monomorphisms from this graph to `g`, though at most `maxNumMatches`.
+.. function:: std::shared_ptr<Graph> makePermutation() const
+
+    :returns: a graph isomorphic to this, but with the vertex indices randomly permuted.
+.. function:: void setImage(std::shared_ptr<Function<std::string()> > image)
+
+    Set a custom depiction for the graph. The depiction file used will be the string
+    returned by the given function, with ``.pdf`` appended.
+    The function will only be called once.
+    Give `nullptr` to use auto-generated depiction.
+.. function:: std::shared_ptr<Function<std::string()> > getImage() const
+
+    :returns: the current custom depiction file function.
+.. function:: void setImageCommand(std::string cmd)
+
+    Set a command to be run in post-processing if a custom depiction is set.
+    The command is only run once.
+.. function:: std::string getImageCommand() const
+
+    :returns: the current post-processing command.
+.. function:: Vertex getVertexFromExternalId(int id) const
+
+    If the graph was not loaded from an external data format, then this function
+    always return a null descriptor.
+    If the graph was loaded from a SMILES string, but *any* class label was not unique,
+    then the function always return a null descriptor.
+
+    .. note:: In general there is no correlation between external and internal ids.
+
+    :returns: the vertex descriptor for the given external id.
+              The descriptor is null if the external id was not used.
+.. function:: int getMinExternalId() const
+              int getMaxExternalId() const
+
+    If the graph was not loaded from an external data format, then these functions
+    always return 0. Otherwise, return the minimum/maximum external id from which
+    non-null vertices can be obtained from :cpp:func:`getVertexFromExternalId`.
+    If no such minimum and maximum exists, then 0 will be returned.
+.. function:: void instantiateStereo() const
+
+        Make sure that stereo data is instantiated.
+
+        :throws: `StereoDeductionError` if the data was not instantiated and deduction failed.
+.. function:: static std::shared_ptr<Graph> graphGMLString(const std::string &data)
+
+    :returns: a graph created from the given :ref:`GML <graph-gml>` data.
+    :throws: :class:`InputError` on bad input.
+.. function:: static std::shared_ptr<Graph> graphGML(const std::string &file)
+
+    :returns: a graph loaded from the given :ref:`GML <graph-gml>` file.
+    :throws: :class:`InputError` on bad input.
+.. function:: static std::shared_ptr<Graph> graphDFS(const std::string &graphDFS)
+
+    :returns: a graph loaded from the given :ref:`GraphDFS <graph-graphDFS>` string.
+    :throws: :class:`InputError` on bad input.
+.. function:: static std::shared_ptr<Graph> smiles(const std::string &smiles)
+              static std::shared_ptr<Graph> smiles(const std::string &smiles, bool allowAbstract, SmilesClassPolicy classPolicy)
+
+    :returns: a graph representing a molecule, loaded from the given :ref:`SMILES <graph-smiles>` string.
+        The `allowAbstract` argument defaults to `false`
+        and `classPolicy` defaults to `SmilesClassPolicy::NoneOnDuplicate`.
+    :throws: :class:`InputError` on bad input.
+    :throws: :class:`InputError` if `classPolicy == SmilesClassPolicy::NoneOnDuplicate` and a class label is duplicated.
+.. function:: static std::shared_ptr<Graph> makeGraph(std::unique_ptr<lib::Graph::Single> g)
+              static std::shared_ptr<Graph> makeGraph(std::unique_ptr<lib::Graph::Single> g, std::map<int, std::size_t> externalToInternalIds)
+
+    :returns: a graph wrapping the given internal graph object. If an id mapping is given, it will be used for the :cpp:func:`getVertexFromExternalId` function.
+
+.. cpp:namespace-pop::
+

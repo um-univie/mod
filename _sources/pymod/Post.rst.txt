@@ -1,0 +1,14 @@
+.. _py-Post:
+
+**********************************************************
+Post
+**********************************************************
+.. default-domain:: py
+
+.. py:currentmodule:: mod
+.. cpp:namespace:: mod
+
+.. function:: makeUniqueFilePrefix()
+
+    :returns: a unique file prefix from the ``out/`` folder.
+    :rtype: str
