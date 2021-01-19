@@ -1,7 +1,7 @@
 name: CI
 on: [push, pull_request]
 jobs:
-  Ubuntu:
+  Conda:
     runs-on: ubuntu-18.04
     steps:
     - name: Checkout
@@ -24,31 +24,14 @@ jobs:
         cd boost_1_74_0
         ./bootstrap.sh --with-python=python3 --prefix=/opt/boost
         ./b2 -j 2 --with-python --with-graph --with-iostreams install
-    - name: Install Graphviz
-      run: |
-        sudo apt install librsvg2-dev libpango1.0-dev libperl-dev
-        wget http://graphviz.gitlab.io/pub/graphviz/stable/SOURCES/graphviz.tar.gz
-        tar -xf graphviz.tar.gz --one-top-level=graphviz --strip-components=1
-        cd graphviz
-        ./configure
-        make -j 2
-        sudo make install
     - name: Bootstrap
       run: ./bootstrap.sh
     - name: Configure
-      env:
-        CXXFLAGS: -Werror
       run: |
         mkdir build
         cd build
-        cmake ../ -DBUILD_TESTING=on -DBOOST_ROOT=/opt/boost
+        cmake ../ -DBOOST_ROOT=/opt/boost -DBUILD_POST_MOD=off
+    - name: Make archive
+      run: cd build && make dist
     - name: Build
-      run: cd build && make -j 2
-    - name: Install
-      run: cd build && sudo make install
-    - name: Build tests
-      run: cd build && make tests -j 2
-    - name: Run tests
-      run: cd build && ctest --output-on-failure -j 2
-    - name: Run simple test
-      run: mod -e "smiles('O').print()"
+      run: ./scripts/makeConda.sh
