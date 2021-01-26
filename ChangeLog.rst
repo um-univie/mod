@@ -5,6 +5,15 @@ Changes
 #######
 
 
+develop
+=======
+
+Bugs Fixed
+----------
+
+- Fix v0.12 problem with RPATH handling of ``libmod``.
+
+
 v0.12.0 (2021-01-18)
 ====================
 

@@ -65,6 +65,7 @@ target_compile_options(libmod PUBLIC
         $<$<CXX_COMPILER_ID:Clang>:-Wno-mismatched-tags>
         $<$<CXX_COMPILER_ID:AppleClang>:-Wno-mismatched-tags>)
 set_target_properties(libmod PROPERTIES OUTPUT_NAME "mod")
+set_target_properties(libmod PROPERTIES INSTALL_RPATH "${CMAKE_INSTALL_FULL_LIBDIR}")
 if(ENABLE_SYMBOL_HIDING)
     set_target_properties(libmod PROPERTIES
             CXX_VISIBILITY_PRESET hidden
