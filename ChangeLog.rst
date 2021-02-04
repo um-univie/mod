@@ -12,6 +12,7 @@ Bugs Fixed
 ----------
 
 - Fix v0.12 problem with RPATH handling of ``libmod``.
+- Doc, fix infinite search.
 
 
 v0.12.0 (2021-01-18)
