@@ -13,6 +13,7 @@ Bugs Fixed
 
 - Fix v0.12 problem with RPATH handling of ``libmod``.
 - Doc, fix infinite search.
+- Fix exception visibility on macOS so they can be caught outside the library.
 
 
 v0.12.0 (2021-01-18)
