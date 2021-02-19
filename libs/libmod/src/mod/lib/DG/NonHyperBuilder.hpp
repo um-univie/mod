@@ -35,6 +35,11 @@ public:
 	std::vector<std::pair<NonHyper::Edge, bool>>
 	apply(const std::vector<std::shared_ptr<graph::Graph>> &graphs, std::shared_ptr<rule::Rule> r,
 	      int verbosity, IsomorphismPolicy graphPolicy);
+
+	std::vector<std::pair<NonHyper::Edge, bool>>
+	apply_v2(const std::vector<std::shared_ptr<graph::Graph>> &graphs, std::shared_ptr<rule::Rule> r,
+	      int verbosity, IsomorphismPolicy graphPolicy);
+
 	std::vector<std::pair<NonHyper::Edge, bool>>
 	applyRelaxed(const std::vector<std::shared_ptr<graph::Graph>> &graphs, std::shared_ptr<rule::Rule> r,
 	             int verbosity, IsomorphismPolicy graphPolicy);

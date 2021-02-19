@@ -14,6 +14,7 @@
 #include <mod/lib/IO/JsonUtils.hpp>
 #include <mod/lib/RC/ComposeRuleReal.hpp>
 #include <mod/lib/RC/MatchMaker/Super.hpp>
+#include <mod/lib/Rules/Application/Enumerate.hpp>
 
 #include <boost/iostreams/device/mapped_file.hpp>
 #include <boost/lexical_cast.hpp>
@@ -223,6 +224,21 @@ Builder::execute(std::unique_ptr<Strategies::Strategy> strategy_, int verbosity,
 	exec.strategy->execute(Strategies::PrintSettings(std::cout, false, verbosity), *exec.input);
 	dg->executions.push_back(std::move(exec));
 	return ExecuteResult(dg, dg->executions.size() - 1);
+}
+
+std::vector<std::pair<NonHyper::Edge, bool>>
+Builder::apply_v2(const std::vector<std::shared_ptr<graph::Graph>> &graphs,
+               std::shared_ptr<rule::Rule> rOrig,
+               int verbosity, IsomorphismPolicy graphPolicy) {
+	std::vector<std::pair<NonHyper::Edge, bool>> res;
+	std::vector<const lib::Graph::Single *> libGraphs, libGraphsEmpty;
+	libGraphs.reserve(graphs.size());
+	for(const auto &g : graphs)
+		libGraphs.push_back(&g->getGraph());
+
+	Rules::Application::computeDerivations(rOrig->getRule(), libGraphs, libGraphsEmpty);
+	return res;
+
 }
 
 std::vector<std::pair<NonHyper::Edge, bool>>

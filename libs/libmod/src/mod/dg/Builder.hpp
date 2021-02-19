@@ -124,6 +124,8 @@ public:
 	// rst:		:throws: :class:`LogicError` if `graphPolicy == IsomorphismPolicy::Check` and a given graph object
 	// rst:			is different but isomorphic to another given graph object or to a graph object already
 	// rst:			in the internal graph database in the associated derivation graph.
+	std::vector<DG::HyperEdge> apply_v2(const std::vector<std::shared_ptr<graph::Graph> > &graphs,
+	                                 std::shared_ptr<rule::Rule> r);
 	std::vector<DG::HyperEdge> apply(const std::vector<std::shared_ptr<graph::Graph> > &graphs,
 	                                 std::shared_ptr<rule::Rule> r);
 	std::vector<DG::HyperEdge> apply(const std::vector<std::shared_ptr<graph::Graph> > &graphs,

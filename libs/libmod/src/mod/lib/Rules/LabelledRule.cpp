@@ -5,6 +5,10 @@
 #include <mod/lib/Stereo/CloneUtil.hpp>
 #include <mod/lib/Stereo/Inference.hpp>
 
+#include <mod/lib/Graph/Properties/String.hpp>
+#include <mod/lib/Graph/Properties/Stereo.hpp>
+
+
 #include <boost/graph/connected_components.hpp>
 
 #include <iostream>
@@ -72,12 +76,110 @@ LabelledRule::LabelledRule(const LabelledRule &other, bool withConstraints) : La
 	}
 }
 
+template<typename SideGraph>
+std::vector<LabelledRule::ComponentGraph_v2> splitSideGraph(const SideGraph&& sideGraph,
+                                                            std::vector<std::vector<std::size_t>>& componentVertexToCoreVertexMap) {
+	struct GraphData {
+		using Graph = LabelledRule::ComponentGraph_v2;
+		using SideVertex = boost::graph_traits<LabelledLeftGraph::GraphType>::vertex_descriptor;
+	public:
+		GraphData() :
+		    gPtr(new Graph::GraphType()),
+		    pStringPtr(new Graph::PropStringType(*gPtr)) {}
+
+	public:
+		std::unique_ptr<GraphData::Graph::GraphType> gPtr;
+		std::unique_ptr<GraphData::Graph::PropStringType> pStringPtr;
+		std::unique_ptr<GraphData::Graph::PropStereoType> pStereoPtr;
+		std::vector<SideVertex> vertexMap;
+	};
+	using Vertex = lib::Graph::Vertex;
+
+	std::vector<LabelledRule::ComponentGraph_v2> out;
+
+	std::size_t num_components = get_num_connected_components(sideGraph);
+
+	//const auto& rDPO = rule.getDPORule();
+
+	std::vector<GraphData> products(num_components);
+	componentVertexToCoreVertexMap.clear();
+
+	const auto &compMap = get_connected_component_map(sideGraph);
+	//const auto &gRight = get_left(rDPO);
+	const auto &gSideGraph = get_graph(sideGraph);
+	auto rpString = get_string(sideGraph);
+	assert(num_vertices(gSideGraph) == num_vertices(get_graph(sideGraph.r)));
+	std::vector<Vertex> vertexMap(num_vertices(gSideGraph));
+	for(const auto vSide : asRange(vertices(gSideGraph))) {
+		const auto comp = compMap[get(boost::vertex_index_t(), gSideGraph, vSide)];
+		auto &p = products[comp];
+		const auto v = add_vertex(*p.gPtr);
+		vertexMap[get(boost::vertex_index_t(), gSideGraph, vSide)] = v;
+		p.pStringPtr->addVertex(v, rpString[vSide]);
+	}
+	for(const auto eSide : asRange(edges(gSideGraph))) {
+		const auto vSideSrc = source(eSide, gSideGraph);
+		const auto vSideTar = target(eSide, gSideGraph);
+		const auto comp = compMap[get(boost::vertex_index_t(), gSideGraph, vSideSrc)];
+		assert(comp == compMap[get(boost::vertex_index_t(), gSideGraph, vSideTar)]);
+		const auto vCompSrc = vertexMap[get(boost::vertex_index_t(), gSideGraph, vSideSrc)];
+		const auto vCompTar = vertexMap[get(boost::vertex_index_t(), gSideGraph, vSideTar)];
+		const auto epComp = add_edge(vCompSrc, vCompTar, *products[comp].gPtr);
+		assert(epComp.second);
+		products[comp].pStringPtr->addEdge(epComp.first, rpString[eSide]);
+	}
+
+	// make the inverse vertex maps
+	for(auto &p : products)
+		p.vertexMap.resize(num_vertices(*p.gPtr));
+	for(const auto vSide : asRange(vertices(gSideGraph))) {
+		const auto comp = compMap[get(boost::vertex_index_t(), gSideGraph, vSide)];
+		auto &p = products[comp];
+		const auto v = vertexMap[get(boost::vertex_index_t(), gSideGraph, vSide)];
+		p.vertexMap[get(boost::vertex_index_t(), *p.gPtr, v)] = vSide;
+	}
+
+	if (has_stereo(sideGraph.r)) {
+		for(auto &p : products) {
+			// const auto &lgRight = get_labelled_left(rDPO);
+			assert(has_stereo(sideGraph));
+			const auto vertexMap = [&p](const auto &vProduct) {
+				return p.vertexMap[get(boost::vertex_index_t(), *p.gPtr, vProduct)];
+			};
+			const auto edgeMap = [&p, &sideGraph](const auto &eProduct) {
+				const auto &g = *p.gPtr;
+				const auto &gSide = get_graph(sideGraph);
+				const auto vSrc = source(eProduct, g);
+				const auto vTar = target(eProduct, g);
+				const auto vSrcSide = p.vertexMap[get(boost::vertex_index_t(), g, vSrc)];
+				const auto vTarSide = p.vertexMap[get(boost::vertex_index_t(), g, vTar)];
+				const auto epSide = edge(vSrcSide, vTarSide, gSide);
+				assert(epSide.second);
+				return epSide.first;
+			};
+			const auto inf = Stereo::makeCloner(sideGraph, *p.gPtr, vertexMap, edgeMap);
+			p.pStereoPtr = std::make_unique<lib::Graph::PropStereo>(*p.gPtr, inf);
+		} // end foreach product
+	} // end of stereo prop
+	// wrap them
+
+	for(auto &g : products) {
+		out.emplace_back(std::move(g.gPtr), std::move(g.pStringPtr), std::move(g.pStereoPtr));
+		componentVertexToCoreVertexMap.push_back(g.vertexMap);
+	}
+	return out;
+}
+
 void LabelledRule::initComponents() { // TODO: structure this better
 	if(numLeftComponents != std::numeric_limits<std::size_t>::max()) MOD_ABORT;
 	leftComponents.resize(num_vertices(get_graph(*this)), -1);
 	rightComponents.resize(num_vertices(get_graph(*this)), -1);
 	numLeftComponents = boost::connected_components(get_graph(get_labelled_left(*this)), leftComponents.data());
 	numRightComponents = boost::connected_components(get_graph(get_labelled_right(*this)), rightComponents.data());
+	leftComponentGraphs = splitSideGraph(get_labelled_left(*this), leftComponentVertexToCoreVertex);
+	assert(leftComponentVertexToCoreVertex.size() == numLeftComponents);
+	rightComponentGraphs = splitSideGraph(get_labelled_right(*this), rightComponentVertexToCoreVertex);
+	assert(rightComponentVertexToCoreVertex.size() == numRightComponents);
 }
 
 void LabelledRule::invert() {
@@ -225,6 +327,8 @@ LabelledRule::Projections::Projections(const LabelledRule &r)
 
 namespace detail {
 
+
+
 LabelledSideGraph::LabelledSideGraph(const LabelledRule &r, jla_boost::GraphDPO::Membership m)
 		: r(r), m(m) {}
 
@@ -234,7 +338,7 @@ LabelledSideGraph::LabelledSideGraph(const LabelledRule &r, jla_boost::GraphDPO:
 //------------------------------------------------------------------------------
 
 LabelledLeftGraph::LabelledLeftGraph(const LabelledRule &r)
-		: Base(r, jla_boost::GraphDPO::Membership::Left) {}
+        : Base(r, jla_boost::GraphDPO::Membership::Left) {}
 
 const LabelledLeftGraph::GraphType &get_graph(const LabelledLeftGraph &g) {
 	return get_left(g.r);
@@ -265,6 +369,21 @@ std::size_t get_num_connected_components(const LabelledLeftGraph &g) {
 	return g.r.numLeftComponents;
 }
 
+const std::vector<size_t>& get_connected_component_map(const LabelledLeftGraph &g) {
+	return g.r.leftComponents;
+}
+
+const LabelledRule::ComponentGraph_v2& get_component_graph_v2(std::size_t i, const LabelledLeftGraph &g) {
+	assert(i < g.r.numLeftComponents);
+	return g.r.leftComponentGraphs[i];
+}
+
+boost::graph_traits<SideGraphType>::vertex_descriptor get_component_core_vertex(std::size_t i, std::size_t v, const LabelledLeftGraph &g) {
+	assert(i < g.r.numLeftComponents);
+	assert(v < g.r.leftComponentVertexToCoreVertex[i].size());
+	return g.r.leftComponentVertexToCoreVertex[i][v];
+}
+
 LabelledLeftGraph::PropMoleculeType get_molecule(const LabelledLeftGraph &g) {
 	return get_molecule(g.r).getLeft();
 }
@@ -291,7 +410,7 @@ get_vertex_order_component(std::size_t i, const LabelledLeftGraph &g) {
 //------------------------------------------------------------------------------
 
 LabelledRightGraph::LabelledRightGraph(const LabelledRule &r)
-		: Base(r, jla_boost::GraphDPO::Membership::Right) {}
+        : Base(r, jla_boost::GraphDPO::Membership::Right) {}
 
 const LabelledRightGraph::GraphType &get_graph(const LabelledRightGraph &g) {
 	return get_right(g.r);
@@ -320,6 +439,21 @@ get_match_constraints(const LabelledRightGraph &g) {
 
 std::size_t get_num_connected_components(const LabelledRightGraph &g) {
 	return g.r.numRightComponents;
+}
+
+const std::vector<size_t>& get_connected_component_map(const LabelledRightGraph &g) {
+	return g.r.rightComponents;
+}
+
+const LabelledRule::ComponentGraph_v2& get_component_graph_v2(std::size_t i, const LabelledRightGraph &g) {
+	assert(i < g.r.numRightComponents);
+	return g.r.rightComponentGraphs[i];
+}
+
+boost::graph_traits<SideGraphType>::vertex_descriptor get_component_core_vertex(std::size_t i, std::size_t v, const LabelledRightGraph &g) {
+	assert(i < g.r.numRightComponents);
+	assert(v < g.r.rightComponentVertexToCoreVertex[i].size());
+	return g.r.rightComponentVertexToCoreVertex[i][v];
 }
 
 LabelledRightGraph::Base::ComponentGraph

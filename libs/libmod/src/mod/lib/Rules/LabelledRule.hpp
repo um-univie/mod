@@ -8,6 +8,7 @@
 #include <mod/lib/Rules/Properties/Stereo.hpp>
 #include <mod/lib/Rules/Properties/String.hpp>
 #include <mod/lib/Rules/Properties/Term.hpp>
+#include <mod/lib/Graph/LabelledGraph.hpp>
 
 #include <vector>
 
@@ -34,6 +35,8 @@ public: // Other
 	using RightMatchConstraint = GraphMorphism::Constraints::Constraint<RightGraphType>;
 	using LabelledLeftType = LabelledLeftGraph;
 	using LabelledRightType = LabelledRightGraph;
+
+	using ComponentGraph_v2 = Graph::LabelledGraph;
 public:
 	LabelledRule();
 	LabelledRule(const LabelledRule &other, bool withConstraints);
@@ -81,6 +84,9 @@ private:
 public:
 	std::size_t numLeftComponents = -1, numRightComponents = -1;
 	std::vector<std::size_t> leftComponents, rightComponents;
+
+	std::vector<ComponentGraph_v2> leftComponentGraphs, rightComponentGraphs;
+	std::vector<std::vector<std::size_t>> leftComponentVertexToCoreVertex, rightComponentVertexToCoreVertex;
 };
 
 namespace detail {
@@ -97,6 +103,7 @@ public:
 	const jla_boost::GraphDPO::Membership m;
 protected:
 	mutable std::vector<std::vector<boost::graph_traits<GraphType>::vertex_descriptor> > vertex_orders;
+
 };
 
 } // namespace detail
@@ -120,7 +127,10 @@ public:
 	get_match_constraints(const LabelledLeftGraph &g);
 public:
 	friend std::size_t get_num_connected_components(const LabelledLeftGraph &g);
+	friend const std::vector<std::size_t>& get_connected_component_map(const LabelledLeftGraph& g);
 	friend Base::ComponentGraph get_component_graph(std::size_t i, const LabelledLeftGraph &g);
+	friend const LabelledRule::ComponentGraph_v2& get_component_graph_v2(std::size_t i, const LabelledLeftGraph &g);
+	friend boost::graph_traits<SideGraphType>::vertex_descriptor get_component_core_vertex(std::size_t i, std::size_t v, const LabelledLeftGraph &g);
 public:
 	friend PropMoleculeType get_molecule(const LabelledLeftGraph &g);
 public:
@@ -147,7 +157,10 @@ public:
 	get_match_constraints(const LabelledRightGraph &g);
 public:
 	friend std::size_t get_num_connected_components(const LabelledRightGraph &g);
+	friend const std::vector<std::size_t>& get_connected_component_map(const LabelledRightGraph& g);
 	friend Base::ComponentGraph get_component_graph(std::size_t i, const LabelledRightGraph &g);
+	friend const LabelledRule::ComponentGraph_v2& get_component_graph_v2(std::size_t i, const LabelledRightGraph &g);
+	friend boost::graph_traits<SideGraphType>::vertex_descriptor get_component_core_vertex(std::size_t i, std::size_t v, const LabelledRightGraph &g);
 public:
 	friend PropMoleculeType get_molecule(const LabelledRightGraph &g);
 public:

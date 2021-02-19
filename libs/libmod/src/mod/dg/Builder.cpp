@@ -109,6 +109,23 @@ std::vector<DG::HyperEdge> Builder::apply(const std::vector<std::shared_ptr<grap
 	return res;
 }
 
+std::vector<DG::HyperEdge> Builder::apply_v2(const std::vector<std::shared_ptr<graph::Graph> > &graphs,
+                                          std::shared_ptr<rule::Rule> r) {
+	check(p);
+	if(std::any_of(graphs.begin(), graphs.end(), [](const auto &p) {
+	    return !p;
+    }))
+		throw LogicError("One of the graphs is a null pointer.");
+	if(!r) throw LogicError("The rule is a null pointer.");
+	auto innerRes =  p->b.apply_v2(graphs, r, 0, IsomorphismPolicy::Check);
+	std::vector<DG::HyperEdge> res;
+	const auto &nonHyper = p->dg_->getNonHyper();
+	const auto &hyper = p->dg_->getHyper();
+	for(const auto &rp : innerRes)
+		res.push_back(hyper.getInterfaceEdge(nonHyper.getHyperEdge(rp.first)));
+	return res;
+}
+
 void Builder::addAbstract(const std::string &description) {
 	check(p);
 	p->b.addAbstract(description);
