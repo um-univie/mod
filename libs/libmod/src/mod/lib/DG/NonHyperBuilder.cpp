@@ -14,7 +14,10 @@
 #include <mod/lib/IO/JsonUtils.hpp>
 #include <mod/lib/RC/ComposeRuleReal.hpp>
 #include <mod/lib/RC/MatchMaker/Super.hpp>
+
 #include <mod/lib/Rules/Application/Enumerate.hpp>
+#include <mod/lib/Rules/Application/ComponentMatchDB/Basic.hpp>
+#include <mod/lib/Rules/Application/MatchValidator/None.hpp>
 
 #include <boost/iostreams/device/mapped_file.hpp>
 #include <boost/lexical_cast.hpp>
@@ -232,11 +235,25 @@ Builder::apply_v2(const std::vector<std::shared_ptr<graph::Graph>> &graphs,
                int verbosity, IsomorphismPolicy graphPolicy) {
 	std::vector<std::pair<NonHyper::Edge, bool>> res;
 	std::vector<const lib::Graph::Single *> libGraphs, libGraphsEmpty;
+	std::map<const lib::Graph::Single *, int> graphMap;
 	libGraphs.reserve(graphs.size());
-	for(const auto &g : graphs)
-		libGraphs.push_back(&g->getGraph());
+	for(const auto &g : graphs) {
+		std::map<const lib::Graph::Single*, int>::iterator it = graphMap.find(&g->getGraph());
+		if (it == graphMap.end()) {
+			graphMap[&g->getGraph()] = 1;
+		} else {
+			it->second += 1;
+		}
+		//libGraphs.push_back(&g->getGraph());
+	}
 
-	Rules::Application::computeDerivations(rOrig->getRule(), libGraphs, libGraphsEmpty);
+	for (const auto &it : graphMap) {
+		libGraphs.push_back(it.first);
+	}
+
+	Rules::Application::ComponentMatchDB::Basic matchDB(dg->getLabelSettings());
+	Rules::Application::computeDerivations(rOrig->getRule(), libGraphs, libGraphsEmpty,
+	                                       matchDB);
 	return res;
 
 }

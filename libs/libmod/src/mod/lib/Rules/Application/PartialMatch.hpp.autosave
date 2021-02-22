@@ -1,0 +1,20 @@
+#ifndef MOD_LIB_RULES_APPLICATION_PARTIALMATCH_HPP
+#define MOD_LIB_RULES_APPLICATION_PARTIALMATCH_HPP
+
+#include <mod/lib/Rules/Real.hpp>
+#include <mod/lib/Graph/Single.hpp>
+#include <mod/lib/Rules/Application/ComponentMatch.hpp>
+
+namespace mod::lib::Rules::Application {
+
+class PartialMatch {
+public:
+private:
+	const Rules::Real& rule;
+	std::vector<const Graph::Single*> hosts;
+	std::vector<ComponentMatch> compMatches;
+};
+
+}
+
+#endif
