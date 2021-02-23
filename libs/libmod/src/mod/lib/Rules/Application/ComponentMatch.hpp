@@ -3,6 +3,7 @@
 
 #include <jla_boost/graph/morphism/models/Vector.hpp>
 #include <mod/lib/Graph/LabelledGraph.hpp>
+#include <mod/lib/Graph/Single.hpp>
 #include <iosfwd>
 
 namespace mod::lib::Rules::Application {
@@ -13,11 +14,14 @@ public:
 	using GraphType = Graph::LabelledGraph::GraphType;
 	using Morphism = jla_boost::GraphMorphism::VectorVertexMap<GraphType, GraphType>;
 
-	ComponentMatch(size_t componentIndex, size_t hostIndex, const Morphism& m):
-	    componentIndex(componentIndex), hostIndex(hostIndex), morphism(m), graphInstance(0) {}
+	ComponentMatch() {}
+	ComponentMatch(size_t componentIndex, bool isSubsetHost, const Graph::Single* host, const Morphism& m):
+	    componentIndex(componentIndex), isSubsetHost(isSubsetHost), host(host), morphism(&m), graphInstance(0) {}
 
-	size_t componentIndex, hostIndex;
-	const Morphism& morphism;
+	size_t componentIndex;
+	bool isSubsetHost;
+	const Graph::Single* host;
+	const Morphism* morphism;
 	int graphInstance;
 };
 

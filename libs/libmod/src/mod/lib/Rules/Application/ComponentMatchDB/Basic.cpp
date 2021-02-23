@@ -41,21 +41,23 @@ bool Basic::isValid(const Real& rule,
 	return hasSubsetMatch;
 }
 
-std::map<std::pair<const Graph::Single*, size_t>, std::vector<ComponentMatch>>
+//std::map<std::pair<const Graph::Single*, size_t>, std::vector<ComponentMatch>>
+std::vector<ComponentMatch>
 Basic::getMatches(const Real& rule,
                   const std::vector<const Graph::Single*>& subset,
                   const std::vector<const Graph::Single*>& universe)  {
-	std::map<std::pair<const Graph::Single*, size_t>, std::vector<ComponentMatch>> out;
-	std::vector<const Graph::Single*> graphs(subset.begin(), subset.end());
-	graphs.insert(graphs.end(), universe.begin(), universe.end());
-	for (size_t cid = 0; cid < rule.getDPORule().numLeftComponents; ++cid) {
-		for (size_t graphIndex = 0; graphIndex < subset.size(); ++graphIndex) {
+	// std::map<std::pair<const Graph::Single*, size_t>, std::vector<ComponentMatch>> out;
+	std::vector<ComponentMatch> out;
+	std::vector<const Graph::Single*> graphs(universe.begin(), universe.end());
+	graphs.insert(graphs.end(), subset.begin(), subset.end());
+	for (size_t graphIndex = 0; graphIndex < subset.size(); ++graphIndex) {
+		for (size_t cid = 0; cid < rule.getDPORule().numLeftComponents; ++cid) {
+			bool isSubset = (graphIndex >= universe.size());
 			const auto& host = graphs[graphIndex]->getLabelledGraph();
 			auto key = std::make_pair(graphs[graphIndex], cid);
 			matches[key] = enumerateMonomorphisms(rule.getDPORule(), cid, host, labelSettings);
-			out[key] = std::vector<ComponentMatch>();
 			for (const auto& m : matches[key]) {
-				out[key].push_back(ComponentMatch(cid, graphIndex, m));
+				out.push_back(ComponentMatch(cid, isSubset, graphs[graphIndex], m));
 			}
 		}
 	}

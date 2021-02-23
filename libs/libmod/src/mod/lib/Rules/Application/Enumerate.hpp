@@ -4,22 +4,27 @@
 #include <mod/lib/Rules/Real.hpp>
 #include <iostream>
 #include <mod/lib/Rules/Application/ComponentMatch.hpp>
+#include <functional>
 
 namespace mod::lib::Rules::Application {
 
 namespace detail {
+
 std::vector<std::unique_ptr<Rules::Real>>
 computeDerivations(const Rules::Real& rule,
-                   const std::vector<const Graph::Single*>& subset,
-                   const std::vector<const Graph::Single*>& universe,
-                   const std::map<std::pair<const Graph::Single*, size_t>, std::vector<ComponentMatch>>& matches);
+                   const std::vector<ComponentMatch>& matches,
+                   std::function<bool(std::unique_ptr<Rules::Real>)>& onMatch,
+                   std::function<bool(const Graph::LabelledGraph*, int)>& onNewGraphInstance);
 }
 
 template<typename ComponentMatchDB>
 std::vector<std::unique_ptr<Rules::Real>> computeDerivations(const Rules::Real& rule,
                                                              const std::vector<const Graph::Single*>& subset,
                                                              const std::vector<const Graph::Single*>& universe,
-                                                             ComponentMatchDB& matchDB) {
+                                                             ComponentMatchDB& matchDB,
+                   std::function<bool(std::unique_ptr<Rules::Real>)>& onMatch,
+                   std::function<bool(const Graph::LabelledGraph*, int)>& onNewGraphInstance
+                                                             ) {
 	std::vector<std::unique_ptr<Rules::Real>> derivations;
 	std::cout << "Now I'm here" << std::endl;
 
@@ -31,7 +36,7 @@ std::vector<std::unique_ptr<Rules::Real>> computeDerivations(const Rules::Real& 
 	std::cout << "Finding matches" << std::endl;
 	auto matches = matchDB.getMatches(rule, subset, universe);
 
-	derivations = detail::computeDerivations(rule, subset, universe, matches);
+	derivations = detail::computeDerivations(rule, matches, onMatch, onNewGraphInstance);
 	return derivations;
 }
 

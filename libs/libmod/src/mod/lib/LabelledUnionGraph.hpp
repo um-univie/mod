@@ -63,6 +63,11 @@ public:
 		lgs.push_back(lg);
 		ug.push_back(&get_graph(*lg));
 	}
+
+	void pop_back() {
+		lgs.pop_back();
+		ug.pop_back();
+	}
 public:
 	friend const GraphType &get_graph(const LabelledUnionGraph &lug) {
 		return lug.ug;

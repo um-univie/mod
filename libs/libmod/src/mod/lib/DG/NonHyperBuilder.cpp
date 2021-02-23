@@ -251,9 +251,44 @@ Builder::apply_v2(const std::vector<std::shared_ptr<graph::Graph>> &graphs,
 		libGraphs.push_back(it.first);
 	}
 
+	IO::Logger logger(std::cout);
+	const auto ls = dg->getLabelSettings();
+	auto onMatch = std::function([&] (std::unique_ptr<Rules::Real> r) -> bool{
+	    assert(r->isOnlyRightSide());
+	    auto products = splitRule(
+	                r->getDPORule(), ls.type, ls.withStereo,
+	                [this](std::unique_ptr<lib::Graph::Single> gCand) {
+	            return dg->checkIfNew(std::move(gCand)).first;
+    },
+	            [verbosity, &logger](std::shared_ptr<graph::Graph> gWrapped, std::shared_ptr<graph::Graph> gPrev) {
+		    if(verbosity >= V_RuleApplication_Binding) {
+				++logger.indentLevel;
+				logger.indent() << "Discarding product " << gWrapped->getName()
+				                << ", isomorphic to other product " << gPrev->getName()
+				                << "." << std::endl;
+				--logger.indentLevel;
+			}
+	    }
+	    );
+	    for(const auto &p : products)
+			dg->addProduct(p);
+		/*
+		std::vector<const lib::Graph::Single *> rightGraphs;
+		rightGraphs.reserve(products.size());
+		for(const auto &p : products)
+			rightGraphs.push_back(&p->getGraph());
+		lib::DG::GraphMultiset gmsLeft(br.boundGraphs), gmsRight(std::move(rightGraphs));
+		const auto derivationRes = dg->suggestDerivation(gmsLeft, gmsRight, &rOrig->getRule());
+		res.push_back(derivationRes);
+		*/
+		return true;
+    });
+
+    auto onNewGraphInstance = std::function([] (const Graph::LabelledGraph*, int) -> bool{ return true; });
+
 	Rules::Application::ComponentMatchDB::Basic matchDB(dg->getLabelSettings());
 	Rules::Application::computeDerivations(rOrig->getRule(), libGraphs, libGraphsEmpty,
-	                                       matchDB);
+	                                       matchDB, onMatch, onNewGraphInstance);
 	return res;
 
 }

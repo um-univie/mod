@@ -51,6 +51,7 @@ struct union_graph {
 public:
 	union_graph();
 	void push_back(const Graph *g);
+	void pop_back();
 	const Graph &operator[](std::size_t idx) const;
 	std::size_t size() const;
 	const_iterator begin() const;
@@ -82,6 +83,13 @@ void union_graph<Graph>::push_back(const Graph *g) {
 	const auto eOffset = edgeIdxOffset.back() + num_edges(*g);
 	edgeIdxOffset.push_back(eOffset);
 	graphs.push_back(g);
+}
+
+template<typename Graph>
+void union_graph<Graph>::pop_back() {
+	vertexIdxOffset.pop_back();
+	edgeIdxOffset.pop_back();
+	graphs.pop_back();
 }
 
 template<typename Graph>

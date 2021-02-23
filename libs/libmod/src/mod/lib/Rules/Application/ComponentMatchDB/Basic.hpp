@@ -15,7 +15,8 @@ public:
 	             const std::vector<const Graph::Single*>& subset,
 	             const std::vector<const Graph::Single*>& universe);
 
-	std::map<std::pair<const Graph::Single*, size_t>, std::vector<ComponentMatch>>
+	//std::map<std::pair<const Graph::Single*, size_t>, std::vector<ComponentMatch>>
+	std::vector<ComponentMatch>
 	getMatches(const Real& rule,
 	           const std::vector<const Graph::Single*>& subset,
 	           const std::vector<const Graph::Single*>& universe);
