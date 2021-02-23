@@ -234,6 +234,19 @@ Builder::apply_v2(const std::vector<std::shared_ptr<graph::Graph>> &graphs,
                std::shared_ptr<rule::Rule> rOrig,
                int verbosity, IsomorphismPolicy graphPolicy) {
 	std::vector<std::pair<NonHyper::Edge, bool>> res;
+
+	dg->rules.insert(rOrig);
+	switch(graphPolicy) {
+	case IsomorphismPolicy::Check:
+		for(const auto &g : graphs)
+			dg->tryAddGraph(g);
+		break;
+	case IsomorphismPolicy::TrustMe:
+		for(const auto &g : graphs)
+			dg->trustAddGraph(g);
+		break;
+	}
+
 	std::vector<const lib::Graph::Single *> libGraphs, libGraphsEmpty;
 	std::map<const lib::Graph::Single *, int> graphMap;
 	libGraphs.reserve(graphs.size());
@@ -253,7 +266,7 @@ Builder::apply_v2(const std::vector<std::shared_ptr<graph::Graph>> &graphs,
 
 	IO::Logger logger(std::cout);
 	const auto ls = dg->getLabelSettings();
-	auto onMatch = std::function([&] (std::unique_ptr<Rules::Real> r) -> bool{
+	auto onMatch = std::function([&] (std::vector<const Graph::Single*> lhs, std::unique_ptr<Rules::Real> r) -> bool{
 	    assert(r->isOnlyRightSide());
 	    auto products = splitRule(
 	                r->getDPORule(), ls.type, ls.withStereo,
@@ -272,19 +285,17 @@ Builder::apply_v2(const std::vector<std::shared_ptr<graph::Graph>> &graphs,
 	    );
 	    for(const auto &p : products)
 			dg->addProduct(p);
-		/*
 		std::vector<const lib::Graph::Single *> rightGraphs;
 		rightGraphs.reserve(products.size());
 		for(const auto &p : products)
 			rightGraphs.push_back(&p->getGraph());
-		lib::DG::GraphMultiset gmsLeft(br.boundGraphs), gmsRight(std::move(rightGraphs));
+		lib::DG::GraphMultiset gmsLeft(std::move(lhs)), gmsRight(std::move(rightGraphs));
 		const auto derivationRes = dg->suggestDerivation(gmsLeft, gmsRight, &rOrig->getRule());
 		res.push_back(derivationRes);
-		*/
 		return true;
     });
 
-    auto onNewGraphInstance = std::function([] (const Graph::LabelledGraph*, int) -> bool{ return true; });
+    auto onNewGraphInstance = std::function([] (const Graph::Single*, int) -> bool{ return true; });
 
 	Rules::Application::ComponentMatchDB::Basic matchDB(dg->getLabelSettings());
 	Rules::Application::computeDerivations(rOrig->getRule(), libGraphs, libGraphsEmpty,

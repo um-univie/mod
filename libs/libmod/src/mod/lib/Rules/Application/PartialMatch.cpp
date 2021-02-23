@@ -27,6 +27,7 @@ size_t PartialMatch::updateHostGraph(const ComponentMatch& cm) {
 		size_t idx = get_graph(hosts).size();
 		hostIndexMap[hostKey] = idx;
 		hosts.push_back(&cm.host->getLabelledGraph());
+		lhs.push_back(cm.host);
 		morphism.resizeRight(get_left(rule.getDPORule()), get_graph(hosts));
 		std::cout << "added new graph " << idx << " (" << cm.host << ", " << cm.graphInstance << ")" << std::endl;
 		return idx;
@@ -81,6 +82,7 @@ void PartialMatch::pop() {
 	if (addedGraph.back()) {
 		std::cout << "removing graph" << std::endl;
 		hosts.pop_back();
+		lhs.pop_back();
 		morphism.resizeRight(get_left(rule.getDPORule()), get_graph(hosts));
 
 		std::pair<const Graph::Single*, size_t> hostKey = std::make_pair(cm.host, cm.graphInstance);
@@ -104,6 +106,10 @@ bool PartialMatch::lastPushIsNewInstance() const {
 
 const std::vector<ComponentMatch>& PartialMatch::getCompMatches() const {
 	return compMatches;
+}
+
+const std::vector<const Graph::Single*>& PartialMatch::getLhs() const {
+	return lhs;
 }
 
 std::unique_ptr<Rules::Real> PartialMatch::apply() const {

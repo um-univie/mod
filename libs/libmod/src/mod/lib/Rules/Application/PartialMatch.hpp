@@ -25,6 +25,7 @@ public:
 	bool lastPushIsNewInstance() const;
 
 	const std::vector<ComponentMatch>& getCompMatches() const;
+	const std::vector<const Graph::Single*>& getLhs() const;
 
 	std::unique_ptr<Rules::Real> apply() const;
 
@@ -36,6 +37,7 @@ private:
 	size_t updateHostGraph(const ComponentMatch& cm);
 
 	const Rules::Real& rule;
+	std::vector<const Graph::Single *> lhs;
 	LabelledUnionGraph<Graph::LabelledGraph> hosts;
 	std::map<std::pair<const Graph::Single*, size_t>, size_t> hostIndexMap;
 	std::vector<ComponentMatch> compMatches;

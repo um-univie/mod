@@ -13,8 +13,9 @@ namespace detail {
 std::vector<std::unique_ptr<Rules::Real>>
 computeDerivations(const Rules::Real& rule,
                    const std::vector<ComponentMatch>& matches,
-                   std::function<bool(std::unique_ptr<Rules::Real>)>& onMatch,
-                   std::function<bool(const Graph::LabelledGraph*, int)>& onNewGraphInstance);
+                   std::function<bool(std::vector<const Graph::Single*>, std::unique_ptr<Rules::Real>)>& onMatch,
+                   std::function<bool(const Graph::Single*, int)>& onNewGraphInstance
+                   );
 }
 
 template<typename ComponentMatchDB>
@@ -22,8 +23,8 @@ std::vector<std::unique_ptr<Rules::Real>> computeDerivations(const Rules::Real& 
                                                              const std::vector<const Graph::Single*>& subset,
                                                              const std::vector<const Graph::Single*>& universe,
                                                              ComponentMatchDB& matchDB,
-                   std::function<bool(std::unique_ptr<Rules::Real>)>& onMatch,
-                   std::function<bool(const Graph::LabelledGraph*, int)>& onNewGraphInstance
+                   std::function<bool(std::vector<const Graph::Single*>, std::unique_ptr<Rules::Real>)>& onMatch,
+                   std::function<bool(const Graph::Single*, int)>& onNewGraphInstance
                                                              ) {
 	std::vector<std::unique_ptr<Rules::Real>> derivations;
 	std::cout << "Now I'm here" << std::endl;
