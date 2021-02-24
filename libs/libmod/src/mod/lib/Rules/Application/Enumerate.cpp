@@ -40,7 +40,7 @@ buildMatchInstanceMap(const std::vector<ComponentMatch>& matches) {
 	return out;
 }
 
-std::vector<std::unique_ptr<Rules::Real>>
+void
 computeDerivations(const Rules::Real& realRule,
                    const std::vector<ComponentMatch>& matchDB,
                    std::function<bool(std::vector<const Graph::Single*>, std::unique_ptr<Rules::Real>)>& onMatch,
@@ -118,7 +118,7 @@ computeDerivations(const Rules::Real& realRule,
 			if (res != nullptr) {
 				bool shouldContinue = onMatch(partialMatch.getLhs(), std::move(res));
 				if (!shouldContinue) {
-					return derivations;
+					return;
 				}
 				//derivations.push_back(std::move(res));
 			}
@@ -165,7 +165,7 @@ computeDerivations(const Rules::Real& realRule,
 				if (res != nullptr) {
 					bool shouldContinue = onMatch(partialMatch.getLhs(), std::move(res));
 					if (!shouldContinue) {
-						return derivations;
+						return;
 					}
 					//derivations.push_back(std::move(res));
 				}
@@ -183,7 +183,7 @@ computeDerivations(const Rules::Real& realRule,
 
 
 
-	return derivations;
+	return;
 }
 
 }

@@ -268,6 +268,9 @@ Builder::apply_v2(const std::vector<std::shared_ptr<graph::Graph>> &graphs,
 	const auto ls = dg->getLabelSettings();
 	auto onMatch = std::function([&] (std::vector<const Graph::Single*> lhs, std::unique_ptr<Rules::Real> r) -> bool{
 	    assert(r->isOnlyRightSide());
+	    if (lhs.size() != graphs.size()) {
+	        return true;
+        }
 	    auto products = splitRule(
 	                r->getDPORule(), ls.type, ls.withStereo,
 	                [this](std::unique_ptr<lib::Graph::Single> gCand) {

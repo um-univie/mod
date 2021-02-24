@@ -10,7 +10,7 @@ namespace mod::lib::Rules::Application {
 
 namespace detail {
 
-std::vector<std::unique_ptr<Rules::Real>>
+void
 computeDerivations(const Rules::Real& rule,
                    const std::vector<ComponentMatch>& matches,
                    std::function<bool(std::vector<const Graph::Single*>, std::unique_ptr<Rules::Real>)>& onMatch,
@@ -19,7 +19,7 @@ computeDerivations(const Rules::Real& rule,
 }
 
 template<typename ComponentMatchDB>
-std::vector<std::unique_ptr<Rules::Real>> computeDerivations(const Rules::Real& rule,
+void computeDerivations(const Rules::Real& rule,
                                                              size_t numSubsetGraphs,
                                                              const std::vector<const Graph::Single*>& universe,
                                                              ComponentMatchDB& matchDB,
@@ -30,15 +30,14 @@ std::vector<std::unique_ptr<Rules::Real>> computeDerivations(const Rules::Real& 
 	std::cout << "Now I'm here" << std::endl;
 
 	if (!matchDB.isValid(rule, numSubsetGraphs, universe)) {
-		return derivations;
+		return;
 	}
 
 	std::cout << "All connected components has a match..." << std::endl;
 	std::cout << "Finding matches" << std::endl;
 	auto matches = matchDB.getMatches(rule, numSubsetGraphs, universe);
 
-	derivations = detail::computeDerivations(rule, matches, onMatch, onNewGraphInstance);
-	return derivations;
+	detail::computeDerivations(rule, matches, onMatch, onNewGraphInstance);
 }
 
 }
