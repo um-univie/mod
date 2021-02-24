@@ -13,6 +13,7 @@ buildPatternMatchVector(const LabelledRule& rule,
 	std::vector<const ComponentMatch*> subsetMatches;
 	bool doneUniverse = false;
 	for (const auto& m : matches) {
+		assert(m.graphInstance == 0);
 		// ensure matches are sorted such that unverse graphs comes before subset graphs
 		assert(!doneUniverse || (m.isSubsetHost && doneUniverse));
 		doneUniverse = m.isSubsetHost;
@@ -35,6 +36,7 @@ std::unordered_map<const Graph::Single *, std::vector<const ComponentMatch*>>
 buildMatchInstanceMap(const std::vector<ComponentMatch>& matches) {
 	std::unordered_map<const Graph::Single *, std::vector<const ComponentMatch*>> out;
 	for (const auto& m : matches) {
+		assert(m.graphInstance == 0);
 		out[m.host].push_back(&m);
 	}
 	return out;
@@ -63,6 +65,14 @@ computeDerivations(const Rules::Real& realRule,
 	std::tie(universeOffsets, matches, subsetMatches) = buildPatternMatchVector(rule, matchDB);
 
 	std::vector<std::vector<size_t>> instanceOffsets(rule.numLeftComponents, std::vector<size_t>(rule.numLeftComponents));
+	for (std::vector<size_t>& offsets : instanceOffsets) {
+		for (size_t cid = 0; cid < rule.numLeftComponents; ++cid) {
+			offsets[cid] = matches[cid].size();
+		}
+	}
+
+	size_t curCid = subsetMatches[0]->componentIndex;
+
 	auto addInstance = [&] (const ComponentMatch& cm, bool addAll) {
 		if(!onNewGraphInstance(cm.host, cm.graphInstance + 1)) {
 			return;
@@ -75,19 +85,27 @@ computeDerivations(const Rules::Real& realRule,
 			if (m->componentIndex == cm.componentIndex || (!addAll && m->componentIndex <= cm.componentIndex)) {
 				continue;
 			}
+
+			// We have already fixed the subset match (and enumerated everything),
+			// hence no reason to add the match again, again
+			if (m->isSubsetHost && m->componentIndex < curCid) {
+				std::cout << "Pruning thing\n";
+				continue;
+			}
+
 			matches[m->componentIndex].push_back(ComponentMatch(*m));
 			matches[m->componentIndex].back().graphInstance = cm.graphInstance + 1;
 		}
 	};
 
 	auto removeInstance = [&] (const ComponentMatch& cm) {
+		std::cout << "REMOVING INSTANCE" << std::endl;
 		for (size_t cid = 0; cid < rule.numLeftComponents; ++cid) {
 			matches[cid].resize(instanceOffsets[cm.componentIndex][cid]);
 		}
 	};
 
 	assert(subsetMatches.size() > 0);
-	size_t curCid = subsetMatches[0]->componentIndex;
 	PartialMatch partialMatch(realRule);
 	for (const ComponentMatch* subsetMatch : subsetMatches) {
 		bool success, addedGraph;
@@ -136,6 +154,7 @@ computeDerivations(const Rules::Real& realRule,
 			}
 			size_t mid = stack.back();
 			std::cout << "cid: " << cid << " " << "mid: " << mid << std::endl;
+			std::cout << matches[cid].size() << std::endl;
 
 			if (mid == matches[cid].size()) {
 				std::cout << "Done" << std::endl;
@@ -150,7 +169,10 @@ computeDerivations(const Rules::Real& realRule,
 				continue;
 			}
 
+			assert(cid < matches.size() && mid < matches[cid].size());
 			const ComponentMatch& match = matches[cid][mid];
+
+			std::cout << matches[cid].size() << std::endl;
 			std::tie(success, addedGraph) = partialMatch.tryPush(match);
 			if (!success) {
 				std::cout << "Not valid match\n";
@@ -163,6 +185,7 @@ computeDerivations(const Rules::Real& realRule,
 				std::cout << "found full match" << std::endl;
 				std::unique_ptr<Rules::Real> res = partialMatch.apply();
 				if (res != nullptr) {
+					std::cout << "Could compose\n";
 					bool shouldContinue = onMatch(partialMatch.getLhs(), std::move(res));
 					if (!shouldContinue) {
 						return;

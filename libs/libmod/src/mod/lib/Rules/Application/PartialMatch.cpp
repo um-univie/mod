@@ -78,6 +78,16 @@ void PartialMatch::pop() {
 	assert(compMatches.size() > 0);
 	const auto& cm = compMatches.back();
 
+	const auto& lRule = get_labelled_left(rule.getDPORule());
+	const auto& gCorePattern = get_graph(get_labelled_left(rule.getDPORule()));
+	const auto& gCoreHost = get_graph(hosts);
+	const auto& compPatternGraph = get_graph(get_component_graph_v2(cm.componentIndex, lRule));
+	for (auto vCompPattern : asRange(vertices(compPatternGraph))) {
+		// get the core pattern vertex and ensure it is not already mapped in the partial match
+		auto vCorePattern = get_component_core_vertex(cm.componentIndex, vCompPattern, lRule);
+		put(morphism, gCorePattern, gCoreHost, vCorePattern, boost::graph_traits<HostGraph>::null_vertex());
+	}
+
 
 	if (addedGraph.back()) {
 		std::cout << "removing graph" << std::endl;

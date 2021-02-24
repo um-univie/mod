@@ -110,14 +110,14 @@ std::vector<DG::HyperEdge> Builder::apply(const std::vector<std::shared_ptr<grap
 }
 
 std::vector<DG::HyperEdge> Builder::apply_v2(const std::vector<std::shared_ptr<graph::Graph> > &graphs,
-                                          std::shared_ptr<rule::Rule> r) {
+                                          std::shared_ptr<rule::Rule> r, bool includeRelaxed) {
 	check(p);
 	if(std::any_of(graphs.begin(), graphs.end(), [](const auto &p) {
 	    return !p;
     }))
 		throw LogicError("One of the graphs is a null pointer.");
 	if(!r) throw LogicError("The rule is a null pointer.");
-	auto innerRes =  p->b.apply_v2(graphs, r, 0, IsomorphismPolicy::Check);
+	auto innerRes =  p->b.apply_v2(graphs, r, 0, IsomorphismPolicy::Check, includeRelaxed);
 	std::vector<DG::HyperEdge> res;
 	const auto &nonHyper = p->dg_->getNonHyper();
 	const auto &hyper = p->dg_->getHyper();

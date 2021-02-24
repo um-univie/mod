@@ -232,7 +232,8 @@ Builder::execute(std::unique_ptr<Strategies::Strategy> strategy_, int verbosity,
 std::vector<std::pair<NonHyper::Edge, bool>>
 Builder::apply_v2(const std::vector<std::shared_ptr<graph::Graph>> &graphs,
                std::shared_ptr<rule::Rule> rOrig,
-               int verbosity, IsomorphismPolicy graphPolicy) {
+               int verbosity, IsomorphismPolicy graphPolicy,
+                  bool includeRelaxed) {
 	std::vector<std::pair<NonHyper::Edge, bool>> res;
 
 	dg->rules.insert(rOrig);
@@ -268,7 +269,7 @@ Builder::apply_v2(const std::vector<std::shared_ptr<graph::Graph>> &graphs,
 	const auto ls = dg->getLabelSettings();
 	auto onMatch = std::function([&] (std::vector<const Graph::Single*> lhs, std::unique_ptr<Rules::Real> r) -> bool{
 	    assert(r->isOnlyRightSide());
-	    if (lhs.size() != graphs.size()) {
+	    if (!includeRelaxed && lhs.size() != graphs.size()) {
 	        return true;
         }
 	    auto products = splitRule(
