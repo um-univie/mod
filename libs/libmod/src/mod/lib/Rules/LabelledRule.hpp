@@ -85,6 +85,7 @@ public:
 	std::size_t numLeftComponents = -1, numRightComponents = -1;
 	std::vector<std::size_t> leftComponents, rightComponents;
 
+public: // experimental new component graphs that does not use the filtered wrapper
 	std::vector<ComponentGraph_v2> leftComponentGraphs, rightComponentGraphs;
 	std::vector<std::vector<std::size_t>> leftComponentVertexToCoreVertex, rightComponentVertexToCoreVertex;
 };
