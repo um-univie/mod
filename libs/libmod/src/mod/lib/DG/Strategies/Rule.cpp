@@ -10,6 +10,9 @@
 #include <mod/lib/RC/ComposeRuleReal.hpp>
 #include <mod/lib/RC/MatchMaker/Super.hpp>
 
+#include <mod/lib/Rules/Application/Enumerate.hpp>
+#include <mod/lib/Rules/Application/ComponentMatchDB/Basic.hpp>
+
 namespace mod::lib::DG::Strategies {
 
 Rule::Rule(std::shared_ptr<rule::Rule> r)
@@ -253,7 +256,7 @@ void Rule::executeImpl(PrintSettings settings, const GraphState &input) {
 			if(context.executionEnv.doExit()) break;
 		}
 		assert(intermediaryRules.back().empty());
-	} else { // new implementation
+	} else if (!getConfig().dg.useExplicitMatchRuleApplication.get()) { // new implementation
 		const auto &subset = input.getSubset();
 		const auto &universe = input.getUniverse();
 
@@ -305,7 +308,34 @@ void Rule::executeImpl(PrintSettings settings, const GraphState &input) {
 			std::swap(inputRules, outputRules);
 		} // for each round based on numComponents
 		assert(inputRules.empty());
-	} // if(getConfig().dg.useOldRuleApplication.get())
+	} else {
+		const auto &subset = input.getSubset();
+		const auto &universe = input.getUniverse();
+
+		// partition such that the subset is first
+		for(int i = 0; i != subset.size(); ++i)
+			assert(subset.begin()[i] == universe[subset.getIndices()[i]]);
+
+		std::vector<const lib::Graph::Single *> graphs = universe;
+		Context context{r, getExecutionEnv(), output, consumedGraphs};
+		IO::Logger logger(std::cout);
+		auto onMatch = std::function([&] (std::vector<const Graph::Single*> lhs, std::unique_ptr<Rules::Real> r) -> bool{
+		    assert(r->isOnlyRightSide());
+		    BoundRule br;
+		    br.rule = &(*r);
+		    br.boundGraphs = std::move(lhs);
+		    handleBoundRulePair(settings.verbosity, logger, context, br);
+
+		    return true;
+	    });
+
+		auto onNewGraphInstance = std::function([&] (const Graph::Single* graph, int instance) -> bool{
+			return true;
+		});
+		Rules::Application::ComponentMatchDB::Basic matchDB(getExecutionEnv().labelSettings);
+		Rules::Application::computeDerivations(*rRaw, subset.size(), graphs,
+		                                       matchDB, onMatch, onNewGraphInstance);
+	}
 }
 
 } // namespace mod::lib::DG::Strategies

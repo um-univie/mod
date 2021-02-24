@@ -239,7 +239,8 @@ struct Config {
     ))                                                                              \
     ((DG, dg,                                                                       \
         ((bool, useOldRuleApplication, false))                                      \
-        ((bool, calculateVerbosePrint, false))                                      \
+	    ((bool, useExplicitMatchRuleApplication, false))                                      \
+	    ((bool, calculateVerbosePrint, false))                                      \
         ((bool, putAllProductsInSubset, false))                                     \
         ((bool, dryDerivationPrinting, false))                                      \
         ((bool, derivationDebugOutput, false))                                      \

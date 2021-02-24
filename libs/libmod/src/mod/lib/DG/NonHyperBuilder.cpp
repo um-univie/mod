@@ -248,10 +248,10 @@ Builder::apply_v2(const std::vector<std::shared_ptr<graph::Graph>> &graphs,
 	}
 
 	std::vector<const lib::Graph::Single *> libGraphs, libGraphsEmpty;
-	std::map<const lib::Graph::Single *, int> graphMap;
+	std::unordered_map<const lib::Graph::Single *, int> graphMap;
 	libGraphs.reserve(graphs.size());
 	for(const auto &g : graphs) {
-		std::map<const lib::Graph::Single*, int>::iterator it = graphMap.find(&g->getGraph());
+		std::unordered_map<const lib::Graph::Single*, int>::iterator it = graphMap.find(&g->getGraph());
 		if (it == graphMap.end()) {
 			graphMap[&g->getGraph()] = 1;
 		} else {
@@ -301,7 +301,7 @@ Builder::apply_v2(const std::vector<std::shared_ptr<graph::Graph>> &graphs,
 	});
 
 	Rules::Application::ComponentMatchDB::Basic matchDB(dg->getLabelSettings());
-	Rules::Application::computeDerivations(rOrig->getRule(), libGraphs, libGraphsEmpty,
+	Rules::Application::computeDerivations(rOrig->getRule(), libGraphs.size(), libGraphs,
 	                                       matchDB, onMatch, onNewGraphInstance);
 	return res;
 
