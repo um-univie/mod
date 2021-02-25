@@ -112,6 +112,14 @@ void testApplyV2(){
 	                                        right []
 	                                   ]
 	                                   )", false);
+	auto r5 = rule::Rule::ruleGMLString(R"(
+	                                   rule [
+	                                   ruleID "AddEdge"
+	                                   left [ edge [ source 0 target 1 label "-" ] ]
+	                                   context [ node [ id 0 label "C" ] node [ id 1 label "C" ] ]
+	                                   right [ ]
+	                                   ]
+	                                   )", false);
 
 	auto dg = mod::dg::DG::make(LabelSettings{LabelType::String, LabelRelation::Isomorphism},
 	                            {singleton, path2, path3},
@@ -153,6 +161,13 @@ void testApplyV2(){
 	ders = b.apply_v2({path2}, r4);
 	std::cout << "  found: " << ders.size() << " derivations" << std::endl;
 	assert(ders.size() == 0);
+
+	std::cout << "-------\n";
+	std::cout << "test: C-C with rule C-C -> C C " << std::endl;
+	ders = b.apply_v2({path2}, r5);
+	std::cout << "  found: " << ders.size() << " derivations" << std::endl;
+	der_set = std::set<mod::dg::DG::HyperEdge>(ders.begin(), ders.end());
+	assert(der_set.size() == 1);
 }
 
 void testApplyV2ReactionCenter() {
@@ -388,5 +403,7 @@ int main() {
 	testMultipleDupsApplyV2();
 	testExecute();
 	testFormoseReactions();
+
+
 
 }

@@ -11,6 +11,8 @@
 #include <mod/lib/Rules/GraphToRule.hpp>
 #include <mod/lib/Rules/Application/ValidDPO.hpp>
 
+#include <mod/lib/Rules/Application/ResultGraph.hpp>
+
 
 namespace mod::lib::Rules::Application {
 
@@ -147,6 +149,9 @@ std::unique_ptr<Rules::Real> PartialMatch::apply() const {
 	using HasTerm = GraphMorphism::HasTermData<RuleMorphism>;
 	using HasStereo = GraphMorphism::HasStereoData<RuleMorphism>;
 	constexpr LabelType labelType = HasTerm::value ? LabelType::Term : LabelType::String;
+
+	const auto graphs = applyMatch(rule.getDPORule(), hosts, morphism);
+	std::cout << "NUM PRODUCTS: " << graphs.size() << std::endl;
 	return RC::composeRuleRealByMatch<labelType, HasStereo::value>(
 	            *rHost, rule, ruleMorphism, false, logger);
 
