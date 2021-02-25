@@ -9,6 +9,7 @@
 #include <mod/lib/Graph/LabelledGraph.hpp>
 #include <mod/lib/LabelledUnionGraph.hpp>
 #include <mod/lib/Rules/GraphToRule.hpp>
+#include <mod/lib/Rules/Application/ValidDPO.hpp>
 
 
 namespace mod::lib::Rules::Application {
@@ -69,6 +70,11 @@ std::pair<bool, bool> PartialMatch::tryPush(const ComponentMatch& cm) {
 			return std::make_pair(false, false);
 		}
 		put(morphism, gCorePattern, gCoreHost, vCorePattern, vCoreHost);
+	}
+
+	if (!isValidDPOMatch(rule.getDPORule(), lRule, cm.componentIndex,  hosts, morphism)) {
+		this->pop();
+		return std::make_pair(false, false);
 	}
 
 	return std::make_pair(true, addedGraph.back());

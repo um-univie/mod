@@ -88,6 +88,7 @@ public:
 public: // experimental new component graphs that does not use the filtered wrapper
 	std::vector<ComponentGraph_v2> leftComponentGraphs, rightComponentGraphs;
 	std::vector<std::vector<std::size_t>> leftComponentVertexToCoreVertex, rightComponentVertexToCoreVertex;
+	std::vector<std::pair<std::size_t, std::size_t>> coreVertexToLeftComponentVertex, coreVertexToRightComponentVertex;
 };
 
 namespace detail {

@@ -48,6 +48,9 @@ computeDerivations(const Rules::Real& realRule,
                    std::function<bool(std::vector<const Graph::Single*>, std::unique_ptr<Rules::Real>)>& onMatch,
                    std::function<bool(const Graph::Single*, int)>& onNewGraphInstance,
                    int verbosity) {
+	if (matchDB.size() == 0) {
+		return;
+	}
 
 
 	const LabelledRule& rule = realRule.getDPORule();
@@ -75,6 +78,10 @@ computeDerivations(const Rules::Real& realRule,
 		for (size_t cid = 0; cid < rule.numLeftComponents; ++cid) {
 			offsets[cid] = matches[cid].size();
 		}
+	}
+
+	if (subsetMatches.size() == 0) {
+		return;
 	}
 
 	size_t curCid = subsetMatches[0]->componentIndex;
@@ -146,13 +153,12 @@ computeDerivations(const Rules::Real& realRule,
 
 		if (partialMatch.isFull()) {
 			std::unique_ptr<Rules::Real> res = partialMatch.apply();
-			if (res != nullptr) {
-				bool shouldContinue = onMatch(partialMatch.getLhs(), std::move(res));
-				if (!shouldContinue) {
-					return;
-				}
-				//derivations.push_back(std::move(res));
+			assert(res != nullptr);
+			bool shouldContinue = onMatch(partialMatch.getLhs(), std::move(res));
+			if (!shouldContinue) {
+				return;
 			}
+			//derivations.push_back(std::move(res));
 			partialMatch.pop();
 			continue;
 		}
@@ -206,12 +212,10 @@ computeDerivations(const Rules::Real& realRule,
 
 			if (partialMatch.isFull()) {
 				std::unique_ptr<Rules::Real> res = partialMatch.apply();
-				if (res != nullptr) {
-					bool shouldContinue = onMatch(partialMatch.getLhs(), std::move(res));
-					if (!shouldContinue) {
-						return;
-					}
-					//derivations.push_back(std::move(res));
+				assert(res != nullptr);
+				bool shouldContinue = onMatch(partialMatch.getLhs(), std::move(res));
+				if (!shouldContinue) {
+					return;
 				}
 				partialMatch.pop();
 				stack.back() += 1;

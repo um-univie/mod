@@ -62,6 +62,16 @@ void testApplyV2(){
 	auto path2 = graph::Graph::smiles("[C][C]");
 	auto path3 = graph::Graph::smiles("[C][C][C]");
 	auto singleton = graph::Graph::smiles("[C]");
+	auto triangle = graph::Graph::graphGMLString(R"(
+	                                             graph [
+	                                             node [ id 0 label "C" ]
+	                                             node [ id 1 label "C" ]
+	                                             node [ id 2 label "C" ]
+	                                             edge [ source 0 target 1 label "-" ]
+	                                             edge [ source 0 target 2 label "-" ]
+	                                             edge [ source 1 target 2 label "-" ]
+	                                             ]
+	                                             )");
 	auto r = rule::Rule::ruleGMLString(R"(
 	                                   rule [
 	                                   ruleID "AddEdge"
@@ -76,6 +86,30 @@ void testApplyV2(){
 	                                        left [ node [ id 0 label "C" ] ]
 	                                        context [  node [ id 1 label "C" ] edge [ source 0 target 1 label "-" ] ]
 	                                        right [ node [ id 0 label "A"] ]
+	                                   ]
+	                                   )", false);
+	auto r3 = rule::Rule::ruleGMLString(R"(
+	                                   rule [
+	                                   ruleID "AddEdge"
+	                                   left [ ]
+	                                   context [
+	                                    node [ id 0 label "C" ]
+	                                    node [ id 1 label "C" ]
+	                                    node [ id 2 label "C" ]
+	                                    edge [ source 0 target 2 label "-" ]
+	                                    edge [ source 1 target 2 label "-" ]
+	                                   ]
+	                                   right [
+	                                    edge [ source 0 target 1 label "-" ]
+	                                   ]
+	                                   ]
+	                                   )", false);
+	auto r4 = rule::Rule::ruleGMLString(R"(
+	                                   rule [
+	                                        ruleID "AddEdge"
+	                                        left [ node [ id 0 label "C" ] ]
+	                                        context []
+	                                        right []
 	                                   ]
 	                                   )", false);
 
@@ -107,6 +141,18 @@ void testApplyV2(){
 	std::cout << "  found: " << ders.size() << " derivations" << std::endl;
 	auto der_set = std::set<mod::dg::DG::HyperEdge>(ders.begin(), ders.end());
 	assert(der_set.size() == 2);
+
+	std::cout << "-------\n";
+	std::cout << "test: triangle with rule C-C-C -> triangle" << std::endl;
+	ders = b.apply_v2({triangle}, r3);
+	std::cout << "  found: " << ders.size() << " derivations" << std::endl;
+	assert(ders.size() == 0);
+
+	std::cout << "-------\n";
+	std::cout << "test: C-C with rule C -> " << std::endl;
+	ders = b.apply_v2({path2}, r4);
+	std::cout << "  found: " << ders.size() << " derivations" << std::endl;
+	assert(ders.size() == 0);
 }
 
 void testApplyV2ReactionCenter() {

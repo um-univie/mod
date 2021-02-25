@@ -78,7 +78,9 @@ LabelledRule::LabelledRule(const LabelledRule &other, bool withConstraints) : La
 
 template<typename SideGraph>
 std::vector<LabelledRule::ComponentGraph_v2> splitSideGraph(const SideGraph&& sideGraph,
-                                                            std::vector<std::vector<std::size_t>>& componentVertexToCoreVertexMap) {
+                                                            std::vector<std::vector<std::size_t>>& componentVertexToCoreVertexMap,
+                                                            std::vector<std::pair<size_t, size_t>>& coreVertexToComponentVertex
+                                                            ) {
 	struct GraphData {
 		using Graph = LabelledRule::ComponentGraph_v2;
 		using SideVertex = boost::graph_traits<LabelledLeftGraph::GraphType>::vertex_descriptor;
@@ -130,13 +132,16 @@ std::vector<LabelledRule::ComponentGraph_v2> splitSideGraph(const SideGraph&& si
 	}
 
 	// make the inverse vertex maps
-	for(auto &p : products)
+	for(auto &p : products) {
 		p.vertexMap.resize(num_vertices(*p.gPtr));
+	}
+
 	for(const auto vSide : asRange(vertices(gSideGraph))) {
 		const auto comp = compMap[get(boost::vertex_index_t(), gSideGraph, vSide)];
 		auto &p = products[comp];
 		const auto v = vertexMap[get(boost::vertex_index_t(), gSideGraph, vSide)];
 		p.vertexMap[get(boost::vertex_index_t(), *p.gPtr, v)] = vSide;
+		coreVertexToComponentVertex[vSide] = std::make_pair(comp, v);
 	}
 
 	if (has_stereo(sideGraph.r)) {
@@ -176,9 +181,19 @@ void LabelledRule::initComponents() { // TODO: structure this better
 	rightComponents.resize(num_vertices(get_graph(*this)), -1);
 	numLeftComponents = boost::connected_components(get_graph(get_labelled_left(*this)), leftComponents.data());
 	numRightComponents = boost::connected_components(get_graph(get_labelled_right(*this)), rightComponents.data());
-	leftComponentGraphs = splitSideGraph(get_labelled_left(*this), leftComponentVertexToCoreVertex);
+
+	// experimental
+	coreVertexToLeftComponentVertex = std::vector<std::pair<size_t, size_t>>(num_vertices(get_graph(*this)),
+	                                                                         std::make_pair(boost::graph_traits<ComponentGraph_v2::GraphType>::null_vertex(),
+	                                                                                        boost::graph_traits<ComponentGraph_v2::GraphType>::null_vertex()
+	                                                                                        ));
+	coreVertexToRightComponentVertex = std::vector<std::pair<size_t, size_t>>(num_vertices(get_graph(*this)),
+	                                                                         std::make_pair(boost::graph_traits<ComponentGraph_v2::GraphType>::null_vertex(),
+	                                                                                        boost::graph_traits<ComponentGraph_v2::GraphType>::null_vertex()
+	                                                                                        ));
+	leftComponentGraphs = splitSideGraph(get_labelled_left(*this), leftComponentVertexToCoreVertex, coreVertexToLeftComponentVertex);
 	assert(leftComponentVertexToCoreVertex.size() == numLeftComponents);
-	rightComponentGraphs = splitSideGraph(get_labelled_right(*this), rightComponentVertexToCoreVertex);
+	rightComponentGraphs = splitSideGraph(get_labelled_right(*this), rightComponentVertexToCoreVertex, coreVertexToRightComponentVertex);
 	assert(rightComponentVertexToCoreVertex.size() == numRightComponents);
 }
 
