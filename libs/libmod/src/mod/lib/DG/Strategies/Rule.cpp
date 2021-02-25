@@ -189,6 +189,22 @@ void Rule::executeImpl(PrintSettings settings, const GraphState &input) {
 		++settings.indentLevel;
 	}
 
+	/*
+	{
+		const auto &subset = input.getSubset();
+		const auto &universe = input.getUniverse();
+		std::cout << "-------" << std::endl;
+		std::cout << "SUBSET: " << std::endl;
+		for (const auto& g : subset) {
+			std::cout << g->getSmiles() << std::endl;
+		}
+		std::cout << "\nUNIVERSE: " << std::endl;
+		for (const auto& g : universe) {
+			std::cout << g->getSmiles() << std::endl;
+		}
+	}
+	*/
+
 	if(getExecutionEnv().labelSettings.withStereo) {
 		// let's trigger deduction errors early
 		try {
@@ -313,10 +329,25 @@ void Rule::executeImpl(PrintSettings settings, const GraphState &input) {
 		const auto &universe = input.getUniverse();
 
 		// partition such that the subset is first
-		for(int i = 0; i != subset.size(); ++i)
+		for(int i = 0; i != subset.size(); ++i) {
 			assert(subset.begin()[i] == universe[subset.getIndices()[i]]);
+		}
+
+		std::vector<bool> inSubset(universe.size(), false);
+		for(int idx : subset.getIndices())
+			inSubset[idx] = true;
 
 		std::vector<const lib::Graph::Single *> graphs = universe;
+		auto subsetEnd = graphs.begin();
+		for(auto iter = graphs.begin(); iter != graphs.end(); ++iter) {
+			const auto offset = iter - graphs.begin();
+			if(inSubset[offset]) {
+				std::iter_swap(subsetEnd, iter);
+				++subsetEnd;
+			}
+		}
+		assert(subsetEnd - graphs.begin() == subset.size());
+
 		Context context{r, getExecutionEnv(), output, consumedGraphs};
 		IO::Logger logger(std::cout);
 		auto onMatch = std::function([&] (std::vector<const Graph::Single*> lhs, std::unique_ptr<Rules::Real> r) -> bool{
@@ -329,9 +360,16 @@ void Rule::executeImpl(PrintSettings settings, const GraphState &input) {
 		    return true;
 	    });
 
-		auto onNewGraphInstance = std::function([&] (const Graph::Single* graph, int instance) -> bool{
+		auto onNewGraphInstance = std::function([&] (const Graph::Single*, int) -> bool{
 			return true;
 		});
+		/*
+		std::cout << "NUM SUBSETS: " << subset.size() << std::endl;
+		std::cout << "\nUNIVERSE: " << std::endl;
+		for (const auto& g : graphs) {
+			std::cout << g->getSmiles() << std::endl;
+		}
+		*/
 		Rules::Application::ComponentMatchDB::Basic matchDB(getExecutionEnv().labelSettings);
 		Rules::Application::computeDerivations(*rRaw, subset.size(), graphs,
 		                                       matchDB, onMatch, onNewGraphInstance, settings.verbosity);

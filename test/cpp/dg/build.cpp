@@ -260,6 +260,92 @@ void testMultipleDupsApplyV2() {
 	assert(der_set.size() == 5);
 }
 
+void testFormoseReactions() {
+	/*
+	SUBSET:
+	C(C(C(CO)O)O)=O
+	C(C(CO)O)=O
+	UNIVERSE:
+	C(O)=CO
+	C(C(C(CO)O)O)=O
+	C(C(CO)O)=O
+	C=O
+	C(CO)=O
+	*/
+
+	auto s1 = graph::Graph::smiles("C(C(C(CO)O)O)=O");
+	auto s2 = graph::Graph::smiles("C(C(CO)O)=O");
+	auto u1 = graph::Graph::smiles("C(O)=CO");
+	auto u2 = graph::Graph::smiles("C=O");
+	auto u3 = graph::Graph::smiles("C(CO)=O");
+	auto r = rule::Rule::ruleGMLString(R"(
+	                                   rule [
+	                                       ruleID "Keto-enol isomerization ->"
+	                                       left [
+	                                           edge [ source 0 target 3 label "-" ]
+	                                           edge [ source 0 target 1 label "-" ]
+	                                           edge [ source 1 target 2 label "=" ]
+	                                       ]
+	                                       context [
+	                                           node [ id 0 label "C" ]
+	                                           node [ id 1 label "C" ]
+	                                           node [ id 2 label "O" ]
+	                                           node [ id 3 label "H" ]
+	                                       ]
+	                                       right [
+	                                           edge [ source 2 target 3 label "-" ]
+	                                           edge [ source 2 target 1 label "-" ]
+	                                           edge [ source 1 target 0 label "=" ]
+	                                       ]
+	                                       constrainAdj [
+	                                           id 1
+	                                           op "="
+	                                           count 1
+	                                           nodeLabels [
+	                                               label "O"
+	                                           ]
+	                                       ]
+	                                   ]
+	                                   )", false);
+
+	auto dg = dg::DG::make(LabelSettings{LabelType::String, LabelRelation::Isomorphism},
+	    {s1,s2,u1,u2,u3}, IsomorphismPolicy::Check);
+	auto policy = IsomorphismPolicy::Check;
+	auto strat = dg::Strategy::makeSequence({
+	        dg::Strategy::makeAdd(false, {s1,s2}, policy),
+	        dg::Strategy::makeAdd(true, {u1,u2,u3}, policy),
+	        dg::Strategy::makeRule(r)});
+	auto b = dg->build();
+
+//	auto ders = b.apply_v2({g}, r, true);
+//	for (const auto& d : ders) {
+//		for (const auto v : d.targets()) {
+//			std::cout << "TAR: " << v.getGraph()->getSmiles() << std::endl;
+//		}
+//	}
+
+//	std::cout << "FOUND " << ders.size() << std::endl;
+	//assert(der_set.size() == 5);
+
+	std::cout << "---------------------------" << std::endl;
+	std::cout << "  TEST: EXECUTE (KETO)  " << std::endl;
+	std::cout << "---------------------------" << std::endl;
+
+	auto res = b.execute(strat);
+	std::cout << "EDGES " << dg->numEdges() << std::endl;
+	//assert(dg->numEdges() == 2);
+	for (const auto& d : dg->edges()) {
+		for (const auto v : d.sources()) {
+			std::cout << "," << v.getGraph()->getSmiles();
+		}
+		std::cout << " -> ";
+		for (const auto v : d.targets()) {
+			std::cout << "," << v.getGraph()->getSmiles();
+		}
+		std::cout << std::endl;
+	}
+}
+
 void testBuildRAII() {
 	auto g = graph::Graph::fromSMILES("O");
 	auto d = Derivations{{g},
@@ -301,4 +387,6 @@ int main() {
 	testApplyV2ReactionCenter();
 	testMultipleDupsApplyV2();
 	testExecute();
+	testFormoseReactions();
+
 }

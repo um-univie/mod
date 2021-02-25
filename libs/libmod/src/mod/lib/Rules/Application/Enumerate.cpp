@@ -57,7 +57,7 @@ computeDerivations(const Rules::Real& realRule,
 	std::vector<std::unique_ptr<Rules::Real>> derivations;
 
 	IO::Logger logger(std::cout);
-	if (verbosity > 0) {
+	if (verbosity > 1) {
 		logger.indent() << "computeDerivations(rule: " << realRule.getName() << " num_matches: " << matchDB.size() << ")" << std::endl;
 		logger.indentLevel++;
 		logger.indent() << "building data structures..." << std::endl;
@@ -116,7 +116,7 @@ computeDerivations(const Rules::Real& realRule,
 		}
 	};
 
-	if (verbosity > 0) {
+	if (verbosity > 1) {
 		logger.indent() << "subsetMatches: " << subsetMatches.size();
 		logger.s << " matchVector: (";
 		for (const auto& ms : matches) {
@@ -163,7 +163,7 @@ computeDerivations(const Rules::Real& realRule,
 			continue;
 		}
 
-		if (verbosity > 0) {
+		if (verbosity > 1) {
 			logger.indent() << "fixing component match:" << subsetMatch->componentIndex << " " << partialMatch << std::endl;
 			logger.indentLevel++;
 		}
@@ -175,7 +175,7 @@ computeDerivations(const Rules::Real& realRule,
 				cid += 1;
 			}
 			size_t mid = stack.back();
-			if (verbosity > 0) {
+			if (verbosity > 1) {
 				logger.indent() << "cid: " << cid << " " << "mid: " << mid << std::endl;
 			}
 
@@ -197,7 +197,7 @@ computeDerivations(const Rules::Real& realRule,
 			assert(cid < matches.size() && mid < matches[cid].size());
 			const ComponentMatch& match = matches[cid][mid];
 
-			if (verbosity > 0) {
+			if (verbosity > 1) {
 				logger.indent() << "trying to push match" << std::endl;
 			}
 			std::tie(success, addedGraph) = partialMatch.tryPush(match);
@@ -206,7 +206,7 @@ computeDerivations(const Rules::Real& realRule,
 				continue;
 			}
 
-			if (verbosity > 0) {
+			if (verbosity > 1) {
 				logger.indent() << "could compose" << partialMatch << std::endl;
 			}
 
@@ -227,7 +227,7 @@ computeDerivations(const Rules::Real& realRule,
 			}
 
 		}
-		if(verbosity > 0) {
+		if(verbosity > 1) {
 			logger.indentLevel--;
 		}
 	}
