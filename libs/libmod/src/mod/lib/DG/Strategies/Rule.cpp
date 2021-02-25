@@ -334,7 +334,7 @@ void Rule::executeImpl(PrintSettings settings, const GraphState &input) {
 		});
 		Rules::Application::ComponentMatchDB::Basic matchDB(getExecutionEnv().labelSettings);
 		Rules::Application::computeDerivations(*rRaw, subset.size(), graphs,
-		                                       matchDB, onMatch, onNewGraphInstance);
+		                                       matchDB, onMatch, onNewGraphInstance, settings.verbosity);
 	}
 }
 

@@ -306,7 +306,7 @@ Builder::apply_v2(const std::vector<std::shared_ptr<graph::Graph>> &graphs,
 
 	Rules::Application::ComponentMatchDB::Basic matchDB(dg->getLabelSettings());
 	Rules::Application::computeDerivations(rOrig->getRule(), libGraphs.size(), libGraphs,
-	                                       matchDB, onMatch, onNewGraphInstance);
+	                                       matchDB, onMatch, onNewGraphInstance, verbosity);
 	return res;
 
 }

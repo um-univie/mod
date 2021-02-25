@@ -117,7 +117,7 @@ std::vector<DG::HyperEdge> Builder::apply_v2(const std::vector<std::shared_ptr<g
     }))
 		throw LogicError("One of the graphs is a null pointer.");
 	if(!r) throw LogicError("The rule is a null pointer.");
-	auto innerRes =  p->b.apply_v2(graphs, r, 0, IsomorphismPolicy::Check, includeRelaxed);
+	auto innerRes =  p->b.apply_v2(graphs, r, 1, IsomorphismPolicy::Check, includeRelaxed);
 	std::vector<DG::HyperEdge> res;
 	const auto &nonHyper = p->dg_->getNonHyper();
 	const auto &hyper = p->dg_->getHyper();

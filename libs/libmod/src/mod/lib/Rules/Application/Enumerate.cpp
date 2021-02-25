@@ -46,14 +46,20 @@ void
 computeDerivations(const Rules::Real& realRule,
                    const std::vector<ComponentMatch>& matchDB,
                    std::function<bool(std::vector<const Graph::Single*>, std::unique_ptr<Rules::Real>)>& onMatch,
-                   std::function<bool(const Graph::Single*, int)>& onNewGraphInstance) {
+                   std::function<bool(const Graph::Single*, int)>& onNewGraphInstance,
+                   int verbosity) {
 
 
 	const LabelledRule& rule = realRule.getDPORule();
 	std::vector<std::unique_ptr<Rules::Real>> derivations;
 
+	IO::Logger logger(std::cout);
+	if (verbosity > 0) {
+		logger.indent() << "computeDerivations(rule: " << realRule.getName() << " num_matches: " << matchDB.size() << ")" << std::endl;
+		logger.indentLevel++;
+		logger.indent() << "building data structures..." << std::endl;
+	}
 
-	std::cout << "NUM MATCHES: " << matchDB.size() << std::endl;
 
 	std::vector<size_t> stack;
 	auto matchInstanceMap = buildMatchInstanceMap(matchDB);
@@ -89,7 +95,6 @@ computeDerivations(const Rules::Real& realRule,
 			// We have already fixed the subset match (and enumerated everything),
 			// hence no reason to add the match again, again
 			if (m->isSubsetHost && m->componentIndex < curCid) {
-				std::cout << "Pruning thing\n";
 				continue;
 			}
 
@@ -99,11 +104,19 @@ computeDerivations(const Rules::Real& realRule,
 	};
 
 	auto removeInstance = [&] (const ComponentMatch& cm) {
-		std::cout << "REMOVING INSTANCE" << std::endl;
 		for (size_t cid = 0; cid < rule.numLeftComponents; ++cid) {
 			matches[cid].resize(instanceOffsets[cm.componentIndex][cid]);
 		}
 	};
+
+	if (verbosity > 0) {
+		logger.indent() << "subsetMatches: " << subsetMatches.size();
+		logger.s << " matchVector: (";
+		for (const auto& ms : matches) {
+			logger.s << ms.size() << ",";
+		}
+		logger.s << ")" << std::endl;
+	}
 
 	assert(subsetMatches.size() > 0);
 	PartialMatch partialMatch(realRule);
@@ -144,7 +157,10 @@ computeDerivations(const Rules::Real& realRule,
 			continue;
 		}
 
-		std::cout << partialMatch << std::endl;
+		if (verbosity > 0) {
+			logger.indent() << "fixing component match:" << subsetMatch->componentIndex << " " << partialMatch << std::endl;
+			logger.indentLevel++;
+		}
 
 		stack.push_back(0);
 		while (stack.size() > 0) {
@@ -153,11 +169,14 @@ computeDerivations(const Rules::Real& realRule,
 				cid += 1;
 			}
 			size_t mid = stack.back();
-			std::cout << "cid: " << cid << " " << "mid: " << mid << std::endl;
-			std::cout << matches[cid].size() << std::endl;
+			if (verbosity > 0) {
+				logger.indent() << "cid: " << cid << " " << "mid: " << mid << std::endl;
+			}
 
 			if (mid == matches[cid].size()) {
-				std::cout << "Done" << std::endl;
+
+				//logger.indent() << "no more matches for cid. popping from stack." << std::endl;
+
 				stack.pop_back();
 				if (partialMatch.lastPushIsNewInstance()) {
 					removeInstance(partialMatch.getCompMatches().back());
@@ -172,20 +191,22 @@ computeDerivations(const Rules::Real& realRule,
 			assert(cid < matches.size() && mid < matches[cid].size());
 			const ComponentMatch& match = matches[cid][mid];
 
-			std::cout << matches[cid].size() << std::endl;
+			if (verbosity > 0) {
+				logger.indent() << "trying to push match" << std::endl;
+			}
 			std::tie(success, addedGraph) = partialMatch.tryPush(match);
 			if (!success) {
-				std::cout << "Not valid match\n";
 				stack.back() += 1;
 				continue;
 			}
-			std::cout << partialMatch << std::endl;
+
+			if (verbosity > 0) {
+				logger.indent() << "could compose" << partialMatch << std::endl;
+			}
 
 			if (partialMatch.isFull()) {
-				std::cout << "found full match" << std::endl;
 				std::unique_ptr<Rules::Real> res = partialMatch.apply();
 				if (res != nullptr) {
-					std::cout << "Could compose\n";
 					bool shouldContinue = onMatch(partialMatch.getLhs(), std::move(res));
 					if (!shouldContinue) {
 						return;
@@ -201,6 +222,9 @@ computeDerivations(const Rules::Real& realRule,
 				stack.push_back(0);
 			}
 
+		}
+		if(verbosity > 0) {
+			logger.indentLevel--;
 		}
 	}
 

@@ -22,14 +22,14 @@ size_t PartialMatch::updateHostGraph(const ComponentMatch& cm) {
 
 	auto it = hostIndexMap.find(hostKey);
 	addedGraph.push_back(it == hostIndexMap.end());
-	std::cout << "updating new graph " << "(" << cm.host << ", " << cm.graphInstance << ")" << std::endl;
+	//std::cout << "updating new graph " << "(" << cm.host << ", " << cm.graphInstance << ")" << std::endl;
 	if (addedGraph.back()) {
 		size_t idx = get_graph(hosts).size();
 		hostIndexMap[hostKey] = idx;
 		hosts.push_back(&cm.host->getLabelledGraph());
 		lhs.push_back(cm.host);
 		morphism.resizeRight(get_left(rule.getDPORule()), get_graph(hosts));
-		std::cout << "added new graph " << idx << " (" << cm.host << ", " << cm.graphInstance << ")" << std::endl;
+		//std::cout << "added new graph " << idx << " (" << cm.host << ", " << cm.graphInstance << ")" << std::endl;
 		return idx;
 	} else {
 		return it->second;
@@ -90,14 +90,14 @@ void PartialMatch::pop() {
 
 
 	if (addedGraph.back()) {
-		std::cout << "removing graph" << std::endl;
+		//std::cout << "removing graph" << std::endl;
 		hosts.pop_back();
 		lhs.pop_back();
 		morphism.resizeRight(get_left(rule.getDPORule()), get_graph(hosts));
 
 		std::pair<const Graph::Single*, size_t> hostKey = std::make_pair(cm.host, cm.graphInstance);
 		auto it = hostIndexMap.find(hostKey);
-		std::cout << "popping map " << "(" << cm.host << ", " << cm.graphInstance << ")" << std::endl;
+		//std::cout << "popping map " << "(" << cm.host << ", " << cm.graphInstance << ")" << std::endl;
 		assert(it != hostIndexMap.end());
 		hostIndexMap.erase(it);
 	}
