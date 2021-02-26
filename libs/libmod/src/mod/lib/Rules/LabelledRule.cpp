@@ -181,7 +181,13 @@ void LabelledRule::initComponents() { // TODO: structure this better
 	rightComponents.resize(num_vertices(get_graph(*this)), -1);
 	numLeftComponents = boost::connected_components(get_graph(get_labelled_left(*this)), leftComponents.data());
 	numRightComponents = boost::connected_components(get_graph(get_labelled_right(*this)), rightComponents.data());
+}
 
+void LabelledRule::initComponentsV2() const { // TODO: structure this better
+	if(numLeftComponents == std::numeric_limits<std::size_t>::max()) MOD_ABORT;
+	if (numLeftComponents == leftComponentGraphs.size() && numRightComponents == rightComponentGraphs.size()) {
+		return;
+	}
 	// experimental
 	coreVertexToLeftComponentVertex = std::vector<std::pair<size_t, size_t>>(num_vertices(get_graph(*this)),
 	                                                                         std::make_pair(boost::graph_traits<ComponentGraph_v2::GraphType>::null_vertex(),
@@ -196,6 +202,7 @@ void LabelledRule::initComponents() { // TODO: structure this better
 	rightComponentGraphs = splitSideGraph(get_labelled_right(*this), rightComponentVertexToCoreVertex, coreVertexToRightComponentVertex);
 	assert(rightComponentVertexToCoreVertex.size() == numRightComponents);
 }
+
 
 void LabelledRule::invert() {
 	// invert the underlying graph

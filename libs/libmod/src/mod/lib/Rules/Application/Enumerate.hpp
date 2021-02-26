@@ -22,14 +22,13 @@ computeDerivations(const Rules::Real& rule,
 
 template<typename ComponentMatchDB>
 void computeDerivations(const Rules::Real& rule,
-                                                             size_t numSubsetGraphs,
-                                                             const std::vector<const Graph::Single*>& universe,
-                                                             ComponentMatchDB& matchDB,
-                   std::function<bool(std::vector<const Graph::Single*>, std::vector<std::unique_ptr<Graph::Single>>)>& onMatch,
-                   std::function<bool(const Graph::Single*, int)>& onNewGraphInstance,
-                        int verbosity
-
-                                                             ) {
+                        size_t numSubsetGraphs,
+                        const std::vector<const Graph::Single*>& universe,
+                        ComponentMatchDB& matchDB,
+                        std::function<bool(std::vector<const Graph::Single*>, std::vector<std::unique_ptr<Graph::Single>>)>& onMatch,
+                        std::function<bool(const Graph::Single*, int)>& onNewGraphInstance,
+                        int verbosity) {
+	rule.getDPORule().initComponentsV2();
 	std::vector<std::unique_ptr<Rules::Real>> derivations;
 
 	if (!matchDB.isValid(rule, numSubsetGraphs, universe)) {
