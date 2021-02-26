@@ -275,7 +275,10 @@ struct Config {
         ((bool, printChangedEdgesInContext, false))                                 \
         ((bool, collapseChangedHydrogens, false))                                   \
     ))                                                                              \
-    ((RC, rc,                                                                       \
+	((RuleApplication, application,                                                                   \
+	    ((bool, useCompositionApplication, false))                           \
+	))                                                                              \
+	((RC, rc,                                                                       \
         ((bool, composeConstraints, true))                                          \
         ((bool, printMatches, false))                                               \
         ((bool, matchesWithIndex, false))                                           \

@@ -1,5 +1,6 @@
 #include <mod/lib/Rules/Application/Enumerate.hpp>
 #include <mod/lib/Rules/Application/PartialMatch.hpp>
+#include <mod/Config.hpp>
 #include <iostream>
 
 
@@ -156,7 +157,8 @@ computeDerivations(const Rules::Real& realRule,
 			//std::unique_ptr<Rules::Real> res = partialMatch.apply();
 			//assert(res != nullptr);
 			//bool shouldContinue = onMatch(partialMatch.getLhs(), std::move(res));
-			bool shouldContinue = onMatch(partialMatch.getLhs(), partialMatch.applyNew());
+			auto rhs = (mod::getConfig().application.useCompositionApplication.get()) ? partialMatch.apply() : partialMatch.applyNew();
+			bool shouldContinue = onMatch(partialMatch.getLhs(), std::move(rhs));
 			if (!shouldContinue) {
 				return;
 			}
@@ -216,7 +218,8 @@ computeDerivations(const Rules::Real& realRule,
 //				std::unique_ptr<Rules::Real> res = partialMatch.apply();
 //				assert(res != nullptr);
 //				bool shouldContinue = onMatch(partialMatch.getLhs(), std::move(res));
-				bool shouldContinue = onMatch(partialMatch.getLhs(), partialMatch.applyNew());
+				auto rhs = (mod::getConfig().application.useCompositionApplication.get()) ? partialMatch.apply() : partialMatch.applyNew();
+				bool shouldContinue = onMatch(partialMatch.getLhs(), std::move(rhs));
 				if (!shouldContinue) {
 					return;
 				}

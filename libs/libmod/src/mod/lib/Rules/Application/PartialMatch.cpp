@@ -10,6 +10,7 @@
 #include <mod/lib/LabelledUnionGraph.hpp>
 #include <mod/lib/Rules/GraphToRule.hpp>
 #include <mod/lib/Rules/Application/ValidDPO.hpp>
+#include <mod/lib/Rules/Util.hpp>
 
 #include <mod/lib/Rules/Application/ResultGraph.hpp>
 
@@ -130,7 +131,8 @@ const std::vector<const Graph::Single*>& PartialMatch::getLhs() const {
 	return lhs;
 }
 
-std::unique_ptr<Rules::Real> PartialMatch::apply() const {
+//std::unique_ptr<Rules::Real> PartialMatch::apply() const {
+std::vector<std::unique_ptr<Graph::Single>> PartialMatch::apply() const {
 	const std::unique_ptr<Rules::Real> rHost = lib::Rules::graphToRule(hosts, lib::Rules::Membership::Right, "G");
 	using RuleHostGraph = Rules::LabelledRule::RightGraphType;
 	using RuleMorphism = jla_boost::GraphMorphism::InvertibleVectorVertexMap<MatchGraph, RuleHostGraph>;
@@ -150,10 +152,10 @@ std::unique_ptr<Rules::Real> PartialMatch::apply() const {
 	using HasStereo = GraphMorphism::HasStereoData<RuleMorphism>;
 	constexpr LabelType labelType = HasTerm::value ? LabelType::Term : LabelType::String;
 
-	return RC::composeRuleRealByMatch<labelType, HasStereo::value>(
+	std::unique_ptr<Rules::Real> derRule = RC::composeRuleRealByMatch<labelType, HasStereo::value>(
 	            *rHost, rule, ruleMorphism, false, logger);
-
-
+	assert(derRule);
+	return splitRightRule(derRule->getDPORule(), labelType, HasStereo::value);
 }
 
 std::vector<std::unique_ptr<Graph::Single>> PartialMatch::applyNew() const {

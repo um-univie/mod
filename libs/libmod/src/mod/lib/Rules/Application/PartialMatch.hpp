@@ -27,7 +27,8 @@ public:
 	const std::vector<ComponentMatch>& getCompMatches() const;
 	const std::vector<const Graph::Single*>& getLhs() const;
 
-	std::unique_ptr<Rules::Real> apply() const;
+	//std::unique_ptr<Rules::Real> apply() const;
+	std::vector<std::unique_ptr<Graph::Single>> apply() const;
 	std::vector<std::unique_ptr<Graph::Single>> applyNew() const;
 
 	friend std::ostream& operator << (std::ostream& os, const PartialMatch& pm);
