@@ -45,7 +45,8 @@ buildMatchInstanceMap(const std::vector<ComponentMatch>& matches) {
 void
 computeDerivations(const Rules::Real& realRule,
                    const std::vector<ComponentMatch>& matchDB,
-                   std::function<bool(std::vector<const Graph::Single*>, std::unique_ptr<Rules::Real>)>& onMatch,
+                   //std::function<bool(std::vector<const Graph::Single*>, std::unique_ptr<Rules::Real>)>& onMatch,
+                   std::function<bool(std::vector<const Graph::Single*>, std::vector<std::unique_ptr<Graph::Single>>)>& onMatch,
                    std::function<bool(const Graph::Single*, int)>& onNewGraphInstance,
                    int verbosity) {
 	if (matchDB.size() == 0) {
@@ -152,9 +153,10 @@ computeDerivations(const Rules::Real& realRule,
 		addInstance(*subsetMatch, true);
 
 		if (partialMatch.isFull()) {
-			std::unique_ptr<Rules::Real> res = partialMatch.apply();
-			assert(res != nullptr);
-			bool shouldContinue = onMatch(partialMatch.getLhs(), std::move(res));
+			//std::unique_ptr<Rules::Real> res = partialMatch.apply();
+			//assert(res != nullptr);
+			//bool shouldContinue = onMatch(partialMatch.getLhs(), std::move(res));
+			bool shouldContinue = onMatch(partialMatch.getLhs(), partialMatch.applyNew());
 			if (!shouldContinue) {
 				return;
 			}
@@ -211,9 +213,10 @@ computeDerivations(const Rules::Real& realRule,
 			}
 
 			if (partialMatch.isFull()) {
-				std::unique_ptr<Rules::Real> res = partialMatch.apply();
-				assert(res != nullptr);
-				bool shouldContinue = onMatch(partialMatch.getLhs(), std::move(res));
+//				std::unique_ptr<Rules::Real> res = partialMatch.apply();
+//				assert(res != nullptr);
+//				bool shouldContinue = onMatch(partialMatch.getLhs(), std::move(res));
+				bool shouldContinue = onMatch(partialMatch.getLhs(), partialMatch.applyNew());
 				if (!shouldContinue) {
 					return;
 				}

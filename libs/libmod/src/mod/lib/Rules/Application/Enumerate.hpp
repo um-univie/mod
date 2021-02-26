@@ -13,7 +13,8 @@ namespace detail {
 void
 computeDerivations(const Rules::Real& rule,
                    const std::vector<ComponentMatch>& matches,
-                   std::function<bool(std::vector<const Graph::Single*>, std::unique_ptr<Rules::Real>)>& onMatch,
+//                   std::function<bool(std::vector<const Graph::Single*>, std::unique_ptr<Rules::Real>)>& onMatch,
+                   std::function<bool(std::vector<const Graph::Single*>, std::vector<std::unique_ptr<Graph::Single>>)>& onMatch,
                    std::function<bool(const Graph::Single*, int)>& onNewGraphInstance,
                    int verbosity
                    );
@@ -24,7 +25,7 @@ void computeDerivations(const Rules::Real& rule,
                                                              size_t numSubsetGraphs,
                                                              const std::vector<const Graph::Single*>& universe,
                                                              ComponentMatchDB& matchDB,
-                   std::function<bool(std::vector<const Graph::Single*>, std::unique_ptr<Rules::Real>)>& onMatch,
+                   std::function<bool(std::vector<const Graph::Single*>, std::vector<std::unique_ptr<Graph::Single>>)>& onMatch,
                    std::function<bool(const Graph::Single*, int)>& onNewGraphInstance,
                         int verbosity
 

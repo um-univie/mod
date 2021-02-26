@@ -62,6 +62,73 @@ struct Context {
 	std::unordered_set<const lib::Graph::Single *> &consumedGraphs;
 };
 
+void handleDerivation(int verbosity, IO::Logger logger, Context context, const lib::Rules::Real& r, const std::vector<const Graph::Single *>& lhs, std::vector<std::unique_ptr<Graph::Single>>& rhsCands) {
+	mod::Derivation d;
+	d.r = context.r;
+	for(const lib::Graph::Single *g : lhs) {
+		d.left.push_back(g->getAPIReference());
+	}
+	{ // left predicate
+		bool result = context.executionEnv.checkLeftPredicate(d);
+		if(!result) {
+			if(verbosity >= PrintSettings::V_DerivationPredicatesFail)
+				logger.indent() << "Skipping " << r.getName() << " due to leftPredicate" << std::endl;
+			return;
+		}
+	}
+//	if(verbosity >= PrintSettings::V_RuleApplication) {
+//		logger.indent() << "Splitting " << r.getName() << " into "
+//		                << rDPO.numRightComponents << " graphs" << std::endl;
+//		++logger.indentLevel;
+//	}
+	const std::vector<const lib::Graph::Single *> &educts = lhs;
+	d.right = getAPIGraphs(
+	        rhsCands, context.executionEnv.labelSettings.type, context.executionEnv.labelSettings.withStereo,
+	        [&context](std::unique_ptr<lib::Graph::Single> gCand) {
+	            return context.executionEnv.checkIfNew(std::move(gCand));
+            },
+	        [verbosity, &logger](std::shared_ptr<graph::Graph> gWrapped, std::shared_ptr<graph::Graph> gPrev) {
+		        if(verbosity >= PrintSettings::V_RuleApplication)
+					logger.indent() << "Discarding product " << gWrapped->getName()
+					                << ", isomorphic to other product " << gPrev->getName()
+					                << "." << std::endl;
+	        }
+	);
+	if(verbosity >= PrintSettings::V_RuleApplication)
+		--logger.indentLevel;
+
+	{ // right predicates
+		bool result = context.executionEnv.checkRightPredicate(d);
+		if(!result) {
+			if(verbosity >= PrintSettings::V_DerivationPredicatesFail)
+				logger.indent() << "Skipping " << r.getName() << " due to rightPredicate" << std::endl;
+			return;
+		}
+	}
+	{ // now the derivation is good, so add the products to output
+		if(getConfig().dg.putAllProductsInSubset.get()) {
+			for(const auto &g : d.right)
+				context.output->addToSubset(&g->getGraph());
+		} else {
+			for(const auto &g : d.right)
+				if(!context.output->isInUniverse(&g->getGraph()))
+					context.output->addToSubset(&g->getGraph());
+		}
+		for(const auto &g : d.right)
+			context.executionEnv.addProduct(g);
+	}
+	std::vector<const lib::Graph::Single *> rightGraphs;
+	rightGraphs.reserve(d.right.size());
+	for(const std::shared_ptr<graph::Graph> &g : d.right)
+		rightGraphs.push_back(&g->getGraph());
+	lib::DG::GraphMultiset gmsLeft(educts), gmsRight(std::move(rightGraphs));
+	bool inserted = context.executionEnv.suggestDerivation(gmsLeft, gmsRight, &context.r->getRule());
+	if(inserted) {
+		for(const lib::Graph::Single *g : educts)
+			context.consumedGraphs.insert(g);
+	}
+}
+
 void handleBoundRulePair(int verbosity, IO::Logger logger, Context context, const BoundRule &brp) {
 	assert(brp.rule);
 	// TODO: use a smart pointer so the rule for sure is deallocated, even though we do a 'continue'
@@ -350,12 +417,17 @@ void Rule::executeImpl(PrintSettings settings, const GraphState &input) {
 
 		Context context{r, getExecutionEnv(), output, consumedGraphs};
 		IO::Logger logger(std::cout);
-		auto onMatch = std::function([&] (std::vector<const Graph::Single*> lhs, std::unique_ptr<Rules::Real> r) -> bool{
-		    assert(r->isOnlyRightSide());
-		    BoundRule br;
-		    br.rule = &(*r);
-		    br.boundGraphs = std::move(lhs);
-		    handleBoundRulePair(settings.verbosity, logger, context, br);
+//		auto onMatch = std::function([&] (std::vector<const Graph::Single*> lhs, std::unique_ptr<Rules::Real> r) -> bool{
+//		    assert(r->isOnlyRightSide());
+//		    BoundRule br;
+//		    br.rule = &(*r);
+//		    br.boundGraphs = std::move(lhs);
+//		    handleBoundRulePair(settings.verbosity, logger, context, br);
+
+//		    return true;
+//	    });
+		auto onMatch = std::function([&] (std::vector<const Graph::Single*> lhs, std::vector<std::unique_ptr<Graph::Single>> candRhs) -> bool{
+		    handleDerivation(settings.verbosity, logger, context, *rRaw, lhs, candRhs);
 
 		    return true;
 	    });

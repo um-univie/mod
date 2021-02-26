@@ -22,6 +22,10 @@ bool Basic::isValid(const Real& rule,
 				}
 				break;
 			}
+
+//			if (rule.getDPORule().numLeftComponents == 1 && gid+1 == numSubsetGraphs ) {
+//				break;
+//			}
 		}
 
 		if (!hasMatch) {
@@ -39,7 +43,12 @@ Basic::getMatches(const Real& rule,
                   const std::vector<const Graph::Single*>& universe)  {
 	// std::map<std::pair<const Graph::Single*, size_t>, std::vector<ComponentMatch>> out;
 	std::vector<ComponentMatch> out;
-	for (size_t gid = universe.size() - 1; gid != static_cast<size_t>(-1); --gid) {
+	size_t universeSize = universe.size() - 1;
+	/*
+	if (rule.getDPORule().numLeftComponents == 1) {
+		universeSize = numSubsetGraphs - 1;
+	}*/
+	for (size_t gid = universeSize; gid != static_cast<size_t>(-1); --gid) {
 		for (size_t cid = 0; cid < rule.getDPORule().numLeftComponents; ++cid) {
 			const auto& host = universe[gid]->getLabelledGraph();
 

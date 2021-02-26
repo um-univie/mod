@@ -207,7 +207,7 @@ private:
 // ===========================================================================
 
 template<typename CheckIfNew, typename OnDup>
-std::vector<std::shared_ptr<graph::Graph>> getAPIGraphs(std::vector<std::unique_ptr<Graph::Single>> graphs,
+std::vector<std::shared_ptr<graph::Graph>> getAPIGraphs(std::vector<std::unique_ptr<Graph::Single>>& graphs,
                                                      const LabelType labelType,
                                                      const bool withStereo,
                                                      CheckIfNew checkIfNew,

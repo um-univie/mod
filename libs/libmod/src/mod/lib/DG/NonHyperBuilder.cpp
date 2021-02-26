@@ -267,13 +267,43 @@ Builder::apply_v2(const std::vector<std::shared_ptr<graph::Graph>> &graphs,
 
 	IO::Logger logger(std::cout);
 	const auto ls = dg->getLabelSettings();
-	auto onMatch = std::function([&] (std::vector<const Graph::Single*> lhs, std::unique_ptr<Rules::Real> r) -> bool{
-	    assert(r->isOnlyRightSide());
+//	auto onMatch = std::function([&] (std::vector<const Graph::Single*> lhs, std::unique_ptr<Rules::Real> r) -> bool{
+//	    assert(r->isOnlyRightSide());
+//	    if (!includeRelaxed && lhs.size() != graphs.size()) {
+//	        return true;
+//        }
+//	    auto products = splitRule(
+//	                r->getDPORule(), ls.type, ls.withStereo,
+//	                [this](std::unique_ptr<lib::Graph::Single> gCand) {
+//	            return dg->checkIfNew(std::move(gCand)).first;
+//    },
+//	            [verbosity, &logger](std::shared_ptr<graph::Graph> gWrapped, std::shared_ptr<graph::Graph> gPrev) {
+//		    if(verbosity >= V_RuleApplication_Binding) {
+//				++logger.indentLevel;
+//				logger.indent() << "Discarding product " << gWrapped->getName()
+//				                << ", isomorphic to other product " << gPrev->getName()
+//				                << "." << std::endl;
+//				--logger.indentLevel;
+//			}
+//	    }
+//	    );
+//	    for(const auto &p : products)
+//			dg->addProduct(p);
+//		std::vector<const lib::Graph::Single *> rightGraphs;
+//		rightGraphs.reserve(products.size());
+//		for(const auto &p : products)
+//			rightGraphs.push_back(&p->getGraph());
+//		lib::DG::GraphMultiset gmsLeft(std::move(lhs)), gmsRight(std::move(rightGraphs));
+//		const auto derivationRes = dg->suggestDerivation(gmsLeft, gmsRight, &rOrig->getRule());
+//		res.push_back(derivationRes);
+//		return true;
+//    });
+	auto onMatch = std::function([&] (std::vector<const Graph::Single*> lhs, std::vector<std::unique_ptr<Graph::Single>> candRhs) -> bool{
 	    if (!includeRelaxed && lhs.size() != graphs.size()) {
 	        return true;
         }
-	    auto products = splitRule(
-	                r->getDPORule(), ls.type, ls.withStereo,
+	    auto products = getAPIGraphs(
+	                candRhs, ls.type, ls.withStereo,
 	                [this](std::unique_ptr<lib::Graph::Single> gCand) {
 	            return dg->checkIfNew(std::move(gCand)).first;
     },

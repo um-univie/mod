@@ -53,7 +53,7 @@ std::vector<std::unique_ptr<Graph::Single>> applyMatch(const LabelledRule& rule,
 	const auto& stringRight = get_string(get_labelled_right(rule));
 	const auto& stringHost = get_string(host);
 	for (const auto vRight : asRange(vertices(gRight))) {
-		std::cout << "TRYING " << vRight << std::endl;
+//		std::cout << "TRYING " << vRight << std::endl;
 		if (R2H[vRight] != GraphData::null_vertex()) {
 			continue;
 		}
@@ -65,7 +65,7 @@ std::vector<std::unique_ptr<Graph::Single>> applyMatch(const LabelledRule& rule,
 			while (!ruleStack.empty()) {
 				const auto vRuleSrc = ruleStack.back();
 				ruleStack.pop_back();
-				std::cout << "		ruleStack: POPPING " << vRuleSrc << ", " << ruleStack.size() << std::endl;
+//				std::cout << "		ruleStack: POPPING " << vRuleSrc << ", " << ruleStack.size() << std::endl;
 
 				if (R2H[vRuleSrc] != GraphData::null_vertex()) {
 					continue;
@@ -79,10 +79,10 @@ std::vector<std::unique_ptr<Graph::Single>> applyMatch(const LabelledRule& rule,
 				if (vHostSrc != vHostNull) {
 					G2H[gHost.get_vertex_idx_offset(vHostSrc.gIdx) + vHostSrc.v] = vProductSrc;
 				}
-				std::cout << "			> added  vertex: " << vProductSrc << ", " << vHostSrc << std::endl;
+//				std::cout << "			> added  vertex: " << vProductSrc << ", " << vHostSrc << std::endl;
 
 
-				std::cout << "			> vRuleSrc Range: " <<std::endl;;
+//				std::cout << "			> vRuleSrc Range: " <<std::endl;;
 				for (const auto eRule : asRange(out_edges(vRuleSrc, gRight))) {
 					const auto vRuleTar = target(eRule, gRight);
 					const auto vProductTar = R2H[vRuleTar];
@@ -93,14 +93,14 @@ std::vector<std::unique_ptr<Graph::Single>> applyMatch(const LabelledRule& rule,
 						auto eProduct = add_edge(vProductSrc, vProductTar, *p.gPtr);
 						assert(eProduct.second);
 						p.pStringPtr->addEdge(eProduct.first, stringRight[eRule]);
-						std::cout << "				> added  edge: " << vProductSrc << ", " << vProductTar << std::endl;
+//						std::cout << "				> added  edge: " << vProductSrc << ", " << vProductTar << std::endl;
 					}
 				}
 				if (vHostSrc == vHostNull) {
 					continue;
 				}
 
-				std::cout << "			> vHostSrc Range: " <<std::endl;;
+//				std::cout << "			> vHostSrc Range: " <<std::endl;;
 				for (const auto eHost : asRange(out_edges(vHostSrc, gHost))) {
 					const auto vHostTar = target(eHost, gHost);
 					const auto vRuleTar = get_inverse(morphism, gLeft, gHost, vHostTar);
@@ -119,7 +119,7 @@ std::vector<std::unique_ptr<Graph::Single>> applyMatch(const LabelledRule& rule,
 							auto eProduct = add_edge(vProductSrc, vProductTar, *p.gPtr);
 							assert(eProduct.second);
 							p.pStringPtr->addEdge(eProduct.first, stringHost[eHost]);
-							std::cout << "				> added  edge: " << vProductSrc << ", " << vProductTar << std::endl;
+//							std::cout << "				> added  edge: " << vProductSrc << ", " << vProductTar << std::endl;
 						}
 					} else {
 						if (vProductTar == GraphData::null_vertex()) {
@@ -129,7 +129,7 @@ std::vector<std::unique_ptr<Graph::Single>> applyMatch(const LabelledRule& rule,
 						auto eProduct = add_edge(vProductSrc, vProductTar, *p.gPtr);
 						assert(eProduct.second);
 						p.pStringPtr->addEdge(eProduct.first, stringHost[eHost]);
-						std::cout << "				> added  edge: " << vProductSrc << ", " << vProductTar << std::endl;
+//						std::cout << "				> added  edge: " << vProductSrc << ", " << vProductTar << std::endl;
 					}
 				}
 			} // while ruleStack
@@ -138,7 +138,7 @@ std::vector<std::unique_ptr<Graph::Single>> applyMatch(const LabelledRule& rule,
 				const auto vHostSrc = hostStack.back();
 				hostStack.pop_back();
 				assert(get_inverse(morphism, gLeft, gHost, vHostSrc) == vRuleNull);
-				std::cout << "		hostStack: POPPING " << vHostSrc << ", " << hostStack.size() << std::endl;
+//				std::cout << "		hostStack: POPPING " << vHostSrc << ", " << hostStack.size() << std::endl;
 
 				if (G2H[gHost.get_vertex_idx_offset(vHostSrc.gIdx) + vHostSrc.v] != GraphData::null_vertex()) {
 					continue;
@@ -147,7 +147,7 @@ std::vector<std::unique_ptr<Graph::Single>> applyMatch(const LabelledRule& rule,
 				const auto vProductSrc = add_vertex(*p.gPtr);
 				p.pStringPtr->addVertex(vProductSrc, stringHost[vHostSrc]);
 				G2H[gHost.get_vertex_idx_offset(vHostSrc.gIdx) + vHostSrc.v] = vProductSrc;
-				std::cout << "			> added  vertex: " << vProductSrc << std::endl;;
+//				std::cout << "			> added  vertex: " << vProductSrc << std::endl;;
 
 				for (const auto eHost : asRange(out_edges(vHostSrc, gHost))) {
 					const auto vHostTar = target(eHost, gHost);
