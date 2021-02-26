@@ -206,6 +206,38 @@ private:
 // ===========================================================================
 // ===========================================================================
 
+template<typename CheckIfNew, typename OnDup>
+std::vector<std::shared_ptr<graph::Graph>> getAPIGraphs(std::vector<std::unique_ptr<Graph::Single>> graphs,
+                                                     const LabelType labelType,
+                                                     const bool withStereo,
+                                                     CheckIfNew checkIfNew,
+                                                     OnDup onDup) {
+	std::vector<std::shared_ptr<graph::Graph>> out;
+	for(auto &gCand : graphs) {
+		// check against the database
+		std::shared_ptr<graph::Graph> gWrapped = checkIfNew(std::move(gCand));
+		// checkIfNew does not add the graph, so we must check against the previous products as well
+		for(auto gPrev : out) {
+			const auto ls = mod::LabelSettings(labelType, LabelRelation::Isomorphism, withStereo,
+			                                   LabelRelation::Isomorphism);
+			const bool iso = lib::Graph::Single::isomorphic(gPrev->getGraph(), gWrapped->getGraph(), ls);
+			if(iso) {
+				onDup(gWrapped, gPrev);
+				gWrapped = gPrev;
+				break;
+			}
+		}
+		out.push_back(gWrapped);
+	}
+	return out;
+}
+
+
+
+// ===========================================================================
+// ===========================================================================
+// ===========================================================================
+
 struct GraphData {
 	using SideVertex = boost::graph_traits<lib::Rules::DPOProjection>::vertex_descriptor;
 public:
