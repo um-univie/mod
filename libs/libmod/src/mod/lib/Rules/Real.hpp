@@ -6,6 +6,7 @@
 #include <mod/rule/ForwardDecl.hpp>
 #include <mod/lib/Graph/GraphDecl.hpp>
 #include <mod/lib/Rules/LabelledRule.hpp>
+#include <mod/lib/Rules/Application/CanonRule.hpp>
 
 #include <jla_boost/graph/morphism/Predicates.hpp>
 
@@ -67,6 +68,10 @@ private:
 private:
 	LabelledRule dpoRule;
 	mutable std::unique_ptr<DepictionDataCore> depictionData;
+
+public: // experimental rule autgroup
+	const Rules::AutGroup &getAutGroup() const;
+	mutable std::unique_ptr<Rules::AutGroup> aut_group;
 };
 
 struct LessById {

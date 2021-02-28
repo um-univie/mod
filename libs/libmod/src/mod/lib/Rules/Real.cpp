@@ -179,6 +179,13 @@ const PropMoleculeCore &Real::getMoleculeState() const {
 	return get_molecule(getDPORule());
 }
 
+const AutGroup& Real::getAutGroup() const {
+	if (!aut_group) {
+		aut_group = getRuleAutomorphisms(this->getDPORule());
+	}
+	return *aut_group;
+}
+
 namespace {
 
 template<typename Finder>
