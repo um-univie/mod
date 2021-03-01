@@ -99,7 +99,7 @@ std::vector<ComponentMatch::Morphism> enumerateMonomorphisms(const Real& real,
 		morphisms.erase(std::remove_if(morphisms.begin(),
 		                               morphisms.end(),
 		                               [&](const ComponentMatch::Morphism& m){
-			return !isCanonComponentMatch(real, componentIndex, host, m);
+			return !isCanonComponentMatchFast(real, componentIndex, host, m);
 		}),
 		                morphisms.end());
 	}

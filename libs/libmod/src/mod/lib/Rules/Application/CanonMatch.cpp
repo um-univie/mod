@@ -16,6 +16,66 @@
 
 namespace mod::lib::Rules::Application {
 
+bool isCanonComponentMatchFast(const Real& rule,
+                               size_t compIndex,
+                               const Graph::LabelledGraph& host,
+                               const ComponentMatch::Morphism& match) {
+	const auto& constAutPtrs = rule.getAutGroup().generator_ptrs();
+	if (constAutPtrs.size() == 0)  {
+		return true;
+	}
+
+	std::vector<Rules::AutGroup::const_pointer> gens(constAutPtrs.begin(), constAutPtrs.end());
+	size_t genSize = gens.size();
+
+	const auto& dpoRule = rule.getDPORule();
+	//const auto& dpoHost = g->getBindRule()->getRule().getDPORule();
+	const auto& lgRule = get_labelled_left(dpoRule);;
+	//const auto& lgHost = get_labelled_right(dpoHost);
+//	const auto& gRule = get_graph(lgRule);
+	const auto& compPatternGraph = get_graph(get_component_graph_v2(compIndex, lgRule));
+	const auto& gHost = get_graph(host);
+
+	for (auto vp : asRange(vertices(compPatternGraph))) {
+		const auto vpCore = get_component_core_vertex(compIndex, vp, lgRule);
+		auto vh = get(match, compPatternGraph, gHost, vp);
+//		std::cout << vp << ": " << vh << std::endl;
+		size_t curAutIndex = 0;
+		while (curAutIndex < genSize) {
+			const auto& aut = *gens[curAutIndex];
+//			for (size_t i = 0; i < aut.size(); ++i) { std::cout << aut[i] << " "; }
+//			std::cout << std::endl;
+//			std::cout << validAuts[curAutIndex]->size() << " " << num_vertices(gHost) << std::endl;
+			size_t img =  gens[curAutIndex]->at(vpCore);
+			const auto vpImg = dpoRule.coreVertexToLeftComponentVertex[img];
+			//assert(vpImg.first == compIndex);
+
+			if (vpImg.first == compIndex) {
+				auto vhImg = get(match, compPatternGraph, gHost, vpImg.second);
+	//			std::cout << "\t" << vhImg << std::endl;
+				if (vh > vhImg) {
+					std::cout << "NOT CANON COMP MATCH" << std::endl;
+					 //std::cout << "\t" << vh << " is not canon" << std::endl;
+					return false;
+				}
+			}
+			if (img != vpCore) {
+				assert(static_cast<int>(genSize) >= 0);
+				std::swap(gens[curAutIndex], gens[genSize - 1]);
+				genSize -= 1;
+			} else {
+				curAutIndex += 1;
+			}
+		}
+		if (genSize == 0)  {
+			// std::cout << "\tNO MORE AUTS" << std::endl;
+			return true;
+		}
+		// std::cout << "\tFixed " << vh << " remaining auts: " << validAutSize << std::endl;
+	}
+	return true;
+}
+
 bool isCanonComponentMatch(const Real& rule,
                            size_t compIndex,
                            const Graph::LabelledGraph& host,
@@ -124,17 +184,21 @@ CanonMatch::CanonMatch(const std::vector<const Graph::Single *>& hosts,
 
 bool CanonMatch::pushFast(const ComponentMatch& cm, size_t hostIndex) {
 	const auto& host = *hosts[hostIndex];
+//	std::cout << "pushFast on " << hostIndex << "/" << hosts.size() << std::endl;
 	if (hosts.size() > auts.size()) {
+//		std::cout << "pushing new gens" << std::endl;
 		const auto& gens = host.getAutGroup(labelSettings.type, labelSettings.withStereo);
 		const auto genPtrs = gens.generator_ptrs();
-		auts.emplace_back(genPtrs.begin(), genPtrs.end());
+		// the first perm is the identity
+		auts.emplace_back(genPtrs.begin()+1, genPtrs.end());
 		autSize.push_back(auts[hostIndex].size());
 		assert(hosts.size() == auts.size());
 		assert(hosts.size() == autSize.size());
+		assert(hostIndex == hosts.size() - 1);
 	}
 
-	const auto& validAuts = auts[hostIndex];
-	size_t validAutSize = autSize[hostIndex];
+	auto& validAuts = auts[hostIndex];
+	size_t& validAutSize = autSize[hostIndex];
 
 	pushedStack.push_back(PushedFixes{hostIndex, validAutSize});
 	if (validAutSize == 0) {
@@ -145,9 +209,40 @@ bool CanonMatch::pushFast(const ComponentMatch& cm, size_t hostIndex) {
 	const auto& lgRule = get_labelled_left(dpoRule);;
 	const auto& gRule = get_graph(get_component_graph_v2(cm.componentIndex, lgRule));
 	const auto& gHost = get_graph(cm.host->getLabelledGraph());
+//	std::cout << "CHECKING CANONICITY with " << validAutSize << " auts" << std::endl;
 
 	for (auto vp : asRange(vertices(gRule))) {
 		auto vh = get(*cm.morphism, gRule, gHost, vp);
+//		std::cout << vp << ": " << vh << std::endl;
+		size_t curAutIndex = 0;
+		while (curAutIndex < validAutSize) {
+			const auto& aut = *validAuts[curAutIndex];
+//			for (size_t i = 0; i < aut.size(); ++i) { std::cout << aut[i] << " "; }
+//			std::cout << std::endl;
+//			std::cout << validAuts[curAutIndex]->size() << " " << num_vertices(gHost) << std::endl;
+			assert(validAuts[curAutIndex]->size() == num_vertices(gHost));
+			assert(validAuts[curAutIndex]->size()  > vh);
+			//size_t vhImg =  validAuts[curAutIndex]->at(vh);
+			size_t vhImg =  perm_group::get(*validAuts[curAutIndex], vh);
+//			std::cout << "\t" << vhImg << std::endl;
+			if (vh > vhImg) {
+				 //std::cout << "\t" << vh << " is not canon" << std::endl;
+				return false;
+			}
+			if (vh != vhImg) {
+//				std::cout << "does not fix vh, so we discard " << vh << " " << vhImg << std::endl;
+				assert(static_cast<int>(validAutSize) >= 0);
+				std::swap(validAuts[curAutIndex], validAuts[validAutSize - 1]);
+				validAutSize -= 1;
+			} else {
+				curAutIndex += 1;
+			}
+		}
+		if (validAutSize == 0)  {
+			// std::cout << "\tNO MORE AUTS" << std::endl;
+			return true;
+		}
+		// std::cout << "\tFixed " << vh << " remaining auts: " << validAutSize << std::endl;
 	}
 
 	return true;
@@ -255,6 +350,23 @@ bool CanonMatch::push(const ComponentMatch& cm, size_t hostIndex) {
 		}
 	}
 	return true;
+}
+
+void CanonMatch::popFast() {
+//	std::cout << "POPPING FAST " << hosts.size() << " " << auts.size() << std::endl;
+	assert(pushedStack.size() > 0);
+	const PushedFixes& pf = pushedStack.back();
+	assert(pf.hid < auts.size() && pf.hid < autSize.size());
+	autSize[pf.hid] = pf.oldSize;
+	pushedStack.pop_back();
+
+	if (hosts.size() < auts.size()) {
+		autSize.pop_back();
+		auts.pop_back();
+	}
+	assert(hosts.size() == auts.size());
+	assert(hosts.size() == autSize.size());
+
 }
 
 void CanonMatch::pop() {

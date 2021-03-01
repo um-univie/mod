@@ -12,6 +12,11 @@ bool isCanonComponentMatch(const Real& rule,
                            const Graph::LabelledGraph& host,
                            const ComponentMatch::Morphism& match);
 
+bool isCanonComponentMatchFast(const Real& rule,
+                           size_t compIndex,
+                           const Graph::LabelledGraph& host,
+                           const ComponentMatch::Morphism& match);
+
 class CanonMatch {
 public:
 	CanonMatch(const std::vector<const Graph::Single *>& hosts, const Rules::Real& rule,
