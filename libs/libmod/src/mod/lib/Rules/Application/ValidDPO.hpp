@@ -47,7 +47,7 @@ bool isValidDPOMatch(const Rules::LabelledRule& rule,
 				}
 
 				if (edge(vhSrc, vhTar, gHost).second) {
-					std::cout << "Invalid map: Results in parallel edges." << std::endl;
+//					std::cout << "Invalid map: Results in parallel edges." << std::endl;
 					return false;
 				}
 			}

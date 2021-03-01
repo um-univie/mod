@@ -54,7 +54,7 @@ bool isCanonComponentMatchFast(const Real& rule,
 				auto vhImg = get(match, compPatternGraph, gHost, vpImg.second);
 	//			std::cout << "\t" << vhImg << std::endl;
 				if (vh > vhImg) {
-					std::cout << "NOT CANON COMP MATCH" << std::endl;
+//					std::cout << "NOT CANON COMP MATCH" << std::endl;
 					 //std::cout << "\t" << vh << " is not canon" << std::endl;
 					return false;
 				}
