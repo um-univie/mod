@@ -14,7 +14,7 @@ bool Basic::isValid(const Real& rule,
 		bool hasMatch = false;
 		for (size_t gid = 0; gid < universe.size(); ++gid) {
 			const Graph::Single* host = universe[gid];
-			hasMatch = isMonomorphic(rule.getDPORule(), cid, host->getLabelledGraph(),
+			hasMatch = isMonomorphic(rule, cid, host->getLabelledGraph(),
 			                         labelSettings);
 			if (hasMatch) {
 				if (gid < numSubsetGraphs) {
@@ -54,7 +54,7 @@ Basic::getMatches(const Real& rule,
 
 			bool isSubset = (gid < numSubsetGraphs);
 			auto key = std::make_pair(universe[gid], cid);
-			matches[key] = enumerateMonomorphisms(rule.getDPORule(), cid, host, labelSettings);
+			matches[key] = enumerateMonomorphisms(rule, cid, host, labelSettings);
 			for (const auto& m : matches[key]) {
 				out.push_back(ComponentMatch(cid, isSubset, universe[gid], m));
 			}

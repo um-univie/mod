@@ -8,6 +8,7 @@
 #include <mod/lib/Graph/LabelledGraph.hpp>
 #include <jla_boost/graph/morphism/models/Vector.hpp>
 #include <mod/lib/IO/IO.hpp>
+#include <mod/lib/Rules/Application/CanonMatch.hpp>
 
 namespace mod::lib::Rules::Application {
 
@@ -46,6 +47,8 @@ private:
 	std::vector<bool> addedGraph;
 	Morphism morphism;
 	IO::Logger logger;
+
+	CanonMatch canonMatch;
 };
 
 }

@@ -19,7 +19,8 @@ namespace mod::lib::Rules::Application {
 
 PartialMatch::PartialMatch(const Rules::Real& rule): rule(rule),
     morphism(get_left(rule.getDPORule()), get_graph(hosts)),
-    logger(std::cout) {}
+    logger(std::cout),
+    canonMatch(lhs, rule, LabelSettings{LabelType::String, LabelRelation::Isomorphism}) {}
 
 size_t PartialMatch::updateHostGraph(const ComponentMatch& cm) {
 	std::pair<const Graph::Single*, size_t> hostKey = std::make_pair(cm.host, cm.graphInstance);
@@ -42,6 +43,7 @@ size_t PartialMatch::updateHostGraph(const ComponentMatch& cm) {
 
 std::pair<bool, bool> PartialMatch::tryPush(const ComponentMatch& cm) {
 	assert(!isFull());
+//	std::cout << "pushing partial match" << std::endl;
 
 	compMatches.push_back(cm);
 
@@ -53,6 +55,13 @@ std::pair<bool, bool> PartialMatch::tryPush(const ComponentMatch& cm) {
 	size_t hostIndex = updateHostGraph(cm);
 	assert(hostIndex < get_graph(hosts).size());
 
+	if (getConfig().application.useCanonicalMatches.get()){
+		if (!canonMatch.push(cm, hostIndex)) {
+			// std::cout << "NOT CANON MATCH" << std::endl;
+			this->pop();
+			return std::make_pair(false, false);
+		}
+	}
 
 	const auto& compPatternGraph = get_graph(get_component_graph_v2(cm.componentIndex, lRule));
 	const auto& compHostGraph = get_graph(cm.host->getLabelledGraph());
@@ -80,10 +89,12 @@ std::pair<bool, bool> PartialMatch::tryPush(const ComponentMatch& cm) {
 		return std::make_pair(false, false);
 	}
 
+
 	return std::make_pair(true, addedGraph.back());
 }
 
 void PartialMatch::pop() {
+//	std::cout << "popping partial match" << std::endl;
 	assert(compMatches.size() > 0);
 	const auto& cm = compMatches.back();
 
@@ -113,6 +124,10 @@ void PartialMatch::pop() {
 
 	addedGraph.pop_back();
 	compMatches.pop_back();
+
+	if (getConfig().application.useCanonicalMatches.get()){
+		canonMatch.pop();
+	}
 }
 
 bool PartialMatch::isFull() const {

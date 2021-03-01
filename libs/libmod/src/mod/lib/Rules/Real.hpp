@@ -71,7 +71,7 @@ private:
 
 public: // experimental rule autgroup
 	const Rules::AutGroup &getAutGroup() const;
-	mutable std::unique_ptr<Rules::AutGroup> aut_group;
+	mutable std::unique_ptr<const Rules::AutGroup> aut_group;
 };
 
 struct LessById {
