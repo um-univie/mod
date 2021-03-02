@@ -248,7 +248,8 @@ struct Config {
         ((int, derivationVerbosity, 0))                                             \
         ((bool, applyAssumeConfluence, false))                                      \
         ((int, applyLimit, -1))                                                     \
-    ))                                                                              \
+	    ((bool, doRuleIsomorphism, true))                                                     \
+	))                                                                              \
     ((Graph, graph,                                                                 \
         ((bool, smilesCheckAST, false))                                             \
         ((bool, ignoreStereoInSmiles, false))                                       \

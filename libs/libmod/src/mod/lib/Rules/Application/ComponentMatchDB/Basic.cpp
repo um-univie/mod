@@ -3,7 +3,7 @@
 
 namespace mod::lib::Rules::Application::ComponentMatchDB {
 
-Basic::Basic(const LabelSettings& labelSettings): labelSettings(labelSettings) {};
+Basic::Basic(const LabelSettings& labelSettings): labelSettings(labelSettings) {}
 
 bool Basic::isValid(const Real& rule,
                     size_t numSubsetGraphs,

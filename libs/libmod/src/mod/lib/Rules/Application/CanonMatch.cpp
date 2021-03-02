@@ -42,7 +42,7 @@ bool isCanonComponentMatchFast(const Real& rule,
 //		std::cout << vp << ": " << vh << std::endl;
 		size_t curAutIndex = 0;
 		while (curAutIndex < genSize) {
-			const auto& aut = *gens[curAutIndex];
+//			const auto& aut = *gens[curAutIndex];
 //			for (size_t i = 0; i < aut.size(); ++i) { std::cout << aut[i] << " "; }
 //			std::cout << std::endl;
 //			std::cout << validAuts[curAutIndex]->size() << " " << num_vertices(gHost) << std::endl;
@@ -216,7 +216,7 @@ bool CanonMatch::pushFast(const ComponentMatch& cm, size_t hostIndex) {
 //		std::cout << vp << ": " << vh << std::endl;
 		size_t curAutIndex = 0;
 		while (curAutIndex < validAutSize) {
-			const auto& aut = *validAuts[curAutIndex];
+//			const auto& aut = *validAuts[curAutIndex];
 //			for (size_t i = 0; i < aut.size(); ++i) { std::cout << aut[i] << " "; }
 //			std::cout << std::endl;
 //			std::cout << validAuts[curAutIndex]->size() << " " << num_vertices(gHost) << std::endl;

@@ -25,6 +25,6 @@ public:
 	int graphInstance;
 };
 
-};
+}
 
 #endif

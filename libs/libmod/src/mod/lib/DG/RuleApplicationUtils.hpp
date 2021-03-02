@@ -100,11 +100,13 @@ template<typename Iter, typename OnOutput>
 						if(!brOutput.rule->isOnlyRightSide()) {
 							// check if we have it already
 							brOutput.makeCanonical();
-							for(const BoundRule &brStored : outputRules) {
-								if(brStored.isomorphicTo(brOutput, labelSettings)) {
-									delete brOutput.rule;
-									++numDup;
-									return true;
+							if (mod::getConfig().dg.doRuleIsomorphism.get()) {
+								for(const BoundRule &brStored : outputRules) {
+									if(brStored.isomorphicTo(brOutput, labelSettings)) {
+										delete brOutput.rule;
+										++numDup;
+										return true;
+									}
 								}
 							}
 							// we store a copy of the bound info so the user can mess with their copy
@@ -170,9 +172,12 @@ struct BoundRuleStorage {
 					}
 				}
 				if(doContinue) continue;
-				found = 1 == lib::Rules::Real::isomorphism(*r, *rp.rule, 1,
-				                                           {labelType, LabelRelation::Isomorphism, withStereo,
-				                                            LabelRelation::Isomorphism});
+
+				if (mod::getConfig().dg.doRuleIsomorphism.get()) {
+					found = 1 == lib::Rules::Real::isomorphism(*r, *rp.rule, 1,
+					                                           {labelType, LabelRelation::Isomorphism, withStereo,
+					                                            LabelRelation::Isomorphism});
+				}
 				if(found) break;
 			}
 		}
