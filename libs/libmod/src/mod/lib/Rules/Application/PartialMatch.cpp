@@ -56,10 +56,19 @@ std::pair<bool, bool> PartialMatch::tryPush(const ComponentMatch& cm) {
 	assert(hostIndex < get_graph(hosts).size());
 
 	if (getConfig().application.useCanonicalMatches.get()) {
-		if (!canonMatch.pushFast(cm, hostIndex)) {
-			// std::cout << "NOT CANON MATCH" << std::endl;
-			this->pop();
-			return std::make_pair(false, false);
+		if (getConfig().application.useCanonicalMatchesExhaustive.get()) {
+			if (!canonMatch.push(cm, hostIndex)) {
+				// std::cout << "NOT CANON MATCH" << std::endl;
+				this->pop();
+				return std::make_pair(false, false);
+			}
+
+		} else {
+			if (!canonMatch.pushFast(cm, hostIndex)) {
+				// std::cout << "NOT CANON MATCH" << std::endl;
+				this->pop();
+				return std::make_pair(false, false);
+			}
 		}
 	}
 
@@ -126,7 +135,11 @@ void PartialMatch::pop() {
 	compMatches.pop_back();
 
 	if (getConfig().application.useCanonicalMatches.get()){
-		canonMatch.popFast();
+		if (getConfig().application.useCanonicalMatchesExhaustive.get()) {
+			canonMatch.pop();
+		} else {
+			canonMatch.popFast();
+		}
 	}
 }
 

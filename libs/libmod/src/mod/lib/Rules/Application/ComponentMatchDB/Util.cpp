@@ -96,12 +96,22 @@ std::vector<ComponentMatch::Morphism> enumerateMonomorphisms(const Real& real,
 	                                                  std::ref(mr));
 	// should really be in the matchChecker... but I don't want to use a template for this..
 	if (getConfig().application.useCanonicalMatches.get()) {
-		morphisms.erase(std::remove_if(morphisms.begin(),
-		                               morphisms.end(),
-		                               [&](const ComponentMatch::Morphism& m){
-			return !isCanonComponentMatchFast(real, componentIndex, host, m);
-		}),
-		                morphisms.end());
+		if (getConfig().application.useCanonicalMatchesExhaustive.get()) {
+			morphisms.erase(std::remove_if(morphisms.begin(),
+			                               morphisms.end(),
+			                               [&](const ComponentMatch::Morphism& m){
+				return !isCanonComponentMatch(real, componentIndex, host, m);
+			}),
+			                morphisms.end());
+
+		} else {
+			morphisms.erase(std::remove_if(morphisms.begin(),
+			                               morphisms.end(),
+			                               [&](const ComponentMatch::Morphism& m){
+				return !isCanonComponentMatchFast(real, componentIndex, host, m);
+			}),
+			                morphisms.end());
+		}
 	}
 	//std::cout << "FOUND " << morphisms.size() << std::endl;;
 	return morphisms;

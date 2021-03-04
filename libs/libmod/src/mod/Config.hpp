@@ -279,6 +279,7 @@ struct Config {
 	((RuleApplication, application,                                                                   \
 	    ((bool, useCompositionApplication, false))                           \
 	    ((bool, useCanonicalMatches, true))                           \
+	    ((bool, useCanonicalMatchesExhaustive, false))                           \
 	))                                                                              \
 	((RC, rc,                                                                       \
         ((bool, composeConstraints, true))                                          \
