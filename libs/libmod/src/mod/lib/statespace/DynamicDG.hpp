@@ -19,11 +19,10 @@ class DynamicDG {
 	};
 
 	struct CachedState {
-		CachedState(): isComputed(false) {}
+		CachedState() = default;
 		CachedState(DG::GraphMultiset parent, DG::NonHyper::Edge usedEdge):
-		    parent(parent), usedEdge(usedEdge), isComputed(false) {}
+		    parent(parent), usedEdge(usedEdge) {}
 		DG::GraphMultiset parent;
-		bool isComputed;
 		DG::HyperEdge usedEdge;
 		std::vector<DG::HyperEdge> edges;
 	};

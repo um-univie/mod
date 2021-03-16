@@ -702,6 +702,8 @@ bool Builder::load(const std::vector<std::shared_ptr<rule::Rule>> &ruleDatabase,
 	return res;
 }
 
+lib::Rules::GraphAsRuleCache &Builder::getGraphAsRuleCache() const { return dg->graphAsRuleCache; }
+
 bool Builder::trustLoadDump(nlohmann::json &&j,
                             const std::vector<std::shared_ptr<rule::Rule>> &ruleDatabase,
                             std::ostream &err,

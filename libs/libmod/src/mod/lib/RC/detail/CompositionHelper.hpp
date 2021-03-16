@@ -156,19 +156,19 @@ private:
 	}
 
 	void copyVerticesFirst(Result &result, const std::vector<VertexFirst>& copyVertices) {
-		if(Verbose) IO::log() << "copyVerticesFirst\n" << std::string(80, '-') << std::endl;
+		if(Verbose) std::cout << "copyVerticesFirst\n" << std::string(80, '-') << std::endl;
 		auto &rResult = result.rResult;
 		auto &gResult = get_graph(rResult);
 		const auto &gFirst = get_graph(rFirst);
 		const auto &gSecond = get_graph(rSecond);
 		for(const auto vFirst : copyVertices) {
 			if(Verbose) {
-				IO::log() << "rFirst node:\t"
+				std::cout << "rFirst node:\t"
 				             << get(boost::vertex_index_t(), gFirst, vFirst)
 				             << "(" << membership(rFirst, vFirst) << ")"
 				             << "(";
-				visitor.template printVertexFirst(rFirst, rSecond, match, result, IO::log(), vFirst);
-				IO::log() << ")" << std::endl;
+				visitor.template printVertexFirst(rFirst, rSecond, match, result, std::cout, vFirst);
+				std::cout << ")" << std::endl;
 			}
 			const bool getsDeleted = [&]() {
 				// must be only in R to be deleted
@@ -181,7 +181,7 @@ private:
 			}();
 			if(getsDeleted) {
 				put(result.mFirstToResult, gFirst, gResult, vFirst, getNullResult());
-				if(Verbose) IO::log() << "gets deleted" << std::endl;
+				if(Verbose) std::cout << "gets deleted" << std::endl;
 			} else {
 				const auto vResult = add_vertex(gResult);
 				result.mFirstToResult.resizeRight(gFirst, gResult);
@@ -190,11 +190,11 @@ private:
 				put_membership(rResult, vResult, membership(rFirst, vFirst));
 				visitor.template copyVertexFirst<Verbose>(rFirst, rSecond, match, result, vFirst, vResult);
 				if(Verbose) {
-					IO::log() << "new node:\t"
+					std::cout << "new node:\t"
 					             << get(boost::vertex_index_t(), gResult, vResult)
 					             << "(" << membership(rResult, vResult) << ")(";
-					visitor.template printVertexResult(rFirst, rSecond, match, result, IO::log(), vResult);
-					IO::log() << ")" << std::endl;
+					visitor.template printVertexResult(rFirst, rSecond, match, result, std::cout, vResult);
+					std::cout << ")" << std::endl;
 				}
 			}
 		}
@@ -279,7 +279,7 @@ private:
 	}
 
 	bool copyEdgesFirstUnmatched(Result &result, const std::vector<VertexFirst>& copyVertices) {
-		if(Verbose) IO::log() << "copyEdgesFirstUnmatched\n" << std::string(80, '-') << std::endl;
+		if(Verbose) std::cout << "copyEdgesFirstUnmatched\n" << std::string(80, '-') << std::endl;
 		const auto &gFirst = get_graph(rFirst);
 		const auto &gSecond = get_graph(rSecond);
 		auto &rResult = result.rResult;
@@ -293,12 +293,12 @@ private:
 				const auto vSrcResult = get(result.mFirstToResult, gFirst, gResult, vSrcFirst);
 				const auto vTarResult = get(result.mFirstToResult, gFirst, gResult, vTarFirst);
 				// vSrcResult/vTarResult may be null_vertex
-				IO::log() << "Edge first:\t(" << vSrcFirst << ", " << vTarFirst << ") maybe copy to new (" << vSrcResult
+				std::cout << "Edge first:\t(" << vSrcFirst << ", " << vTarFirst << ") maybe copy to new (" << vSrcResult
 				             << ", " << vTarResult << ")"
 				             << "(" << meFirst << ")"
 				             << "(";
-				visitor.template printEdgeFirst(rFirst, rSecond, match, result, IO::log(), eFirst);
-				IO::log() << ")" << std::endl;
+				visitor.template printEdgeFirst(rFirst, rSecond, match, result, std::cout, eFirst);
+				std::cout << ")" << std::endl;
 			}
 			const auto makeCopy = [&]() {
 				const auto vSrcResult = get(result.mFirstToResult, gFirst, gResult, vSrcFirst);
@@ -306,7 +306,7 @@ private:
 				// vResultSrc/vResultTar should be valid at this point
 				assert(vSrcResult != getNullResult());
 				assert(vTarResult != getNullResult());
-				if(Verbose) IO::log() << "\tCopy eFirst" << std::endl;
+				if(Verbose) std::cout << "\tCopy eFirst" << std::endl;
 				const auto peResult = add_edge(vSrcResult, vTarResult, gResult);
 				// adding shouldn't fail
 				assert(peResult.second);
@@ -320,17 +320,17 @@ private:
 			};
 			// and now the actual case analysis
 			if(meFirst == Membership::Left) {
-				if(Verbose) IO::log() << "\teFirst in LEFT, clean copy" << std::endl;
+				if(Verbose) std::cout << "\teFirst in LEFT, clean copy" << std::endl;
 				makeCopy();
 				return true;
 			}
-			if(Verbose) IO::log() << "\teFirst in RIGHT or CONTEXT" << std::endl;
+			if(Verbose) std::cout << "\teFirst in RIGHT or CONTEXT" << std::endl;
 			const auto vSrcSecond = getVertexSecond(vSrcFirst);
 			const auto vTarSecond = getVertexSecond(vTarFirst);
 			const bool isSrcMatched = vSrcSecond != getNullSecond();
 			const bool isTarMatched = vTarSecond != getNullSecond();
 			if(isSrcMatched && isTarMatched) {
-				if(Verbose) IO::log() << "\tBoth ends matched" << std::endl;
+				if(Verbose) std::cout << "\tBoth ends matched" << std::endl;
 				const auto oeSecond = out_edges(vSrcSecond, gSecond);
 				const auto eSecondIter = std::find_if(oeSecond.first, oeSecond.second,
 				                                                  [&gSecond, vTarSecond, this](const auto &eSecond) {
@@ -343,12 +343,12 @@ private:
 				if(isEdgeMatched) {
 					const auto eSecond = *eSecondIter;
 					if(meFirst == Membership::Right) {
-						if(Verbose) IO::log() << "\teFirst matched and in RIGHT, skipping" << std::endl;
+						if(Verbose) std::cout << "\teFirst matched and in RIGHT, skipping" << std::endl;
 						return true;
 					}
 
 					if(Verbose)
-						IO::log() << "\teFirst matched and in CONTEXT, copying to LEFT or CONTEXT (depending on eSecond ("
+						std::cout << "\teFirst matched and in CONTEXT, copying to LEFT or CONTEXT (depending on eSecond ("
 						             << membership(rSecond, eSecond) << "))" << std::endl;
 					const auto vSrcResult = get(result.mFirstToResult, gFirst, gResult, vSrcFirst);
 					const auto vTarResult = get(result.mFirstToResult, gFirst, gResult, vTarFirst);
@@ -373,7 +373,7 @@ private:
 				// vSrcResult/vTarResult may be null_vertex
 				const bool endPointDeleted = vSrcResult == getNullResult() || vTarResult == getNullResult();
 				if(endPointDeleted) {
-					if(Verbose) IO::log() << "\tComposition failure: at least one matched vertex deleted" << std::endl;
+					if(Verbose) std::cout << "\tComposition failure: at least one matched vertex deleted" << std::endl;
 					return false;
 				}
 
@@ -382,43 +382,43 @@ private:
 				const auto mvTarResult = membership(rResult, vTarResult);
 				if(mvSrcResult == Membership::Left || mvTarResult == Membership::Left) {
 					if(Verbose)
-						IO::log() << "\tComposition failure: at least one matched vertex has inconsistent context ("
+						std::cout << "\tComposition failure: at least one matched vertex has inconsistent context ("
 						             << mvSrcResult << " and " << mvTarResult << "), eFirst is (" << meFirst << ")" << std::endl;
 					return false;
 				}
 
-				if(Verbose) IO::log() << "\teFirst not matched and not dangling" << std::endl;
+				if(Verbose) std::cout << "\teFirst not matched and not dangling" << std::endl;
 				makeCopy();
 				return true;
 			}
 
 			// at most 1 end matched
 			if(isSrcMatched != isTarMatched) {
-				if(Verbose) IO::log() << "\tOne end matched" << std::endl;
+				if(Verbose) std::cout << "\tOne end matched" << std::endl;
 				const auto vSrcResult = get(result.mFirstToResult, gFirst, gResult, vSrcFirst);
 				const auto vTarResult = get(result.mFirstToResult, gFirst, gResult, vTarFirst);
 				// vResultSrc/vResultTar may be null_vertex
 				const auto vResultMatched = isSrcMatched ? vSrcResult : vTarResult;
 				const bool matchedDeleted = vResultMatched == boost::graph_traits<GraphResult>::null_vertex();
 				if(matchedDeleted) {
-					if(Verbose) IO::log() << "\tComposition failure: matched vertex deleted" << std::endl;
+					if(Verbose) std::cout << "\tComposition failure: matched vertex deleted" << std::endl;
 					return false;
 				}
 				// matched, but is it consistent?
 				const auto mvMatchedResult = membership(rResult, vResultMatched);
 				if(mvMatchedResult == Membership::Left) {
 					if(Verbose)
-						IO::log() << "\tComposition failure: matched vertex has inconsistent context ("
+						std::cout << "\tComposition failure: matched vertex has inconsistent context ("
 						             << mvMatchedResult << "), eFirst is (" << meFirst << ")" << std::endl;
 					return false;
 				}
 
-				if(Verbose) IO::log() << "\teFirst not matched and not dangling" << std::endl;
+				if(Verbose) std::cout << "\teFirst not matched and not dangling" << std::endl;
 				makeCopy();
 				return true;
 			}
 
-			if(Verbose) IO::log() << "\tNo ends matched" << std::endl;
+			if(Verbose) std::cout << "\tNo ends matched" << std::endl;
 			makeCopy();
 			return true;
 		};

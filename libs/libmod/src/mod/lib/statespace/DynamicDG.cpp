@@ -88,7 +88,6 @@ public:
 		const auto &lgHosts = get_labelled_right(rHosts.getDPORule());
 		const auto &gHosts = get_graph(lgHosts);
 		const auto vNullHosts = boost::graph_traits<RightGraphType>::null_vertex();
-		const auto vNullPatterns = boost::graph_traits<LeftGraphType>::null_vertex();
 
 		timesGraphAdded[partialMap.hostId] -= 1;
 
@@ -193,7 +192,6 @@ std::vector<DerivationRule> composeRules(const std::vector<Graph::Single *>& hos
                                                        IO::Logger& logger) {
 	std::vector<DerivationRule> rDerivations;
 	size_t nPatterns = rPatterns.getDPORule().numLeftComponents;
-	size_t nHosts = rHosts.getDPORule().numRightComponents;
 
 	for (size_t pid = 0; pid < nPatterns; pid++) {
 		if (maps[pid].size() == 0) {
@@ -316,7 +314,7 @@ DynamicDG::findNewEdges(const std::vector<const Graph::Single *>& graphs,
 			compMatches[curPid] = std::move(filteredMatches);
 			curPid = dm.pid;
 		}
-		bool success = partialMatch.push(*dm.cm);
+		bool success = partialMatch.push(*dm.cm, dgBuilder.getGraphAsRuleCache());
 		if (!success) {
 			partialMatch.pop();
 			continue;
@@ -372,7 +370,7 @@ DynamicDG::findNewEdges(const std::vector<const Graph::Single *>& graphs,
 				if (verbosity > 0) {
 					std::cout << "pushing " << pid << ", " << mid << compMatches[pid][mid] << std::endl;
 				}
-				success = partialMatch.push(compMatches[pid][mid]);
+				success = partialMatch.push(compMatches[pid][mid], dgBuilder.getGraphAsRuleCache());
 			}
 			if (success) {
 				if (stack.size() == compMatches.size()){
@@ -423,7 +421,7 @@ public:
 };
 
 DynamicDG::CachedRule::CachedRule(const Rules::Real *rule, DynamicDG& ddg):
-    rule(rule), ddg(ddg), hasMatch(rule->getDPORule().numLeftComponents) {
+		hasMatch(rule->getDPORule().numLeftComponents), rule(rule), ddg(ddg) {
 	using Vertex = lib::Graph::Vertex;
 	using Edge = lib::Graph::Edge;
 	using SideVertex = boost::graph_traits<lib::Rules::DPOProjection>::vertex_descriptor;
@@ -555,7 +553,7 @@ bool DynamicDG::CachedRule::isCanonMatch(size_t pid, const ComponentMatch::Verte
 	};
 	fixed_vertices fv;
 	const auto& dpoRule = rule->getDPORule();
-	const auto& dpoHost = g->getBindRule()->getRule().getDPORule();
+	const auto& dpoHost = ddg.dgBuilder.getGraphAsRuleCache().getBindRule(g)->getRule().getDPORule();
 	const auto& lgRule = get_labelled_left(dpoRule);;
 	const auto& lgHost = get_labelled_right(dpoHost);
 	const auto& gRule = get_graph(lgRule);
@@ -617,49 +615,9 @@ bool DynamicDG::CachedRule::isCanonMatch(size_t pid, const ComponentMatch::Verte
 
 void DynamicDG::CachedRule::storeMatches(const Graph::Single *graph) {
 	const auto& dpoRule = rule->getDPORule();
-	const auto& dpoHost = graph->getBindRule()->getRule().getDPORule();
+	const auto& dpoHost = ddg.dgBuilder.getGraphAsRuleCache().getBindRule(graph)->getRule().getDPORule();
 	const auto& lgRule = get_labelled_left(dpoRule);;
 	const auto& lgHost = get_labelled_right(dpoHost);
-	const auto& gRule = get_graph(lgRule);
-	const auto& gHost = get_graph(lgHost);
-
-	auto getReactionCenter = [&] (size_t pid, const ComponentMatch::VertexMap& map) {
-		using jla_boost::GraphDPO::Membership;
-		const auto& gp = get_component_graph(pid, lgRule);
-		std::vector<size_t> reactionCenter;
-		for (auto v : asRange(vertices(gp))) {
-			auto vHost = get(map, gRule, gHost, v);
-			bool isRC = false;
-			if (membership(dpoRule, v) != Membership::Context) {
-				isRC = true;
-			} else {
-				for (auto e : asRange(out_edges(v, get_graph(dpoRule)))){
-					if (membership(dpoRule, e) != Membership::Context) {
-						isRC = true;
-						break;
-					}
-				}
-			}
-			if (!isRC) {
-				if (dpoRule.pString->getLeft()[v] != dpoRule.pString->getRight()[v])  {
-					isRC = true;
-				} else {
-					for (auto e : asRange(out_edges(v, get_graph(dpoRule)))){
-						if (dpoRule.pString->getLeft()[e] != dpoRule.pString->getRight()[e])  {
-							        isRC = true;
-									break;
-						}
-					}
-
-				}
-			}
-			if (isRC) {
-				reactionCenter.push_back(vHost);
-			}
-
-		}
-		return reactionCenter;
-	};
 
 	if (ddg.verbosity > 0) {
 		std::cout << "SAVING MATCHES FOR " << graph->getName() << std::endl;
@@ -712,7 +670,7 @@ DynamicDG::CachedRule::getMatches(const std::vector<const Graph::Single *>& grap
 	size_t hid = 0;
 	for (const Graph::Single *g : graphs) {
 		const auto& dpoRule = rule->getDPORule();
-		const auto& dpoHost = g->getBindRule()->getRule().getDPORule();
+		const auto& dpoHost = ddg.dgBuilder.getGraphAsRuleCache().getBindRule(g)->getRule().getDPORule();
 		const auto& lgRule = get_labelled_left(dpoRule);;
 		const auto& lgHost = get_labelled_right(dpoHost);
 
@@ -933,7 +891,6 @@ DynamicDG::updateRuleAndCache( const Rules::Real& rHosts,
 	std::vector<std::shared_ptr<RuleApplication>> out;
 	std::cout << "UPDATING RULE WITH MAP " << usedAppMap << std::endl;
 
-	const auto &lgHosts = get_labelled_right(rHosts.getDPORule());
 	const auto &gHosts = get_graph(get_labelled_right(rHosts.getDPORule()));
 	std::vector<size_t> reactionCenterVertices = usedAppMap.getProjectedReactionCenter();
 	std::cout << "FOUND REACTION CENTER: ";
@@ -1169,7 +1126,6 @@ DynamicDG::applyRuleAndCache(const std::vector<const Graph::Single *>& hosts,
                                       IO::Logger& logger
                                       ) {
 	size_t nPatterns = rPatterns.getDPORule().numLeftComponents;
-	size_t nHosts = rHosts.getDPORule().numRightComponents;
 	std::vector<std::shared_ptr<RuleApplication>> out;
 	std::cout << "NUM Patterns: " << nPatterns << " npattern vertices: " << num_vertices(get_graph(rPatterns.getDPORule())) << std::endl;
 

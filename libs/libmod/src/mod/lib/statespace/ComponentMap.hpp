@@ -73,7 +73,6 @@ bool isValidComponentMap(const Rules::LabelledRule& rHosts,
                          IO::Logger& logger) {
 	    using jla_boost::GraphDPO::Membership;
 	    const auto &lgPatterns = get_labelled_left(rPatterns);
-		const auto &gPatterns = get_graph(lgPatterns);
 
 		const auto &lgHosts = get_labelled_right(rHosts);
 		const auto &gHosts = get_graph(rHosts);

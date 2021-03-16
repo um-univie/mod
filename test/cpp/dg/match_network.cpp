@@ -1,16 +1,11 @@
 #include <mod/Config.hpp>
 #include <mod/Derivation.hpp>
-#include <mod/Error.hpp>
 #include <mod/graph/Graph.hpp>
-#include <mod/dg/Builder.hpp>
-#include <mod/dg/DG.hpp>
 #include <mod/rule/Rule.hpp>
 #include <mod/graph/Printer.hpp>
-#include <mod/dg/Printer.hpp>
 #include <mod/lib/statespace/MatchNetwork.hpp>
 
 #include <iostream>
-#include <set>
 
 #undef NDEBUG
 

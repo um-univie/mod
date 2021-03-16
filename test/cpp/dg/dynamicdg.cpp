@@ -1,6 +1,5 @@
 #include <mod/Config.hpp>
 #include <mod/Derivation.hpp>
-#include <mod/Error.hpp>
 #include <mod/graph/Graph.hpp>
 #include <mod/dg/Builder.hpp>
 #include <mod/dg/DG.hpp>

@@ -193,6 +193,8 @@ MatchNetwork::MatchNetwork(const std::vector<const Rules::Real *>& rules,
 
 }
 
+MatchNetwork::~MatchNetwork() = default;
+
 bool MatchNetwork::containsPattern(Vertex v, const Graph::Single *host) {
 	if (graph[v].isEmbeddable.find(host) != graph[v].isEmbeddable.end())  {
 		return graph[v].isEmbeddable[host];

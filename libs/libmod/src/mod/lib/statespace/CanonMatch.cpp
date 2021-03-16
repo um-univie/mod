@@ -4,6 +4,7 @@
 #include <mod/lib/statespace/GeneratingSystem.hpp>
 #include <mod/lib/Rules/Real.hpp>
 #include <mod/rule/Rule.hpp>
+#include <mod/lib/Rules/GraphAsRuleCache.hpp>
 
 #include <perm_group/orbit.hpp>
 
@@ -13,7 +14,7 @@ CanonMatch::CanonMatch(const std::vector<const Graph::Single *>& hosts,
                        const Rules::Real& rule, LabelSettings ls): hosts(hosts), rule(rule),
                         hostFixes(hosts.size()), pushedStack(), labelSettings(ls) {}
 
-bool CanonMatch::push(const ComponentMatch& cm) {
+bool CanonMatch::push(const ComponentMatch& cm, lib::Rules::GraphAsRuleCache &graphAsRule) {
 	assert(cm.getHostId() < hostFixes.size());
 
 	auto& fixVec = hostFixes[cm.getHostId()];
@@ -21,7 +22,7 @@ bool CanonMatch::push(const ComponentMatch& cm) {
 	const Graph::Single *host = hosts[cm.getHostId()];
 
 	const auto& dpoRule = rule.getDPORule();
-	const auto& dpoHost = host->getBindRule()->getRule().getDPORule();
+	const auto& dpoHost = graphAsRule.getBindRule(host)->getRule().getDPORule();
 	const auto& lgRule = get_labelled_left(dpoRule);;
 	const auto& lgHost = get_labelled_right(dpoHost);
 	const auto& gRule = get_graph(lgRule);

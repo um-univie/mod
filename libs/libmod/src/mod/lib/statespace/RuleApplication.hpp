@@ -3,6 +3,7 @@
 
 #include <mod/lib/Rules/LabelledRule.hpp>
 #include <mod/lib/Rules/Real.hpp>
+#include <mod/lib/Rules/GraphAsRuleCache.hpp>
 #include <jla_boost/graph/morphism/models/Vector.hpp>
 #include <mod/lib/statespace/ComponentMap.hpp>
 #include <mod/lib/DG/NonHyper.hpp>
@@ -23,7 +24,7 @@ public:
 	             IO::Logger& logger);
 
 
-	bool push(const ComponentMatch& cm);
+	bool push(const ComponentMatch& cm, lib::Rules::GraphAsRuleCache &graphAsRule);
 	bool empty() const;
 	void pop();
 	std::unique_ptr<Rules::Real> apply() const;

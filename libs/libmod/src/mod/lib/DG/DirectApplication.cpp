@@ -28,7 +28,6 @@ bool isValidComponentMap(const Rules::LabelledRule& rHosts,
                          IO::Logger& logger) {
 	    using jla_boost::GraphDPO::Membership;
 	    const auto &lgPatterns = get_labelled_left(rPatterns);
-		const auto &gPatterns = get_graph(lgPatterns);
 
 		const auto &lgHosts = get_labelled_right(rHosts);
 		const auto &gHosts = get_graph(rHosts);
@@ -114,7 +113,6 @@ public:
 		const auto &lgHosts = get_labelled_right(rHosts.getDPORule());
 		const auto &gHosts = get_graph(lgHosts);
 		const auto vNullHosts = boost::graph_traits<RightGraphType>::null_vertex();
-		const auto vNullPatterns = boost::graph_traits<LeftGraphType>::null_vertex();
 
 		const auto &gp = get_component_graph(partialMap.componentId, lgPatterns);
 		for (const auto vp : asRange(vertices(gp))) {
@@ -174,8 +172,7 @@ std::vector<std::vector<ComponentMonomorphism>> computeMorphisms(const Rules::Re
 
 	for (size_t pid = 0; pid < nPatterns; pid++) {
 		for (size_t hid = 0; hid < nHosts; hid++) {
-			bool ignoreContexts = false;
-			auto morphisms = mm(pid, hid, ignoreContexts);
+			auto morphisms = mm(pid, hid);
 			for (auto& m : morphisms) {
 				maps[pid].push_back(ComponentMonomorphism(std::move(m), hid, pid));
 				bool isValid = isValidComponentMap(rHosts.getDPORule(),

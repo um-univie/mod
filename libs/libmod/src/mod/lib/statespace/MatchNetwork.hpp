@@ -7,7 +7,7 @@
 
 namespace mod::lib::statespace {
 
-class MatchNetwork {
+class MOD_DECL MatchNetwork {
 	struct RulePatternIdx {
 		size_t ruleIdx, patternIdx;
 	};
@@ -34,6 +34,7 @@ public:
 
 	MatchNetwork(const std::vector<const Rules::Real *>& rules,
 	             LabelSettings labelSettings);
+	~MatchNetwork();
 	std::vector<size_t> getValidRules(const std::vector<const Graph::Single *>& hosts);
 private:
 	bool containsPattern(Vertex v, const Graph::Single *host);

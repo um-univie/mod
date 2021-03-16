@@ -31,7 +31,7 @@ PartialMatch::lhs(const std::vector<const Graph::Single *>& graphs) const {
 	return lhs;
 }
 
-bool PartialMatch::push(const ComponentMatch& cm) {
+bool PartialMatch::push(const ComponentMatch& cm, lib::Rules::GraphAsRuleCache &graphAsRule) {
 	const auto& gPatterns = getPatternsGraph();
 	const auto& gHosts = getHostsGraph();
 
@@ -39,7 +39,7 @@ bool PartialMatch::push(const ComponentMatch& cm) {
 
 	const auto &gp = get_component_graph(cm.patternId,
 	                                     get_labelled_left(rPatterns.getDPORule()));
-	bool isCanon = canonMatch.push(cm);
+	bool isCanon = canonMatch.push(cm, graphAsRule);
 	for (const auto vp : asRange(vertices(gp))) {
 		assert(get(map, gPatterns, gHosts, vp) == getHostsNullVertex());
 		const auto vh = cm[vp];
@@ -219,7 +219,6 @@ RuleApplicationMap::getLeftGraphs(const std::vector<const Graph::Single *>& grap
 std::vector<size_t> RuleApplicationMap::getProjectedReactionCenter() const {
 	using jla_boost::GraphDPO::Membership;
 	const auto &gPatterns = get_graph(rPatterns.getDPORule());
-	const auto &gHosts = get_graph(rHosts.getDPORule());
 
 	const auto &lgr = rPatterns.getDPORule();
 

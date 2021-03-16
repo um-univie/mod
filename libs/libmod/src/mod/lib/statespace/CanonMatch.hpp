@@ -4,13 +4,17 @@
 #include <mod/lib/Graph/Single.hpp>
 #include <mod/lib/statespace/ComponentMap.hpp>
 
+namespace mod::lib::Rules {
+struct Real;
+struct GraphAsRuleCache;
+} // mod::lib::Rules
 namespace mod::lib::statespace {
 
 class CanonMatch {
 public:
 	CanonMatch(const std::vector<const Graph::Single *>& hosts, const Rules::Real& rule,
 	           LabelSettings ls);
-	bool push(const ComponentMatch& cm);
+	bool push(const ComponentMatch& cm, lib::Rules::GraphAsRuleCache &graphAsRule);
 	void pop();
 private:
 	const std::vector<const Graph::Single *>& hosts;

@@ -59,6 +59,8 @@ public:
 	bool load(const std::vector<std::shared_ptr<rule::Rule>> &ruleDatabase,
 	          const std::string &file, std::ostream &err, int verbosity);
 public:
+	lib::Rules::GraphAsRuleCache &getGraphAsRuleCache() const;
+public:
 	// load a dump, without checking label settings
 	// returns false if it did not go well
 	bool trustLoadDump(nlohmann::json &&j,
