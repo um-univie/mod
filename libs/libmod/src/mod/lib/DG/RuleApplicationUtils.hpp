@@ -68,6 +68,7 @@ template<typename Iter, typename OnOutput>
 		Rules::GraphAsRuleCache &graphAsRuleCache,
 		const LabelSettings labelSettings,
 		OnOutput onOutput) {
+	throw FatalError(std::string(__func__) + " disaabled");
 	if(verbosity >= V_RuleApplication) {
 		logger.indent() << "Bind round " << (bindRound + 1) << " with "
 		                << (lastGraph - firstGraph) << " graphs "
