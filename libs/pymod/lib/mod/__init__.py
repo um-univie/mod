@@ -345,7 +345,7 @@ class DGBuildContextManager:
 
 	def apply2(self, graphs, rule, verbosity=0, graphPolicy=IsomorphismPolicy.Check) -> List[DGHyperEdge]:
 		assert self._builder
-		return _unwrap(self._builder.apply2(_wrap(libpymod._VecGraph, graphs), rule))
+		return _unwrap(self._builder.apply2(_wrap(libpymod._VecGraph, graphs), rule))  # type: ignore
 
 	def addAbstract(self, description: str) -> None:
 		assert self._builder
@@ -728,8 +728,8 @@ Rule.__hash__ = lambda self: self.id  # type: ignore
 def makeDynamicDG(dg, rules):
 	return libpymod.DynamicDG.make(dg, _wrap(libpymod._VecRule, rules))
 
-_DynamicDG_apply = libpymod.DynamicDG.apply
-libpymod.DynamicDG.apply = lambda self, graphs: _unwrap(_DynamicDG_apply(self, _wrap(libpymod._VecGraph, graphs)))
+_DynamicDG_apply = libpymod.DynamicDG.apply  # type: ignore
+libpymod.DynamicDG.apply = lambda self, graphs: _unwrap(_DynamicDG_apply(self, _wrap(libpymod._VecGraph, graphs)))  # type: ignore
 
 #----------------------------------------------------------
 # Composition
