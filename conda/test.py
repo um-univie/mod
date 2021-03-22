@@ -10,9 +10,5 @@ r = ruleGMLString("""rule [
 		node [ id 2 label "H+" ]
 	]
 ]""")
-dg = DG()
-dg.build().execute(addSubset(g) >> r)
-
 g.print()
 r.print()
-dg.print()
