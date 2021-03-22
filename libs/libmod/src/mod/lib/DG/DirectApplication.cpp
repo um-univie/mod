@@ -87,11 +87,10 @@ public:
 		const auto &lgHosts = get_labelled_right(rHosts.getDPORule());
 		const auto &gHosts = get_graph(lgHosts);
 		const auto vNullHosts = boost::graph_traits<RightGraphType>::null_vertex();
-		const auto vNullPatterns = boost::graph_traits<LeftGraphType>::null_vertex();
 
 		const auto &gp = get_component_graph(partialMap.componentId, lgPatterns);
 		for (const auto vp : asRange(vertices(gp))) {
-			assert(get(m, gPatterns, gHosts, vp) == vNullPatterns);
+			assert(get(m, gPatterns, gHosts, vp) == boost::graph_traits<LeftGraphType>::null_vertex());
 			const auto vh = get(partialMap.m, gPatterns, gHosts, vp);
 			assert(vh != vNullHosts);
 			if (get_inverse(m, gPatterns, gHosts, vh) != vNullHosts) {
