@@ -280,6 +280,8 @@ struct Config {
 	    ((bool, useCompositionApplication, false))                           \
 	    ((bool, useCanonicalMatches, true))                           \
 	    ((bool, useCanonicalMatchesExhaustive, false))                           \
+	    ((bool, useCanonicalMatchesCombined, false))                           \
+	    ((bool, useIsoCompPruning, false))                           \
 	))                                                                              \
 	((RC, rc,                                                                       \
         ((bool, composeConstraints, true))                                          \

@@ -58,6 +58,123 @@ void testExecute(){
 	assert(dg->numEdges() == 2);
 }
 
+void testIsoLOrder() {
+	auto host1 = graph::Graph::graphDFS("C-C");
+	auto host2 = graph::Graph::graphDFS("C=C");
+	auto host3 = graph::Graph::graphDFS("[C]1([C]([C](1)[Y])[Z])[X]");
+	auto host4 = graph::Graph::graphDFS("[H][C]");
+
+	auto r = rule::Rule::ruleGMLString(R"(
+	                                   rule [
+	                                   ruleID "AddEdge"
+	                                   left [ ]
+	                                   context [
+	                                   node [ id 0 label "C" ] node [ id 1 label "C" ]
+	                                   ]
+	                                   right [
+	                                   ]
+	                                   ]
+	                                   )", false);
+	auto r2 = rule::Rule::ruleGMLString(R"(
+	                                   rule [
+	                                   ruleID "AddEdge"
+	                                   left [ ]
+	                                   context [
+	                                       node [ id 0 label "C" ]
+	                                       node [ id 1 label "C" ]
+	                                       node [ id 2 label "C" ]
+	                                   ]
+	                                   right [
+	                                   ]
+	                                   ]
+	                                   )", false);
+	auto r3 = rule::Rule::ruleGMLString(R"(
+	                                   rule [
+	                                   ruleID "AddEdge"
+	                                   left [ ]
+	                                   context [
+	                                   node [ id 0 label "H" ] node [ id 1 label "H" ]
+	                                   node [ id 2 label "C" ] node [ id 3 label "C" ]
+	                                   ]
+	                                   right [
+	                                   ]
+	                                   ]
+	                                   )", false);
+
+	auto dg = mod::dg::DG::make(LabelSettings{LabelType::String, LabelRelation::Isomorphism},
+	                            {host1, host2},
+	                            IsomorphismPolicy::Check);
+	auto b = dg->build();
+	mod::getConfig().application.useCanonicalMatchesExhaustive.set(true);
+	mod::getConfig().application.useCanonicalMatchesCombined.set(true);
+	mod::getConfig().application.useIsoCompPruning.set(true);
+
+	std::cout << "test to check host graph generation in the case that you have isomorphic comps in L" << std::endl;
+	auto ders = b.apply_v2({host2, host1},  r);
+	std::cout << "found ders " << ders.size() << std::endl;
+
+	std::cout << "test to check host graph generation in the case that you have isomorphic comps in L" << std::endl;
+	ders = b.apply_v2({host3},  r2);
+	std::cout << "found ders " << ders.size() << std::endl;
+
+	std::cout << "test to check iso L total order when x < y" << std::endl;
+	ders = b.apply_v2({host4, host4},  r3);
+	std::cout << "found ders " << ders.size() << std::endl;
+}
+
+void testIsoL() {
+	auto hostGraph = graph::Graph::graphGMLString(R"(
+	                                              graph [
+	                                                  node [ id 0 label "C" ]
+	                                                  node [ id 3 label "C" ]
+	                                                  node [ id 2 label "C" ]
+	                                                  node [ id 1 label "C" ]
+	                                                  node [ id 4 label "F" ]
+	                                                  node [ id 5 label "H" ]
+	                                                  node [ id 6 label "H" ]
+	                                                  node [ id 7 label "F" ]
+	                                                  edge [ source 0 target 3 label "-" ]
+	                                                  edge [ source 0 target 5 label "-" ]
+	                                                  edge [ source 3 target 4 label "-" ]
+	                                                  edge [ source 3 target 5 label "-" ]
+	                                                  edge [ source 5 target 6 label "-" ]
+	                                                  edge [ source 1 target 6 label "-" ]
+	                                                  edge [ source 2 target 1 label "-" ]
+	                                                  edge [ source 2 target 6 label "-" ]
+	                                                  edge [ source 1 target 7 label "-" ]
+	                                              ]
+	                                              )");
+	auto r = rule::Rule::ruleGMLString(R"(
+	                                   rule [
+	                                   ruleID "AddEdge"
+	                                   left [ ]
+	                                   context [
+	                                   node [ id 0 label "C" ] node [ id 1 label "C" ]
+	                                   edge [ source 0 target 1 label "-" ]
+	                                   ]
+	                                   right [
+	                                   ]
+	                                   ]
+	                                   )", false);
+	auto dg = mod::dg::DG::make(LabelSettings{LabelType::String, LabelRelation::Isomorphism},
+	                            {hostGraph},
+	                            IsomorphismPolicy::Check);
+	auto b = dg->build();
+	mod::getConfig().application.useCanonicalMatchesExhaustive.set(true);
+	mod::getConfig().application.useCanonicalMatchesCombined.set(true);
+
+
+	std::cout << "---------------------------" << std::endl;
+	std::cout << "  TEST: APPLY V2 (RULE L ISOS)  " << std::endl;
+	std::cout << "---------------------------" << std::endl;
+
+	std::cout << "test: C + C -> C-C" << std::endl;
+	auto ders = b.apply_v2({hostGraph},  r);
+	std::cout << "found ders " << ders.size() << std::endl;
+	assert(ders.size() == 1);
+
+}
+
 void testApplyV2(){
 	auto path2 = graph::Graph::smiles("[C][C]");
 	auto path3 = graph::Graph::smiles("[C][C][C]");
@@ -403,7 +520,7 @@ int main() {
 	testMultipleDupsApplyV2();
 	testExecute();
 	testFormoseReactions();
-
-
+	testIsoL();
+	testIsoLOrder();
 
 }

@@ -57,15 +57,27 @@ std::pair<bool, bool> PartialMatch::tryPush(const ComponentMatch& cm) {
 
 	if (getConfig().application.useCanonicalMatches.get()) {
 		if (getConfig().application.useCanonicalMatchesExhaustive.get()) {
-			if (!canonMatch.push(cm, hostIndex)) {
+			if (!getConfig().application.useCanonicalMatchesCombined.get() && !canonMatch.push(cm, hostIndex)) {
 				// std::cout << "NOT CANON MATCH" << std::endl;
+				this->pop();
+				return std::make_pair(false, false);
+			} else if (getConfig().application.useCanonicalMatchesCombined.get() && !canonMatch.pushCombined(cm, hostIndex)){
 				this->pop();
 				return std::make_pair(false, false);
 			}
 
 		} else {
-			if (!canonMatch.pushFast(cm, hostIndex)) {
+			if (!getConfig().application.useCanonicalMatchesCombined.get() && !canonMatch.pushFast(cm, hostIndex)) {
 				// std::cout << "NOT CANON MATCH" << std::endl;
+				this->pop();
+				return std::make_pair(false, false);
+			} else if (getConfig().application.useCanonicalMatchesCombined.get() && !canonMatch.pushFastCombined(cm, hostIndex)) {
+				this->pop();
+				return std::make_pair(false, false);
+			}
+		}
+		if (getConfig().application.useIsoCompPruning.get()) {
+			if (!canonMatch.isIsoCompsCorrectlyOrdered(cm, hostIndex, addedGraph.back())) {
 				this->pop();
 				return std::make_pair(false, false);
 			}

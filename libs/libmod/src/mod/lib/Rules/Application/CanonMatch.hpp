@@ -21,8 +21,11 @@ class CanonMatch {
 public:
 	CanonMatch(const std::vector<const Graph::Single *>& hosts, const Rules::Real& rule,
 	           LabelSettings ls);
+	bool isIsoCompsCorrectlyOrdered(const ComponentMatch& cm, size_t hostIndex, bool isAdded);
 	bool push(const ComponentMatch& cm, size_t hostIndex);
 	bool pushFast(const ComponentMatch& cm, size_t hostIndex);
+	bool pushFastCombined(const ComponentMatch& cm, size_t hostIndex);
+	bool pushCombined(const ComponentMatch& cm, size_t hostIndex);
 
 	void pop();
 	void popFast();
@@ -32,6 +35,7 @@ private:
 	struct PushedFixes {
 		size_t hid;
 		size_t oldSize;
+		const ComponentMatch *cm;
 	};
 	std::vector<std::vector<int>> hostFixes;
 	std::vector<PushedFixes> pushedStack;
@@ -39,6 +43,11 @@ private:
 
 	std::vector<std::vector<Graph::Single::AutGroup::const_pointer>> auts;
 	std::vector<size_t> autSize;
+
+
+	// really shouldnt be here, but in a hurry...
+	std::vector<int> prevIsoComp;
+	std::vector<std::vector<size_t>> prevIsoVertex;
 
 };
 

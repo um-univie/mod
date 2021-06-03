@@ -54,6 +54,7 @@ computeDerivations(const Rules::Real& realRule,
 		return;
 	}
 
+//	verbosity = 2;
 
 	const LabelledRule& rule = realRule.getDPORule();
 	std::vector<std::unique_ptr<Rules::Real>> derivations;
@@ -89,11 +90,11 @@ computeDerivations(const Rules::Real& realRule,
 	size_t curCid = subsetMatches[0]->componentIndex;
 
 	auto addInstance = [&] (const ComponentMatch& cm, bool addAll) {
-		if(!onNewGraphInstance(cm.host, cm.graphInstance + 1)) {
-			return;
-		}
 		for (size_t cid = 0; cid < rule.numLeftComponents; ++cid) {
 			instanceOffsets[cm.componentIndex][cid] = matches[cid].size();
+		}
+		if(!onNewGraphInstance(cm.host, cm.graphInstance + 1)) {
+			return;
 		}
 		assert(matchInstanceMap.find(cm.host) != matchInstanceMap.end());
 		for (const ComponentMatch *m : matchInstanceMap[cm.host]) {
@@ -154,6 +155,9 @@ computeDerivations(const Rules::Real& realRule,
 		addInstance(*subsetMatch, true);
 
 		if (partialMatch.isFull()) {
+			if (verbosity > 1) {
+				logger.indent() << "Found full match" << partialMatch << std::endl;
+			}
 			//std::unique_ptr<Rules::Real> res = partialMatch.apply();
 			//assert(res != nullptr);
 			//bool shouldContinue = onMatch(partialMatch.getLhs(), std::move(res));
@@ -180,7 +184,14 @@ computeDerivations(const Rules::Real& realRule,
 			}
 			size_t mid = stack.back();
 			if (verbosity > 1) {
+				logger.indent() << "STACK: ";
+				for (auto i :stack) {
+					std::cout << i << ", ";
+				}
+				std::cout << std::endl;
+
 				logger.indent() << "cid: " << cid << " " << "mid: " << mid << std::endl;
+				logger.indent() << "matches[cid].size = " << matches[cid].size() << std::endl;
 			}
 
 			if (mid == matches[cid].size()) {
