@@ -16,10 +16,10 @@
 using namespace mod;
 
 void testExecute(){
-	auto path2 = graph::Graph::smiles("[C][C]");
-	auto path3 = graph::Graph::smiles("[C][C][C]");
-	auto singleton = graph::Graph::smiles("[C]");
-	auto r = rule::Rule::ruleGMLString(R"(
+	auto path2 = graph::Graph::fromSMILES("[C][C]");
+	auto path3 = graph::Graph::fromSMILES("[C][C][C]");
+	auto singleton = graph::Graph::fromSMILES("[C]");
+	auto r = rule::Rule::fromGMLString(R"(
 	                                   rule [
 	                                   ruleID "AddEdge"
 	                                   left [ ]
@@ -27,7 +27,7 @@ void testExecute(){
 	                                   right [ edge [ source 0 target 1 label "-" ] ]
 	                                   ]
 	                                   )", false);
-	auto r2 = rule::Rule::ruleGMLString(R"(
+	auto r2 = rule::Rule::fromGMLString(R"(
 	                                   rule [
 	                                        ruleID "AddEdge"
 	                                        left [ node [ id 0 label "C" ] ]
@@ -59,12 +59,12 @@ void testExecute(){
 }
 
 void testIsoLOrder() {
-	auto host1 = graph::Graph::graphDFS("C-C");
-	auto host2 = graph::Graph::graphDFS("C=C");
-	auto host3 = graph::Graph::graphDFS("[C]1([C]([C](1)[Y])[Z])[X]");
-	auto host4 = graph::Graph::graphDFS("[H][C]");
+	auto host1 = graph::Graph::fromDFS("C-C");
+	auto host2 = graph::Graph::fromDFS("C=C");
+	auto host3 = graph::Graph::fromDFS("[C]1([C]([C](1)[Y])[Z])[X]");
+	auto host4 = graph::Graph::fromDFS("[H][C]");
 
-	auto r = rule::Rule::ruleGMLString(R"(
+	auto r = rule::Rule::fromGMLString(R"(
 	                                   rule [
 	                                   ruleID "AddEdge"
 	                                   left [ ]
@@ -75,7 +75,7 @@ void testIsoLOrder() {
 	                                   ]
 	                                   ]
 	                                   )", false);
-	auto r2 = rule::Rule::ruleGMLString(R"(
+	auto r2 = rule::Rule::fromGMLString(R"(
 	                                   rule [
 	                                   ruleID "AddEdge"
 	                                   left [ ]
@@ -88,7 +88,7 @@ void testIsoLOrder() {
 	                                   ]
 	                                   ]
 	                                   )", false);
-	auto r3 = rule::Rule::ruleGMLString(R"(
+	auto r3 = rule::Rule::fromGMLString(R"(
 	                                   rule [
 	                                   ruleID "AddEdge"
 	                                   left [ ]
@@ -123,7 +123,7 @@ void testIsoLOrder() {
 }
 
 void testIsoL() {
-	auto hostGraph = graph::Graph::graphGMLString(R"(
+	auto hostGraph = graph::Graph::fromGMLString(R"(
 	                                              graph [
 	                                                  node [ id 0 label "C" ]
 	                                                  node [ id 3 label "C" ]
@@ -144,7 +144,7 @@ void testIsoL() {
 	                                                  edge [ source 1 target 7 label "-" ]
 	                                              ]
 	                                              )");
-	auto r = rule::Rule::ruleGMLString(R"(
+	auto r = rule::Rule::fromGMLString(R"(
 	                                   rule [
 	                                   ruleID "AddEdge"
 	                                   left [ ]
@@ -176,10 +176,10 @@ void testIsoL() {
 }
 
 void testApplyV2(){
-	auto path2 = graph::Graph::smiles("[C][C]");
-	auto path3 = graph::Graph::smiles("[C][C][C]");
-	auto singleton = graph::Graph::smiles("[C]");
-	auto triangle = graph::Graph::graphGMLString(R"(
+	auto path2 = graph::Graph::fromSMILES("[C][C]");
+	auto path3 = graph::Graph::fromSMILES("[C][C][C]");
+	auto singleton = graph::Graph::fromSMILES("[C]");
+	auto triangle = graph::Graph::fromGMLString(R"(
 	                                             graph [
 	                                             node [ id 0 label "C" ]
 	                                             node [ id 1 label "C" ]
@@ -189,7 +189,7 @@ void testApplyV2(){
 	                                             edge [ source 1 target 2 label "-" ]
 	                                             ]
 	                                             )");
-	auto r = rule::Rule::ruleGMLString(R"(
+	auto r = rule::Rule::fromGMLString(R"(
 	                                   rule [
 	                                   ruleID "AddEdge"
 	                                   left [ ]
@@ -197,7 +197,7 @@ void testApplyV2(){
 	                                   right [ edge [ source 0 target 1 label "-" ] ]
 	                                   ]
 	                                   )", false);
-	auto r2 = rule::Rule::ruleGMLString(R"(
+	auto r2 = rule::Rule::fromGMLString(R"(
 	                                   rule [
 	                                        ruleID "AddEdge"
 	                                        left [ node [ id 0 label "C" ] ]
@@ -205,7 +205,7 @@ void testApplyV2(){
 	                                        right [ node [ id 0 label "A"] ]
 	                                   ]
 	                                   )", false);
-	auto r3 = rule::Rule::ruleGMLString(R"(
+	auto r3 = rule::Rule::fromGMLString(R"(
 	                                   rule [
 	                                   ruleID "AddEdge"
 	                                   left [ ]
@@ -221,7 +221,7 @@ void testApplyV2(){
 	                                   ]
 	                                   ]
 	                                   )", false);
-	auto r4 = rule::Rule::ruleGMLString(R"(
+	auto r4 = rule::Rule::fromGMLString(R"(
 	                                   rule [
 	                                        ruleID "AddEdge"
 	                                        left [ node [ id 0 label "C" ] ]
@@ -229,7 +229,7 @@ void testApplyV2(){
 	                                        right []
 	                                   ]
 	                                   )", false);
-	auto r5 = rule::Rule::ruleGMLString(R"(
+	auto r5 = rule::Rule::fromGMLString(R"(
 	                                   rule [
 	                                   ruleID "AddEdge"
 	                                   left [ edge [ source 0 target 1 label "-" ] ]
@@ -288,9 +288,9 @@ void testApplyV2(){
 }
 
 void testApplyV2ReactionCenter() {
-	auto g = graph::Graph::graphDFS("[C]1([N]([C](=[N][C]2=[C]([N]=[C]([C]([N](2)[H])([H])[H])[C]([C]([O][H])([C]([O][H])([H])[H])[H])([H])[O-])1)[N]([H])[H])[H])([O][C]([C]([C]([Amino{C, Glu, *, *}])([H])[H])([H])[H])=[O])[O][H]");
+	auto g = graph::Graph::fromDFS("[C]1([N]([C](=[N][C]2=[C]([N]=[C]([C]([N](2)[H])([H])[H])[C]([C]([O][H])([C]([O][H])([H])[H])[H])([H])[O-])1)[N]([H])[H])[H])([O][C]([C]([C]([Amino{C, Glu, *, *}])([H])[H])([H])[H])=[O])[O][H]");
 
-	auto r = rule::Rule::ruleGMLString(R"(
+	auto r = rule::Rule::fromGMLString(R"(
 	                                   rule [
 	                                       ruleID "r_{6169}"
 	                                       left [
@@ -330,13 +330,13 @@ void testApplyV2ReactionCenter() {
 }
 
 void testMultipleDupsApplyV2() {
-	auto gs = {graph::Graph::graphDFS("[H][O][H]"),
-	           graph::Graph::graphDFS("[N]([C]([H])([H])[C]([H])([H])[C]([H])([H])[C]([Amino{C, Lys, *, *}])([H])[H])([H])[H]"),
-	           graph::Graph::graphDFS("[Amino{C, Glu, *, *}][C]([H])([H])[C]([H])([H])[C]([O-])=[O]"),
-	           graph::Graph::graphDFS("[C]1([C]2=[C]([N]=[C]([N](1)[H])[N]([H])[H])[N]([C]([C]([C]([C]([O][H])([C]([O][H])([H])[H])[H])([H])[O-])=[N+]([H])2)([H])[H])[H])=[O]")
+	auto gs = {graph::Graph::fromDFS("[H][O][H]"),
+	           graph::Graph::fromDFS("[N]([C]([H])([H])[C]([H])([H])[C]([H])([H])[C]([Amino{C, Lys, *, *}])([H])[H])([H])[H]"),
+	           graph::Graph::fromDFS("[Amino{C, Glu, *, *}][C]([H])([H])[C]([H])([H])[C]([O-])=[O]"),
+	           graph::Graph::fromDFS("[C]1([C]2=[C]([N]=[C]([N](1)[H])[N]([H])[H])[N]([C]([C]([C]([C]([O][H])([C]([O][H])([H])[H])[H])([H])[O-])=[N+]([H])2)([H])[H])[H])=[O]")
 	          };
 
-	auto r = rule::Rule::ruleGMLString(R"(
+	auto r = rule::Rule::fromGMLString(R"(
 	                                   rule [
 	                                       ruleID "r_{1648}"
 	                                       left [
@@ -405,12 +405,12 @@ void testFormoseReactions() {
 	C(CO)=O
 	*/
 
-	auto s1 = graph::Graph::smiles("C(C(C(CO)O)O)=O");
-	auto s2 = graph::Graph::smiles("C(C(CO)O)=O");
-	auto u1 = graph::Graph::smiles("C(O)=CO");
-	auto u2 = graph::Graph::smiles("C=O");
-	auto u3 = graph::Graph::smiles("C(CO)=O");
-	auto r = rule::Rule::ruleGMLString(R"(
+	auto s1 = graph::Graph::fromSMILES("C(C(C(CO)O)O)=O");
+	auto s2 = graph::Graph::fromSMILES("C(C(CO)O)=O");
+	auto u1 = graph::Graph::fromSMILES("C(O)=CO");
+	auto u2 = graph::Graph::fromSMILES("C=O");
+	auto u3 = graph::Graph::fromSMILES("C(CO)=O");
+	auto r = rule::Rule::fromGMLString(R"(
 	                                   rule [
 	                                       ruleID "Keto-enol isomerization ->"
 	                                       left [

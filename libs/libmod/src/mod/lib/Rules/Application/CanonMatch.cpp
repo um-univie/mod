@@ -442,7 +442,7 @@ bool CanonMatch::pushFastCombined(const ComponentMatch& cm, size_t hostIndex) {
 		while (curAutIndex < gensSizeRule) {
 			size_t img =  gensRule[curAutIndex]->at(vpCore);
 			if (img != vpCore) {
-				assert(static_cast<int>(genSize) >= 0);
+				assert(static_cast<int>(gensSizeRule) >= 0);
 				std::swap(gensRule[curAutIndex], gensRule[gensSizeRule - 1]);
 				gensSizeRule -= 1;
 			} else {

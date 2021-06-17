@@ -16,7 +16,7 @@
 using namespace mod;
 
 void testConnectedComponents(){
-	auto r = rule::Rule::ruleGMLString(R"(
+	auto r = rule::Rule::fromGMLString(R"(
 	                                   rule [
 	                                   ruleID "AddEdge"
 	                                   left [ node [id 2 label "C"] ]
