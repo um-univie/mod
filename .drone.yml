@@ -49,7 +49,7 @@ steps:
   commands:
   - mkdir build
   - cd build
-  - cmake ../ -DCMAKE_BUILD_TYPE=OptDebug -DBUILD_TESTING=on -DBUILD_TESTING_SANITIZERS=off -DBOOST_ROOT=/opt/boost/1_75_0
+  - cmake ../ -DCMAKE_BUILD_TYPE=OptDebug -DBUILD_DOC=on -DBUILD_TESTING=on -DBUILD_TESTING_SANITIZERS=off -DBOOST_ROOT=/opt/boost/1_75_0
   environment:
     CXX: g++
     CXXFLAGS: -Werror
@@ -98,222 +98,6 @@ steps:
 
 ---
 kind: pipeline
-name: g++-7, Boost 1_73_0
-
-platform:
-  os: linux
-  arch: amd64
-
-steps:
-- name: bootstrap
-  image: localhost:5000/jla/mod
-  commands:
-  - git fetch --tags
-  - git submodule update --init --recursive
-  - ./bootstrap.sh
-
-- name: configure
-  image: localhost:5000/jla/mod
-  commands:
-  - mkdir build
-  - cd build
-  - cmake ../ -DCMAKE_BUILD_TYPE=OptDebug -DBUILD_TESTING=on -DBUILD_TESTING_SANITIZERS=off -DBOOST_ROOT=/opt/boost/1_73_0
-  environment:
-    CXX: g++-7
-    CXXFLAGS: -Werror
-
-- name: build
-  image: localhost:5000/jla/mod
-  commands:
-  - cd build
-  - cmake ../ -DBUILD_TESTING=on -DBUILD_TESTING_SANITIZERS=off -DBOOST_ROOT=/opt/boost/1_73_0
-  - make
-
-- name: install
-  image: localhost:5000/jla/mod
-  commands:
-  - cd build
-  - make install
-
-- name: build-test
-  image: localhost:5000/jla/mod
-  commands:
-  - cd build
-  - make tests
-
-- name: test
-  image: localhost:5000/jla/mod
-  commands:
-  - cd build
-  - make install
-  - ctest --output-on-failure -E cmake_add_subdirectory_build
-
-- name: simple test
-  image: localhost:5000/jla/mod
-  commands:
-  - cd build
-  - make install
-  - cd ../
-  - mod -e "smiles('O').print()"
-
-- name: test subdirectory build
-  image: localhost:5000/jla/mod
-  commands:
-  - cd build
-  - make install
-  - ctest --output-on-failure -R cmake_add_subdirectory_build
-  when:
-    ref:
-    - refs/heads/develop
-    - refs/heads/master
-    - refs/tags/v*
-
----
-kind: pipeline
-name: g++-7, Boost 1_74_0
-
-platform:
-  os: linux
-  arch: amd64
-
-steps:
-- name: bootstrap
-  image: localhost:5000/jla/mod
-  commands:
-  - git fetch --tags
-  - git submodule update --init --recursive
-  - ./bootstrap.sh
-
-- name: configure
-  image: localhost:5000/jla/mod
-  commands:
-  - mkdir build
-  - cd build
-  - cmake ../ -DCMAKE_BUILD_TYPE=OptDebug -DBUILD_TESTING=on -DBUILD_TESTING_SANITIZERS=off -DBOOST_ROOT=/opt/boost/1_74_0
-  environment:
-    CXX: g++-7
-    CXXFLAGS: -Werror
-
-- name: build
-  image: localhost:5000/jla/mod
-  commands:
-  - cd build
-  - cmake ../ -DBUILD_TESTING=on -DBUILD_TESTING_SANITIZERS=off -DBOOST_ROOT=/opt/boost/1_74_0
-  - make
-
-- name: install
-  image: localhost:5000/jla/mod
-  commands:
-  - cd build
-  - make install
-
-- name: build-test
-  image: localhost:5000/jla/mod
-  commands:
-  - cd build
-  - make tests
-
-- name: test
-  image: localhost:5000/jla/mod
-  commands:
-  - cd build
-  - make install
-  - ctest --output-on-failure -E cmake_add_subdirectory_build
-
-- name: simple test
-  image: localhost:5000/jla/mod
-  commands:
-  - cd build
-  - make install
-  - cd ../
-  - mod -e "smiles('O').print()"
-
-- name: test subdirectory build
-  image: localhost:5000/jla/mod
-  commands:
-  - cd build
-  - make install
-  - ctest --output-on-failure -R cmake_add_subdirectory_build
-  when:
-    ref:
-    - refs/heads/develop
-    - refs/heads/master
-    - refs/tags/v*
-
----
-kind: pipeline
-name: g++-7, Boost 1_75_0
-
-platform:
-  os: linux
-  arch: amd64
-
-steps:
-- name: bootstrap
-  image: localhost:5000/jla/mod
-  commands:
-  - git fetch --tags
-  - git submodule update --init --recursive
-  - ./bootstrap.sh
-
-- name: configure
-  image: localhost:5000/jla/mod
-  commands:
-  - mkdir build
-  - cd build
-  - cmake ../ -DCMAKE_BUILD_TYPE=OptDebug -DBUILD_TESTING=on -DBUILD_TESTING_SANITIZERS=off -DBOOST_ROOT=/opt/boost/1_75_0
-  environment:
-    CXX: g++-7
-    CXXFLAGS: -Werror
-
-- name: build
-  image: localhost:5000/jla/mod
-  commands:
-  - cd build
-  - cmake ../ -DBUILD_TESTING=on -DBUILD_TESTING_SANITIZERS=off -DBOOST_ROOT=/opt/boost/1_75_0
-  - make
-
-- name: install
-  image: localhost:5000/jla/mod
-  commands:
-  - cd build
-  - make install
-
-- name: build-test
-  image: localhost:5000/jla/mod
-  commands:
-  - cd build
-  - make tests
-
-- name: test
-  image: localhost:5000/jla/mod
-  commands:
-  - cd build
-  - make install
-  - ctest --output-on-failure -E cmake_add_subdirectory_build
-
-- name: simple test
-  image: localhost:5000/jla/mod
-  commands:
-  - cd build
-  - make install
-  - cd ../
-  - mod -e "smiles('O').print()"
-
-- name: test subdirectory build
-  image: localhost:5000/jla/mod
-  commands:
-  - cd build
-  - make install
-  - ctest --output-on-failure -R cmake_add_subdirectory_build
-  when:
-    ref:
-    - refs/heads/develop
-    - refs/heads/master
-    - refs/tags/v*
-
----
-kind: pipeline
 name: g++-8, Boost 1_73_0
 
 platform:
@@ -333,7 +117,7 @@ steps:
   commands:
   - mkdir build
   - cd build
-  - cmake ../ -DCMAKE_BUILD_TYPE=OptDebug -DBUILD_TESTING=on -DBUILD_TESTING_SANITIZERS=off -DBOOST_ROOT=/opt/boost/1_73_0
+  - cmake ../ -DCMAKE_BUILD_TYPE=OptDebug -DBUILD_DOC=on -DBUILD_TESTING=on -DBUILD_TESTING_SANITIZERS=off -DBOOST_ROOT=/opt/boost/1_73_0
   environment:
     CXX: g++-8
     CXXFLAGS: -Werror
@@ -405,7 +189,7 @@ steps:
   commands:
   - mkdir build
   - cd build
-  - cmake ../ -DCMAKE_BUILD_TYPE=OptDebug -DBUILD_TESTING=on -DBUILD_TESTING_SANITIZERS=off -DBOOST_ROOT=/opt/boost/1_74_0
+  - cmake ../ -DCMAKE_BUILD_TYPE=OptDebug -DBUILD_DOC=on -DBUILD_TESTING=on -DBUILD_TESTING_SANITIZERS=off -DBOOST_ROOT=/opt/boost/1_74_0
   environment:
     CXX: g++-8
     CXXFLAGS: -Werror
@@ -477,7 +261,7 @@ steps:
   commands:
   - mkdir build
   - cd build
-  - cmake ../ -DCMAKE_BUILD_TYPE=OptDebug -DBUILD_TESTING=on -DBUILD_TESTING_SANITIZERS=off -DBOOST_ROOT=/opt/boost/1_75_0
+  - cmake ../ -DCMAKE_BUILD_TYPE=OptDebug -DBUILD_DOC=on -DBUILD_TESTING=on -DBUILD_TESTING_SANITIZERS=off -DBOOST_ROOT=/opt/boost/1_75_0
   environment:
     CXX: g++-8
     CXXFLAGS: -Werror
@@ -487,6 +271,78 @@ steps:
   commands:
   - cd build
   - cmake ../ -DBUILD_TESTING=on -DBUILD_TESTING_SANITIZERS=off -DBOOST_ROOT=/opt/boost/1_75_0
+  - make
+
+- name: install
+  image: localhost:5000/jla/mod
+  commands:
+  - cd build
+  - make install
+
+- name: build-test
+  image: localhost:5000/jla/mod
+  commands:
+  - cd build
+  - make tests
+
+- name: test
+  image: localhost:5000/jla/mod
+  commands:
+  - cd build
+  - make install
+  - ctest --output-on-failure -E cmake_add_subdirectory_build
+
+- name: simple test
+  image: localhost:5000/jla/mod
+  commands:
+  - cd build
+  - make install
+  - cd ../
+  - mod -e "smiles('O').print()"
+
+- name: test subdirectory build
+  image: localhost:5000/jla/mod
+  commands:
+  - cd build
+  - make install
+  - ctest --output-on-failure -R cmake_add_subdirectory_build
+  when:
+    ref:
+    - refs/heads/develop
+    - refs/heads/master
+    - refs/tags/v*
+
+---
+kind: pipeline
+name: g++-8, Boost 1_76_0
+
+platform:
+  os: linux
+  arch: amd64
+
+steps:
+- name: bootstrap
+  image: localhost:5000/jla/mod
+  commands:
+  - git fetch --tags
+  - git submodule update --init --recursive
+  - ./bootstrap.sh
+
+- name: configure
+  image: localhost:5000/jla/mod
+  commands:
+  - mkdir build
+  - cd build
+  - cmake ../ -DCMAKE_BUILD_TYPE=OptDebug -DBUILD_DOC=on -DBUILD_TESTING=on -DBUILD_TESTING_SANITIZERS=off -DBOOST_ROOT=/opt/boost/1_76_0
+  environment:
+    CXX: g++-8
+    CXXFLAGS: -Werror
+
+- name: build
+  image: localhost:5000/jla/mod
+  commands:
+  - cd build
+  - cmake ../ -DBUILD_TESTING=on -DBUILD_TESTING_SANITIZERS=off -DBOOST_ROOT=/opt/boost/1_76_0
   - make
 
 - name: install
@@ -549,7 +405,7 @@ steps:
   commands:
   - mkdir build
   - cd build
-  - cmake ../ -DCMAKE_BUILD_TYPE=OptDebug -DBUILD_TESTING=on -DBUILD_TESTING_SANITIZERS=off -DBOOST_ROOT=/opt/boost/1_73_0
+  - cmake ../ -DCMAKE_BUILD_TYPE=OptDebug -DBUILD_DOC=on -DBUILD_TESTING=on -DBUILD_TESTING_SANITIZERS=off -DBOOST_ROOT=/opt/boost/1_73_0
   environment:
     CXX: g++-9
     CXXFLAGS: -Werror
@@ -621,7 +477,7 @@ steps:
   commands:
   - mkdir build
   - cd build
-  - cmake ../ -DCMAKE_BUILD_TYPE=OptDebug -DBUILD_TESTING=on -DBUILD_TESTING_SANITIZERS=off -DBOOST_ROOT=/opt/boost/1_74_0
+  - cmake ../ -DCMAKE_BUILD_TYPE=OptDebug -DBUILD_DOC=on -DBUILD_TESTING=on -DBUILD_TESTING_SANITIZERS=off -DBOOST_ROOT=/opt/boost/1_74_0
   environment:
     CXX: g++-9
     CXXFLAGS: -Werror
@@ -723,7 +579,7 @@ steps:
   commands:
   - mkdir build
   - cd build
-  - cmake ../ -DCMAKE_BUILD_TYPE=OptDebug -DBUILD_TESTING=on -DBUILD_TESTING_SANITIZERS=off -DBOOST_ROOT=/opt/boost/1_75_0
+  - cmake ../ -DCMAKE_BUILD_TYPE=OptDebug -DBUILD_DOC=on -DBUILD_TESTING=on -DBUILD_TESTING_SANITIZERS=off -DBOOST_ROOT=/opt/boost/1_75_0
   environment:
     CXX: g++-9
     CXXFLAGS: -Werror
@@ -733,6 +589,78 @@ steps:
   commands:
   - cd build
   - cmake ../ -DBUILD_TESTING=on -DBUILD_TESTING_SANITIZERS=off -DBOOST_ROOT=/opt/boost/1_75_0
+  - make
+
+- name: install
+  image: localhost:5000/jla/mod
+  commands:
+  - cd build
+  - make install
+
+- name: build-test
+  image: localhost:5000/jla/mod
+  commands:
+  - cd build
+  - make tests
+
+- name: test
+  image: localhost:5000/jla/mod
+  commands:
+  - cd build
+  - make install
+  - ctest --output-on-failure -E cmake_add_subdirectory_build
+
+- name: simple test
+  image: localhost:5000/jla/mod
+  commands:
+  - cd build
+  - make install
+  - cd ../
+  - mod -e "smiles('O').print()"
+
+- name: test subdirectory build
+  image: localhost:5000/jla/mod
+  commands:
+  - cd build
+  - make install
+  - ctest --output-on-failure -R cmake_add_subdirectory_build
+  when:
+    ref:
+    - refs/heads/develop
+    - refs/heads/master
+    - refs/tags/v*
+
+---
+kind: pipeline
+name: g++-9, Boost 1_76_0
+
+platform:
+  os: linux
+  arch: amd64
+
+steps:
+- name: bootstrap
+  image: localhost:5000/jla/mod
+  commands:
+  - git fetch --tags
+  - git submodule update --init --recursive
+  - ./bootstrap.sh
+
+- name: configure
+  image: localhost:5000/jla/mod
+  commands:
+  - mkdir build
+  - cd build
+  - cmake ../ -DCMAKE_BUILD_TYPE=OptDebug -DBUILD_DOC=on -DBUILD_TESTING=on -DBUILD_TESTING_SANITIZERS=off -DBOOST_ROOT=/opt/boost/1_76_0
+  environment:
+    CXX: g++-9
+    CXXFLAGS: -Werror
+
+- name: build
+  image: localhost:5000/jla/mod
+  commands:
+  - cd build
+  - cmake ../ -DBUILD_TESTING=on -DBUILD_TESTING_SANITIZERS=off -DBOOST_ROOT=/opt/boost/1_76_0
   - make
 
 - name: install
@@ -795,7 +723,7 @@ steps:
   commands:
   - mkdir build
   - cd build
-  - cmake ../ -DCMAKE_BUILD_TYPE=OptDebug -DBUILD_TESTING=on -DBUILD_TESTING_SANITIZERS=off -DBOOST_ROOT=/opt/boost/1_73_0
+  - cmake ../ -DCMAKE_BUILD_TYPE=OptDebug -DBUILD_DOC=on -DBUILD_TESTING=on -DBUILD_TESTING_SANITIZERS=off -DBOOST_ROOT=/opt/boost/1_73_0
   environment:
     CXX: g++-10
     CXXFLAGS: -Werror
@@ -867,7 +795,7 @@ steps:
   commands:
   - mkdir build
   - cd build
-  - cmake ../ -DCMAKE_BUILD_TYPE=OptDebug -DBUILD_TESTING=on -DBUILD_TESTING_SANITIZERS=off -DBOOST_ROOT=/opt/boost/1_74_0
+  - cmake ../ -DCMAKE_BUILD_TYPE=OptDebug -DBUILD_DOC=on -DBUILD_TESTING=on -DBUILD_TESTING_SANITIZERS=off -DBOOST_ROOT=/opt/boost/1_74_0
   environment:
     CXX: g++-10
     CXXFLAGS: -Werror
@@ -939,7 +867,7 @@ steps:
   commands:
   - mkdir build
   - cd build
-  - cmake ../ -DCMAKE_BUILD_TYPE=OptDebug -DBUILD_TESTING=on -DBUILD_TESTING_SANITIZERS=off -DBOOST_ROOT=/opt/boost/1_75_0
+  - cmake ../ -DCMAKE_BUILD_TYPE=OptDebug -DBUILD_DOC=on -DBUILD_TESTING=on -DBUILD_TESTING_SANITIZERS=off -DBOOST_ROOT=/opt/boost/1_75_0
   environment:
     CXX: g++-10
     CXXFLAGS: -Werror
@@ -949,6 +877,366 @@ steps:
   commands:
   - cd build
   - cmake ../ -DBUILD_TESTING=on -DBUILD_TESTING_SANITIZERS=off -DBOOST_ROOT=/opt/boost/1_75_0
+  - make
+
+- name: install
+  image: localhost:5000/jla/mod
+  commands:
+  - cd build
+  - make install
+
+- name: build-test
+  image: localhost:5000/jla/mod
+  commands:
+  - cd build
+  - make tests
+
+- name: test
+  image: localhost:5000/jla/mod
+  commands:
+  - cd build
+  - make install
+  - ctest --output-on-failure -E cmake_add_subdirectory_build
+
+- name: simple test
+  image: localhost:5000/jla/mod
+  commands:
+  - cd build
+  - make install
+  - cd ../
+  - mod -e "smiles('O').print()"
+
+- name: test subdirectory build
+  image: localhost:5000/jla/mod
+  commands:
+  - cd build
+  - make install
+  - ctest --output-on-failure -R cmake_add_subdirectory_build
+  when:
+    ref:
+    - refs/heads/develop
+    - refs/heads/master
+    - refs/tags/v*
+
+---
+kind: pipeline
+name: g++-10, Boost 1_76_0
+
+platform:
+  os: linux
+  arch: amd64
+
+steps:
+- name: bootstrap
+  image: localhost:5000/jla/mod
+  commands:
+  - git fetch --tags
+  - git submodule update --init --recursive
+  - ./bootstrap.sh
+
+- name: configure
+  image: localhost:5000/jla/mod
+  commands:
+  - mkdir build
+  - cd build
+  - cmake ../ -DCMAKE_BUILD_TYPE=OptDebug -DBUILD_DOC=on -DBUILD_TESTING=on -DBUILD_TESTING_SANITIZERS=off -DBOOST_ROOT=/opt/boost/1_76_0
+  environment:
+    CXX: g++-10
+    CXXFLAGS: -Werror
+
+- name: build
+  image: localhost:5000/jla/mod
+  commands:
+  - cd build
+  - cmake ../ -DBUILD_TESTING=on -DBUILD_TESTING_SANITIZERS=off -DBOOST_ROOT=/opt/boost/1_76_0
+  - make
+
+- name: install
+  image: localhost:5000/jla/mod
+  commands:
+  - cd build
+  - make install
+
+- name: build-test
+  image: localhost:5000/jla/mod
+  commands:
+  - cd build
+  - make tests
+
+- name: test
+  image: localhost:5000/jla/mod
+  commands:
+  - cd build
+  - make install
+  - ctest --output-on-failure -E cmake_add_subdirectory_build
+
+- name: simple test
+  image: localhost:5000/jla/mod
+  commands:
+  - cd build
+  - make install
+  - cd ../
+  - mod -e "smiles('O').print()"
+
+- name: test subdirectory build
+  image: localhost:5000/jla/mod
+  commands:
+  - cd build
+  - make install
+  - ctest --output-on-failure -R cmake_add_subdirectory_build
+  when:
+    ref:
+    - refs/heads/develop
+    - refs/heads/master
+    - refs/tags/v*
+
+---
+kind: pipeline
+name: g++-11, Boost 1_73_0
+
+platform:
+  os: linux
+  arch: amd64
+
+steps:
+- name: bootstrap
+  image: localhost:5000/jla/mod
+  commands:
+  - git fetch --tags
+  - git submodule update --init --recursive
+  - ./bootstrap.sh
+
+- name: configure
+  image: localhost:5000/jla/mod
+  commands:
+  - mkdir build
+  - cd build
+  - cmake ../ -DCMAKE_BUILD_TYPE=OptDebug -DBUILD_DOC=on -DBUILD_TESTING=on -DBUILD_TESTING_SANITIZERS=off -DBOOST_ROOT=/opt/boost/1_73_0
+  environment:
+    CXX: g++-11
+    CXXFLAGS: -Werror
+
+- name: build
+  image: localhost:5000/jla/mod
+  commands:
+  - cd build
+  - cmake ../ -DBUILD_TESTING=on -DBUILD_TESTING_SANITIZERS=off -DBOOST_ROOT=/opt/boost/1_73_0
+  - make
+
+- name: install
+  image: localhost:5000/jla/mod
+  commands:
+  - cd build
+  - make install
+
+- name: build-test
+  image: localhost:5000/jla/mod
+  commands:
+  - cd build
+  - make tests
+
+- name: test
+  image: localhost:5000/jla/mod
+  commands:
+  - cd build
+  - make install
+  - ctest --output-on-failure -E cmake_add_subdirectory_build
+
+- name: simple test
+  image: localhost:5000/jla/mod
+  commands:
+  - cd build
+  - make install
+  - cd ../
+  - mod -e "smiles('O').print()"
+
+- name: test subdirectory build
+  image: localhost:5000/jla/mod
+  commands:
+  - cd build
+  - make install
+  - ctest --output-on-failure -R cmake_add_subdirectory_build
+  when:
+    ref:
+    - refs/heads/develop
+    - refs/heads/master
+    - refs/tags/v*
+
+---
+kind: pipeline
+name: g++-11, Boost 1_74_0
+
+platform:
+  os: linux
+  arch: amd64
+
+steps:
+- name: bootstrap
+  image: localhost:5000/jla/mod
+  commands:
+  - git fetch --tags
+  - git submodule update --init --recursive
+  - ./bootstrap.sh
+
+- name: configure
+  image: localhost:5000/jla/mod
+  commands:
+  - mkdir build
+  - cd build
+  - cmake ../ -DCMAKE_BUILD_TYPE=OptDebug -DBUILD_DOC=on -DBUILD_TESTING=on -DBUILD_TESTING_SANITIZERS=off -DBOOST_ROOT=/opt/boost/1_74_0
+  environment:
+    CXX: g++-11
+    CXXFLAGS: -Werror
+
+- name: build
+  image: localhost:5000/jla/mod
+  commands:
+  - cd build
+  - cmake ../ -DBUILD_TESTING=on -DBUILD_TESTING_SANITIZERS=off -DBOOST_ROOT=/opt/boost/1_74_0
+  - make
+
+- name: install
+  image: localhost:5000/jla/mod
+  commands:
+  - cd build
+  - make install
+
+- name: build-test
+  image: localhost:5000/jla/mod
+  commands:
+  - cd build
+  - make tests
+
+- name: test
+  image: localhost:5000/jla/mod
+  commands:
+  - cd build
+  - make install
+  - ctest --output-on-failure -E cmake_add_subdirectory_build
+
+- name: simple test
+  image: localhost:5000/jla/mod
+  commands:
+  - cd build
+  - make install
+  - cd ../
+  - mod -e "smiles('O').print()"
+
+- name: test subdirectory build
+  image: localhost:5000/jla/mod
+  commands:
+  - cd build
+  - make install
+  - ctest --output-on-failure -R cmake_add_subdirectory_build
+  when:
+    ref:
+    - refs/heads/develop
+    - refs/heads/master
+    - refs/tags/v*
+
+---
+kind: pipeline
+name: g++-11, Boost 1_75_0
+
+platform:
+  os: linux
+  arch: amd64
+
+steps:
+- name: bootstrap
+  image: localhost:5000/jla/mod
+  commands:
+  - git fetch --tags
+  - git submodule update --init --recursive
+  - ./bootstrap.sh
+
+- name: configure
+  image: localhost:5000/jla/mod
+  commands:
+  - mkdir build
+  - cd build
+  - cmake ../ -DCMAKE_BUILD_TYPE=OptDebug -DBUILD_DOC=on -DBUILD_TESTING=on -DBUILD_TESTING_SANITIZERS=off -DBOOST_ROOT=/opt/boost/1_75_0
+  environment:
+    CXX: g++-11
+    CXXFLAGS: -Werror
+
+- name: build
+  image: localhost:5000/jla/mod
+  commands:
+  - cd build
+  - cmake ../ -DBUILD_TESTING=on -DBUILD_TESTING_SANITIZERS=off -DBOOST_ROOT=/opt/boost/1_75_0
+  - make
+
+- name: install
+  image: localhost:5000/jla/mod
+  commands:
+  - cd build
+  - make install
+
+- name: build-test
+  image: localhost:5000/jla/mod
+  commands:
+  - cd build
+  - make tests
+
+- name: test
+  image: localhost:5000/jla/mod
+  commands:
+  - cd build
+  - make install
+  - ctest --output-on-failure -E cmake_add_subdirectory_build
+
+- name: simple test
+  image: localhost:5000/jla/mod
+  commands:
+  - cd build
+  - make install
+  - cd ../
+  - mod -e "smiles('O').print()"
+
+- name: test subdirectory build
+  image: localhost:5000/jla/mod
+  commands:
+  - cd build
+  - make install
+  - ctest --output-on-failure -R cmake_add_subdirectory_build
+  when:
+    ref:
+    - refs/heads/develop
+    - refs/heads/master
+    - refs/tags/v*
+
+---
+kind: pipeline
+name: g++-11, Boost 1_76_0
+
+platform:
+  os: linux
+  arch: amd64
+
+steps:
+- name: bootstrap
+  image: localhost:5000/jla/mod
+  commands:
+  - git fetch --tags
+  - git submodule update --init --recursive
+  - ./bootstrap.sh
+
+- name: configure
+  image: localhost:5000/jla/mod
+  commands:
+  - mkdir build
+  - cd build
+  - cmake ../ -DCMAKE_BUILD_TYPE=OptDebug -DBUILD_DOC=on -DBUILD_TESTING=on -DBUILD_TESTING_SANITIZERS=off -DBOOST_ROOT=/opt/boost/1_76_0
+  environment:
+    CXX: g++-11
+    CXXFLAGS: -Werror
+
+- name: build
+  image: localhost:5000/jla/mod
+  commands:
+  - cd build
+  - cmake ../ -DBUILD_TESTING=on -DBUILD_TESTING_SANITIZERS=off -DBOOST_ROOT=/opt/boost/1_76_0
   - make
 
 - name: install
@@ -1011,7 +1299,7 @@ steps:
   commands:
   - mkdir build
   - cd build
-  - cmake ../ -DCMAKE_BUILD_TYPE=OptDebug -DBUILD_TESTING=on -DBUILD_TESTING_SANITIZERS=off -DBOOST_ROOT=/opt/boost/1_73_0
+  - cmake ../ -DCMAKE_BUILD_TYPE=OptDebug -DBUILD_DOC=on -DBUILD_TESTING=on -DBUILD_TESTING_SANITIZERS=off -DBOOST_ROOT=/opt/boost/1_73_0
   environment:
     CXX: clang++-8
     CXXFLAGS: -Werror
@@ -1083,7 +1371,7 @@ steps:
   commands:
   - mkdir build
   - cd build
-  - cmake ../ -DCMAKE_BUILD_TYPE=OptDebug -DBUILD_TESTING=on -DBUILD_TESTING_SANITIZERS=off -DBOOST_ROOT=/opt/boost/1_74_0
+  - cmake ../ -DCMAKE_BUILD_TYPE=OptDebug -DBUILD_DOC=on -DBUILD_TESTING=on -DBUILD_TESTING_SANITIZERS=off -DBOOST_ROOT=/opt/boost/1_74_0
   environment:
     CXX: clang++-8
     CXXFLAGS: -Werror
@@ -1155,7 +1443,7 @@ steps:
   commands:
   - mkdir build
   - cd build
-  - cmake ../ -DCMAKE_BUILD_TYPE=OptDebug -DBUILD_TESTING=on -DBUILD_TESTING_SANITIZERS=off -DBOOST_ROOT=/opt/boost/1_75_0
+  - cmake ../ -DCMAKE_BUILD_TYPE=OptDebug -DBUILD_DOC=on -DBUILD_TESTING=on -DBUILD_TESTING_SANITIZERS=off -DBOOST_ROOT=/opt/boost/1_75_0
   environment:
     CXX: clang++-8
     CXXFLAGS: -Werror
@@ -1165,6 +1453,78 @@ steps:
   commands:
   - cd build
   - cmake ../ -DBUILD_TESTING=on -DBUILD_TESTING_SANITIZERS=off -DBOOST_ROOT=/opt/boost/1_75_0
+  - make
+
+- name: install
+  image: localhost:5000/jla/mod
+  commands:
+  - cd build
+  - make install
+
+- name: build-test
+  image: localhost:5000/jla/mod
+  commands:
+  - cd build
+  - make tests
+
+- name: test
+  image: localhost:5000/jla/mod
+  commands:
+  - cd build
+  - make install
+  - ctest --output-on-failure -E cmake_add_subdirectory_build
+
+- name: simple test
+  image: localhost:5000/jla/mod
+  commands:
+  - cd build
+  - make install
+  - cd ../
+  - mod -e "smiles('O').print()"
+
+- name: test subdirectory build
+  image: localhost:5000/jla/mod
+  commands:
+  - cd build
+  - make install
+  - ctest --output-on-failure -R cmake_add_subdirectory_build
+  when:
+    ref:
+    - refs/heads/develop
+    - refs/heads/master
+    - refs/tags/v*
+
+---
+kind: pipeline
+name: clang++-8, Boost 1_76_0
+
+platform:
+  os: linux
+  arch: amd64
+
+steps:
+- name: bootstrap
+  image: localhost:5000/jla/mod
+  commands:
+  - git fetch --tags
+  - git submodule update --init --recursive
+  - ./bootstrap.sh
+
+- name: configure
+  image: localhost:5000/jla/mod
+  commands:
+  - mkdir build
+  - cd build
+  - cmake ../ -DCMAKE_BUILD_TYPE=OptDebug -DBUILD_DOC=on -DBUILD_TESTING=on -DBUILD_TESTING_SANITIZERS=off -DBOOST_ROOT=/opt/boost/1_76_0
+  environment:
+    CXX: clang++-8
+    CXXFLAGS: -Werror
+
+- name: build
+  image: localhost:5000/jla/mod
+  commands:
+  - cd build
+  - cmake ../ -DBUILD_TESTING=on -DBUILD_TESTING_SANITIZERS=off -DBOOST_ROOT=/opt/boost/1_76_0
   - make
 
 - name: install
@@ -1227,7 +1587,7 @@ steps:
   commands:
   - mkdir build
   - cd build
-  - cmake ../ -DCMAKE_BUILD_TYPE=OptDebug -DBUILD_TESTING=on -DBUILD_TESTING_SANITIZERS=off -DBOOST_ROOT=/opt/boost/1_73_0
+  - cmake ../ -DCMAKE_BUILD_TYPE=OptDebug -DBUILD_DOC=on -DBUILD_TESTING=on -DBUILD_TESTING_SANITIZERS=off -DBOOST_ROOT=/opt/boost/1_73_0
   environment:
     CXX: clang++-9
     CXXFLAGS: -Werror
@@ -1299,7 +1659,7 @@ steps:
   commands:
   - mkdir build
   - cd build
-  - cmake ../ -DCMAKE_BUILD_TYPE=OptDebug -DBUILD_TESTING=on -DBUILD_TESTING_SANITIZERS=off -DBOOST_ROOT=/opt/boost/1_74_0
+  - cmake ../ -DCMAKE_BUILD_TYPE=OptDebug -DBUILD_DOC=on -DBUILD_TESTING=on -DBUILD_TESTING_SANITIZERS=off -DBOOST_ROOT=/opt/boost/1_74_0
   environment:
     CXX: clang++-9
     CXXFLAGS: -Werror
@@ -1371,7 +1731,7 @@ steps:
   commands:
   - mkdir build
   - cd build
-  - cmake ../ -DCMAKE_BUILD_TYPE=OptDebug -DBUILD_TESTING=on -DBUILD_TESTING_SANITIZERS=off -DBOOST_ROOT=/opt/boost/1_75_0
+  - cmake ../ -DCMAKE_BUILD_TYPE=OptDebug -DBUILD_DOC=on -DBUILD_TESTING=on -DBUILD_TESTING_SANITIZERS=off -DBOOST_ROOT=/opt/boost/1_75_0
   environment:
     CXX: clang++-9
     CXXFLAGS: -Werror
@@ -1381,6 +1741,78 @@ steps:
   commands:
   - cd build
   - cmake ../ -DBUILD_TESTING=on -DBUILD_TESTING_SANITIZERS=off -DBOOST_ROOT=/opt/boost/1_75_0
+  - make
+
+- name: install
+  image: localhost:5000/jla/mod
+  commands:
+  - cd build
+  - make install
+
+- name: build-test
+  image: localhost:5000/jla/mod
+  commands:
+  - cd build
+  - make tests
+
+- name: test
+  image: localhost:5000/jla/mod
+  commands:
+  - cd build
+  - make install
+  - ctest --output-on-failure -E cmake_add_subdirectory_build
+
+- name: simple test
+  image: localhost:5000/jla/mod
+  commands:
+  - cd build
+  - make install
+  - cd ../
+  - mod -e "smiles('O').print()"
+
+- name: test subdirectory build
+  image: localhost:5000/jla/mod
+  commands:
+  - cd build
+  - make install
+  - ctest --output-on-failure -R cmake_add_subdirectory_build
+  when:
+    ref:
+    - refs/heads/develop
+    - refs/heads/master
+    - refs/tags/v*
+
+---
+kind: pipeline
+name: clang++-9, Boost 1_76_0
+
+platform:
+  os: linux
+  arch: amd64
+
+steps:
+- name: bootstrap
+  image: localhost:5000/jla/mod
+  commands:
+  - git fetch --tags
+  - git submodule update --init --recursive
+  - ./bootstrap.sh
+
+- name: configure
+  image: localhost:5000/jla/mod
+  commands:
+  - mkdir build
+  - cd build
+  - cmake ../ -DCMAKE_BUILD_TYPE=OptDebug -DBUILD_DOC=on -DBUILD_TESTING=on -DBUILD_TESTING_SANITIZERS=off -DBOOST_ROOT=/opt/boost/1_76_0
+  environment:
+    CXX: clang++-9
+    CXXFLAGS: -Werror
+
+- name: build
+  image: localhost:5000/jla/mod
+  commands:
+  - cd build
+  - cmake ../ -DBUILD_TESTING=on -DBUILD_TESTING_SANITIZERS=off -DBOOST_ROOT=/opt/boost/1_76_0
   - make
 
 - name: install
@@ -1443,7 +1875,7 @@ steps:
   commands:
   - mkdir build
   - cd build
-  - cmake ../ -DCMAKE_BUILD_TYPE=OptDebug -DBUILD_TESTING=on -DBUILD_TESTING_SANITIZERS=off -DBOOST_ROOT=/opt/boost/1_73_0
+  - cmake ../ -DCMAKE_BUILD_TYPE=OptDebug -DBUILD_DOC=on -DBUILD_TESTING=on -DBUILD_TESTING_SANITIZERS=off -DBOOST_ROOT=/opt/boost/1_73_0
   environment:
     CXX: clang++-10
     CXXFLAGS: -Werror
@@ -1515,7 +1947,7 @@ steps:
   commands:
   - mkdir build
   - cd build
-  - cmake ../ -DCMAKE_BUILD_TYPE=OptDebug -DBUILD_TESTING=on -DBUILD_TESTING_SANITIZERS=off -DBOOST_ROOT=/opt/boost/1_74_0
+  - cmake ../ -DCMAKE_BUILD_TYPE=OptDebug -DBUILD_DOC=on -DBUILD_TESTING=on -DBUILD_TESTING_SANITIZERS=off -DBOOST_ROOT=/opt/boost/1_74_0
   environment:
     CXX: clang++-10
     CXXFLAGS: -Werror
@@ -1587,7 +2019,7 @@ steps:
   commands:
   - mkdir build
   - cd build
-  - cmake ../ -DCMAKE_BUILD_TYPE=OptDebug -DBUILD_TESTING=on -DBUILD_TESTING_SANITIZERS=off -DBOOST_ROOT=/opt/boost/1_75_0
+  - cmake ../ -DCMAKE_BUILD_TYPE=OptDebug -DBUILD_DOC=on -DBUILD_TESTING=on -DBUILD_TESTING_SANITIZERS=off -DBOOST_ROOT=/opt/boost/1_75_0
   environment:
     CXX: clang++-10
     CXXFLAGS: -Werror
@@ -1597,6 +2029,654 @@ steps:
   commands:
   - cd build
   - cmake ../ -DBUILD_TESTING=on -DBUILD_TESTING_SANITIZERS=off -DBOOST_ROOT=/opt/boost/1_75_0
+  - make
+
+- name: install
+  image: localhost:5000/jla/mod
+  commands:
+  - cd build
+  - make install
+
+- name: build-test
+  image: localhost:5000/jla/mod
+  commands:
+  - cd build
+  - make tests
+
+- name: test
+  image: localhost:5000/jla/mod
+  commands:
+  - cd build
+  - make install
+  - ctest --output-on-failure -E cmake_add_subdirectory_build
+
+- name: simple test
+  image: localhost:5000/jla/mod
+  commands:
+  - cd build
+  - make install
+  - cd ../
+  - mod -e "smiles('O').print()"
+
+- name: test subdirectory build
+  image: localhost:5000/jla/mod
+  commands:
+  - cd build
+  - make install
+  - ctest --output-on-failure -R cmake_add_subdirectory_build
+  when:
+    ref:
+    - refs/heads/develop
+    - refs/heads/master
+    - refs/tags/v*
+
+---
+kind: pipeline
+name: clang++-10, Boost 1_76_0
+
+platform:
+  os: linux
+  arch: amd64
+
+steps:
+- name: bootstrap
+  image: localhost:5000/jla/mod
+  commands:
+  - git fetch --tags
+  - git submodule update --init --recursive
+  - ./bootstrap.sh
+
+- name: configure
+  image: localhost:5000/jla/mod
+  commands:
+  - mkdir build
+  - cd build
+  - cmake ../ -DCMAKE_BUILD_TYPE=OptDebug -DBUILD_DOC=on -DBUILD_TESTING=on -DBUILD_TESTING_SANITIZERS=off -DBOOST_ROOT=/opt/boost/1_76_0
+  environment:
+    CXX: clang++-10
+    CXXFLAGS: -Werror
+
+- name: build
+  image: localhost:5000/jla/mod
+  commands:
+  - cd build
+  - cmake ../ -DBUILD_TESTING=on -DBUILD_TESTING_SANITIZERS=off -DBOOST_ROOT=/opt/boost/1_76_0
+  - make
+
+- name: install
+  image: localhost:5000/jla/mod
+  commands:
+  - cd build
+  - make install
+
+- name: build-test
+  image: localhost:5000/jla/mod
+  commands:
+  - cd build
+  - make tests
+
+- name: test
+  image: localhost:5000/jla/mod
+  commands:
+  - cd build
+  - make install
+  - ctest --output-on-failure -E cmake_add_subdirectory_build
+
+- name: simple test
+  image: localhost:5000/jla/mod
+  commands:
+  - cd build
+  - make install
+  - cd ../
+  - mod -e "smiles('O').print()"
+
+- name: test subdirectory build
+  image: localhost:5000/jla/mod
+  commands:
+  - cd build
+  - make install
+  - ctest --output-on-failure -R cmake_add_subdirectory_build
+  when:
+    ref:
+    - refs/heads/develop
+    - refs/heads/master
+    - refs/tags/v*
+
+---
+kind: pipeline
+name: clang++-11, Boost 1_73_0
+
+platform:
+  os: linux
+  arch: amd64
+
+steps:
+- name: bootstrap
+  image: localhost:5000/jla/mod
+  commands:
+  - git fetch --tags
+  - git submodule update --init --recursive
+  - ./bootstrap.sh
+
+- name: configure
+  image: localhost:5000/jla/mod
+  commands:
+  - mkdir build
+  - cd build
+  - cmake ../ -DCMAKE_BUILD_TYPE=OptDebug -DBUILD_DOC=on -DBUILD_TESTING=on -DBUILD_TESTING_SANITIZERS=off -DBOOST_ROOT=/opt/boost/1_73_0
+  environment:
+    CXX: clang++-11
+    CXXFLAGS: -Werror
+
+- name: build
+  image: localhost:5000/jla/mod
+  commands:
+  - cd build
+  - cmake ../ -DBUILD_TESTING=on -DBUILD_TESTING_SANITIZERS=off -DBOOST_ROOT=/opt/boost/1_73_0
+  - make
+
+- name: install
+  image: localhost:5000/jla/mod
+  commands:
+  - cd build
+  - make install
+
+- name: build-test
+  image: localhost:5000/jla/mod
+  commands:
+  - cd build
+  - make tests
+
+- name: test
+  image: localhost:5000/jla/mod
+  commands:
+  - cd build
+  - make install
+  - ctest --output-on-failure -E cmake_add_subdirectory_build
+
+- name: simple test
+  image: localhost:5000/jla/mod
+  commands:
+  - cd build
+  - make install
+  - cd ../
+  - mod -e "smiles('O').print()"
+
+- name: test subdirectory build
+  image: localhost:5000/jla/mod
+  commands:
+  - cd build
+  - make install
+  - ctest --output-on-failure -R cmake_add_subdirectory_build
+  when:
+    ref:
+    - refs/heads/develop
+    - refs/heads/master
+    - refs/tags/v*
+
+---
+kind: pipeline
+name: clang++-11, Boost 1_74_0
+
+platform:
+  os: linux
+  arch: amd64
+
+steps:
+- name: bootstrap
+  image: localhost:5000/jla/mod
+  commands:
+  - git fetch --tags
+  - git submodule update --init --recursive
+  - ./bootstrap.sh
+
+- name: configure
+  image: localhost:5000/jla/mod
+  commands:
+  - mkdir build
+  - cd build
+  - cmake ../ -DCMAKE_BUILD_TYPE=OptDebug -DBUILD_DOC=on -DBUILD_TESTING=on -DBUILD_TESTING_SANITIZERS=off -DBOOST_ROOT=/opt/boost/1_74_0
+  environment:
+    CXX: clang++-11
+    CXXFLAGS: -Werror
+
+- name: build
+  image: localhost:5000/jla/mod
+  commands:
+  - cd build
+  - cmake ../ -DBUILD_TESTING=on -DBUILD_TESTING_SANITIZERS=off -DBOOST_ROOT=/opt/boost/1_74_0
+  - make
+
+- name: install
+  image: localhost:5000/jla/mod
+  commands:
+  - cd build
+  - make install
+
+- name: build-test
+  image: localhost:5000/jla/mod
+  commands:
+  - cd build
+  - make tests
+
+- name: test
+  image: localhost:5000/jla/mod
+  commands:
+  - cd build
+  - make install
+  - ctest --output-on-failure -E cmake_add_subdirectory_build
+
+- name: simple test
+  image: localhost:5000/jla/mod
+  commands:
+  - cd build
+  - make install
+  - cd ../
+  - mod -e "smiles('O').print()"
+
+- name: test subdirectory build
+  image: localhost:5000/jla/mod
+  commands:
+  - cd build
+  - make install
+  - ctest --output-on-failure -R cmake_add_subdirectory_build
+  when:
+    ref:
+    - refs/heads/develop
+    - refs/heads/master
+    - refs/tags/v*
+
+---
+kind: pipeline
+name: clang++-11, Boost 1_75_0
+
+platform:
+  os: linux
+  arch: amd64
+
+steps:
+- name: bootstrap
+  image: localhost:5000/jla/mod
+  commands:
+  - git fetch --tags
+  - git submodule update --init --recursive
+  - ./bootstrap.sh
+
+- name: configure
+  image: localhost:5000/jla/mod
+  commands:
+  - mkdir build
+  - cd build
+  - cmake ../ -DCMAKE_BUILD_TYPE=OptDebug -DBUILD_DOC=on -DBUILD_TESTING=on -DBUILD_TESTING_SANITIZERS=off -DBOOST_ROOT=/opt/boost/1_75_0
+  environment:
+    CXX: clang++-11
+    CXXFLAGS: -Werror
+
+- name: build
+  image: localhost:5000/jla/mod
+  commands:
+  - cd build
+  - cmake ../ -DBUILD_TESTING=on -DBUILD_TESTING_SANITIZERS=off -DBOOST_ROOT=/opt/boost/1_75_0
+  - make
+
+- name: install
+  image: localhost:5000/jla/mod
+  commands:
+  - cd build
+  - make install
+
+- name: build-test
+  image: localhost:5000/jla/mod
+  commands:
+  - cd build
+  - make tests
+
+- name: test
+  image: localhost:5000/jla/mod
+  commands:
+  - cd build
+  - make install
+  - ctest --output-on-failure -E cmake_add_subdirectory_build
+
+- name: simple test
+  image: localhost:5000/jla/mod
+  commands:
+  - cd build
+  - make install
+  - cd ../
+  - mod -e "smiles('O').print()"
+
+- name: test subdirectory build
+  image: localhost:5000/jla/mod
+  commands:
+  - cd build
+  - make install
+  - ctest --output-on-failure -R cmake_add_subdirectory_build
+  when:
+    ref:
+    - refs/heads/develop
+    - refs/heads/master
+    - refs/tags/v*
+
+---
+kind: pipeline
+name: clang++-11, Boost 1_76_0
+
+platform:
+  os: linux
+  arch: amd64
+
+steps:
+- name: bootstrap
+  image: localhost:5000/jla/mod
+  commands:
+  - git fetch --tags
+  - git submodule update --init --recursive
+  - ./bootstrap.sh
+
+- name: configure
+  image: localhost:5000/jla/mod
+  commands:
+  - mkdir build
+  - cd build
+  - cmake ../ -DCMAKE_BUILD_TYPE=OptDebug -DBUILD_DOC=on -DBUILD_TESTING=on -DBUILD_TESTING_SANITIZERS=off -DBOOST_ROOT=/opt/boost/1_76_0
+  environment:
+    CXX: clang++-11
+    CXXFLAGS: -Werror
+
+- name: build
+  image: localhost:5000/jla/mod
+  commands:
+  - cd build
+  - cmake ../ -DBUILD_TESTING=on -DBUILD_TESTING_SANITIZERS=off -DBOOST_ROOT=/opt/boost/1_76_0
+  - make
+
+- name: install
+  image: localhost:5000/jla/mod
+  commands:
+  - cd build
+  - make install
+
+- name: build-test
+  image: localhost:5000/jla/mod
+  commands:
+  - cd build
+  - make tests
+
+- name: test
+  image: localhost:5000/jla/mod
+  commands:
+  - cd build
+  - make install
+  - ctest --output-on-failure -E cmake_add_subdirectory_build
+
+- name: simple test
+  image: localhost:5000/jla/mod
+  commands:
+  - cd build
+  - make install
+  - cd ../
+  - mod -e "smiles('O').print()"
+
+- name: test subdirectory build
+  image: localhost:5000/jla/mod
+  commands:
+  - cd build
+  - make install
+  - ctest --output-on-failure -R cmake_add_subdirectory_build
+  when:
+    ref:
+    - refs/heads/develop
+    - refs/heads/master
+    - refs/tags/v*
+
+---
+kind: pipeline
+name: clang++-12, Boost 1_73_0
+
+platform:
+  os: linux
+  arch: amd64
+
+steps:
+- name: bootstrap
+  image: localhost:5000/jla/mod
+  commands:
+  - git fetch --tags
+  - git submodule update --init --recursive
+  - ./bootstrap.sh
+
+- name: configure
+  image: localhost:5000/jla/mod
+  commands:
+  - mkdir build
+  - cd build
+  - cmake ../ -DCMAKE_BUILD_TYPE=OptDebug -DBUILD_DOC=on -DBUILD_TESTING=on -DBUILD_TESTING_SANITIZERS=off -DBOOST_ROOT=/opt/boost/1_73_0
+  environment:
+    CXX: clang++-12
+    CXXFLAGS: -Werror
+
+- name: build
+  image: localhost:5000/jla/mod
+  commands:
+  - cd build
+  - cmake ../ -DBUILD_TESTING=on -DBUILD_TESTING_SANITIZERS=off -DBOOST_ROOT=/opt/boost/1_73_0
+  - make
+
+- name: install
+  image: localhost:5000/jla/mod
+  commands:
+  - cd build
+  - make install
+
+- name: build-test
+  image: localhost:5000/jla/mod
+  commands:
+  - cd build
+  - make tests
+
+- name: test
+  image: localhost:5000/jla/mod
+  commands:
+  - cd build
+  - make install
+  - ctest --output-on-failure -E cmake_add_subdirectory_build
+
+- name: simple test
+  image: localhost:5000/jla/mod
+  commands:
+  - cd build
+  - make install
+  - cd ../
+  - mod -e "smiles('O').print()"
+
+- name: test subdirectory build
+  image: localhost:5000/jla/mod
+  commands:
+  - cd build
+  - make install
+  - ctest --output-on-failure -R cmake_add_subdirectory_build
+  when:
+    ref:
+    - refs/heads/develop
+    - refs/heads/master
+    - refs/tags/v*
+
+---
+kind: pipeline
+name: clang++-12, Boost 1_74_0
+
+platform:
+  os: linux
+  arch: amd64
+
+steps:
+- name: bootstrap
+  image: localhost:5000/jla/mod
+  commands:
+  - git fetch --tags
+  - git submodule update --init --recursive
+  - ./bootstrap.sh
+
+- name: configure
+  image: localhost:5000/jla/mod
+  commands:
+  - mkdir build
+  - cd build
+  - cmake ../ -DCMAKE_BUILD_TYPE=OptDebug -DBUILD_DOC=on -DBUILD_TESTING=on -DBUILD_TESTING_SANITIZERS=off -DBOOST_ROOT=/opt/boost/1_74_0
+  environment:
+    CXX: clang++-12
+    CXXFLAGS: -Werror
+
+- name: build
+  image: localhost:5000/jla/mod
+  commands:
+  - cd build
+  - cmake ../ -DBUILD_TESTING=on -DBUILD_TESTING_SANITIZERS=off -DBOOST_ROOT=/opt/boost/1_74_0
+  - make
+
+- name: install
+  image: localhost:5000/jla/mod
+  commands:
+  - cd build
+  - make install
+
+- name: build-test
+  image: localhost:5000/jla/mod
+  commands:
+  - cd build
+  - make tests
+
+- name: test
+  image: localhost:5000/jla/mod
+  commands:
+  - cd build
+  - make install
+  - ctest --output-on-failure -E cmake_add_subdirectory_build
+
+- name: simple test
+  image: localhost:5000/jla/mod
+  commands:
+  - cd build
+  - make install
+  - cd ../
+  - mod -e "smiles('O').print()"
+
+- name: test subdirectory build
+  image: localhost:5000/jla/mod
+  commands:
+  - cd build
+  - make install
+  - ctest --output-on-failure -R cmake_add_subdirectory_build
+  when:
+    ref:
+    - refs/heads/develop
+    - refs/heads/master
+    - refs/tags/v*
+
+---
+kind: pipeline
+name: clang++-12, Boost 1_75_0
+
+platform:
+  os: linux
+  arch: amd64
+
+steps:
+- name: bootstrap
+  image: localhost:5000/jla/mod
+  commands:
+  - git fetch --tags
+  - git submodule update --init --recursive
+  - ./bootstrap.sh
+
+- name: configure
+  image: localhost:5000/jla/mod
+  commands:
+  - mkdir build
+  - cd build
+  - cmake ../ -DCMAKE_BUILD_TYPE=OptDebug -DBUILD_DOC=on -DBUILD_TESTING=on -DBUILD_TESTING_SANITIZERS=off -DBOOST_ROOT=/opt/boost/1_75_0
+  environment:
+    CXX: clang++-12
+    CXXFLAGS: -Werror
+
+- name: build
+  image: localhost:5000/jla/mod
+  commands:
+  - cd build
+  - cmake ../ -DBUILD_TESTING=on -DBUILD_TESTING_SANITIZERS=off -DBOOST_ROOT=/opt/boost/1_75_0
+  - make
+
+- name: install
+  image: localhost:5000/jla/mod
+  commands:
+  - cd build
+  - make install
+
+- name: build-test
+  image: localhost:5000/jla/mod
+  commands:
+  - cd build
+  - make tests
+
+- name: test
+  image: localhost:5000/jla/mod
+  commands:
+  - cd build
+  - make install
+  - ctest --output-on-failure -E cmake_add_subdirectory_build
+
+- name: simple test
+  image: localhost:5000/jla/mod
+  commands:
+  - cd build
+  - make install
+  - cd ../
+  - mod -e "smiles('O').print()"
+
+- name: test subdirectory build
+  image: localhost:5000/jla/mod
+  commands:
+  - cd build
+  - make install
+  - ctest --output-on-failure -R cmake_add_subdirectory_build
+  when:
+    ref:
+    - refs/heads/develop
+    - refs/heads/master
+    - refs/tags/v*
+
+---
+kind: pipeline
+name: clang++-12, Boost 1_76_0
+
+platform:
+  os: linux
+  arch: amd64
+
+steps:
+- name: bootstrap
+  image: localhost:5000/jla/mod
+  commands:
+  - git fetch --tags
+  - git submodule update --init --recursive
+  - ./bootstrap.sh
+
+- name: configure
+  image: localhost:5000/jla/mod
+  commands:
+  - mkdir build
+  - cd build
+  - cmake ../ -DCMAKE_BUILD_TYPE=OptDebug -DBUILD_DOC=on -DBUILD_TESTING=on -DBUILD_TESTING_SANITIZERS=off -DBOOST_ROOT=/opt/boost/1_76_0
+  environment:
+    CXX: clang++-12
+    CXXFLAGS: -Werror
+
+- name: build
+  image: localhost:5000/jla/mod
+  commands:
+  - cd build
+  - cmake ../ -DBUILD_TESTING=on -DBUILD_TESTING_SANITIZERS=off -DBOOST_ROOT=/opt/boost/1_76_0
   - make
 
 - name: install

@@ -150,16 +150,18 @@ private:
 // rst:
 // rst:		Compose the rules by all common subgraphs of :math:`R_1` and :math:`L_2`,
 // rst:		possibly limited to connected subgraphs or to the subgraphs of maximum size.
+// rst:		By default the empty overlap is not considered, but can be enabled to be.
 // rst:
 // rst-class-start:
 struct MOD_DECL ComposeCommon : public ComposeBase {
-	ComposeCommon(Expression first, Expression second, bool discardNonchemical, bool maximum, bool connected);
+	ComposeCommon(Expression first, Expression second, bool discardNonchemical, bool maximum, bool connected, bool includeEmpty);
 	bool getMaxmimum() const;
 	bool getConnected() const;
+	bool getIncludeEmpty() const;
 private:
 	std::ostream &print(std::ostream &s) const;
 private:
-	bool maximum, connected;
+	bool maximum, connected, includeEmpty;
 };
 // rst-class-end:
 

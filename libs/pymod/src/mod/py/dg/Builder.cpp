@@ -115,7 +115,7 @@ void Builder_doExport() {
 					// rst:			:param str description: the description to parse into abstract derivations.
 					// rst:			:raises: :class:`InputError` if the description could not be parsed.
 			.def("addAbstract", &Builder::addAbstract)
-					// rst:		.. method:: load(ruleDatabase, file, verbosity=2)
+					// rst:		.. method:: load(ruleDatabase, f, verbosity=2)
 					// rst:
 					// rst:			Load and add a derivation graph dump.
 					// rst:			Use :func:`DG.load` to load a dump as a locked derivation graph.
@@ -131,7 +131,8 @@ void Builder_doExport() {
 					// rst:
 					// rst:			:param ruleDatabase: A list of rules used as explained above.
 					// rst:			:type ruleDatabase: list[Rule]
-					// rst:			:param str file: a DG dump file to load.
+					// rst:			:param f: a DG dump file to load.
+					// rst:			:type f: str or CWDPath
 					// rst:			:raises: :class:`LogicError` if there is a ``None`` in ``ruleDatabase``.
 					// rst:			:raises: :class:`LogicError` if the label settings of the dump does not match those of this DG.
 					// rst: 			:raises: :class:`InputError` if the file can not be opened or its content is bad.

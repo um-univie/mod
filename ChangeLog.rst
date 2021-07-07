@@ -5,16 +5,130 @@ Changes
 #######
 
 
-develop
-=======
+v0.13.0 (2021-07-08)
+====================
+
+Incompatible Changes
+--------------------
+
+- The package name has been changed to simply "MØD".
+- Use more C++17 features, making some code not compile with GCC 7.
+- Clang 9 seems to produce wrong code for PyMØD, resultining in
+  segmentation faults during module import.
+- Require Sphinx 3.5
+- The return type of :cpp:func:`rule::Rule::getLabelType` has changed
+  from using ``boost::optional`` to ``std::optional``.
+- Change the GraphCanon submodule from a relative path to the Github
+  repository.
+- Rename the C++ graph loading functions
+
+  - ``graph::Graph::gmlString`` to :cpp:func:`graph::Graph::fromGMLString`
+  - ``graph::Graph::gml``       to :cpp:func:`graph::Graph::fromGMLFile`
+  - ``graph::Graph::graphDFS``  to :cpp:func:`graph::Graph::fromDFS`
+  - ``graph::Graph::smiles``    to :cpp:func:`graph::Graph::fromSMILES`
+  - ``graph::Graph::makeGraph`` to :cpp:func:`graph::Graph::create`
+- Rename the C++ rule loading functions
+
+  - ``rule::Rule::ruleGMLString`` to :cpp:func:`rule::Rule::fromGMLString`
+  - ``rule::Rule::ruleGML``       to :cpp:func:`rule::Rule::fromGMLFile`
+- Add ``warnings`` parameter to :cpp:func:`graph::Graph::create`.
+- Fix ``rcCommon`` to consistently enumerate common subgraphs that are not
+  necessarily vertex-induced.
+  Use ``config.rc.useBoostCommonSubgraph = False`` to switch to the old
+  behaviour.
+- The ``BUILD_DOC`` option for building from source now defaults to ``OFF``.
+- Add :cpp:class:`rule::CompositionMatch`/:py:class:`RCMatch`.
+- The file parameter for :py:func:`DG.load` and :py:func:`DGBuilder.load`
+  has been changed name from ``file`` to ``f``.
+- :py:func:`Graph.fromSMILES` has changed order of parameters,
+  ``add`` is now the last one.
+
+
+New Features
+------------
+
+- Added ``printCombined`` parameter to
+  :cpp:func:`rule::Rule::print`/:py:meth:`Rule.print`
+  to optionally print a figure where the rule is depicted as a single
+  combined graph.
+  This was previously always printed, but now it defaults to off.
+- Added <-operator to
+  :cpp:class:`graph::Union`/:py:class:`UnionGraph`,
+  :cpp:class:`rule::Rule::LeftGraph`/:py:class:`Rule.LeftGraph`,
+  :cpp:class:`rule::Rule::ContextGraph`/:py:class:`Rule.ContextGraph`, and
+  :cpp:class:`rule::Rule::RightGraph`/:py:class:`Rule.RightGraph`.
+- Added :cpp:func:`dg::Printer::getTikzpictureOption`,
+  :cpp:func:`dg::Printer::setTikzpictureOption`,
+  :py:attr:`DGPrinter.tikzpictureOption`.
+- Added :cpp:func:`dg::DG::printNonHyper`/:py:meth:`DG.printNonHyper`.
+- Allow ``limit=0`` for repeat strategies,
+  :cpp:func:`dg::Strategy::makeRepeat`/:py:meth:`DGStrat.makeRepeat`.
+- Added overload for :cpp:func:`dg::DG::dump`/:py:meth:`DG.dump` that takes a
+  target filename as argument.
+- Add the static methods
+
+  - :py:func:`Graph.fromGMLString` (the same as :py:func:`graphGMLString`)
+  - :py:func:`Graph.fromGMLFile`   (the same as :py:func:`graphGML`)
+  - :py:func:`Graph.fromDFS`       (the same as :py:func:`graphDFS`)
+  - :py:func:`Graph.fromSMILES`    (the same as :py:func:`smiles`)
+  - :py:func:`Rule.fromGMLString`  (the same as :py:func:`ruleGMLString`)
+  - :py:func:`Rule.fromGMLFile`    (the same as :py:func:`ruleGML`)
+- Allow dot (``.``) bonds in :ref:`SMILES <graph-smiles>` strings.
+- Add the following functions for loading a possibly disconnected graph:
+
+  - :cpp:func:`graph::Graph::fromSMILESMulti`/:py:func:`Graph.fromSMILESMulti`
+  - :cpp:func:`graph::Graph::fromGMLStringMulti`/:py:func:`Graph.fromGMLStringMulti`
+  - :cpp:func:`graph::Graph::fromGMLFileMulti`/:py:func:`Graph.fromGMLFileMulti`
+- Add :envvar:`MOD_PYTHON` and :envvar:`MOD_IPYTHON` to overwrite the
+  interpreter the :ref:`wrapper script <mod-wrapper>` executes.
+- Add :cpp:func:`graph::Graph::getLoadingWarnings`/:py:attr:`Graph.loadingWarnings`.
+
 
 Bugs Fixed
 ----------
+
+- :cpp:func:`rule::Rule::fromGMLFile`/:py:func:`Rule.fromGMLFile` and
+  :cpp:func:`rule::Rule::fromGMLString`/:py:func:`Rule.fromGMLString`:
+
+  - Fixed typos in a few error messages.
+  - Actually fail loading when errors in constraints are encountered.
 
 - Fix v0.12 problem with RPATH handling of ``libmod``.
 - Doc, fix infinite search.
 - Fix exception visibility on macOS so they can be caught outside the library.
 - Tests, set C++ standard in CMake tests.
+- Added missing ``operator<`` to :cpp:class:`graph::Union::Vertex`.
+- Fix error handling to throw the right exception with better message when the
+  file can not be opened for the functions
+  :cpp:func:`graph::Graph::fromGMLFile`/:py:func:`Graph.fromGMLFile`,
+  :cpp:func:`rule::Rule::fromGMLFile`/:py:func:`Rule.fromGMLFile`,
+  :cpp:func:`dg::DG::load`/:py:meth:`DG.load`,
+  :cpp:func:`dg::Builder::load`/:py:meth:`DGBuilder.load`.
+- Fixes to support Boost 1.76.
+- Fixes to support GCC 11.
+
+
+Other
+-----
+
+- Test, set C++ standard in CMake tests.
+- Doc, fix description of :py:class:`RCExpExp` and :py:class:`RCExpComposeCommon`.
+- Doc, for libMØD classes, make a synopsis with links to declarations.
+- Doc, fix documentation for :cpp:func:`post::makeUniqueFilePrefix` so it is
+  documented to be in namespace ``post``.
+- Docker, for building the Ubuntu image, download Boost from the new URL.
+- Conda, require a newer Graphviz version with rsvg from conda-forge instead of
+  custom version.
+- Refresh the messages from and the documentation on :ref:`mod-wrapper`.
+- Doc, clarify use of ``pip`` may need ``--user`` for home folder installation.
+- Doc, properly document that a :py:class:`CWDPath` is a valid argument for
+
+  - :py:func:`DG.load`,
+  - :py:func:`DGBuilder.load`,
+  - :py:func:`Graph.fromGMLFile`, and
+  - :py:func:`Rule.fromGMLFile`.
+- Doc, clarify conditions on methods in :cpp:class:`dg::DG`/:py:class:`DG`
+  regarding "hasActiveBuilder" and "isLocked".
 
 
 v0.12.0 (2021-01-18)
@@ -159,7 +273,7 @@ New Features
 
 - Added :cpp:func:`dg::Builder::apply`/:py:meth:`DGBuilder.apply`
   as a lower-level function for computing proper direct derivations.
-- :cpp:func:`graph::Graph::smiles`/:py:meth:`smiles`:
+- :cpp:func:`graph::Graph::fromSMILES`/:py:meth:`smiles`:
 
   - Generalize the parser to accept almost arbitrary strings as symbols inside
     brackets. See :ref:`graph-smiles`.
@@ -171,12 +285,12 @@ New Features
 
 - Added the PyMØD submodule :ref:`epim`.
 - Added :cpp:enum:`SmilesClassPolicy`/:py:class:`SmilesClassPolicy`
-  argument to :cpp:func:`graph::Graph::smiles`/:py:meth:`smiles`.
+  argument to :cpp:func:`graph::Graph::fromSMILES`/:py:meth:`smiles`.
 - Support using either Open Babel 2 or 3 as dependency.
 - Make :py:attr:`DGPrinter.graphPrinter` writeable as well.
 - Make :cpp:class:`graph::Printer`/:py:class:`GraphPrinter` equality comparable.
 - Added :cpp:func:`dg::Printer::setGraphvizPrefix`/:cpp:func:`dg::Printer::getGraphvizPrefix`/:py:attr:`DGPrinter.graphvizPrefix`.
-- Added :cpp:func:`makeUniqueFilePrefix`/:py:func:`makeUniqueFilePrefix`.
+- Added ``makeUniqueFilePrefix``/:py:func:`makeUniqueFilePrefix`.
 - Improve verbosity level 8 information from
   :cpp:func:`dg::Builder::execute`/:py:func:`DGBuilder.execute` to the universe
   size.
@@ -230,7 +344,7 @@ Bugs Fixed
   - :cpp:func:`dg::Printer::setRotationOverwrite`, and
   - :cpp:func:`dg::Printer::setMirrorOverwrite`.
 
-- :cpp:func:`graph::Graph::smiles`/:py:meth:`smiles`:
+- :cpp:func:`graph::Graph::fromSMILES`/:py:meth:`smiles`:
 
   - Improve parsing error messages.
   - Fix missing external ID for bracketed wildcard atoms with class label,
@@ -254,7 +368,7 @@ Bugs Fixed
   Thanks to Christoph Flamm.
 - Fix :cpp:func:`rule::Rule::getGMLString`/:py:meth:`Rule.getGMLString` to not
   perform coordinate instantiation when not needed.
-- Fix Python export of :py:class:`RuleContextGraphVertex`.
+- Fix Python export of :py:class:`Rule.ContextGraph.Vertex`.
 - Properly throw exceptions from all ``pop`` functions in
   :cpp:class:`dg::Printer`/:py:class:`DGPrinter` when there is nothing to pop.
 - PostMØD: remove extranous escape of a quote in AWK script in ``coordsFromGV``.

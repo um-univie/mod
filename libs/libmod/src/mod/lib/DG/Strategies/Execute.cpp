@@ -5,16 +5,13 @@
 #include <mod/lib/DG/Strategies/GraphState.hpp>
 #include <mod/lib/Graph/Single.hpp>
 
-namespace mod {
-namespace lib {
-namespace DG {
-namespace Strategies {
+namespace mod::lib::DG::Strategies {
 
 Execute::Execute(std::shared_ptr<mod::Function<void(const dg::Strategy::GraphState &)> > func)
 		: Strategy::Strategy(0), func(func) {}
 
-Strategy *Execute::clone() const {
-	return new Execute(func->clone());
+std::unique_ptr<Strategy> Execute::clone() const {
+	return std::make_unique<Execute>(func->clone());
 }
 
 void Execute::preAddGraphs(std::function<void(std::shared_ptr<graph::Graph>, IsomorphismPolicy)> add) const {}
@@ -50,7 +47,4 @@ void Execute::executeImpl(PrintSettings settings, const GraphState &input) {
 	(*func)(gs);
 }
 
-} // namespace Strategies
-} // namespace DG
-} // namespace lib
-} // namespace mod
+} // namespace mod::lib::DG::Strategies

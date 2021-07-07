@@ -207,21 +207,20 @@ BondType DepictionDataCore::DepictionData<membership>::operator()(Edge e) const 
 template<Membership membership>
 bool DepictionDataCore::DepictionData<membership>::hasImportantStereo(Vertex v) const {
 	const auto &lr = depict.lr;
+	if(!has_stereo(lr)) return false;
 	switch(membership) {
 	case Membership::Left: {
 		const auto &lg = get_labelled_left(lr);
-		if(!has_stereo(lg)) return false;
 		return !get_stereo(lg)[v]->morphismDynamicOk();
 	}
 	case Membership::Right: {
 		const auto &lg = get_labelled_right(lr);
-		if(!has_stereo(lg)) return false;
 		return !get_stereo(lg)[v]->morphismDynamicOk();
 	}
 	case Membership::Context:
 		return get_stereo(lr).inContext(v) && depict.hasImportantStereo(v);
 	}
-	MOD_ABORT;
+	__builtin_unreachable();
 }
 
 template<Membership membership>
@@ -258,7 +257,7 @@ DepictionDataCore::DepictionData<membership>::getEdgeFake3DType(Edge e, bool wit
 	case Membership::Right:
 		return cData.obMolRight.getBondFake3D(idSrc, idTar);
 	case Membership::Context:
-		if(get_stereo(depict.lr).inContext(vSrc) && get_stereo(depict.lr).inContext(vTar))
+		if(has_stereo(depict.lr) && get_stereo(depict.lr).inContext(vSrc) && get_stereo(depict.lr).inContext(vTar))
 			return cData.obMolLeft.getBondFake3D(idSrc, idTar);
 		else
 			return lib::IO::Graph::Write::EdgeFake3DType::None;
@@ -469,10 +468,7 @@ double DepictionDataCore::getY(Vertex v, bool withHydrogen) const {
 }
 
 void DepictionDataCore::copyCoords(const DepictionDataCore &other, const std::map<Vertex, Vertex> &vMap) {
-	if(!other.getHasCoordinates()) {
-		std::cout << "Can not copy coordinates from depiction without coordinates." << std::endl;
-		MOD_ABORT;
-	}
+	if(!other.getHasCoordinates()) return;
 	const auto &g = get_graph(lr);
 	const auto doIt = [&](CoordData &cData, const bool withHydrogen) {
 		cData.x.resize(num_vertices(g));

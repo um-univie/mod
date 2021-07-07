@@ -331,7 +331,17 @@ void Printer_doExport() {
 			.add_property("graphvizPrefix",
 			              py::make_function(&Printer::getGraphvizPrefix,
 			                                py::return_value_policy<py::copy_const_reference>()),
-			              &Printer::setGraphvizPrefix);
+			              &Printer::setGraphvizPrefix)
+					// rst:		.. attribute:: tikzpictureOption
+					// rst:
+					// rst:			Access the string that will be inserted into generated Tikz files,
+					// rst:			in the options for the ``\tikzpicture`` macro used for the DG.
+					// rst:
+					// rst:			:type: str
+			.add_property("tikzpictureOption",
+			              py::make_function(&Printer::getTikzpictureOption,
+			                                py::return_value_policy<py::copy_const_reference>()),
+			              &Printer::setTikzpictureOption);
 }
 
 } // namespace mod::dg::Py

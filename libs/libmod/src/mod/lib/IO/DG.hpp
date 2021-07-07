@@ -29,21 +29,20 @@ public:
 	}
 };
 
-boost::optional<nlohmann::json> loadDump(const std::string &file, std::ostream &err);
+std::optional<nlohmann::json> loadDump(const std::string &file, std::ostream &err);
 
 std::unique_ptr<lib::DG::NonHyper> dump(const std::vector<std::shared_ptr<graph::Graph> > &graphDatabase,
                                         const std::vector<std::shared_ptr<rule::Rule> > &ruleDatabase,
                                         const std::string &file,
                                         IsomorphismPolicy graphPolicy,
                                         std::ostream &err, int verbosity);
-boost::optional<std::vector<AbstractDerivation>> abstract(const std::string &s, std::ostream &err);
+std::optional<std::vector<AbstractDerivation>> abstract(const std::string &s, std::ostream &err);
 } // namespace mod::lib::IO::DG::Read
 namespace mod::lib::IO::DG::Write {
 using Vertex = lib::DG::HyperVertex;
 using Edge = lib::DG::HyperEdge;
 
 nlohmann::json dumpToJson(const lib::DG::NonHyper &dg);
-std::string dumpToFile(const lib::DG::NonHyper &dg);
 
 std::string dotNonHyper(const lib::DG::NonHyper &nonHyper);
 std::string pdfNonHyper(const lib::DG::NonHyper &nonHyper);
@@ -150,9 +149,6 @@ struct Options {
 	using DupVertex = boost::graph_traits<DupGraphType>::vertex_descriptor;
 	using DupEdge = boost::graph_traits<DupGraphType>::edge_descriptor;
 public:
-	Options() : withShortcutEdges(true), withGraphImages(true), labelsAsLatexMath(true),
-	            withShortcutEdgesAfterVisibility(false), withInlineGraphs(false) {}
-
 	Options &Non() {
 		return WithShortcutEdges(false).WithGraphImages(false).LabelsAsLatexMath(false);
 	}
@@ -260,11 +256,11 @@ public:
 	                    int inDegreeVisible, int outDegreeVisible) const;
 	std::string vDupToId(DupVertex vDup, const lib::DG::Hyper &dg) const;
 public:
-	bool withShortcutEdges;
-	bool withGraphImages;
-	bool labelsAsLatexMath;
-	bool withShortcutEdgesAfterVisibility;
-	bool withInlineGraphs;
+	bool withShortcutEdges = true;
+	bool withGraphImages = true;
+	bool labelsAsLatexMath = true;
+	bool withShortcutEdgesAfterVisibility = false;
+	bool withInlineGraphs = false;
 	std::string suffix;
 	// appearance (not giving state)
 	std::function<bool(Vertex, const lib::DG::Hyper &)> vertexVisible;
@@ -282,6 +278,7 @@ public:
 	std::function<bool(std::shared_ptr<graph::Graph>)> mirrorOverwrite;
 	// rendering engine things
 	std::string graphvizPrefix;
+	std::string tikzpictureOption = "scale=\\modDGHyperScale";
 	// duplication (not giving state)
 	// all vertices must be first and then all edges
 	// all incarnations must be contiguous and in increasing order
@@ -293,12 +290,11 @@ public:
 struct Data {
 	struct Connections {
 		Connections(int numTails, int numHeads) : tail(numTails, 0), head(numHeads, 0) {}
-
+	public:
 		// indices are offsets on the in-/out-edge iterators
 		// values are the duplicate numbers
 		std::vector<int> tail, head;
 	};
-
 	using ConnectionsStore = std::unordered_map<Vertex, std::unordered_map<int, Connections>>;
 public:
 	explicit Data(const lib::DG::Hyper &dg);
@@ -321,7 +317,6 @@ public:
 };
 
 struct Printer {
-	Printer();
 	std::pair<std::string, std::string> printHyper(const Data &data, const IO::Graph::Write::Options &graphOptions);
 	void pushSuffix(const std::string suffix);
 	void popSuffix();
@@ -350,6 +345,8 @@ public:
 public: // rendering engine things
 	void setGraphvizPrefix(const std::string &prefix);
 	const std::string &getGraphvizPrefix() const;
+	void setTikzpictureOption(const std::string &option);
+	const std::string &getTikzpictureOption() const;
 public:
 	Options prePrint(const Data &data);
 	void postPrint();
@@ -365,23 +362,21 @@ private:
 	std::vector<std::pair<std::function<std::string(Vertex, const lib::DG::Hyper &)>, bool> > vertexColour;
 	std::vector<std::function<std::string(Vertex, const lib::DG::Hyper &)> > edgeColour;
 public:
-	std::string vertexLabelSep, edgeLabelSep;
-	bool withGraphName, withRuleName, withRuleId;
+	std::string vertexLabelSep = ", ", edgeLabelSep = ", ";
+	bool withGraphName = true, withRuleName = false, withRuleId = true;
 };
 
 void generic(const lib::DG::Hyper &dg, const Options &options, SyntaxPrinter &print);
 std::string dot(const lib::DG::Hyper &dg, const Options &options, const IO::Graph::Write::Options &graphOptions);
 std::string coords(const lib::DG::Hyper &dg, const Options &options, const IO::Graph::Write::Options &graphOptions);
-std::pair<std::string, std::string> tikz(const lib::DG::Hyper &dg,
-                                         const Options &options,
+std::pair<std::string, std::string> tikz(const lib::DG::Hyper &dg, const Options &options,
                                          const IO::Graph::Write::Options &graphOptions);
 std::string pdfFromDot(const lib::DG::Hyper &dg, const Options &options, const IO::Graph::Write::Options &graphOptions);
-std::pair<std::string, std::string> pdf(const lib::DG::Hyper &dg,
-                                        const Options &options,
+std::pair<std::string, std::string> pdf(const lib::DG::Hyper &dg, const Options &options,
                                         const IO::Graph::Write::Options &graphOptions);
-std::pair<std::string, std::string> summary(const Data &data,
-                                            Printer &printer,
+std::pair<std::string, std::string> summary(const Data &data, Printer &printer,
                                             const IO::Graph::Write::Options &graphOptions);
+std::string summaryNonHyper(const lib::DG::NonHyper &dg);
 
 } // namespace mod::lib::IO::DG::Write
 

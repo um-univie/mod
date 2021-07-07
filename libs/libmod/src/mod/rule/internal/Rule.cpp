@@ -38,7 +38,7 @@ makePropMoleculeCore(const lib::Rules::GraphType &g, const lib::Rules::PropStrin
 }
 
 std::shared_ptr<Rule> makeRule(lib::Rules::LabelledRule &&r) {
-	auto rLib = std::make_unique<mod::lib::Rules::Real>(std::move(r), boost::none);
+	auto rLib = std::make_unique<mod::lib::Rules::Real>(std::move(r), std::nullopt);
 	return mod::rule::Rule::makeRule(std::move(rLib));
 }
 

@@ -39,7 +39,7 @@ std::shared_ptr<graph::Graph> makeGraph(
 		std::unique_ptr<lib::Graph::PropString> pString,
 		std::unique_ptr<lib::Graph::PropStereo> pStereo) {
 	auto gLib = std::make_unique<lib::Graph::Single>(std::move(g), std::move(pString), std::move(pStereo));
-	return graph::Graph::makeGraph(std::move(gLib));
+	return graph::Graph::create(std::move(gLib));
 }
 
 std::string writePDF(const lib::Graph::Single &g, const mod::lib::IO::Graph::Write::Options &options) {

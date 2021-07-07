@@ -35,13 +35,9 @@ BOOST_FUSION_ADAPT_STRUCT(mod::lib::IO::DG::Read::AbstractDerivation,
                           (mod::lib::IO::DG::Read::AbstractDerivation::List, left)
 		                          (bool, reversible)
 		                          (mod::lib::IO::DG::Read::AbstractDerivation::List, right)
-);
+)
 
-namespace mod {
-namespace lib {
-namespace IO {
-namespace DG {
-namespace Read {
+namespace mod::lib::IO::DG::Read {
 namespace {
 namespace parser {
 
@@ -62,7 +58,7 @@ const auto derivations = +derivation;
 } // namespace parser
 } // namespace
 
-boost::optional<nlohmann::json> loadDump(const std::string &file, std::ostream &err) {
+std::optional<nlohmann::json> loadDump(const std::string &file, std::ostream &err) {
 	boost::iostreams::mapped_file_source ifs(file);
 	std::vector<std::uint8_t> data(ifs.begin(), ifs.end());
 	auto jOpt = IO::readJson(data, err);
@@ -112,7 +108,13 @@ std::unique_ptr<lib::DG::NonHyper> dump(const std::vector<std::shared_ptr<graph:
                                         const std::string &file,
                                         IsomorphismPolicy graphPolicy,
                                         std::ostream &err, int verbosity) {
-	boost::iostreams::mapped_file_source ifs(file);
+	boost::iostreams::mapped_file_source ifs;
+	try {
+		ifs.open(file);
+	} catch(const BOOST_IOSTREAMS_FAILURE &e) {
+		err << "Could not open file '" << file << "':\n" << e.what();
+		return {};
+	}
 	if(ifs.size() > 8 && std::string(ifs.begin(), ifs.begin() + 8) == "version:") {
 		ifs.close();
 		return lib::DG::Dump::load(graphDatabase, ruleDatabase, file, err);
@@ -132,16 +134,16 @@ std::unique_ptr<lib::DG::NonHyper> dump(const std::vector<std::shared_ptr<graph:
 	return std::unique_ptr<lib::DG::NonHyper>(dgInternal.release());
 }
 
-boost::optional<std::vector<AbstractDerivation>> abstract(const std::string &s, std::ostream &err) {
+std::optional<std::vector<AbstractDerivation>> abstract(const std::string &s, std::ostream &err) {
 	auto iterStart = s.begin(), iterEnd = s.end();
 	std::vector<AbstractDerivation> derivations;
-	const bool res = lib::IO::parse(iterStart, iterEnd, parser::derivations, derivations, err, x3::ascii::space);
-	if(!res) return {};
-	else return derivations;
+	try {
+		lib::IO::parse(iterStart, iterEnd, parser::derivations, derivations, x3::ascii::space);
+	} catch(const lib::IO::ParsingError &e) {
+		err << e.msg;
+		return {};
+	}
+	return derivations;
 }
 
-} // namespace Read
-} // namespace DG
-} // namespace IO
-} // namespace lib
-} // namespace mod
+} // namespace mod::lib::IO::DG::Read

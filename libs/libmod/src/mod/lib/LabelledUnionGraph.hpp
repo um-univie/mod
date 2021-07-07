@@ -41,10 +41,10 @@ protected:
          return up[k];                                                          \
       }                                                                         \
    };
-MOD_MAKE_UNION_PROP(String, string);
-MOD_MAKE_UNION_PROP(Term, term);
-MOD_MAKE_UNION_PROP(Stereo, stereo);
-MOD_MAKE_UNION_PROP(Molecule, molecule);
+MOD_MAKE_UNION_PROP(String, string)
+MOD_MAKE_UNION_PROP(Term, term)
+MOD_MAKE_UNION_PROP(Stereo, stereo)
+MOD_MAKE_UNION_PROP(Molecule, molecule)
 #undef MOD_MAKE_UNION_PROP
 
 } // namespace detail

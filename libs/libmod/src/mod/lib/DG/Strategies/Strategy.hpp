@@ -72,15 +72,15 @@ public: // constants for verbosity 'levels'
 };
 
 struct Strategy {
-	Strategy(unsigned int maxComponents);
+	Strategy(int maxComponents);
 	Strategy(const Strategy &) = delete;
 	Strategy &operator=(const Strategy &) = delete;
 	virtual ~Strategy();
-	virtual Strategy *clone() const = 0;
+	virtual std::unique_ptr<Strategy> clone() const = 0;
 	void setExecutionEnv(ExecutionEnv &env);
 	virtual void preAddGraphs(std::function<void(std::shared_ptr<graph::Graph>, IsomorphismPolicy)> add) const = 0;
 	virtual void forEachRule(std::function<void(const lib::Rules::Real &)> f) const = 0;
-	unsigned int getMaxComponents() const;
+	int getMaxComponents() const;
 	void execute(PrintSettings settings, const GraphState &input);
 	virtual void printInfo(PrintSettings settings) const = 0;
 	virtual const GraphState &getOutput() const;
@@ -92,13 +92,13 @@ private:
 	virtual void setExecutionEnvImpl();
 	virtual void executeImpl(PrintSettings settings, const GraphState &input) = 0;
 private:
-	ExecutionEnv *env;
-	const unsigned int maxComponents;
+	ExecutionEnv *env = nullptr;
+	const int maxComponents;
 protected:
-	const GraphState *input;
-	GraphState *output;
+	const GraphState *input = nullptr;
+	GraphState *output = nullptr;
 protected:
-	static unsigned int calcMaxNumComponents(const std::vector<Strategy *> &strats);
+	static int calcMaxNumComponents(const std::vector<std::unique_ptr<Strategy>> &strats);
 };
 
 } // namespace mod::lib::DG::Strategies

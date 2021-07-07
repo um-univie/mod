@@ -2,6 +2,8 @@
 
 #include <mod/Config.hpp>
 
+#include <boost/mpl/vector.hpp>
+
 namespace mod::Py {
 namespace {
 

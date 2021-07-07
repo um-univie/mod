@@ -1,3 +1,5 @@
+include("xxx_helpers.py")
+
 rId = ruleGMLString("""rule [
 	ruleID "id"
 	context [

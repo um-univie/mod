@@ -1,5 +1,5 @@
-#ifndef MOD_LIB_ALGORITHM_H
-#define	MOD_LIB_ALGORITHM_H
+#ifndef MOD_LIB_ALGORITHM_HPP
+#define MOD_LIB_ALGORITHM_HPP
 
 #include <mod/Error.hpp>
 
@@ -10,8 +10,7 @@
 // - findAndInsert
 // - MultiDimSelector
 
-namespace mod {
-namespace lib {
+namespace mod::lib {
 
 template<typename Container, typename T, typename Pred>
 std::pair<T, bool> findAndInsert(Container &c, T t, Pred pred) {
@@ -217,7 +216,6 @@ public:
 	Positions position;
 };
 
-} // namespace lib
-} // namespace mod
+} // namespace mod::lib
 
-#endif	/* MOD_LIB_ALGORITHM_H */
+#endif // MOD_LIB_ALGORITHM_HPP

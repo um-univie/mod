@@ -206,6 +206,15 @@ void Graph_doExport() {
 					// rst:
 					// rst:			:type: str
 			.add_property("imageCommand", &Graph::getImageCommand, &Graph::setImageCommand)
+					// rst:		.. method:: instantiateStereo()
+					// rst:
+					// rst: 			Make sure that stereo data is instantiated.
+					// rst:
+					// rst: 			:raises: :class:`StereoDeductionError` if the data was not instantiated and deduction failed.
+			.def("instantiateStereo", &Graph::instantiateStereo)
+					// ===================================================================
+					// External data
+					// ===================================================================
 					// rst:		.. method:: getVertexFromExternalId(id)
 					// rst:
 					// rst:			If the graph was not loaded from an external data format, then this function
@@ -221,8 +230,9 @@ void Graph_doExport() {
 					// rst:			:rtype: Vertex
 			.def("getVertexFromExternalId", &Graph::getVertexFromExternalId)
 					// rst:		.. attribute:: minExternalId
-					// rst:		                  maxExternalId
+					// rst:		               maxExternalId
 					// rst:
+					// rst:			(Read-only)
 					// rst:			If the graph was not loaded from an external data format, then these attributes
 					// rst:			are always return 0. Otherwise, they are the minimum/maximum external id from which
 					// rst:			non-null vertices can be obtained from :meth:`getVertexFromExternalId`.
@@ -231,66 +241,116 @@ void Graph_doExport() {
 					// rst:			:type: int
 			.add_property("minExternalId", &Graph::getMinExternalId)
 			.add_property("maxExternalId", &Graph::getMaxExternalId)
-					// rst: 	.. method:: instantiateStereo()
+					// rst:		.. attribute:: loadingWarnings
 					// rst:
-					// rst: 		Make sure that stereo data is instantiated.
+					// rst:			(Read-only)
+					// rst:			The list of warnings stored when the graph was created from an external format.
+					// rst:			Each entry is a message and then an indicator of whether
+					// rst:			the warning was printed before construction (``True``), or was a silenced warning (``False``).
 					// rst:
-					// rst: 		:raises: :class:`StereoDeductionError` if the data was not instantiated and deduction failed.
-			.def("instantiateStereo", &Graph::instantiateStereo);
+					// rst:			:raises: :class:`LogicError` if the graph does not have data from external loading
+					// rst:			:type: List[Tuple[str, bool]]
+			.add_property("loadingWarnings", &Graph::getLoadingWarnings)
+					// rst:
+					// rst: Loading Functions
+					// rst: =================
+					// rst:
+					// rst:	.. staticmethod:: Graph.fromGMLString(s, name=None, add=True)
+					// rst:                    Graph.fromGMLFile(f, name=None, add=True)
+					// rst:
+					// rst:		Load a graph in :ref:`GML <graph-gml>` format from a given string, ``s``,
+					// rst:		or given file ``f``.
+					// rst:		The graph must be connected.
+					// rst:		If not, use :meth:`Graph.fromGMLStringMulti` or :meth:`Graph.fromGMLFileMulti`.
+					// rst:
+					// rst:		:param str s: the string with the :ref:`GML <graph-gml>` data to load from.
+					// rst:		:param f: name of the :ref:`GML <graph-gml>` file to be loaded.
+					// rst:		:type f: str or CWDPath
+					// rst:		:param str name: the name of the graph. If none is given the default name is used.
+					// rst:		:param bool add: whether to append the graph to :data:`inputGraphs` or not.
+					// rst:		:returns: the loaded graph.
+					// rst:		:rtype: Graph
+					// rst:		:raises: :class:`InputError` on bad input.
+			.def("fromGMLString", &Graph::fromGMLString)
+			.staticmethod("fromGMLString")
+			.def("fromGMLFile", &Graph::fromGMLFile)
+			.staticmethod("fromGMLFile")
+					// rst:	.. staticmethod:: Graph.fromGMLStringMulti(s, add=True)
+					// rst:                    Graph.fromGMLFileMulti(f, add=True)
+					// rst:
+					// rst:		Load a set of graphs in :ref:`GML <graph-gml>` format from a given string, ``s``,
+					// rst:		or given file ``f``,
+					// rst:		with each graph being a connected component of the graph specified in the GML data.
+					// rst:
+					// rst:		See :meth:`Graph.fromGMLString` and :meth:`Graph.fromGMLFile`
+					// rst:		for a description of the parameters and exceptions.
+					// rst:
+					// rst:		:returns: a list of the loaded graphs.
+					// rst:		:rtype: list[Graph]
+			.def("fromGMLStringMulti", &Graph::fromGMLStringMulti)
+			.staticmethod("fromGMLStringMulti")
+			.def("fromGMLFileMulti", &Graph::fromGMLFileMulti)
+			.staticmethod("fromGMLFileMulti")
+					// rst: .. staticmethod:: Graph.fromDFS(s, name=None, add=True)
+					// rst:
+					// rst:		Load a graph from a :ref:`GraphDFS <graph-graphDFS>` string.
+					// rst:
+					// rst:		:param str s: the :ref:`GraphDFS <graph-graphDFS>` string to parse.
+					// rst:		:param str name: the name of the graph. If none is given the default name is used.
+					// rst:		:param bool add: whether to append the graph to :data:`inputGraphs` or not.
+					// rst:		:returns: the loaded graph.
+					// rst:		:rtype: Graph
+					// rst:		:raises: :class:`InputError` on bad input.
+			.def("fromDFS", &Graph::fromDFS)
+			.staticmethod("fromDFS")
+					// rst: .. staticmethod:: Graph.fromSMILES(s, name=None, allowAbstract=False, classPolicy=SmilesClassPolicy.NoneOnDuplicate, add=True)
+					// rst:
+					// rst:		Load a molecule from a :ref:`SMILES <graph-smiles>` string.
+					// rst:		The molecule must be a connected graph. If not, use :meth:`Graph.fromSMILESMulti`.
+					// rst:
+					// rst:		:param str s: the :ref:`SMILES <graph-smiles>` string to parse.
+					// rst:		:param str name: the name of the graph. If none is given the default name is used.
+					// rst:		:param bool allowAbstract: whether to allow abstract vertex labels in bracketed atoms.
+					// rst:		:param bool add: whether to append the graph to :data:`inputGraphs` or not.
+					// rst:		:returns: the loaded molecule.
+					// rst:		:rtype: Graph
+					// rst:		:raises: :class:`InputError` on bad input.
+			.def("fromSMILES",
+			     static_cast<std::shared_ptr<Graph> (*)(const std::string &, bool, SmilesClassPolicy)>(&Graph::fromSMILES))
+			.staticmethod("fromSMILES")
+					// rst: .. staticmethod:: Graph.fromSMILESMulti(s, allowAbstract=False, classPolicy=SmilesClassPolicy.NoneOnDuplicate, add=True)
+					// rst:
+					// rst:		Load a set of molecules from a :ref:`SMILES <graph-smiles>` string,
+					// rst:		with each molecule being a connected component of the graph specified in the SMILES string.
+					// rst:
+					// rst:		See :meth:`Graph.fromSMILES` for a description of the parameters and exceptions.
+					// rst:
+					// rst:		:returns: a list of the loaded molecules.
+					// rst:		:rtype: list[Graph]
+			.def("fromSMILESMulti", static_cast<std::vector<std::shared_ptr<Graph>>(*)(const std::string &, bool,
+			                                                                           SmilesClassPolicy)>(&Graph::fromSMILESMulti))
+			.staticmethod("fromSMILESMulti");
 
+	// rst: .. method:: graphGMLString(s, name=None, add=True)
+	// rst:
+	// rst:		Alias of :py:meth:`Graph.fromGMLString`.
+	// rst: .. method:: graphGML(f, name=None, add=True)
+	// rst:
+	// rst:		Alias of :py:meth:`Graph.fromGMLFile`.
+	// rst: .. method:: graphDFS(s, name=None, add=True)
+	// rst:
+	// rst:		Alias of :py:meth:`Graph.fromDFS`.
+	// rst: .. method:: smiles(s, name=None, allowAbstract=False, classPolicy=SmilesClassPolicy.NoneOnDuplicate, add=True)
+	// rst:
+	// rst:		Alias of :py:meth:`Graph.fromSMILES`.
+	// rst:
+	// rst:
 	// rst: .. data:: inputGraphs
 	// rst:
 	// rst:		A list of graphs to which explicitly loaded graphs as default are appended.
 	// rst:
 	// rst:		:type: list[Graph]
 	// rst:
-
-	// rst: .. method:: graphGMLString(s, name=None, add=True)
-	// rst:
-	// rst:		Load a graph in :ref:`GML <graph-gml>` format from a given string.
-	// rst:
-	// rst:		:param str s: the string with the :ref:`GML <graph-gml>` data to load from.
-	// rst:		:param str name: the name of the graph. If none is given the default name is used.
-	// rst:		:param bool add: whether to append the graph to :data:`inputGraphs` or not.
-	// rst:		:returns: the loaded graph.
-	// rst:		:rtype: Graph
-	// rst:		:raises: :class:`InputError` on bad input.
-	py::def("graphGMLString", &Graph::graphGMLString);
-	// rst: .. method:: graphGML(f, name=None, add=True)
-	// rst:
-	// rst:		Load a graph in :ref:`GML <graph-gml>` format from a given file.
-	// rst:
-	// rst:		:param str f: name of the :ref:`GML <graph-gml>` file to be loaded.
-	// rst:		:param str name: the name of the graph. If none is given the default name is used.
-	// rst:		:param bool add: whether to append the graph to :data:`inputGraphs` or not.
-	// rst:		:returns: the loaded graph.
-	// rst:		:rtype: Graph
-	// rst:		:raises: :class:`InputError` on bad input.
-	py::def("graphGML", &Graph::graphGML);
-	// rst: .. method:: graphDFS(s, name=None, add=True)
-	// rst:
-	// rst:		Load a graph from a :ref:`GraphDFS <graph-graphDFS>` string.
-	// rst:
-	// rst:		:param str s: the :ref:`GraphDFS <graph-graphDFS>` string to parse.
-	// rst:		:param str name: the name of the graph. If none is given the default name is used.
-	// rst:		:param bool add: whether to append the graph to :data:`inputGraphs` or not.
-	// rst:		:returns: the loaded graph.
-	// rst:		:rtype: Graph
-	// rst:		:raises: :class:`InputError` on bad input.
-	py::def("graphDFS", &Graph::graphDFS);
-	// rst: .. method:: smiles(s, name=None, add=True, allowAbstract=False, classPolicy=SmilesClassPolicy.NoneOnDuplicate)
-	// rst:
-	// rst:		Load a molecule from a :ref:`SMILES <graph-smiles>` string.
-	// rst:
-	// rst:		:param str s: the :ref:`SMILES <graph-smiles>` string to parse.
-	// rst:		:param str name: the name of the graph. If none is given the default name is used.
-	// rst:		:param bool add: whether to append the graph to :data:`inputGraphs` or not.
-	// rst:		:param bool allowAbstract: whether to allow abstract vertex labels in bracketed atoms.
-	// rst:		:returns: the loaded molecule.
-	// rst:		:rtype: Graph
-	// rst:		:raises: :class:`InputError` on bad input.
-	py::def("smiles",
-	        static_cast<std::shared_ptr<Graph> (*)(const std::string &, bool, SmilesClassPolicy)>(&Graph::smiles));
 }
 
 } // namespace mod::graph::Py

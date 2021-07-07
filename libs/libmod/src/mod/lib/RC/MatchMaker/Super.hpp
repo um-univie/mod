@@ -14,9 +14,8 @@
 
 #include <jla_boost/graph/dpo/FilteredGraphProjection.hpp>
 
-#include <boost/optional.hpp>
-
 #include <iomanip>
+#include <optional>
 
 namespace mod::lib::RC {
 
@@ -104,12 +103,11 @@ private:
 			if(!continue_) break;
 		}
 	}
-
 public:
 	template<typename Position>
-	boost::optional<VertexMapType> matchFromPosition(const lib::Rules::Real &rFirst,
-	                                                 const lib::Rules::Real &rSecond,
-	                                                 const std::vector<Position> &position) const;
+	std::optional<VertexMapType> matchFromPosition(const lib::Rules::Real &rFirst,
+	                                               const lib::Rules::Real &rSecond,
+	                                               const std::vector<Position> &position) const;
 private:
 	const int verbosity;
 	mutable IO::Logger logger;
@@ -118,7 +116,7 @@ private:
 };
 
 template<typename Position>
-inline boost::optional<Super::VertexMapType>
+inline std::optional<Super::VertexMapType>
 Super::matchFromPosition(const lib::Rules::Real &rFirst,
                          const lib::Rules::Real &rSecond,
                          const std::vector<Position> &position) const {
@@ -156,7 +154,7 @@ Super::matchFromPosition(const lib::Rules::Real &rFirst,
 			const auto vCodomHost = get(morphism, gDom, gCodom, vDomPattern);
 			assert(vCodomHost != vNullCodom);
 			if(get_inverse(map, gDom, gCodom, vCodomHost) != vNullDom)
-				return boost::none; // the combined match is not injective
+				return {}; // the combined match is not injective
 			put(map, gDom, gCodom, vDomPattern, vCodomHost);
 		}
 	}

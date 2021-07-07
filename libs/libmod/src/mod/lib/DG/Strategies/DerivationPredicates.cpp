@@ -3,25 +3,20 @@
 #include <mod/Config.hpp>
 #include <mod/Function.hpp>
 
-namespace mod {
-namespace lib {
-namespace DG {
-namespace Strategies {
+namespace mod::lib::DG::Strategies {
 
 //------------------------------------------------------------------------------
 // DerivationPredicate
 //------------------------------------------------------------------------------
 
-DerivationPredicate::DerivationPredicate(std::shared_ptr<mod::Function<bool(const mod::Derivation &)> > predicate,
-													  Strategy *strat)
-		: Strategy(strat->getMaxComponents()), predicate(predicate), strat(strat) {}
+DerivationPredicate::DerivationPredicate(std::shared_ptr<mod::Function<bool(const mod::Derivation &)>> predicate,
+                                         std::unique_ptr<Strategy> strat)
+		: Strategy(strat->getMaxComponents()), predicate(predicate), strat(std::move(strat)) {}
 
-DerivationPredicate::~DerivationPredicate() {
-	delete strat;
-}
+DerivationPredicate::~DerivationPredicate() = default;
 
 void DerivationPredicate::preAddGraphs(std::function<void(std::shared_ptr<graph::Graph>,
-																			 IsomorphismPolicy)> add) const {
+                                                          IsomorphismPolicy)> add) const {
 	strat->preAddGraphs(add);
 }
 
@@ -74,11 +69,12 @@ void DerivationPredicate::executeImpl(PrintSettings settings, const GraphState &
 // LeftPredicate
 //------------------------------------------------------------------------------
 
-LeftPredicate::LeftPredicate(std::shared_ptr<mod::Function<bool(const mod::Derivation &)> > predicate, Strategy *strat)
-		: DerivationPredicate(predicate, strat) {}
+LeftPredicate::LeftPredicate(std::shared_ptr<mod::Function<bool(const mod::Derivation &)>> predicate,
+                             std::unique_ptr<Strategy> strat)
+		: DerivationPredicate(predicate, std::move(strat)) {}
 
-Strategy *LeftPredicate::clone() const {
-	return new LeftPredicate(predicate->clone(), strat->clone());
+std::unique_ptr<Strategy> LeftPredicate::clone() const {
+	return std::make_unique<LeftPredicate>(predicate->clone(), strat->clone());
 }
 
 void LeftPredicate::printName(std::ostream &s) const {
@@ -97,12 +93,12 @@ void LeftPredicate::popPredicate() {
 // RightPredicate
 //------------------------------------------------------------------------------
 
-RightPredicate::RightPredicate(std::shared_ptr<mod::Function<bool(const mod::Derivation &)> > predicate,
-										 Strategy *strat)
-		: DerivationPredicate(predicate, strat) {}
+RightPredicate::RightPredicate(std::shared_ptr<mod::Function<bool(const mod::Derivation &)>> predicate,
+                               std::unique_ptr<Strategy> strat)
+		: DerivationPredicate(predicate, std::move(strat)) {}
 
-Strategy *RightPredicate::clone() const {
-	return new RightPredicate(predicate->clone(), strat->clone());
+std::unique_ptr<Strategy> RightPredicate::clone() const {
+	return std::make_unique<RightPredicate>(predicate->clone(), strat->clone());
 }
 
 void RightPredicate::printName(std::ostream &s) const {
@@ -117,7 +113,4 @@ void RightPredicate::popPredicate() {
 	getExecutionEnv().popRightPredicate();
 }
 
-} // namespace Strategies
-} // namespace DG
-} // namespace lib
-} // namespace mod
+} // namespace mod::lib::DG::Strategies

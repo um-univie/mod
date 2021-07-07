@@ -36,50 +36,51 @@ std::size_t Rule::LeftGraph::numEdges() const {
 // Vertex
 //------------------------------------------------------------------------------
 
-MOD_GRAPHPIMPL_Define_Vertex(Rule::LeftGraph, RuleLeftGraph, Rule::LeftGraph,
-                             get_left(r->getRule().getDPORule()), r, Rule)
-MOD_GRAPHPIMPL_Define_Vertex_Undirected(Rule::LeftGraph, get_left(r->getRule().getDPORule()), r)
+MOD_GRAPHPIMPL_Define_Vertex(Rule::LeftGraph, RuleLeftGraph,
+                             get_left(this->g->getRule()->getRule().getDPORule()), g, ->getRule())
+MOD_GRAPHPIMPL_Define_Vertex_Undirected(Rule::LeftGraph,
+                                        get_left(this->g->getRule()->getRule().getDPORule()), g)
 
 const std::string &Rule::LeftGraph::Vertex::getStringLabel() const {
-	if(!r) throw LogicError("Can not get string label on a null vertex.");
-	const auto &graph = get_left(r->getRule().getDPORule());
+	if(!*this) throw LogicError("Can not get string label on a null vertex.");
+	const auto &graph = get_left(getRule()->getRule().getDPORule());
 	using boost::vertices;
 	auto v = *std::next(vertices(graph).first, vId);
-	return r->getRule().getStringState().getLeft()[v];
+	return g->getRule()->getRule().getStringState().getLeft()[v];
 }
 
 AtomId Rule::LeftGraph::Vertex::getAtomId() const {
-	if(!r) throw LogicError("Can not get atom id on a null vertex.");
-	const auto &graph = get_left(r->getRule().getDPORule());
+	if(!*this) throw LogicError("Can not get atom id on a null vertex.");
+	const auto &graph = get_left(g->getRule()->getRule().getDPORule());
 	using boost::vertices;
 	auto v = *std::next(vertices(graph).first, vId);
-	return r->getRule().getMoleculeState().getLeft()[v].getAtomId();
+	return g->getRule()->getRule().getMoleculeState().getLeft()[v].getAtomId();
 }
 
 Isotope Rule::LeftGraph::Vertex::getIsotope() const {
-	if(!r) throw LogicError("Can not get isotope on a null vertex.");
-	const auto &graph = get_left(r->getRule().getDPORule());
+	if(!*this) throw LogicError("Can not get isotope on a null vertex.");
+	const auto &graph = get_left(g->getRule()->getRule().getDPORule());
 	using boost::vertices;
 	auto v = *std::next(vertices(graph).first, vId);
-	return r->getRule().getMoleculeState().getLeft()[v].getIsotope();
+	return g->getRule()->getRule().getMoleculeState().getLeft()[v].getIsotope();
 }
 
 Charge Rule::LeftGraph::Vertex::getCharge() const {
-	if(!r) throw LogicError("Can not get charge on a null vertex.");
-	const auto &graph = get_left(r->getRule().getDPORule());
+	if(!*this) throw LogicError("Can not get charge on a null vertex.");
+	const auto &graph = get_left(g->getRule()->getRule().getDPORule());
 	using boost::vertices;
 	auto iter = vertices(graph).first;
 	std::advance(iter, vId);
 	auto v = *iter;
-	return r->getRule().getMoleculeState().getLeft()[v].getCharge();
+	return g->getRule()->getRule().getMoleculeState().getLeft()[v].getCharge();
 }
 
 bool Rule::LeftGraph::Vertex::getRadical() const {
-	if(!r) throw LogicError("Can not get radical status on a null vertex.");
-	const auto &graph = get_left(r->getRule().getDPORule());
+	if(!*this) throw LogicError("Can not get radical status on a null vertex.");
+	const auto &graph = get_left(g->getRule()->getRule().getDPORule());
 	using boost::vertices;
 	auto v = *std::next(vertices(graph).first, vId);
-	return r->getRule().getMoleculeState().getLeft()[v].getRadical();
+	return g->getRule()->getRule().getMoleculeState().getLeft()[v].getRadical();
 }
 
 std::string Rule::LeftGraph::Vertex::printStereo() const {
@@ -92,71 +93,71 @@ std::string Rule::LeftGraph::Vertex::printStereo() const {
 }
 
 std::string Rule::LeftGraph::Vertex::printStereo(const graph::Printer &p) const {
-	if(!r) throw LogicError("Can not print stereo on a null vertex.");
-	const auto &graph = get_graph(get_labelled_left(r->getRule().getDPORule()));
+	if(!*this) throw LogicError("Can not print stereo on a null vertex.");
+	const auto &graph = get_graph(get_labelled_left(g->getRule()->getRule().getDPORule()));
 	using boost::vertices;
 	auto v = *std::next(vertices(graph).first, vId);
-	return lib::IO::Stereo::Write::summary(r->getRule(), v, lib::Rules::Membership::Left, p.getOptions());
+	return lib::IO::Stereo::Write::summary(g->getRule()->getRule(), v, lib::Rules::Membership::Left, p.getOptions());
 }
 
 Rule::Vertex Rule::LeftGraph::Vertex::getCore() const {
 	if(isNull()) return Rule::Vertex();
-	const auto &graph = get_left(r->getRule().getDPORule());
+	const auto &graph = get_left(g->getRule()->getRule().getDPORule());
 	using boost::vertices;
 	auto v = *std::next(vertices(graph).first, vId);
 	auto vCoreId = get(boost::vertex_index_t(), graph, v);
-	return Rule::Vertex(r, vCoreId);
+	return Rule::Vertex(g->getRule(), vCoreId);
 }
 
 std::shared_ptr<Rule> Rule::LeftGraph::Vertex::getRule() const {
-	if(!r) throw LogicError("Can not get rule on a null vertex.");
-	return r;
+	if(!*this) throw LogicError("Can not get rule on a null vertex.");
+	return g->getRule();
 }
 
 //------------------------------------------------------------------------------
 // Edge
 //------------------------------------------------------------------------------
 
-MOD_GRAPHPIMPL_Define_Indices(Rule::LeftGraph, RuleLeftGraph, Rule::LeftGraph,
-                              get_left(r->getRule().getDPORule()), r, Rule)
+MOD_GRAPHPIMPL_Define_Indices(Rule::LeftGraph, RuleLeftGraph,
+                              get_left(this->g->getRule()->getRule().getDPORule()), g, ->getRule())
 
 BOOST_CONCEPT_ASSERT((boost::ForwardIterator<Rule::LeftGraph::VertexIterator>));
 BOOST_CONCEPT_ASSERT((boost::ForwardIterator<Rule::LeftGraph::EdgeIterator>));
 BOOST_CONCEPT_ASSERT((boost::ForwardIterator<Rule::LeftGraph::IncidentEdgeIterator>));
 
 const std::string &Rule::LeftGraph::Edge::getStringLabel() const {
-	if(!r) throw LogicError("Can not get string label on a null edge.");
-	const auto &graph = get_left(r->getRule().getDPORule());
+	if(!*this) throw LogicError("Can not get string label on a null edge.");
+	const auto &graph = get_left(g->getRule()->getRule().getDPORule());
 	using boost::vertices;
 	auto v = *std::next(vertices(graph).first, vId);
 	auto e = *std::next(out_edges(v, graph).first, eId);
-	return r->getRule().getStringState().getLeft()[e];
+	return g->getRule()->getRule().getStringState().getLeft()[e];
 }
 
 BondType Rule::LeftGraph::Edge::getBondType() const {
-	if(!r) throw LogicError("Can not get bond type on a null edge.");
-	const auto &graph = get_left(r->getRule().getDPORule());
+	if(!*this) throw LogicError("Can not get bond type on a null edge.");
+	const auto &graph = get_left(g->getRule()->getRule().getDPORule());
 	using boost::vertices;
 	auto v = *std::next(vertices(graph).first, vId);
 	auto e = *std::next(out_edges(v, graph).first, eId);
-	return r->getRule().getMoleculeState().getLeft()[e];
+	return g->getRule()->getRule().getMoleculeState().getLeft()[e];
 }
 
 Rule::Edge Rule::LeftGraph::Edge::getCore() const {
 	if(isNull()) return Rule::Edge();
-	const auto &graph = get_left(r->getRule().getDPORule());
+	const auto &graph = get_left(g->getRule()->getRule().getDPORule());
 	using boost::vertices;
 	auto v = *std::next(vertices(graph).first, vId);
 	auto vCoreId = get(boost::vertex_index_t(), graph, v);
 	auto e = *std::next(out_edges(v, graph).first, eId);
-	const auto &es = out_edges(v, get_graph(r->getRule().getDPORule()));
+	const auto &es = out_edges(v, get_graph(g->getRule()->getRule().getDPORule()));
 	auto eCoreId = std::distance(es.first, std::find(es.first, es.second, e));
-	return Rule::Edge(r, vCoreId, eCoreId);
+	return Rule::Edge(g->getRule(), vCoreId, eCoreId);
 }
 
 std::shared_ptr<Rule> Rule::LeftGraph::Edge::getRule() const {
-	if(!r) throw LogicError("Can not get rule on a null edge.");
-	return r;
+	if(!*this) throw LogicError("Can not get rule on a null edge.");
+	return g->getRule();
 }
 
 
@@ -186,30 +187,31 @@ std::size_t Rule::ContextGraph::numEdges() const {
 // Vertex
 //------------------------------------------------------------------------------
 
-MOD_GRAPHPIMPL_Define_Vertex(Rule::ContextGraph, RuleContextGraph, Rule::ContextGraph,
-                             get_context(r->getRule().getDPORule()), r, Rule)
-MOD_GRAPHPIMPL_Define_Vertex_Undirected(Rule::ContextGraph, get_context(r->getRule().getDPORule()), r)
+MOD_GRAPHPIMPL_Define_Vertex(Rule::ContextGraph, RuleContextGraph,
+                             get_context(this->g->getRule()->getRule().getDPORule()), g, ->getRule())
+MOD_GRAPHPIMPL_Define_Vertex_Undirected(Rule::ContextGraph,
+                                        get_context(this->g->getRule()->getRule().getDPORule()), g)
 
 Rule::Vertex Rule::ContextGraph::Vertex::getCore() const {
 	if(isNull()) return Rule::Vertex();
-	const auto &graph = get_context(r->getRule().getDPORule());
+	const auto &graph = get_context(g->getRule()->getRule().getDPORule());
 	using boost::vertices;
 	auto v = *std::next(vertices(graph).first, vId);
 	auto vCoreId = get(boost::vertex_index_t(), graph, v);
-	return Rule::Vertex(r, vCoreId);
+	return Rule::Vertex(g->getRule(), vCoreId);
 }
 
 std::shared_ptr<Rule> Rule::ContextGraph::Vertex::getRule() const {
-	if(!r) throw LogicError("Can not get rule on a null vertex.");
-	return r;
+	if(!g) throw LogicError("Can not get rule on a null vertex.");
+	return g->getRule();
 }
 
 //------------------------------------------------------------------------------
 // Edge
 //------------------------------------------------------------------------------
 
-MOD_GRAPHPIMPL_Define_Indices(Rule::ContextGraph, RuleContextGraph, Rule::ContextGraph,
-                              get_context(r->getRule().getDPORule()), r, Rule)
+MOD_GRAPHPIMPL_Define_Indices(Rule::ContextGraph, RuleContextGraph,
+                              get_context(this->g->getRule()->getRule().getDPORule()), g, ->getRule())
 
 BOOST_CONCEPT_ASSERT((boost::ForwardIterator<Rule::ContextGraph::VertexIterator>));
 BOOST_CONCEPT_ASSERT((boost::ForwardIterator<Rule::ContextGraph::EdgeIterator>));
@@ -217,19 +219,19 @@ BOOST_CONCEPT_ASSERT((boost::ForwardIterator<Rule::ContextGraph::IncidentEdgeIte
 
 Rule::Edge Rule::ContextGraph::Edge::getCore() const {
 	if(isNull()) return Rule::Edge();
-	const auto &graph = get_context(r->getRule().getDPORule());
+	const auto &graph = get_context(getRule()->getRule().getDPORule());
 	using boost::vertices;
 	auto v = *std::next(vertices(graph).first, vId);
 	auto vCoreId = get(boost::vertex_index_t(), graph, v);
 	auto e = *std::next(out_edges(v, graph).first, eId);
-	const auto &es = out_edges(v, get_graph(r->getRule().getDPORule()));
+	const auto &es = out_edges(v, get_graph(g->getRule()->getRule().getDPORule()));
 	auto eCoreId = std::distance(es.first, std::find(es.first, es.second, e));
-	return Rule::Edge(r, vCoreId, eCoreId);
+	return Rule::Edge(g->getRule(), vCoreId, eCoreId);
 }
 
 std::shared_ptr<Rule> Rule::ContextGraph::Edge::getRule() const {
-	if(!r) throw LogicError("Can not get rule on a null edge.");
-	return r;
+	if(!g) throw LogicError("Can not get rule on a null edge.");
+	return g->getRule();
 }
 
 //==============================================================================
@@ -258,62 +260,63 @@ std::size_t Rule::RightGraph::numEdges() const {
 // Vertex
 //------------------------------------------------------------------------------
 
-MOD_GRAPHPIMPL_Define_Vertex(Rule::RightGraph, RuleRightGraph, Rule::RightGraph,
-                             get_right(r->getRule().getDPORule()), r, Rule)
-MOD_GRAPHPIMPL_Define_Vertex_Undirected(Rule::RightGraph, get_right(r->getRule().getDPORule()), r)
+MOD_GRAPHPIMPL_Define_Vertex(Rule::RightGraph, RuleRightGraph,
+                             get_right(this->g->getRule()->getRule().getDPORule()), g, ->getRule())
+MOD_GRAPHPIMPL_Define_Vertex_Undirected(Rule::RightGraph,
+                                        get_right(this->g->getRule()->getRule().getDPORule()), g)
 
 const std::string &Rule::RightGraph::Vertex::getStringLabel() const {
-	if(!r) throw LogicError("Can not get string label on a null vertex.");
-	const auto &graph = get_right(r->getRule().getDPORule());
+	if(!g) throw LogicError("Can not get string label on a null vertex.");
+	const auto &graph = get_right(getRule()->getRule().getDPORule());
 	using boost::vertices;
 	auto v = *std::next(vertices(graph).first, vId);
-	return r->getRule().getStringState().getRight()[v];
+	return getRule()->getRule().getStringState().getRight()[v];
 }
 
 AtomId Rule::RightGraph::Vertex::getAtomId() const {
-	if(!r) throw LogicError("Can not get atom id on a null vertex.");
-	const auto &graph = get_right(r->getRule().getDPORule());
+	if(!g) throw LogicError("Can not get atom id on a null vertex.");
+	const auto &graph = get_right(getRule()->getRule().getDPORule());
 	using boost::vertices;
 	auto v = *std::next(vertices(graph).first, vId);
-	return r->getRule().getMoleculeState().getRight()[v].getAtomId();
+	return getRule()->getRule().getMoleculeState().getRight()[v].getAtomId();
 }
 
 Isotope Rule::RightGraph::Vertex::getIsotope() const {
-	if(!r) throw LogicError("Can not get isotope on a null vertex.");
-	const auto &graph = get_right(r->getRule().getDPORule());
+	if(!g) throw LogicError("Can not get isotope on a null vertex.");
+	const auto &graph = get_right(getRule()->getRule().getDPORule());
 	using boost::vertices;
 	auto v = *std::next(vertices(graph).first, vId);
-	return r->getRule().getMoleculeState().getRight()[v].getIsotope();
+	return getRule()->getRule().getMoleculeState().getRight()[v].getIsotope();
 }
 
 Charge Rule::RightGraph::Vertex::getCharge() const {
-	if(!r) throw LogicError("Can not get charge on a null vertex.");
-	const auto &graph = get_right(r->getRule().getDPORule());
+	if(!g) throw LogicError("Can not get charge on a null vertex.");
+	const auto &graph = get_right(getRule()->getRule().getDPORule());
 	using boost::vertices;
 	auto v = *std::next(vertices(graph).first, vId);
-	return r->getRule().getMoleculeState().getRight()[v].getCharge();
+	return getRule()->getRule().getMoleculeState().getRight()[v].getCharge();
 }
 
 bool Rule::RightGraph::Vertex::getRadical() const {
-	if(!r) throw LogicError("Can not get radical status on a null vertex.");
-	const auto &graph = get_right(r->getRule().getDPORule());
+	if(!g) throw LogicError("Can not get radical status on a null vertex.");
+	const auto &graph = get_right(getRule()->getRule().getDPORule());
 	using boost::vertices;
 	auto v = *std::next(vertices(graph).first, vId);
-	return r->getRule().getMoleculeState().getRight()[v].getRadical();
+	return getRule()->getRule().getMoleculeState().getRight()[v].getRadical();
 }
 
 Rule::Vertex Rule::RightGraph::Vertex::getCore() const {
 	if(isNull()) return Rule::Vertex();
-	const auto &graph = get_right(r->getRule().getDPORule());
+	const auto &graph = get_right(getRule()->getRule().getDPORule());
 	using boost::vertices;
 	auto v = *std::next(vertices(graph).first, vId);
 	auto vCoreId = get(boost::vertex_index_t(), graph, v);
-	return Rule::Vertex(r, vCoreId);
+	return Rule::Vertex(getRule(), vCoreId);
 }
 
 std::shared_ptr<Rule> Rule::RightGraph::Vertex::getRule() const {
-	if(!r) throw LogicError("Can not get rule on a null vertex.");
-	return r;
+	if(!g) throw LogicError("Can not get rule on a null vertex.");
+	return g->getRule();
 }
 
 //------------------------------------------------------------------------------
@@ -328,61 +331,61 @@ std::string Rule::RightGraph::Vertex::printStereo() const {
 }
 
 std::string Rule::RightGraph::Vertex::printStereo(const graph::Printer &p) const {
-	if(!r) throw LogicError("Can not print stereo on a null vertex.");
-	const auto &graph = get_graph(get_labelled_right(r->getRule().getDPORule()));
+	if(!g) throw LogicError("Can not print stereo on a null vertex.");
+	const auto &graph = get_graph(get_labelled_right(getRule()->getRule().getDPORule()));
 	using boost::vertices;
 	auto v = *std::next(vertices(graph).first, vId);
-	return lib::IO::Stereo::Write::summary(r->getRule(), v, lib::Rules::Membership::Right, p.getOptions());
+	return lib::IO::Stereo::Write::summary(getRule()->getRule(), v, lib::Rules::Membership::Right, p.getOptions());
 }
 
 //------------------------------------------------------------------------------
 // Edge
 //------------------------------------------------------------------------------
 
-MOD_GRAPHPIMPL_Define_Indices(Rule::RightGraph, RuleRightGraph, Rule::RightGraph,
-                              get_right(r->getRule().getDPORule()), r, Rule)
+MOD_GRAPHPIMPL_Define_Indices(Rule::RightGraph, RuleRightGraph,
+                              get_right(this->g->getRule()->getRule().getDPORule()), g, ->getRule())
 
 BOOST_CONCEPT_ASSERT((boost::ForwardIterator<Rule::RightGraph::VertexIterator>));
 BOOST_CONCEPT_ASSERT((boost::ForwardIterator<Rule::RightGraph::EdgeIterator>));
 BOOST_CONCEPT_ASSERT((boost::ForwardIterator<Rule::RightGraph::IncidentEdgeIterator>));
 
 const std::string &Rule::RightGraph::Edge::getStringLabel() const {
-	if(!r) throw LogicError("Can not get string label on a null edge.");
-	const auto &graph = get_right(r->getRule().getDPORule());
+	if(!g) throw LogicError("Can not get string label on a null edge.");
+	const auto &graph = get_right(getRule()->getRule().getDPORule());
 	using boost::vertices;
 	auto iter = vertices(graph).first;
 	std::advance(iter, vId);
 	auto v = *iter;
 	auto e = *std::next(out_edges(v, graph).first, eId);
-	return r->getRule().getStringState().getRight()[e];
+	return getRule()->getRule().getStringState().getRight()[e];
 }
 
 BondType Rule::RightGraph::Edge::getBondType() const {
-	if(!r) throw LogicError("Can not get bond type on a null edge.");
-	const auto &graph = get_right(r->getRule().getDPORule());
+	if(!g) throw LogicError("Can not get bond type on a null edge.");
+	const auto &graph = get_right(getRule()->getRule().getDPORule());
 	using boost::vertices;
 	auto iter = vertices(graph).first;
 	std::advance(iter, vId);
 	auto v = *iter;
 	auto e = *std::next(out_edges(v, graph).first, eId);
-	return r->getRule().getMoleculeState().getRight()[e];
+	return getRule()->getRule().getMoleculeState().getRight()[e];
 }
 
 Rule::Edge Rule::RightGraph::Edge::getCore() const {
 	if(isNull()) return Rule::Edge();
-	const auto &graph = get_right(r->getRule().getDPORule());
+	const auto &graph = get_right(getRule()->getRule().getDPORule());
 	using boost::vertices;
 	auto v = *std::next(vertices(graph).first, vId);
 	auto vCoreId = get(boost::vertex_index_t(), graph, v);
 	auto e = *std::next(out_edges(v, graph).first, eId);
-	const auto &es = out_edges(v, get_graph(r->getRule().getDPORule()));
+	const auto &es = out_edges(v, get_graph(getRule()->getRule().getDPORule()));
 	auto eCoreId = std::distance(es.first, std::find(es.first, es.second, e));
-	return Rule::Edge(r, vCoreId, eCoreId);
+	return Rule::Edge(getRule(), vCoreId, eCoreId);
 }
 
 std::shared_ptr<Rule> Rule::RightGraph::Edge::getRule() const {
-	if(!r) throw LogicError("Can not get rule on a null edge.");
-	return r;
+	if(!g) throw LogicError("Can not get rule on a null edge.");
+	return g->getRule();
 }
 
 
@@ -394,8 +397,7 @@ std::shared_ptr<Rule> Rule::RightGraph::Edge::getRule() const {
 // Vertex
 //------------------------------------------------------------------------------
 
-MOD_GRAPHPIMPL_Define_Vertex(Rule, Rule, std::shared_ptr<Rule>,
-                             r->getRule().getGraph(), r, Rule)
+MOD_GRAPHPIMPL_Define_Vertex(Rule, Rule, r->getRule().getGraph(), r, /* VertexPrint */)
 MOD_GRAPHPIMPL_Define_Vertex_Undirected(Rule, r->getRule().getGraph(), r)
 
 Rule::LeftGraph::Vertex Rule::Vertex::getLeft() const {
@@ -463,8 +465,7 @@ double Rule::Vertex::get2DY(bool withHydrogens) {
 // Edge
 //------------------------------------------------------------------------------
 
-MOD_GRAPHPIMPL_Define_Indices(Rule, Rule, std::shared_ptr<Rule>,
-                              r->getRule().getGraph(), r, Rule)
+MOD_GRAPHPIMPL_Define_Indices(Rule, Rule, r->getRule().getGraph(), r, /* EdgePrint */)
 
 BOOST_CONCEPT_ASSERT((boost::ForwardIterator<Rule::VertexIterator>));
 BOOST_CONCEPT_ASSERT((boost::ForwardIterator<Rule::EdgeIterator>));

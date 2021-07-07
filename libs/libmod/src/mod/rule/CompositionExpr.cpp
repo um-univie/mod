@@ -78,27 +78,27 @@ Expression::Expression(std::shared_ptr<rule::Rule> r) : data(r) {
 	assert(r);
 }
 
-Expression::Expression(Union u) : data(u) { }
+Expression::Expression(Union u) : data(u) {}
 
-Expression::Expression(Bind bind) : data(bind) { }
+Expression::Expression(Bind bind) : data(bind) {}
 
-Expression::Expression(Id id) : data(id) { }
+Expression::Expression(Id id) : data(id) {}
 
-Expression::Expression(Unbind unbind) : data(unbind) { }
+Expression::Expression(Unbind unbind) : data(unbind) {}
 
-Expression::Expression(ComposeCommon compose) : data(compose) { }
+Expression::Expression(ComposeCommon compose) : data(compose) {}
 
-Expression::Expression(ComposeParallel compose) : data(compose) { }
+Expression::Expression(ComposeParallel compose) : data(compose) {}
 
-Expression::Expression(ComposeSub compose) : data(compose) { }
+Expression::Expression(ComposeSub compose) : data(compose) {}
 
-Expression::Expression(ComposeSuper compose) : data(compose) { }
+Expression::Expression(ComposeSuper compose) : data(compose) {}
 
 namespace {
 
-struct Visitor : boost::static_visitor<std::ostream&> {
+struct Visitor : boost::static_visitor<std::ostream &> {
 
-	Visitor(std::ostream &s) : s(s) { }
+	Visitor(std::ostream &s) : s(s) {}
 
 	template<typename T>
 	std::ostream &operator()(const T &v) {
@@ -123,9 +123,9 @@ std::ostream &operator<<(std::ostream &s, const Expression &exp) {
 //------------------------------------------------------------------------------
 
 ComposeBase::ComposeBase(Expression first, Expression second, bool discardNonchemical)
-: first(first), second(second), discardNonchemical(discardNonchemical) { }
+		: first(first), second(second), discardNonchemical(discardNonchemical) {}
 
-ComposeBase::~ComposeBase() { }
+ComposeBase::~ComposeBase() {}
 
 std::ostream &operator<<(std::ostream &s, const ComposeBase &compose) {
 	return compose.print(s << compose.getFirst() << " *")
@@ -147,8 +147,10 @@ bool ComposeBase::getDiscardNonchemical() const {
 // ComposeCommon
 //------------------------------------------------------------------------------
 
-ComposeCommon::ComposeCommon(Expression first, Expression second, bool discardNonchemical, bool maximum, bool connected)
-: ComposeBase(first, second, discardNonchemical), maximum(maximum), connected(connected) { }
+ComposeCommon::ComposeCommon(Expression first, Expression second, bool discardNonchemical, bool maximum, bool connected,
+                             bool includeEmpty)
+		: ComposeBase(first, second, discardNonchemical), maximum(maximum), connected(connected),
+		  includeEmpty(includeEmpty) {}
 
 bool ComposeCommon::getMaxmimum() const {
 	return maximum;
@@ -158,15 +160,21 @@ bool ComposeCommon::getConnected() const {
 	return connected;
 }
 
+bool ComposeCommon::getIncludeEmpty() const {
+	return includeEmpty;
+}
+
 std::ostream &ComposeCommon::print(std::ostream &s) const {
-	return s << "rcCommon(maximum=" << std::boolalpha << maximum << ", connected=" << connected << ", ";
+	return s << std::boolalpha << "rcCommon(maximum=" << maximum
+	         << ", connected=" << connected << ", "
+	         << ", includeEmpty=" << includeEmpty << ", ";
 }
 
 // ComposeParallel
 //------------------------------------------------------------------------------
 
 ComposeParallel::ComposeParallel(Expression first, Expression second, bool discardNonchemical)
-: ComposeBase(first, second, discardNonchemical) { }
+		: ComposeBase(first, second, discardNonchemical) {}
 
 std::ostream &ComposeParallel::print(std::ostream &s) const {
 	return s << "rcParallel(";
@@ -176,7 +184,7 @@ std::ostream &ComposeParallel::print(std::ostream &s) const {
 //------------------------------------------------------------------------------
 
 ComposeSub::ComposeSub(Expression first, Expression second, bool discardNonchemical, bool allowPartial)
-: ComposeBase(first, second, discardNonchemical), allowPartial(allowPartial) { }
+		: ComposeBase(first, second, discardNonchemical), allowPartial(allowPartial) {}
 
 bool ComposeSub::getAllowPartial() const {
 	return allowPartial;
@@ -189,8 +197,10 @@ std::ostream &ComposeSub::print(std::ostream &s) const {
 // ComposeSuper
 //------------------------------------------------------------------------------
 
-ComposeSuper::ComposeSuper(Expression first, Expression second, bool discardNonchemical, bool allowPartial, bool enforceConstraints)
-: ComposeBase(first, second, discardNonchemical), allowPartial(allowPartial), enforceConstraints(enforceConstraints) { }
+ComposeSuper::ComposeSuper(Expression first, Expression second, bool discardNonchemical, bool allowPartial,
+                           bool enforceConstraints)
+		: ComposeBase(first, second, discardNonchemical), allowPartial(allowPartial),
+		  enforceConstraints(enforceConstraints) {}
 
 bool ComposeSuper::getAllowPartial() const {
 	return allowPartial;
@@ -201,7 +211,8 @@ bool ComposeSuper::getEnforceConstraints() const {
 }
 
 std::ostream &ComposeSuper::print(std::ostream &s) const {
-	return s << "rcSuper(allowPartial=" << std::boolalpha << allowPartial << ", enforceConstraints=" << enforceConstraints << ", ";
+	return s << "rcSuper(allowPartial=" << std::boolalpha << allowPartial << ", enforceConstraints="
+	         << enforceConstraints << ", ";
 }
 
 } // namespace mod::rule::RCExp

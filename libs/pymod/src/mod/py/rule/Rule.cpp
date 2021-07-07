@@ -8,7 +8,7 @@ namespace mod::rule::Py {
 namespace {
 
 py::object getLabelType(std::shared_ptr<Rule> r) {
-	if(r->getLabelType()) return py::object(r->getLabelType().get());
+	if(r->getLabelType()) return py::object(*r->getLabelType());
 	else return py::object();
 }
 
@@ -16,9 +16,9 @@ py::object getLabelType(std::shared_ptr<Rule> r) {
 
 void Rule_doExport() {
 	std::pair<std::string, std::string>(Rule::*
-	printWithoutOptions)() const = &Rule::print;
+	printWithoutOptions)(bool) const = &Rule::print;
 	std::pair<std::string, std::string>(Rule::*
-	printWithOptions)(const graph::Printer&, const graph::Printer&) const = &Rule::print;
+	printWithOptions)(const graph::Printer&, const graph::Printer&, bool) const = &Rule::print;
 
 	// rst: .. class:: Rule
 	// rst:
@@ -73,8 +73,8 @@ void Rule_doExport() {
 					// rst:			:rtype: Rule
 					// rst:			:raises: :class:`LogicError` if inversion is not possible (due to matching constraints).
 			.def("makeInverse", &Rule::makeInverse)
-					// rst:		.. method:: print()
-					// rst:		               print(first, second=None)
+					// rst:		.. method:: print(printCombined=False)
+					// rst:		            print(first, second=None, printCombined=False)
 					// rst:
 					// rst:			Print the rule, using either the default options or the options in ``first`` and ``second``.
 					// rst:			If ``first`` and ``second`` are the same, only one depiction will be made.
@@ -82,6 +82,7 @@ void Rule_doExport() {
 					// rst:			:param GraphPrinter first: the printing options used for the first depiction.
 					// rst:			:param GraphPrinter second: the printing options used for the second depiction.
 					// rst:				If it is ``None`` then it is set to ``first``.
+					// rst:			:param bool printCombined: whether a depiction of the rule as a single combined graph is printed.
 					// rst:			:returns: a pair of filename prefixes for the PDF-files that will be compiled in post-processing.
 					// rst:				The actual names can be obtained by appending ``_L.pdf``, ``_K.pdf``, and ``_R.pdf`` for
 					// rst:				respectively the left side, context, and right side graphs.
@@ -182,42 +183,49 @@ void Rule_doExport() {
 					// rst:
 					// rst:			:type: int
 			.add_property("minExternalId", &Rule::getMinExternalId)
-			.add_property("maxExternalId", &Rule::getMaxExternalId);
+			.add_property("maxExternalId", &Rule::getMaxExternalId)
+					// rst:
+					// rst: Loading Functions
+					// rst: =================
+					// rst:
+					// rst: .. staticmethod:: Rule.fromGMLString(s, invert=False, add=True)
+					// rst:                   Rule.fromGMLFile(f, invert=False, add=True)
+					// rst:
+					// rst:		Load a rule from a :ref:`GML <rule-gml>` string or file, and maybe store it in a global list.
+					// rst:		The name of the rule is the one specified in the GML string, though when ``invert=True``
+					// rst:		the string ", inverse" is appended to the name.
+					// rst:
+					// rst:		.. note::
+					// rst:
+					// rst:			If the GML string/file specifies matching constraints it is currently not possible to invert the rule.
+					// rst:			There is however a configuration option to ignore matching constraints when inverting rules.
+					// rst:
+					// rst:		:param str s: the GML string to load a rule from.
+					// rst:		:param f: name of the GML file to be loaded.
+					// rst:		:type f: str or CWDPath
+					// rst:		:param bool invert: whether or not to invert the loaded rule.
+					// rst:		:param bool add: whether to append the rule to :data:`inputRules` or not.
+					// rst:		:returns: the rule in the GML string, possibly inverted.
+					// rst:		:rtype: Rule
+			.def("fromGMLString", &Rule::fromGMLString)
+			.staticmethod("fromGMLString")
+			.def("fromGMLFile", &Rule::fromGMLFile)
+			.staticmethod("fromGMLFile");
 
+	// rst: .. function:: ruleGMLString(s, invert=False, add=True)
+	// rst:
+	// rst:		Alias of :py:meth:`Rule.fromGMLString`.
+	// rst: .. method:: ruleGML(f, invert=False, add=True)
+	// rst:		
+	// rst:		Alias of :py:meth:`Rule.fromGMLFile`.
+	// rst:
+	// rst:
 	// rst: .. data:: inputRules
 	// rst:
 	// rst:		A list of rules to which explicitly loaded rules as default are appended.
 	// rst:
 	// rst:		:type: list[Rule]
 	// rst:
-
-	// rst: .. method:: ruleGMLString(s, invert=False, add=True)
-	// rst:
-	// rst:		Load a rule from a :ref:`GML <rule-gml>` string, and maybe store it in a global list.
-	// rst:		The name of the rule is the one specified in the GML string, though when ``invert=True``
-	// rst:		the string ", inverse" is appended to the name.
-	// rst:
-	// rst:		.. note::
-	// rst:
-	// rst:			If the GML string specifies matching constraints it is currently not possible to invert the rule.
-	// rst:			There is however a configuration option to ignore matching constraints when inverting rules.
-	// rst:
-	// rst:		:param str s: the GML string to load a rule from.
-	// rst:		:param bool invert: whether or not to invert the loaded rule.
-	// rst:		:param bool add: whether to append the rule to :data:`inputRules` or not.
-	// rst:		:returns: the rule in the GML string, possibly inverted.
-	// rst:		:rtype: Rule
-	py::def("ruleGMLString", &Rule::ruleGMLString);
-	// rst: .. method:: ruleGML(f, invert=False, add=True)
-	// rst:		
-	// rst:		Read ``file`` and pass the contents to :func:`ruleGMLString`.
-	// rst:
-	// rst:		:param str f: name of the GML file to be loaded.
-	// rst:		:param bool invert: whether or not to invert the loaded rule.
-	// rst:		:param bool add: whether to append the rule to :data:`inputRules` or not.
-	// rst:		:returns: the rule in the GML file, possibly inverted.
-	// rst:		:rtype: Rule
-	py::def("ruleGML", &Rule::ruleGML);
 }
 
 } // namespace mod::rule::Py

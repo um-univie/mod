@@ -41,7 +41,7 @@ public:
 	std::vector<std::shared_ptr<rule::Rule>> eval(const rule::RCExp::Expression &exp, int verbosity);
 	void print() const;
 	const GraphType &getGraph() const;
-public: // evalutation interface
+public: // evaluation interface
 	// adds a rule to the database, returns true iff it was a new rule
 	bool addRule(std::shared_ptr<rule::Rule> r);
 	// adds a rule to the product graph list
@@ -62,7 +62,7 @@ public:
 	const LabelSettings labelSettings;
 	Rules::GraphAsRuleCache graphAsRuleCache;
 private:
-	std::unordered_set<std::shared_ptr<rule::Rule> > database, products;
+	std::unordered_set<std::shared_ptr<rule::Rule>> database, products;
 private:
 	GraphType rcg;
 	std::unordered_map<const lib::Rules::Real *, Vertex> ruleToVertex;

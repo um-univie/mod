@@ -8,14 +8,12 @@
 
 namespace mod::lib::DG::Strategies {
 
-Revive::Revive(Strategy *strat) : Strategy(strat->getMaxComponents()), strat(strat) {}
+Revive::Revive(std::unique_ptr<Strategy> strat) : Strategy(strat->getMaxComponents()), strat(std::move(strat)) {}
 
-Revive::~Revive() {
-	delete strat;
-}
+Revive::~Revive() = default;
 
-Strategy *Revive::clone() const {
-	return new Revive(strat->clone());
+std::unique_ptr<Strategy> Revive::clone() const {
+	return std::make_unique<Revive>(strat->clone());
 }
 
 void Revive::preAddGraphs(std::function<void(std::shared_ptr<graph::Graph>, IsomorphismPolicy)> add) const {

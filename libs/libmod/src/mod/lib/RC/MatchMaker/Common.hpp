@@ -2,7 +2,7 @@
 #define MOD_LIB_RC_COMMONSG_HPP
 
 #include <mod/lib/GraphMorphism/LabelledMorphism.hpp>
-#include <mod/lib/GraphMorphism/McGregorCommonFinder.hpp>
+#include <mod/lib/GraphMorphism/CommonSubgraphFinder.hpp>
 #include <mod/lib/RC/MatchMaker/LabelledMatch.hpp>
 #include <mod/lib/Rules/Real.hpp>
 
@@ -22,7 +22,8 @@ struct Common {
 	                 LabelSettings labelSettings) {
 		using MapImpl = std::vector<lib::Rules::Vertex>;
 		std::vector<MapImpl> maps;
-		const auto mr = [&rFirst, &rSecond, &callback, this, &maps](auto &&m, const auto &gSecond, const auto &gFirst) -> bool {
+		const auto mr = [&rFirst, &rSecond, &callback, this, &maps]
+				(auto &&m, const auto &gSecond, const auto &gFirst) -> bool {
 			MapImpl map(num_vertices(gFirst));
 			for(const auto v : asRange(vertices(gFirst)))
 				map[get(boost::vertex_index_t(), gFirst, v)] = get_inverse(m, gSecond, gFirst, v);
@@ -33,14 +34,33 @@ struct Common {
 		};
 		const auto &lgDom = get_labelled_left(rSecond.getDPORule());
 		const auto &lgCodom = get_labelled_right(rFirst.getDPORule());
-		auto finder = lib::GraphMorphism::McGregorCommonFinder(maximum, connected);
 		if(labelSettings.relation == LabelRelation::Specialisation) {
 			MOD_ABORT;
 		}
 		if(labelSettings.withStereo && labelSettings.stereoRelation == LabelRelation::Specialisation) {
 			MOD_ABORT;
 		}
-		lib::GraphMorphism::morphismSelectByLabelSettings(lgDom, lgCodom, labelSettings, finder, mr);
+		if(getConfig().rc.useBoostCommonSubgraph.get()) {
+			lib::GraphMorphism::morphismSelectByLabelSettings(
+					lgDom, lgCodom, labelSettings,
+					lib::GraphMorphism::CommonSubgraphFinder<true>(maximum, connected),
+					mr);
+		} else {
+			if(connected) {
+				lib::GraphMorphism::morphismSelectByLabelSettings(
+						lgDom, lgCodom, labelSettings,
+						lib::GraphMorphism::CommonSubgraphFinder<false>(maximum, connected),
+						mr);
+			} else {
+				lib::GraphMorphism::morphismSelectByLabelSettings(
+						lgDom, lgCodom, labelSettings,
+						lib::GraphMorphism::CommonSubgraphFinder<false>(maximum, connected),
+						[&rFirst, &rSecond, &callback, this]
+								(auto &&m, const auto &gSecond, const auto &gFirst) -> bool {
+							return callback(rFirst, rSecond, std::move(m), verbosity, logger);
+						});
+			}
+		}
 	}
 private:
 	const int verbosity;

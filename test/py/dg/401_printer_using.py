@@ -172,3 +172,8 @@ postSection("graphvizPrefix")
 p = DGPrinter()
 p.graphvizPrefix = 'layout = "dot";'
 dg.print(p)
+
+postSection("tikzpictureOption")
+p = DGPrinter()
+p.tikzpictureOption += ', draw=blue'
+dg.print(p)

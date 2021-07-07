@@ -5,10 +5,11 @@
 #include <mod/graph/GraphInterface.hpp>
 #include <mod/graph/Printer.hpp>
 #include <mod/graph/Union.hpp>
+#include <mod/VertexMap.hpp>
+
+#include <mod/py/VertexMap.hpp>
 
 #include <boost/python/stl_iterator.hpp>
-
-#include <ostream>
 
 namespace mod::graph::Py {
 namespace {
@@ -20,9 +21,8 @@ Union *make(const py::object &o) {
 	));
 }
 
-} // namespace
+void exportClass() {
 
-void Union_doExport() {
 	// rst: .. class:: UnionGraph
 	// rst:
 	// rst:		An adaptor for a multiset of :class:`Graph`\ s to present them
@@ -43,6 +43,7 @@ void Union_doExport() {
 			.def("__init__", py::make_constructor(&make))
 			.def(py::self == py::self)
 			.def(py::self != py::self)
+			.def(py::self < py::self)
 					// rst:		.. method:: __str__()
 					// rst:
 					// rst:			:rtype: str
@@ -198,6 +199,18 @@ void Union_doExport() {
 	// rst:
 	py::class_<Union::IncidentEdgeRange>("IncidentEdgeRange", py::no_init)
 			.def("__iter__", py::iterator<Union::IncidentEdgeRange>());
+}
+
+} // namespace
+
+void Union_doExport() {
+	// export the class first, but it needs scoping, so do it in another function
+	exportClass();
+
+	// rst: .. class:: VertexMapUnionGraphUnionGraph
+	// rst:
+	// rst:		Implements the :class:`protocols.VertexMap` protocol.
+	mod::Py::exportVertexMap<VertexMap<graph::Union, graph::Union>>("VertexMapUnionGraphUnionGraph");
 }
 
 } // namespace mod::graph::Py

@@ -19,17 +19,20 @@ namespace {
 
 template<typename T>
 struct Label {
-	boost::optional<T> left, context, right;
+	std::optional<T> left, context, right;
 };
 
 } // namespace
 
-Data gml(std::string_view src, std::ostream &err) {
+Result<Data> gml(lib::IO::Warnings &warnings, std::string_view input) {
 	GML::Rule rule;
-	{
+	{ // GML parsing and conversion
 		gml::ast::KeyValue ast;
-		bool res = gml::parser::parse(src, ast, err);
-		if(!res) return Data();
+		try {
+			ast = gml::parser::parse(input);
+		} catch(const gml::parser::error &e) {
+			return Result<>::Error(e.what());
+		}
 		using namespace gml::converter::edsl;
 		auto cVertex = GML::makeVertexConverter(0);
 		auto cEdge = GML::makeEdgeConverter(0);
@@ -60,37 +63,37 @@ Data gml(std::string_view src, std::ostream &err) {
 				(constrainAdj)(constrainShortestPath);
 		auto iterBegin = &ast;
 		auto iterEnd = iterBegin + 1;
-		res = gml::converter::convert(iterBegin, iterEnd, cRule, err, rule);
-		if(!res) return Data();
-	}
+		try {
+			gml::converter::convert(iterBegin, iterEnd, cRule, rule);
+		} catch(const gml::converter::error &e) {
+			return Result<>::Error(e.what());
+		}
+	} // end of GML parsing
 
-	auto checkSide = [&err](const GML::Graph &side, std::string name) {
+	const auto checkSide = [](const GML::Graph &side, std::string name) -> Result<> {
 		std::unordered_set<int> vertexIds;
 		for(const GML::Vertex &v : side.vertices) {
-			if(vertexIds.find(v.id) != end(vertexIds)) {
-				err << "Duplicate vertex " << v.id << " in " << name << " graph.";
-				return false;
-			}
+			if(vertexIds.find(v.id) != end(vertexIds))
+				return Result<>::Error("Duplicate vertex " + std::to_string(v.id) + " in " + name + " graph.");
 			vertexIds.insert(v.id);
 		}
 		std::set<std::pair<int, int> > edgeIds;
 		for(const GML::Edge &e : side.edges) {
-			if(e.source == e.target) {
-				err << "Loop edge (on " << e.source << ", in " << name << ") is not allowed.";
-				return false;
-			}
+			if(e.source == e.target)
+				return Result<>::Error("Loop edge (on " + std::to_string(e.source) + ", in " + name + ") is not allowed.");
 			auto eSorted = std::minmax(e.source, e.target);
-			if(edgeIds.find(eSorted) != end(edgeIds)) {
-				err << "Duplicate edge (" << e.source << ", " << e.target << ") in " << name << " graph.";
-				return false;
-			}
+			if(edgeIds.find(eSorted) != end(edgeIds))
+				return Result<>::Error(
+						"Duplicate edge (" + std::to_string(e.source) + ", " + std::to_string(e.target) + ") in "
+						+ name + " graph.");
 			edgeIds.insert(eSorted);
 		}
-		return true;
+		return Result<>();
 	};
-	if(!checkSide(rule.left, "left")) return Data();
-	if(!checkSide(rule.context, "context")) return Data();
-	if(!checkSide(rule.right, "right")) return Data();
+
+	if(auto res = checkSide(rule.left, "left"); !res) return res;
+	if(auto res = checkSide(rule.context, "context"); !res) return res;
+	if(auto res = checkSide(rule.right, "right"); !res) return res;
 
 	using Vertex = lib::Rules::Vertex;
 	using Edge = lib::Rules::Edge;
@@ -98,15 +101,13 @@ Data gml(std::string_view src, std::ostream &err) {
 	data.rule = lib::Rules::LabelledRule();
 	data.name = rule.id;
 	if(rule.labelType) {
-		if(rule.labelType.get() == "string") data.labelType = LabelType::String;
-		else if(rule.labelType.get() == "term") data.labelType = LabelType::Term;
-		else {
-			err << "Error in rule GML. Unknown labelType '" << rule.labelType.get() << "'.";
-			return Data();
-		}
+		const std::string &ltString = *rule.labelType;
+		if(ltString == "string") data.labelType = LabelType::String;
+		else if(ltString == "term") data.labelType = LabelType::Term;
+		else return Result<>::Error("Error in rule GML. Unknown labelType '" + ltString + "'.");
 	}
 
-	auto &dpoResult = data.rule.get();
+	auto &dpoResult = *data.rule;
 	auto &g = get_graph(dpoResult);
 	dpoResult.pString = std::make_unique<lib::Rules::PropStringCore>(g);
 	auto &pString = *dpoResult.pString;
@@ -116,7 +117,7 @@ Data gml(std::string_view src, std::ostream &err) {
 		Label<std::string> string, stereo;
 	public:
 		Vertex v;
-		boost::optional<lib::IO::Stereo::Read::ParsedEmbedding> parsedEmbeddingLeft, parsedEmbeddingRight;
+		std::optional<lib::IO::Stereo::Read::ParsedEmbedding> parsedEmbeddingLeft, parsedEmbeddingRight;
 	};
 
 	struct EdgeLabels {
@@ -178,69 +179,59 @@ Data gml(std::string_view src, std::ostream &err) {
 
 		// Check labels and make (left, right) the correct labels
 		if(vData.string.context) {
-			if(vData.string.left) {
-				err << "Error in rule GML. Vertex " << id << " has a label both in 'context' and 'left'.";
-				return Data();
-			}
-			if(vData.string.right) {
-				err << "Error in rule GML. Vertex " << id << " has a label both in 'context' and 'right'.";
-				return Data();
-			}
+			if(vData.string.left)
+				return Result<>::Error(
+						"Error in rule GML. Vertex " + std::to_string(id) + " has a label both in 'context' and 'left'.");
+			if(vData.string.right)
+				return Result<>::Error(
+						"Error in rule GML. Vertex " + std::to_string(id) + " has a label both in 'context' and 'right'.");
 			// Note: terms follow the same semantics as string, i.e., the same string in L and R becomes the exact same terms.
 			vData.string.left = vData.string.right = vData.string.context;
 		}
 		if(vData.stereo.context) {
-			if(vData.stereo.left) {
-				err << "Error in rule GML. Vertex " << id << " has stereo both in 'context' and 'left'.";
-				return Data();
-			}
-			if(vData.stereo.right) {
-				err << "Error in rule GML. Vertex " << id << " has stereo both in 'context' and 'right'.";
-				return Data();
-			}
+			if(vData.stereo.left)
+				return Result<>::Error(
+						"Error in rule GML. Vertex " + std::to_string(id) + " has stereo both in 'context' and 'left'.");
+			if(vData.stereo.right)
+				return Result<>::Error(
+						"Error in rule GML. Vertex " + std::to_string(id) + " has stereo both in 'context' and 'right'.");
 			// for stereo it matters if it's L+R or it's K
 		}
 
 		// Check that there is a string/stereo in left/right when inLeft/inRight
-		if(vData.inLeft && !vData.string.left) {
-			err << "Error in rule GML. Vertex " << id << " is in L, but has no label.";
-			return Data();
-		}
-		if(vData.inRight && !vData.string.right) {
-			err << "Error in rule GML. Vertex " << id << " is in R, but has no label.";
-			return Data();
-		}
+		if(vData.inLeft && !vData.string.left)
+			return Result<>::Error("Error in rule GML. Vertex " + std::to_string(id) + " is in L, but has no label.");
+		if(vData.inRight && !vData.string.right)
+			return Result<>::Error("Error in rule GML. Vertex " + std::to_string(id) + " is in R, but has no label.");
 
 		vData.v = add_vertex(g);
 		vertexMapId[vData.v] = id;
 		data.externalToInternalIds[id] = get(boost::vertex_index_t(), g, vData.v);
 		if(vData.inContext) {
 			put_membership(dpoResult, vData.v, lib::Rules::Membership::Context);
-			pString.add(vData.v, vData.string.left.get(), vData.string.right.get());
+			pString.add(vData.v, *vData.string.left, *vData.string.right);
 		} else if(vData.inLeft) {
 			assert(!vData.inRight);
 			put_membership(dpoResult, vData.v, lib::Rules::Membership::Left);
-			pString.add(vData.v, vData.string.left.get(), "");
+			pString.add(vData.v, *vData.string.left, "");
 		} else {
 			assert(vData.inRight);
 			put_membership(dpoResult, vData.v, lib::Rules::Membership::Right);
-			pString.add(vData.v, "", vData.string.right.get());
+			pString.add(vData.v, "", *vData.string.right);
 		}
 	} // for each vertex
 
 	for(auto &p : idMapEdge) {
-		int src = p.first.first;
-		int tar = p.first.second;
-		if(idMapVertex.find(src) == end(idMapVertex)) {
-			err << "Error in rule GML. Edge endpoint '" << src << "' does not exist for edge (" << src << ", " << tar
-			    << ").";
-			return Data();
-		}
-		if(idMapVertex.find(tar) == end(idMapVertex)) {
-			err << "Error in rule GML. Edge endpoint '" << tar << "' does not exist for edge (" << src << ", " << tar
-			    << ").";
-			return Data();
-		}
+		const int src = p.first.first;
+		const int tar = p.first.second;
+		if(idMapVertex.find(src) == end(idMapVertex))
+			return Result<>::Error(
+					"Error in rule GML. Edge endpoint '" + std::to_string(src) + "' does not exist for edge ("
+					+ std::to_string(src) + ", " + std::to_string(tar) + ").");
+		if(idMapVertex.find(tar) == end(idMapVertex))
+			return Result<>::Error(
+					"Error in rule GML. Edge endpoint '" + std::to_string(tar) + "' does not exist for edge ("
+					+ std::to_string(src) + ", " + std::to_string(tar) + ").");
 		Vertex vSrc = idMapVertex[src].v, vTar = idMapVertex[tar].v;
 		auto &eData = p.second;
 		// First find the right membership:
@@ -250,50 +241,44 @@ Data gml(std::string_view src, std::ostream &err) {
 
 		// Check labels and make (left, right) the correct labels
 		if(eData.string.context) {
-			if(eData.string.left) {
-				err << "Error in rule GML. Edge (" << src << ", " << tar << ") has a label both in 'context' and 'left'.";
-				return Data();
-			}
-			if(eData.string.right) {
-				err << "Error in rule GML. Edge (" << src << ", " << tar << ") has a label both in 'context' and 'left'.";
-				return Data();
-			}
+			if(eData.string.left)
+				return Result<>::Error("Error in rule GML. Edge (" + std::to_string(src) + ", " + std::to_string(tar) +
+				                       ") has a label both in 'context' and 'left'.");
+			if(eData.string.right)
+				return Result<>::Error("Error in rule GML. Edge (" + std::to_string(src) + ", " + std::to_string(tar) +
+				                       ") has a label both in 'context' and 'right'.");
 			eData.string.left = eData.string.right = eData.string.context;
 		}
 		if(eData.stereo.context) {
-			if(eData.stereo.left) {
-				err << "Error in rule GML. Edge (" << src << ", " << tar << ") has stereo both in 'context' and 'left'.";
-				return Data();
-			}
-			if(eData.stereo.right) {
-				err << "Error in rule GML. Edge (" << src << ", " << tar << ") has stereo both in 'context' and 'left'.";
-				return Data();
-			}
+			if(eData.stereo.left)
+				return Result<>::Error("Error in rule GML. Edge (" + std::to_string(src) + ", " + std::to_string(tar) +
+				                       ") has stereo both in 'context' and 'left'.");
+			if(eData.stereo.right)
+				return Result<>::Error("Error in rule GML. Edge (" + std::to_string(src) + ", " + std::to_string(tar) +
+				                       ") has stereo both in 'context' and 'right'.");
 			// for stereo it matters if it's L+R or it's K
 		}
 
 		// Check that there is a string in left/right when inLeft/inRight
-		if(eData.inLeft && !eData.string.left) {
-			err << "Error in rule GML. Edge (" << src << ", " << tar << ") is in L, but has no label.";
-			return Data();
-		}
-		if(eData.inRight && !eData.string.right) {
-			err << "Error in rule GML. Edge (" << src << ", " << tar << ") is in R, but has no label.";
-			return Data();
-		}
+		if(eData.inLeft && !eData.string.left)
+			return Result<>::Error("Error in rule GML. Edge (" + std::to_string(src) + ", " + std::to_string(tar) +
+			                       ") is in L, but has no label.");
+		if(eData.inRight && !eData.string.right)
+			return Result<>::Error("Error in rule GML. Edge (" + std::to_string(src) + ", " + std::to_string(tar) +
+			                       ") is in R, but has no label.");
 
 		eData.e = add_edge(vSrc, vTar, g).first;
 		if(eData.inContext) {
 			put_membership(dpoResult, eData.e, lib::Rules::Membership::Context);
-			pString.add(eData.e, eData.string.left.get(), eData.string.right.get());
+			pString.add(eData.e, *eData.string.left, *eData.string.right);
 		} else if(eData.inLeft) {
 			assert(!eData.inRight);
 			put_membership(dpoResult, eData.e, lib::Rules::Membership::Left);
-			pString.add(eData.e, eData.string.left.get(), "");
+			pString.add(eData.e, *eData.string.left, "");
 		} else {
 			assert(eData.inRight);
 			put_membership(dpoResult, eData.e, lib::Rules::Membership::Right);
-			pString.add(eData.e, "", eData.string.right.get());
+			pString.add(eData.e, "", *eData.string.right);
 		}
 	} // for each edge
 	// the graph is set, so initialise the component storage
@@ -301,20 +286,16 @@ Data gml(std::string_view src, std::ostream &err) {
 
 	// constraints
 	for(const GML::MatchConstraint &cGML : rule.matchConstraints) {
+		struct MatchConstraintConverter {
+			MatchConstraintConverter(lib::Rules::LabelledRule &dpoResult, const std::map<int, VertexLabels> &idMapVertex)
+					: dpoResult(dpoResult), idMapVertex(idMapVertex) {}
 
-		struct MatchConstraintConverter : boost::static_visitor<bool> {
-
-			MatchConstraintConverter(lib::Rules::LabelledRule &dpoResult, const std::map<int, VertexLabels> &idMapVertex,
-			                         std::ostream &err)
-					: dpoResult(dpoResult), idMapVertex(idMapVertex), err(err) {}
-
-			bool operator()(const GML::AdjacencyConstraint &cGML) {
-				auto iter = idMapVertex.find(cGML.id);
-				if(iter == end(idMapVertex)) {
-					err << "Error in rule GML. Vertex " << cGML.id << " in adjacency constraint does not exist.";
-					return false;
-				}
-				Vertex vConstrained = iter->second.v;
+			Result<> operator()(const GML::AdjacencyConstraint &cGML) {
+				const auto iter = idMapVertex.find(cGML.id);
+				if(iter == end(idMapVertex))
+					return Result<>::Error("Error in rule GML. Vertex " + std::to_string(cGML.id) +
+					                       " in adjacency constraint does not exist.");
+				const Vertex vConstrained = iter->second.v;
 				lib::GraphMorphism::Constraints::Operator op;
 				{
 					const auto &s = cGML.op;
@@ -324,33 +305,28 @@ Data gml(std::string_view src, std::ostream &err) {
 					else if(s == "=") op = Operator::EQ;
 					else if(s == ">=") op = Operator::GEQ;
 					else if(s == ">") op = Operator::GT;
-					else {
-						err << "Error in rule GML. Unknown operator '" << s << "' in adjacency constraint.";
-						return false;
-					}
+					else return Result<>::Error("Error in rule GML. Unknown operator '" + s + "' in adjacency constraint.");
 				}
 				auto c = std::make_unique<
-						lib::GraphMorphism::Constraints::VertexAdjacency < lib::Rules::LabelledRule::LeftGraphType> > (
-						         vConstrained, op, cGML.count);
-				for(const auto &s : cGML.nodeLabels) c->vertexLabels.insert(s);
-				for(const auto &s : cGML.edgeLabels) c->edgeLabels.insert(s);
+						lib::GraphMorphism::Constraints::VertexAdjacency < lib::Rules::LabelledRule::LeftGraphType>
+				         > (vConstrained, op, cGML.count);
+				c->vertexLabels.insert(cGML.nodeLabels.begin(), cGML.nodeLabels.end());
+				c->edgeLabels.insert(cGML.edgeLabels.begin(), cGML.edgeLabels.end());
 				dpoResult.leftMatchConstraints.push_back(std::move(c));
-				return true;
+				return Result<>();
 			}
 
-			bool operator()(const GML::ShortestPathConstraint &cGML) {
-				auto iterSrc = idMapVertex.find(cGML.source);
-				auto iterTar = idMapVertex.find(cGML.target);
-				if(iterSrc == end(idMapVertex)) {
-					err << "Error in rule GML. Vertex " << cGML.source << " in shortest path constraint does not exist.";
-					return false;
-				}
-				if(iterTar == end(idMapVertex)) {
-					err << "Error in rule GML. Vertex " << cGML.target << " in shortest path constraint does not exist.";
-					return false;
-				}
-				Vertex vSrc = iterSrc->second.v;
-				Vertex vTar = iterTar->second.v;
+			Result<> operator()(const GML::ShortestPathConstraint &cGML) {
+				const auto iterSrc = idMapVertex.find(cGML.source);
+				const auto iterTar = idMapVertex.find(cGML.target);
+				if(iterSrc == end(idMapVertex))
+					return Result<>::Error("Error in rule GML. Vertex " + std::to_string(cGML.source) +
+					                       " in shortest path constraint does not exist.");
+				if(iterTar == end(idMapVertex))
+					return Result<>::Error("Error in rule GML. Vertex " + std::to_string(cGML.target) +
+					                       " in shortest path constraint does not exist.");
+				const Vertex vSrc = iterSrc->second.v;
+				const Vertex vTar = iterTar->second.v;
 				lib::GraphMorphism::Constraints::Operator op;
 				{
 					const auto &s = cGML.op;
@@ -360,33 +336,29 @@ Data gml(std::string_view src, std::ostream &err) {
 					else if(s == "=") op = Operator::EQ;
 					else if(s == ">=") op = Operator::GEQ;
 					else if(s == ">") op = Operator::GT;
-					else {
-						err << "Error in rule GML. Unknown operator '" << s << "' in shortest path constraint.";
-						return false;
-					}
+					else
+						return Result<>::Error(
+								"Error in rule GML. Unknown operator '" + s + "' in shortest path constraint.");
 				}
-				auto compSrc = dpoResult.leftComponents[get(boost::vertex_index_t(), get_graph(dpoResult), vSrc)];
-				auto compTar = dpoResult.leftComponents[get(boost::vertex_index_t(), get_graph(dpoResult), vTar)];
-				if(compSrc != compTar) {
-					err << "Error in rule GML. Vertex " << cGML.source << " and " << cGML.target
-					    << " are in different connected components of the left graph. "
-					    << "This is currently not supported for the shortest path constraint." << std::endl;
-					return false;
-				}
+				const auto compSrc = dpoResult.leftComponents[get(boost::vertex_index_t(), get_graph(dpoResult), vSrc)];
+				const auto compTar = dpoResult.leftComponents[get(boost::vertex_index_t(), get_graph(dpoResult), vTar)];
+				if(compSrc != compTar)
+					return Result<>::Error(
+							"Error in rule GML. Vertex " + std::to_string(cGML.source) + " and " + std::to_string(cGML.target)
+							+ " are in different connected components of the left graph. "
+							+ "This is currently not supported for the shortest path constraint.");
 				auto c = std::make_unique<
-						lib::GraphMorphism::Constraints::ShortestPath < lib::Rules::LabelledRule::LeftGraphType> > (
-						         vSrc, vTar, op, cGML.length);
+						lib::GraphMorphism::Constraints::ShortestPath < lib::Rules::LabelledRule::LeftGraphType>
+				         > (vSrc, vTar, op, cGML.length);
 				dpoResult.leftMatchConstraints.push_back(std::move(c));
-				return true;
+				return Result<>();
 			}
 		public:
 			lib::Rules::LabelledRule &dpoResult;
 			const std::map<int, VertexLabels> &idMapVertex;
-			std::ostream &err;
-		} visitor(dpoResult, idMapVertex, err);
-		bool success = boost::apply_visitor(visitor, cGML);
-		if(!success) return data;
-	}
+		} visitor(dpoResult, idMapVertex);
+		if(auto res = std::visit(visitor, cGML); !res) return res;
+	} // for each constriant
 	bool doStereo = false;
 	for(const auto &v : rule.left.vertices) doStereo = doStereo || v.stereo;
 	for(const auto &v : rule.context.vertices) doStereo = doStereo || v.stereo;
@@ -394,11 +366,11 @@ Data gml(std::string_view src, std::ostream &err) {
 	for(const auto &e : rule.left.edges) doStereo = doStereo || e.stereo;
 	for(const auto &e : rule.context.edges) doStereo = doStereo || e.stereo;
 	for(const auto &e : rule.right.edges) doStereo = doStereo || e.stereo;
-	if(!doStereo) return data;
+	if(!doStereo) return std::move(data); // TODO: remove std::move when C++20/P1825R0 is available
 
 	// Stereo
 	//==========================================================================
-	auto vFromVertexId = [&idMapVertex](int id) {
+	const auto vFromVertexId = [&idMapVertex](int id) {
 		auto iter = idMapVertex.find(id);
 		assert(iter != end(idMapVertex));
 		return iter->second.v;
@@ -409,71 +381,65 @@ Data gml(std::string_view src, std::ostream &err) {
 	auto molRight = mol.getRight();
 	auto leftInference = lib::Stereo::makeInference(gLeft, molLeft, true);
 	auto rightInference = lib::Stereo::makeInference(gRight, molRight, true);
-	std::stringstream ssErr;
 	const auto &gGeometry = lib::Stereo::getGeometryGraph();
 	// Set the explicitly defined edge categories.
 	//----------------------------------------------------------------------------
 	for(const auto &p : idMapEdge) {
-		const auto handleSide = [&err, &ssErr, &p](const boost::optional<std::string> &os, const std::string &side,
-		                                           auto &inference) {
-			if(!os) return true;
+		const auto handleSide = [&p](const std::optional<std::string> &os, const std::string &side,
+		                             auto &inference) -> Result<> {
+			if(!os) return Result<>();
 			const std::string &s = *os;
-			if(s.size() != 1) {
-				err << "Error in stereo data for edge (" << p.first.first << ", " << p.first.second << ") in " << side
-				    << ". ";
-				err << "Parsing error in stereo data '" << s << "'.";
-				return false;
-			}
+			if(s.size() != 1)
+				return Result<>::Error("Error in stereo data for edge (" + std::to_string(p.first.first)
+				                       + ", " + std::to_string(p.first.second) + ") in " + side
+				                       + ". Parsing error in stereo data '" + s + "'.");
 			lib::Stereo::EdgeCategory cat;
 			switch(s.front()) {
 			case '*':
 				cat = lib::Stereo::EdgeCategory::Any;
 				break;
 			default:
-				err << "Error in stereo data for edge (" << p.first.first << ", " << p.first.second << ") in " << side
-				    << ". ";
-				err << "Parsing error in stereo data '" << s << "'.";
-				return false;
+				return Result<>::Error("Error in stereo data for edge (" + std::to_string(p.first.first) + ", "
+				                       + std::to_string(p.first.second) + ") in " + side
+				                       + ". Parsing error in stereo data '" + s + "'.");
 			}
-			bool res = inference.assignEdgeCategory(p.second.e, cat, ssErr);
+			auto res = inference.assignEdgeCategory(p.second.e, cat);
 			if(!res) {
-				err << "Error in stereo data for edge (" << p.first.first << ", " << p.first.second << ") in " << side
-				    << ". ";
-				err << ssErr.str();
-				return false;
+				res.setError("Error in stereo data for edge (" + std::to_string(p.first.first) + ", "
+				             + std::to_string(p.first.second) + ") in " + side + ". " + res.extractError());
+				return res;
 			}
-			return true;
+			return res;
 		};
-		if(!handleSide(p.second.stereo.left, "L", leftInference)) return Data();
-		if(!handleSide(p.second.stereo.right, "R", rightInference)) return Data();
+		if(auto res = handleSide(p.second.stereo.left, "L", leftInference); !res) return res;
+		if(auto res = handleSide(p.second.stereo.right, "R", rightInference); !res) return res;
 	} // for each edge
 	// Set the explicitly stereo data.
 	//----------------------------------------------------------------------------
 	for(auto &p : idMapVertex) {
-		const auto handleSide = [&](const boost::optional<std::string> &os, const std::string &side, auto &inference,
+		const auto handleSide = [&](const std::optional<std::string> &os, const std::string &side, auto &inference,
 		                            auto &parsedEmbedding, const auto &gSide) {
-			if(!os) return true;
+			if(!os) return Result<>();
 			const auto &v = p.second.v;
-			parsedEmbedding = lib::IO::Stereo::Read::parseEmbedding(os.get(), ssErr);
-			if(!parsedEmbedding) {
-				err << "Error in stereo data for vertex " << p.first << " in " << side << ". ";
-				err << ssErr.str();
-				return false;
+			if(auto parsedEmbeddingRes = lib::IO::Stereo::Read::parseEmbedding(*os)) {
+				parsedEmbedding = std::move(*parsedEmbeddingRes);
+			} else {
+				return Result<>::Error(
+						"Error in stereo data for vertex " + std::to_string(p.first) + " in " + side + ". " +
+						parsedEmbeddingRes.extractError());
 			}
 			// Geometry
 			//..........................................................................
 			const auto &embGML = *parsedEmbedding;
 			if(embGML.geometry) {
 				auto vGeo = gGeometry.findGeometry(*embGML.geometry);
-				if(vGeo == gGeometry.nullGeometry()) {
-					err << "Error in stereo data for vertex " << p.first << " in " << side << ". Invalid gGeometry '"
-					    << *embGML.geometry << "'." << std::endl;
-					return false;
-				}
-				bool res = inference.assignGeometry(v, vGeo, ssErr);
-				if(!res) {
-					err << "Error in stereo data for vertex " << p.first << " in " << side << ". " << ssErr.str();
-					return false;
+				if(vGeo == gGeometry.nullGeometry())
+					return Result<>::Error("Error in stereo data for vertex " + std::to_string(p.first) + " in " + side +
+					                       ". Invalid gGeometry '" + *embGML.geometry + "'.");
+				if(auto res = inference.assignGeometry(v, vGeo); !res) {
+					return Result<>::Error(
+							"Error in stereo data for vertex " + std::to_string(p.first) + " in " + side + ". " +
+							res.extractError());
 				}
 			}
 			// Edges
@@ -481,21 +447,19 @@ Data gml(std::string_view src, std::ostream &err) {
 			if(embGML.edges) {
 				inference.initEmbedding(v);
 				for(const auto &e : *embGML.edges) {
-					if(const int *idPtr = boost::get<int>(&e)) {
+					if(const int *idPtr = std::get_if<int>(&e)) {
 						int idNeighbour = *idPtr;
-						if(idMapVertex.find(idNeighbour) == end(idMapVertex)) {
-							err << "Error in graph GML. Neighbour vertex " << idNeighbour << " in stereo embedding for vertex "
-							    << p.first << " in " << side << " does not exist." << std::endl;
-							return false;
-						}
+						if(idMapVertex.find(idNeighbour) == end(idMapVertex))
+							return Result<>::Error("Error in graph GML. Neighbour vertex " + std::to_string(idNeighbour) +
+							                       " in stereo embedding for vertex "
+							                       + std::to_string(p.first) + " in " + side + " does not exist.");
 						auto ePair = edge(v, vFromVertexId(idNeighbour), gSide);
-						if(!ePair.second) {
-							err << "Error in graph GML. Vertex " << idNeighbour << " in stereo embedding for vertex "
-							    << p.first << " in " << side << " is not a neighbour." << std::endl;
-							return false;
-						}
+						if(!ePair.second)
+							return Result<>::Error("Error in graph GML. Vertex " + std::to_string(idNeighbour) +
+							                       " in stereo embedding for vertex "
+							                       + std::to_string(p.first) + " in " + side + " is not a neighbour.");
 						inference.addEdge(v, ePair.first);
-					} else if(const char *virtPtr = boost::get<char>(&e)) {
+					} else if(const char *virtPtr = std::get_if<char>(&e)) {
 						switch(*virtPtr) {
 						case 'e':
 							inference.addLonePair(v);
@@ -512,37 +476,28 @@ Data gml(std::string_view src, std::ostream &err) {
 			//..........................................................................
 			if(embGML.fixation) {
 				// TODO: expand this when more complicated geometries are implemented
-				bool isFixed = embGML.fixation.get();
+				const bool isFixed = *embGML.fixation;
 				if(isFixed) inference.fixSimpleGeometry(v);
 			}
-			return true;
+			return Result<>();
 		};
-		if(!handleSide(p.second.stereo.left, "L", leftInference, p.second.parsedEmbeddingLeft, gLeft)) return Data();
-		if(!handleSide(p.second.stereo.right, "R", rightInference, p.second.parsedEmbeddingRight, gRight)) return Data();
+		if(auto res = handleSide(p.second.stereo.left, "L", leftInference, p.second.parsedEmbeddingLeft,
+		                         gLeft); !res)
+			return res;
+		if(auto res = handleSide(p.second.stereo.right, "R", rightInference, p.second.parsedEmbeddingRight,
+		                         gRight); !res)
+			return res;
 	} // for each vertex
 
-	auto finalize = [&err, &ssErr, &vertexMapId](auto &inference, const std::string &side) {
-		auto stereoResult = inference.finalize(ssErr, [&vertexMapId, &side](Vertex v) {
+	const auto finalize = [&warnings, &vertexMapId](auto &inference, const std::string &side) {
+		return inference.finalize(warnings, [&vertexMapId, &side](Vertex v) {
 			auto iter = vertexMapId.find(v);
 			assert(iter != vertexMapId.end());
 			return std::to_string(iter->second) + " in " + side;
 		});
-		switch(stereoResult) {
-		case lib::Stereo::DeductionResult::Success:
-			return true;
-		case lib::Stereo::DeductionResult::Warning:
-			std::cout << ssErr.str();
-			return true;
-		case lib::Stereo::DeductionResult::Error:
-			err << ssErr.str();
-			return false;
-		}
-		MOD_ABORT; // should not happen
 	};
-	auto resLeft = finalize(leftInference, "L");
-	if(!resLeft) return Data();
-	auto resRight = finalize(rightInference, "R");
-	if(!resRight) return Data();
+	if(auto resLeft = finalize(leftInference, "L"); !resLeft) return resLeft;
+	if(auto resRight = finalize(rightInference, "R"); !resRight) return resRight;
 
 	const auto vertexInContext = [&](Vertex v) -> bool {
 		const auto idIter = vertexMapId.find(v);
@@ -552,8 +507,8 @@ Data gml(std::string_view src, std::ostream &err) {
 		assert(lIter->second.inContext);
 		const auto &stereo = lIter->second.stereo;
 		// if there is any stereo data, maybe we are in context
-		if(stereo.left.is_initialized() || stereo.context.is_initialized() || stereo.right.is_initialized())
-			return stereo.context.is_initialized();
+		if(stereo.left.has_value() || stereo.context.has_value() || stereo.right.has_value())
+			return stereo.context.has_value();
 		else // otherwise, default to be in context
 			return true;
 	};
@@ -569,15 +524,15 @@ Data gml(std::string_view src, std::ostream &err) {
 		assert(lIter->second.inContext);
 		const auto &stereo = lIter->second.stereo;
 		// if there is any stereo data, maybe we are in context
-		if(stereo.left.is_initialized() || stereo.context.is_initialized() || stereo.right.is_initialized())
-			return stereo.context.is_initialized();
+		if(stereo.left.has_value() || stereo.context.has_value() || stereo.right.has_value())
+			return stereo.context.has_value();
 		else // otherwise, default to be in context
 			return true;
 	};
 	dpoResult.pStereo = std::make_unique<lib::Rules::PropStereoCore>(g, std::move(leftInference),
 	                                                                 std::move(rightInference), vertexInContext,
 	                                                                 edgeInContext);
-	return data;
+	return std::move(data); // TODO: remove std::move when C++20/P1825R0 is available
 }
 
 } // namespace mod::lib::IO::Rules::Read

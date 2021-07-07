@@ -1,5 +1,5 @@
-#ifndef MOD_DG_STRATEGIES_H
-#define MOD_DG_STRATEGIES_H
+#ifndef MOD_DG_STRATEGIES_HPP
+#define MOD_DG_STRATEGIES_HPP
 
 #include <mod/BuildConfig.hpp>
 #include <mod/dg/DG.hpp>
@@ -33,27 +33,26 @@ public:
 	// rst:
 	// rst-nested-start:
 	struct GraphState {
-		GraphState(std::function<void(std::vector<std::shared_ptr<graph::Graph> > &)> fSubset,
-		           std::function<void(std::vector<std::shared_ptr<graph::Graph> > &)> fUniverse);
-		// rst:		.. function:: const std::vector<std::shared_ptr<graph::Graph> > &getSubset() const
+		GraphState(std::function<void(std::vector<std::shared_ptr<graph::Graph>> &)> fSubset,
+		           std::function<void(std::vector<std::shared_ptr<graph::Graph>> &)> fUniverse);
+		// rst:		.. function:: const std::vector<std::shared_ptr<graph::Graph>> &getSubset() const
 		// rst:
 		// rst:			:returns: the subset :math:`\mathcal{S}`.
 		// rst:
-		const std::vector<std::shared_ptr<graph::Graph> > &getSubset() const;
-		// rst:		.. function:: const std::vector<std::shared_ptr<graph::Graph> > &getUniverse() const
+		const std::vector<std::shared_ptr<graph::Graph>> &getSubset() const;
+		// rst:		.. function:: const std::vector<std::shared_ptr<graph::Graph>> &getUniverse() const
 		// rst:
 		// rst:			:returns: the universe :math:`\mathcal{U}`
 		// rst:
-		const std::vector<std::shared_ptr<graph::Graph> > &getUniverse() const;
+		const std::vector<std::shared_ptr<graph::Graph>> &getUniverse() const;
 	private:
-		mutable bool subsetInit, universeInit;
-		mutable std::vector<std::shared_ptr<graph::Graph> > subset, universe;
-		std::function<void(std::vector<std::shared_ptr<graph::Graph> > &)> fSubset, fUniverse;
+		mutable bool subsetInit = false, universeInit = false;
+		mutable std::vector<std::shared_ptr<graph::Graph>> subset, universe;
+		std::function<void(std::vector<std::shared_ptr<graph::Graph>> &)> fSubset, fUniverse;
 	};
 	// rst-nested-end:
-private:
-	Strategy(std::unique_ptr<lib::DG::Strategies::Strategy> strategy);
 public:
+	explicit Strategy(std::unique_ptr<lib::DG::Strategies::Strategy> strategy);
 	~Strategy();
 	std::unique_ptr<Strategy> clone() const;
 	MOD_DECL friend std::ostream &operator<<(std::ostream &s, const Strategy &strat);
@@ -78,18 +77,18 @@ public:
 	static std::shared_ptr<Strategy>
 	makeAdd(bool onlyUniverse, const std::shared_ptr<Function<std::vector<std::shared_ptr<graph::Graph>>()>> generator,
 	        IsomorphismPolicy graphPolicy);
-	// rst: .. function:: static std::shared_ptr<Strategy> makeSequence(const std::vector<std::shared_ptr<Strategy> > &strategies)
+	// rst: .. function:: static std::shared_ptr<Strategy> makeSequence(const std::vector<std::shared_ptr<Strategy>> &strategies)
 	// rst:
 	// rst:		:retunrs: a :ref:`strat-sequence` strategy.
 	// rst:		:throws: :class:`LogicError` if `strategies.empty()`.
 	// rst:		:throws: :class:`LogicError` if there is a `nullptr` in `strategies`.
-	static std::shared_ptr<Strategy> makeSequence(const std::vector<std::shared_ptr<Strategy> > &strategies);
-	// rst: .. function:: static std::shared_ptr<Strategy> makeParallel(const std::vector<std::shared_ptr<Strategy> > &strategies)
+	static std::shared_ptr<Strategy> makeSequence(const std::vector<std::shared_ptr<Strategy>> &strategies);
+	// rst: .. function:: static std::shared_ptr<Strategy> makeParallel(const std::vector<std::shared_ptr<Strategy>> &strategies)
 	// rst:
 	// rst:		:returns: a :ref:`strat-parallel` strategy.
 	// rst:		:throws: :class:`LogicError` if `strategies` is empty.
 	// rst:		:throws: :class:`LogicError` if there is a `nullptr` in `strategies`.
-	static std::shared_ptr<Strategy> makeParallel(const std::vector<std::shared_ptr<Strategy> > &strategies);
+	static std::shared_ptr<Strategy> makeParallel(const std::vector<std::shared_ptr<Strategy>> &strategies);
 	// rst: .. function:: static std::shared_ptr<Strategy> makeFilter(bool alsoUniverse, std::shared_ptr<Function<bool(std::shared_ptr<graph::Graph>, const Strategy::GraphState&, bool)>> filterFunc)
 	// rst:
 	// rst:		The filtering predicate will be called for each graph in either the subset or the universe.
@@ -102,11 +101,11 @@ public:
 	                                            std::shared_ptr<Function<bool(std::shared_ptr<graph::Graph>,
 	                                                                          const Strategy::GraphState &,
 	                                                                          bool)>> filterFunc);
-	// rst: .. function:: static std::shared_ptr<Strategy> makeExecute(std::shared_ptr<Function<void(const Strategy::GraphState&)> > func)
+	// rst: .. function:: static std::shared_ptr<Strategy> makeExecute(std::shared_ptr<Function<void(const Strategy::GraphState&)>> func)
 	// rst:
 	// rst:		:returns: an :ref:`strat-execute` strategy.
 	// rst:		:throws: :class:`LogicError` if `func` is a null pointer.
-	static std::shared_ptr<Strategy> makeExecute(std::shared_ptr<Function<void(const Strategy::GraphState &)> > func);
+	static std::shared_ptr<Strategy> makeExecute(std::shared_ptr<Function<void(const Strategy::GraphState &)>> func);
 	// rst: .. function:: static std::shared_ptr<Strategy> makeRule(std::shared_ptr<rule::Rule> r)
 	// rst:
 	// rst:		:returns: a :ref:`strat-rule` strategy.
@@ -120,12 +119,12 @@ public:
 	// rst:		:throws: :class:`LogicError` if `predicate` or `strategy` is a `nullptr`.
 	static std::shared_ptr<Strategy>
 	makeLeftPredicate(std::shared_ptr<Function<bool(const Derivation &)>> predicate, std::shared_ptr<Strategy> strategy);
-	// rst: .. function:: static std::shared_ptr<Strategy> makeRightPredicate(std::shared_ptr<Function<bool(const Derivation&) > > predicate, std::shared_ptr<Strategy> strategy)
+	// rst: .. function:: static std::shared_ptr<Strategy> makeRightPredicate(std::shared_ptr<Function<bool(const Derivation&) >> predicate, std::shared_ptr<Strategy> strategy)
 	// rst:
 	// rst:		:returns: a :ref:`strat-rightPredicate` strategy.
 	// rst:		:throws: :class:`LogicError` if `predicate` or `strategy` is a `nullptr`.
 	static std::shared_ptr<Strategy>
-	makeRightPredicate(std::shared_ptr<Function<bool(const Derivation &)> > predicate,
+	makeRightPredicate(std::shared_ptr<Function<bool(const Derivation &)>> predicate,
 	                   std::shared_ptr<Strategy> strategy);
 	// rst: .. function:: static std::shared_ptr<Strategy> makeRevive(std::shared_ptr<Strategy> strategy)
 	// rst:
@@ -135,7 +134,7 @@ public:
 	// rst: .. function:: static std::shared_ptr<Strategy> makeRepeat(int limit, std::shared_ptr<Strategy> strategy)
 	// rst:
 	// rst:		:returns: a :ref:`strat-repeat` strategy.
-	// rst:		:throws: :class:`LogicError` if `limit <= 0`
+	// rst:		:throws: :class:`LogicError` if `limit < 0`
 	// rst:		:throws: :class:`LogicError` if `strategy` is a `nullptr`.
 	static std::shared_ptr<Strategy> makeRepeat(int limit, std::shared_ptr<Strategy> strategy);
 };
@@ -143,4 +142,4 @@ public:
 
 } // namespace mod::dg
 
-#endif /* MOD_DG_STRATEGIES_H */
+#endif // MOD_DG_STRATEGIES_HPP

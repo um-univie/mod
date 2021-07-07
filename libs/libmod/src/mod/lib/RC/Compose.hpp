@@ -1,5 +1,5 @@
-#ifndef MOD_LIB_RC_COMPOSE_H
-#define MOD_LIB_RC_COMPOSE_H
+#ifndef MOD_LIB_RC_COMPOSE_HPP
+#define MOD_LIB_RC_COMPOSE_HPP
 
 // Generic DPO rule composition for rules represented as the pushout of
 // L <- K -> R, i.e., the "core" graph.
@@ -12,15 +12,13 @@
 #include <jla_boost/graph/dpo/IO.hpp>
 #include <jla_boost/graph/morphism/VertexMap.hpp>
 
-namespace mod {
-namespace lib {
-namespace RC {
+namespace mod::lib::RC {
 
 template<typename R>
 using DPOTraits = jla_boost::GraphDPO::PushoutRuleTraits<R>;
 
 template<bool Verbose, typename Result, typename RuleFirst, typename RuleSecond, typename InvertibleVertexMap, typename VisitorT>
-boost::optional<Result> compose(const RuleFirst &rFirst, const RuleSecond &rSecond, const InvertibleVertexMap &match, VisitorT visitor) {
+std::optional<Result> compose(const RuleFirst &rFirst, const RuleSecond &rSecond, const InvertibleVertexMap &match, VisitorT visitor) {
 	// match must be rSecond -> rFirst
 	using RuleResult = typename Result::RuleResult;
 	using WrappedVisitor = Visitor::Compound<VisitorT>;
@@ -32,8 +30,6 @@ boost::optional<Result> compose(const RuleFirst &rFirst, const RuleSecond &rSeco
 			InvertibleVertexMap, WrappedVisitor>(rFirst, rSecond, match, Visitor::makeVisitor(std::move(visitor)))();
 }
 
-} // namespace RC
-} // namespace lib
-} // namespace mod
+} // namespace mod::lib::RC
 
-#endif /* MOD_LIB_RC_COMPOSE_H */
+#endif // MOD_LIB_RC_COMPOSE_HPP

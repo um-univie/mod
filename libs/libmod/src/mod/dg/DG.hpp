@@ -27,6 +27,7 @@ struct MOD_DECL DG {
 	DG(const DG &) = delete;
 	DG &operator=(const DG &) = delete;
 public:
+	using Handle = std::shared_ptr<DG>;
 	class Vertex;
 	class HyperEdge;
 	class VertexIterator;
@@ -76,29 +77,29 @@ public: // hypergraph interface
 	// rst: .. function:: std::size_t numVertices() const
 	// rst:
 	// rst:		:returns: the number of vertices in the derivation graph.
-	// rst:		:throws: :class:`LogicError` if not `hasActiveBuilder()` or `isLocked()`.
+	// rst:		:throws: :class:`LogicError` if neither `hasActiveBuilder()` nor `isLocked()`.
 	std::size_t numVertices() const;
 	// rst: .. function:: VertexRange vertices() const
 	// rst:
 	// rst:		:returns: a range of all vertices in the derivation graph.
-	// rst:		:throws: :class:`LogicError` if not `hasActiveBuilder()` or `isLocked()`.
+	// rst:		:throws: :class:`LogicError` if neither `hasActiveBuilder()` nor `isLocked()`.
 	VertexRange vertices() const;
 	// rst: .. function:: std::size_t numEdges() const
 	// rst:
 	// rst:		:returns: the number of edges in the derivation graph.
-	// rst:		:throws: :class:`LogicError` if not `hasActiveBuilder()` or `isLocked()`.
+	// rst:		:throws: :class:`LogicError` if neither `hasActiveBuilder()` nor `isLocked()`.
 	std::size_t numEdges() const;
 	// rst: .. function:: EdgeRange edges() const
 	// rst:
 	// rst:		:returns: a range of all edges in the derivation graph.
-	// rst:		:throws: :class:`LogicError` if not `hasActiveBuilder()` or `isLocked()`.
+	// rst:		:throws: :class:`LogicError` if neither `hasActiveBuilder()` nor `isLocked()`.
 	EdgeRange edges() const;
 public: // searching for vertices and hyperedges
 	// rst: .. function:: Vertex findVertex(std::shared_ptr<graph::Graph> g) const
 	// rst:
 	// rst:		:returns: a vertex descriptor for which the given graph is associated,
 	// rst:			or a null descriptor if no such vertex exists.
-	// rst:		:throws: :class:`LogicError` if not `hasActiveBuilder()` or `isLocked()`.
+	// rst:		:throws: :class:`LogicError` if neither `hasActiveBuilder()` nor `isLocked()`.
 	// rst:		:throws: :class:`LogicError` if `g` is a `nullptr`.
 	Vertex findVertex(std::shared_ptr<graph::Graph> g) const;
 	// rst: .. function:: HyperEdge findEdge(const std::vector<Vertex> &sources, const std::vector<Vertex> &targets) const
@@ -108,7 +109,7 @@ public: // searching for vertices and hyperedges
 	// rst:			If no such hyperedge exists in the derivation graph then a null edge is returned.
 	// rst:			In the second version, the graphs are put through :func:`findVertex` first.
 	// rst:		:throws: :class:`LogicError` if a vertex descriptor is null, or does not belong to the derivation graph.
-	// rst:		:throws: :class:`LogicError` if not `hasActiveBuilder()` or `isLocked()`.
+	// rst:		:throws: :class:`LogicError` if neither `hasActiveBuilder()` nor `isLocked()`.
 	HyperEdge findEdge(const std::vector<Vertex> &sources, const std::vector<Vertex> &targets) const;
 	HyperEdge findEdge(const std::vector<std::shared_ptr<graph::Graph>> &sources,
 	                   const std::vector<std::shared_ptr<graph::Graph>> &targets) const;
@@ -137,13 +138,27 @@ public:
 	// rst:		:returns: the name of the PDF-file that will be compiled in post-processing and the name of the coordinate tex-file used.
 	// rst:		:throws: :class:`LogicError` if the print data is not for this DG.
 	std::pair<std::string, std::string> print(const Printer &printer, const PrintData &data) const;
+	// rst: .. function:: std::string printNonHyper() const
+	// rst:
+	// rst:		Print the derivation graph in style of a digraph, where each edge represents a hyperedge.
+	// rst:		Each vertex in the depiction then represents a multiset of vertices in the hypergraph.
+	// rst:
+	// rst:		:returns: the name of the PDF-file that will be compiled in post-processing.
+	std::string printNonHyper() const;
 	// rst: .. function:: std::string dump() const
+	// rst:               std::string dump(const std::string &filename) const
 	// rst:
-	// rst:		Exports the derivation graph to a text file, which can be imported.
+	// rst:		Exports the derivation graph to a file, including associated graphs and rules.
+	// rst:		Use :func:`load` or :func:`Builder::load` to import the derivation graph again.
 	// rst:
+	// rst:		:param filename: the name of the file to save the dump to.
+	// rst:			If non is given an auto-generated name in the ``out/`` folder is used.
+	// rst:			If an empty string is given, it is treated as if non is given.
 	// rst:		:returns: the name of the file with the exported data.
-	// rst:		:throws: :class:`LogicError` if the DG has not been calculated.
+	// rst:		:throws: :class:`LogicError` if `!isLocked()`.
+	// rst:		:throws: :class:`LogicError` if the target file can not be opened.
 	std::string dump() const;
+	std::string dump(const std::string &filename) const;
 	// rst: .. function:: void listStats() const
 	// rst: 
 	// rst:		Output various stats of the derivation graph.

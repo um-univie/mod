@@ -123,7 +123,7 @@ void gml(const lib::Rules::Real &r, bool withCoords, std::ostream &s) {
 	s << "\truleID \"" << r.getName() << "\"\n";
 	if(r.getLabelType()) {
 		s << "\tlabelType \"";
-		switch(r.getLabelType().get()) {
+		switch(*r.getLabelType()) {
 		case LabelType::String:
 			s << "string";
 			break;
@@ -654,21 +654,22 @@ std::string pdfCombined(const lib::Rules::Real &r, const Options &options) {
 	MOD_ABORT;
 }
 
-std::pair<std::string, std::string> summary(const lib::Rules::Real &r) {
+std::pair<std::string, std::string> summary(const lib::Rules::Real &r, bool printCombined) {
 	graph::Printer first;
 	graph::Printer second;
 	second.setReactionDefault();
-	return summary(r, first.getOptions(), second.getOptions());
+	return summary(r, first.getOptions(), second.getOptions(), printCombined);
 }
 
-std::pair<std::string, std::string> summary(const lib::Rules::Real &r, const Options &first, const Options &second) {
+std::pair<std::string, std::string>
+summary(const lib::Rules::Real &r, const Options &first, const Options &second, bool printCombined) {
 	auto visible = jla_boost::AlwaysTrue();
 	auto vColour = jla_boost::Nop<std::string>();
 	auto eColour = jla_boost::Nop<std::string>();
 	const BaseArgs args{visible, vColour, eColour};
 	std::string graphLike = pdf(r, first, "L", "K", "R", args);
 	std::string molLike = first == second ? "" : pdf(r, second, "L", "K", "R", args);
-	std::string combined = getConfig().rule.printCombined.get()
+	std::string combined = printCombined
 	                       ? pdfCombined(r /*, Options().EdgesAsBonds().RaiseCharges()*/)
 	                       : "";
 	std::string constraints =

@@ -19,7 +19,7 @@ jobs:
       run: sudo apt install -y $(bindep -b | tr '\n' ' ')
     - name: Install Boost
       run: |
-        wget https://dl.bintray.com/boostorg/release/1.74.0/source/boost_1_74_0.tar.gz
+        wget https://boostorg.jfrog.io/artifactory/main/release/1.74.0/source/boost_1_74_0.tar.gz
         tar -xf boost_1_74_0.tar.gz
         cd boost_1_74_0
         ./bootstrap.sh --with-python=python3 --prefix=/opt/boost
@@ -41,7 +41,7 @@ jobs:
       run: |
         mkdir build
         cd build
-        cmake ../ -DBUILD_TESTING=on -DBOOST_ROOT=/opt/boost
+        cmake ../ -DBUILD_DOC=on -DBUILD_TESTING=on -DBOOST_ROOT=/opt/boost
     - name: Build
       run: cd build && make -j 2
     - name: Install
@@ -72,7 +72,7 @@ jobs:
       run: |
         mkdir build
         cd build
-        cmake ../ -DBUILD_TESTING=on
+        cmake ../ -DBUILD_DOC=on -DBUILD_TESTING=on
     - name: Build
       run: cd build && make -j 2
     - name: Install

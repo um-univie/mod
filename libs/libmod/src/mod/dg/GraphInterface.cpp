@@ -13,8 +13,7 @@ namespace mod::dg {
 // Vertex
 //------------------------------------------------------------------------------
 
-MOD_GRAPHPIMPL_Define_Vertex_noGraph(DG, DG,
-                                     g->getHyper().getGraph(), g, DG)
+MOD_GRAPHPIMPL_Define_Vertex_noGraph(DG, DG,g->getHyper().getGraph(), g, /* VertexPrint */)
 
 std::shared_ptr<DG> DG::Vertex::getDG() const {
 	if(!g) throw LogicError("Can not get DG on a null vertex.");

@@ -115,7 +115,7 @@ std::pair<std::unique_ptr<Hyper>, HyperCreator> Hyper::makeHyper(const NonHyper 
 //		// insert to map
 //		edgeToHyper[e] = v;
 //		// fix reverse
-//		boost::optional<NonHyperEdge> reverse = dg[e].reverse;
+//		std::optional<NonHyperEdge> reverse = dg[e].reverse;
 //		if(reverse) {
 //			auto iter = edgeToHyper.find(reverse.get());
 //			if(iter != end(edgeToHyper)) {

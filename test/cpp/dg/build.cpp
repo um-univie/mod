@@ -12,7 +12,7 @@
 using namespace mod;
 
 void testBuildRAII() {
-	auto g = graph::Graph::smiles("O");
+	auto g = graph::Graph::fromSMILES("O");
 	auto d = Derivations{{g},
 	                     {},
 	                     {g}};

@@ -32,14 +32,11 @@
 #include <map>
 #include <ostream>
 
-namespace mod {
-namespace lib {
-namespace Graph {
-namespace DFSEncoding {
+namespace mod::lib::Graph::DFSEncoding {
 namespace {
 
 void escapeLabel(std::ostream &s, const std::string &label, char escChar) {
-	for(unsigned int i = 0; i < label.size(); i++) {
+	for(int i = 0; i != label.size(); i++) {
 		char c = label[i];
 		if(c == escChar) s << "\\" << escChar;
 		else if(c == '\t') s << "\\t";
@@ -53,29 +50,24 @@ void escapeLabel(std::ostream &s, const std::string &label, char escChar) {
 
 } // namespace
 namespace detail {
-
-const std::string invalidLabelString("");
-
 class LabelVertex;
 class RingClosure;
 class Branch;
 
+// x3 does not yet fully support std::variant
+// https://github.com/boostorg/spirit/issues/321
 using BaseVertex = boost::variant<LabelVertex, RingClosure>;
 
 using GVertex = lib::Graph::Vertex;
 using GEdge = lib::Graph::Edge;
 
 struct LabelVertex {
-
-	LabelVertex() : label(invalidLabelString), implicit(false) { }
-public:
 	std::string label;
-	bool implicit;
-	boost::optional<unsigned int> id;
+	bool implicit = false;
+	std::optional<int> id;
 public:
 	GVertex gVertex;
 public:
-
 	friend std::ostream &operator<<(std::ostream &s, const LabelVertex &lv) {
 		if(lv.implicit) s << lv.label;
 		else {
@@ -89,12 +81,9 @@ public:
 };
 
 struct RingClosure {
-
-	RingClosure() : id(std::numeric_limits<unsigned int>::max()) { }
+	// must use unsigned so the parser understands how to store it
+	unsigned int id = std::numeric_limits<unsigned int>::max();
 public:
-	unsigned int id;
-public:
-
 	friend std::ostream &operator<<(std::ostream &s, const RingClosure &rc) {
 		return s << rc.id;
 	}
@@ -108,12 +97,8 @@ public:
 };
 
 struct Edge {
-
-	Edge() : label(invalidLabelString) { }
-public:
 	std::string label;
 public:
-
 	friend std::ostream &operator<<(std::ostream &s, const Edge &e) {
 		if(e.label.size() > 1) {
 			s << '{';
@@ -121,11 +106,14 @@ public:
 			return s << '}';
 		}
 		switch(e.label.front()) {
-		case '-': return s;
+		case '-':
+			return s;
 		case '=':
 		case '#':
-		case ':': return s << e.label;
-		default: return s << "{" << e.label << "}";
+		case ':':
+			return s << e.label;
+		default:
+			return s << "{" << e.label << "}";
 		}
 	}
 };
@@ -137,7 +125,6 @@ struct Chain {
 	std::vector<EVPair> tail;
 	bool hasNonSmilesRingClosure; // only set when creating GraphDFS from a graph
 public:
-
 	friend std::ostream &operator<<(std::ostream &s, const Chain &c) {
 		s << c.head;
 		for(const auto &ev : c.tail) s << ev.first << ev.second;
@@ -148,7 +135,6 @@ public:
 struct Branch {
 	std::vector<EVPair> tail;
 public:
-
 	friend std::ostream &operator<<(std::ostream &s, const Branch &b) {
 		for(const auto &ev : b.tail) s << ev.first << ev.second;
 		return s;
@@ -165,7 +151,6 @@ namespace {
 namespace parser {
 
 struct SpecialVertexLabels : x3::symbols<const std::string> {
-
 	SpecialVertexLabels() {
 		name("specialVertexLabels");
 		for(auto atomId : lib::Chem::getSmilesOrganicSubset())
@@ -174,7 +159,6 @@ struct SpecialVertexLabels : x3::symbols<const std::string> {
 } specialVertexLabels;
 
 struct SpecialEdgeLabels : x3::symbols<const std::string> {
-
 	SpecialEdgeLabels() {
 		name("specialEdgeLabels");
 		add("-", "-");
@@ -192,8 +176,10 @@ const auto plainBrace /*  */ = (x3::char_ - x3::char_('}'));
 const auto plainBracket /**/ = (x3::char_ - x3::char_(']'));
 const auto escapedBrace /*  */ = '\\' >> (x3::char_('}') | tab | explicitBackslash | implicitBackslash);
 const auto escapedBracket /**/ = '\\' >> (x3::char_(']') | tab | explicitBackslash | implicitBackslash);
-const auto escapedStringBrace /*  */ = x3::lexeme[x3::lit('{') > *(escapedBrace /*  */ | plainBrace /*  */) > x3::lit('}')];
-const auto escapedStringBracket /**/ = x3::lexeme[x3::lit('[') > *(escapedBracket /**/ | plainBracket /**/) > x3::lit(']')];
+const auto escapedStringBrace /*  */ = x3::lexeme[x3::lit('{') > *(escapedBrace /*  */ | plainBrace /*  */) >
+                                                  x3::lit('}')];
+const auto escapedStringBracket /**/ = x3::lexeme[x3::lit('[') > *(escapedBracket /**/ | plainBracket /**/) >
+                                                  x3::lit(']')];
 
 const auto specialEdgeLabels = specialEdgeLabelSymbols | x3::attr(std::string(1, '-'));
 const auto edge = x3::rule<struct edge, Edge>("edge") = escapedStringBrace | specialEdgeLabels;
@@ -210,7 +196,7 @@ const auto evPair = x3::rule<struct evPair, EVPair>("edgeVertexPair") = edge >> 
 const auto branch = x3::rule<struct branch, Branch>("branch") = '(' > +evPair > ')';
 const auto branches = *branch;
 const auto vertex_def = (labelVertex | ringClosure) >> branches;
-BOOST_SPIRIT_DEFINE(vertex);
+BOOST_SPIRIT_DEFINE(vertex)
 // no recursion
 const auto chain = vertex > *evPair;
 const auto graphDFS = x3::rule<struct graphDFS, Chain>("graphDFS")
@@ -219,41 +205,46 @@ const auto graphDFS = x3::rule<struct graphDFS, Chain>("graphDFS")
 } // namespace parser
 } // namespace
 
-struct Converter : public boost::static_visitor<std::pair<GVertex, bool> > {
-
-	Converter(GraphType &g, PropString &pString, std::ostream &s) : g(g), pString(pString), s(s), error(false) { }
-
-	bool convert(Chain &chain) {
-		std::pair<GVertex, bool> res = convert(chain.head, g.null_vertex());
-		if(error) return false;
-		GVertex vPrev = res.first;
-		assert(!res.second);
-		assert(vPrev != g.null_vertex());
-		for(EVPair &ev : chain.tail) {
-			vPrev = attach(ev, vPrev);
-			if(error) break;
-			assert(vPrev != g.null_vertex());
-		}
-		return !error;
-	}
-
-	std::pair<GVertex, bool> convert(Vertex &vertex, GVertex prev) {
+class Converter {
+	struct ConvertRes {
 		GVertex next;
 		bool isRingClosure;
-		boost::tie(next, isRingClosure) = boost::apply_visitor(*this, vertex.vertex);
-		if(error) return std::make_pair(next, isRingClosure);
-		assert(!(isRingClosure && prev == g.null_vertex()));
-		GVertex branchRoot = isRingClosure ? prev : next;
-		for(Branch &branch : vertex.branches) {
-			GVertex prev = branchRoot;
-			for(EVPair &ev : branch.tail) {
-				prev = attach(ev, prev);
-				if(error) break;
-				assert(prev != g.null_vertex());
-			}
-			if(error) break;
+	};
+public:
+	Converter(GraphType &g, PropString &pString) : g(g), pString(pString) {}
+
+	lib::IO::Result<> convert(Chain &chain) {
+		auto subRes = convertTail(chain.head, g.null_vertex());
+		if(!subRes) return std::move(subRes);
+		const auto sub = *subRes;
+		GVertex vPrev = sub.next;
+		assert(!sub.isRingClosure);
+		assert(vPrev != g.null_vertex());
+		for(EVPair &ev : chain.tail) {
+			auto attachRes = attach(ev, vPrev);
+			if(!attachRes) return std::move(attachRes);
+			vPrev = *attachRes;
+			assert(vPrev != g.null_vertex());
 		}
-		return std::make_pair(next, isRingClosure);
+		return {};
+	}
+
+	lib::IO::Result<ConvertRes> convertTail(Vertex &vertex, GVertex prev) {
+		auto subRes = boost::apply_visitor(*this, vertex.vertex);
+		if(!subRes) return subRes;
+		const auto sub = *subRes;
+		assert(!(sub.isRingClosure && prev == g.null_vertex()));
+		GVertex branchRoot = sub.isRingClosure ? prev : sub.next;
+		for(Branch &branch : vertex.branches) {
+			GVertex branchPrev = branchRoot;
+			for(EVPair &ev : branch.tail) {
+				auto branchPrevRes = attach(ev, branchPrev);
+				if(!branchPrevRes) return std::move(branchPrevRes);
+				branchPrev = *branchPrevRes;
+				assert(branchPrev != g.null_vertex());
+			}
+		}
+		return sub;
 	}
 
 	void makeRingClosureBond(GVertex vSrc, GVertex vTar, const std::string &label) {
@@ -262,53 +253,47 @@ struct Converter : public boost::static_visitor<std::pair<GVertex, bool> > {
 		pString.addEdge(e.first, label);
 	}
 
-	GVertex attach(EVPair &ev, GVertex prev) {
-		GVertex next;
-		bool isRingClosure;
-		boost::tie(next, isRingClosure) = convert(ev.second, prev);
-		if(!error) makeRingClosureBond(prev, next, ev.first.label);
-		if(isRingClosure) return prev;
-		else return next;
+	lib::IO::Result<GVertex> attach(EVPair &ev, GVertex prev) {
+		auto subRes = convertTail(ev.second, prev);
+		if(!subRes) return std::move(subRes);
+		const auto res = *subRes;
+		makeRingClosureBond(prev, res.next, ev.first.label);
+		if(res.isRingClosure) return prev;
+		else return res.next;
 	}
 
-	std::pair<GVertex, bool> operator()(LabelVertex &vertex) {
+	ConvertRes operator()(LabelVertex &vertex) {
 		GVertex v = add_vertex(g);
 		pString.addVertex(v, vertex.label);
 		if(vertex.id) {
-			const auto iter = idVertexMap.find(vertex.id.get());
+			const auto iter = idVertexMap.find(*vertex.id);
 			if(iter == idVertexMap.end()) {
 				// use the id as definition
-				idVertexMap[vertex.id.get()] = v;
+				idVertexMap[*vertex.id] = v;
 			} else {
 				// use the id as ring closure
 				makeRingClosureBond(v, iter->second, "-");
 			}
 		}
 		vertex.gVertex = v;
-		return std::make_pair(v, false);
+		return ConvertRes{v, false};
 	}
 
-	std::pair<GVertex, bool> operator()(const RingClosure &vertex) {
+	lib::IO::Result<ConvertRes> operator()(const RingClosure &vertex) {
 		const auto iter = idVertexMap.find(vertex.id);
-		if(iter == idVertexMap.end()) {
-			s << "Ring closure id " << vertex.id << " not found." << std::endl;
-			error = true;
-			return std::make_pair(g.null_vertex(), true);
-		}
-		return std::make_pair(iter->second, true);
+		if(iter == idVertexMap.end())
+			return lib::IO::Result<>::Error("Ring closure id " + std::to_string(vertex.id) + " not found.");
+		return ConvertRes{iter->second, true};
 	}
 private:
 	GraphType &g;
 	PropString &pString;
-	std::ostream &s;
-	bool error;
 public:
-	std::map<unsigned int, GVertex> idVertexMap;
+	std::map<int, GVertex> idVertexMap;
 };
 
 struct ImplicitHydrogenAdder : public boost::static_visitor<void> {
-
-	ImplicitHydrogenAdder(GraphType &g, PropString &pString) : g(g), pString(pString) { }
+	ImplicitHydrogenAdder(GraphType &g, PropString &pString) : g(g), pString(pString) {}
 
 	void operator()(const Chain &chain) {
 		(*this)(chain.head);
@@ -321,7 +306,7 @@ struct ImplicitHydrogenAdder : public boost::static_visitor<void> {
 			for(const auto &ev : b.tail) (*this)(ev.second);
 	}
 
-	void operator()(const RingClosure&) { }
+	void operator()(const RingClosure &) {}
 
 	void operator()(const LabelVertex &vertex) {
 		if(vertex.implicit) {
@@ -330,13 +315,16 @@ struct ImplicitHydrogenAdder : public boost::static_visitor<void> {
 				if(lib::Chem::decodeEdgeLabel(pString[eOut]) == BondType::Invalid)
 					return;
 			}
-			auto atomId = lib::Chem::atomIdFromSymbol(vertex.label);
-			if(std::find(begin(lib::Chem::getSmilesOrganicSubset()), end(lib::Chem::getSmilesOrganicSubset()), atomId)
-							== end(lib::Chem::getSmilesOrganicSubset())) MOD_ABORT;
-			auto hydrogenAdder = [](lib::Graph::GraphType &g, lib::Graph::PropString &pString, lib::Graph::Vertex p) {
-				GVertex v = add_vertex(g);
+			const auto atomId = lib::Chem::atomIdFromSymbol(vertex.label);
+			const auto iter = std::find(begin(lib::Chem::getSmilesOrganicSubset()),
+			                            end(lib::Chem::getSmilesOrganicSubset()), atomId);
+			if(iter == end(lib::Chem::getSmilesOrganicSubset()))
+				MOD_ABORT;
+			const auto hydrogenAdder = [](lib::Graph::GraphType &g, lib::Graph::PropString &pString,
+			                              lib::Graph::Vertex p) {
+				const GVertex v = add_vertex(g);
 				pString.addVertex(v, "H");
-				GEdge e = add_edge(v, p, g).first;
+				const GEdge e = add_edge(v, p, g).first;
 				pString.addEdge(e, "-");
 			};
 			lib::Chem::addImplicitHydrogens(g, pString, vertex.gVertex, atomId, hydrogenAdder);
@@ -349,53 +337,52 @@ private:
 
 } // namespace detail
 
-lib::IO::Graph::Read::Data parse(const std::string &dfs, std::ostream &s) {
+lib::IO::Result<lib::IO::Graph::Read::Data> parse(const std::string &dfs) {
 	using IteratorType = std::string::const_iterator;
 	IteratorType first = dfs.begin(), last = dfs.end();
 	detail::Chain chain;
-	bool res = lib::IO::parse(first, last, detail::parser::graphDFS, chain, s);
-	if(!res) return lib::IO::Graph::Read::Data();
+	try {
+		lib::IO::parse(first, last, detail::parser::graphDFS, chain);
+	} catch(const lib::IO::ParsingError &e) {
+		return lib::IO::Result<>::Error(e.msg);
+	}
 
 	auto g = std::make_unique<GraphType>();
 	auto pString = std::make_unique<PropString>(*g);
-	detail::Converter conv(*g, *pString, s);
-	if(conv.convert(chain)) {
+	detail::Converter conv(*g, *pString);
+	if(auto res = conv.convert(chain); res) {
 		detail::ImplicitHydrogenAdder adder(*g, *pString);
 		adder(chain);
 		//		write(*g, *pString);
 		lib::IO::Graph::Read::Data data;
 		data.g = std::move(g);
 		data.pString = std::move(pString);
-		for(auto &&vp : conv.idVertexMap) {
+		for(auto &&vp : conv.idVertexMap)
 			data.externalToInternalIds[vp.first] = get(boost::vertex_index_t(), *g, vp.second);
-		}
-		return data;
+		return std::move(data); // TODO: remove std::move when C++20/P1825R0 is available
 	} else {
-		return lib::IO::Graph::Read::Data();
+		return res;
 	}
 }
 
-} // namespace DFSEncoding
-} // namespace Graph
-} // namespace lib
-} // namespace mod
+} // namespace mod::lib::Graph::DFSEncoding
 
 BOOST_FUSION_ADAPT_STRUCT(mod::lib::Graph::DFSEncoding::detail::LabelVertex,
-				(std::string, label)
-				(bool, implicit)
-				(boost::optional<unsigned int>, id))
+                          (std::string, label)
+		                          (bool, implicit)
+		                          (std::optional<int>, id))
 BOOST_FUSION_ADAPT_STRUCT(mod::lib::Graph::DFSEncoding::detail::RingClosure,
-				(unsigned int, id))
+                          (unsigned int, id))
 BOOST_FUSION_ADAPT_STRUCT(mod::lib::Graph::DFSEncoding::detail::Vertex,
-				(mod::lib::Graph::DFSEncoding::detail::BaseVertex, vertex)
-				(std::vector<mod::lib::Graph::DFSEncoding::detail::Branch>, branches))
+                          (mod::lib::Graph::DFSEncoding::detail::BaseVertex, vertex)
+		                          (std::vector<mod::lib::Graph::DFSEncoding::detail::Branch>, branches))
 BOOST_FUSION_ADAPT_STRUCT(mod::lib::Graph::DFSEncoding::detail::Edge,
-				(std::string, label))
+                          (std::string, label))
 BOOST_FUSION_ADAPT_STRUCT(mod::lib::Graph::DFSEncoding::detail::Chain,
-				(mod::lib::Graph::DFSEncoding::detail::Vertex, head)
-				(std::vector<mod::lib::Graph::DFSEncoding::detail::EVPair>, tail))
+                          (mod::lib::Graph::DFSEncoding::detail::Vertex, head)
+		                          (std::vector<mod::lib::Graph::DFSEncoding::detail::EVPair>, tail))
 BOOST_FUSION_ADAPT_STRUCT(mod::lib::Graph::DFSEncoding::detail::Branch,
-				(std::vector<mod::lib::Graph::DFSEncoding::detail::EVPair>, tail))
+                          (std::vector<mod::lib::Graph::DFSEncoding::detail::EVPair>, tail))
 
 #include <mod/lib/Chem/MoleculeUtil.hpp>
 #include <mod/lib/IO/IO.hpp>
@@ -404,19 +391,15 @@ BOOST_FUSION_ADAPT_STRUCT(mod::lib::Graph::DFSEncoding::detail::Branch,
 #include <string>
 #include <sstream>
 
-namespace mod {
-namespace lib {
-namespace Graph {
-namespace DFSEncoding {
+namespace mod::lib::Graph::DFSEncoding {
 namespace detail {
 
 enum class Colour {
 	White, Grey, Black
 };
 
-struct Printer : public boost::static_visitor<void> {
-
-	Printer(std::ostream &s, std::map<unsigned int, unsigned int> idMap) : s(s), idMap(idMap) { }
+struct Printer {
+	Printer(std::ostream &s, std::map<int, int> idMap) : s(s), idMap(idMap) {}
 
 	void operator()(const Chain &chain) {
 		(*this)(chain.head);
@@ -436,8 +419,8 @@ struct Printer : public boost::static_visitor<void> {
 		s << "[";
 		escapeLabel(s, v.label, ']');
 		s << "]";
-		if(v.id && idMap.find(v.id.get()) != idMap.end())
-			s << idMap[v.id.get()];
+		if(v.id && idMap.find(*v.id) != idMap.end())
+			s << idMap[*v.id];
 	}
 
 	void operator()(const RingClosure &v) {
@@ -456,7 +439,8 @@ struct Printer : public boost::static_visitor<void> {
 		if(e.label.size() == 1) {
 			char c = e.label[0];
 			switch(c) {
-			case '-': return;
+			case '-':
+				return;
 			case ':':
 			case '=':
 			case '#':
@@ -470,12 +454,11 @@ struct Printer : public boost::static_visitor<void> {
 	}
 private:
 	std::ostream &s;
-	std::map<unsigned int, unsigned int> idMap;
+	std::map<int, int> idMap;
 };
 
-struct Prettyfier : public boost::static_visitor<void> {
-
-	Prettyfier(const std::vector<bool> &targetForRing) : targetForRing(targetForRing) { }
+struct Prettyfier {
+	Prettyfier(const std::vector<bool> &targetForRing) : targetForRing(targetForRing) {}
 
 	void operator()(Chain &chain) {
 		(*this)(chain.head);
@@ -493,7 +476,7 @@ struct Prettyfier : public boost::static_visitor<void> {
 
 	void operator()(LabelVertex &v) {
 		if(v.id)
-			if(!targetForRing[v.id.get()]) v.id.reset();
+			if(!targetForRing[*v.id]) v.id.reset();
 	}
 
 	void operator()(RingClosure &v) {
@@ -516,16 +499,17 @@ struct Prettyfier : public boost::static_visitor<void> {
 		}
 	}
 
-	void operator()(Edge &e) { }
+	void operator()(Edge &e) {}
 private:
 	const std::vector<bool> targetForRing;
 };
 
-std::pair<Chain, std::map<unsigned int, unsigned int> > write(const lib::Graph::GraphType &g, const PropString &pString, bool withIds) {
+std::pair<Chain, std::map<int, int>>
+write(const lib::Graph::GraphType &g, const PropString &pString, bool withIds) {
 	using namespace detail;
 	using GEdgeIter = lib::Graph::GraphType::out_edge_iterator;
-	typedef std::pair<GVertex, std::pair<GEdgeIter, GEdgeIter> > VertexInfo;
-	std::vector<Vertex*> realVertices(num_vertices(g), nullptr);
+	using VertexInfo = std::pair<GVertex, std::pair<GEdgeIter, GEdgeIter>>;
+	std::vector<Vertex *> realVertices(num_vertices(g), nullptr);
 	Chain chain;
 	chain.hasNonSmilesRingClosure = false;
 
@@ -613,9 +597,9 @@ std::pair<Chain, std::map<unsigned int, unsigned int> > write(const lib::Graph::
 		colour[curId] = Colour::Black;
 	}
 
-	std::map<unsigned int, unsigned int> idMap;
-	unsigned int nextMappedId = 1;
-	for(unsigned int id = 0; id < targetForRing.size(); id++)
+	std::map<int, int> idMap;
+	int nextMappedId = 1;
+	for(int id = 0; id != targetForRing.size(); id++)
 		if(targetForRing[id])
 			idMap[id] = nextMappedId++;
 	Prettyfier pretty(targetForRing);
@@ -628,9 +612,7 @@ std::pair<Chain, std::map<unsigned int, unsigned int> > write(const lib::Graph::
 std::pair<std::string, bool> write(const lib::Graph::GraphType &g, const PropString &pString, bool withIds) {
 	if(num_vertices(g) == 0) return std::make_pair("", false);
 	using namespace detail;
-	std::pair<Chain, std::map<unsigned int, unsigned int> > res = detail::write(g, pString, withIds);
-	Chain &chain = res.first;
-	std::map<unsigned int, unsigned int> &idMap = res.second;
+	auto[chain, idMap] = detail::write(g, pString, withIds);
 
 	std::stringstream graphDFS;
 	Printer p(graphDFS, idMap);
@@ -638,8 +620,4 @@ std::pair<std::string, bool> write(const lib::Graph::GraphType &g, const PropStr
 	return std::make_pair(graphDFS.str(), chain.hasNonSmilesRingClosure);
 }
 
-} // namespace DFSEncoding
-} // namespace Graph
-} // namespace lib
-} // namespace mod
-
+} // namespace mod::lib::Graph::DFSEncoding

@@ -15,8 +15,7 @@ namespace mod::graph {
 // Vertex
 //------------------------------------------------------------------------------
 
-MOD_GRAPHPIMPL_Define_Vertex(Graph, Graph, std::shared_ptr<Graph>,
-                             g->getGraph().getGraph(), g, Graph)
+MOD_GRAPHPIMPL_Define_Vertex(Graph, Graph, g->getGraph().getGraph(), g, /* VertexPrint */)
 MOD_GRAPHPIMPL_Define_Vertex_Undirected(Graph, g->getGraph().getGraph(), g)
 
 const std::string &Graph::Vertex::getStringLabel() const {
@@ -84,7 +83,7 @@ std::string Graph::Vertex::printStereo(const Printer &p) const {
 // Edge
 //------------------------------------------------------------------------------
 
-MOD_GRAPHPIMPL_Define_Indices(Graph, Graph, std::shared_ptr<Graph>, g->getGraph().getGraph(), g, Graph)
+MOD_GRAPHPIMPL_Define_Indices(Graph, Graph, g->getGraph().getGraph(), g, /* EdgePrint */)
 
 const std::string &Graph::Edge::getStringLabel() const {
 	if(!g) throw LogicError("Can not get string label on a null edge.");

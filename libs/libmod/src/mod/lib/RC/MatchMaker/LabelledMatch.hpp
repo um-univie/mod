@@ -22,12 +22,12 @@ void initTermLabel(const RFirst &rFirst, const RSecond &rSecond) {
 	const auto &termSecond = get_term(rSecond.getDPORule());
 	if(!isValid(termFirst)) {
 		std::string msg = "Term state of rFirst is invalid:\n" + termFirst.getParsingError();
-		lib::IO::Rules::Write::summary(rFirst);
+		lib::IO::Rules::Write::summary(rFirst, true);
 		throw mod::FatalError(std::move(msg));
 	}
 	if(!isValid(termSecond)) {
 		std::string msg = "Term state of rSecond is invalid:\n" + termSecond.getParsingError();
-		lib::IO::Rules::Write::summary(rSecond);
+		lib::IO::Rules::Write::summary(rSecond, true);
 		throw mod::FatalError(std::move(msg));
 	}
 }

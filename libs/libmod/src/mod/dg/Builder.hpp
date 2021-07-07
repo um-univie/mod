@@ -1,5 +1,5 @@
-#ifndef MOD_DG_BUILDER_H
-#define MOD_DG_BUILDER_H
+#ifndef MOD_DG_BUILDER_HPP
+#define MOD_DG_BUILDER_HPP
 
 #include <mod/BuildConfig.hpp>
 #include <mod/dg/ForwardDecl.hpp>
@@ -9,12 +9,10 @@
 
 namespace mod {
 struct Derivations;
-namespace lib {
-namespace DG {
-struct ExecuteResult;
-} // namespace DG
-} // namespace lib
 } // namespace mod
+namespace mod::lib::DG {
+struct ExecuteResult;
+} // namespace mod::lib::DG
 namespace mod::dg {
 
 // rst-class: dg::Builder
@@ -200,4 +198,4 @@ private:
 
 } // namespace mod::dg
 
-#endif /* MOD_DG_BUILDER_H */
+#endif // MOD_DG_BUILDER_HPP

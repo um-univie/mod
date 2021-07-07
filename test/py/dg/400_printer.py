@@ -47,3 +47,4 @@ fail(lambda: p.popEdgeColour(), "No edge colour callback to pop.")
 
 # rendering engine stuff
 assert p.graphvizPrefix == ""
+assert p.tikzpictureOption == r"scale=\modDGHyperScale"

@@ -30,6 +30,8 @@ for a in inputGraphs:
 		res = a.isomorphism(b, labelSettings=LabelSettings(LabelType.String, LabelRelation.Isomorphism, LabelRelation.Isomorphism))
 		if not res:
 			print(a.name, "not isomorphic to", b.name)
+			print("{}: {}".format(a.name, a.smiles))
+			print("{}: {}".format(b.name, b.smiles))
 			assert False
 
 postSection("from OpenSMILES")

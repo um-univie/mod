@@ -4,9 +4,9 @@
 #include <mod/lib/IO/Graph.hpp>
 #include <mod/lib/Rules/Real.hpp>
 
-#include <boost/variant/variant.hpp>
-
+#include <optional>
 #include <string>
+#include <variant>
 
 namespace mod::lib::Rules {
 struct PropStereoCore;
@@ -16,15 +16,15 @@ struct Configuration;
 struct GeometryGraph;
 } // namespace mod::lib::Stereo
 namespace mod::lib::IO::Stereo::Read {
-using ParsedEmbeddingEdge = boost::variant<int, char>;
+using ParsedEmbeddingEdge = std::variant<int, char>;
 
 struct ParsedEmbedding {
-	boost::optional<std::string> geometry;
-	boost::optional<std::vector<ParsedEmbeddingEdge> > edges;
-	boost::optional<bool> fixation;
+	std::optional<std::string> geometry;
+	std::optional<std::vector<ParsedEmbeddingEdge> > edges;
+	std::optional<bool> fixation;
 };
 
-boost::optional<ParsedEmbedding> parseEmbedding(const std::string &str, std::ostream &err);
+lib::IO::Result<ParsedEmbedding> parseEmbedding(const std::string &str);
 
 } // namesapce mod::lib::IO::Stereo::Read
 namespace mod::lib::IO::Stereo::Write {

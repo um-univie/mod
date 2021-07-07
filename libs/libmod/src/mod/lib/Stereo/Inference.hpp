@@ -1,8 +1,9 @@
-#ifndef MOD_LIB_STEREO_INFERENCE_H
-#define MOD_LIB_STEREO_INFERENCE_H
+#ifndef MOD_LIB_STEREO_INFERENCE_HPP
+#define MOD_LIB_STEREO_INFERENCE_HPP
 
 #include <mod/Error.hpp>
 
+#include <mod/lib/IO/Result.hpp>
 #include <mod/lib/Stereo/EdgeCategory.hpp>
 #include <mod/lib/Stereo/EmbeddingEdge.hpp>
 #include <mod/lib/Stereo/GeometryGraph.hpp>
@@ -11,15 +12,14 @@
 #include <jla_boost/graph/PairToRangeAdaptor.hpp>
 
 #include <boost/graph/graph_traits.hpp>
+#include <boost/lexical_cast.hpp>
 
-namespace mod {
-namespace lib {
-namespace Stereo {
+namespace mod::lib::Stereo {
 namespace detail {
-template<typename Graph, typename PropMolecule> struct makeInferenceHelper;
+template<typename Graph, typename PropMolecule>
+struct makeInferenceHelper;
 
 struct InferenceBase {
-
 	struct VertexData {
 		GeometryGraph::Vertex vGeometry = GeometryGraph::nullGeometry();
 		std::size_t nextAvailableVirtual;
@@ -31,15 +31,12 @@ struct InferenceBase {
 	};
 
 	struct EdgeData {
-
-		EdgeData() : valid(EdgeCategorySubset().all()) { }
-	public:
-		EdgeCategorySubset valid;
+		EdgeCategorySubset valid = EdgeCategorySubset().all();
 		EdgeCategory finalCategory; // will be set by finalize
 	};
 };
 
-} // namesapce detail
+} // namespace detail
 
 template<typename Graph, typename PropMolecule>
 struct Inference : private detail::InferenceBase {
@@ -48,37 +45,37 @@ struct Inference : private detail::InferenceBase {
 public:
 	friend class detail::makeInferenceHelper<Graph, PropMolecule>;
 
-	Inference(const Graph &g, PropMolecule&&) = delete;
+	Inference(const Graph &g, PropMolecule &&) = delete;
 
 	Inference(const Graph &g, const PropMolecule &pMolecule, bool asPattern)
-	: g(g), pMolecule(pMolecule), asPattern(asPattern),
-	hasFinalized(false), vertexData(num_vertices(g)), edgeData(num_edges(g)) {
+			: g(g), pMolecule(pMolecule), asPattern(asPattern),
+			  hasFinalized(false), vertexData(num_vertices(g)), edgeData(num_edges(g)) {
 		for(Vertex v : asRange(vertices(g))) {
 			vertexData[get(boost::vertex_index_t(), g, v)].nextAvailableVirtual = out_degree(v, g);
 		}
 	}
 
-	bool assignGeometry(Vertex v, GeometryGraph::Vertex vGeometry, std::ostream &err) {
+	lib::IO::Result<> assignGeometry(Vertex v, GeometryGraph::Vertex vGeometry) {
 		assert(vGeometry != GeometryGraph::nullGeometry());
 		auto vId = get(boost::vertex_index_t(), g, v);
 		auto &data = vertexData[vId];
-		if(data.vGeometry != GeometryGraph::nullGeometry()) {
-			err << "Geometry already assigned.\n";
-			return false;
-		}
+		if(data.vGeometry != GeometryGraph::nullGeometry())
+			return lib::IO::Result<>::Error("Geometry already assigned.");
 		data.vGeometry = vGeometry;
-		return true;
+		return {};
 	}
 
-	bool assignEdgeCategory(Edge e, EdgeCategory cat, std::ostream &err) {
+	lib::IO::Result<> assignEdgeCategory(Edge e, EdgeCategory cat) {
 		auto eId = get(boost::edge_index_t(), g, e);
 		auto &data = edgeData[eId];
 		if(!data.valid(cat)) {
-			err << "Can not assign '" << cat << "'. Not a valid possibility (valid=" << data.valid << ").";
-			return false;
+			return lib::IO::Result<>::Error(
+					"Can not assign '" + boost::lexical_cast<std::string>(cat)
+					+ "'. Not a valid possibility (valid="
+					+ boost::lexical_cast<std::string>(data.valid) + ").");
 		}
 		data.valid = EdgeCategorySubset() + cat;
-		return true;
+		return {};
 	}
 
 	void initEmbedding(Vertex v) {
@@ -124,8 +121,7 @@ public:
 	}
 
 	template<typename VertexPrinter>
-	DeductionResult finalize(std::ostream &err, VertexPrinter vertexPrinter) {
-		auto result = DeductionResult::Success;
+	lib::IO::Result<> finalize(lib::IO::Warnings &warnings, VertexPrinter vertexPrinter) {
 		const auto &geo = getGeometryGraph();
 		const auto &gGeometry = geo.getGraph();
 		assert(!hasFinalized);
@@ -150,8 +146,8 @@ public:
 
 		// Assign edge categories to embedding edges.
 		//--------------------------------------------------------------------------
-		for(Vertex v : asRange(vertices(g))) {
-			auto vId = get(boost::vertex_index_t(), g, v);
+		for(const Vertex v : asRange(vertices(g))) {
+			const auto vId = get(boost::vertex_index_t(), g, v);
 			auto &data = vertexData[vId];
 			for(auto &emb : data.edges) {
 				if(emb.type != EmbeddingEdge::Type::Edge) continue;
@@ -160,10 +156,9 @@ public:
 			}
 		}
 
-		for(Vertex v : asRange(vertices(g))) {
-			auto res = finalizeVertex(v, err, vertexPrinter);
-			if(res == DeductionResult::Error) return res;
-			else if(res == DeductionResult::Warning) result = DeductionResult::Warning;
+		for(const Vertex v : asRange(vertices(g))) {
+			auto res = finalizeVertex(warnings, v, vertexPrinter);
+			if(!res) return res;
 		}
 
 		// Construct the configurations.
@@ -176,17 +171,14 @@ public:
 			std::stringstream ssErr;
 			data.configuration = gGeometry[data.vGeometry].constructor(
 					data.edges.data(), data.edges.data() + data.edges.size(), data.fix, ssErr);
-			if(!data.configuration) {
-				err << "Error in configuration construction for vertex " << vertexPrinter(v) << ".\n";
-				err << ssErr.str();
-				return DeductionResult::Error;
-			}
+			if(!data.configuration)
+				return lib::IO::Result<>::Error("Error in configuration construction for vertex " + vertexPrinter(v) + ".\n"
+				                                + ssErr.str());
 		}
 		hasFinalized = true;
-		return result;
+		return {};
 	}
 private:
-
 	EdgeCategoryCount addEdgesFromGraph(Vertex v) {
 		auto vId = get(boost::vertex_index_t(), g, v);
 		auto &data = vertexData[vId];
@@ -196,7 +188,8 @@ private:
 		std::size_t offset = 0;
 		EdgeCategoryCount catCount;
 		for(Edge eOut : asRange(out_edges(v, g))) {
-			data.edges.emplace_back(offset, EmbeddingEdge::Type::Edge, edgeData[get(boost::edge_index_t(), g, eOut)].finalCategory);
+			data.edges.emplace_back(offset, EmbeddingEdge::Type::Edge,
+			                        edgeData[get(boost::edge_index_t(), g, eOut)].finalCategory);
 			++catCount[edgeData[get(boost::edge_index_t(), g, eOut)].finalCategory];
 			++offset;
 		}
@@ -213,8 +206,7 @@ private:
 	}
 
 	template<typename VertexPrinter>
-	DeductionResult finalizeVertex(Vertex v, std::ostream &err, VertexPrinter vertexPrinter) {
-		auto result = DeductionResult::Success;
+	lib::IO::Result<> finalizeVertex(lib::IO::Warnings &warnings, Vertex v, VertexPrinter vertexPrinter) {
 		const auto &geo = getGeometryGraph();
 		auto vId = get(boost::vertex_index_t(), g, v);
 		auto &data = vertexData[vId];
@@ -232,21 +224,24 @@ private:
 		} else {
 			std::vector<bool> neighbourPresent(data.edges.size(), false);
 			if(data.edges.size() < out_degree(v, g)) {
-				err << "Too few edges in embedding for vertex " << vertexPrinter(v) << ". Got " << data.edges.size() << ", but the degree is " << out_degree(v, g) << "." << std::endl;
-				return DeductionResult::Error;
+				return lib::IO::Result<>::Error(
+						"Too few edges in embedding for vertex " + vertexPrinter(v) + ". Got " +
+						std::to_string(data.edges.size())
+						+ ", but the degree is " + std::to_string(out_degree(v, g)) + "."
+				);
 			}
 			for(const auto &emb : data.edges) {
 				if(emb.offset >= data.edges.size()) {
 					MOD_ABORT; // error, offset out of bounds
-					return DeductionResult::Error;
+					return lib::IO::Result<>::Error("");
 				}
 				if(neighbourPresent[emb.offset]) {
 					MOD_ABORT; // error, duplicate neighbour
-					return DeductionResult::Error;
+					return lib::IO::Result<>::Error("");
 				}
 				if(emb.offset < out_degree(v, g) && emb.type != EmbeddingEdge::Type::Edge) {
 					MOD_ABORT; // error, [0, d[ are reserved for the real edges
-					return DeductionResult::Error;
+					return lib::IO::Result<>::Error("");
 				}
 				neighbourPresent[emb.offset] = true;
 				switch(emb.type) {
@@ -259,7 +254,7 @@ private:
 				case EmbeddingEdge::Type::Radical:
 					if(radical) {
 						MOD_ABORT; // only one radical per vertex
-						return DeductionResult::Error;
+						return lib::IO::Result<>::Error("");
 					}
 					radical = true;
 					break;
@@ -269,19 +264,23 @@ private:
 		if(explicitGeometry && explicitEmbedding) {
 			// the user has spoken
 		} else if(explicitGeometry && !explicitEmbedding) {
-			std::tie(result, numLonePairs) = geo.deduceLonePairs(ad, catCount, data.vGeometry, asPattern, err);
+			if(auto res = geo.deduceLonePairs(warnings, ad, catCount, data.vGeometry, asPattern))
+				numLonePairs = *res;
+			else return std::move(res);
 		} else if(!explicitGeometry && explicitEmbedding) {
-			std::tie(result, data.vGeometry) = geo.deduceGeometry(ad, catCount, numLonePairs, asPattern, err);
+			if(auto res = geo.deduceGeometry(warnings, ad, catCount, numLonePairs, asPattern))
+				data.vGeometry = *res;
+			else return std::move(res);
 		} else {
 			assert(!explicitGeometry && !explicitEmbedding);
-			std::tie(result, data.vGeometry, numLonePairs) = geo.deduceGeometryAndLonePairs(ad, catCount, asPattern, err);
+			if(auto res = geo.deduceGeometryAndLonePairs(warnings, ad, catCount, asPattern))
+				std::tie(data.vGeometry, numLonePairs) = *res;
+			else return std::move(res);
 		}
-		if(result == DeductionResult::Error) return result;
 		if(!explicitEmbedding) addLonePairs(v, numLonePairs);
-		return result;
+		return {};
 	}
 public: // if hasFinalized
-
 	std::unique_ptr<Configuration> extractConfiguration(Vertex v) {
 		assert(hasFinalized);
 		auto vId = get(boost::vertex_index_t(), g, v);
@@ -320,13 +319,12 @@ struct makeInferenceHelper {
 } // detail
 
 template<typename Graph, typename PropMolecule>
-Inference<typename std::decay<Graph>::type, typename std::decay<PropMolecule>::type> makeInference(Graph &&g, PropMolecule &&pMolecule, bool asPattern) {
+Inference<typename std::decay<Graph>::type, typename std::decay<PropMolecule>::type>
+makeInference(Graph &&g, PropMolecule &&pMolecule, bool asPattern) {
 	return detail::makeInferenceHelper<typename std::decay<Graph>::type, typename std::decay<PropMolecule>::type>
-			::make(std::forward<Graph>(g), std::forward<PropMolecule>(pMolecule), asPattern);
+	::make(std::forward<Graph>(g), std::forward<PropMolecule>(pMolecule), asPattern);
 }
 
-} // namespace Stereo
-} // namespace lib
-} // namespace mod
+} // namespace mod::lib::Stereo
 
-#endif /* MOD_LIB_STEREO_INFERENCE_H */
+#endif // MOD_LIB_STEREO_INFERENCE_HPP

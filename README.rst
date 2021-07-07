@@ -1,5 +1,5 @@
 #####################
-MedØlDatschgerl (MØD)
+MØD
 #####################
 
 This is a software package developed for graph-based cheminformatics.

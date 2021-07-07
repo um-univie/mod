@@ -20,7 +20,7 @@ First, get MØD and install the easy dependencies:
 
 	git clone --recursive https://github.com/jakobandersen/mod.git
 	./bootstrap.sh
-	pip3 install -r requirements.txt
+	pip3 install -r requirements.txt  # may need --user to install in home folder instead of system folders
 	# Ubuntu:
 	sudo apt install $(bindep -b | tr '\n' ' ')
 	# Fedora:

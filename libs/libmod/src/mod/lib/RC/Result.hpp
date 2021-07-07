@@ -1,5 +1,5 @@
 #ifndef MOD_LIB_RC_RESULT_H
-#define	MOD_LIB_RC_RESULT_H
+#define   MOD_LIB_RC_RESULT_H
 
 #include <jla_boost/graph/dpo/Rule.hpp>
 #include <jla_boost/graph/morphism/models/Vector.hpp>
@@ -48,10 +48,10 @@ struct BaseResult {
 	using GraphSecond = typename jla_boost::GraphDPO::PushoutRuleTraits<RuleSecond>::GraphType;
 
 	template<typename ...Args>
-	BaseResult(const RuleFirst &rFirst, const RuleSecond &rSecond, Args&&... args)
-	: rResult(std::forward<Args>(args)...),
-	mFirstToResult(get_graph(rFirst), get_graph(rResult)),
-	mSecondToResult(get_graph(rSecond), get_graph(rResult)) { }
+	BaseResult(const RuleFirst &rFirst, const RuleSecond &rSecond, Args &&... args)
+			: rResult(std::forward<Args>(args)...),
+			  mFirstToResult(get_graph(rFirst), get_graph(rResult)),
+			  mSecondToResult(get_graph(rSecond), get_graph(rResult)) {}
 public:
 	RuleResult rResult;
 	jla_boost::GraphMorphism::InvertibleVectorVertexMap<GraphFirst, GraphResult> mFirstToResult;
@@ -63,4 +63,4 @@ public:
 } // namespace mod
 
 
-#endif	/* MOD_LIB_RC_RESULT_H */
+#endif   /* MOD_LIB_RC_RESULT_H */

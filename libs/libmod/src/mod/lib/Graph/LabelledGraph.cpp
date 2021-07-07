@@ -69,20 +69,13 @@ bool has_stereo(const LabelledGraph &g) {
 const LabelledGraph::PropStereoType &get_stereo(const LabelledGraph &g) {
 	if(!has_stereo(g)) {
 		auto inference = lib::Stereo::makeInference(get_graph(g), get_molecule(g), false);
-		std::stringstream ssErr;
-		auto result = inference.finalize(ssErr, [&g](Vertex v) {
-			return get(boost::vertex_index_t(), get_graph(g), v);
+		lib::IO::Warnings warnings;
+		auto result = inference.finalize(warnings, [&g](Vertex v) {
+			return std::to_string(get(boost::vertex_index_t(), get_graph(g), v));
 		});
-		switch(result) {
-		case Stereo::DeductionResult::Success:
-			break;
-		case Stereo::DeductionResult::Warning:
-			if(!getConfig().stereo.silenceDeductionWarnings.get())
-				std::cout << ssErr.str();
-			break;
-		case Stereo::DeductionResult::Error:
-			throw StereoDeductionError(ssErr.str());
-		}
+		if(!getConfig().stereo.silenceDeductionWarnings.get())
+			std::cout << warnings;
+		result.throwIfError<StereoDeductionError>();
 		g.pStereo.reset(new PropStereo(get_graph(g), std::move(inference)));
 	}
 	return *g.pStereo;

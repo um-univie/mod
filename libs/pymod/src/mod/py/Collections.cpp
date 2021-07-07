@@ -66,16 +66,20 @@ void Collections_doExport() {
 	makeVector(VecRule, std::shared_ptr<rule::Rule>);
 	using PairString = std::pair<std::string, std::string>;
 	makeVector(VecPairString, PairString);
+	using PairStringBool = std::pair<std::string, bool>;
+	makeVector(VecPairStringBool, PairStringBool);
 	makeVector(VecRCExpExp, rule::RCExp::Expression);
 	makeVector(VecString, std::string);
 
 	// Pair
 	makePair<std::string, std::string>();
+	makePair<std::string, bool>();
 	makePair<int, int>();
+	makePair<double, double>();
 	makePair<dg::DG::HyperEdge, double>();
 
 	// Optional
-	py::to_python_converter<boost::optional<int>, ToPythonOptionalValue<int>>();
+	py::to_python_converter<std::optional<int>, ToPythonOptionalValue<int>>();
 }
 
 } // namespace Py

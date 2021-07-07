@@ -69,7 +69,7 @@ private:
 			using AddressType = lib::Term::AddressType;
 			using Address = lib::Term::Address;
 			using Cell = lib::Term::Cell;
-			using CellTag = lib::Term::CellTag;
+			using CellTag = lib::Term::Cell::Tag;
 			Address addrLhs = machineLeft.deref({AddressType::Heap, l});
 			Address addrRhs = machineRight.deref({AddressType::Heap, r});
 			if constexpr(DEBUG) std::cout << "compDeref(" << addrLhs.addr << ", " << addrRhs.addr << ")\n";

@@ -2,20 +2,31 @@
 
 function printHelp {
 	echo "MØD Wrapper usage:"
-	echo "$0 [wrapper options] [shared options] [vm options]"
-	echo "Wrapper Options:"
-	echo "	--help, -h      Show this and return."
+	echo "$0 [options] [Python options]"
+	echo ""
+	echo "  Meta options"
+	echo ""
+	echo "	--help, -h      Show this and exit."
 	echo "	--version, -v   Print version and exit."
-	echo "	--get-latex     Copy mod.sty and mod.mk to the current folder."
+	echo "	--get-latex     Copy mod.sty and mod.mk to the current folder and exit."
+	echo ""
+	echo "  Execution Customization Options"
+	echo ""
+	echo "	-i              Enter interactive mode after execution, and disable the log."
+	echo "	-q              Use quiet mode."
+	echo ""
+	echo "  Post-processing Options"
+	echo ""
 	echo "	--nopost        Do not generate the summary."
+	echo "	-j <N>          Set number of available threads for post processing."
+	echo "	clean           Delete out/ and summary/. Any other args are ignored."
+	echo ""
+	echo "  Debugging Options"
+	echo ""
 	echo "	--profile       Use callgrind to profile the execution."
 	echo "	--memcheck      Use valgrind to do memory check."
 	echo "	--vgArgs <arg>  Options for valgrind."
 	echo "	--debug         Start gdb with the program."
-	echo "	clean           Delete out/ and summary/. Any other args are ignored."
-	echo "	-j <N>          Set number of available threads for post processing."
-	echo "	-i              Enter interactive mode after execution, and disable the log."
-	echo "	-q              Use quiet mode."
 }
 
 # Args
@@ -28,14 +39,12 @@ memcheck="false"
 debug="false"
 clean="false"
 vgArgs=""
-pymod="true"
 interactive="false"
 quiet="false"
 interceptedArgs=""
 summaryArgs=""
 
 # File names
-modvm="modvm"
 summaryMaker="mod_post"
 obabelSupp="obabel.supp"
 pythonSupp="python.supp"
@@ -79,8 +88,12 @@ while test "$1" != ""; do
 			getLatex="true"
 			shift
 			;;
-		"--nopost" )
-			post="false"
+		"-i" )
+			interactive="true"
+			shift
+			;;
+		"-q" )
+			quiet="true"
 			shift
 			;;
 		"--profile" )
@@ -101,8 +114,7 @@ while test "$1" != ""; do
 			post="false"
 			shift
 			;;
-		"clean" )
-			clean="true"
+		"--nopost" )
 			post="false"
 			shift
 			;;
@@ -111,12 +123,9 @@ while test "$1" != ""; do
 			shift
 			shift
 			;;
-		"-i" )
-			interactive="true"
-			shift
-			;;
-		"-q" )
-			quiet="true"
+		"clean" )
+			clean="true"
+			post="false"
 			shift
 			;;
 		* )
@@ -129,7 +138,7 @@ done
 if test "$quiet" = "false"; then
 	echo "MØD Wrapper --------------------------------------------------------"
 	echo "Prefix: $MOD_PREFIX"
-	echo -n "MedØlDatschgerl version "
+	echo -n "MØD version "
 fi
 if test "$quiet" = "false" -o "$doVersion" = "true"; then
 	echo "@PROJECT_VERSION@"
@@ -237,9 +246,7 @@ elif [ $memcheck = "true" ]; then
 		fi
 	}
 	checkSuppFile $obabelSupp
-	if [ $pymod = "true" ]; then
-		checkSuppFile $pythonSupp
-	fi
+	checkSuppFile $pythonSupp
 	if [ $debug = "true" ]; then
 		precommand="$precommand --vgdb=yes --vgdb-error=0"
 	fi
@@ -269,7 +276,7 @@ fi
 
 function executeVM {
 	if test "$quiet" = "false"; then
-		echo "Running VM ---------------------------------------------------------"
+		echo "Running Python Interpreter -----------------------------------------"
 		time "$@"
 	else
 		"$@"
@@ -381,11 +388,19 @@ EOF
 		echo "(see $pyFile)"
 		echo "Command ------------------------------------------------------------"
 	fi
-	pythonvm="python3"
+	if [ "x$MOD_PYTHON" = 'x' ]; then
+		pythonvm="python3"
+	else
+		pythonvm="$MOD_PYTHON"
+	fi
 	if [ "$interactive" = "true" ]; then
-		which ipython3 &> /dev/null
-		if test $? -eq 0; then
-			pythonvm="ipython3"
+		if [ "x$MOD_IPYTHON" = 'x' ]; then
+			which ipython3 &> /dev/null
+			if test $? -eq 0; then
+				pythonvm="ipython3"
+			fi
+		else
+			pythonvm="$MOD_IPYTHON"
 		fi
 		if test "$quiet" = "false"; then
 			echo "$precommand $pythonvm -i $pyFile"
@@ -407,20 +422,12 @@ EOF
 	return $ret
 }
 
-function executeVMClean {
-	rm -rf out/ summary/
-}
-
 if [ $clean = "true" ]; then
-	executeVMClean
+	rm -rf out/ summary/
 	exit $?
-elif [ "$pymod" = "true" ]; then
-	executeVMPython "${args[@]}"
-	ret=$?
-else
-	echo "Neither 'clean' or 'pymod'? What is going on?"
-	exit 1
 fi
+executeVMPython "${args[@]}"
+ret=$?
 
 if [ $ret -ne 0 ]; then
 	echo "Program failed! Exit code: $ret"

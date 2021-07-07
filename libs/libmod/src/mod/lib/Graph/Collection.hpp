@@ -9,9 +9,7 @@
 
 #include <boost/functional/hash.hpp>
 
-namespace mod {
-namespace lib {
-namespace Graph {
+namespace mod::lib::Graph {
 
 struct CollectionStats {
 	std::size_t numVertices;
@@ -21,9 +19,8 @@ public:
 		return std::tie(a.numVertices, a.numEdges) == std::tie(b.numVertices, b.numEdges);
 	}
 };
-} // namespace Graph
-} // namespace lib
-} // namespace mod
+
+} // namespace mod::lib::Graph
 
 template<>
 struct std::hash<mod::lib::Graph::CollectionStats> {
@@ -34,9 +31,7 @@ struct std::hash<mod::lib::Graph::CollectionStats> {
 	}
 };
 
-namespace mod {
-namespace lib {
-namespace Graph {
+namespace mod::lib::Graph {
 
 struct Collection {
 	explicit Collection(LabelSettings ls, Config::IsomorphismAlg alg);
@@ -69,8 +64,6 @@ private:
 	std::vector<std::shared_ptr<graph::Graph>> graphs;
 };
 
-} // namespace Graph
-} // namespace lib
-} // namespace mod
+} // namespace mod::lib::Graph
 
-#endif //MOD_LIB_GRAPH_COLLECTION_HPP
+#endif // MOD_LIB_GRAPH_COLLECTION_HPP

@@ -28,7 +28,7 @@ struct IndexSequence {
 
 template<std::size_t N>
 struct MakeIndexSequence {
-	using type = typename MakeIndexSequence<N - 1 > ::type::next;
+	using type = typename MakeIndexSequence<N - 1>::type::next;
 };
 
 template<>
@@ -37,7 +37,7 @@ struct MakeIndexSequence<0> {
 };
 
 template<std::size_t ...Is>
-std::array<EmbeddingEdge, sizeof...(Is) > toArrayHelper(IndexSequence<Is...>, const EmbeddingEdge *b) {
+std::array<EmbeddingEdge, sizeof...(Is)> toArrayHelper(IndexSequence<Is...>, const EmbeddingEdge *b) {
 	return std::array<EmbeddingEdge, sizeof...(Is)>({b[Is]...});
 }
 
@@ -53,18 +53,19 @@ std::array<EmbeddingEdge, N> toArray(const EmbeddingEdge *b, const EmbeddingEdge
 // VProp
 //------------------------------------------------------------------------------
 
-GeometryGraph::VProp::VProp(const std::string &name) : name(name) { }
+GeometryGraph::VProp::VProp(const std::string &name) : name(name) {}
 
 // GeometryGraph
 //------------------------------------------------------------------------------
 
 GeometryGraph::GeometryGraph() {
 	any = addGeometry(VProp("any"));
-	g[any].constructor = [this](const EmbeddingEdge *b, const EmbeddingEdge *e, const Fixation &fix, std::ostream & err) {
+	g[any].constructor = [this](const EmbeddingEdge *b, const EmbeddingEdge *e, const Fixation &fix, std::ostream &err) {
 		return std::make_unique<Any>(*this, b, e);
 	};
 	linear = addChild(any, VProp("linear"));
-	g[linear].constructor = [this](const EmbeddingEdge *b, const EmbeddingEdge *e, const Fixation &fix, std::ostream & err) {
+	g[linear].constructor = [this](const EmbeddingEdge *b, const EmbeddingEdge *e, const Fixation &fix,
+	                               std::ostream &err) {
 		constexpr std::size_t N = 2;
 		if(e - b != N) {
 			err << "Can not create linear geometry for vertex with degree " << (e - b) << ", must be 2.";
@@ -73,7 +74,8 @@ GeometryGraph::GeometryGraph() {
 		return std::make_unique<Linear>(*this, toArray<N>(b, e));
 	};
 	trigonalPlanar = addChild(any, VProp("trigonalPlanar"));
-	g[trigonalPlanar].constructor = [this](const EmbeddingEdge *b, const EmbeddingEdge *e, const Fixation &fix, std::ostream & err) {
+	g[trigonalPlanar].constructor = [this](const EmbeddingEdge *b, const EmbeddingEdge *e, const Fixation &fix,
+	                                       std::ostream &err) {
 		constexpr std::size_t N = 3;
 		if(e - b != N) {
 			err << "Can not create trigonalPlanar geometry for vertex with degree " << (e - b) << ", must be 3.";
@@ -85,7 +87,8 @@ GeometryGraph::GeometryGraph() {
 		return std::make_unique<TrigonalPlanar>(*this, toArray<N>(b, e), fixed);
 	};
 	tetrahedral = addChild(any, VProp("tetrahedral"));
-	g[tetrahedral].constructor = [this](const EmbeddingEdge *b, const EmbeddingEdge *e, const Fixation &fix, std::ostream & err) {
+	g[tetrahedral].constructor = [this](const EmbeddingEdge *b, const EmbeddingEdge *e, const Fixation &fix,
+	                                    std::ostream &err) {
 		constexpr std::size_t N = 4;
 		if(e - b != N) {
 			err << "Can not create tetrahedral geometry for vertex with degree " << (e - b) << ", must be 4.";
@@ -98,14 +101,14 @@ GeometryGraph::GeometryGraph() {
 	};
 
 #define V(atomId, charge, radical, single, double_, triple, aromatic, lonePair, geometry)\
-	do {                                                                         \
-		EdgeCategoryCount catCount;                                               \
-		catCount[EdgeCategory::Single] = single;                                  \
-		catCount[EdgeCategory::Double] = double_;                                 \
-		catCount[EdgeCategory::Triple] = triple;                                  \
-		catCount[EdgeCategory::Aromatic] = aromatic;                              \
-		chemValids.push_back(ChemValid{AtomId(atomId), Charge(charge), radical, catCount, lonePair, geometry}); \
-	} while(false)
+   do {                                                                         \
+      EdgeCategoryCount catCount;                                               \
+      catCount[EdgeCategory::Single] = single;                                  \
+      catCount[EdgeCategory::Double] = double_;                                 \
+      catCount[EdgeCategory::Triple] = triple;                                  \
+      catCount[EdgeCategory::Aromatic] = aromatic;                              \
+      chemValids.push_back(ChemValid{AtomId(atomId), Charge(charge), radical, catCount, lonePair, geometry}); \
+   } while(false)
 	using namespace mod::AtomIds;
 	V(H, 1, false, 0, 0, 0, 0, 0, any);
 	V(H, 0, false, 1, 0, 0, 0, 0, any);
@@ -156,59 +159,65 @@ GeometryGraph::Vertex GeometryGraph::nullGeometry() {
 	return boost::graph_traits<GraphType>::null_vertex();
 }
 
-std::tuple<DeductionResult, unsigned char>
-GeometryGraph::deduceLonePairs(const AtomData &ad, const EdgeCategoryCount &catCount, Vertex vGeometry, bool asPattern, std::ostream &err) const {
+lib::IO::Result<unsigned char>
+GeometryGraph::deduceLonePairs(lib::IO::Warnings &warnings, const AtomData &ad, const EdgeCategoryCount &catCount,
+                               Vertex vGeometry, bool asPattern) const {
 	auto atomId = ad.getAtomId();
 	auto charge = ad.getCharge();
 	auto radical = ad.getRadical();
 	if(catCount[EdgeCategory::Undefined] > 0) MOD_ABORT; // wait for test case
-	if(atomId == AtomIds::Invalid || catCount[EdgeCategory::Undefined] > 0) {
-		return std::make_tuple(DeductionResult::Success, 0);
-	}
+	if(atomId == AtomIds::Invalid || catCount[EdgeCategory::Undefined] > 0)
+		return 0;
 	assert(catCount[EdgeCategory::Undefined] == 0);
 	std::vector<ChemValid> viables;
 	if(asPattern) {
 		// find all matches where we may be missing some neighbours
-		std::copy_if(chemValids.begin(), chemValids.end(), std::back_inserter(viables), [&](const ChemValid & cv) {
+		std::copy_if(chemValids.begin(), chemValids.end(), std::back_inserter(viables), [&](const ChemValid &cv) {
 			return cv.atomId == atomId && cv.charge == charge && cv.radical == radical
-					&& componentWiseLEQ(catCount, cv.catCount)
-					&& cv.geometry == vGeometry;
+			       && componentWiseLEQ(catCount, cv.catCount)
+			       && cv.geometry == vGeometry;
 		});
 	} else {
 		// find all exact matches
-		std::copy_if(chemValids.begin(), chemValids.end(), std::back_inserter(viables), [&](const ChemValid & cv) {
+		std::copy_if(chemValids.begin(), chemValids.end(), std::back_inserter(viables), [&](const ChemValid &cv) {
 			return cv.atomId == atomId && cv.charge == charge && cv.radical == radical
-					&& cv.catCount == catCount
-					&& cv.geometry == vGeometry;
+			       && cv.catCount == catCount
+			       && cv.geometry == vGeometry;
 		});
 	}
+
 	if(viables.empty()) {
-		err << "WARNING: No viable configurations for " << ad << " with bonds " << catCount << ", in geometry '" << g[vGeometry].name << "'.\n";
-		return std::make_tuple(DeductionResult::Warning, 0);
+		std::stringstream msg;
+		msg << "No viable configurations for " << ad << " with bonds " << catCount << ", in geometry '"
+		    << g[vGeometry].name << "'.";
+		warnings.add(msg.str());
+		return 0;
 	}
 	if(viables.size() > 1) {
-		err << "Ambiguous deduction for " << ad << " with bonds " << catCount << ", in geometry '" << g[vGeometry].name << "'. Matches are:\n";
+		std::stringstream msg;
+		msg << "Ambiguous deduction for " << ad << " with bonds " << catCount << ", in geometry '" << g[vGeometry].name
+		    << "'. Matches are:\n";
 		for(const auto &v : viables) {
-			err << "\t" << AtomData(v.atomId, v.charge, v.radical);
-			if(v.catCount.sum() > 0) err << ", " << v.catCount;
-			if(v.lonePair > 0) err << ", e = " << v.lonePair;
-			err << ", geometry = " << g[v.geometry].name << "\n";
+			msg << "\t" << AtomData(v.atomId, v.charge, v.radical);
+			if(v.catCount.sum() > 0) msg << ", " << v.catCount;
+			if(v.lonePair > 0) msg << ", e = " << v.lonePair;
+			msg << ", geometry = " << g[v.geometry].name << "\n";
 		}
-		return std::make_tuple(DeductionResult::Error, 0);
+		return lib::IO::Result<>::Error(msg.str());
 	}
 	assert(viables.size() == 1);
-	return std::make_tuple(DeductionResult::Success, viables.front().lonePair);
+	return viables.front().lonePair;
 }
 
-std::tuple<DeductionResult, GeometryGraph::Vertex>
-GeometryGraph::deduceGeometry(const AtomData &ad, const EdgeCategoryCount &catCount, unsigned char numLonePairs, bool asPattern, std::ostream &err) const {
+lib::IO::Result<GeometryGraph::Vertex>
+GeometryGraph::deduceGeometry(lib::IO::Warnings &warnings, const AtomData &ad, const EdgeCategoryCount &catCount,
+                              unsigned char numLonePairs, bool asPattern) const {
 	auto atomId = ad.getAtomId();
 	auto charge = ad.getCharge();
 	auto radical = ad.getRadical();
 	if(catCount[EdgeCategory::Undefined] > 0) MOD_ABORT; // wait for test case
-	if(atomId == AtomIds::Invalid || catCount[EdgeCategory::Undefined] > 0) {
-		return std::make_tuple(DeductionResult::Success, any);
-	}
+	if(atomId == AtomIds::Invalid || catCount[EdgeCategory::Undefined] > 0)
+		return any;
 	assert(catCount[EdgeCategory::Undefined] == 0);
 	std::vector<ChemValid> viables;
 	// TODO: should there be a difference when it's a pattern? we know all the neighbours.
@@ -216,41 +225,46 @@ GeometryGraph::deduceGeometry(const AtomData &ad, const EdgeCategoryCount &catCo
 	//		MOD_ABORT;
 	//	} else {
 	// find all exact matches
-	std::copy_if(chemValids.begin(), chemValids.end(), std::back_inserter(viables), [&](const ChemValid & cv) {
+	std::copy_if(chemValids.begin(), chemValids.end(), std::back_inserter(viables), [&](const ChemValid &cv) {
 		return cv.atomId == atomId && cv.charge == charge && cv.radical == radical
-				&& cv.catCount == catCount && cv.lonePair == numLonePairs;
+		       && cv.catCount == catCount && cv.lonePair == numLonePairs;
 	});
 	//	}
 	if(viables.empty()) {
-		err << "WARNING: No viable geometries for " << ad;
-		if(catCount.sum() > 0) err << " with bonds " << catCount;
-		else err << " without bonds";
-		err << ", and ";
-		if(numLonePairs > 0) err << numLonePairs << " lone pairs.\n";
-		else err << " no lone pairs.\n";
-		return std::make_tuple(DeductionResult::Warning, any);
+		std::stringstream msg;
+		msg << "No viable geometries for " << ad;
+		if(catCount.sum() > 0) msg << " with bonds " << catCount;
+		else msg << " without bonds";
+		msg << ", and ";
+		if(numLonePairs > 0) msg << numLonePairs << " lone pairs.";
+		else msg << " no lone pairs.";
+		warnings.add(msg.str());
+		return any;
 	}
 	if(viables.size() > 1) {
-		err << "Ambiguous deduction for " << ad << " with bonds " << catCount << ", and " << numLonePairs << " lone pairs.Matches are:\n";
+		std::stringstream msg;
+		msg << "Ambiguous deduction for " << ad << " with bonds " << catCount << ", and " << numLonePairs
+		    << " lone pairs.Matches are:\n";
 		for(auto &v : viables) {
-			err << "\t" << AtomData(v.atomId, v.charge, v.radical);
-			if(v.catCount.sum() > 0) err << ", " << v.catCount;
-			err << ", geometry = " << g[v.geometry].name << "\n";
+			msg << "\t" << AtomData(v.atomId, v.charge, v.radical);
+			if(v.catCount.sum() > 0) msg << ", " << v.catCount;
+			msg << ", geometry = " << g[v.geometry].name << "\n";
 		}
-		return std::make_tuple(DeductionResult::Error, GeometryGraph::nullGeometry());
+		return lib::IO::Result<>::Error(msg.str());
 	}
 	assert(viables.size() == 1);
-	return std::make_tuple(DeductionResult::Success, viables.front().geometry);
+	return viables.front().geometry;
 }
 
-std::tuple<DeductionResult, GeometryGraph::Vertex, unsigned char>
-GeometryGraph::deduceGeometryAndLonePairs(const AtomData &ad, const EdgeCategoryCount &catCount, bool asPattern, std::ostream &err) const {
+lib::IO::Result<std::tuple<GeometryGraph::Vertex, unsigned char>>
+GeometryGraph::deduceGeometryAndLonePairs(lib::IO::Warnings &warnings, const AtomData &ad,
+                                          const EdgeCategoryCount &catCount, bool asPattern) const {
+	using Res = std::tuple<GeometryGraph::Vertex, unsigned char>;
 	auto atomId = ad.getAtomId();
 	auto charge = ad.getCharge();
 	auto radical = ad.getRadical();
-	if(atomId == AtomIds::Invalid || catCount[EdgeCategory::Undefined] > 0) {
-		return std::make_tuple(DeductionResult::Success, any, 0);
-	}
+	if(atomId == AtomIds::Invalid || catCount[EdgeCategory::Undefined] > 0)
+		return Res{any, 0};
 	assert(catCount[EdgeCategory::Undefined] == 0);
 	std::vector<ChemValid> viables;
 	//	if(asPattern && false) { // for now only exact matches
@@ -261,44 +275,47 @@ GeometryGraph::deduceGeometryAndLonePairs(const AtomData &ad, const EdgeCategory
 	//		});
 	//	} else {
 	// find all exact matches
-	std::copy_if(chemValids.begin(), chemValids.end(), std::back_inserter(viables), [&](const ChemValid & cv) {
+	std::copy_if(chemValids.begin(), chemValids.end(), std::back_inserter(viables), [&](const ChemValid &cv) {
 		return cv.atomId == atomId && cv.charge == charge && cv.radical == radical
-				&& cv.catCount == catCount;
+		       && cv.catCount == catCount;
 	});
 	//	}
 	if(viables.empty()) {
 		bool doWarn = true;
 		if(asPattern) {
 			// if it could match some viable, then don't warn
-			std::copy_if(chemValids.begin(), chemValids.end(), std::back_inserter(viables), [&](const ChemValid & cv) {
+			std::copy_if(chemValids.begin(), chemValids.end(), std::back_inserter(viables), [&](const ChemValid &cv) {
 				return cv.atomId == atomId && cv.charge == charge && cv.radical == radical
-						&& componentWiseLEQ(catCount, cv.catCount);
+				       && componentWiseLEQ(catCount, cv.catCount);
 			});
 			if(!viables.empty()) doWarn = false;
 		}
 		if(doWarn) {
-			err << "WARNING: No viable geometries for " << ad;
-			if(catCount.sum() > 0) err << " with bonds " << catCount << ".\n";
-			else err << " without bonds.\n";
+			std::stringstream msg;
+			msg << "No viable geometries for " << ad;
+			if(catCount.sum() > 0) msg << " with bonds " << catCount << ".";
+			else msg << " without bonds.";
+			warnings.add(msg.str());
 		}
-		return std::make_tuple(DeductionResult::Warning, any, 0);
+		return Res{any, 0};
 	}
 	if(viables.size() > 1) {
 		if(asPattern) {
 			// TODO: be more clever, maybe?
-			return std::make_tuple(DeductionResult::Success, any, 0);
+			return Res{any, 0};
 		}
-		err << "Ambiguous deduction for " << ad << " with bonds " << catCount << ". Matches are:\n";
+		std::stringstream msg;
+		msg << "Ambiguous deduction for " << ad << " with bonds " << catCount << ". Matches are:\n";
 		for(auto &v : viables) {
-			err << "\t" << AtomData(v.atomId, v.charge, v.radical);
-			if(v.catCount.sum() > 0) err << ", " << v.catCount;
-			if(v.lonePair > 0) err << ", e = " << v.lonePair;
-			err << ", geometry = " << g[v.geometry].name << "\n";
+			msg << "\t" << AtomData(v.atomId, v.charge, v.radical);
+			if(v.catCount.sum() > 0) msg << ", " << v.catCount;
+			if(v.lonePair > 0) msg << ", e = " << v.lonePair;
+			msg << ", geometry = " << g[v.geometry].name << "\n";
 		}
-		return std::make_tuple(DeductionResult::Error, GeometryGraph::nullGeometry(), 0);
+		return lib::IO::Result<>::Error(msg.str());
 	}
 	assert(viables.size() == 1);
-	return std::make_tuple(DeductionResult::Success, viables.front().geometry, viables.front().lonePair);
+	return Res{viables.front().geometry, viables.front().lonePair};
 }
 
 bool GeometryGraph::isAncestorOf(Vertex ancestor, Vertex child) const {

@@ -1,7 +1,5 @@
 #include "DG.hpp"
 
-#include <mod/Config.hpp>
-#include <mod/Function.hpp>
 #include <mod/Post.hpp>
 #include <mod/graph/Graph.hpp>
 #include <mod/rule/Rule.hpp>
@@ -17,19 +15,13 @@
 #include <mod/lib/IO/IO.hpp>
 #include <mod/lib/IO/JsonUtils.hpp>
 #include <mod/lib/IO/Rule.hpp>
-#include <mod/lib/RC/ComposeRuleReal.hpp>
-#include <mod/lib/RC/MatchMaker/Super.hpp>
 #include <mod/lib/Rules/Real.hpp>
 
 #include <boost/lexical_cast.hpp>
 
 #include <fstream>
 
-namespace mod {
-namespace lib {
-namespace IO {
-namespace DG {
-namespace Write {
+namespace mod::lib::IO::DG::Write {
 
 nlohmann::json dumpToJson(const lib::DG::NonHyper &dgNonHyper) {
 	if(dgNonHyper.getLabelSettings().withStereo)
@@ -112,11 +104,6 @@ nlohmann::json dumpToJson(const lib::DG::NonHyper &dgNonHyper) {
 	return j;
 }
 
-std::string dumpToFile(const lib::DG::NonHyper &dg) {
-	auto j = dumpToJson(dg);
-	return writeJsonFile("DG.dg", std::move(j));
-}
-
 std::string dotNonHyper(const lib::DG::NonHyper &nonHyper) {
 	post::FileHandle s(
 			getUniqueFilePrefix() + "dgNonHyper_" + boost::lexical_cast<std::string>(nonHyper.getId()) + ".dot");
@@ -165,7 +152,7 @@ std::string pdfNonHyper(const lib::DG::NonHyper &nonHyper) {
 //------------------------------------------------------------------------------
 
 void TikzPrinter::begin() {
-	s << "\\begin{tikzpicture}[remember picture, " << getConfig().dg.tikzPictureOption.get() << "]\n";
+	s << "\\begin{tikzpicture}[remember picture, " << options.tikzpictureOption << "]\n";
 	s << "\\input{\\modInputPrefix/" << coords << "}\n";
 }
 
@@ -541,9 +528,6 @@ void Data::compile(Options &options) const {
 // Printer
 //------------------------------------------------------------------------------
 
-Printer::Printer() : vertexLabelSep(", "), edgeLabelSep(", "),
-                     withGraphName(true), withRuleName(false), withRuleId(true) {}
-
 std::pair<std::string, std::string> Printer::printHyper(
 		const Data &data, const IO::Graph::Write::Options &graphOptions) {
 	Options options = prePrint(data);
@@ -668,6 +652,14 @@ void Printer::setGraphvizPrefix(const std::string &prefix) {
 
 const std::string &Printer::getGraphvizPrefix() const {
 	return baseOptions.graphvizPrefix;
+}
+
+void Printer::setTikzpictureOption(const std::string &option) {
+	baseOptions.tikzpictureOption = option;
+}
+
+const std::string &Printer::getTikzpictureOption() const {
+	return baseOptions.tikzpictureOption;
 }
 
 Options Printer::prePrint(const Data &data) {
@@ -994,8 +986,7 @@ std::string coords(const lib::DG::Hyper &dg, const Options &options, const IO::G
 	return fileNoExt + "_coord.tex";
 }
 
-std::pair<std::string, std::string> tikz(const lib::DG::Hyper &dg,
-                                         const Options &options,
+std::pair<std::string, std::string> tikz(const lib::DG::Hyper &dg, const Options &options,
                                          const IO::Graph::Write::Options &graphOptions) {
 	std::string fileCoordsExt = coords(dg, options, graphOptions);
 	std::string file = getUniqueFilePrefix();
@@ -1007,8 +998,7 @@ std::pair<std::string, std::string> tikz(const lib::DG::Hyper &dg,
 	return std::make_pair(file, fileCoordsExt);
 }
 
-std::string pdfFromDot(const lib::DG::Hyper &dg,
-                       const Options &options,
+std::string pdfFromDot(const lib::DG::Hyper &dg, const Options &options,
                        const IO::Graph::Write::Options &graphOptions) {
 	std::string fileNoExt = dot(dg, options, graphOptions);
 	fileNoExt.erase(end(fileNoExt) - 4, end(fileNoExt));
@@ -1016,8 +1006,7 @@ std::string pdfFromDot(const lib::DG::Hyper &dg,
 	return fileNoExt + ".pdf";
 }
 
-std::pair<std::string, std::string> pdf(const lib::DG::Hyper &dg,
-                                        const Options &options,
+std::pair<std::string, std::string> pdf(const lib::DG::Hyper &dg, const Options &options,
                                         const IO::Graph::Write::Options &graphOptions) {
 	auto tikzFiles = tikz(dg, options, graphOptions);
 	std::string fileNoExt = tikzFiles.first.substr(0, tikzFiles.first.length() - 4);
@@ -1028,23 +1017,20 @@ std::pair<std::string, std::string> pdf(const lib::DG::Hyper &dg,
 	return {fileNoExt + ".pdf", tikzFiles.second};
 }
 
-std::pair<std::string, std::string> summary(const Data &data,
-                                            Printer &printer,
+std::pair<std::string, std::string> summary(const Data &data, Printer &printer,
                                             const IO::Graph::Write::Options &graphOptions) {
 	const auto files = printer.printHyper(data, graphOptions);
 	std::string fileNoExt = files.first;
 	const auto &dg = data.dg;
 	fileNoExt.erase(end(fileNoExt) - 4, end(fileNoExt));
 	IO::post() << "summaryDGHyper \"dg_" << dg.getNonHyper().getId() << "\" \"" << fileNoExt << "\"\n";
-	if(getConfig().dg.printNonHyper.get()) {
-		std::string fileNoExtNonHyper = pdfNonHyper(dg.getNonHyper());
-		IO::post() << "summaryDGNonHyper \"dg_" << dg.getNonHyper().getId() << "\" \"" << fileNoExtNonHyper << "\"\n";
-	}
 	return files;
 }
 
-} // namespace Write
-} // namespace DG
-} // namespace IO
-} // namespace lib
-} // namespace mod
+std::string summaryNonHyper(const lib::DG::NonHyper &dg) {
+	std::string file = pdfNonHyper(dg);
+	IO::post() << "summaryDGNonHyper \"dg_" << dg.getId() << "\" \"" << file << "\"\n";
+	return file;
+}
+
+} // namespace mod::lib::IO::DG::Write

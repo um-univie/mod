@@ -1,5 +1,5 @@
-#ifndef MOD_LIB_GRAPH_DEPICTION_H
-#define MOD_LIB_GRAPH_DEPICTION_H
+#ifndef MOD_LIB_GRAPH_DEPICTION_HPP
+#define MOD_LIB_GRAPH_DEPICTION_HPP
 
 #include <mod/BuildConfig.hpp>
 #include <mod/lib/Chem/OBabel.hpp>
@@ -10,24 +10,19 @@ struct AtomId;
 struct Charge;
 struct AtomData;
 enum class BondType;
-template<typename Sig> class Function;
-namespace lib {
-namespace IO {
-namespace Graph {
-namespace Write {
+template<typename Sig>
+class Function;
+} // namespace mod
+namespace mod::lib::IO::Graph::Write {
 enum class EdgeFake3DType;
-} // namespace Write
-} // namespace Graph
-} // namespace IO
-namespace Graph {
+} // namespace mod::lib::IO::Graph::Write
+namespace mod::lib::Graph {
 struct PropMolecule;
 struct PropString;
 
 class DepictionData {
-	DepictionData(const DepictionData&) = delete;
-	DepictionData &operator=(const DepictionData&) = delete;
-	DepictionData(DepictionData&&) = delete;
-	DepictionData &operator=(DepictionData&&) = delete;
+	DepictionData(const DepictionData &) = delete;
+	DepictionData &operator=(const DepictionData &) = delete;
 public:
 	DepictionData(const LabelledGraph &lg);
 	AtomId getAtomId(Vertex v) const; // shortcut to moleculeState
@@ -65,12 +60,10 @@ private:
 #ifdef MOD_HAVE_OPENBABEL
 	mutable lib::Chem::OBMolHandle obMolAll, obMolNoHydrogen;
 #endif
-	std::shared_ptr<mod::Function<std::string()> > image;
+	std::shared_ptr<mod::Function<std::string()>> image;
 	std::string imageCmd;
 };
 
-} // namespace Graph
-} // namespace lib
-} // namespace mod
+} // namespace mod::lib::Graph
 
-#endif /* MOD_LIB_GRAPH_DEPICTION_H */
+#endif // MOD_LIB_GRAPH_DEPICTION_HPP

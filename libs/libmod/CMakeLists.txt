@@ -52,13 +52,16 @@ target_link_libraries(libmod PRIVATE
         $<$<CXX_COMPILER_ID:GNU>:-Wl,--disable-new-dtags>
         $<$<CXX_COMPILER_ID:Clang>:-Wl,--disable-new-dtags>
         )
-target_compile_options(libmod PRIVATE -Wall -Wextra
+target_compile_options(libmod PRIVATE -Wall -Wextra -pedantic
         -Wno-unused-parameter
         -Wno-comment
         -Wno-sign-compare
         -Wno-unused-local-typedefs
         # gives false positive for boost::optional
         $<$<CXX_COMPILER_ID:GNU>:-Wno-error=maybe-uninitialized>
+        $<$<CXX_COMPILER_ID:GNU>:-Wno-unknown-pragmas> # for PetriNet.cpp
+        # TODO: remove when C++20/P1825R0 is available
+        $<$<CXX_COMPILER_ID:GNU>:-Wno-redundant-move>
         )
 target_compile_options(libmod PUBLIC
         -DBOOST_ALLOW_DEPRECATED_HEADERS # until Boost stops using include/boost/detail/iterator.hpp

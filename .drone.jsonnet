@@ -65,7 +65,7 @@ local Configure(compiler, boost, dep=false) = {
 	commands: [
 		"mkdir build",
 		"cd build",
-		"cmake ../ -DCMAKE_BUILD_TYPE=OptDebug -DBUILD_TESTING=on -DBUILD_TESTING_SANITIZERS=off %s" % [boostArg(boost)],
+		"cmake ../ -DCMAKE_BUILD_TYPE=OptDebug -DBUILD_DOC=on -DBUILD_TESTING=on -DBUILD_TESTING_SANITIZERS=off %s" % [boostArg(boost)],
 	],
 	[ if dep then "depends_on"]: [ "bootstrap" ],
 };
@@ -231,10 +231,10 @@ local Pipeline(withCoverage, compiler, boost) = {
 ] + [
 	Pipeline(boost == "1_74_0" && compiler == "g++-9", compiler, boost)
 	for compiler in [
-		"g++-7", "g++-8", "g++-9", "g++-10",
-		"clang++-8", "clang++-9", "clang++-10",
+		"g++-8", "g++-9", "g++-10", "g++-11",
+		"clang++-8", "clang++-9", "clang++-10", "clang++-11", "clang++-12",
 	]
 	for boost in [
-		"1_73_0", "1_74_0", "1_75_0",
+		"1_73_0", "1_74_0", "1_75_0", "1_76_0",
 	]
 ]

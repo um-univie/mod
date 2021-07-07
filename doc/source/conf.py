@@ -119,7 +119,7 @@ generateExamples()
 
 
 # If your documentation needs a minimal Sphinx version, state it here.
-needs_sphinx = '3.4.0'
+needs_sphinx = '3.5.0'
 
 # Add any Sphinx extension module names here, as strings. They can be
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
@@ -130,7 +130,6 @@ extensions = [
     'sphinx.ext.mathjax',
 	'sphinx.ext.githubpages',
 	'sphinx.ext.intersphinx',
-	'sphinx.ext.autodoc',
 	'sphinx_bootstrap_theme',
 	'ignore_missing_refs',
 ]
@@ -201,6 +200,7 @@ exclude_patterns = [
 # The name of the Pygments (syntax highlighting) style to use.
 # https://stackoverflow.com/questions/48615629/how-to-include-pygments-styles-in-a-sphinx-project
 pygments_style = 'solarized_modified.light'
+highlight_language = 'none'
 
 # -- Options for HTML output ----------------------------------------------
 

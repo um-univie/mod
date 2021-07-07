@@ -13,9 +13,7 @@
 
 #include <boost/lexical_cast.hpp>
 
-namespace mod {
-namespace lib {
-namespace Graph {
+namespace mod::lib::Graph {
 
 DepictionData::DepictionData(const LabelledGraph &lg) : lg(lg), hasMoleculeEncoding(true) {
 	const auto &g = get_graph(lg);
@@ -189,7 +187,7 @@ std::string DepictionData::getStereoString(Edge e) const {
 	return boost::lexical_cast<std::string>(cat);
 }
 
-void DepictionData::setImage(std::shared_ptr<mod::Function<std::string()> > image) {
+void DepictionData::setImage(std::shared_ptr<mod::Function<std::string()>> image) {
 	this->image = image;
 }
 
@@ -222,6 +220,4 @@ const lib::Chem::OBMolHandle &DepictionData::getOB(bool withHydrogen) const {
 #endif
 }
 
-} // namespace Graph
-} // namespace lib
-} // namespace mod
+} // namespace mod::lib::Graph

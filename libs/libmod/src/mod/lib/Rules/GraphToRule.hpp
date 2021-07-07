@@ -105,7 +105,7 @@ std::unique_ptr<Real> graphToRule(const LGraph &lg, Membership membership, const
 	completeName += "<";
 	completeName += name;
 	completeName += ">";
-	auto res = std::make_unique<Real>(std::move(rule), boost::none);
+	auto res = std::make_unique<Real>(std::move(rule), std::nullopt);
 	res->setName(completeName);
 	return res;
 }

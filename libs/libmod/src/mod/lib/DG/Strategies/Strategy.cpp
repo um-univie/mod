@@ -4,13 +4,9 @@
 #include <mod/lib/DG/Strategies/GraphState.hpp>
 #include <mod/lib/Graph/Single.hpp>
 
-namespace mod {
-namespace lib {
-namespace DG {
-namespace Strategies {
+namespace mod::lib::DG::Strategies {
 
-Strategy::Strategy(unsigned int maxComponents)
-		: env(nullptr), maxComponents(maxComponents), input(nullptr), output(nullptr) {}
+Strategy::Strategy(int maxComponents) : maxComponents(maxComponents) {}
 
 Strategy::~Strategy() {
 	delete output;
@@ -21,7 +17,7 @@ void Strategy::setExecutionEnv(ExecutionEnv &env) {
 	setExecutionEnvImpl();
 }
 
-unsigned int Strategy::getMaxComponents() const {
+int Strategy::getMaxComponents() const {
 	return maxComponents;
 }
 
@@ -78,13 +74,11 @@ void Strategy::setExecutionEnvImpl() {}
 // Static
 //------------------------------------------------------------------------------
 
-unsigned int Strategy::calcMaxNumComponents(const std::vector<Strategy *> &strats) {
-	unsigned int res = 0;
-	for(const Strategy *strat : strats) res = std::max(res, strat->getMaxComponents());
+int Strategy::calcMaxNumComponents(const std::vector<std::unique_ptr<Strategy>> &strats) {
+	int res = 0;
+	for(const auto &strat : strats)
+		res = std::max(res, strat->getMaxComponents());
 	return res;
 }
 
-} // namespace Strategies
-} // namespace DG
-} // namespace lib
-} // namespace mod
+} // namespace mod::lib::DG::Strategies

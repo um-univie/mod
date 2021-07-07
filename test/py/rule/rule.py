@@ -1,3 +1,5 @@
+include("xxx_helpers.py")
+
 testRule = ruleGMLString("""
 	rule [ ruleID "inline rule" context [ node [ id 0 label "A" ] ] ]
 """)
@@ -17,7 +19,6 @@ except LogicError:
 else:
 	assert False
 
-a.print()
 a.printGML()
 print(a.getGMLString())
 
@@ -40,33 +41,8 @@ assert a.isomorphism(b) > 0
 assert a.isomorphism(testRule) == 0
 
 a = ruleGMLString("""rule [ context [ node [ id 0 label "C" ] ] ]""")
-a.print()
 
 
-inputRules[:] = []
-include("../formoseCommon/grammar.py")
-postSection("Formose")
-for a in inputRules: a.print()
-inputRules[0].print(GraphPrinter(), GraphPrinter())
-
-try:
-	rBad = ruleGMLString("""rule [
-		left  [ node [ id 0 label "A" ] ]
-		right [ node [ id 0 label "A" ] ]
-	]""")
-except InputError as e:
-	print("InputError catched")
-try:
-	rBad = ruleGMLString("""rule [
-		left  [ edge [ source 0 target 1 label "A" ] ]
-		context [
-			node [ id 0 label "A" ]
-			node [ id 1 label "A" ]
-		]
-		right  [ edge [ source 0 target 1 label "A" ] ]
-	]""")
-except InputError as e:
-	print("InputError catched")
 r = ruleGMLString("""rule [
 	context [
 		node [ id 0 label "*" ]

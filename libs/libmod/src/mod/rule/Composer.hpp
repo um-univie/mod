@@ -1,5 +1,5 @@
-#ifndef MOD_RULE_COMPOSITION_H
-#define MOD_RULE_COMPOSITION_H
+#ifndef MOD_RULE_COMPOSITION_HPP
+#define MOD_RULE_COMPOSITION_HPP
 
 #include <mod/BuildConfig.hpp>
 #include <mod/Config.hpp>
@@ -25,7 +25,7 @@ namespace mod::rule {
 // rst:
 // rst-class-start:
 class MOD_DECL Composer {
-	Composer(const std::unordered_set<std::shared_ptr<Rule> > &database, LabelSettings labelSettings);
+	Composer(const std::unordered_set<std::shared_ptr<Rule>> &database, LabelSettings labelSettings);
 	Composer(Composer &&) = delete;
 	Composer &operator=(Composer &&) = delete;
 public:
@@ -66,11 +66,11 @@ public:
 	// rst:		:returns: a new instance of an evaluator with its database initialised with the given rules.
 	// rst: 
 	// rst:		.. note:: The caller is responsible for ensuring the given rules are unique.
-	static std::shared_ptr<Composer> create(const std::unordered_set<std::shared_ptr<Rule> > &database,
-														 LabelSettings labelSettings);
+	static std::shared_ptr<Composer> create(const std::unordered_set<std::shared_ptr<Rule>> &database,
+	                                        LabelSettings labelSettings);
 };
 // rst-class-end:
 
 } // namespace mod::rule
 
-#endif /* MOD_RULE_COMPOSITION_H */
+#endif // MOD_RULE_COMPOSITION_HPP

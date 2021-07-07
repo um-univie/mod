@@ -1,3 +1,5 @@
+include("../xxx_helpers.py")
+
 def doChecks():
 	print("############################################")
 	# Rules

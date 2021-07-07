@@ -39,7 +39,6 @@ notes/changes.
 
 - Only single SMILES strings are accepted, i.e., not multiple strings separated
   by white-space.
-- The specical dot "bond" (``.``) is not allowed.
 - Up and down bonds are regarded as implicit bonds, i.e., they might represent
   either a sngle bond or an aromatic bond. The stereo information is ignored.
 - Atom classes are (mostly) ignored. They can be used to specify unique IDs to
@@ -57,8 +56,8 @@ notes/changes.
   or using the special lower case atoms.
   I.e., ``c1ccccc1`` and ``C1:C:C:C:C:C:1`` represent the same molecule,
   but ``C1=CC=CC=C1`` is a different molecule.
-- Ring-bonds and branches may appear in mixed order. The normal order is to have
-  all ring-bonds first and all branches, e.g., ``C123(O)(N)``.
+- Ring-bonds and branches may appear in mixed order. The normal order is to
+  have all ring-bonds first and all branches, e.g., ``C123(O)(N)``.
   The parser accepts them in mixed order, e.g., ``C1(O)2(N)3``.
 - The final graph will conform to the molecule encoding scheme described below.
 - Implicit hydrogens are added following a more complicated procedure.

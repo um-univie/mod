@@ -35,7 +35,7 @@ struct MOD_DECL PrintData {
 	// rst:		:throws: :class:`LogicError` if `!dg->isLocked()`.
 	explicit PrintData(std::shared_ptr<DG> dg);
 	PrintData(const PrintData &other);
-	PrintData(PrintData &&other);
+	PrintData &operator=(const PrintData &other);
 	~PrintData();
 	lib::IO::DG::Write::Data &getData();
 	lib::IO::DG::Write::Data &getData() const;
@@ -273,6 +273,13 @@ public:
 	// rst:		just after the graph declaration.
 	void setGraphvizPrefix(const std::string &prefix);
 	const std::string &getGraphvizPrefix() const;
+	// rst: .. function:: void setTikzpictureOption(const std::string &option)
+	// rst:               const std::string &getTikzpictureOption() const
+	// rst:
+	// rst:		Access the string that will be inserted into generated Tikz files,
+	// rst:		in the options for the ``\tikzpicture`` macro used for the DG.
+	void setTikzpictureOption(const std::string &option);
+	const std::string &getTikzpictureOption() const;
 private:
 	std::unique_ptr<graph::Printer> graphPrinter;
 	std::unique_ptr<lib::IO::DG::Write::Printer> printer;

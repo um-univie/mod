@@ -7,7 +7,7 @@
 
 #include <jla_boost/Functional.hpp>
 #include <jla_boost/graph/PairToRangeAdaptor.hpp>
-#include <jla_boost/graph/morphism/PropertyTags.hpp>
+#include <jla_boost/graph/morphism/AsPropertyMap.hpp>
 #include <jla_boost/graph/morphism/models/InvertibleAdaptor.hpp>
 #include <jla_boost/graph/morphism/models/PropertyVertexMap.hpp>
 
@@ -23,14 +23,13 @@
 #include <vector>
 #include <stack>
 
-namespace jla_boost {
-namespace GraphMorphism {
+namespace jla_boost::GraphMorphism {
 using namespace boost; // TODO: remvoe
 
-template<typename GraphLeft, typename GraphRight, typename EdgePred, typename VertexPred>
+template<bool OnlyConnected, typename GraphLeft, typename GraphRight, typename EdgePred, typename VertexPred>
 struct CommonSubgraphEnumerator : InjectiveEnumerationState<
-CommonSubgraphEnumerator<GraphLeft, GraphRight, EdgePred, VertexPred>,
-GraphLeft, GraphRight, EdgePred, VertexPred> {
+		CommonSubgraphEnumerator<OnlyConnected, GraphLeft, GraphRight, EdgePred, VertexPred>,
+		GraphLeft, GraphRight, EdgePred, VertexPred> {
 	using Self = CommonSubgraphEnumerator;
 	using Base = InjectiveEnumerationState<Self, GraphLeft, GraphRight, EdgePred, VertexPred>;
 public:
@@ -39,7 +38,6 @@ public:
 	using EdgeLeft = typename boost::graph_traits<GraphLeft>::edge_descriptor;
 	using EdgeRight = typename boost::graph_traits<GraphRight>::edge_descriptor;
 private:
-
 	static VertexLeft vNullLeft() {
 		return boost::graph_traits<GraphLeft>::null_vertex();
 	}
@@ -48,30 +46,30 @@ private:
 		return boost::graph_traits<GraphRight>::null_vertex();
 	}
 public:
-
 	CommonSubgraphEnumerator(const GraphLeft &gLeft, const GraphRight &gRight,
-			EdgePred edgePred, VertexPred vertexPred, bool onlyConnected)
-	: Base(gLeft, gRight, edgePred, vertexPred),
-	onlyConnected(onlyConnected) { }
+	                         EdgePred edgePred, VertexPred vertexPred)
+			: Base(gLeft, gRight, edgePred, vertexPred) {}
 public:
-
 	bool visit_tryPush(VertexLeft vLeft, VertexRight vRight) {
-		if(this->getStackSize() == 0) return true;
+		if(this->getTotalStackSize() == 0) return true;
 		bool has_one_edge = false;
 
 		// Verify edges with existing sub-graph
 		for(auto vOtherLeft : asRange(vertices(this->gLeft))) {
 			auto vOtherRight = this->rightFromLeft(vOtherLeft);
+#ifdef MORPHISM_INJECTIVE_ENUMERATION_DEBUG
+			std::cout << this->indent(2) << "visit_tryPush, checking " << vOtherLeft << " <-> " << vOtherRight
+			          << std::endl;
+#endif
 			// Skip unassociated vertices
 			if(vOtherRight == vNullRight()) continue;
 
 			// NOTE: This will not work with parallel edges, since the
 			// first matching edge is always chosen.
-			EdgeLeft edge_to_new1, edge_from_new1;
-			bool edge_to_new_exists1 = false, edge_from_new_exists1 = false;
-
-			EdgeRight edge_to_new2, edge_from_new2;
-			bool edge_to_new_exists2 = false, edge_from_new_exists2 = false;
+			EdgeLeft edge_to_new1;
+			bool edge_to_new_exists1 = false;
+			EdgeRight edge_to_new2;
+			bool edge_to_new_exists2 = false;
 
 			// Search for edge from existing to new vertex (gLeft)
 			for(auto eOutLeft : asRange(out_edges(vOtherLeft, this->gLeft))) {
@@ -91,16 +89,35 @@ public:
 				}
 			}
 
-			bool is_undirected1 = is_undirected(this->gLeft),
-					is_undirected2 = is_undirected(this->gRight);
+			const bool is_undirected1 = is_undirected(this->gLeft);
+			const bool is_undirected2 = is_undirected(this->gRight);
+#ifdef MORPHISM_INJECTIVE_ENUMERATION_DEBUG
+			std::cout << this->indent(3) << "undirected? "
+			          << std::boolalpha << is_undirected1 << ", " << is_undirected2 << std::endl;
+			std::cout << this->indent(3) << "edge_to_new_exists? "
+			          << std::boolalpha << edge_to_new_exists1 << ", " << edge_to_new_exists1 << std::endl;
+#endif
+
+			if(edge_to_new_exists1 && edge_to_new_exists2) {
+				if(this->edgePred(edge_to_new1, edge_to_new2)) {
+					has_one_edge = true;
+				} else {
+#ifdef MORPHISM_INJECTIVE_ENUMERATION_DEBUG
+					std::cout << this->indent(3) << "failed: edgePred on edge from previous to new mapped pair" << std::endl;
+#endif
+					return false;
+				}
+			}
 
 			if(is_undirected1 && is_undirected2) {
-				// Edge in both graphs exists and both graphs are undirected
-				if(edge_to_new_exists1 && edge_to_new_exists2) {
-					has_one_edge = true;
-				}
-				continue;
-			} else {
+				// nothing more to do
+			} else { // one of them is directed
+				EdgeLeft edge_from_new1;
+				bool edge_from_new_exists1 = false;
+				EdgeRight edge_from_new2;
+				bool edge_from_new_exists2 = false;
+
+				// TODO: should this really work with mixed directed vs. undirected?
 				if(!is_undirected1) {
 					// Search for edge from new to existing vertex (gLeft)
 					for(auto eOutLeft : asRange(out_edges(vLeft, this->gLeft))) {
@@ -123,65 +140,77 @@ public:
 					}
 				}
 
-				// Make sure edges from new to existing vertices are equivalent
-				//			if(edge_from_new_exists1 != edge_from_new_exists2) return false; // here is the induced part
+#ifdef MORPHISM_INJECTIVE_ENUMERATION_DEBUG
+				std::cout << this->indent(3) << "edge_from_new_exists? "
+				          << std::boolalpha << edge_from_new_exists1 << ", " << edge_from_new_exists2 << std::endl;
+#endif
+
 				if(edge_from_new_exists1 && edge_from_new_exists2) {
 					if(!this->edgePred(edge_from_new1, edge_from_new2)) {
-						//						std::cout << "\tfailed: edgePred\n";
+#ifdef MORPHISM_INJECTIVE_ENUMERATION_DEBUG
+						std::cout << this->indent(3) << "failed: edgePred on edge to previous from new mapped pair"
+						          << std::endl;
+#endif
 						return false;
 					}
 				}
 
-				if((edge_from_new_exists1 && edge_from_new_exists2) ||
-						(edge_to_new_exists1 && edge_to_new_exists2)) {
+				if(edge_from_new_exists1 && edge_from_new_exists2)
 					has_one_edge = true;
-				}
-			} // else
-		} // BGL_FORALL_VERTICES_T
+			}
+		} // foreach vOtherLeft
 
 		// Make sure new vertices are connected to the existing subgraph
-		if(onlyConnected && !has_one_edge) {
-			//			std::cout << "\tfailed: onlyConnected\n";
+		if(OnlyConnected && !has_one_edge) {
+#ifdef MORPHISM_INJECTIVE_ENUMERATION_DEBUG
+			std::cout << this->indent(3) << "failed: onlyConnected" << std::endl;
+#endif
 			return false;
 		}
 		return true;
 	}
 public:
-
-	// Recursive method that does a depth-first search in the space of
-	// potential subgraphs.  At each level, every new vertex pair from
-	// both graphs is tested to see if it can extend the current
-	// subgraph.  If so, the subgraph is output to subgraph_callback
-	// in the form of two correspondence maps (one for each graph).
-	// Returning false from subgraph_callback will terminate the
-	// search.
-
 	template<typename Callback>
-	bool operator()(Callback &&callback) {
-		auto vsLeft = asRange(vertices(this->gLeft));
-		auto vsRight = asRange(vertices(this->gRight));
+	void operator()(Callback &&callback) {
+		extendMatch(callback, vertices(this->gLeft).first);
+	}
+private:
+	template<typename Callback>
+	bool extendMatch(Callback &&callback, typename boost::graph_traits<GraphLeft>::vertex_iterator iterLeft) {
+		// If we are searching for connected graphs, then the default vertex iteration order
+		// is probably not correlated with connectedness, so just try them all at each level.
+		// But if we search for not-necessarily connected subgraphs, then we only give each vLeft
+		// a single chance to get into the subgraph, so recurse starting with the next vLeft.
+		if(OnlyConnected) iterLeft = vertices(this->gLeft).first;
 
-		// Iterate until all vertices have been visited
-		for(auto vLeft : vsLeft) {
+		for(; iterLeft != vertices(this->gLeft).second; ++iterLeft) {
+			const auto vLeft = *iterLeft;
 			// Skip already matched vertices in first graph
 			if(this->rightFromLeft(vLeft) != vNullRight()) continue;
 
-			for(auto vRight : vsRight) {
+			for(const auto vRight : asRange(vertices(this->gRight))) {
 				// Skip already matched vertices in second graph
 				if(this->leftFromRight(vRight) != vNullLeft()) continue;
 
 				// Check if current sub-graph can be extended with the matched vertex pair
-				bool wasPushed = this->tryPush(vLeft, vRight);
+				const bool wasPushed = this->tryPush(vLeft, vRight);
 				if(!wasPushed) continue;
 
+#ifdef MORPHISM_INJECTIVE_ENUMERATION_DEBUG
+				std::cout << this->indent() << "map!" << std::endl;
+#endif
 				// Returning false from the callback will cancel iteration
-				auto mSized = addProp(this->getVertexMap(), PreImageSizeT(), this->getStackSize());
-				if(!callback(std::move(mSized), this->gLeft, this->gRight)) {
+				if(!callback(this->getSizedVertexMap(), this->gLeft, this->gRight))
 					return false;
-				}
 
 				// Depth-first search into the state space of possible sub-graphs
-				bool continueSearch = (*this)(callback);
+#ifdef MORPHISM_INJECTIVE_ENUMERATION_DEBUG
+				++this->debug_indent;
+#endif
+				const bool continueSearch = extendMatch(callback, std::next(iterLeft));
+#ifdef MORPHISM_INJECTIVE_ENUMERATION_DEBUG
+				--this->debug_indent;
+#endif
 				if(!continueSearch) return false;
 
 				VertexLeft vStackLeft;
@@ -193,14 +222,13 @@ public:
 		} // for all vertices(gLeft)
 		return true;
 	}
-private: // args
-	const bool onlyConnected;
 };
 
-template<typename GraphLeft, typename GraphRight, typename EdgePred, typename VertexPred>
+template<bool OnlyConnected, typename GraphLeft, typename GraphRight, typename EdgePred, typename VertexPred>
 auto makeCommonSubgraphEnumerator(const GraphLeft &gLeft, const GraphRight &gRight,
-		EdgePred edgePred, VertexPred vertexPred, bool onlyConnected) {
-	return CommonSubgraphEnumerator<GraphLeft, GraphRight, EdgePred, VertexPred>(gLeft, gRight, edgePred, vertexPred, onlyConnected);
+                                  EdgePred edgePred, VertexPred vertexPred) {
+	return CommonSubgraphEnumerator<OnlyConnected, GraphLeft, GraphRight, EdgePred, VertexPred>(
+			gLeft, gRight, edgePred, vertexPred);
 }
 
 // ==========================================================================
@@ -208,31 +236,29 @@ auto makeCommonSubgraphEnumerator(const GraphLeft &gLeft, const GraphRight &gRig
 // Enumerates all common subgraphs present in gLeft and gRight.
 // Continues until the search space has been fully explored or false
 // is returned from callback.
-
-template<typename GraphLeft, typename GraphRight, typename EdgePred, typename VertexPred, typename Callback>
+template<bool OnlyConnected, typename GraphLeft, typename GraphRight, typename EdgePred, typename VertexPred, typename Callback>
 void commonSubgraphs(const GraphLeft &gLeft, const GraphRight &gRight,
-		EdgePred edgePred, VertexPred vertexPred, bool onlyConnected, Callback callback) {
-	CommonSubgraphEnumerator<GraphLeft, GraphRight, EdgePred, VertexPred>
-			(gLeft, gRight, edgePred, vertexPred, onlyConnected)(callback);
+                     EdgePred edgePred, VertexPred vertexPred, Callback callback) {
+	CommonSubgraphEnumerator<OnlyConnected, GraphLeft, GraphRight, EdgePred, VertexPred>(
+			gLeft, gRight, edgePred, vertexPred)(callback);
 }
 
 // Variant of commonSubgraphs with all default parameters
-
-template<typename GraphLeft, typename GraphRight, typename Callback>
-void commonSubgraphs(const GraphLeft &gLeft, const GraphRight &gRight, bool onlyConnected, Callback callback) {
-	commonSubgraphs(gLeft, gRight, get(boost::vertex_index, gLeft), get(boost::vertex_index, gRight),
-			jla_boost::AlwaysTrue(), jla_boost::AlwaysTrue(), onlyConnected, callback);
+template<bool OnlyConnected, typename GraphLeft, typename GraphRight, typename Callback>
+void commonSubgraphs(const GraphLeft &gLeft, const GraphRight &gRight, Callback callback) {
+	commonSubgraphs<OnlyConnected>(gLeft, gRight, get(boost::vertex_index, gLeft), get(boost::vertex_index, gRight),
+	                               jla_boost::AlwaysTrue(), jla_boost::AlwaysTrue(), callback);
 }
 
 // Named parameter variant of commonSubgraphs
-
-template<typename GraphLeft, typename GraphRight, typename Callback, typename Param, typename Tag, typename Rest>
-void commonSubgraphs(const GraphLeft &gLeft, const GraphRight &gRight, bool onlyConnected, Callback callback,
-		const boost::bgl_named_params<Param, Tag, Rest> &params) {
-	commonSubgraphs(gLeft, gRight,
+template<bool OnlyConnected, typename GraphLeft, typename GraphRight, typename Callback, typename Param, typename Tag, typename Rest>
+void commonSubgraphs(const GraphLeft &gLeft, const GraphRight &gRight, Callback callback,
+                     const boost::bgl_named_params<Param, Tag, Rest> &params) {
+	commonSubgraphs<OnlyConnected>(
+			gLeft, gRight,
 			choose_param(get_param(params, boost::edges_equivalent_t()), jla_boost::AlwaysTrue()),
 			choose_param(get_param(params, boost::vertices_equivalent_t()), jla_boost::AlwaysTrue()),
-			onlyConnected, callback);
+			callback);
 }
 
 // ==========================================================================
@@ -240,32 +266,29 @@ void commonSubgraphs(const GraphLeft &gLeft, const GraphRight &gRight, bool only
 namespace detail {
 
 // Helper class for caching maximum and/or unique subgraphs.
-
 template<typename GraphLeft, typename GraphRight, typename Next, bool Unique, bool Maximum>
 struct CommonSubgraphCallbackHelper {
 	static_assert(Unique || Maximum, "Not intended for just caching.");
 	using CachedVertexMap = InvertibleVectorVertexMap<GraphLeft, GraphRight>;
 
 	struct CachedSubgraph {
-
 		template<typename VertexMap>
 		CachedSubgraph(VertexMap &&m, const GraphLeft &gLeft, const GraphRight &gRight, std::size_t size)
-		: m(std::forward<VertexMap>(m), gLeft, gRight), size(size) { }
+				: m(std::forward<VertexMap>(m), gLeft, gRight), size(size) {}
 	public:
 		CachedVertexMap m;
 		std::size_t size;
 	};
 private:
-	CommonSubgraphCallbackHelper(const CommonSubgraphCallbackHelper&) = delete;
-	CommonSubgraphCallbackHelper &operator=(const CommonSubgraphCallbackHelper&) = delete;
+	CommonSubgraphCallbackHelper(const CommonSubgraphCallbackHelper &) = delete;
+	CommonSubgraphCallbackHelper &operator=(const CommonSubgraphCallbackHelper &) = delete;
 public:
-
 	CommonSubgraphCallbackHelper(const GraphLeft &gLeft, const GraphRight &gRight, Next next)
-	: gLeft(gLeft), gRight(gRight), next(next) { }
+			: gLeft(gLeft), gRight(gRight), next(next) {}
 
 	template<typename VertexMap>
 	bool operator()(VertexMap &&m, const GraphLeft &gLeft, const GraphRight &gRight) {
-		auto subgraphSize = get_prop(PreImageSizeT(), m);
+		const auto subgraphSize = get_prop(PreImageSizeT(), m);
 		if(Maximum) {
 			if(!cache.empty()) {
 				if(subgraphSize > cache.front().size) cache.clear();
@@ -284,10 +307,10 @@ public:
 		}
 		cache.emplace_back(m, gLeft, gRight, subgraphSize);
 		if(Maximum) return true;
-		else return next(m, gLeft, gRight);
+		else return next(std::forward<VertexMap>(m), gLeft, gRight);
 	}
 
-	void outputSubgraphs() {
+	void outputMatches() {
 		static_assert(Maximum, "Otherwise they are reported online.");
 		for(auto &subgraph : cache)
 			next(addProp(std::move(subgraph.m), PreImageSizeT(), subgraph.size), gLeft, gRight);
@@ -299,75 +322,77 @@ private:
 	std::vector<CachedSubgraph> cache;
 };
 
-template<typename GraphLeft, typename GraphRight, typename Next>
-using UniqueVertexMapCallback = CommonSubgraphCallbackHelper<GraphLeft, GraphRight, Next, true, false>;
-template<typename GraphLeft, typename GraphRight, typename Next>
-using MaximumSubgraphCallback = CommonSubgraphCallbackHelper<GraphLeft, GraphRight, Next, false, true>;
-template<typename GraphLeft, typename GraphRight, typename Next>
-using UniqueMaximumSubgraphCallback = CommonSubgraphCallbackHelper<GraphLeft, GraphRight, Next, true, true>;
-
 } // namespace detail
+
+// TODO: the 'unique' callbacks should be deleted once the core algorithm has been fixed to not enumerate duplicates
+template<typename GraphLeft, typename GraphRight, typename Next>
+using UniqueVertexMapCallback = detail::CommonSubgraphCallbackHelper<GraphLeft, GraphRight, Next, true, false>;
+template<typename GraphLeft, typename GraphRight, typename Next>
+using MaximumSubgraphCallback = detail::CommonSubgraphCallbackHelper<GraphLeft, GraphRight, Next, false, true>;
+template<typename GraphLeft, typename GraphRight, typename Next>
+using UniqueMaximumSubgraphCallback = detail::CommonSubgraphCallbackHelper<GraphLeft, GraphRight, Next, true, true>;
+
+template<typename GraphLeft, typename GraphRight, typename Next>
+auto makeMaxmimumSubgraphCallback(const GraphLeft &gLeft, const GraphRight &gRight, Next next) {
+	return MaximumSubgraphCallback<GraphLeft, GraphRight, Next>(gLeft, gRight, next);
+}
 
 // Enumerates all unique common subgraphs between gLeft and gRight.
 // The user callback is invoked for each unique subgraph as they are
 // discovered.
-
-template<typename GraphLeft, typename GraphRight, typename EdgePred, typename VertexPred, typename Callback>
+template<bool OnlyConnected, typename GraphLeft, typename GraphRight, typename EdgePred, typename VertexPred, typename Callback>
 void commonSubgraphs_unique(const GraphLeft &gLeft, const GraphRight &gRight,
-		EdgePred edgePred, VertexPred vertexPred, bool onlyConnected, Callback callback) {
-	detail::UniqueVertexMapCallback<GraphLeft, GraphRight, Callback> unique_callback(gLeft, gRight, callback);
-	commonSubgraphs(gLeft, gRight, edgePred, vertexPred, onlyConnected, std::ref(unique_callback));
+                            EdgePred edgePred, VertexPred vertexPred, Callback callback) {
+	UniqueVertexMapCallback<GraphLeft, GraphRight, Callback> unique_callback(gLeft, gRight, callback);
+	commonSubgraphs<OnlyConnected>(gLeft, gRight, edgePred, vertexPred, std::ref(unique_callback));
 }
 
 // Variant of commonSubgraphs_unique with all default parameters.
-
-template<typename GraphLeft, typename GraphRight, typename Callback>
-void commonSubgraphs_unique(const GraphLeft &gLeft, const GraphRight &gRight, bool onlyConnected, Callback callback) {
-	commonSubgraphs_unique(gLeft, gRight, jla_boost::AlwaysTrue(), jla_boost::AlwaysTrue(), onlyConnected, callback);
+template<bool OnlyConnected, typename GraphLeft, typename GraphRight, typename Callback>
+void commonSubgraphs_unique(const GraphLeft &gLeft, const GraphRight &gRight, Callback callback) {
+	commonSubgraphs_unique<OnlyConnected>(gLeft, gRight, jla_boost::AlwaysTrue(), jla_boost::AlwaysTrue(), callback);
 }
 
 // Named parameter variant of commonSubgraphs_unique
-
-template <typename GraphLeft, typename GraphRight, typename Callback, typename Param, typename Tag, typename Rest>
-void commonSubgraphs_unique(const GraphLeft &gLeft, const GraphRight &gRight, bool onlyConnected, Callback callback,
-		const boost::bgl_named_params<Param, Tag, Rest> &params) {
-	commonSubgraphs_unique(gLeft, gRight,
+template<bool OnlyConnected, typename GraphLeft, typename GraphRight, typename Callback, typename Param, typename Tag, typename Rest>
+void commonSubgraphs_unique(const GraphLeft &gLeft, const GraphRight &gRight, Callback callback,
+                            const boost::bgl_named_params<Param, Tag, Rest> &params) {
+	commonSubgraphs_unique<OnlyConnected>(
+			gLeft, gRight,
 			choose_param(get_param(params, boost::edges_equivalent_t()), jla_boost::AlwaysTrue()),
 			choose_param(get_param(params, boost::vertices_equivalent_t()), jla_boost::AlwaysTrue()),
-			onlyConnected, callback);
+			callback);
 }
 
 // ==========================================================================
 
 // Enumerates the largest common subgraphs found between gLeft and gRight
 // Note that the ENTIRE search space is explored before callback is actually invoked.
-
-template<typename GraphLeft, typename GraphRight, typename EdgePred, typename VertexPred, typename Callback>
+template<bool OnlyConnected, typename GraphLeft, typename GraphRight, typename EdgePred, typename VertexPred, typename Callback>
 void commonSubgraphs_maximum(const GraphLeft &gLeft, const GraphRight &gRight,
-		EdgePred edgePred, VertexPred vertexPred, bool onlyConnected, Callback callback) {
-	detail::MaximumSubgraphCallback<GraphLeft, GraphRight, Callback> max_interceptor(gLeft, gRight, callback);
-	commonSubgraphs(gLeft, gRight, edgePred, vertexPred, onlyConnected, std::ref(max_interceptor));
+                             EdgePred edgePred, VertexPred vertexPred, Callback callback) {
+	MaximumSubgraphCallback<GraphLeft, GraphRight, Callback> max_interceptor(gLeft, gRight, callback);
+	commonSubgraphs<OnlyConnected>(gLeft, gRight, edgePred, vertexPred, std::ref(max_interceptor));
 	// Only output the largest subgraphs
-	max_interceptor.outputSubgraphs();
+	max_interceptor.outputMatches();
 }
 
 // Variant of commonSubgraphs_maximum with all default
 // parameters.
-
-template <typename GraphLeft, typename GraphRight, typename Callback>
-void commonSubgraphs_maximum(const GraphLeft &gLeft, const GraphRight &gRight, bool onlyConnected, Callback callback) {
-	commonSubgraphs_maximum(gLeft, gRight, jla_boost::AlwaysTrue(), jla_boost::AlwaysTrue(), onlyConnected, callback);
+template<bool OnlyConnected, typename GraphLeft, typename GraphRight, typename Callback>
+void commonSubgraphs_maximum(const GraphLeft &gLeft, const GraphRight &gRight, Callback callback) {
+	commonSubgraphs_maximum<OnlyConnected>(gLeft, gRight, jla_boost::AlwaysTrue(), jla_boost::AlwaysTrue(), callback);
 }
 
 // Named parameter variant of commonSubgraphs_maximum
-
-template <typename GraphLeft, typename GraphRight, typename Callback, typename Param, typename Tag, typename Rest>
-void commonSubgraphs_maximum(const GraphLeft &gLeft, const GraphRight &gRight, bool onlyConnected, Callback callback,
-		const boost::bgl_named_params<Param, Tag, Rest> &params) {
-	commonSubgraphs_maximum(gLeft, gRight,
+template<bool OnlyConnected, typename GraphLeft, typename GraphRight, typename Callback, typename Param, typename Tag, typename Rest>
+void commonSubgraphs_maximum(const GraphLeft &gLeft, const GraphRight &gRight, Callback callback,
+                             const boost::bgl_named_params<Param, Tag, Rest> &params) {
+	commonSubgraphs_maximum<OnlyConnected>(
+			gLeft, gRight,
 			choose_param(get_param(params, boost::edges_equivalent_t()), jla_boost::AlwaysTrue()),
 			choose_param(get_param(params, boost::vertices_equivalent_t()), jla_boost::AlwaysTrue()),
-			onlyConnected, callback);
+			callback);
 }
 
 // ==========================================================================
@@ -375,35 +400,34 @@ void commonSubgraphs_maximum(const GraphLeft &gLeft, const GraphRight &gRight, b
 // Enumerates the largest, unique common subgraphs found between
 // gLeft and gRight.  Note that the ENTIRE search space is explored
 // before callback is actually invoked.
-
-template<typename GraphLeft, typename GraphRight, typename EdgePred, typename VertexPred, typename Callback>
+template<bool OnlyConnected, typename GraphLeft, typename GraphRight, typename EdgePred, typename VertexPred, typename Callback>
 void commonSubgraphs_maximum_unique(const GraphLeft &gLeft, const GraphRight &gRight,
-		EdgePred edgePred, VertexPred vertexPred, bool onlyConnected, Callback callback) {
-	detail::UniqueMaximumSubgraphCallback<GraphLeft, GraphRight, Callback> unique_max_interceptor(gLeft, gRight, callback);
-	commonSubgraphs(gLeft, gRight, edgePred, vertexPred, onlyConnected, std::ref(unique_max_interceptor));
+                                    EdgePred edgePred, VertexPred vertexPred, Callback callback) {
+	UniqueMaximumSubgraphCallback<GraphLeft, GraphRight, Callback> unique_max_interceptor(
+			gLeft, gRight, callback);
+	commonSubgraphs<OnlyConnected>(gLeft, gRight, edgePred, vertexPred, std::ref(unique_max_interceptor));
 	// Only output the largest, unique subgraphs
-	unique_max_interceptor.outputSubgraphs();
+	unique_max_interceptor.outputMatches();
 }
 
 // Variant of commonSubgraphs_maximum_unique with all default parameters
-
-template<typename GraphLeft, typename GraphRight, typename Callback>
-void commonSubgraphs_maximum_unique(const GraphLeft &gLeft, const GraphRight &gRight, bool onlyConnected, Callback callback) {
-	commonSubgraphs_maximum_unique(gLeft, gRight, jla_boost::AlwaysTrue(), jla_boost::AlwaysTrue(), onlyConnected, callback);
+template<bool OnlyConnected, typename GraphLeft, typename GraphRight, typename Callback>
+void commonSubgraphs_maximum_unique(const GraphLeft &gLeft, const GraphRight &gRight, Callback callback) {
+	commonSubgraphs_maximum_unique<OnlyConnected>(
+			gLeft, gRight, jla_boost::AlwaysTrue(), jla_boost::AlwaysTrue(), callback);
 }
 
 // Named parameter variant of commonSubgraphs_maximum_unique
-
-template<typename GraphLeft, typename GraphRight, typename Callback, typename Param, typename Tag, typename Rest>
-void commonSubgraphs_maximum_unique(const GraphLeft &gLeft, const GraphRight &gRight, bool onlyConnected, Callback callback,
-		const boost::bgl_named_params<Param, Tag, Rest> &params) {
-	commonSubgraphs_maximum_unique(gLeft, gRight,
+template<bool OnlyConnected, typename GraphLeft, typename GraphRight, typename Callback, typename Param, typename Tag, typename Rest>
+void commonSubgraphs_maximum_unique(const GraphLeft &gLeft, const GraphRight &gRight, Callback callback,
+                                    const boost::bgl_named_params<Param, Tag, Rest> &params) {
+	commonSubgraphs_maximum_unique<OnlyConnected>(
+			gLeft, gRight,
 			choose_param(get_param(params, boost::edges_equivalent_t()), jla_boost::AlwaysTrue()),
 			choose_param(get_param(params, boost::vertices_equivalent_t()), jla_boost::AlwaysTrue()),
-			onlyConnected, callback);
+			callback);
 }
 
-} // namespace GraphMorphism
-} // namespace jla_boost
+} // namespace jla_boost::GraphMorphism
 
-#endif /* JLA_BOOST_GRAPH_MORPHOSM_FINDERS_COMMON_SUBGRAPH_HPP */
+#endif // JLA_BOOST_GRAPH_MORPHOSM_FINDERS_COMMON_SUBGRAPH_HPP

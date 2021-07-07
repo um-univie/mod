@@ -10,7 +10,7 @@ target_include_directories(gml
         PUBLIC
         $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>)
-target_compile_options(gml PRIVATE -Wall -Wextra
+target_compile_options(gml PRIVATE -Wall -Wextra -pedantic
         -Wno-unused-parameter
         -Wno-parentheses)
 target_link_libraries(gml PUBLIC Boost::boost)
@@ -50,7 +50,7 @@ if(BUILD_TESTING)
     endif()
     foreach(testName ${mod_gml_TEST_CPP_FILES})
         add_executable(${testName} EXCLUDE_FROM_ALL test/${testName}.cpp)
-        target_compile_options(${testName} PRIVATE -Wall -Wextra -Werror -pedantic
+        target_compile_options(${testName} PRIVATE -Wall -Wextra -pedantic -Werror
                 -Wno-unused-parameter
                 -Wno-parentheses)
         target_link_libraries(${testName} PRIVATE GML::gml)

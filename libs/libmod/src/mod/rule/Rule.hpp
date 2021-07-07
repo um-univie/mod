@@ -6,11 +6,10 @@
 #include <mod/graph/ForwardDecl.hpp>
 #include <mod/rule/ForwardDecl.hpp>
 
-#include <boost/optional/optional.hpp>
-
 #include <iosfwd>
 #include <map>
 #include <memory>
+#include <optional>
 #include <string>
 
 namespace mod::rule {
@@ -23,6 +22,7 @@ namespace mod::rule {
 // rst:
 // rst-class-start:
 struct MOD_DECL Rule {
+	using Handle = std::shared_ptr<Rule>;
 	class Vertex;
 	class Edge;
 	class VertexIterator;
@@ -84,17 +84,23 @@ public:
 	// rst:			:raises: :class:`LogicError` if inversion is not possible (due to matching constraints).
 	std::shared_ptr<Rule> makeInverse() const;
 	// rst: .. function:: std::pair<std::string, std::string> print() const
+	// rst:               std::pair<std::string, std::string> print(bool printCombined) const
 	// rst:               std::pair<std::string, std::string> print(const graph::Printer &first, const graph::Printer &second) const
+	// rst:               std::pair<std::string, std::string> print(const graph::Printer &first, const graph::Printer &second, bool printCombined) const
 	// rst:
 	// rst:		Print the rule, using either the default options or the options in `first` and `second`.
 	// rst:		If `first` and `second` are the same, only one depiction will be made.
 	// rst:
+	// rst:		:param printCombined: whether a depiction of the rule as a single combined graph is printed. Defaults to ``false``.
 	// rst:		:returns: a pair of filename prefixes for the PDF-files that will be compiled in post-processing.
 	// rst:			The actual names can be obtained by appending ``_L.pdf``, ``_K.pdf``, and ``_R.pdf`` for
 	// rst:			respectively the left side, context, and right side graphs.
 	// rst:			If `first` and `second` are the same, the two file prefixes are equal.
 	std::pair<std::string, std::string> print() const;
+	std::pair<std::string, std::string> print(bool printCombined) const;
 	std::pair<std::string, std::string> print(const graph::Printer &first, const graph::Printer &second) const;
+	std::pair<std::string, std::string>
+	print(const graph::Printer &first, const graph::Printer &second, bool printCombined) const;
 	// rst: .. function:: void printTermState() const
 	// rst:
 	// rst:		Print the term state for the rule.
@@ -121,10 +127,10 @@ public:
 	// rst:		Access the name of the rule.
 	const std::string &getName() const;
 	void setName(std::string name);
-	// rst: .. function:: boost::optional<LabelType> getLabelType() const
+	// rst: .. function:: std::optional<LabelType> getLabelType() const
 	// rst:
 	// rst:		:returns: the intended label type for this rule, or nothing if no specific label type is intended.
-	boost::optional<LabelType> getLabelType() const;
+	std::optional<LabelType> getLabelType() const;
 	// rst: .. function:: std::size_t getNumLeftComponents() const
 	// rst:
 	// rst:		:returns: the number of connected components in the left graph.
@@ -165,9 +171,10 @@ public:
 	int getMinExternalId() const;
 	int getMaxExternalId() const;
 public:
-	// rst: .. function:: static std::shared_ptr<Rule> ruleGMLString(const std::string &data, bool invert)
+	// rst: .. function:: static std::shared_ptr<Rule> fromGMLString(const std::string &data, bool invert)
+	// rst:               static std::shared_ptr<Rule> fromGMLFile(const std::string &file, bool invert)
 	// rst:
-	// rst:		Load a rule from a :ref:`GML <rule-gml>` string, and store either that rule or its inverse.
+	// rst:		Load a rule from a :ref:`GML <rule-gml>` string or file, and store either that rule or its inverse.
 	// rst:		The name of the rule is the one specified in the GML string, though when ``invert=True``
 	// rst:		the string ", inverse" is appended to the name.
 	// rst:
@@ -178,14 +185,8 @@ public:
 	// rst:
 	// rst:		:returns: the loaded (possibly inverted) rule.
 	// rst:		:throws: :class:`InputError` on bad data and when inversion fails due to constraints.
-	static std::shared_ptr<Rule> ruleGMLString(const std::string &data, bool invert);
-	// rst: .. function:: static std::shared_ptr<Rule> ruleGML(const std::string &file, bool invert)
-	// rst:		
-	// rst:		Read `file` and pass the contents to :cpp:func:`ruleGMLString`.
-	// rst:
-	// rst:		:returns: the loaded (possibly inverted) rule.
-	// rst:		:throws: :class:`InputError` on bad data and when inversion fails due to constraints.
-	static std::shared_ptr<Rule> ruleGML(const std::string &file, bool invert);
+	static std::shared_ptr<Rule> fromGMLString(const std::string &data, bool invert);
+	static std::shared_ptr<Rule> fromGMLFile(const std::string &file, bool invert);
 	// rst: .. function:: static std::shared_ptr<Rule> makeRule(std::unique_ptr<lib::Rules::Real> r)
 	// rst:               static std::shared_ptr<Rule> makeRule(std::unique_ptr<lib::Rules::Real> r, std::map<int, std::size_t> externalToInternalIds)
 	// rst:

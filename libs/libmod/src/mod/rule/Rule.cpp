@@ -99,14 +99,24 @@ std::shared_ptr<Rule> Rule::makeInverse() const {
 }
 
 std::pair<std::string, std::string> Rule::print() const {
+	return print(false);
+}
+
+std::pair<std::string, std::string> Rule::print(bool printCombined) const {
 	graph::Printer first;
 	graph::Printer second;
 	second.setReactionDefault();
-	return print(first, second);
+	return print(first, second, printCombined);
 }
 
-std::pair<std::string, std::string> Rule::print(const graph::Printer &first, const graph::Printer &second) const {
-	return lib::IO::Rules::Write::summary(getRule(), first.getOptions(), second.getOptions());
+std::pair<std::string, std::string>
+Rule::print(const graph::Printer &first, const graph::Printer &second) const {
+	return print(first, second, false);
+}
+
+std::pair<std::string, std::string>
+Rule::print(const graph::Printer &first, const graph::Printer &second, bool printCombined) const {
+	return lib::IO::Rules::Write::summary(getRule(), first.getOptions(), second.getOptions(), printCombined);
 }
 
 void Rule::printTermState() const {
@@ -135,7 +145,7 @@ void Rule::setName(std::string name) {
 	p->r->setName(name);
 }
 
-boost::optional<LabelType> Rule::getLabelType() const {
+std::optional<LabelType> Rule::getLabelType() const {
 	return p->r->getLabelType();
 }
 
@@ -202,54 +212,63 @@ int Rule::getMaxExternalId() const {
 
 namespace {
 
-std::shared_ptr<Rule> handleLoadedRule(lib::IO::Rules::Read::Data &&data,
+std::shared_ptr<Rule> handleLoadedRule(lib::IO::Result<lib::IO::Rules::Read::Data> dataRes,
+                                       lib::IO::Warnings warnings,
                                        bool invert,
-                                       const std::string &dataSource,
-                                       std::ostringstream &err) {
-	if(!data.rule) {
-		err << "\nCould not load rule from " << dataSource << "." << std::endl;
-		throw InputError(err.str());
-	}
+                                       const std::string &dataSource) {
+	std::cout << warnings << std::flush;
+	if(!dataRes)
+		throw InputError(dataRes.extractError()
+		                 + "\nCould not load rule from " + dataSource + ".");
+	auto data = std::move(*dataRes);
 	assert(data.rule->pString);
 	if(invert) {
 		if(!data.rule->leftMatchConstraints.empty()) {
-			if(getConfig().rule.ignoreConstraintsDuringInversion.get()) std::cout << "WARNING: ";
-			bool ignore = getConfig().rule.ignoreConstraintsDuringInversion.get();
-			std::ostream &stream = ignore ? std::cout : err;
-			stream << "The rule '";
-			if(data.name) stream << data.name.get();
-			else stream << "anon";
-			stream << "' from " << dataSource << " has matching constraints ";
+			const bool ignore = getConfig().rule.ignoreConstraintsDuringInversion.get();
+			std::string msg = "The rule '";
+			if(data.name) msg += *data.name;
+			else msg += "anon";
+			msg += "' from ";
+			msg += dataSource;
+			msg += " has matching constraints ";
 			if(!ignore) {
-				stream << "and can not be reversed. Use " << getConfig().rule.ignoreConstraintsDuringInversion.getName()
-				       << " == true to strip constraints." << std::endl;
-				throw InputError(err.str());
+				msg += "and can not be reversed. Use ";
+				msg += getConfig().rule.ignoreConstraintsDuringInversion.getName();
+				msg += " == true to strip constraints.";
+				throw InputError(std::move(msg));
 			} else {
-				stream << "and these will be stripped from the reversed rule." << std::endl;
+				msg += "and these will be stripped from the reversed rule.";
 				data.rule->leftMatchConstraints.clear();
+				std::cout << "WARNING: " << msg << '\n';
 			}
 		}
 		data.rule->invert();
-		if(data.name) data.name.get() += ", inverse";
+		if(data.name) *data.name += ", inverse";
 	}
 	auto libRes = std::make_unique<lib::Rules::Real>(std::move(*data.rule), data.labelType);
-	if(data.name) libRes->setName(std::move(data.name.get()));
+	if(data.name) libRes->setName(std::move(*data.name));
 	return Rule::makeRule(std::move(libRes), std::move(data.externalToInternalIds));
 }
 
 } // namespace
 
-std::shared_ptr<Rule> Rule::ruleGMLString(const std::string &data, bool invert) {
-	std::ostringstream err;
-	return handleLoadedRule(lib::IO::Rules::Read::gml(data, err), invert, "<inline GML string>", err);
+std::shared_ptr<Rule> Rule::fromGMLString(const std::string &data, bool invert) {
+	lib::IO::Warnings warnings;
+	auto res = lib::IO::Rules::Read::gml(warnings, data);
+	return handleLoadedRule(std::move(res), std::move(warnings), invert, "<inline GML string>");
 }
 
-std::shared_ptr<Rule> Rule::ruleGML(const std::string &file, bool invert) {
-	boost::iostreams::mapped_file_source ifs(file);
+std::shared_ptr<Rule> Rule::fromGMLFile(const std::string &file, bool invert) {
+	boost::iostreams::mapped_file_source ifs;
+	try {
+		ifs.open(file);
+	} catch(const BOOST_IOSTREAMS_FAILURE &e) {
+		throw InputError("Could not open rule GML file '" + file + "':\n" + e.what());
+	}
 	if(!ifs) throw InputError("Could not open rule GML file '" + file + "'.\n");
-	std::ostringstream err;
-	return handleLoadedRule(lib::IO::Rules::Read::gml({ifs.begin(), ifs.size()}, err),
-	                        invert, "file '" + file + "'", err);
+	lib::IO::Warnings warnings;
+	auto res = lib::IO::Rules::Read::gml(warnings, {ifs.begin(), ifs.size()});
+	return handleLoadedRule(std::move(res), std::move(warnings), invert, "file '" + file + "'");
 }
 
 std::shared_ptr<Rule> Rule::makeRule(std::unique_ptr<lib::Rules::Real> r) {

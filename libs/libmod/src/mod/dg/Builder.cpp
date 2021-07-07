@@ -99,8 +99,8 @@ std::vector<DG::HyperEdge> Builder::apply(const std::vector<std::shared_ptr<grap
 		throw LogicError("One of the graphs is a null pointer.");
 	if(!r) throw LogicError("The rule is a null pointer.");
 	auto innerRes = onlyProper
-			? p->b.apply(graphs, r, verbosity, graphPolicy)
-			: p->b.applyRelaxed(graphs, r, verbosity, graphPolicy);
+	                ? p->b.apply(graphs, r, verbosity, graphPolicy)
+	                : p->b.applyRelaxed(graphs, r, verbosity, graphPolicy);
 	std::vector<DG::HyperEdge> res;
 	const auto &nonHyper = p->dg_->getNonHyper();
 	const auto &hyper = p->dg_->getHyper();
@@ -118,12 +118,10 @@ void Builder::load(const std::vector<std::shared_ptr<rule::Rule>> &ruleDatabase,
                    const std::string &file, int verbosity) {
 	if(std::any_of(ruleDatabase.begin(), ruleDatabase.end(), [](const auto &r) {
 		return !r;
-	}))
+	})) {
 		throw LogicError("Nullptr in rule database.");
+	}
 
-	std::ifstream fileStream(file.c_str());
-	if(!fileStream.is_open()) throw InputError("DG dump file not found, '" + file + "'.");
-	fileStream.close();
 	std::ostringstream err;
 	const bool res = p->b.load(ruleDatabase, file, err, verbosity);
 	if(!res) throw InputError("DG load error: " + err.str());

@@ -8,11 +8,8 @@
 namespace mod::post {
 
 FileHandle::FileHandle(std::string name) : name(name) {
-	if(name.find("out/") != 0)
-		throw LogicError("The file is not in the out/ folder.");
 	stream.open(name.c_str());
-	if(!stream)
-		throw LogicError("Could not open file '" + name + "'.");
+	if(!stream) throw LogicError("Can not open file '" + name + "'.");
 }
 
 void command(const std::string &text) {

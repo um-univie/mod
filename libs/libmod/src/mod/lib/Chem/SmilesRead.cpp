@@ -117,6 +117,8 @@ public:
 	AtomId atomId = AtomIds::Invalid;
 	std::vector<Vertex> hydrogens;
 public:
+	int connectedComponentID;
+public:
 	Atom() = default;
 
 	Atom(const std::string &shorthandSymbol)
@@ -150,7 +152,7 @@ struct BondBranchedAtomPair {
 	unsigned int bond;
 	x3::forward_ast<BranchedAtom> atom;
 public:
-	Edge edge;
+	Edge edge; // may be uninitialized if bond == '.'
 public:
 	friend std::ostream &operator<<(std::ostream &s, const BondBranchedAtomPair &bba) {
 		if(bba.bond != 0) s << char(bba.bond);
@@ -169,10 +171,12 @@ public:
 };
 
 struct RingBond {
-	unsigned int bond;
+	unsigned int bond; // set on the closing end to be the right bond
 	unsigned int ringId;
 public:
 	Edge edge;
+	Atom *otherAtom = nullptr; // set on the closing end
+	RingBond *otherRingBond = nullptr; // set on the closing end
 public:
 	friend std::ostream &operator<<(std::ostream &s, const RingBond &rb) {
 		if(rb.bond != 0) s << char(rb.bond);
@@ -322,7 +326,7 @@ const auto atom = x3::rule<struct atom, Atom>{"atom"}
 const auto ringId = singleDigit | (x3::lit('%') > doubleDigit);
 const auto ringBond = x3::rule<struct ringBond, RingBond>{"ringBond"}
 		                      = (bondSymbol | x3::attr(0)) >> ringId;
-const auto bond = bondSymbol | x3::char_('.') | x3::attr(0);
+const auto bond = bondSymbol | x3::char_('.');
 
 // part of recursion
 const x3::rule<struct chainTail, ChainTail> chainTail = "chainTail";
@@ -337,19 +341,65 @@ const auto pushRingBond = [](auto &ctx) {
 const auto pushBranch = [](auto &ctx) {
 	_val(ctx).branches.push_back(_attr(ctx));
 };
-const auto branchedAtom = x3::rule<struct branchedAtom, BranchedAtom>{"branchedAtom"}
+const auto branchedAtom = x3::rule<struct branchedAtom, BranchedAtom>{"branched atom"}
 		                          = atom[setAtom] > *(ringBond[pushRingBond] | branch[pushBranch]);
 const auto bondBranchedAtomPair = x3::rule<struct bondBranchedAtomPair, BondBranchedAtomPair>{"bondBranchedAtomPair"}
-		                                  = bond >> branchedAtom;
+		                                  = (bond > branchedAtom) | (x3::attr(0) >> branchedAtom);
 const auto chainTail_def =
 		*bondBranchedAtomPair >> x3::attr(0); // dummy attr(0) because of a quirk in the attribute collapsing
-BOOST_SPIRIT_DEFINE(nestedAbstractSymbol, chainTail);
+BOOST_SPIRIT_DEFINE(nestedAbstractSymbol, chainTail)
 
 // no recursion
 const auto smiles = x3::rule<struct smiles, SmilesChain>{"smiles"}
 		                    = branchedAtom > chainTail > x3::eoi;
 
 } // namespace
+
+struct RingResolver {
+	lib::IO::Result<> operator()(SmilesChain &c) {
+		auto res = (*this)(c.branchedAtom);
+		if(!res) return res;
+		return (*this)(c.tail, c.branchedAtom.atom);
+	}
+
+	lib::IO::Result<> operator()(ChainTail &ct, Atom &parent) {
+		for(BondBranchedAtomPair &bba : ct.elements) {
+			auto res = (*this)(bba.atom.get());
+			if(!res) return res;
+		}
+		return lib::IO::Result<>();
+	}
+
+	lib::IO::Result<> operator()(BranchedAtom &bAtom) {
+		for(auto &rb : bAtom.ringBonds) {
+			const auto iter = openRings.find(rb.ringId);
+			if(iter == end(openRings)) {
+				openRings.insert(std::make_pair(rb.ringId, std::make_pair(&bAtom.atom, &rb)));
+			} else {
+				unsigned int &bondOpen = iter->second.second->bond;
+				unsigned int &bondClose = rb.bond;
+				if(bondOpen != 0 && bondClose != 0 && bondOpen != bondClose) {
+					return lib::IO::Result<>::Error(
+							"Error in SMILES conversion: ring closure " + std::to_string(rb.ringId) + " can not be both '"
+							+ static_cast<char>(bondOpen) + "' and '" + static_cast<char>(bondClose) + "'.");
+				}
+				if(bondOpen == 0) bondOpen = bondClose;
+				if(bondClose == 0) bondClose = bondOpen;
+				rb.otherAtom = iter->second.first;
+				rb.otherRingBond = iter->second.second;
+				openRings.erase(iter);
+			}
+		}
+
+		for(auto &b : bAtom.branches) {
+			auto res = (*this)(b, bAtom.atom);
+			if(!res) return res;
+		}
+		return lib::IO::Result<>();
+	}
+public:
+	std::map<char, std::pair<Atom *, RingBond *>> openRings;
+};
 
 Vertex addHydrogen(lib::Graph::GraphType &g, lib::Graph::PropString &pString, Vertex p) {
 	Vertex v = add_vertex(g);
@@ -359,19 +409,16 @@ Vertex addHydrogen(lib::Graph::GraphType &g, lib::Graph::PropString &pString, Ve
 	return v;
 }
 
-bool addBond(lib::Graph::GraphType &g,
-             lib::Graph::PropString &pString,
-             Atom &p,
-             Atom &v,
-             char bond,
-             Edge &e,
-             std::ostream &err) {
+lib::IO::Result<> addBond(lib::IO::Warnings &warnings,
+                          lib::Graph::GraphType &g, lib::Graph::PropString &pString,
+                          Atom &p, Atom &v,
+                          char bond, Edge &e) {
 	std::string edgeLabel;
 	switch(bond) {
 	case '/': // note: fall-through to make / and \ implicit
 	case '\\':
-		if(getConfig().graph.printSmilesParsingWarnings.get())
-			std::cout << "WARNING: up/down bonds are not supported, converted to '-' instead." << std::endl;
+		warnings.add("up/down bonds are not supported, converted to '-' instead.",
+		             getConfig().graph.printSmilesParsingWarnings.get());
 		[[fallthrough]];
 	case 0:
 		if(p.isAromatic && v.isAromatic) edgeLabel += ':';
@@ -384,13 +431,9 @@ bool addBond(lib::Graph::GraphType &g,
 		edgeLabel += bond;
 		break;
 	case '.':
-		err
-				<< "Error in SMILES conversion: the virtual bond type '.' is not (and probably will never be) supported. The SMILES string _must_ encode a single molecule."
-				<< std::endl;
-		return false;
+		return {};
 	case '$':
-		err << "Error in SMILES conversion: bond type '$' is not supported." << std::endl;
-		return false;
+		return lib::IO::Result<>::Error("Error in SMILES conversion: bond type '$' is not supported.");
 	default:
 		std::cout << "Internal error, unknown bond '" << bond << "' (" << (int) bond << ")" << std::endl;
 		std::cout << "p = '" << pString[p.vertex] << "'(" << p.vertex << ")" << std::endl;
@@ -402,77 +445,140 @@ bool addBond(lib::Graph::GraphType &g,
 	e = ePair.first;
 	assert(!edgeLabel.empty());
 	pString.addEdge(e, edgeLabel);
-	return true;
+	return {};
 }
 
-struct Converter {
-	Converter(lib::Graph::GraphType &g, lib::Graph::PropString &pString, std::ostream &err, bool allowAbstract)
-			: g(g), pString(pString), err(err), allowAbstract(allowAbstract) {}
-
-	bool operator()(SmilesChain &c) {
-		bool res = (*this)(c.branchedAtom);
-		if(!res) return false;
-		res = (*this)(c.tail, c.branchedAtom.atom);
-		return res;
+struct AssignConnectedComponentID {
+	int operator()(SmilesChain &c) {
+		(*this)(c.branchedAtom);
+		(*this)(c.tail);
+		return nextID;
 	}
 
-	bool operator()(ChainTail &ct, Atom &parent) {
+	void operator()(ChainTail &ct) {
+		for(auto &bap : ct.elements)
+			(*this)(bap.atom.get());
+	}
+
+	void operator()(BranchedAtom &bAtom) {
+		(*this)(bAtom.atom);
+		for(auto &b : bAtom.branches)
+			(*this)(b);
+	}
+
+	void operator()(Atom &a) {
+		a.connectedComponentID = nextID;
+		++nextID;
+	}
+public:
+	int nextID = 0;
+};
+
+
+struct JoinConnected {
+	JoinConnected(lib::IO::Graph::Read::ConnectedComponents &components) : components(components) {}
+
+	void operator()(const SmilesChain &c) {
+		(*this)(c.branchedAtom);
+		(*this)(c.tail, c.branchedAtom.atom);
+	}
+
+	void operator()(const ChainTail &ct, const Atom &parent) {
 		auto *parentPtr = &parent;
-		for(BondBranchedAtomPair &bba : ct.elements) {
-			bool res = (*this)(bba, *parentPtr);
-			if(!res) return false;
+		for(const BondBranchedAtomPair &bba : ct.elements) {
+			(*this)(bba, *parentPtr);
 			parentPtr = &bba.atom.get().atom;
 		}
-		return true;
 	}
 
-	bool operator()(BondBranchedAtomPair &bba, Atom &parent) {
-		bool res = (*this)(bba.atom.get());
-		if(!res) return false;
-		res = addBond(g, pString, parent, bba.atom.get().atom, bba.bond, bba.edge, err);
+	void operator()(const BondBranchedAtomPair &bba, const Atom &parent) {
+		(*this)(bba.atom.get());
+		if(bba.bond != '.')
+			join(parent, bba.atom.get().atom);
+	}
+
+	void operator()(const BranchedAtom &bAtom) {
+		for(const auto &rb : bAtom.ringBonds) {
+			if(!rb.otherAtom) continue;
+			if(rb.bond != '.')
+				join(*rb.otherAtom, bAtom.atom);
+		}
+
+		for(auto &b : bAtom.branches)
+			(*this)(b, bAtom.atom);
+	}
+private:
+	void join(const Atom &a, const Atom &b) {
+		components.join(a.connectedComponentID, b.connectedComponentID);
+	}
+public:
+	lib::IO::Graph::Read::ConnectedComponents &components;
+};
+
+struct Converter {
+	Converter(std::vector<std::unique_ptr<lib::Graph::GraphType>> &gPtrs,
+	          std::vector<std::unique_ptr<lib::Graph::PropString>> &pStringPtrs,
+	          const lib::IO::Graph::Read::ConnectedComponents &components,
+	          lib::IO::Warnings &warnings, bool allowAbstract)
+			: gPtrs(gPtrs), pStringPtrs(pStringPtrs), components(components), warnings(warnings),
+			  allowAbstract(allowAbstract) {}
+
+	lib::IO::Result<> operator()(SmilesChain &c) {
+		if(auto res = (*this)(c.branchedAtom); !res) return res;
+		return (*this)(c.tail, c.branchedAtom.atom);
+	}
+
+	lib::IO::Result<> operator()(ChainTail &ct, Atom &parent) {
+		auto *parentPtr = &parent;
+		for(BondBranchedAtomPair &bba : ct.elements) {
+			if(auto res = (*this)(bba, *parentPtr); !res) return res;
+			parentPtr = &bba.atom.get().atom;
+		}
+		return {};
+	}
+
+	lib::IO::Result<> operator()(BondBranchedAtomPair &bba, Atom &parent) {
+		if(auto res = (*this)(bba.atom.get()); !res) return res;
+		if(bba.bond == '.') return {};
+		assert(components[bba.atom.get().atom.connectedComponentID]
+		       == components[parent.connectedComponentID]);
+		const auto comp = components[parent.connectedComponentID];
+		auto res = addBond(warnings, *gPtrs[comp], *pStringPtrs[comp], parent, bba.atom.get().atom, bba.bond, bba.edge);
 		return res;
 	}
 
-	bool operator()(BranchedAtom &bAtom) {
-		const bool res = (*this)(bAtom.atom);
-		if(!res) return false;
+	lib::IO::Result<> operator()(BranchedAtom &bAtom) {
+		if(auto res = (*this)(bAtom.atom); !res) return res;
 		// process ring bonds
 		for(auto &rb : bAtom.ringBonds) {
-			const auto iter = openRings.find(rb.ringId);
-			if(iter == end(openRings)) {
-				openRings.insert(std::make_pair(rb.ringId, std::make_pair(&bAtom.atom, &rb)));
-			} else {
-				unsigned int &bondOpen = iter->second.second->bond;
-				unsigned int &bondClose = rb.bond;
-				if(bondOpen != 0 && bondClose != 0 && bondOpen != bondClose) {
-					err << "Error in SMILES conversion: ring closure " << rb.ringId << " can not be both '"
-					    << static_cast<char>(bondOpen) << "' and '" << static_cast<char>(bondClose) << "'.";
-					return false;
-				}
-				if(bondOpen == 0) bondOpen = bondClose;
-				if(bondClose == 0) bondClose = bondOpen;
-				const char bond = bondOpen;
-				const bool res = addBond(g, pString, *iter->second.first, bAtom.atom, bond, iter->second.second->edge, err);
-				rb.edge = iter->second.second->edge;
-				openRings.erase(iter);
-				if(!res) return false;
-			}
+			if(!rb.otherAtom) continue; // link ring bond from the other side
+			assert(rb.otherRingBond);
+			assert(rb.bond != '.');
+			assert(components[rb.otherAtom->connectedComponentID]
+			       == components[bAtom.atom.connectedComponentID]);
+			const auto comp = components[rb.otherAtom->connectedComponentID];
+			if(auto res = addBond(warnings, *gPtrs[comp], *pStringPtrs[comp],
+			                      *rb.otherAtom, bAtom.atom, rb.bond, rb.edge);
+					!res)
+				return res;
+			rb.otherRingBond->edge = rb.edge;
 		}
 
-		for(auto &b : bAtom.branches) {
-			const bool res = (*this)(b, bAtom.atom);
-			if(!res) return false;
-		}
-		return true;
+		for(auto &b : bAtom.branches)
+			if(auto res = (*this)(b, bAtom.atom); !res) return res;
+		return {};
 	}
 
-	bool operator()(Atom &a) {
+	lib::IO::Result<> operator()(Atom &a) {
+		const auto comp = components[a.connectedComponentID];
+		auto &g = *gPtrs[comp];
+		auto &pString = *pStringPtrs[comp];
 		if(a.symbol == "*") {
 			a.vertex = add_vertex(g);
 			pString.addVertex(a.vertex, "*");
 			if(a.class_ != -1)
-				classToVertexId.emplace(a.class_, a.vertex);
-			return true;
+				classToVertexId.emplace(a.class_, std::pair(comp, a.vertex));
+			return {};
 		}
 
 		a.atomId = atomIdFromSymbol(a.symbol);
@@ -496,10 +602,9 @@ struct Converter {
 
 		a.vertex = add_vertex(g);
 		if(a.atomId == AtomIds::Invalid) {
-			if(!allowAbstract) {
-				err << "SMILES string has abstract vertex label '" + a.symbol + "'. Use allowAbstract=True to allow it.";
-				return false;
-			}
+			if(!allowAbstract)
+				return lib::IO::Result<>::Error(
+						"SMILES string has abstract vertex label '" + a.symbol + "'. Use allowAbstract=True to allow it.");
 			assert(a.isotope == 0);
 			assert(!a.isImplicit);
 			std::string label = a.symbol;
@@ -508,10 +613,10 @@ struct Converter {
 					label += ":";
 					label += boost::lexical_cast<std::string>(a.class_);
 				}
-				classToVertexId.emplace(a.class_, a.vertex);
+				classToVertexId.emplace(a.class_, std::pair(comp, a.vertex));
 			}
 			pString.addVertex(a.vertex, label);
-			return true;
+			return {};
 		}
 
 		// an actual real atom!
@@ -525,11 +630,10 @@ struct Converter {
 			{ // charge
 				unsigned char absCharge = std::abs(a.charge);
 				if(absCharge > 1) {
-					if(absCharge > 9) {
-						err << "Error in SMILES conversion, charge 'abs(" << a.charge
-						    << ")' is too large. The lazy developer currently assumes 9 is maximum." << std::endl;
-						return false;
-					}
+					if(absCharge > 9)
+						return lib::IO::Result<>::Error(
+								"Error in SMILES conversion, charge 'abs(" + std::to_string(a.charge)
+								+ ")' is too large. The lazy developer currently assumes 9 is maximum.");
 					label += ('0' + absCharge);
 				}
 				if(a.charge < 0) label += '-';
@@ -541,11 +645,11 @@ struct Converter {
 					label += ":";
 					label += boost::lexical_cast<std::string>(a.class_);
 				}
-				classToVertexId.emplace(a.class_, a.vertex);
+				classToVertexId.emplace(a.class_, std::pair(comp, a.vertex));
 			}
 		}
 		pString.addVertex(a.vertex, label);
-		return true;
+		return {};
 	}
 
 	void operator()(Chiral &ch) {
@@ -553,19 +657,22 @@ struct Converter {
 			hasStereo = true;
 	}
 private:
-	lib::Graph::GraphType &g;
-	lib::Graph::PropString &pString;
+	std::vector<std::unique_ptr<lib::Graph::GraphType>> &gPtrs;
+	std::vector<std::unique_ptr<lib::Graph::PropString>> &pStringPtrs;
+	const lib::IO::Graph::Read::ConnectedComponents &components;
+	lib::IO::Warnings &warnings;
 public:
-	std::map<char, std::pair<Atom *, RingBond *> > openRings;
-	std::multimap<std::size_t, Vertex> classToVertexId;
+	std::multimap<int, std::pair<int, Vertex>> classToVertexId;
 	bool hasStereo = false;
 private:
-	std::ostream &err;
 	const bool allowAbstract;
 };
 
 struct ExplicitHydrogenAdder {
-	ExplicitHydrogenAdder(lib::Graph::GraphType &g, lib::Graph::PropString &pString) : g(g), pString(pString) {}
+	ExplicitHydrogenAdder(std::vector<std::unique_ptr<lib::Graph::GraphType>> &gPtrs,
+	                      std::vector<std::unique_ptr<lib::Graph::PropString>> &pStringPtrs,
+	                      const lib::IO::Graph::Read::ConnectedComponents &components)
+			: gPtrs(gPtrs), pStringPtrs(pStringPtrs), components(components) {}
 
 	void operator()(SmilesChain &c) {
 		(*this)(c.branchedAtom);
@@ -585,20 +692,23 @@ struct ExplicitHydrogenAdder {
 	void operator()(Atom &a) {
 		if(!a.isImplicit) {
 			for(unsigned int i = 0; i < a.hCount; i++) {
-				const auto v = addHydrogen(g, pString, a.vertex);
+				const auto comp = components[a.connectedComponentID];
+				const auto v = addHydrogen(*gPtrs[comp], *pStringPtrs[comp], a.vertex);
 				a.hydrogens.push_back(v);
 			}
 		}
 	}
-
 private:
-	lib::Graph::GraphType &g;
-	lib::Graph::PropString &pString;
+	std::vector<std::unique_ptr<lib::Graph::GraphType>> &gPtrs;
+	std::vector<std::unique_ptr<lib::Graph::PropString>> &pStringPtrs;
+	const lib::IO::Graph::Read::ConnectedComponents &components;
 };
 
 struct ImplicitHydrogenAdder {
-	ImplicitHydrogenAdder(lib::Graph::GraphType &g, lib::Graph::PropString &pString)
-			: g(g), pString(pString) {}
+	ImplicitHydrogenAdder(std::vector<std::unique_ptr<lib::Graph::GraphType>> &gPtrs,
+	                      std::vector<std::unique_ptr<lib::Graph::PropString>> &pStringPtrs,
+	                      const lib::IO::Graph::Read::ConnectedComponents &components)
+			: gPtrs(gPtrs), pStringPtrs(pStringPtrs), components(components) {}
 
 	void operator()(SmilesChain &c) {
 		(*this)(c.branchedAtom);
@@ -617,75 +727,93 @@ struct ImplicitHydrogenAdder {
 
 	void operator()(Atom &a) {
 		// only implicit atoms, and only non-wildcard atoms
-		if(a.isImplicit && a.atomId != AtomIds::Invalid)
-			addImplicitHydrogens(g, pString, a.vertex, a.atomId, &addHydrogen);
+		if(a.isImplicit && a.atomId != AtomIds::Invalid) {
+			const auto comp = components[a.connectedComponentID];
+			addImplicitHydrogens(*gPtrs[comp], *pStringPtrs[comp], a.vertex, a.atomId, &addHydrogen);
+		}
 	}
-
 private:
-	lib::Graph::GraphType &g;
-	lib::Graph::PropString &pString;
+	std::vector<std::unique_ptr<lib::Graph::GraphType>> &gPtrs;
+	std::vector<std::unique_ptr<lib::Graph::PropString>> &pStringPtrs;
+	const lib::IO::Graph::Read::ConnectedComponents &components;
 };
 
 struct StereoConverter {
-	StereoConverter(const lib::Graph::GraphType &g, const lib::Graph::PropMolecule &pMol, std::ostream &err)
-			: g(g), pMol(pMol), inf(g, pMol, false), err(err) {}
+	StereoConverter(std::vector<std::unique_ptr<lib::Graph::GraphType>> &gPtrs,
+	                const std::vector<lib::Graph::PropMolecule> &pMols,
+	                const lib::IO::Graph::Read::ConnectedComponents &components,
+	                lib::IO::Warnings &warnings)
+			: gPtrs(gPtrs), pMols(pMols), components(components), warnings(warnings),
+			  hasAssigned(gPtrs.size(), false) {
+		infs.reserve(gPtrs.size());
+		for(int i = 0; i != gPtrs.size(); ++i)
+			infs.emplace_back(*gPtrs[i], pMols[i], false);
+	}
 
-	void operator()(const SmilesChain &c) {
+	lib::IO::Result<> operator()(const SmilesChain &c) {
 		const Atom *next = nullptr;
 		if(!c.tail.elements.empty())
 			next = &c.tail.elements.front().atom.get().atom;
-		(*this)(c.branchedAtom, nullptr, next);
-		(*this)(c.tail, c.branchedAtom.atom);
+		if(auto res = (*this)(c.branchedAtom, nullptr, next); !res) return res;
+		return (*this)(c.tail, c.branchedAtom.atom);
 	}
 
-	void operator()(const ChainTail &ct, const Atom &prev) {
+	lib::IO::Result<> operator()(const ChainTail &ct, const Atom &prev) {
+		lib::IO::Result<> result;
 		const Atom *prevPtr = &prev;
 		for(int i = 0; i != ct.elements.size(); ++i) {
 			const Atom *nextPtr = i + 1 == ct.elements.size() ? nullptr
 			                                                  : &ct.elements[i + 1].atom.get().atom;
 			const auto &bba = ct.elements[i];
-			(*this)(ct.elements[i].atom.get(), prevPtr, nextPtr);
+			if(auto res = (*this)(ct.elements[i].atom.get(), prevPtr, nextPtr); !res) return res;
 			prevPtr = &bba.atom.get().atom;
 		}
+		return result;
 	}
 
-	void operator()(const BranchedAtom &bAtom, const Atom *prev, const Atom *next) {
+	lib::IO::Result<> operator()(const BranchedAtom &bAtom, const Atom *prev, const Atom *next) {
 		if(!bAtom.atom.isImplicit) {
 			const auto &ch = bAtom.atom.chiral;
 			if(!ch.specifier.empty()) {
 				if(getConfig().graph.ignoreStereoInSmiles.get()) {
-					if(getConfig().graph.printSmilesParsingWarnings.get())
-						std::cout << "WARNING: ignoring stereochemical information (" << ch
-						          << ") in SMILES, requested by user." << std::endl;
+					warnings.add("Ignoring stereochemical information ("
+					             + boost::lexical_cast<std::string>(ch)
+					             + ") in SMILES, requested by user.",
+					             getConfig().graph.printSmilesParsingWarnings.get());
 				} else {
 					if(ch.specifier == "@" || ch.specifier == "@@") {
-						assignTetrahedral(ch.specifier, bAtom, prev, next);
+						if(auto res = assignTetrahedral(ch.specifier, bAtom, prev, next); !res) return res;
 					} else { // not @ or @@
-						if(getConfig().graph.printSmilesParsingWarnings.get())
-							std::cout << "WARNING: stereochemical information (" << ch << ") in SMILES string ignored."
-							          << std::endl;
+						warnings.add("Stereochemical information ("
+						             + boost::lexical_cast<std::string>(ch)
+						             + ") in SMILES string not handled.",
+						             getConfig().graph.printSmilesParsingWarnings.get());
 					}
 				}
 			}
 		}
 		for(auto &b : bAtom.branches)
-			(*this)(b, bAtom.atom);
+			if(auto res = (*this)(b, bAtom.atom); !res) return res;
+		return {};
 	}
-
 private:
-	void assignTetrahedral(const std::string &winding, const BranchedAtom &bAtom, const Atom *prev, const Atom *next) {
+	lib::IO::Result<>
+	assignTetrahedral(const std::string &winding, const BranchedAtom &bAtom, const Atom *prev, const Atom *next) {
 		const auto v = bAtom.atom.vertex;
+		const auto comp = components[bAtom.atom.connectedComponentID];
+		const auto &g = *gPtrs[comp];
 		const std::vector<Edge> oes(out_edges(v, g).first, out_edges(v, g).second);
 		if(oes.size() != 4) {
-			if(getConfig().graph.printSmilesParsingWarnings.get())
-				std::cout << "WARNING: Ignoring stereo information in SMILES. Can not add tetrahedral geometry to vertex ("
-				          << bAtom.atom << ") with degree " << oes.size() << ". Must be 4." << std::endl;
-			return;
+			warnings.add("Ignoring stereo information in SMILES. Can not add tetrahedral geometry to vertex ("
+			             + boost::lexical_cast<std::string>(bAtom.atom) + ") with degree " +
+			             std::to_string(oes.size()) + ". Must be 4.",
+			             getConfig().graph.printSmilesParsingWarnings.get());
+			return {};
 		}
 		std::vector<bool> used(oes.size(), false);
 		std::vector<Edge> edgesToAdd;
 		const auto addNeighbour = [&](const auto &v) {
-			const auto eIter = std::find_if(oes.begin(), oes.end(), [v, this](const auto &e) {
+			const auto eIter = std::find_if(oes.begin(), oes.end(), [v, &g](const auto &e) {
 				return target(e, g) == v;
 			});
 			assert(eIter != oes.end());
@@ -715,31 +843,37 @@ private:
 		// And finally try to add them to the inferrence.
 		// But for now, only if we are sure to add all edges.
 		assert(edgesToAdd.size() == oes.size());
-		hasAssigned = true;
-		inf.assignGeometry(v, lib::Stereo::getGeometryGraph().tetrahedral, err);
+		hasAssigned[comp] = true;
+		auto &inf = infs[comp];
+		if(auto res = inf.assignGeometry(v, lib::Stereo::getGeometryGraph().tetrahedral); !res) return res;
 		inf.initEmbedding(v);
 		inf.fixSimpleGeometry(v);
-		if(winding == "@@" && !edgesToAdd.empty()) {
+		if(winding == "@@" && !edgesToAdd.empty())
 			std::reverse(edgesToAdd.begin() + 1, edgesToAdd.end());
-		}
 		for(const auto &e : edgesToAdd) inf.addEdge(v, e);
+		return {};
 	}
-
 public:
-	const lib::Graph::GraphType &g;
-	const lib::Graph::PropMolecule &pMol;
-	lib::Stereo::Inference<lib::Graph::GraphType, lib::Graph::PropMolecule> inf;
-	std::ostream &err;
-	bool hasAssigned = false;
+	std::vector<std::unique_ptr<lib::Graph::GraphType>> &gPtrs;
+	const std::vector<lib::Graph::PropMolecule> &pMols;
+	const lib::IO::Graph::Read::ConnectedComponents &components;
+	lib::IO::Warnings &warnings;
+public:
+	std::vector<lib::Stereo::Inference<lib::Graph::GraphType, lib::Graph::PropMolecule>> infs;
+	std::vector<bool> hasAssigned;
 };
 
-lib::IO::Graph::Read::Data parseSmiles(const std::string &smiles, std::ostream &err, const bool allowAbstract,
-                                       SmilesClassPolicy classPolicy) {
+lib::IO::Result<std::vector<lib::IO::Graph::Read::Data>>
+parseSmiles(lib::IO::Warnings &warnings, const std::string &smiles, const bool allowAbstract,
+            SmilesClassPolicy classPolicy) {
 	using IteratorType = std::string::const_iterator;
 	IteratorType iterStart = begin(smiles), iterEnd = end(smiles);
 	SmilesChain ast;
-	bool res = lib::IO::parse(iterStart, iterEnd, parser::smiles, ast, err);
-	if(!res) return lib::IO::Graph::Read::Data();
+	try {
+		lib::IO::parse(iterStart, iterEnd, parser::smiles, ast);
+	} catch(const lib::IO::ParsingError &e) {
+		return lib::IO::Result<>::Error(e.msg);
+	}
 	if(getConfig().graph.smilesCheckAST.get()) {
 		std::stringstream astStr;
 		astStr << ast;
@@ -760,23 +894,43 @@ lib::IO::Graph::Read::Data parseSmiles(const std::string &smiles, std::ostream &
 		}
 	}
 
-	auto gPtr = std::make_unique<lib::Graph::GraphType>();
-	auto pStringPtr = std::make_unique<lib::Graph::PropString>(*gPtr);
-	Converter conv(*gPtr, *pStringPtr, err, allowAbstract);
-	res = conv(ast);
-	if(!res) return lib::IO::Graph::Read::Data();
-	if(conv.openRings.size() > 0) {
-		err << "Error in SMILES conversion: unclosed rings (";
-		auto iter = begin(conv.openRings);
-		err << (int) iter->first;
-		for(iter++; iter != end(conv.openRings); iter++) err << ", " << (int) iter->first;
-		err << ")" << std::endl;
-		return lib::IO::Graph::Read::Data();
+	{ // Rings
+		RingResolver rings;
+		if(auto res = rings(ast); !res) return res;
+		if(!rings.openRings.empty()) {
+			auto iter = begin(rings.openRings);
+			std::string msg = "Error in SMILES conversion: unclosed rings ("
+			                  + std::to_string(static_cast<int>(iter->first));
+			for(iter++; iter != end(rings.openRings); iter++) {
+				msg += ", ";
+				msg += std::to_string(static_cast<int>(iter->first));
+			}
+			msg += ")\n";
+			return lib::IO::Result<>::Error(std::move(msg));
+		}
 	}
-	(ExplicitHydrogenAdder(*gPtr, *pStringPtr))(ast);
-	(ImplicitHydrogenAdder(*gPtr, *pStringPtr)(ast));
 
-	lib::IO::Graph::Read::Data data;
+	const int numAtoms = AssignConnectedComponentID()(ast);
+	lib::IO::Graph::Read::ConnectedComponents components(numAtoms);
+	(JoinConnected(components)(ast));
+	const int numComponents = components.finalize();
+	for(int i = 0; i != numAtoms; ++i) {
+		assert(components[i] >= 0);
+		assert(components[i] < numComponents);
+	}
+
+	std::vector<std::unique_ptr<lib::Graph::GraphType>> gPtrs(numComponents);
+	std::vector<std::unique_ptr<lib::Graph::PropString>> pStringPtrs(numComponents);
+	for(int i = 0; i != numComponents; ++i) {
+		gPtrs[i] = std::make_unique<lib::Graph::GraphType>();
+		pStringPtrs[i] = std::make_unique<lib::Graph::PropString>(*gPtrs[i]);
+	}
+	Converter conv(gPtrs, pStringPtrs, components, warnings, allowAbstract);
+	if(auto res = conv(ast); !res) return res;
+	(ExplicitHydrogenAdder(gPtrs, pStringPtrs, components))(ast);
+	(ImplicitHydrogenAdder(gPtrs, pStringPtrs, components)(ast));
+
+	std::vector<lib::IO::Graph::Read::Data> datas(numComponents);
 
 	const auto iter = std::find_if(conv.classToVertexId.begin(), conv.classToVertexId.end(), [&conv](auto &vp) {
 		return conv.classToVertexId.count(vp.first) > 1;
@@ -789,10 +943,10 @@ lib::IO::Graph::Read::Data parseSmiles(const std::string &smiles, std::ostream &
 		break;
 	case SmilesClassPolicy::ThrowOnDuplicate:
 		if(iter != conv.classToVertexId.end()) {
-			err << "Error in SMILES conversion: class label " << iter->first << " is used more than once ("
-			    << conv.classToVertexId.count(iter->first) << "), and the class label policy is "
-			    << SmilesClassPolicy::ThrowOnDuplicate << ".";
-			return {};
+			return lib::IO::Result<>::Error(
+					"Error in SMILES conversion: class label " + std::to_string(iter->first) + " is used more than once ("
+					+ std::to_string(conv.classToVertexId.count(iter->first)) + "), and the class label policy is "
+					+ boost::lexical_cast<std::string>(SmilesClassPolicy::ThrowOnDuplicate) + ".");
 		}
 		break;
 	case SmilesClassPolicy::MapUnique:
@@ -802,49 +956,52 @@ lib::IO::Graph::Read::Data parseSmiles(const std::string &smiles, std::ostream &
 		if(classPolicy == SmilesClassPolicy::MapUnique) {
 			for(auto &&vp : conv.classToVertexId) {
 				if(conv.classToVertexId.count(vp.first) > 1) continue;
-				data.externalToInternalIds[vp.first] = get(boost::vertex_index_t(), *gPtr, vp.second);
+				datas[vp.second.first].externalToInternalIds[vp.first]
+						= get(boost::vertex_index_t(), *gPtrs[vp.second.first], vp.second.second);
 			}
 		} else {
-			for(auto &&vp : conv.classToVertexId)
-				data.externalToInternalIds[vp.first] = get(boost::vertex_index_t(), *gPtr, vp.second);
+			for(auto &&vp : conv.classToVertexId) {
+				datas[vp.second.first].externalToInternalIds[vp.first]
+						= get(boost::vertex_index_t(), *gPtrs[vp.second.first], vp.second.second);
+			}
 		}
 	}
 
 	if(conv.hasStereo) {
-		lib::Graph::PropMolecule pMol(*gPtr, *pStringPtr);
-		StereoConverter stereoConv(*gPtr, pMol, err);
-		stereoConv(ast);
-		if(stereoConv.hasAssigned) {
-			std::stringstream finalizeErr;
-			auto deductionResult = stereoConv.inf.finalize(finalizeErr, [&](auto v) {
-				return get(boost::vertex_index_t(), *gPtr, v);
-			});
-			switch(deductionResult) {
-			case lib::Stereo::DeductionResult::Success:
-				break;
-			case lib::Stereo::DeductionResult::Warning:
-				if(!getConfig().stereo.silenceDeductionWarnings.get())
-					std::cout << finalizeErr.str();
-				break;
-			case lib::Stereo::DeductionResult::Error:
-				err << finalizeErr.str();
-				return lib::IO::Graph::Read::Data();
+		std::vector<lib::Graph::PropMolecule> pMols;
+		for(int i = 0; i != numComponents; ++i)
+			pMols.emplace_back(*gPtrs[i], *pStringPtrs[i]);
+		StereoConverter stereoConv(gPtrs, pMols, components, warnings);
+		if(auto res = stereoConv(ast); !res) return res;
+		for(int i = 0; i != numComponents; ++i) {
+			if(stereoConv.hasAssigned[i]) {
+				lib::IO::Warnings deductionWarnings;
+				auto deductionResult = stereoConv.infs[i].finalize(deductionWarnings, [&](auto v) {
+					return std::to_string(get(boost::vertex_index_t(), *gPtrs[i], v));
+				});
+				warnings.addFrom(std::move(deductionWarnings),
+				                 !getConfig().stereo.silenceDeductionWarnings.get());
+				if(!deductionResult) return deductionResult;
+				datas[i].pStereo = std::make_unique<lib::Graph::PropStereo>(*gPtrs[i], std::move(stereoConv.infs[i]));
 			}
-			data.pStereo = std::make_unique<lib::Graph::PropStereo>(*gPtr, std::move(stereoConv.inf));
 		}
 	}
-	data.g = std::move(gPtr);
-	data.pString = std::move(pStringPtr);
-	return data;
+	for(int i = 0; i != numComponents; ++i) {
+		assert(gPtrs[i]);
+		datas[i].g = std::move(gPtrs[i]);
+		datas[i].pString = std::move(pStringPtrs[i]);
+	}
+	return lib::IO::Result<std::vector<lib::IO::Graph::Read::Data>>(std::move(datas));
 }
 
 } // namespace
 } // namespace mod::lib::Chem::Smiles
 namespace mod::lib::Chem {
 
-lib::IO::Graph::Read::Data
-readSmiles(const std::string &smiles, std::ostream &err, const bool allowAbstract, SmilesClassPolicy classPolicy) {
-	return Smiles::parseSmiles(smiles, err, allowAbstract, classPolicy);
+lib::IO::Result<std::vector<lib::IO::Graph::Read::Data>>
+readSmiles(lib::IO::Warnings &warnings, const std::string &smiles, const bool allowAbstract,
+           SmilesClassPolicy classPolicy) {
+	return Smiles::parseSmiles(warnings, smiles, allowAbstract, classPolicy);
 }
 
 } // namespace mod::lib::Chem

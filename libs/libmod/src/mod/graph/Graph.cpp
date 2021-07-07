@@ -17,59 +17,56 @@
 
 #include <cassert>
 #include <fstream>
+#include <iostream>
 
 namespace mod::graph {
 
 // Graph
 //------------------------------------------------------------------------------
 
-struct Graph::Pimpl {
-	Pimpl(std::unique_ptr<lib::Graph::Single> g) : g(std::move(g)) {
-		assert(this->g);
-	}
-public:
-	const std::unique_ptr<lib::Graph::Single> g;
-	std::unique_ptr<const std::map<int, std::size_t> > externalToInternalIds;
+struct Graph::ExternalData {
+	std::map<int, std::size_t> externalToInternalIds;
+	std::vector<std::pair<std::string, bool>> warnings;
 };
 
-Graph::Graph(std::unique_ptr<lib::Graph::Single> g) : p(new Pimpl(std::move(g))) {}
+Graph::Graph(std::unique_ptr<lib::Graph::Single> g) : g(std::move(g)) {}
 
-Graph::~Graph() {}
+Graph::~Graph() = default;
 
 std::size_t Graph::getId() const {
-	return p->g->getId();
+	return g->getId();
 }
 
 std::ostream &operator<<(std::ostream &s, const Graph &g) {
-	return s << "'" << g.getGraph().getName() << "'";
+	return s << "'" << g.g->getName() << "'";
 }
 
 lib::Graph::Single &Graph::getGraph() const {
-	return *p->g;
+	return *g;
 }
 
 //------------------------------------------------------------------------------
 
 std::size_t Graph::numVertices() const {
-	return num_vertices(p->g->getGraph());
+	return num_vertices(g->getGraph());
 }
 
 Graph::VertexRange Graph::vertices() const {
-	return VertexRange(p->g->getAPIReference());
+	return VertexRange(g->getAPIReference());
 }
 
 std::size_t Graph::numEdges() const {
-	return num_edges(p->g->getGraph());
+	return num_edges(g->getGraph());
 }
 
 Graph::EdgeRange Graph::edges() const {
-	return EdgeRange(p->g->getAPIReference());
+	return EdgeRange(g->getAPIReference());
 }
 
 //------------------------------------------------------------------------------
 
 Graph::AutGroup Graph::aut(LabelSettings labelSettings) const {
-	return AutGroup(p->g->getAPIReference(), labelSettings);
+	return AutGroup(g->getAPIReference(), labelSettings);
 }
 
 //------------------------------------------------------------------------------
@@ -82,81 +79,81 @@ std::pair<std::string, std::string> Graph::print() const {
 }
 
 std::pair<std::string, std::string> Graph::print(const Printer &first, const Printer &second) const {
-	return lib::IO::Graph::Write::summary(*p->g, first.getOptions(), second.getOptions());
+	return lib::IO::Graph::Write::summary(*g, first.getOptions(), second.getOptions());
 }
 
 void Graph::printTermState() const {
-	lib::IO::Graph::Write::termState(*p->g);
+	lib::IO::Graph::Write::termState(*g);
 }
 
 std::string Graph::getGMLString(bool withCoords) const {
-	if(withCoords && !getGraph().getDepictionData().getHasCoordinates())
+	if(withCoords && !g->getDepictionData().getHasCoordinates())
 		throw LogicError("Coordinates are not available for this graph (" + getName() + ").");
 	std::stringstream ss;
-	lib::IO::Graph::Write::gml(getGraph(), withCoords, ss);
+	lib::IO::Graph::Write::gml(*g, withCoords, ss);
 	return ss.str();
 }
 
 std::string Graph::printGML(bool withCoords) const {
-	if(withCoords && !getGraph().getDepictionData().getHasCoordinates())
+	if(withCoords && !g->getDepictionData().getHasCoordinates())
 		throw LogicError("Coordinates are not available for this graph (" + getName() + ").");
-	return lib::IO::Graph::Write::gml(getGraph(), withCoords);
+	return lib::IO::Graph::Write::gml(*g, withCoords);
 }
 
 const std::string &Graph::getName() const {
-	return p->g->getName();
+	return g->getName();
 }
 
 void Graph::setName(std::string name) const {
-	p->g->setName(name);
+	g->setName(name);
 }
 
 const std::string &Graph::getSmiles() const {
-	return p->g->getSmiles();
+	return g->getSmiles();
 }
 
 const std::string &Graph::getSmilesWithIds() const {
-	return p->g->getSmilesWithIds();
+	return g->getSmilesWithIds();
 }
 
 const std::string &Graph::getGraphDFS() const {
-	return p->g->getGraphDFS().first;
+	return g->getGraphDFS().first;
 }
 
 const std::string &Graph::getGraphDFSWithIds() const {
-	return p->g->getGraphDFSWithIds();
+	return g->getGraphDFSWithIds();
 }
 
 const std::string &Graph::getLinearEncoding() const {
-	if(p->g->getMoleculeState().getIsMolecule()) return p->g->getSmiles();
-	else return p->g->getGraphDFS().first;
+	if(g->getMoleculeState().getIsMolecule()) return g->getSmiles();
+	else return g->getGraphDFS().first;
 }
 
 bool Graph::getIsMolecule() const {
-	return p->g->getMoleculeState().getIsMolecule();
+	return g->getMoleculeState().getIsMolecule();
 }
 
 double Graph::getEnergy() const {
-	if(getIsMolecule()) return p->g->getMoleculeState().getEnergy();
+	if(getIsMolecule()) return g->getMoleculeState().getEnergy();
 	else return std::numeric_limits<double>::quiet_NaN();
 }
 
 void Graph::cacheEnergy(double value) const {
-	if(getIsMolecule()) p->g->getMoleculeState().cacheEnergy(value);
+	if(getIsMolecule()) g->getMoleculeState().cacheEnergy(value);
 	else throw LogicError("Graph::cacheEnergy: Caching of energy failed. '" + getName() + "' is not a molecule.\n");
 }
 
 double Graph::getExactMass() const {
 	if(!getIsMolecule()) throw LogicError("Can not get exact mass of a non-molecule.");
-	return p->g->getMoleculeState().getExactMass();
+	return g->getMoleculeState().getExactMass();
 }
 
 unsigned int Graph::vLabelCount(const std::string &label) const {
-	return p->g->getVertexLabelCount(label);
+	return g->getVertexLabelCount(label);
 }
 
 unsigned int Graph::eLabelCount(const std::string &label) const {
-	return p->g->getEdgeLabelCount(label);
+	return g->getEdgeLabelCount(label);
 }
 
 namespace {
@@ -174,60 +171,65 @@ void checkTermParsing(const lib::Graph::Single &g, LabelSettings ls) {
 } // namespace
 
 std::size_t
-Graph::isomorphism(std::shared_ptr<graph::Graph> g, std::size_t maxNumMatches, LabelSettings labelSettings) const {
-	checkTermParsing(this->getGraph(), labelSettings);
-	checkTermParsing(g->getGraph(), labelSettings);
-	return lib::Graph::Single::isomorphism(getGraph(), g->getGraph(), maxNumMatches, labelSettings);
+Graph::isomorphism(std::shared_ptr<graph::Graph> host, std::size_t maxNumMatches, LabelSettings labelSettings) const {
+	checkTermParsing(*g, labelSettings);
+	checkTermParsing(*host->g, labelSettings);
+	return lib::Graph::Single::isomorphism(*g, *host->g, maxNumMatches, labelSettings);
 }
 
 std::size_t
-Graph::monomorphism(std::shared_ptr<graph::Graph> g, std::size_t maxNumMatches, LabelSettings labelSettings) const {
-	checkTermParsing(this->getGraph(), labelSettings);
-	checkTermParsing(g->getGraph(), labelSettings);
-	return lib::Graph::Single::monomorphism(getGraph(), g->getGraph(), maxNumMatches, labelSettings);
+Graph::monomorphism(std::shared_ptr<graph::Graph> host, std::size_t maxNumMatches, LabelSettings labelSettings) const {
+	checkTermParsing(*g, labelSettings);
+	checkTermParsing(*host->g, labelSettings);
+	return lib::Graph::Single::monomorphism(*g, *host->g, maxNumMatches, labelSettings);
 }
 
 std::shared_ptr<Graph> Graph::makePermutation() const {
-	auto gPerm = makeGraph(std::make_unique<lib::Graph::Single>(lib::Graph::makePermutation(getGraph())));
+	auto gPerm = create(std::make_unique<lib::Graph::Single>(lib::Graph::makePermutation(*g)));
 	gPerm->setName(getName() + " perm");
 	return gPerm;
 }
 
-void Graph::setImage(std::shared_ptr<mod::Function<std::string()> > image) {
-	getGraph().getDepictionData().setImage(image);
+void Graph::setImage(std::shared_ptr<mod::Function<std::string()>> image) {
+	g->getDepictionData().setImage(image);
 }
 
 std::shared_ptr<mod::Function<std::string()> > Graph::getImage() const {
-	return getGraph().getDepictionData().getImage();
+	return g->getDepictionData().getImage();
 }
 
 void Graph::setImageCommand(std::string cmd) {
-	getGraph().getDepictionData().setImageCommand(cmd);
+	g->getDepictionData().setImageCommand(cmd);
 }
 
 std::string Graph::getImageCommand() const {
-	return getGraph().getDepictionData().getImageCommand();
-}
-
-Graph::Vertex Graph::getVertexFromExternalId(int id) const {
-	if(!p->externalToInternalIds) return Vertex();
-	auto iter = p->externalToInternalIds->find(id);
-	if(iter == end(*p->externalToInternalIds)) return Vertex();
-	return Vertex(p->g->getAPIReference(), iter->second);
-}
-
-int Graph::getMinExternalId() const {
-	if(!p->externalToInternalIds) return 0;
-	return p->externalToInternalIds->begin()->first;
-}
-
-int Graph::getMaxExternalId() const {
-	if(!p->externalToInternalIds) return 0;
-	return (--p->externalToInternalIds->end())->first;
+	return g->getDepictionData().getImageCommand();
 }
 
 void Graph::instantiateStereo() const {
-	get_stereo(getGraph().getLabelledGraph());
+	get_stereo(g->getLabelledGraph());
+}
+
+Graph::Vertex Graph::getVertexFromExternalId(int id) const {
+	if(!externalData || externalData->externalToInternalIds.empty()) return Vertex();
+	const auto iter = externalData->externalToInternalIds.find(id);
+	if(iter == end(externalData->externalToInternalIds)) return Vertex();
+	return Vertex(g->getAPIReference(), iter->second);
+}
+
+int Graph::getMinExternalId() const {
+	if(!externalData || externalData->externalToInternalIds.empty()) return 0;
+	return externalData->externalToInternalIds.begin()->first;
+}
+
+int Graph::getMaxExternalId() const {
+	if(!externalData || externalData->externalToInternalIds.empty()) return 0;
+	return (--externalData->externalToInternalIds.end())->first;
+}
+
+std::vector<std::pair<std::string, bool>> Graph::getLoadingWarnings() const {
+	if(!externalData) throw LogicError("Can not get loading warnings. No data from external loading stored.");
+	return externalData->warnings;
 }
 
 //------------------------------------------------------------------------------
@@ -237,73 +239,125 @@ void Graph::instantiateStereo() const {
 namespace {
 
 std::shared_ptr<Graph>
-handleLoadedGraph(lib::IO::Graph::Read::Data data, const std::string &source, std::ostringstream &err) {
-	if(!data.g) {
-		throw InputError("Error in graph loading from " + source + ".\n" + err.str());
-	}
-	{ // check connectedness
-		std::vector<std::size_t> cMap(num_vertices(*data.g));
-		auto numComponents = boost::connected_components(*data.g, cMap.data());
-		if(numComponents > 1) {
-			throw InputError("Error in graph loading from " + source
-			                 + ".\nThe graph is not connected (" + std::to_string(numComponents) + " components).");
-		}
-	}
-	auto gInternal = std::make_unique<lib::Graph::Single>(std::move(data.g), std::move(data.pString),
-	                                                      std::move(data.pStereo));
-	std::shared_ptr<Graph> g = Graph::makeGraph(std::move(gInternal), std::move(data.externalToInternalIds));
+makeGraphFromData(lib::IO::Graph::Read::Data data, std::vector<std::pair<std::string, bool>> warnings) {
+	auto gInternal = std::make_unique<lib::Graph::Single>(
+			std::move(data.g), std::move(data.pString), std::move(data.pStereo));
+	std::shared_ptr<Graph> g = Graph::create(std::move(gInternal),
+	                                         std::move(data.externalToInternalIds),
+	                                         std::move(warnings));
 	return g;
+}
+
+std::shared_ptr<Graph>
+handleLoadedGraph(lib::IO::Result<std::vector<lib::IO::Graph::Read::Data>> dataRes, lib::IO::Warnings warnings,
+                  const std::string &source) {
+	std::cout << warnings << std::flush;
+	if(!dataRes) throw InputError("Error in graph loading from " + source + ".\n" + dataRes.extractError());
+	auto data = std::move(*dataRes);
+	if(data.size() != 1)
+		throw InputError("Error in graph loading from " + source
+		                 + ".\nThe graph is not connected (" + std::to_string(data.size()) + " components).");
+	return makeGraphFromData(std::move(data.front()), warnings.extractWarnings());
+}
+
+std::vector<std::shared_ptr<Graph>>
+handleLoadedGraphs(lib::IO::Result<std::vector<lib::IO::Graph::Read::Data>> dataRes, lib::IO::Warnings warnings,
+                   const std::string &source) {
+	std::cout << warnings << std::flush;
+	if(!dataRes) throw InputError("Error in graph loading from " + source + ".\n" + dataRes.extractError());
+	auto data = std::move(*dataRes);
+	// the warnings are copied into each graph
+	const auto warningList = warnings.extractWarnings();
+	std::vector<std::shared_ptr<Graph>> res;
+	res.reserve(data.size());
+	for(auto &d : data)
+		res.push_back(makeGraphFromData(std::move(d), warningList));
+	return res;
 }
 
 } // namespace
 
-std::shared_ptr<Graph> Graph::graphGMLString(const std::string &data) {
-	std::ostringstream err;
-	auto gData = lib::IO::Graph::Read::gml(data, err);
-	return handleLoadedGraph(std::move(gData), "inline GML string", err);
+std::shared_ptr<Graph> Graph::fromGMLString(const std::string &data) {
+	lib::IO::Warnings warnings;
+	auto res = lib::IO::Graph::Read::gml(warnings, data);
+	return handleLoadedGraph(std::move(res), std::move(warnings), "inline GML string");
 }
 
-std::shared_ptr<Graph> Graph::graphGML(const std::string &file) {
-	boost::iostreams::mapped_file_source ifs(file);
-	std::ostringstream err;
-	if(!ifs) {
-		err << "Could not open graph GML file '" << file << "'.\n";
-		throw InputError(err.str());
+std::shared_ptr<Graph> Graph::fromGMLFile(const std::string &file) {
+	boost::iostreams::mapped_file_source ifs;
+	try {
+		ifs.open(file);
+	} catch(const BOOST_IOSTREAMS_FAILURE &e) {
+		throw InputError("Could not open graph GML file '" + file + "':\n" + e.what());
 	}
-	auto gData = lib::IO::Graph::Read::gml({ifs.begin(), ifs.size()}, err);
-	return handleLoadedGraph(std::move(gData), "file, '" + file + "'", err);
+	if(!ifs) throw InputError("Could not open graph GML file '" + file + "'.\n");
+	lib::IO::Warnings warnings;
+	auto res = lib::IO::Graph::Read::gml(warnings, {ifs.begin(), ifs.size()});
+	return handleLoadedGraph(std::move(res), std::move(warnings), "file, '" + file + "'");
 }
 
-std::shared_ptr<Graph> Graph::graphDFS(const std::string &graphDFS) {
-	std::ostringstream err;
-	auto gData = lib::IO::Graph::Read::dfs(graphDFS, err);
-	return handleLoadedGraph(std::move(gData), "graphDFS, '" + graphDFS + "'", err);
+std::vector<std::shared_ptr<Graph>> Graph::fromGMLStringMulti(const std::string &data) {
+	lib::IO::Warnings warnings;
+	auto res = lib::IO::Graph::Read::gml(warnings, data);
+	return handleLoadedGraphs(std::move(res), std::move(warnings), "inline GML string");
 }
 
-std::shared_ptr<Graph> Graph::smiles(const std::string &smiles) {
-	return Graph::smiles(smiles, false, SmilesClassPolicy::NoneOnDuplicate);
+std::vector<std::shared_ptr<Graph>> Graph::fromGMLFileMulti(const std::string &file) {
+	boost::iostreams::mapped_file_source ifs;
+	try {
+		ifs.open(file);
+	} catch(const BOOST_IOSTREAMS_FAILURE &e) {
+		throw InputError("Could not open graph GML file '" + file + "':\n" + e.what());
+	}
+	if(!ifs) throw InputError("Could not open graph GML file '" + file + "'.\n");
+	lib::IO::Warnings warnings;
+	auto res = lib::IO::Graph::Read::gml(warnings, {ifs.begin(), ifs.size()});
+	return handleLoadedGraphs(std::move(res), std::move(warnings), "file, '" + file + "'");
+}
+
+std::shared_ptr<Graph> Graph::fromDFS(const std::string &graphDFS) {
+	auto data = lib::IO::Graph::Read::dfs(graphDFS);
+	if(!data) throw InputError("Error in graph loading from graphDFS, '" + graphDFS + "'.\n" + data.extractError());
+	return makeGraphFromData(std::move(*data), {});
+}
+
+std::shared_ptr<Graph> Graph::fromSMILES(const std::string &smiles) {
+	return Graph::fromSMILES(smiles, false, SmilesClassPolicy::NoneOnDuplicate);
 }
 
 std::shared_ptr<Graph>
-Graph::smiles(const std::string &smiles, const bool allowAbstract, SmilesClassPolicy classPolicy) {
-	std::ostringstream err;
-	auto gData = lib::IO::Graph::Read::smiles(smiles, err, allowAbstract, classPolicy);
-	return handleLoadedGraph(std::move(gData), "smiles string, '" + smiles + "'", err);
+Graph::fromSMILES(const std::string &smiles, const bool allowAbstract, SmilesClassPolicy classPolicy) {
+	lib::IO::Warnings warnings;
+	auto res = lib::IO::Graph::Read::smiles(warnings, smiles, allowAbstract, classPolicy);
+	return handleLoadedGraph(std::move(res), std::move(warnings), "smiles string, '" + smiles + "'");
 }
 
-std::shared_ptr<Graph> Graph::makeGraph(std::unique_ptr<lib::Graph::Single> g) {
-	return makeGraph(std::move(g), {});
+std::vector<std::shared_ptr<Graph>> Graph::fromSMILESMulti(const std::string &smiles) {
+	return fromSMILESMulti(smiles, false, SmilesClassPolicy::NoneOnDuplicate);
 }
 
-std::shared_ptr<Graph>
-Graph::makeGraph(std::unique_ptr<lib::Graph::Single> g, std::map<int, std::size_t> externalToInternalIds) {
+std::vector<std::shared_ptr<Graph>>
+Graph::fromSMILESMulti(const std::string &smiles, bool allowAbstract, SmilesClassPolicy classPolicy) {
+	lib::IO::Warnings warnings;
+	auto res = lib::IO::Graph::Read::smiles(warnings, smiles, allowAbstract, classPolicy);
+	return handleLoadedGraphs(std::move(res), std::move(warnings), "smiles string, '" + smiles + "'");
+}
+
+std::shared_ptr<Graph> Graph::create(std::unique_ptr<lib::Graph::Single> g) {
 	if(!g) MOD_ABORT;
 	std::shared_ptr<Graph> wrapped = std::shared_ptr<Graph>(new Graph(std::move(g)));
-	wrapped->p->g->setAPIReference(wrapped);
-	if(!externalToInternalIds.empty()) {
-		wrapped->p->externalToInternalIds = std::make_unique<std::map<int, std::size_t> >(
-				std::move(externalToInternalIds));
-	}
+	wrapped->g->setAPIReference(wrapped);
+	return wrapped;
+}
+
+std::shared_ptr<Graph> Graph::create(std::unique_ptr<lib::Graph::Single> g,
+                                     std::map<int, std::size_t> externalToInternalIds,
+                                     std::vector<std::pair<std::string, bool>> warnings) {
+	auto wrapped = create(std::move(g));
+	auto externalData = std::make_unique<ExternalData>();
+	externalData->externalToInternalIds = std::move(externalToInternalIds);
+	externalData->warnings = std::move(warnings);
+	wrapped->externalData = std::move(externalData);
 	return wrapped;
 }
 

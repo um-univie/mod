@@ -31,6 +31,7 @@ WORKDIR /opt/mod
 COPY ./build/mod-*.tar.gz ./build/
 COPY ./conda/build.sh ./conda/
 COPY ./conda/meta.yaml ./conda/
+COPY ./conda/conda_build_config.yaml ./conda/
 RUN conda build -c jakobandersen -c conda-forge ./conda
 
 

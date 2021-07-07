@@ -459,7 +459,7 @@ void Builder::addAbstract(const std::string &description) {
 			auto gBoost = std::make_unique<lib::Graph::GraphType>();
 			auto pString = std::make_unique<lib::Graph::PropString>(*gBoost);
 			auto gLib = std::make_unique<lib::Graph::Single>(std::move(gBoost), std::move(pString), nullptr);
-			auto g = graph::Graph::makeGraph(std::move(gLib));
+			auto g = graph::Graph::create(std::move(gLib));
 			dg->addProduct(g); // this renames it
 			g->setName(e.second);
 			strToGraph[e.second] = g;
@@ -503,7 +503,13 @@ void Builder::addAbstract(const std::string &description) {
 
 bool Builder::load(const std::vector<std::shared_ptr<rule::Rule>> &ruleDatabase,
                    const std::string &file, std::ostream &err, int verbosity) {
-	boost::iostreams::mapped_file_source ifs(file);
+	boost::iostreams::mapped_file_source ifs;
+	try {
+		ifs.open(file);
+	} catch(const BOOST_IOSTREAMS_FAILURE &e) {
+		err << "Could not open file '" << file << "':\n" << e.what();
+		return {};
+	}
 	if(ifs.size() > 8 && std::string(ifs.begin(), ifs.begin() + 8) == "version:") {
 		ifs.close();
 		err << "Dump version too old to load into an existing DG."
@@ -549,18 +555,28 @@ bool Builder::trustLoadDump(nlohmann::json &&j,
 		Vertex v;
 		v.id = jv[0].get<int>();
 		const std::string &gml = jv[2].get<std::string>();
-		auto gData = lib::IO::Graph::Read::gml(gml, err);
-		if(!gData.g) {
+		lib::IO::Warnings warnings;
+		auto gDatasRes = lib::IO::Graph::Read::gml(warnings, gml);
+		err << warnings;
+		if(!gDatasRes) {
+			err << gDatasRes.extractError() << '\n';
 			err << "Error when loading graph GML in DG dump, for graph '";
 			err << jv[1].get<std::string>() << "', in vertex " << v.id << ".";
 			return false;
 		}
-		auto gCand = std::make_unique<lib::Graph::Single>(std::move(gData.g),
-		                                                  std::move(gData.pString), std::move(gData.pStereo));
+		auto gDatas = std::move(*gDatasRes);
+		if(gDatas.size() != 1) {
+			err << "Loaded graph has multiple connected components (" << gDatas.size() << "). ";
+			err << "Error when loading graph GML in DG dump, for graph '";
+			err << jv[1].get<std::string>() << "', in vertex " << v.id << ".";
+			return false;
+		}
+		auto gCand = std::make_unique<lib::Graph::Single>(
+				std::move(gDatas.front().g), std::move(gDatas.front().pString), std::move(gDatas.front().pStereo));
 		gCand->setName(jv[1].get<std::string>());
 		auto p = dg->checkIfNew(std::move(gCand));
 		v.graph = p.first;
-		v.wasNew = p.second;
+		v.wasNew = p.second == nullptr;
 		vertices.push_back(std::move(v));
 	}
 	// now the vertices are ready to be added
@@ -572,7 +588,7 @@ bool Builder::trustLoadDump(nlohmann::json &&j,
 	const auto ls = dg->getLabelSettings();
 	for(const auto &j : jRules) {
 		const std::string &jr = j.get<std::string>();
-		auto rCand = rule::Rule::ruleGMLString(jr, false);
+		auto rCand = rule::Rule::fromGMLString(jr, false);
 		const auto iter = std::find_if(ruleDatabase.begin(), ruleDatabase.end(), [rCand, ls](const auto &r) {
 			return r->isomorphism(rCand, 1, ls) == 1;
 		});

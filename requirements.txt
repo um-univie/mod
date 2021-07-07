@@ -1,2 +1,2 @@
 -r requirements_nodoc.txt
-sphinx>=3.4
+sphinx>=3.5

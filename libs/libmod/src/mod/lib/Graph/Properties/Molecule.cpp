@@ -51,7 +51,7 @@ const lib::Chem::OBMolHandle &PropMolecule::getOBMol() const {
 		MOD_ABORT;
 	}
 	if(!obMol) {
-		obMol = Chem::makeOBMol(this->g, [this](Vertex v) -> const AtomData & {
+		obMol = Chem::makeOBMol(*this->g, [this](Vertex v) -> const AtomData & {
 			return (*this)[v];
 		}, [this](Edge e) {
 			return (*this)[e];
@@ -65,7 +65,7 @@ const lib::Chem::OBMolHandle &PropMolecule::getOBMol() const {
 double PropMolecule::getExactMass() const {
 	if(!getIsMolecule()) MOD_ABORT;
 	if(!exactMass) {
-		const auto vs = vertices(g);
+		const auto vs = vertices(*g);
 		exactMass = std::accumulate(vs.first, vs.second, 0.0, [&](double val, const auto v) {
 			const auto &ad = (*this)[v];
 			return val + lib::Chem::exactMass(ad.getAtomId(), ad.getIsotope()) - lib::Chem::electronMass * ad.getCharge();

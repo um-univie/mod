@@ -1,6 +1,7 @@
 #include "Term.hpp"
 
 #include <mod/lib/IO/IO.hpp>
+#include <mod/lib/IO/ParsingError.hpp>
 #include <mod/lib/IO/Term.hpp>
 #include <mod/lib/Term/RawTerm.hpp>
 #include <mod/lib/Term/WAM.hpp>
@@ -10,11 +11,14 @@
 namespace mod::Term {
 
 void mgu(const std::string &left, const std::string &right) {
-	auto tRawLeftOpt = lib::IO::Term::Read::rawTerm(left, lib::Term::getStrings(), std::cout);
-	auto tRawRightOpt = lib::IO::Term::Read::rawTerm(right, lib::Term::getStrings(), std::cout);
-	if(!tRawLeftOpt || !tRawRightOpt) return;
-	auto tRawLeft = tRawLeftOpt.get();
-	auto tRawRight = tRawRightOpt.get();
+	lib::Term::RawTerm tRawLeft, tRawRight;
+	try {
+		tRawLeft = lib::IO::Term::Read::rawTerm(left, lib::Term::getStrings());
+		tRawRight = lib::IO::Term::Read::rawTerm(right, lib::Term::getStrings());
+	} catch(const lib::IO::ParsingError &e) {
+		std::cout << e.msg << '\n';
+		return;
+	}
 
 	lib::Term::Wam machine, machineTemp;
 	lib::Term::RawAppendStore storeMachine, storeMachineTemp;

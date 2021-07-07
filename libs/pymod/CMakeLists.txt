@@ -23,7 +23,7 @@ target_link_libraries(pymod PRIVATE
         #$<$<CXX_COMPILER_ID:AppleClang>:-Wl,--no-undefined> # TODO: is there an equivalent?
         )
 set_target_properties(pymod PROPERTIES INSTALL_RPATH "${CMAKE_INSTALL_FULL_LIBDIR}")
-target_compile_options(pymod PRIVATE -Wall -Wextra
+target_compile_options(pymod PRIVATE -Wall -Wextra -pedantic
         -Wno-unused-parameter
         -Wno-comment
         -Wno-unused-local-typedefs)

@@ -1,5 +1,5 @@
-#ifndef MOD_LIB_RC_LABELLEDCOMPOSITION_H
-#define MOD_LIB_RC_LABELLEDCOMPOSITION_H
+#ifndef MOD_LIB_RC_LABELLEDCOMPOSITION_HPP
+#define MOD_LIB_RC_LABELLEDCOMPOSITION_HPP
 
 // This file is specific to the label settings we use.
 
@@ -12,13 +12,11 @@
 #include <mod/lib/RC/Visitor/String.hpp>
 #include <mod/lib/RC/Visitor/Term.hpp>
 
-namespace mod {
-namespace lib {
-namespace RC {
+namespace mod::lib::RC {
 namespace detail {
 
 template<bool Verbose, typename Result, typename RuleFirst, typename RuleSecond, typename InvertibleVertexMap, typename VisitorT>
-boost::optional<Result> composeLabelledFinallyDoIt(const RuleFirst &rFirst, const RuleSecond &rSecond, InvertibleVertexMap &match, VisitorT visitor) {
+std::optional<Result> composeLabelledFinallyDoIt(const RuleFirst &rFirst, const RuleSecond &rSecond, InvertibleVertexMap &match, VisitorT visitor) {
 	return compose<Verbose, Result>(rFirst, rSecond, match, std::move(visitor));
 }
 
@@ -51,7 +49,7 @@ struct WithStereoVisitor<false> {
 } // namespace detail
 
 template<bool Verbose, typename Result, LabelType labelType, bool withStereo, typename RuleFirst, typename RuleSecond, typename InvertibleVertexMap, typename VisitorT = Visitor::Null>
-boost::optional<Result> composeLabelled(const RuleFirst &rFirst, const RuleSecond &rSecond, InvertibleVertexMap &match, VisitorT visitor = Visitor::Null()) {
+std::optional<Result> composeLabelled(const RuleFirst &rFirst, const RuleSecond &rSecond, InvertibleVertexMap &match, VisitorT visitor = Visitor::Null()) {
 	return detail::composeLabelledFinallyDoIt<Verbose, Result>(rFirst, rSecond, match, Visitor::makeVisitor(
 			std::move(visitor),
 			typename detail::LabelTypeToVisitor<labelType>::type(),
@@ -59,8 +57,6 @@ boost::optional<Result> composeLabelled(const RuleFirst &rFirst, const RuleSecon
 			));
 }
 
-} // namespace RC
-} // namespace lib
-} // namespace mod
+} // namespace mod::lib::RC
 
-#endif /* MOD_LIB_RC_LABELLEDCOMPOSITION_H */
+#endif // MOD_LIB_RC_LABELLEDCOMPOSITION_HPP

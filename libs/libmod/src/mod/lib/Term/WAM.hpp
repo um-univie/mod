@@ -18,12 +18,6 @@ namespace mod::lib::Term {
 
 const StringStore &getStrings();
 
-enum class CellTag : int {
-	STR, // structure pointer
-	REF, // variable pointer / variable
-	Structure // actual structure
-};
-
 enum class AddressType : int { // order matters, used in operator<
 	Heap = 0, Temp = 1
 };
@@ -54,39 +48,43 @@ public:
 };
 
 struct Cell {
-	CellTag tag;
+	enum class Tag : char {
+		STR, // structure pointer
+		REF, // variable pointer / variable
+		Structure // actual structure
+	};
+	struct Ref {
+		Address addr;
+	};
+	struct Struct {
+		int arity;
+		std::size_t name;
+	};
+public:
+	Tag tag;
 	union {
-		struct {
-			Address addr;
-		} STR;
-
-		struct {
-			Address addr;
-		} REF;
-
-		struct {
-			int arity;
-			std::size_t name;
-		} Structure;
+		Ref STR;
+		Ref REF;
+		Struct Structure;
 	};
 public:
 	static Cell makeSTR(Address addr) {
 		Cell cell;
-		cell.tag = CellTag::STR;
+		cell.tag = Tag::STR;
 		cell.STR.addr = addr;
 		return cell;
 	}
 
 	static Cell makeREF(Address addr) {
 		Cell cell;
-		cell.tag = CellTag::REF;
+		cell.tag = Tag::REF;
 		cell.REF.addr = addr;
 		return cell;
 	}
 
 	static Cell makeStructure(std::size_t arity, std::size_t name) {
 		Cell cell;
-		cell.tag = CellTag::Structure;
+		cell.tag = Tag::Structure;
 		cell.Structure.arity = arity;
 		cell.Structure.name = name;
 		return cell;
@@ -130,25 +128,25 @@ struct Wam {
 		const auto addr = deref({AddressType::Temp, addrTemp});
 		if(addr.type == AddressType::Heap) return addr;
 		Cell &cellTemp = getCell(addr);
-		if(cellTemp.tag == CellTag::REF) {
+		if(cellTemp.tag == Cell::Tag::REF) {
 			// put a new variable on the heap, and bind the temp variable to it
 			const auto addrHeap = putRefPtr();
 			cellTemp.REF.addr = addrHeap;
 			return addrHeap;
 		}
 		// Copy the structure recursively
-		assert(cellTemp.tag == CellTag::Structure);
+		assert(cellTemp.tag == Cell::Tag::Structure);
 		// first copy the header and overwrite it in temp
 		const auto arity = cellTemp.Structure.arity;
 		const auto addrHeap = putStructure(cellTemp.Structure.name, arity);
-		cellTemp.tag = CellTag::STR;
+		cellTemp.tag = Cell::Tag::STR;
 		cellTemp.STR.addr = addrHeap;
 		// now make space for each argument, and copy singleton cells
 		std::vector<bool> doCopy(arity, false);
 		for(int i = 1; i <= arity; ++i) {
 			const auto addrArg = deref(addr + i);
-			assert(getCell(addrArg).tag != CellTag::STR);
-			if(getCell(addrArg).tag == CellTag::REF) {
+			assert(getCell(addrArg).tag != Cell::Tag::STR);
+			if(getCell(addrArg).tag == Cell::Tag::REF) {
 				const auto heapAddrArg = putRefPtr();
 				//				getCell(addrArg).REF.addr = heapAddrArg; // TODO: why was this here?
 				if(addrArg.type == AddressType::Heap) {
@@ -159,12 +157,12 @@ struct Wam {
 					getCell(addrArg).REF.addr = heapAddrArg;
 				}
 			} else {
-				assert(getCell(addrArg).tag == CellTag::Structure);
+				assert(getCell(addrArg).tag == Cell::Tag::Structure);
 				const auto arity = getCell(addrArg).Structure.arity;
 				if(arity == 0) {
 					// just copy it inline
 					const auto addrNew = putStructure(getCell(addrArg).Structure.name, arity);
-					getCell(addrArg).tag = CellTag::STR;
+					getCell(addrArg).tag = Cell::Tag::STR;
 					getCell(addrArg).STR.addr = addrNew;
 				} else {
 					// put a dummy to reserve the space
@@ -177,10 +175,10 @@ struct Wam {
 		for(int i = 1; i <= arity; ++i) {
 			if(!doCopy[i - 1]) continue;
 			const auto argAddr = deref(addr + i);
-			assert(getCell(argAddr).tag == CellTag::Structure);
+			assert(getCell(argAddr).tag == Cell::Tag::Structure);
 			const auto targetAddr = addrHeap + i;
 			auto &targetCell = getCell(targetAddr);
-			targetCell.tag = CellTag::STR;
+			targetCell.tag = Cell::Tag::STR;
 			if(argAddr.type == AddressType::Temp) {
 				// the targetCell reference may now dangle
 				const auto argCopyAddr = copyFromTemp(argAddr.addr);
@@ -211,11 +209,11 @@ struct Wam {
 	Address deref(Address addr) const {
 		Cell cell = getCell(addr);
 		switch(cell.tag) {
-		case CellTag::STR:
+		case Cell::Tag::STR:
 			return deref(cell.STR.addr);
-		case CellTag::REF:
+		case Cell::Tag::REF:
 			return cell.REF.addr == addr ? addr : deref(cell.REF.addr);
-		case CellTag::Structure:
+		case Cell::Tag::Structure:
 			return addr;
 		}
 		MOD_ABORT;
@@ -253,15 +251,15 @@ struct Wam {
 		temp = other.heap;
 		for(Cell &cell : temp) {
 			switch(cell.tag) {
-			case CellTag::REF:
+			case Cell::Tag::REF:
 				assert(cell.REF.addr.type == AddressType::Heap);
 				cell.REF.addr.type = AddressType::Temp;
 				break;
-			case CellTag::STR:
+			case Cell::Tag::STR:
 				assert(cell.STR.addr.type == AddressType::Heap);
 				cell.STR.addr.type = AddressType::Temp;
 				break;
-			case CellTag::Structure:
+			case Cell::Tag::Structure:
 				break;
 			}
 		}
@@ -275,7 +273,7 @@ struct Wam {
 	void revert(const MGU &mgu) {
 		for(const Address &a : mgu.bindings) {
 			Cell &c = getCell(a);
-			assert(c.tag == CellTag::REF);
+			assert(c.tag == Cell::Tag::REF);
 			assert(c.REF.addr != a);
 			c.REF.addr = a;
 		}
@@ -303,7 +301,7 @@ inline bool MGU::isRenaming(const Wam &machine) const {
 		addr = machine.deref(addr);
 		assert(addr.type == AddressType::Heap);
 		Cell target = machine.getCell(addr);
-		if(target.tag != CellTag::REF) return false;
+		if(target.tag != Cell::Tag::REF) return false;
 		if(isTarget[addr.addr]) return false;
 		isTarget[addr.addr] = true;
 	}
@@ -336,16 +334,16 @@ inline void Wam::unifyHeapHeap(std::size_t lhs, std::size_t rhs, MGU &mgu) {
 		stack.pop();
 		if(lhs == rhs) continue;
 		Cell leftCell = heap[lhs], rightCell = heap[rhs];
-		assert(leftCell.tag != CellTag::STR);
-		assert(rightCell.tag != CellTag::STR);
-		if(leftCell.tag != CellTag::REF && rightCell.tag == CellTag::REF) {
+		assert(leftCell.tag != Cell::Tag::STR);
+		assert(rightCell.tag != Cell::Tag::STR);
+		if(leftCell.tag != Cell::Tag::REF && rightCell.tag == Cell::Tag::REF) {
 			std::swap(lhs, rhs);
 			std::swap(leftCell, rightCell);
 		}
 
-		if(leftCell.tag == CellTag::REF) {
+		if(leftCell.tag == Cell::Tag::REF) {
 			// bind
-			if(rightCell.tag == CellTag::REF && rightCell.REF.addr < leftCell.REF.addr) {
+			if(rightCell.tag == Cell::Tag::REF && rightCell.REF.addr < leftCell.REF.addr) {
 				// right = left
 				assert(heap[rhs].REF.addr.type == AddressType::Heap);
 				heap[rhs].REF.addr.addr = lhs;
@@ -357,8 +355,8 @@ inline void Wam::unifyHeapHeap(std::size_t lhs, std::size_t rhs, MGU &mgu) {
 				mgu.bindings.push_back(Address{AddressType::Heap, lhs});
 			}
 		} else {
-			assert(leftCell.tag == CellTag::Structure);
-			assert(rightCell.tag == CellTag::Structure);
+			assert(leftCell.tag == Cell::Tag::Structure);
+			assert(rightCell.tag == Cell::Tag::Structure);
 			if(leftCell.Structure.name != rightCell.Structure.name
 			   || leftCell.Structure.arity != rightCell.Structure.arity) {
 				mgu.status = MGU::Status::Fail;
@@ -376,13 +374,13 @@ inline void Wam::verify() const {
 	// nothing in the heap should point at temp
 	for(Cell cell : heap) {
 		switch(cell.tag) {
-		case CellTag::REF:
+		case Cell::Tag::REF:
 			if(cell.REF.addr.type != AddressType::Heap) MOD_ABORT;
 			break;
-		case CellTag::STR:
+		case Cell::Tag::STR:
 			if(cell.STR.addr.type != AddressType::Heap) MOD_ABORT;
 			break;
-		case CellTag::Structure:
+		case Cell::Tag::Structure:
 			break;
 		}
 	}
@@ -406,46 +404,46 @@ inline void Wam::unifyHeapTemp(std::size_t lhsIndex, std::size_t rhsIndex, MGU &
 			unifyHeapHeap(lhsAddr.addr, rhsAddr.addr, mgu);
 		} else {
 			Cell rhsCell = getCell(rhsAddr);
-			if(rhsCell.tag == CellTag::REF) {
+			if(rhsCell.tag == Cell::Tag::REF) {
 				assert(rhsCell.REF.addr == rhsAddr);
 				getCell(rhsAddr).REF.addr = lhsAddr;
 				mgu.bindings.push_back(rhsAddr);
-			} else if(rhsCell.tag == CellTag::Structure) {
+			} else if(rhsCell.tag == Cell::Tag::Structure) {
 				Cell lhsCell = getCell(lhsAddr);
-				if(lhsCell.tag == CellTag::REF) {
+				if(lhsCell.tag == Cell::Tag::REF) {
 					assert(lhsCell.REF.addr == lhsAddr);
 					// copy the structure to the heap, and bind lhs to it
 					Address rhsAddrNew = putStructure(rhsCell.Structure.name, rhsCell.Structure.arity);
 					getCell(lhsAddr).REF.addr = rhsAddrNew;
 					mgu.bindings.push_back(lhsAddr);
 					// overwrite rhs
-					getCell(rhsAddr).tag = CellTag::STR;
+					getCell(rhsAddr).tag = Cell::Tag::STR;
 					getCell(rhsAddr).STR.addr = rhsAddrNew;
 					// copy arguments
 					for(int i = 1; i <= rhsCell.Structure.arity; i++) {
 						Address rhsSubAddr = rhsAddr + i;
 						Cell rhsSubCell = getCell(rhsSubAddr);
 						switch(rhsSubCell.tag) {
-						case CellTag::REF:
-						case CellTag::STR:
+						case Cell::Tag::REF:
+						case Cell::Tag::STR:
 							// create a variable and schedule unification
 							stack.emplace(putRefPtr(), rhsSubAddr);
 							break;
-						case CellTag::Structure:
+						case Cell::Tag::Structure:
 							assert(rhsSubCell.Structure.arity == 0);
 							// overwrite rhs and append structure
-							getCell(rhsSubAddr).tag = CellTag::STR;
+							getCell(rhsSubAddr).tag = Cell::Tag::STR;
 							getCell(rhsSubAddr).STR.addr = putStructure(rhsSubCell.Structure.name, rhsSubCell.Structure.arity);
 							break;
 						}
 					}
-				} else if(lhsCell.tag == CellTag::Structure) {
+				} else if(lhsCell.tag == Cell::Tag::Structure) {
 					if(lhsCell.Structure.name == rhsCell.Structure.name &&
 					   lhsCell.Structure.arity == rhsCell.Structure.arity) {
 						for(std::size_t i = lhsCell.Structure.arity; i > 0; i--)
 							stack.emplace(lhsAddr + i, rhsAddr + i);
 						// overwrite rhs to point to heap
-						getCell(rhsAddr).tag = CellTag::STR;
+						getCell(rhsAddr).tag = Cell::Tag::STR;
 						getCell(rhsAddr).STR.addr = lhsAddr;
 					} else {
 						mgu.status = MGU::Status::Fail;

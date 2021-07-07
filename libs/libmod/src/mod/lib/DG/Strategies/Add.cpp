@@ -20,11 +20,11 @@ Add::Add(const std::shared_ptr<mod::Function<std::vector<std::shared_ptr<graph::
 
 Add::~Add() = default;
 
-Strategy *Add::clone() const {
+std::unique_ptr<Strategy> Add::clone() const {
 	if(!generator)
-		return new Add(graphs, onlyUniverse, graphPolicy);
+		return std::make_unique<Add>(graphs, onlyUniverse, graphPolicy);
 	else
-		return new Add(generator, onlyUniverse, graphPolicy);
+		return std::make_unique<Add>(generator, onlyUniverse, graphPolicy);
 }
 
 void Add::preAddGraphs(std::function<void(std::shared_ptr<graph::Graph>, IsomorphismPolicy)> add) const {

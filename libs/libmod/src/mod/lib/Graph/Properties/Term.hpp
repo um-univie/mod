@@ -1,16 +1,13 @@
-#ifndef MOD_LIB_GRAPH_PROP_TERM_H
-#define	MOD_LIB_GRAPH_PROP_TERM_H
+#ifndef MOD_LIB_GRAPH_PROP_TERM_HPP
+#define MOD_LIB_GRAPH_PROP_TERM_HPP
 
 #include <mod/lib/Graph/Properties/Property.hpp>
 #include <mod/lib/Term/WAM.hpp>
 
-#include <boost/optional.hpp>
-
+#include <optional>
 #include <string>
 
-namespace mod {
-namespace lib {
-namespace Graph {
+namespace mod::lib::Graph {
 struct PropString;
 
 struct PropTerm : Prop<PropTerm, std::size_t, std::size_t> {
@@ -21,12 +18,10 @@ public:
 	friend bool isValid(const PropTerm &p);
 	friend const lib::Term::Wam &getMachine(const PropTerm &p);
 private:
-	boost::optional<std::string> parsingError;
+	std::optional<std::string> parsingError;
 	lib::Term::Wam machine;
 };
 
-} // namespace Graph
-} // namespace lib
-} // namespace mod
+} // namespace mod::lib::Graph
 
-#endif	/* MOD_LIB_GRAPH_PROP_TERM_H */
+#endif // MOD_LIB_GRAPH_PROP_TERM_HPP

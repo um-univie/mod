@@ -1,5 +1,5 @@
-#ifndef MOD_LIB_RC_SUB_H
-#define MOD_LIB_RC_SUB_H
+#ifndef MOD_LIB_RC_SUB_HPP
+#define MOD_LIB_RC_SUB_HPP
 
 #include <mod/Config.hpp>
 #include <mod/Misc.hpp>
@@ -14,18 +14,15 @@
 
 #include <jla_boost/graph/dpo/FilteredGraphProjection.hpp>
 
-#include <boost/optional.hpp>
+#include <optional>
 
-namespace mod {
-namespace lib {
-namespace RC {
+namespace mod::lib::RC {
 
 struct Sub {
 	using GraphDom = lib::Rules::LabelledRule::LeftGraphType;
 	using GraphCodom = lib::Rules::LabelledRule::RightGraphType;
 	using VertexMapType = jla_boost::GraphMorphism::InvertibleVectorVertexMap<GraphDom, GraphCodom>;
 public:
-
 	explicit Sub(int verbosity, IO::Logger logger, bool allowPartial)
 			: verbosity(verbosity), logger(logger), allowPartial(allowPartial) {}
 
@@ -39,9 +36,7 @@ public:
 		else
 			makeMatchesInternal<false>(rFirst, rSecond, mr, labelSettings);
 	}
-
 private:
-
 	template<bool AllowPartial, typename MR>
 	void makeMatchesInternal(const lib::Rules::Real &rFirst,
 	                         const lib::Rules::Real &rSecond,
@@ -65,12 +60,11 @@ private:
 			if(!continue_) break;
 		}
 	}
-
 public:
 	template<typename Position>
-	boost::optional<VertexMapType> matchFromPosition(const lib::Rules::Real &rFirst,
-	                                                 const lib::Rules::Real &rSecond,
-	                                                 const std::vector<Position> &position) const;
+	std::optional<VertexMapType> matchFromPosition(const lib::Rules::Real &rFirst,
+	                                               const lib::Rules::Real &rSecond,
+	                                               const std::vector<Position> &position) const;
 private:
 	const int verbosity;
 	IO::Logger logger;
@@ -78,7 +72,7 @@ private:
 };
 
 template<typename Position>
-inline boost::optional<Sub::VertexMapType>
+inline std::optional<Sub::VertexMapType>
 Sub::matchFromPosition(const lib::Rules::Real &rFirst,
                        const lib::Rules::Real &rSecond,
                        const std::vector<Position> &position) const {
@@ -104,7 +98,7 @@ Sub::matchFromPosition(const lib::Rules::Real &rFirst,
 			const auto vDomHost = get(morphism, gCodom, gDom, vCodomPattern);
 			assert(vDomHost != vNullDom);
 			if(get(map, gDom, gCodom, vDomHost) != vNullCodom)
-				return boost::none; // the combined match is not injective
+				return {}; // the combined match is not injective
 			put(map, gDom, gCodom, vDomHost, vCodomPattern);
 		}
 	}
@@ -112,8 +106,6 @@ Sub::matchFromPosition(const lib::Rules::Real &rFirst,
 }
 
 
-} // namespace RC
-} // namespace lib
-} // namespace mod
+} // namespace mod::lib::RC
 
-#endif /* MOD_LIB_RC_SUB_H */
+#endif // MOD_LIB_RC_SUB_HPP

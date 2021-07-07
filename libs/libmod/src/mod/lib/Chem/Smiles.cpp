@@ -6,9 +6,7 @@
 
 #include <jla_boost/graph/PairToRangeAdaptor.hpp>
 
-namespace mod {
-namespace lib {
-namespace Chem {
+namespace mod::lib::Chem {
 
 const std::vector<AtomId> &getSmilesOrganicSubset() {
 	using namespace AtomIds;
@@ -46,7 +44,7 @@ bool isInSmilesOrganicSubset(AtomId atomId) {
 }
 
 void addImplicitHydrogens(lib::Graph::GraphType &g, lib::Graph::PropString &pString, lib::Graph::Vertex v, AtomId atomId,
-		std::function<void(lib::Graph::GraphType&, lib::Graph::PropString&, lib::Graph::Vertex) > hydrogenAdder) {
+		std::function<void(lib::Graph::GraphType&, lib::Graph::PropString&, lib::Graph::Vertex)> hydrogenAdder) {
 	//==========================================================================
 	// WARNING: keep in sync with the smiles writer
 	//==========================================================================
@@ -59,32 +57,32 @@ void addImplicitHydrogens(lib::Graph::GraphType &g, lib::Graph::PropString &pStr
 	// P			3, 5
 	// S			2, 4, 6, {{:, :}}
 	// halogens		1
-	unsigned char numSingle = 0, numDouble = 0, numTriple = 0, numAromatic = 0, valenceNoAromatic = 0;
+	int numSingle = 0, numDouble = 0, numTriple = 0, numAromatic = 0, valenceNoAromatic = 0;
 	for(lib::Graph::Edge eOut : asRange(out_edges(v, g))) {
 		BondType bt = decodeEdgeLabel(pString[eOut]);
 		switch(bt) {
 		case BondType::Invalid: MOD_ABORT;
 		case BondType::Single:
-			numSingle++;
+			++numSingle;
 			break;
 		case BondType::Double:
-			numDouble++;
+			++numDouble;
 			break;
 		case BondType::Triple:
-			numTriple++;
+			++numTriple;
 			break;
 		case BondType::Aromatic:
-			numAromatic++;
+			++numAromatic;
 			break;
 		}
 	}
 	valenceNoAromatic = numSingle + numDouble * 2 + numTriple * 3;
-	using BondVector = std::tuple<unsigned char, unsigned char, unsigned char, unsigned char>;
+	using BondVector = std::tuple<int, int, int, int>;
 	BondVector numBonds{numSingle, numDouble, numTriple, numAromatic};
 	using namespace AtomIds;
-	unsigned char valence = valenceNoAromatic + numAromatic;
-	if(numAromatic > 0) valence++;
-	auto fMissingH = [ = ]() -> unsigned char {
+	int valence = valenceNoAromatic + numAromatic;
+	if(numAromatic > 0) ++valence;
+	const auto fMissingH = [ = ]() -> int {
 		switch(atomId) {
 		case Boron:
 			if(valence <= 3) return 3 - valence;
@@ -120,10 +118,8 @@ void addImplicitHydrogens(lib::Graph::GraphType &g, lib::Graph::PropString &pStr
 		}
 		return 0;
 	};
-	unsigned char hToAdd = fMissingH();
+	const int hToAdd = fMissingH();
 	for(unsigned char i = 0; i < hToAdd; i++) hydrogenAdder(g, pString, v);
 }
 
-} // namespace Chem
-} // namespace lib
-} // namespace mod
+} // namespace mod::lib::Chem

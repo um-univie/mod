@@ -8,8 +8,6 @@ RUN tar xzf mod-*.tar.gz --strip-components=1
 RUN pacman -Suy --noconfirm                                 \
     python-pip                                              \
  && pip3 install -r requirements_nodoc.txt                  \
- && cp docker/bindep_depends_arch.py                        \
-    /usr/lib/python3.9/site-packages/bindep/depends.py      \
  && pacman -Suy --noconfirm                                 \
     $(bindep -b | tr '\n' ' ')                              \
  && rm -rf /var/cache/pacman
