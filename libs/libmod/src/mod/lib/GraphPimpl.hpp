@@ -2,33 +2,42 @@
 #define MOD_LIB_GRAPHPIMPL_HPP
 
 #include <mod/Error.hpp>
+#include <mod/GraphConcepts.hpp>
 
 #include <cassert>
+#include <optional>
 
 namespace mod::lib {
+namespace {
 
-#define MOD_GRAPHPIMPL_Define_Vertex(                                                \
-       GraphClass, GraphName, GetGraphType,                                          \
-       getMacroGraph, g, OwnerImpl)                                                  \
-    MOD_GRAPHPIMPL_Define_Vertex_noGraph(GraphClass, GraphName,                      \
-                                         getMacroGraph, g, OwnerImpl)                \
-                                                                                     \
-GetGraphType GraphClass::Vertex::getGraph() const {                                  \
-    if(!g) throw LogicError("Can not get graph on a null vertex.");                  \
-    return g;                                                                        \
+template<typename Graph>
+std::shared_ptr<Graph> getGraphFromStore(std::shared_ptr<Graph> g) {
+	return g;
 }
 
-#define MOD_GRAPHPIMPL_Define_Vertex_noGraph(GraphClass, GraphName,                  \
-                                             getMacroGraph, g, OwnerImpl)            \
+template<typename Graph>
+Graph getGraphFromStore(std::optional<Graph> g) {
+	return *g;
+}
+
+} // namespace
+
+#define MOD_GRAPHPIMPL_Define_Vertex(GraphClass, GraphName, getMacroGraph, g, VertePrint)        \
+    MOD_GRAPHPIMPL_Define_Vertex_noGraph(GraphClass, GraphName, getMacroGraph, g, VertePrint)    \
                                                                                      \
-GraphClass::Vertex::Vertex(std::shared_ptr<OwnerImpl> g, std::size_t vId)            \
-      : g(g), vId(vId) {                                                             \
-    assert(g);                                                                       \
+GraphHandle<GraphClass> GraphClass::Vertex::getGraph() const {                       \
+    if(!*this) throw LogicError("Can not get graph on a null vertex.");              \
+    return lib::getGraphFromStore(g);                                                \
+}
+
+#define MOD_GRAPHPIMPL_Define_Vertex_noGraph(GraphClass, GraphName, getMacroGraph, g, VertePrint)\
+                                                                                     \
+GraphClass::Vertex::Vertex(GraphHandle<GraphClass> g, std::size_t vId) : g(g), vId(vId) { \
     using boost::vertices;                                                           \
     const auto &graph = getMacroGraph;                                               \
     const auto &vs = vertices(graph);                                                \
     if(vId >= std::distance(vs.first, vs.second)) {                                  \
-        this->g = nullptr;                                                           \
+        this->g = {};                                                                \
         this->vId = 0;                                                               \
     }                                                                                \
 }                                                                                    \
@@ -38,7 +47,7 @@ GraphClass::Vertex::Vertex() : vId(0) { }                                       
 std::ostream &operator<<(std::ostream &s, const GraphClass::Vertex &v) {             \
     s << #GraphName "Vertex(";                                                       \
     if(!v) s << "null";                                                              \
-    else s << *v.g << ", " << v.getId();                                             \
+    else s << *(v.g VertePrint) << ", " << v.getId();                                \
     return s << ")";                                                                 \
 }                                                                                    \
                                                                                      \
@@ -55,7 +64,7 @@ bool operator<(const GraphClass::Vertex &v1, const GraphClass::Vertex &v2) {    
 }                                                                                    \
                                                                                      \
 std::size_t GraphClass::Vertex::hash() const {                                       \
-    if(g) return getId();                                                            \
+    if(*this) return getId();                                                        \
     else return -1;                                                                  \
 }                                                                                    \
                                                                                      \
@@ -68,7 +77,7 @@ bool GraphClass::Vertex::isNull() const {                                       
 }                                                                                    \
                                                                                      \
 std::size_t GraphClass::Vertex::getId() const {                                      \
-    if(!g) throw LogicError("Can not get id on a null vertex.");                     \
+    if(!*this) throw LogicError("Can not get id on a null vertex.");                 \
     const auto &graph = getMacroGraph;                                               \
     using boost::vertices;                                                           \
     auto v = *std::next(vertices(graph).first, vId);                                 \
@@ -79,7 +88,7 @@ std::size_t GraphClass::Vertex::getId() const {                                 
 #define MOD_GRAPHPIMPL_Define_Vertex_Undirected(GraphClass, getMacroGraph, g)            \
                                                                                          \
 std::size_t GraphClass::Vertex::getDegree() const {                                      \
-    if(!g) throw LogicError("Can not get degree on a null vertex.");                     \
+    if(!*this) throw LogicError("Can not get degree on a null vertex.");                 \
     const auto &graph = getMacroGraph;                                                   \
     using boost::vertices;                                                               \
     auto v = *std::next(vertices(graph).first, vId);                                     \
@@ -87,15 +96,15 @@ std::size_t GraphClass::Vertex::getDegree() const {                             
 }                                                                                        \
                                                                                          \
 GraphClass::IncidentEdgeRange GraphClass::Vertex::incidentEdges() const {                \
-    if(!g) throw LogicError("Can not get incident edges on a null vertex.");             \
-    return IncidentEdgeRange(g, vId);                                                    \
+    if(!*this) throw LogicError("Can not get incident edges on a null vertex.");         \
+    return IncidentEdgeRange(lib::getGraphFromStore(g), vId);                            \
 }
 
 
 #define MOD_GRAPHPIMPL_Define_Vertex_Directed(GraphClass, getMacroGraph, g)            \
                                                                                        \
 std::size_t GraphClass::Vertex::inDegree() const {                                     \
-    if(!g) throw LogicError("Can not get in-degree on a null vertex.");                \
+    if(!*this) throw LogicError("Can not get in-degree on a null vertex.");            \
     const auto &graph = getMacroGraph;                                                 \
     using boost::vertices;                                                             \
     auto v = *std::next(vertices(graph).first, vId);                                   \
@@ -103,7 +112,7 @@ std::size_t GraphClass::Vertex::inDegree() const {                              
 }                                                                                      \
                                                                                        \
 std::size_t GraphClass::Vertex::outDegree() const {                                    \
-    if(!g) throw LogicError("Can not get out-degree on a null vertex.");               \
+    if(!*this) throw LogicError("Can not get out-degree on a null vertex.");           \
     const auto &graph = getMacroGraph;                                                 \
     using boost::vertices;                                                             \
     auto v = *std::next(vertices(graph).first, vId);                                   \
@@ -111,20 +120,19 @@ std::size_t GraphClass::Vertex::outDegree() const {                             
 }
 
 
-#define MOD_GRAPHPIMPL_Define_Indices(GraphClass, GraphName, GetGraphType, getMacroGraph, g, OwnerImpl)   \
+#define MOD_GRAPHPIMPL_Define_Indices(GraphClass, GraphName, getMacroGraph, g, EdgePrint)        \
                                                                                                  \
 /*----------------------------------------------------------------------------*/                 \
 /* Edge                                                                       */                 \
 /*----------------------------------------------------------------------------*/                 \
                                                                                                  \
-GraphClass::Edge::Edge(std::shared_ptr<OwnerImpl> g, std::size_t vId, std::size_t eId) : g(g), vId(vId), eId(eId) { \
-    assert(g);                                                                                   \
+GraphClass::Edge::Edge(GraphHandle<GraphClass> g, std::size_t vId, std::size_t eId) : g(g), vId(vId), eId(eId) { \
     using boost::vertices;                                                                       \
     const auto &graph = getMacroGraph;                                                           \
     const auto &vs = vertices(graph);                                                            \
     if(vId >= std::distance(vs.first, vs.second)                                                 \
             || eId >= out_degree(*std::next(vertices(graph).first, vId), graph)) {               \
-        this->g = nullptr;                                                                       \
+        this->g = {};                                                                            \
         this->vId = 0;                                                                           \
         this->eId = 0;                                                                           \
     }                                                                                            \
@@ -134,7 +142,7 @@ GraphClass::Edge::Edge() : vId(0), eId(0) { }                                   
                                                                                                  \
 std::ostream &operator<<(std::ostream &s, const GraphClass::Edge &e) {                           \
     s << #GraphName "Edge(";                                                                     \
-    if(e.g) s << *e.g << ", " << e.source().getId() << ", " << e.target().getId();               \
+    if(e) s << *(e.g EdgePrint) << ", " << e.source().getId() << ", " << e.target().getId();     \
     else s << "null";                                                                            \
     return s << ")";                                                                             \
 }                                                                                                \
@@ -163,14 +171,14 @@ bool GraphClass::Edge::isNull() const {                                         
     return *this == GraphClass::Edge();                                                          \
 }                                                                                                \
                                                                                                  \
-GetGraphType GraphClass::Edge::getGraph() const {                                                \
+GraphHandle<GraphClass> GraphClass::Edge::getGraph() const {                                     \
     if(!g) throw LogicError("Can not get graph on a null edge.");                                \
-    return g;                                                                                    \
+    return lib::getGraphFromStore(g);                                                            \
 }                                                                                                \
                                                                                                  \
 GraphClass::Vertex GraphClass::Edge::source() const {                                            \
     if(!g) throw LogicError("Can not get source on a null edge.");                               \
-    return Vertex(g, vId);                                                                       \
+    return Vertex(lib::getGraphFromStore(g), vId);                                               \
 }                                                                                                \
                                                                                                  \
 GraphClass::Vertex GraphClass::Edge::target() const {                                            \
@@ -183,26 +191,25 @@ GraphClass::Vertex GraphClass::Edge::target() const {                           
     auto vTar = target(e, graph);                                                                \
     const auto &vs = vertices(graph);                                                            \
     auto vTarIter = std::find(vs.first, vs.second, vTar);                                        \
-    return Vertex(g, std::distance(vs.first, vTarIter));                                         \
+    return Vertex(lib::getGraphFromStore(g), std::distance(vs.first, vTarIter));                 \
 }                                                                                                \
                                                                                                  \
 /*----------------------------------------------------------------------------*/                 \
 /* VertexIterator                                                             */                 \
 /*----------------------------------------------------------------------------*/                 \
                                                                                                  \
-GraphClass::VertexIterator::VertexIterator(std::shared_ptr<OwnerImpl> g) : g(g), vId(0) {        \
-    assert(g);                                                                                   \
+GraphClass::VertexIterator::VertexIterator(GraphHandle<GraphClass> g) : g(g), vId(0) {           \
     using boost::vertices;                                                                       \
     const auto &graph = getMacroGraph;                                                           \
     const auto &vs = vertices(graph);                                                            \
     if(0 == std::distance(vs.first, vs.second))                                                  \
-        this->g = nullptr;                                                                       \
+        this->g = {};                                                                            \
 }                                                                                                \
                                                                                                  \
-GraphClass::VertexIterator::VertexIterator() : g(nullptr), vId(0) { }                            \
+GraphClass::VertexIterator::VertexIterator() : g(), vId(0) { }                                   \
                                                                                                  \
 GraphClass::Vertex GraphClass::VertexIterator::dereference() const {                             \
-    return GraphClass::Vertex(g, vId);                                                           \
+    return GraphClass::Vertex(lib::getGraphFromStore(g), vId);                                   \
 }                                                                                                \
                                                                                                  \
 bool GraphClass::VertexIterator::equal(const VertexIterator &iter) const {                       \
@@ -216,7 +223,7 @@ void GraphClass::VertexIterator::increment() {                                  
     const auto &graph = getMacroGraph;                                                           \
     const auto &vs = vertices(graph);                                                            \
     if(vId >= std::distance(vs.first, vs.second)) {                                              \
-        this->g = nullptr;                                                                       \
+        this->g = {};                                                                            \
         this->vId = 0;                                                                           \
     }                                                                                            \
 }                                                                                                \
@@ -225,15 +232,14 @@ void GraphClass::VertexIterator::increment() {                                  
 /* EdgeIterator												                           */                 \
 /*----------------------------------------------------------------------------*/                 \
                                                                                                  \
-GraphClass::EdgeIterator::EdgeIterator(std::shared_ptr<OwnerImpl> g) : g(g), vId(0), eId(0) {    \
-    assert(g);                                                                                   \
+GraphClass::EdgeIterator::EdgeIterator(GraphHandle<GraphClass> g) : g(g), vId(0), eId(0) {       \
     advanceToValid();                                                                            \
 }                                                                                                \
                                                                                                  \
-GraphClass::EdgeIterator::EdgeIterator() : g(nullptr), vId(0), eId(0) { }                        \
+GraphClass::EdgeIterator::EdgeIterator() : g(), vId(0), eId(0) { }                               \
                                                                                                  \
 GraphClass::Edge GraphClass::EdgeIterator::dereference() const {                                 \
-    return Edge(g, vId, eId);                                                                    \
+    return Edge(lib::getGraphFromStore(g), vId, eId);                                            \
 }                                                                                                \
                                                                                                  \
 bool GraphClass::EdgeIterator::equal(const EdgeIterator &iter) const {                           \
@@ -260,7 +266,7 @@ void GraphClass::EdgeIterator::advanceToValid() {                               
                 return;                                                                          \
         }                                                                                        \
     }                                                                                            \
-    g = nullptr;                                                                                 \
+    g = {};                                                                                      \
     vId = 0;                                                                                     \
     eId = 0;                                                                                     \
 }                                                                                                \
@@ -269,21 +275,20 @@ void GraphClass::EdgeIterator::advanceToValid() {                               
 /* IncidentEdgeIterator                                                       */                 \
 /*----------------------------------------------------------------------------*/                 \
                                                                                                  \
-GraphClass::IncidentEdgeIterator::IncidentEdgeIterator(std::shared_ptr<OwnerImpl> g, std::size_t vId) : g(g), vId(vId), eId(0) { \
-    assert(g);                                                                                   \
+GraphClass::IncidentEdgeIterator::IncidentEdgeIterator(GraphHandle<GraphClass> g, std::size_t vId) : g(g), vId(vId), eId(0) { \
     const auto &graph = getMacroGraph;                                                           \
     using boost::vertices;                                                                       \
     auto v = *std::next(vertices(graph).first, vId);                                             \
     if(out_degree(v, graph) == 0) {                                                              \
-        this->g = nullptr;                                                                       \
+        this->g = {};                                                                            \
         this->vId = 0;                                                                           \
     }                                                                                            \
 }                                                                                                \
                                                                                                  \
-GraphClass::IncidentEdgeIterator::IncidentEdgeIterator() : g(nullptr), vId(0), eId(0) { }        \
+GraphClass::IncidentEdgeIterator::IncidentEdgeIterator() : g(), vId(0), eId(0) { }               \
                                                                                                  \
 GraphClass::Edge GraphClass::IncidentEdgeIterator::dereference() const {                         \
-    return GraphClass::Edge(g, vId, eId);                                                        \
+    return GraphClass::Edge(lib::getGraphFromStore(g), vId, eId);                                \
 }                                                                                                \
                                                                                                  \
 bool GraphClass::IncidentEdgeIterator::equal(const IncidentEdgeIterator &iter) const {           \
@@ -297,7 +302,7 @@ void GraphClass::IncidentEdgeIterator::increment() {                            
     using boost::vertices;                                                                       \
     auto v = *std::next(vertices(graph).first, vId);                                             \
     if(eId >= out_degree(v, graph)) {                                                            \
-        this->g = nullptr;                                                                       \
+        this->g = {};                                                                            \
         this->vId = 0;                                                                           \
     }                                                                                            \
 }

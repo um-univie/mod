@@ -3,9 +3,7 @@
 #include <mod/Error.hpp>
 #include <mod/lib/Graph/Single.hpp>
 
-namespace mod {
-namespace lib {
-namespace Graph {
+namespace mod::lib::Graph {
 namespace {
 
 inline CollectionStats getStats(const lib::Graph::Single *g) {
@@ -116,6 +114,4 @@ std::pair<std::shared_ptr<graph::Graph>, bool> Collection::tryInsert(std::shared
 	return {g, true};
 }
 
-} // namespace Graph
-} // namespace lib
-} // namespace mod
+} // namespace mod::lib::Graph

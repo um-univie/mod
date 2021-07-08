@@ -3,7 +3,7 @@ post("disableSummary")
 def fail(f, pattern, err=LogicError, isSubstring=False):
 	try:
 		f()
-		assert False
+		assert False, "Expected an {} exception.".format(err)
 	except err as e:
 		if isSubstring:
 			res = pattern in str(e)

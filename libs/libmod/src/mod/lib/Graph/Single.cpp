@@ -3,7 +3,6 @@
 #include <mod/Misc.hpp>
 #include <mod/graph/Graph.hpp>
 #include <mod/lib/Chem/MoleculeUtil.hpp>
-#include <mod/lib/Chem/OBabel.hpp>
 #include <mod/lib/Chem/Smiles.hpp>
 #include <mod/lib/Graph/Canonicalisation.hpp>
 #include <mod/lib/Graph/DFSEncoding.hpp>
@@ -26,9 +25,7 @@
 #include <boost/graph/graph_traits.hpp>
 #include <boost/lexical_cast.hpp>
 
-namespace mod {
-namespace lib {
-namespace Graph {
+namespace mod::lib::Graph {
 BOOST_CONCEPT_ASSERT((LabelledGraphConcept<LabelledGraph>));
 
 namespace {
@@ -131,10 +128,10 @@ const std::string &Single::getSmiles() const {
 	if(getMoleculeState().getIsMolecule()) {
 		if(!smiles) {
 			if(getConfig().graph.useWrongSmilesCanonAlg.get()) {
-				smiles.reset(Chem::getSmiles(getGraph(), getMoleculeState(), nullptr, false));
+				smiles = Chem::getSmiles(getGraph(), getMoleculeState(), nullptr, false);
 			} else {
 				getCanonForm(LabelType::String, false); // TODO: make the withStereo a parameter
-				smiles.reset(Chem::getSmiles(getGraph(), getMoleculeState(), &canon_perm_string, false));
+				smiles = Chem::getSmiles(getGraph(), getMoleculeState(), &canon_perm_string, false);
 			}
 		}
 		return *smiles;
@@ -151,10 +148,10 @@ const std::string &Single::getSmilesWithIds() const {
 	if(getMoleculeState().getIsMolecule()) {
 		if(!smilesWithIds) {
 			if(getConfig().graph.useWrongSmilesCanonAlg.get()) {
-				smilesWithIds.reset(Chem::getSmiles(getGraph(), getMoleculeState(), nullptr, true));
+				smilesWithIds = Chem::getSmiles(getGraph(), getMoleculeState(), nullptr, true);
 			} else {
 				getCanonForm(LabelType::String, false); // TODO: make the withStereo a parameter
-				smilesWithIds.reset(Chem::getSmiles(getGraph(), getMoleculeState(), &canon_perm_string, true));
+				smilesWithIds = Chem::getSmiles(getGraph(), getMoleculeState(), &canon_perm_string, true);
 			}
 		}
 		return *smilesWithIds;
@@ -370,6 +367,4 @@ Single makePermutation(const Single &g) {
 	return gPerm;
 }
 
-} // namespace Graph
-} // namespace lib
-} // namespace mod
+} // namespace mod::lib::Graph

@@ -6,10 +6,10 @@
 namespace mod::lib::DG::Strategies {
 
 struct Repeat : Strategy {
-	// pre: limit > 0
-	Repeat(Strategy *strat, int limit);
+	// pre: limit >= 0
+	Repeat(std::unique_ptr<Strategy> strat, int limit);
 	virtual ~Repeat() override;
-	virtual Strategy *clone() const override;
+	virtual std::unique_ptr<Strategy> clone() const override;
 	virtual void preAddGraphs(std::function<void(std::shared_ptr<graph::Graph>, IsomorphismPolicy)> add) const override;
 	virtual void forEachRule(std::function<void(const lib::Rules::Real &)> f) const override;
 	virtual void printInfo(PrintSettings settings) const override;
@@ -19,9 +19,9 @@ private:
 	virtual void setExecutionEnvImpl() override;
 	virtual void executeImpl(PrintSettings settings, const GraphState &input) override;
 private:
-	Strategy *strat;
+	std::unique_ptr<Strategy> strat;
 	int limit;
-	std::vector<Strategy *> subStrats;
+	std::vector<std::unique_ptr<Strategy>> subStrats;
 };
 
 } // namespace mod::lib::DG::Strategies

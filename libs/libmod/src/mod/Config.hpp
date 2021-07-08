@@ -244,8 +244,6 @@ struct Config {
         ((bool, dryDerivationPrinting, false))                                      \
         ((bool, derivationDebugOutput, false))                                      \
         ((bool, disableRepeatFixedPointCheck, false))                               \
-        ((std::string, tikzPictureOption, "scale=\\modDGHyperScale"))               \
-        ((bool, printNonHyper, false))                                              \
         ((int, derivationVerbosity, 0))                                             \
         ((bool, applyAssumeConfluence, false))                                      \
         ((int, applyLimit, -1))                                                     \
@@ -274,7 +272,6 @@ struct Config {
         ((std::string, changeColourK, "Purple"))                                    \
         ((std::string, changeColourR, "Green"))                                     \
         ((bool, printChangedEdgesInContext, false))                                 \
-        ((bool, printCombined, true))                                               \
         ((bool, collapseChangedHydrogens, false))                                   \
     ))                                                                              \
     ((RC, rc,                                                                       \
@@ -283,6 +280,7 @@ struct Config {
         ((bool, matchesWithIndex, false))                                           \
         ((bool, printMatchesOnlyHaxChem, false))                                    \
         ((int, componentWiseMorphismLimit, 0))                                      \
+        ((bool, useBoostCommonSubgraph, false))                                     \
     ))                                                                              \
     ((Stereo, stereo,                                                               \
         ((bool, silenceDeductionWarnings, false))                                   \

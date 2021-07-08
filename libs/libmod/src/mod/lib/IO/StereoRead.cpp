@@ -14,11 +14,7 @@
 #include <boost/spirit/home/x3/operator/list.hpp>
 #include <boost/spirit/home/x3/operator/optional.hpp>
 
-namespace mod {
-namespace lib {
-namespace IO {
-namespace Stereo {
-namespace Read {
+namespace mod::lib::IO::Stereo::Read {
 namespace {
 namespace parser {
 
@@ -38,27 +34,25 @@ const auto start = x3::rule<struct start, ParsedEmbedding>{"stereoEmbedding"}
 } // namespace parser
 } // namesapce
 
-boost::optional<ParsedEmbedding> parseEmbedding(const std::string &str, std::ostream &err) {
+lib::IO::Result<ParsedEmbedding> parseEmbedding(const std::string &str) {
 	using Iter = std::string::const_iterator;
 	Iter start = str.begin();
 	ParsedEmbedding embedding;
 	bool res = x3::phrase_parse(start, str.end(), parser::start, x3::space, embedding);
 	if(!res || start != str.end()) {
-		err << "Error in stereo embedding at column " << (start - str.begin()) << ".";
-		if(start != str.end()) err << " Expected end of input." << std::endl;
-		return boost::none;
+		std::string msg = "Error in stereo embedding at column ";
+		msg += std::to_string(start - str.begin());
+		msg += ".";
+		if(start != str.end()) msg += " Expected end of input.";
+		return lib::IO::Result<ParsedEmbedding>::Error(std::move(msg));
 	}
 	return embedding;
 }
 
-} // namesapce Read
-} // namesapce Stereo
-} // namesapce IO
-} // namesapce lib
-} // namesapce mod
+} // namespace mod::lib::IO::Stereo::Read
 
 BOOST_FUSION_ADAPT_STRUCT(mod::lib::IO::Stereo::Read::ParsedEmbedding,
-		(boost::optional<std::string>, geometry)
-		(boost::optional<std::vector<mod::lib::IO::Stereo::Read::ParsedEmbeddingEdge> >, edges)
-		(boost::optional<bool>, fixation)
-		)
+                          (std::optional<std::string>, geometry)
+		                          (std::optional<std::vector<mod::lib::IO::Stereo::Read::ParsedEmbeddingEdge> >, edges)
+		                          (std::optional<bool>, fixation)
+)

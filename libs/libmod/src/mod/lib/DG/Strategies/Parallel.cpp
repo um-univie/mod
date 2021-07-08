@@ -5,38 +5,27 @@
 #include <mod/lib/Graph/Single.hpp>
 #include <mod/lib/IO/IO.hpp>
 
-namespace mod {
-namespace lib {
-namespace DG {
-namespace Strategies {
+namespace mod::lib::DG::Strategies {
 
-unsigned int calcMaxNumComponents(const std::vector<Strategy *> &strats) {
-	unsigned int res = 0;
-	for(const Strategy *strat : strats) res = std::max(res, strat->getMaxComponents());
-	return res;
+Parallel::Parallel(std::vector<std::unique_ptr<Strategy>> strats)
+		: Strategy::Strategy(calcMaxNumComponents(strats)), strats(std::move(strats)) {
+	assert(!this->strats.empty());
 }
 
-Parallel::Parallel(const std::vector<Strategy *> &strats)
-		: Strategy::Strategy(calcMaxNumComponents(strats)), strats(strats) {
-	assert(!strats.empty());
-}
+Parallel::~Parallel() = default;
 
-Parallel::~Parallel() {
-	for(Strategy *s : strats) delete s;
-}
-
-Strategy *Parallel::clone() const {
-	std::vector<Strategy *> subStrats;
-	for(const Strategy *s : strats) subStrats.push_back(s->clone());
-	return new Parallel(subStrats);
+std::unique_ptr<Strategy> Parallel::clone() const {
+	std::vector<std::unique_ptr<Strategy>> subStrats;
+	for(const auto &s : strats) subStrats.push_back(s->clone());
+	return std::make_unique<Parallel>(std::move(subStrats));
 }
 
 void Parallel::preAddGraphs(std::function<void(std::shared_ptr<graph::Graph>, IsomorphismPolicy)> add) const {
-	for(const auto *s : strats) s->preAddGraphs(add);
+	for(const auto &s : strats) s->preAddGraphs(add);
 }
 
 void Parallel::forEachRule(std::function<void(const lib::Rules::Real &)> f) const {
-	for(const auto *s : strats) s->forEachRule(f);
+	for(const auto &s : strats) s->forEachRule(f);
 }
 
 void Parallel::printInfo(PrintSettings settings) const {
@@ -52,13 +41,13 @@ void Parallel::printInfo(PrintSettings settings) const {
 }
 
 bool Parallel::isConsumed(const Graph::Single *g) const {
-	for(const Strategy *strat : strats)
-		if(strat->isConsumed(g)) return true;
+	for(const auto &s : strats)
+		if(s->isConsumed(g)) return true;
 	return false;
 }
 
 void Parallel::setExecutionEnvImpl() {
-	for(Strategy *strat : strats) strat->setExecutionEnv(getExecutionEnv());
+	for(auto &s : strats) s->setExecutionEnv(getExecutionEnv());
 }
 
 void Parallel::executeImpl(PrintSettings settings, const GraphState &input) {
@@ -67,24 +56,20 @@ void Parallel::executeImpl(PrintSettings settings, const GraphState &input) {
 		++settings.indentLevel;
 	}
 	for(unsigned int i = 0; i != strats.size(); i++) {
-		Strategy *strat = strats[i];
+		auto &s = strats[i];
 		if(settings.verbosity >= PrintSettings::V_Parallel) {
 			settings.indent() << "Parallel, substrategy " << (i + 1) << ":" << std::endl;
 			++settings.indentLevel;
 		}
-		strat->execute(settings, input);
+		s->execute(settings, input);
 		if(settings.verbosity >= PrintSettings::V_Parallel)
 			--settings.indentLevel;
 	}
 	std::vector<const GraphState *> outputs;
-	for(const Strategy *strat : strats)
-		outputs.push_back(&strat->getOutput());
+	for(const auto &s : strats) outputs.push_back(&s->getOutput());
 	output = new GraphState(outputs);
 	output->sortUniverse(Graph::Single::nameLess);
 	output->sortSubset(Graph::Single::nameLess);
 }
 
-} // namespace Strategies
-} // namespace DG
-} // namespace lib
-} // namespace mod
+} // namespace mob::lib::DG::Strategies

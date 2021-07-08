@@ -42,7 +42,7 @@ add_library(awesome MODULE
         stuff.cpp)
 set_target_properties(awesome PROPERTIES PREFIX "") # so it doesn't get the "lib" prefix
 target_link_libraries(awesome PUBLIC mod::libmod Boost::${PYTHON_TARGET} Python3::Python)
-target_compile_options(awesome PRIVATE -Wall -Wextra
+target_compile_options(awesome PRIVATE -Wall -Wextra -pedantic
         -Wno-unused-parameter
         -Wno-comment
         -Wno-unused-local-typedefs)

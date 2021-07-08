@@ -5,19 +5,13 @@
 #include <mod/Error.hpp>
 #include <mod/lib/IO/IO.hpp>
 
-#include <boost/variant/get.hpp>
-
 #include <unordered_map>
 
-namespace mod {
-namespace lib {
-namespace Term {
+namespace mod::lib::Term {
 
 Address append(Wam &machine, const RawTerm &term, RawAppendStore &varToAddr) {
-
 	struct Writer {
-
-		Writer(Wam &machine, RawAppendStore &varToAddr) : machine(machine), varToAddr(varToAddr) { }
+		Writer(Wam &machine, RawAppendStore &varToAddr) : machine(machine), varToAddr(varToAddr) {}
 
 		//		std::pair<Cell, bool> operator()(RawVariable var) const {
 		//			auto iter = varToAddr.find(var.name);
@@ -34,7 +28,7 @@ Address append(Wam &machine, const RawTerm &term, RawAppendStore &varToAddr) {
 			// recurse and save pointers
 			std::vector<std::size_t> strPtrs;
 			for(const auto &term : str.args) {
-				if(const RawStructure * subStr = boost::get<RawStructure>(&term)) {
+				if(const RawStructure *subStr = std::get_if<RawStructure>(&term)) {
 					// space optimization: constants are written in-line
 					if(!subStr->args.empty()) {
 						strPtrs.push_back((*this)(*subStr));
@@ -44,8 +38,8 @@ Address append(Wam &machine, const RawTerm &term, RawAppendStore &varToAddr) {
 			auto strAddr = machine.putStructure(str.name, str.args.size());
 			std::size_t nextStrPtr = 0;
 			for(auto term : str.args) {
-				if(const RawVariable * var = boost::get<RawVariable>(&term)) {
-					auto iter = varToAddr.find(var->name);
+				if(const RawVariable *var = std::get_if<RawVariable>(&term)) {
+					const auto iter = varToAddr.find(var->name);
 					if(iter == end(varToAddr)) {
 						auto vAddr = machine.putRefPtr();
 						varToAddr.emplace(var->name, vAddr);
@@ -54,7 +48,7 @@ Address append(Wam &machine, const RawTerm &term, RawAppendStore &varToAddr) {
 						machine.getCell(addr).REF.addr = iter->second;
 					}
 				} else {
-					const RawStructure &str = boost::get<RawStructure>(term);
+					const RawStructure &str = std::get<RawStructure>(term);
 					if(str.args.empty()) {
 						// space optimization: constants are written in-line
 						(*this)(str);
@@ -73,10 +67,10 @@ Address append(Wam &machine, const RawTerm &term, RawAppendStore &varToAddr) {
 		std::unordered_map<std::size_t, Address> &varToAddr;
 	};
 
-	if(const RawStructure * str = boost::get<RawStructure>(&term)) {
+	if(const RawStructure *str = std::get_if<RawStructure>(&term)) {
 		return Address{AddressType::Heap, Writer(machine, varToAddr)(*str)};
-	} else if(const RawVariable * var = boost::get<RawVariable>(&term)) {
-		auto iter = varToAddr.find(var->name);
+	} else if(const RawVariable *var = std::get_if<RawVariable>(&term)) {
+		const auto iter = varToAddr.find(var->name);
 		if(iter == end(varToAddr)) {
 			auto addr = machine.putRefPtr();
 			varToAddr.emplace(var->name, addr);
@@ -84,9 +78,8 @@ Address append(Wam &machine, const RawTerm &term, RawAppendStore &varToAddr) {
 		} else {
 			return iter->second;
 		}
-	} else MOD_ABORT;
+	} else
+		MOD_ABORT;
 }
 
-} // namespace Term
-} // namespace lib
-} // namespace mod
+} // namespace mod::lib::Term

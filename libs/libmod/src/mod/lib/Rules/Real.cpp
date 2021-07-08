@@ -75,7 +75,7 @@ namespace {
 std::size_t nextRuleNum = 0;
 } // namespace 
 
-Real::Real(LabelledRule &&rule, boost::optional<LabelType> labelType)
+Real::Real(LabelledRule &&rule, std::optional<LabelType> labelType)
 		: id(nextRuleNum++), name("r_{" + boost::lexical_cast<std::string>(id) + "}"), labelType(labelType),
 		  dpoRule(std::move(rule)) {
 	if(dpoRule.numLeftComponents == std::numeric_limits<std::size_t>::max()) dpoRule.initComponents();
@@ -115,7 +115,7 @@ void Real::setName(std::string name) {
 	this->name = name;
 }
 
-boost::optional<LabelType> Real::getLabelType() const {
+std::optional<LabelType> Real::getLabelType() const {
 	return labelType;
 }
 

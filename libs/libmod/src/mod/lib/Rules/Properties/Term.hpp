@@ -1,18 +1,15 @@
-#ifndef MOD_LIB_RULES_PROP_TERM_H
-#define MOD_LIB_RULES_PROP_TERM_H
+#ifndef MOD_LIB_RULES_PROP_TERM_HPP
+#define MOD_LIB_RULES_PROP_TERM_HPP
 
 #include <mod/lib/GraphMorphism/Constraints/Constraint.hpp>
 #include <mod/lib/Rules/GraphDecl.hpp>
 #include <mod/lib/Rules/Properties/Property.hpp>
 #include <mod/lib/Term/WAM.hpp>
 
-#include <boost/optional.hpp>
-
+#include <optional>
 #include <string>
 
-namespace mod {
-namespace lib {
-namespace Rules {
+namespace mod::lib::Rules {
 struct PropStringCore;
 
 struct PropTermCore : PropCore<PropTermCore, GraphType, std::size_t, std::size_t> {
@@ -29,7 +26,7 @@ public:
 	friend lib::Term::Wam &getMachine(PropTermCore &core);
 	friend const lib::Term::Wam &getMachine(const PropTermCore &core);
 private:
-	boost::optional<std::string> parsingError;
+	std::optional<std::string> parsingError;
 	lib::Term::Wam machine;
 };
 
@@ -49,8 +46,6 @@ inline bool isValid(const PropTermCore::RightType &p) {
 	return isValid(p.state.getDerived());
 }
 
-} // namespace Rules
-} // namespace lib
-} // namespace mod
+} // namespace mod::lib::Rules
 
-#endif /* MOD_LIB_RULES_PROP_TERM_H */
+#endif // MOD_LIB_RULES_PROP_TERM_HPP

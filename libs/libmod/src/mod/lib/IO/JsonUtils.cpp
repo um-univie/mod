@@ -5,25 +5,22 @@
 
 #include <boost/crc.hpp>
 
-namespace mod {
-namespace lib {
-namespace IO {
+namespace mod::lib::IO {
 
-std::string writeJsonFile(const std::string &name, const nlohmann::json &j) {
+void writeJsonFile(const std::string &name, const nlohmann::json &j) {
 	const std::vector<std::uint8_t> bytes = nlohmann::json::to_cbor(j);
 	boost::crc_32_type result;
 	result.process_bytes(bytes.data(), bytes.size());
 	const std::uint32_t checksum = result.checksum();
 	const char version = 1;
 
-	post::FileHandle s(getUniqueFilePrefix() + name);
+	post::FileHandle s(name);
 	s.stream.write(reinterpret_cast<const char *>(bytes.data()), bytes.size());
 	s.stream.write(reinterpret_cast<const char *>(&checksum), sizeof(checksum));
 	s.stream.write(&version, 1);
-	return s;
 }
 
-boost::optional<nlohmann::json> readJson(const std::vector<std::uint8_t> &data, std::ostream &err) {
+std::optional<nlohmann::json> readJson(const std::vector<std::uint8_t> &data, std::ostream &err) {
 	if(data.size() < sizeof(std::uint32_t) + 1) {
 		err << "Integrity check failed. Input too short.";
 		return {};
@@ -73,6 +70,4 @@ bool validateJson(const nlohmann::json &j,
 	return !handler;
 }
 
-} // namespace IO
-} // namespace lib
-} // namespace mod
+} // namespace mod::lib::IO

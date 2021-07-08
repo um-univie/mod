@@ -22,15 +22,9 @@
 #include <mod/lib/Rules/Properties/Depiction.hpp>
 #include <mod/lib/Rules/Properties/Term.hpp>
 
-#include <jla_boost/graph/morphism/Predicates.hpp>
-
 #include <boost/lexical_cast.hpp>
 
-namespace mod {
-namespace lib {
-namespace IO {
-namespace Derivation {
-namespace Write {
+namespace mod::lib::IO::Derivation::Write {
 namespace {
 namespace GM = jla_boost::GraphMorphism;
 
@@ -235,8 +229,4 @@ summary(const lib::DG::NonHyper &dg,
 	return res;
 }
 
-} // namespace Write
-} // namespace Derivation
-} // namespace IO
-} // namespace lib
-} // namespace mod
+} // namespace mod::lib::IO::Derivation::Write

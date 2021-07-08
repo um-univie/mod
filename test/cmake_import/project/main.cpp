@@ -3,6 +3,6 @@
 #include <iostream>
 
 int main() {
-	auto g = mod::graph::Graph::graphDFS("[T]");
+	auto g = mod::graph::Graph::fromDFS("[T]");
 	std::cout << "Graph name:      " << g->getName() << "\n";
 }

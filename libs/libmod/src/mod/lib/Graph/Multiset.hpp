@@ -1,14 +1,12 @@
-#ifndef MOD_LIB_GRAPH_MULTISET_H
-#define MOD_LIB_GRAPH_MULTISET_H
+#ifndef MOD_LIB_GRAPH_MULTISET_HPP
+#define MOD_LIB_GRAPH_MULTISET_HPP
 
 #include <boost/functional/hash.hpp>
 
 #include <algorithm>
 #include <vector>
 
-namespace mod {
-namespace lib {
-namespace Graph {
+namespace mod::lib::Graph {
 
 template<typename GraphType>
 struct Multiset {
@@ -49,9 +47,7 @@ private:
 	std::vector<GraphType *> graphs;
 };
 
-} // namespace Graph
-} // namespace lib
-} // namespace mod
+} // namespace mod::lib::Graph
 
 template<typename GraphType>
 struct std::hash<mod::lib::Graph::Multiset<GraphType>> {
@@ -60,5 +56,4 @@ struct std::hash<mod::lib::Graph::Multiset<GraphType>> {
 	}
 };
 
-#endif /* MOD_LIB_GRAPH_MULTISET_H */
-
+#endif // MOD_LIB_GRAPH_MULTISET_HPP

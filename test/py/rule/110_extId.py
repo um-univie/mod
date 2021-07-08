@@ -1,3 +1,5 @@
+include("xxx_helpers.py")
+
 def check(a):
 	data = {42: "C", 1337: "O", 0: "U"}
 	for i in range(a.minExternalId, a.maxExternalId + 1):

@@ -1,5 +1,5 @@
-#ifndef MOD_LIB_RC_COMPOSE_RULE_REAL_GENERIC_H
-#define MOD_LIB_RC_COMPOSE_RULE_REAL_GENERIC_H
+#ifndef MOD_LIB_RC_COMPOSE_RULE_REAL_GENERIC_HPP
+#define MOD_LIB_RC_COMPOSE_RULE_REAL_GENERIC_HPP
 
 #include <mod/Config.hpp>
 #include <mod/Misc.hpp>
@@ -11,11 +11,9 @@
 #include <mod/lib/RC/Visitor/String.hpp>
 #include <mod/lib/RC/Visitor/Term.hpp>
 
-#include <boost/optional.hpp>
+#include <optional>
 
-namespace mod {
-namespace lib {
-namespace RC {
+namespace mod::lib::RC {
 struct Common;
 struct Parallel;
 struct Sub;
@@ -83,7 +81,6 @@ struct MatchMakerCallback {
 		}
 		return true;
 	}
-
 private:
 	std::function<bool(std::unique_ptr<lib::Rules::Real>)> rr;
 };
@@ -101,8 +98,6 @@ void composeRuleRealByMatchMakerGeneric(const lib::Rules::Real &rFirst,
 	mm.makeMatches(rFirst, rSecond, detail::MatchMakerCallback(rr), labelSettings);
 }
 
-} // namespace RC
-} // namespace lib
-} // namespace mod
+} // namespace mod::lib::RC
 
-#endif /* MOD_LIB_RC_COMPOSE_RULE_REAL_GENERIC_H */
+#endif // MOD_LIB_RC_COMPOSE_RULE_REAL_GENERIC_HPP

@@ -1,6 +1,6 @@
 [submodule "external/graph_canon"]
 	path = external/graph_canon
-	url = ../graph_canon
+	url = https://github.com/jakobandersen/graph_canon.git
 [submodule "external/nlohmann_json"]
 	path = external/nlohmann_json
 	url = https://github.com/nlohmann/json.git

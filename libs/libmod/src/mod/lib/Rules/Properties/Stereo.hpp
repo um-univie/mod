@@ -5,6 +5,7 @@
 #include <mod/lib/Stereo/EdgeCategory.hpp>
 #include <mod/lib/Rules/Properties/Molecule.hpp>
 
+#include <optional>
 #include <tuple>
 
 namespace mod::lib::Rules {
@@ -27,12 +28,11 @@ struct PropStereoCore
 	};
 
 	struct ValueTypeEdge {
-		boost::optional<lib::Stereo::EdgeCategory> left;
-		boost::optional<lib::Stereo::EdgeCategory> right;
+		std::optional<lib::Stereo::EdgeCategory> left;
+		std::optional<lib::Stereo::EdgeCategory> right;
 		bool inContext;
 	};
 public:
-
 	template<typename InferenceLeft, typename InferenceRight, typename VertexInContext, typename EdgeInContext>
 	PropStereoCore(const GraphType &g, InferenceLeft &&leftInference, InferenceRight &&rightInference,
 	               VertexInContext vCallback, EdgeInContext eCallback) : Base(g) {
@@ -119,7 +119,6 @@ public:
 		res.inContext = inContext(e);
 		return res;
 	}
-
 public:
 	using Base::verify;
 	using Base::getLeft;
@@ -127,7 +126,6 @@ public:
 	using Base::print;
 
 	struct Handler {
-
 		template<typename VEProp, typename LabGraphDom, typename LabGraphCodom, typename F, typename ...Args>
 		static auto fmap2(const VEProp &l,
 		                  const VEProp &r,
@@ -135,27 +133,27 @@ public:
 		                  const LabGraphCodom &gCodom,
 		                  F &&f,
 		                  Args &&... args) {
-			assert(l.left.is_initialized() || l.right.is_initialized());
+			assert(l.left.has_value() || l.right.has_value());
 			if(l.inContext) {
-				assert(l.left.is_initialized());
-				assert(l.right.is_initialized());
+				assert(l.left.has_value());
+				assert(l.right.has_value());
 			}
-			assert(r.left.is_initialized() || r.right.is_initialized());
+			assert(r.left.has_value() || r.right.has_value());
 			if(r.inContext) {
-				assert(r.left.is_initialized());
-				assert(r.right.is_initialized());
+				assert(r.left.has_value());
+				assert(r.right.has_value());
 			}
-			assert(l.left.is_initialized() == r.left.is_initialized());
-			assert(l.right.is_initialized() == r.right.is_initialized());
+			assert(l.left.has_value() == r.left.has_value());
+			assert(l.right.has_value() == r.right.has_value());
 			using Left = decltype(f(*l.left, *r.left, get_labelled_left(gDom), get_labelled_left(gCodom), args...));
 			using Right = decltype(f(*l.right, *r.right, get_labelled_right(gDom), get_labelled_right(gCodom), args...));
 			using InContext = decltype(f(l.inContext, r.inContext, get_labelled_left(gDom), get_labelled_left(gCodom),
 			                             args...));
 			return std::tuple<boost::optional<Left>, boost::optional<Right>, InContext>(
-					l.left.is_initialized() ? f(*l.left, *r.left, get_labelled_left(gDom), get_labelled_left(gCodom),
-					                            args...) : boost::optional<Left>(),
-					l.right.is_initialized() ? f(*l.right, *r.right, get_labelled_right(gDom), get_labelled_right(gCodom),
-					                             args...) : boost::optional<Right>(),
+					l.left.has_value() ? f(*l.left, *r.left, get_labelled_left(gDom), get_labelled_left(gCodom),
+					                       args...) : boost::optional<Left>(),
+					l.right.has_value() ? f(*l.right, *r.right, get_labelled_right(gDom), get_labelled_right(gCodom),
+					                        args...) : boost::optional<Right>(),
 					f(l.inContext, r.inContext, args...)
 			);
 		}
@@ -172,7 +170,6 @@ public:
 		}
 	};
 public:
-
 	bool inContext(Vertex v) const {
 		return vertexInContext[get(boost::vertex_index_t(), g, v)];
 	}
@@ -180,7 +177,6 @@ public:
 	bool inContext(Edge e) const {
 		return edgeInContext[get(boost::edge_index_t(), g, e)];
 	}
-
 private:
 	std::vector<bool> vertexInContext, edgeInContext;
 };

@@ -6,9 +6,7 @@
 #include <mod/lib/RC/MatchMaker/Sub.hpp>
 #include <mod/lib/RC/MatchMaker/Super.hpp>
 
-namespace mod {
-namespace lib {
-namespace RC {
+namespace mod::lib::RC {
 
 #define MOD_RC_COMPOSE_BY_MATCH_MAKER(MM)                                                                              \
    void composeRuleRealByMatchMaker(const lib::Rules::Real &rFirst, const lib::Rules::Real &rSecond,                   \
@@ -16,16 +14,10 @@ namespace RC {
       composeRuleRealByMatchMakerGeneric(rFirst, rSecond, mm, rr, labelSettings);                                      \
    }
 
-MOD_RC_COMPOSE_BY_MATCH_MAKER(Common);
-
-MOD_RC_COMPOSE_BY_MATCH_MAKER(Parallel);
-
-MOD_RC_COMPOSE_BY_MATCH_MAKER(Sub);
-
-MOD_RC_COMPOSE_BY_MATCH_MAKER(Super);
+MOD_RC_COMPOSE_BY_MATCH_MAKER(Common)
+MOD_RC_COMPOSE_BY_MATCH_MAKER(Parallel)
+MOD_RC_COMPOSE_BY_MATCH_MAKER(Sub)
+MOD_RC_COMPOSE_BY_MATCH_MAKER(Super)
 #undef MOD_RC_COMPOSE_BY_MATCH_MAKER
 
-
-} // namespace RC
-} // namespace lib
-} // namespace mod
+} // namespace mod::lib::RC

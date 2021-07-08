@@ -9,6 +9,26 @@ r = ruleGMLString("""rule [
 	right [ node [ id 0 label "S" ] ]
 ]""")
 
+# DG.dump
+
+fail(lambda: DG().dump(), "Can not dump DG before it is locked.")
+
+dg = DG()
+dg.build()
+
+f = dg.dump()
+assert f.startswith("out/")
+assert f.endswith("_DG.dg")
+
+f = dg.dump('')
+assert f.startswith("out/")
+assert f.endswith("_DG.dg")
+
+f = dg.dump("out/myFilename.dg")
+assert f == "out/myFilename.dg"
+fail(lambda: dg.dump("/dev/null/DG.dg"),
+	"Can not open file '/dev/null/DG.dg'.")
+
 
 # DG.load
 
@@ -21,8 +41,9 @@ fail(lambda: DG.load([g1, g2], [], CWDPath(f)), "Isomorphic graphs '{}' and '{}'
 dg = DG.load([g1, g2], [], CWDPath(f), graphPolicy=IsomorphismPolicy.TrustMe)
 
 fail(lambda: DG.load([], [None], CWDPath(f)), "Nullptr in rule database.")
-fail(lambda: DG.load([], [], "blah"), "DG dump file not found, '{}'.".format(prefixFilename("blah")),
-	err=InputError)
+fail(lambda: DG.load([], [], 'doesNotExist.dg'),
+	"DG load error: Could not open file",
+	err=InputError, isSubstring=True)
 
 
 dg = DG()
@@ -63,7 +84,6 @@ dg3 = DG.load(dg.graphDatabase, inputRules, CWDPath(f))
 _compareDGs(dg, dg3)
 
 
-
 # DGBuilder.load
 
 dg = DG()
@@ -71,8 +91,9 @@ dg.build()
 f = dg.dump()
 
 fail(lambda: DG().build().load([None], CWDPath(f)), "Nullptr in rule database.")
-fail(lambda: DG().build().load([], "blah"), "DG dump file not found, '{}'.".format(prefixFilename("blah")),
-	err=InputError)
+fail(lambda: DG().build().load([], 'doesNotExist.dg'),
+	"DG load error: Could not open file ",
+	err=InputError, isSubstring=True)
 
 dg2 = DG(labelSettings=LabelSettings(LabelType.Term, LabelRelation.Specialisation))
 fail(lambda: dg2.build().load([], CWDPath(f)),

@@ -58,8 +58,10 @@ BEGIN {
 		print "Synopsis"
 		print "^^^^^^^^"
 		print ""
-		print ".. code-block:: c++"
-		print "    "
+		print ".. alias:: " lastClass
+		print "	:maxdepth: 2"
+		print "	:noroot:"
+		print ""
 	} else if($0 ~/^[\t]*\/\/ rst-class-end:/) {
 		inClass = 0
 		if(lineNum > 0) {
@@ -76,7 +78,8 @@ BEGIN {
 			lineNum = 0
 		}
 		if(nestedLineNum > 0) {
-			for(i = 0; i < nestedLineNum; i++) print nestedRST[i]
+			for(i = 0; i < nestedLineNum; i++)
+				print nestedRST[i]
 			print ""
 			nestedLineNum = 0
 		}
@@ -103,9 +106,6 @@ BEGIN {
 		print "Unknown rst command in line " NR ":" | "cat 1>&2"
 		print $0 | "cat 1>&2"
 		exit 1
-	} else if(inClass) {
-		if(!($0 ~/^[\t]*$/))
-			print "\t"$0
 	}
 }
 '
@@ -158,7 +158,7 @@ EOF
 	function data {
 		cat << "EOF"
 ################################################
-MedØlDatschgerl
+MØD
 ################################################
 
 .. toctree::
@@ -175,7 +175,7 @@ cat << "EOF"
 Overview
 ========
 
-This is the documentation for the MedØlDatschgerl (MØD) software package.
+This is the documentation for the MØD software package.
 The sources can be found in the GitHub repository: `<http://github.com/jakobandersen/mod>`_.
 For additional information see the webpage: `<http://mod.imada.sdu.dk>`_.
 

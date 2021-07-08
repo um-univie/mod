@@ -245,3 +245,37 @@ documentation device.
 			:raises: :class:`~mod.LogicError` if it is a null descriptor.
 
 
+.. class:: VertexMap
+
+	The protocol implemented by classes that represent a map of vertices
+	from a domain :class:`Graph` to a codomain :class:`Graph`.
+
+	.. attribute:: domain
+
+		(Read-only) The graph for which the vertices form the domain of the map.
+
+		:type: :class:`Graph`
+
+	.. attribute:: codomain
+
+		(Read-only) The graph for which the vertices form the codomain of the map.
+
+		:type: :class:`Graph`
+
+	.. method:: __getitem__(v)
+
+		:param Graph.Vertex v: the vertex to return the image of.
+		:returns: the image of the given domain vertex.
+			May return a null vertex if the map is partial.
+		:rtype: Graph.Vertex
+		:raises: :class:`~mod.LogicError` if ``v`` is a null vertex.
+		:raises: :class:`~mod.LogicError` if ``v`` does not belong to the domain graph for the map.
+
+	.. method:: inverse(v)
+
+		:param Graph.Vertex v: the codomain vertex to return the domain vertex for.
+		:returns: the domain vertex that maps to the given codomain vertex.
+			May return a null vertex if non exist.
+		:rtype: Graph.Vertex
+		:raises: :class:`~mod.LogicError` if ``v`` is a null vertex.
+		:raises: :class:`~mod.LogicError` if ``v`` does not belong to the codomain graph for the map.

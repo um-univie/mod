@@ -62,7 +62,7 @@ std::shared_ptr<Composer> create(const std::vector<std::shared_ptr<Rule>> dVec, 
 
 } // namespace 
 
-void RC_doExport() {
+void Composition_doExport() {
 
 	// rst: Expression Evaluator
 	// rst: #################################################
@@ -119,7 +119,7 @@ void RC_doExport() {
 	// rst:
 	// rst:		.. note:: The caller is responsible for ensuring the given rules are unique.
 	// rst:
-	py::def("rcEvaluator", create);
+	py::def("_rcEvaluator", create);
 
 	// rst: Rule Composition Expressions
 	// rst: #################################################
@@ -163,7 +163,7 @@ void RC_doExport() {
 	//--------------------------------------------------------------------------
 	// rst: .. class:: RCExpExp
 	// rst:
-	// rst:		A generic rule composition expression.
+	// rst:		The base class for the composition of two rule :math:`(L_1, K_1, R_1)` and :math:`(L_2, K_2, R_2)`.
 	// rst:
 	py::class_<RCExp::Expression>("RCExpExp", py::no_init)
 			.def(str(py::self));
@@ -172,10 +172,12 @@ void RC_doExport() {
 	//--------------------------------------------------------------------------
 	// rst: .. class:: RCExpComposeCommon
 	// rst:
-	// rst:		The base class for the composition of two rule :math:`(L_1, K_1, R_1)` and :math:`(L_2, K_2, R_2)`.
+	// rst:		Compose the rules by all common subgraphs of :math:`R_1` and :math:`L_2`,
+	// rst:		possibly limited to connected subgraphs or to the subgraphs of maximum size.
+	// rst:		By default the empty overlap is not considered, but can be enabled to be.
 	// rst:
 	py::class_<RCExp::ComposeCommon>("RCExpComposeCommon", py::no_init)
-			.def(py::init<RCExp::Expression, RCExp::Expression, bool, bool, bool>())
+			.def(py::init<RCExp::Expression, RCExp::Expression, bool, bool, bool, bool>())
 			.def(str(py::self));
 	// rst: .. class:: RCExpComposeParallel
 	// rst:

@@ -16,8 +16,8 @@ foreach(fileName ${mod_TEST_CPP_FILES})
     set(workDir ${CMAKE_CURRENT_BINARY_DIR}/workDir/${testName})
     file(MAKE_DIRECTORY ${workDir})
     add_executable(${testName} EXCLUDE_FROM_ALL ${fileName}.cpp)
-    target_compile_options(${testName} PRIVATE
-            -Wall -Wextra -Werror -pedantic -Wno-comment)
+    target_compile_options(${testName} PRIVATE -Wall -Wextra -pedantic -Werror
+            -Wno-comment)
     target_link_libraries(${testName} PRIVATE mod::libmod)
     if(BUILD_TESTING_SANITIZERS AND NOT BUILD_COVERAGE)
         target_compile_options(${testName} PRIVATE ${sanFlags})

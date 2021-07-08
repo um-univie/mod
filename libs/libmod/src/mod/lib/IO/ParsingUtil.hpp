@@ -1,5 +1,9 @@
-#ifndef MOD_LIB_IO_PARSINGUTIL_H
-#define MOD_LIB_IO_PARSINGUTIL_H
+#ifndef MOD_LIB_IO_PARSINGUTIL_HPP
+#define MOD_LIB_IO_PARSINGUTIL_HPP
+
+#include <mod/lib/IO/ParsingError.hpp>
+
+#include <boost/lexical_cast.hpp>
 
 #include <boost/spirit/home/x3/support/traits/tuple_traits.hpp> // because it's missing somewhere inside operator/sequence.hpp
 
@@ -12,14 +16,11 @@
 namespace spirit = boost::spirit;
 namespace x3 = boost::spirit::x3;
 
-namespace mod {
-namespace lib {
-namespace IO {
+namespace mod::lib::IO {
 namespace detail {
 
 template<typename Skipper = void>
 struct ParseDispatch {
-
 	template<typename Iter, typename Parser, typename Attr>
 	static bool parse(Iter &iter, Iter iterEnd, const Parser &p, Attr &attr, const Skipper &s) {
 		return x3::phrase_parse(iter, iterEnd, p, s, attr);
@@ -28,7 +29,6 @@ struct ParseDispatch {
 
 template<>
 struct ParseDispatch<void> {
-
 	template<typename Iter, typename Parser, typename Attr>
 	static bool parse(Iter &iter, Iter iterEnd, const Parser &p, Attr &attr) {
 		return x3::parse(iter, iterEnd, p, attr);
@@ -36,20 +36,20 @@ struct ParseDispatch<void> {
 };
 
 template<typename TextIter, typename PosIter>
-void doParserError(const TextIter &textIter, const PosIter &iter, const PosIter &iterEnd, std::ostream &err) {
+std::string makeParserError(const TextIter &textIter, const PosIter &iter, const PosIter &iterEnd) {
 	const auto lineNumber = iter.position();
 	const auto lineRange = get_current_line(PosIter(textIter), iter, iterEnd);
 	const auto column = get_column(lineRange.begin(), iter);
-	err << "Parsing failed at " << lineNumber << ":" << column << ":\n";
-	err << lineRange << "\n";
-	err << std::string(column - 1, '-') << "^\n";
+	return "Parsing failed at " + std::to_string(lineNumber)
+	       + ":" + std::to_string(column) + ":\n"
+	       + boost::lexical_cast<std::string>(lineRange) + "\n" + std::string(column - 1, '-') + "^";
 }
 
 template<typename TextIter, typename PosIter>
-void doParserExpectationError(const x3::expectation_failure<PosIter> &e, const TextIter &textIter, const PosIter &iterEnd, std::ostream &err) {
-	const PosIter &iter = e.where();
-	detail::doParserError(textIter, iter, iterEnd, err);
-	err << "Expected " << e.which() << ".";
+std::string makeParserExpectationError(const x3::expectation_failure<PosIter> &e, const TextIter &textIter,
+                                       const PosIter &iterEnd) {
+	return detail::makeParserError(textIter, e.where(), iterEnd)
+	       + "\nExpected " + e.which() + ".";
 }
 
 } // namespace detail
@@ -58,28 +58,25 @@ template<typename Iter>
 using PositionIter = spirit::line_pos_iterator<Iter>;
 
 template<typename TextIter, typename Parser, typename Attr, typename ...Skipper>
-bool parse(const TextIter &textFirst, PositionIter<TextIter> &first, const PositionIter<TextIter> &last, const Parser &p, Attr &attr, std::ostream &err, const Skipper& ...skipper) {
+void parse(const TextIter &textFirst, PositionIter<TextIter> &first, const PositionIter<TextIter> &last,
+           const Parser &p, Attr &attr, const Skipper &...skipper) {
+	bool res;
 	try {
-		bool res = detail::ParseDispatch < Skipper...>::parse(first, last, p, attr, skipper...);
-		if(!res || first != last) {
-			detail::doParserError(textFirst, first, last, err);
-			return false;
-		}
+		res = detail::ParseDispatch<Skipper...>::parse(first, last, p, attr, skipper...);
 	} catch(const x3::expectation_failure<PositionIter<TextIter> > &e) {
-		detail::doParserExpectationError(e, textFirst, last, err);
-		return false;
+		throw ParsingError{detail::makeParserExpectationError(e, textFirst, last)};
 	}
-	return true;
+	if(!res || first != last)
+		throw ParsingError{detail::makeParserError(textFirst, first, last)};
 }
 
 template<typename TextIter, typename Parser, typename Attr, typename ...Skipper>
-bool parse(const TextIter &textFirst, const TextIter &textLast, const Parser &p, Attr &attr, std::ostream &err, const Skipper& ...skipper) {
+void parse(const TextIter &textFirst, const TextIter &textLast,
+           const Parser &p, Attr &attr, const Skipper &...skipper) {
 	PositionIter<TextIter> first(textFirst);
-	return parse(textFirst, first, PositionIter<TextIter>(textLast), p, attr, err, skipper...);
+	return parse(textFirst, first, PositionIter<TextIter>(textLast), p, attr, skipper...);
 }
 
-} // namespace IO
-} // namespace lib
-} // namespace mod
+} // namespace mod::lib::IO
 
-#endif /* MOD_LIB_IO_PARSINGUTIL_H */
+#endif // MOD_LIB_IO_PARSINGUTIL_HPP

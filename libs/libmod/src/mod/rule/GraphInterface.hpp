@@ -41,10 +41,12 @@ private:
 public:
 	// rst: .. function:: friend bool operator==(const LeftGraph &a, const LeftGraph &b)
 	// rst:               friend bool operator!=(const LeftGraph &a, const LeftGraph &b)
+	// rst:               friend bool operator<(const LeftGraph &a, const LeftGraph &b)
 	// rst:               friend std::ostream &operator<<(std::ostream &s, const LeftGraph &g)
 	// rst:
 	MOD_DECL friend bool operator==(const LeftGraph &a, const LeftGraph &b) { return a.r == b.r; }
 	MOD_DECL friend bool operator!=(const LeftGraph &a, const LeftGraph &b) { return a.r != b.r; }
+	MOD_DECL friend bool operator<(const LeftGraph &a, const LeftGraph &b) { return a.r < b.r; }
 	MOD_DECL friend std::ostream &operator<<(std::ostream &s, const LeftGraph &g);
 	// rst: .. function:: std::size_t numVertices() const
 	// rst:
@@ -86,7 +88,7 @@ class Rule::LeftGraph::Vertex {
 	friend class Edge;
 	friend class VertexIterator;
 	friend class VertexRange;
-	Vertex(std::shared_ptr<Rule> r, std::size_t vId);
+	Vertex(LeftGraph g, std::size_t vId);
 public:
 	// rst:	.. function:: Vertex()
 	// rst:
@@ -169,7 +171,7 @@ public:
 	// rst:		:throws: :cpp:class:`LogicError` if it is a null descriptor.
 	std::shared_ptr<Rule> getRule() const;
 private:
-	std::shared_ptr<Rule> r;
+	std::optional<LeftGraph> g;
 	std::size_t vId;
 };
 // rst-class-end:
@@ -182,7 +184,7 @@ class Rule::LeftGraph::Edge {
 	friend class Rule::Edge;
 	friend class EdgeIterator;
 	friend class IncidentEdgeIterator;
-	Edge(std::shared_ptr<Rule> r, std::size_t vId, std::size_t eId);
+	Edge(LeftGraph g, std::size_t vId, std::size_t eId);
 public:
 	// rst:	.. function:: Edge()
 	// rst:
@@ -235,7 +237,7 @@ public:
 	// rst:		:throws: :cpp:class:`LogicError` if it is a null descriptor.
 	std::shared_ptr<Rule> getRule() const;
 private:
-	std::shared_ptr<Rule> r;
+	std::optional<LeftGraph> g;
 	std::size_t vId, eId;
 };
 // rst-class-end:
@@ -252,7 +254,7 @@ private:
 class Rule::LeftGraph::VertexIterator
 		: public boost::iterator_facade<VertexIterator, Vertex, std::forward_iterator_tag, Vertex> {
 	friend class Rule;
-	VertexIterator(std::shared_ptr<Rule> r);
+	VertexIterator(LeftGraph g);
 public:
 	// rst:	.. function:: VertexIterator()
 	// rst:
@@ -264,7 +266,7 @@ private:
 	bool equal(const VertexIterator &iter) const;
 	void increment();
 private:
-	std::shared_ptr<Rule> r;
+	std::optional<LeftGraph> g;
 	std::size_t vId;
 };
 // rst-class-end:
@@ -278,12 +280,12 @@ struct Rule::LeftGraph::VertexRange {
 	using const_iterator = iterator;
 private:
 	friend class Rule;
-	VertexRange(std::shared_ptr<Rule> r);
+	VertexRange(LeftGraph g);
 public:
 	VertexIterator begin() const;
 	VertexIterator end() const;
 private:
-	std::shared_ptr<Rule> r;
+	LeftGraph g;
 };
 // rst-class-end:
 
@@ -299,7 +301,7 @@ private:
 class Rule::LeftGraph::EdgeIterator
 		: public boost::iterator_facade<EdgeIterator, Edge, std::forward_iterator_tag, Edge> {
 	friend class Rule;
-	EdgeIterator(std::shared_ptr<Rule> r);
+	EdgeIterator(LeftGraph g);
 public:
 	// rst:	.. function:: EdgeIterator()
 	// rst:
@@ -312,7 +314,7 @@ private:
 	void increment();
 	void advanceToValid();
 private:
-	std::shared_ptr<Rule> r;
+	std::optional<LeftGraph> g;
 	std::size_t vId, eId;
 };
 // rst-class-end:
@@ -326,12 +328,12 @@ struct Rule::LeftGraph::EdgeRange {
 	using const_iterator = iterator;
 private:
 	friend class Rule;
-	EdgeRange(std::shared_ptr<Rule> r);
+	EdgeRange(LeftGraph g);
 public:
 	EdgeIterator begin() const;
 	EdgeIterator end() const;
 private:
-	std::shared_ptr<Rule> r;
+	LeftGraph g;
 };
 // rst-class-end:
 
@@ -347,7 +349,7 @@ private:
 class Rule::LeftGraph::IncidentEdgeIterator
 		: public boost::iterator_facade<IncidentEdgeIterator, Edge, std::forward_iterator_tag, Edge> {
 	friend class Rule;
-	IncidentEdgeIterator(std::shared_ptr<Rule> r, std::size_t vId);
+	IncidentEdgeIterator(LeftGraph g, std::size_t vId);
 public:
 	// rst:	.. function:: IncidentEdgeIterator()
 	// rst:
@@ -359,7 +361,7 @@ private:
 	bool equal(const IncidentEdgeIterator &iter) const;
 	void increment();
 private:
-	std::shared_ptr<Rule> r;
+	std::optional<LeftGraph> g;
 	std::size_t vId, eId;
 };
 // rst-class-end:
@@ -373,12 +375,12 @@ struct Rule::LeftGraph::IncidentEdgeRange {
 	using const_iterator = iterator;
 private:
 	friend class Vertex;
-	IncidentEdgeRange(std::shared_ptr<Rule> r, std::size_t vId);
+	IncidentEdgeRange(LeftGraph g, std::size_t vId);
 public:
 	IncidentEdgeIterator begin() const;
 	IncidentEdgeIterator end() const;
 private:
-	std::shared_ptr<Rule> r;
+	LeftGraph g;
 	std::size_t vId;
 };
 // rst-class-end:
@@ -408,10 +410,12 @@ private:
 public:
 	// rst: .. function:: friend bool operator==(const ContextGraph &a, const ContextGraph &b)
 	//	rst:               friend bool operator!=(const ContextGraph &a, const ContextGraph &b)
+	//	rst:               friend bool operator<(const ContextGraph &a, const ContextGraph &b)
 	//	rst:               friend std::ostream &operator<<(std::ostream &s, const ContextGraph &g)
 	// rst:
 	MOD_DECL friend bool operator==(const ContextGraph &a, const ContextGraph &b) { return a.r == b.r; }
 	MOD_DECL friend bool operator!=(const ContextGraph &a, const ContextGraph &b) { return a.r != b.r; }
+	MOD_DECL friend bool operator<(const ContextGraph &a, const ContextGraph &b) { return a.r < b.r; }
 	MOD_DECL friend std::ostream &operator<<(std::ostream &s, const ContextGraph &g);
 	// rst: .. function:: std::size_t numVertices() const
 	// rst:
@@ -451,7 +455,7 @@ class Rule::ContextGraph::Vertex {
 	friend class Edge;
 	friend class VertexIterator;
 	friend class VertexRange;
-	Vertex(std::shared_ptr<Rule> r, std::size_t vId);
+	Vertex(ContextGraph g, std::size_t vId);
 public:
 	// rst:	.. function:: Vertex()
 	// rst:
@@ -500,7 +504,7 @@ public:
 	// rst:		:throws: :cpp:class:`LogicError` if it is a null descriptor.
 	std::shared_ptr<Rule> getRule() const;
 private:
-	std::shared_ptr<Rule> r;
+	std::optional<ContextGraph> g;
 	std::size_t vId;
 };
 // rst-class-end:
@@ -513,7 +517,7 @@ class Rule::ContextGraph::Edge {
 	friend class Rule::Edge;
 	friend class EdgeIterator;
 	friend class IncidentEdgeIterator;
-	Edge(std::shared_ptr<Rule> r, std::size_t vId, std::size_t eId);
+	Edge(ContextGraph g, std::size_t vId, std::size_t eId);
 public:
 	// rst:	.. function:: Edge()
 	// rst:
@@ -556,7 +560,7 @@ public:
 	// rst:		:returns: the descriptor for this edge in the core graph.
 	Rule::Edge getCore() const;
 private:
-	std::shared_ptr<Rule> r;
+	std::optional<ContextGraph> g;
 	std::size_t vId, eId;
 };
 // rst-class-end:
@@ -573,7 +577,7 @@ private:
 class Rule::ContextGraph::VertexIterator
 		: public boost::iterator_facade<VertexIterator, Vertex, std::forward_iterator_tag, Vertex> {
 	friend class Rule;
-	VertexIterator(std::shared_ptr<Rule> r);
+	VertexIterator(ContextGraph g);
 public:
 	// rst:	.. function:: VertexIterator()
 	// rst:
@@ -585,7 +589,7 @@ private:
 	bool equal(const VertexIterator &iter) const;
 	void increment();
 private:
-	std::shared_ptr<Rule> r;
+	std::optional<ContextGraph> g;
 	std::size_t vId;
 };
 // rst-class-end:
@@ -599,12 +603,12 @@ struct Rule::ContextGraph::VertexRange {
 	using const_iterator = iterator;
 private:
 	friend class Rule;
-	VertexRange(std::shared_ptr<Rule> r);
+	VertexRange(ContextGraph g);
 public:
 	VertexIterator begin() const;
 	VertexIterator end() const;
 private:
-	std::shared_ptr<Rule> r;
+	ContextGraph g;
 };
 // rst-class-end:
 
@@ -620,7 +624,7 @@ private:
 class Rule::ContextGraph::EdgeIterator
 		: public boost::iterator_facade<EdgeIterator, Edge, std::forward_iterator_tag, Edge> {
 	friend class Rule;
-	EdgeIterator(std::shared_ptr<Rule> r);
+	EdgeIterator(ContextGraph g);
 public:
 	// rst:	.. function:: EdgeIterator()
 	// rst:
@@ -633,7 +637,7 @@ private:
 	void increment();
 	void advanceToValid();
 private:
-	std::shared_ptr<Rule> r;
+	std::optional<ContextGraph> g;
 	std::size_t vId, eId;
 };
 // rst-class-end:
@@ -647,12 +651,12 @@ struct Rule::ContextGraph::EdgeRange {
 	using const_iterator = iterator;
 private:
 	friend class Rule;
-	EdgeRange(std::shared_ptr<Rule> r);
+	EdgeRange(ContextGraph g);
 public:
 	EdgeIterator begin() const;
 	EdgeIterator end() const;
 private:
-	std::shared_ptr<Rule> r;
+	ContextGraph g;
 };
 // rst-class-end:
 
@@ -668,7 +672,7 @@ private:
 class Rule::ContextGraph::IncidentEdgeIterator
 		: public boost::iterator_facade<IncidentEdgeIterator, Edge, std::forward_iterator_tag, Edge> {
 	friend class Rule;
-	IncidentEdgeIterator(std::shared_ptr<Rule> r, std::size_t vId);
+	IncidentEdgeIterator(ContextGraph g, std::size_t vId);
 public:
 	// rst:	.. function:: IncidentEdgeIterator()
 	// rst:
@@ -680,7 +684,7 @@ private:
 	bool equal(const IncidentEdgeIterator &iter) const;
 	void increment();
 private:
-	std::shared_ptr<Rule> r;
+	std::optional<ContextGraph> g;
 	std::size_t vId, eId;
 };
 // rst-class-end:
@@ -694,12 +698,12 @@ struct Rule::ContextGraph::IncidentEdgeRange {
 	using const_iterator = iterator;
 private:
 	friend class Vertex;
-	IncidentEdgeRange(std::shared_ptr<Rule> r, std::size_t vId);
+	IncidentEdgeRange(ContextGraph g, std::size_t vId);
 public:
 	IncidentEdgeIterator begin() const;
 	IncidentEdgeIterator end() const;
 private:
-	std::shared_ptr<Rule> r;
+	ContextGraph g;
 	std::size_t vId;
 };
 // rst-class-end:
@@ -729,10 +733,12 @@ private:
 public:
 	// rst: .. function:: friend bool operator==(const RightGraph &a, const RightGraph &b)
 	// rst:               friend bool operator!=(const RightGraph &a, const RightGraph &b)
+	// rst:               friend bool operator<(const RightGraph &a, const RightGraph &b)
 	// rst:               friend std::ostream &operator<<(std::ostream &s, const RightGraph &g);
 	// rst:
 	MOD_DECL friend bool operator==(const RightGraph &a, const RightGraph &b) { return a.r == b.r; }
 	MOD_DECL friend bool operator!=(const RightGraph &a, const RightGraph &b) { return a.r != b.r; }
+	MOD_DECL friend bool operator<(const RightGraph &a, const RightGraph &b) { return a.r < b.r; }
 	MOD_DECL friend std::ostream &operator<<(std::ostream &s, const RightGraph &g);
 	// rst: .. function:: std::size_t numVertices() const
 	// rst:
@@ -772,7 +778,7 @@ class Rule::RightGraph::Vertex {
 	friend class Edge;
 	friend class VertexIterator;
 	friend class VertexRange;
-	Vertex(std::shared_ptr<Rule> r, std::size_t vId);
+	Vertex(RightGraph g, std::size_t vId);
 public:
 	// rst:	.. function:: Vertex()
 	// rst:
@@ -855,7 +861,7 @@ public:
 	// rst:		:throws: :cpp:class:`LogicError` if it is a null descriptor.
 	std::shared_ptr<Rule> getRule() const;
 private:
-	std::shared_ptr<Rule> r;
+	std::optional<RightGraph> g;
 	std::size_t vId;
 };
 // rst-class-end:
@@ -868,7 +874,7 @@ class Rule::RightGraph::Edge {
 	friend class Rule::Edge;
 	friend class EdgeIterator;
 	friend class IncidentEdgeIterator;
-	Edge(std::shared_ptr<Rule> r, std::size_t vId, std::size_t eId);
+	Edge(RightGraph g, std::size_t vId, std::size_t eId);
 public:
 	// rst:	.. function:: Edge()
 	// rst:
@@ -921,7 +927,7 @@ public:
 	// rst:		:returns: the descriptor for this edge in the core graph.
 	Rule::Edge getCore() const;
 private:
-	std::shared_ptr<Rule> r;
+	std::optional<RightGraph> g;
 	std::size_t vId, eId;
 };
 // rst-class-end:
@@ -938,7 +944,7 @@ private:
 class Rule::RightGraph::VertexIterator
 		: public boost::iterator_facade<VertexIterator, Vertex, std::forward_iterator_tag, Vertex> {
 	friend class Rule;
-	VertexIterator(std::shared_ptr<Rule> r);
+	VertexIterator(RightGraph g);
 public:
 	// rst:	.. function:: VertexIterator()
 	// rst:
@@ -950,7 +956,7 @@ private:
 	bool equal(const VertexIterator &iter) const;
 	void increment();
 private:
-	std::shared_ptr<Rule> r;
+	std::optional<RightGraph> g;
 	std::size_t vId;
 };
 // rst-class-end:
@@ -964,12 +970,12 @@ struct Rule::RightGraph::VertexRange {
 	using const_iterator = iterator;
 private:
 	friend class Rule;
-	VertexRange(std::shared_ptr<Rule> r);
+	VertexRange(RightGraph g);
 public:
 	VertexIterator begin() const;
 	VertexIterator end() const;
 private:
-	std::shared_ptr<Rule> r;
+	RightGraph g;
 };
 // rst-class-end:
 
@@ -985,7 +991,7 @@ private:
 class Rule::RightGraph::EdgeIterator
 		: public boost::iterator_facade<EdgeIterator, Edge, std::forward_iterator_tag, Edge> {
 	friend class Rule;
-	EdgeIterator(std::shared_ptr<Rule> r);
+	EdgeIterator(RightGraph g);
 public:
 	// rst:	.. function:: EdgeIterator()
 	// rst:
@@ -998,7 +1004,7 @@ private:
 	void increment();
 	void advanceToValid();
 private:
-	std::shared_ptr<Rule> r;
+	std::optional<RightGraph> g;
 	std::size_t vId, eId;
 };
 // rst-class-end:
@@ -1012,12 +1018,12 @@ struct Rule::RightGraph::EdgeRange {
 	using const_iterator = iterator;
 private:
 	friend class Rule;
-	EdgeRange(std::shared_ptr<Rule> r);
+	EdgeRange(RightGraph g);
 public:
 	EdgeIterator begin() const;
 	EdgeIterator end() const;
 private:
-	std::shared_ptr<Rule> r;
+	RightGraph g;
 };
 // rst-class-end:
 
@@ -1033,7 +1039,7 @@ private:
 class Rule::RightGraph::IncidentEdgeIterator
 		: public boost::iterator_facade<IncidentEdgeIterator, Edge, std::forward_iterator_tag, Edge> {
 	friend class Rule;
-	IncidentEdgeIterator(std::shared_ptr<Rule> r, std::size_t vId);
+	IncidentEdgeIterator(RightGraph g, std::size_t vId);
 public:
 	// rst:	.. function:: IncidentEdgeIterator()
 	// rst:
@@ -1045,7 +1051,7 @@ private:
 	bool equal(const IncidentEdgeIterator &iter) const;
 	void increment();
 private:
-	std::shared_ptr<Rule> r;
+	std::optional<RightGraph> g;
 	std::size_t vId, eId;
 };
 // rst-class-end:
@@ -1059,12 +1065,12 @@ struct Rule::RightGraph::IncidentEdgeRange {
 	using const_iterator = iterator;
 private:
 	friend class Vertex;
-	IncidentEdgeRange(std::shared_ptr<Rule> r, std::size_t vId);
+	IncidentEdgeRange(RightGraph g, std::size_t vId);
 public:
 	IncidentEdgeIterator begin() const;
 	IncidentEdgeIterator end() const;
 private:
-	std::shared_ptr<Rule> r;
+	RightGraph g;
 	std::size_t vId;
 };
 // rst-class-end:
@@ -1083,7 +1089,7 @@ private:
 // rst:
 // rst:		A descriptor of either a vertex in a rule, or a null vertex.
 // rst-class-start:
-class Rule::Vertex {
+struct Rule::Vertex {
 	friend class Rule;
 	friend class Edge;
 	friend class VertexIterator;
@@ -1398,10 +1404,10 @@ inline std::shared_ptr<Rule> Rule::LeftGraph::getRule() const {
 // VertexRange
 //------------------------------------------------------------------------------
 
-inline Rule::LeftGraph::VertexRange::VertexRange(std::shared_ptr<Rule> r) : r(r) {}
+inline Rule::LeftGraph::VertexRange::VertexRange(LeftGraph g) : g(g) {}
 
 inline Rule::LeftGraph::VertexIterator Rule::LeftGraph::VertexRange::begin() const {
-	return VertexIterator(r);
+	return VertexIterator(g);
 }
 
 inline Rule::LeftGraph::VertexIterator Rule::LeftGraph::VertexRange::end() const {
@@ -1411,10 +1417,10 @@ inline Rule::LeftGraph::VertexIterator Rule::LeftGraph::VertexRange::end() const
 // EdgeRange
 //------------------------------------------------------------------------------
 
-inline Rule::LeftGraph::EdgeRange::EdgeRange(std::shared_ptr<Rule> r) : r(r) {}
+inline Rule::LeftGraph::EdgeRange::EdgeRange(LeftGraph g) : g(g) {}
 
 inline Rule::LeftGraph::EdgeIterator Rule::LeftGraph::EdgeRange::begin() const {
-	return EdgeIterator(r);
+	return EdgeIterator(g);
 }
 
 inline Rule::LeftGraph::EdgeIterator Rule::LeftGraph::EdgeRange::end() const {
@@ -1424,11 +1430,11 @@ inline Rule::LeftGraph::EdgeIterator Rule::LeftGraph::EdgeRange::end() const {
 // IncidentEdgeRange
 //------------------------------------------------------------------------------
 
-inline Rule::LeftGraph::IncidentEdgeRange::IncidentEdgeRange(std::shared_ptr<Rule> r, std::size_t vId) : r(r),
-                                                                                                         vId(vId) {}
+inline Rule::LeftGraph::IncidentEdgeRange::IncidentEdgeRange(LeftGraph g, std::size_t vId)
+		: g(g), vId(vId) {}
 
 inline Rule::LeftGraph::IncidentEdgeIterator Rule::LeftGraph::IncidentEdgeRange::begin() const {
-	return IncidentEdgeIterator(r, vId);
+	return IncidentEdgeIterator(g, vId);
 }
 
 inline Rule::LeftGraph::IncidentEdgeIterator Rule::LeftGraph::IncidentEdgeRange::end() const {
@@ -1456,10 +1462,10 @@ inline std::shared_ptr<Rule> Rule::ContextGraph::getRule() const {
 // VertexRange
 //------------------------------------------------------------------------------
 
-inline Rule::ContextGraph::VertexRange::VertexRange(std::shared_ptr<Rule> r) : r(r) {}
+inline Rule::ContextGraph::VertexRange::VertexRange(ContextGraph g) : g(g) {}
 
 inline Rule::ContextGraph::VertexIterator Rule::ContextGraph::VertexRange::begin() const {
-	return VertexIterator(r);
+	return VertexIterator(g);
 }
 
 inline Rule::ContextGraph::VertexIterator Rule::ContextGraph::VertexRange::end() const {
@@ -1469,10 +1475,10 @@ inline Rule::ContextGraph::VertexIterator Rule::ContextGraph::VertexRange::end()
 // EdgeRange
 //------------------------------------------------------------------------------
 
-inline Rule::ContextGraph::EdgeRange::EdgeRange(std::shared_ptr<Rule> r) : r(r) {}
+inline Rule::ContextGraph::EdgeRange::EdgeRange(ContextGraph g) : g(g) {}
 
 inline Rule::ContextGraph::EdgeIterator Rule::ContextGraph::EdgeRange::begin() const {
-	return EdgeIterator(r);
+	return EdgeIterator(g);
 }
 
 inline Rule::ContextGraph::EdgeIterator Rule::ContextGraph::EdgeRange::end() const {
@@ -1482,11 +1488,11 @@ inline Rule::ContextGraph::EdgeIterator Rule::ContextGraph::EdgeRange::end() con
 // IncidentEdgeRange
 //------------------------------------------------------------------------------
 
-inline Rule::ContextGraph::IncidentEdgeRange::IncidentEdgeRange(std::shared_ptr<Rule> r, std::size_t vId) : r(r),
-                                                                                                            vId(vId) {}
+inline Rule::ContextGraph::IncidentEdgeRange::IncidentEdgeRange(ContextGraph g, std::size_t vId)
+		: g(g), vId(vId) {}
 
 inline Rule::ContextGraph::IncidentEdgeIterator Rule::ContextGraph::IncidentEdgeRange::begin() const {
-	return IncidentEdgeIterator(r, vId);
+	return IncidentEdgeIterator(g, vId);
 }
 
 inline Rule::ContextGraph::IncidentEdgeIterator Rule::ContextGraph::IncidentEdgeRange::end() const {
@@ -1515,10 +1521,10 @@ inline std::shared_ptr<Rule> Rule::RightGraph::getRule() const {
 // VertexRange
 //------------------------------------------------------------------------------
 
-inline Rule::RightGraph::VertexRange::VertexRange(std::shared_ptr<Rule> r) : r(r) {}
+inline Rule::RightGraph::VertexRange::VertexRange(RightGraph g) : g(g) {}
 
 inline Rule::RightGraph::VertexIterator Rule::RightGraph::VertexRange::begin() const {
-	return VertexIterator(r);
+	return VertexIterator(g);
 }
 
 inline Rule::RightGraph::VertexIterator Rule::RightGraph::VertexRange::end() const {
@@ -1528,10 +1534,10 @@ inline Rule::RightGraph::VertexIterator Rule::RightGraph::VertexRange::end() con
 // EdgeRange
 //------------------------------------------------------------------------------
 
-inline Rule::RightGraph::EdgeRange::EdgeRange(std::shared_ptr<Rule> r) : r(r) {}
+inline Rule::RightGraph::EdgeRange::EdgeRange(RightGraph g) : g(g) {}
 
 inline Rule::RightGraph::EdgeIterator Rule::RightGraph::EdgeRange::begin() const {
-	return EdgeIterator(r);
+	return EdgeIterator(g);
 }
 
 inline Rule::RightGraph::EdgeIterator Rule::RightGraph::EdgeRange::end() const {
@@ -1542,11 +1548,11 @@ inline Rule::RightGraph::EdgeIterator Rule::RightGraph::EdgeRange::end() const {
 // IncidentEdgeRange
 //------------------------------------------------------------------------------
 
-inline Rule::RightGraph::IncidentEdgeRange::IncidentEdgeRange(std::shared_ptr<Rule> r, std::size_t vId) : r(r),
-                                                                                                          vId(vId) {}
+inline Rule::RightGraph::IncidentEdgeRange::IncidentEdgeRange(RightGraph g, std::size_t vId)
+		: g(g), vId(vId) {}
 
 inline Rule::RightGraph::IncidentEdgeIterator Rule::RightGraph::IncidentEdgeRange::begin() const {
-	return IncidentEdgeIterator(r, vId);
+	return IncidentEdgeIterator(g, vId);
 }
 
 inline Rule::RightGraph::IncidentEdgeIterator Rule::RightGraph::IncidentEdgeRange::end() const {

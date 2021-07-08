@@ -93,7 +93,13 @@ struct EvalVisitor : public boost::static_visitor<std::vector<std::shared_ptr<ru
 			RC::Common mm(matchMakerVerbosity(), logger, common.getMaxmimum(), common.getConnected());
 			lib::RC::composeRuleRealByMatchMaker(rFirst, rSecond, mm, reporter, evaluator.labelSettings);
 		};
-		return composeTemplate(common, composer);
+		auto res = composeTemplate(common, composer);
+		if(common.getIncludeEmpty()) {
+			auto resEmpty = (*this)(rule::RCExp::ComposeParallel(
+					common.getFirst(), common.getSecond(), common.getDiscardNonchemical()));
+			res.insert(res.end(), resEmpty.begin(), resEmpty.end());
+		}
+		return res;
 	}
 
 	std::vector<std::shared_ptr<rule::Rule>> operator()(const rule::RCExp::ComposeParallel &common) {
@@ -211,7 +217,6 @@ std::vector<std::shared_ptr<rule::Rule>> Evaluator::eval(const rule::RCExp::Expr
 			compose.getFirst().applyVisitor(*this);
 			compose.getSecond().applyVisitor(*this);
 		}
-
 	private:
 		Evaluator &evaluator;
 	};

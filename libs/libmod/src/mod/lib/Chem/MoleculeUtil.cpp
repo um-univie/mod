@@ -11,9 +11,7 @@
 
 #include <map>
 
-namespace mod {
-namespace lib {
-namespace Chem {
+namespace mod::lib::Chem {
 
 //------------------------------------------------------------------------------
 // Other
@@ -377,6 +375,4 @@ char bondToChar(BondType bt) {
 	}
 }
 
-} // namespace Chem
-} // namespace lib
-} // namespace mod
+} // namespace mod::lib::Chem

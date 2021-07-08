@@ -15,7 +15,7 @@ struct Add : Strategy {
 	Add(const std::shared_ptr<mod::Function<std::vector<std::shared_ptr<graph::Graph> >()> > generator,
 	    bool onlyUniverse, IsomorphismPolicy graphPolicy);
 	virtual ~Add() override;
-	virtual Strategy *clone() const override;
+	virtual std::unique_ptr<Strategy> clone() const override;
 	virtual void preAddGraphs(std::function<void(std::shared_ptr<graph::Graph>, IsomorphismPolicy)> add) const override;
 	virtual void forEachRule(std::function<void(const lib::Rules::Real &)> f) const override {}
 	virtual void printInfo(PrintSettings settings) const override;

@@ -3,14 +3,13 @@
 #include <mod/Error.hpp>
 #include <mod/lib/GraphMorphism/Constraints/AllVisitor.hpp>
 #include <mod/lib/IO/IO.hpp>
+#include <mod/lib/IO/ParsingError.hpp>
 #include <mod/lib/IO/Term.hpp>
 #include <mod/lib/Rules/Properties/String.hpp>
 
 #include <jla_boost/graph/PairToRangeAdaptor.hpp>
 
-namespace mod {
-namespace lib {
-namespace Rules {
+namespace mod::lib::Rules {
 
 PropTermCore::PropTermCore(const GraphType &core,
 		const std::vector<ConstraintPtr> &leftMatchConstraints,
@@ -27,13 +26,14 @@ PropTermCore::PropTermCore(const GraphType &core,
 				return iter->second;
 			}
 		}
-		std::stringstream err;
-		auto rawTerm = lib::IO::Term::Read::rawTerm(label, stringStore, err);
-		if(!rawTerm) {
-			parsingError = err.str();
+		lib::Term::RawTerm rawTerm;
+		try {
+			rawTerm = lib::IO::Term::Read::rawTerm(label, stringStore);
+		} catch(const lib::IO::ParsingError &e) {
+			parsingError = e.msg;
 			return std::numeric_limits<std::size_t>::max();
 		}
-		lib::Term::Address addr = lib::Term::append(machine, *rawTerm, varToAddr);
+		lib::Term::Address addr = lib::Term::append(machine, rawTerm, varToAddr);
 		labelToAddress[label] = addr.addr;
 		return addr.addr;
 	};
@@ -114,7 +114,7 @@ PropTermCore::PropTermCore(const GraphType &core,
 PropTermCore::PropTermCore(const GraphType &core, lib::Term::Wam machine) : Base(core), machine(std::move(machine)) { }
 
 bool isValid(const PropTermCore &core) {
-	return !core.parsingError.is_initialized();
+	return !core.parsingError.has_value();
 }
 
 const std::string &PropTermCore::getParsingError() const {
@@ -130,6 +130,4 @@ const lib::Term::Wam &getMachine(const PropTermCore &core) {
 	return core.machine;
 }
 
-} // namespace Rules
-} // namespace lib
-} // namespace mod
+} // namespace mod::lib::Rules

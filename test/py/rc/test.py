@@ -1,6 +1,6 @@
-post("disableSummary")
+include("../xxx_helpers.py")
 
-include("rules.py")
+include("000_rules.py")
 #for a in inputRules:
 #	a.print()
 #	a.printTermState()

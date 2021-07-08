@@ -37,7 +37,7 @@ MOD_DECL void disable();
 MOD_DECL void summaryChapter(const std::string &chapterTitle);
 MOD_DECL void summarySection(const std::string &sectionTitle);
 
-// rst: .. function:: std::string makeUniqueFilePrefix()
+// rst: .. function:: std::string post::makeUniqueFilePrefix()
 // rst:
 // rst:		:returns: a unique file prefix from the ``out/`` folder.
 MOD_DECL std::string makeUniqueFilePrefix();

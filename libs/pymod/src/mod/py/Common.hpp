@@ -1,11 +1,12 @@
-#ifndef MOD_PY_COMMON_H
-#define MOD_PY_COMMON_H
+#ifndef MOD_PY_COMMON_HPP
+#define MOD_PY_COMMON_HPP
 
-#include <boost/optional.hpp>
 // TODO: https://github.com/boostorg/python/pull/296
 #define BOOST_BIND_GLOBAL_PLACEHOLDERS
 #include <boost/python.hpp>
 #undef BOOST_BIND_GLOBAL_PLACEHOLDERS
+
+#include <optional>
 
 namespace py = boost::python;
 namespace mod::Py {
@@ -26,7 +27,7 @@ struct PairToTupleConverter {
 // https://stackoverflow.com/questions/36485840/wrap-boostoptional-using-boostpython
 template<typename T>
 struct ToPythonOptionalValue {
-	static PyObject *convert(boost::optional<T> obj) {
+	static PyObject *convert(std::optional<T> obj) {
 		return obj
 		       ? py::incref(py::object(*obj).ptr())
 		       : py::incref(py::object().ptr());
@@ -35,4 +36,4 @@ struct ToPythonOptionalValue {
 
 } // namespace mod::Py
 
-#endif /* MOD_PY_COMMON_H */
+#endif // MOD_PY_COMMON_HPP

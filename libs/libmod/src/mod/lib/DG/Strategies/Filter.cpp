@@ -5,10 +5,7 @@
 #include <mod/lib/DG/Strategies/GraphState.hpp>
 #include <mod/lib/Graph/Single.hpp>
 
-namespace mod {
-namespace lib {
-namespace DG {
-namespace Strategies {
+namespace mod::lib::DG::Strategies {
 
 Filter::Filter(std::shared_ptr<mod::Function<bool(std::shared_ptr<graph::Graph>, const dg::Strategy::GraphState &,
                                                   bool)> > filterFunc, bool filterUniverse)
@@ -16,11 +13,9 @@ Filter::Filter(std::shared_ptr<mod::Function<bool(std::shared_ptr<graph::Graph>,
 	assert(filterFunc);
 }
 
-Strategy *Filter::clone() const {
-	return new Filter(filterFunc->clone(), filterUniverse);
+std::unique_ptr<Strategy> Filter::clone() const {
+	return std::make_unique<Filter>(filterFunc->clone(), filterUniverse);
 }
-
-void Filter::preAddGraphs(std::function<void(std::shared_ptr<graph::Graph>, IsomorphismPolicy)> add) const {}
 
 void Filter::printInfo(PrintSettings settings) const {
 	settings.indent() << "Filter";
@@ -97,7 +92,4 @@ void Filter::executeImpl(PrintSettings settings, const GraphState &input) {
 	}
 }
 
-} // namespace Strategies
-} // namespace DG
-} // namespace lib
-} // namespace mod
+} // namespace mod::lib::DG::Strategies

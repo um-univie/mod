@@ -1,16 +1,13 @@
-#ifndef MOD_LIB_RC_DETAIL_COMPOSITIONHELPER_H
-#define MOD_LIB_RC_DETAIL_COMPOSITIONHELPER_H
+#ifndef MOD_LIB_RC_DETAIL_COMPOSITIONHELPER_HPP
+#define MOD_LIB_RC_DETAIL_COMPOSITIONHELPER_HPP
 
 #include <mod/lib/IO/IO.hpp>
 
 #include <jla_boost/graph/dpo/Rule.hpp>
 
-#include <boost/optional.hpp>
+#include <optional>
 
-namespace mod {
-namespace lib {
-namespace RC {
-namespace detail {
+namespace mod::lib::RC::detail {
 
 using jla_boost::GraphDPO::Membership;
 
@@ -27,20 +24,19 @@ struct CompositionHelper {
 	using VertexSecond = typename boost::graph_traits<GraphSecond>::vertex_descriptor;
 	using EdgeSecond = typename boost::graph_traits<GraphSecond>::edge_descriptor;
 public:
-
 	CompositionHelper(const RuleFirst &rFirst,
 							const RuleSecond &rSecond,
 							const InvertibleVertexMap &match,
 							Visitor visitor)
 			: rFirst(rFirst), rSecond(rSecond), match(match), visitor(std::move(visitor)) {}
 
-	boost::optional<Result> operator()() &&{
+	std::optional<Result> operator()() &&{
 		if(Verbose) std::cout << std::string(80, '=') << std::endl;
 		Result result(rFirst, rSecond);
 		bool resInit = visitor.template init<Verbose>(rFirst, rSecond, match, result);
 		if(!resInit) {
 			if(Verbose) std::cout << std::string(80, '=') << std::endl;
-			return boost::none;
+			return {};
 		}
 		// Vertices
 		//--------------------------------------------------------------------------
@@ -51,12 +47,12 @@ public:
 		bool resFirst = copyEdgesFirstUnmatched(result);
 		if(!resFirst) {
 			if(Verbose) std::cout << std::string(80, '=') << std::endl;
-			return boost::none;
+			return {};
 		}
 		bool resSecond = composeEdgesSecond(result);
 		if(!resSecond) {
 			if(Verbose) std::cout << std::string(80, '=') << std::endl;
-			return boost::none;
+			return {};
 		}
 
 		// Finish it
@@ -64,12 +60,11 @@ public:
 		bool resFinal = visitor.template finalize<Verbose>(rFirst, rSecond, match, result);
 		if(!resFinal) {
 			if(Verbose) std::cout << std::string(80, '=') << std::endl;
-			return boost::none;
+			return {};
 		}
 		if(Verbose) std::cout << std::string(80, '=') << std::endl;
-		return boost::optional<Result>(std::move(result)); // something strange is going on with just "return result;"
+		return result;
 	}
-
 private:
 	VertexFirst getNullFirst() const {
 		return boost::graph_traits<GraphFirst>::null_vertex();
@@ -97,9 +92,7 @@ private:
 		assert(membership(rFirst, vFirst) != Membership::Left);
 		return get_inverse(match, gDom, gCodom, vFirst);
 	}
-
 private:
-
 	void copyVerticesFirst(Result &result) {
 		if(Verbose) std::cout << "copyVerticesFirst\n" << std::string(80, '-') << std::endl;
 		auto &rResult = result.rResult;
@@ -427,9 +420,7 @@ private:
 		} // end for each eSecond
 		return true;
 	}
-
 private:
-
 	bool composeEdgeSecond_oneEndMatched(Result &result,
 													 EdgeSecond eSecond,
 													 VertexResult vResultSrc,
@@ -486,9 +477,9 @@ private:
 		auto &gResult = get_graph(rResult);
 		if(Verbose) std::cout << "Both ends matched" << std::endl;
 		// vResultSrc/vResultTar may be null_vertex
-		boost::optional<Membership> omeFirst;
+		std::optional<Membership> omeFirst;
 		// we search in coreFirst, because it has the matched edges
-		for(auto eFirst : asRange(out_edges(vFirstSrc, gFirst))) {
+		for(const auto eFirst : asRange(out_edges(vFirstSrc, gFirst))) {
 			if(target(eFirst, gFirst) != vFirstTar) continue;
 			omeFirst = membership(rFirst, eFirst);
 			break;
@@ -619,7 +610,6 @@ private:
 		visitor.template setEdgeResultRightFromSecondRight<Verbose>(rFirst, rSecond, match, result, eResult, eSecond);
 		return true;
 	}
-
 private:
 	const RuleFirst &rFirst;
 	const RuleSecond &rSecond;
@@ -627,9 +617,6 @@ private:
 	Visitor visitor;
 };
 
-} // namespace detail
-} // namespace RC
-} // namespace lib
-} // namespace mod
+} // namespace mod::lib::RC::detail
 
-#endif /* MOD_LIB_RC_DETAIL_COMPOSITIONHELPER_H */
+#endif // MOD_LIB_RC_DETAIL_COMPOSITIONHELPER_HPP

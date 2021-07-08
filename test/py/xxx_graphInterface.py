@@ -4,6 +4,10 @@ postDisable()
 def checkGraph(g, *, string: str, vertexString: str, edgeString: str,
 		graphNameInElements: str = None,
 		vIdFull: bool = True):
+	assert g == g
+	assert not g != g
+	assert not g < g
+
 	Vertex = g.Vertex
 	Edge = g.Edge
 	VertexRange = g.VertexRange

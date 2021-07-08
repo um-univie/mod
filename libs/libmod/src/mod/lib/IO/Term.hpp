@@ -4,13 +4,15 @@
 #include <mod/lib/Term/RawTerm.hpp>
 #include <mod/lib/Term/WAM.hpp>
 
-#include <boost/optional/optional.hpp>
+#include <functional>
+#include <optional>
 
 namespace mod::lib {
 struct StringStore;
 } // namespace mod::lib
 namespace mod::lib::IO::Term::Read {
-boost::optional<lib::Term::RawTerm> rawTerm(const std::string &data, const StringStore &stringStore, std::ostream &errorStream);
+// throws lib::IO::ParsingError on error
+lib::Term::RawTerm rawTerm(const std::string &data, const StringStore &stringStore);
 } // namespace mod::lib::IO::Term::Read
 namespace mod::lib::IO::Term::Write {
 std::ostream &rawTerm(const lib::Term::RawTerm &term, const StringStore &strings, std::ostream &s);

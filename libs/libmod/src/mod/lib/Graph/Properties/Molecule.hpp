@@ -6,7 +6,7 @@
 #include <mod/lib/Chem/OBabel.hpp>
 #include <mod/lib/Graph/Properties/Property.hpp>
 
-#include <boost/optional.hpp>
+#include <optional>
 
 namespace mod::lib::Graph {
 struct PropString;
@@ -14,6 +14,7 @@ struct PropString;
 struct PropMolecule : Prop<PropMolecule, AtomData, BondType> {
 	using Base = Prop<PropMolecule, AtomData, BondType>;
 public:
+	using Base::Prop;
 	PropMolecule(const GraphType &g, const PropString &pString);
 	bool getIsMolecule() const;
 #ifdef MOD_HAVE_OPENBABEL
@@ -24,11 +25,11 @@ public:
 	void cacheEnergy(double value) const;
 private:
 	bool isMolecule;
-	mutable boost::optional<double> exactMass;
+	mutable std::optional<double> exactMass;
 #ifdef MOD_HAVE_OPENBABEL
 	mutable lib::Chem::OBMolHandle obMol;
 #endif
-	mutable boost::optional<double> energy;
+	mutable std::optional<double> energy;
 };
 
 } // namespace mod::lib::Graph

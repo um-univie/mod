@@ -1,5 +1,6 @@
 #include "Composer.hpp"
 
+#include <mod/rule/Rule.hpp>
 #include <mod/lib/RC/Evaluator.hpp>
 
 namespace mod::rule {
@@ -31,6 +32,7 @@ std::vector<std::shared_ptr<rule::Rule>> Composer::eval(const RCExp::Expression 
 void Composer::print() const {
 	p->evaluator.print();
 }
+
 //------------------------------------------------------------------------------
 // Static
 //------------------------------------------------------------------------------

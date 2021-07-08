@@ -1,5 +1,5 @@
-#ifndef MOD_LIB_RC_VISITOR_TERM_H
-#define MOD_LIB_RC_VISITOR_TERM_H
+#ifndef MOD_LIB_RC_VISITOR_TERM_HPP
+#define MOD_LIB_RC_VISITOR_TERM_HPP
 
 #include <mod/lib/GraphMorphism/TermVertexMap.hpp>
 #include <mod/lib/IO/Term.hpp>
@@ -9,25 +9,22 @@
 
 #include <mod/lib/IO/Term.hpp>
 
-namespace mod {
-namespace lib {
-namespace RC {
-namespace Visitor {
+namespace mod::lib::RC::Visitor {
 static constexpr std::size_t TERM_MAX = std::numeric_limits<std::size_t>::max();
 
 struct Term {
 	using Membership = jla_boost::GraphDPO::Membership;
 	using AddressType = lib::Term::AddressType;
 	using Cell = lib::Term::Cell;
-	using CellTag = lib::Term::CellTag;
+	using CellTag = lib::Term::Cell::Tag;
 public:
-
 	template<bool Verbose, typename RuleFirst, typename RuleSecond, typename InvertibleVertexMap, typename Result>
 	bool init(const RuleFirst &rFirst, const RuleSecond &rSecond, InvertibleVertexMap &match, Result &result) {
 		auto &data = get_prop(lib::GraphMorphism::TermDataT(), match);
 		auto &machine = data.machine;
 		machine.verify();
-		result.rResult.pTerm = std::make_unique<typename Result::RuleResult::PropTermType > (get_graph(result.rResult), std::move(machine));
+		result.rResult.pTerm = std::make_unique<typename Result::RuleResult::PropTermType>(get_graph(result.rResult),
+		                                                                                   std::move(machine));
 		if(Verbose) {
 			std::cout << "New machine:\n";
 			lib::IO::Term::Write::wam(getMachine(*result.rResult.pTerm), lib::Term::getStrings(), std::cout);
@@ -37,15 +34,15 @@ public:
 
 	template<bool Verbose, typename RuleFirst, typename RuleSecond, typename InvertibleVertexMap, typename Result>
 	bool finalize(const RuleFirst &rFirst, const RuleSecond &rSecond, InvertibleVertexMap &match, Result &result) {
-		result.rResult.pTerm ->verify(&get_graph(result.rResult));
+		result.rResult.pTerm->verify(&get_graph(result.rResult));
 		return true;
 	}
 public:
-
 	template<bool Verbose, typename RuleFirst, typename RuleSecond, typename InvertibleVertexMap, typename Result,
-	typename VertexFirst, typename VertexResult>
-	void copyVertexFirst(const RuleFirst &rFirst, const RuleSecond &rSecond, const InvertibleVertexMap &match, const Result &result,
-			const VertexFirst &vFirst, const VertexResult &vResult) {
+			typename VertexFirst, typename VertexResult>
+	void copyVertexFirst(const RuleFirst &rFirst, const RuleSecond &rSecond, const InvertibleVertexMap &match,
+	                     const Result &result,
+	                     const VertexFirst &vFirst, const VertexResult &vResult) {
 		assert(result.rResult.pTerm);
 		const auto &pFirst = *rFirst.pTerm;
 		auto &pResult = *result.rResult.pTerm;
@@ -69,9 +66,10 @@ public:
 	}
 
 	template<bool Verbose, typename RuleFirst, typename RuleSecond, typename InvertibleVertexMap, typename Result,
-	typename VertexSecond, typename VertexResult>
-	void copyVertexSecond(const RuleFirst &rFirst, const RuleSecond &rSecond, const InvertibleVertexMap &match, const Result &result,
-			const VertexSecond &vSecond, const VertexResult &vResult) {
+			typename VertexSecond, typename VertexResult>
+	void copyVertexSecond(const RuleFirst &rFirst, const RuleSecond &rSecond, const InvertibleVertexMap &match,
+	                      const Result &result,
+	                      const VertexSecond &vSecond, const VertexResult &vResult) {
 		assert(result.rResult.pTerm);
 		const auto &pSecond = *rSecond.pTerm;
 		auto &pResult = *result.rResult.pTerm;
@@ -97,9 +95,10 @@ public:
 	}
 
 	template<bool Verbose, typename RuleFirst, typename RuleSecond, typename InvertibleVertexMap, typename Result,
-	typename EdgeFirst, typename EdgeResult>
-	void copyEdgeFirst(const RuleFirst &rFirst, const RuleSecond &rSecond, const InvertibleVertexMap &match, const Result &result,
-			const EdgeFirst &eFirst, const EdgeResult &eResult) {
+			typename EdgeFirst, typename EdgeResult>
+	void copyEdgeFirst(const RuleFirst &rFirst, const RuleSecond &rSecond, const InvertibleVertexMap &match,
+	                   const Result &result,
+	                   const EdgeFirst &eFirst, const EdgeResult &eResult) {
 		// the membership of e may be different from eResult
 		assert(result.rResult.pTerm);
 		const auto &pFirst = *rFirst.pTerm;
@@ -123,9 +122,10 @@ public:
 	}
 
 	template<bool Verbose, typename RuleFirst, typename RuleSecond, typename InvertibleVertexMap, typename Result,
-	typename EdgeSecond, typename EdgeResult>
-	void copyEdgeSecond(const RuleFirst &rFirst, const RuleSecond &rSecond, const InvertibleVertexMap &match, const Result &result,
-			const EdgeSecond &eSecond, const EdgeResult &eResult) {
+			typename EdgeSecond, typename EdgeResult>
+	void copyEdgeSecond(const RuleFirst &rFirst, const RuleSecond &rSecond, const InvertibleVertexMap &match,
+	                    const Result &result,
+	                    const EdgeSecond &eSecond, const EdgeResult &eResult) {
 		// the membership of e may be different from eResult
 		assert(result.rResult.pTerm);
 		const auto &pSecond = *rSecond.pTerm;
@@ -150,42 +150,46 @@ public:
 		}
 	}
 public:
-
 	template<typename RuleFirst, typename RuleSecond, typename InvertibleVertexMap, typename Result, typename VertexFirst>
-	void printVertexFirst(const RuleFirst &rFirst, const RuleSecond &rSecond, const InvertibleVertexMap &match, const Result &result,
-			std::ostream &s, const VertexFirst &vFirst) {
+	void printVertexFirst(const RuleFirst &rFirst, const RuleSecond &rSecond, const InvertibleVertexMap &match,
+	                      const Result &result,
+	                      std::ostream &s, const VertexFirst &vFirst) {
 		rFirst.pTerm->print(s, vFirst);
 	}
 
 	template<typename RuleFirst, typename RuleSecond, typename InvertibleVertexMap, typename Result, typename VertexSecond>
-	void printVertexSecond(const RuleFirst &rFirst, const RuleSecond &rSecond, const InvertibleVertexMap &match, const Result &result,
-			std::ostream &s, const VertexSecond &vSecond) {
+	void printVertexSecond(const RuleFirst &rFirst, const RuleSecond &rSecond, const InvertibleVertexMap &match,
+	                       const Result &result,
+	                       std::ostream &s, const VertexSecond &vSecond) {
 		rSecond.pTerm->print(s, vSecond);
 	}
 
 	template<typename RuleFirst, typename RuleSecond, typename InvertibleVertexMap, typename Result, typename VertexResult>
-	void printVertexResult(const RuleFirst &rFirst, const RuleSecond &rSecond, const InvertibleVertexMap &match, const Result &result,
-			std::ostream &s, const VertexResult &vResult) {
+	void printVertexResult(const RuleFirst &rFirst, const RuleSecond &rSecond, const InvertibleVertexMap &match,
+	                       const Result &result,
+	                       std::ostream &s, const VertexResult &vResult) {
 		result.rResult.pTerm->print(s, vResult);
 	}
 
 	template<typename RuleFirst, typename RuleSecond, typename InvertibleVertexMap, typename Result, typename EdgeFirst>
-	void printEdgeFirst(const RuleFirst &rFirst, const RuleSecond &rSecond, const InvertibleVertexMap &match, const Result &result,
-			std::ostream &s, const EdgeFirst &eFirst) {
+	void printEdgeFirst(const RuleFirst &rFirst, const RuleSecond &rSecond, const InvertibleVertexMap &match,
+	                    const Result &result,
+	                    std::ostream &s, const EdgeFirst &eFirst) {
 		rFirst.pTerm->print(s, eFirst);
 	}
 
 	template<typename RuleFirst, typename RuleSecond, typename InvertibleVertexMap, typename Result, typename EdgeSecond>
-	void printEdgeSecond(const RuleFirst &rFirst, const RuleSecond &rSecond, const InvertibleVertexMap &match, const Result &result,
-			std::ostream &s, const EdgeSecond &eSecond) {
+	void printEdgeSecond(const RuleFirst &rFirst, const RuleSecond &rSecond, const InvertibleVertexMap &match,
+	                     const Result &result,
+	                     std::ostream &s, const EdgeSecond &eSecond) {
 		rSecond.pTerm->print(s, eSecond);
 	}
 public:
-
 	template<bool Verbose, typename RuleFirst, typename RuleSecond, typename InvertibleVertexMap, typename Result,
-	typename VertexResult, typename VertexSecond>
-	void composeVertexRvsLR(const RuleFirst &rFirst, const RuleSecond &rSecond, const InvertibleVertexMap &match, const Result &result,
-			VertexResult vResult, VertexSecond vSecond) {
+			typename VertexResult, typename VertexSecond>
+	void composeVertexRvsLR(const RuleFirst &rFirst, const RuleSecond &rSecond, const InvertibleVertexMap &match,
+	                        const Result &result,
+	                        VertexResult vResult, VertexSecond vSecond) {
 		//   -> a | a -> b, maybe a == b
 		auto addr = rSecond.pTerm->getRight()[vSecond];
 		fixSecondTerm<Verbose>(addr, result);
@@ -194,9 +198,10 @@ public:
 	}
 
 	template<bool Verbose, typename RuleFirst, typename RuleSecond, typename InvertibleVertexMap, typename Result,
-	typename VertexResult, typename VertexSecond>
-	void composeVertexLRvsL(const RuleFirst &rFirst, const RuleSecond &rSecond, const InvertibleVertexMap &match, const Result &result,
-			VertexResult vResult, VertexSecond vSecond) {
+			typename VertexResult, typename VertexSecond>
+	void composeVertexLRvsL(const RuleFirst &rFirst, const RuleSecond &rSecond, const InvertibleVertexMap &match,
+	                        const Result &result,
+	                        VertexResult vResult, VertexSecond vSecond) {
 		// vFirst is CONTEXT, so do nothing
 		// a -> a | a ->
 		// b -> a | a ->
@@ -206,9 +211,10 @@ public:
 	}
 
 	template<bool Verbose, typename RuleFirst, typename RuleSecond, typename InvertibleVertexMap, typename Result,
-	typename VertexResult, typename VertexSecond>
-	void composeVertexLRvsLR(const RuleFirst &rFirst, const RuleSecond &rSecond, const InvertibleVertexMap &match, const Result &result,
-			VertexResult vResult, VertexSecond vSecond) {
+			typename VertexResult, typename VertexSecond>
+	void composeVertexLRvsLR(const RuleFirst &rFirst, const RuleSecond &rSecond, const InvertibleVertexMap &match,
+	                         const Result &result,
+	                         VertexResult vResult, VertexSecond vSecond) {
 		// the left label of vResult is ok, but the right label might have to change
 		// a != b, a != c, b =? c
 		// a -> a | a -> a
@@ -220,17 +226,16 @@ public:
 		result.rResult.pTerm->setRight(vResult, deref(addr, result));
 	}
 public:
-
 	template<bool Verbose, typename RuleFirst, typename RuleSecond, typename InvertibleVertexMap, typename Result,
-	typename EdgeResult, typename EdgeSecond>
-	void setEdgeResultRightFromSecondRight(const RuleFirst &rFirst, const RuleSecond &rSecond, const InvertibleVertexMap &match, const Result &result,
-			EdgeResult eResult, EdgeSecond eSecond) {
+			typename EdgeResult, typename EdgeSecond>
+	void setEdgeResultRightFromSecondRight(const RuleFirst &rFirst, const RuleSecond &rSecond,
+	                                       const InvertibleVertexMap &match, const Result &result,
+	                                       EdgeResult eResult, EdgeSecond eSecond) {
 		auto addr = rSecond.pTerm->getRight()[eSecond];
 		fixSecondTerm<Verbose>(addr, result);
 		result.rResult.pTerm->setRight(eResult, deref(addr, result));
 	}
 private:
-
 	template<bool Verbose, typename Result>
 	void fixSecondTerm(std::size_t addr, Result &result) {
 		auto &m = getMachine(*result.rResult.pTerm);
@@ -252,9 +257,6 @@ private:
 	}
 };
 
-} // namespace Composer
-} // namespace RC
-} // namespace lib
-} // namespace mod
+} // namespace mod::lib::RC::Visitor
 
-#endif /* MOD_LIB_RC_VISITOR_TERM_H */
+#endif // MOD_LIB_RC_VISITOR_TERM_HPP

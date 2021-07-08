@@ -22,7 +22,6 @@ private:
 	VertexMap m;
 	VertexMapInverse mInverse;
 public:
-
 	friend typename boost::graph_traits<GraphCodom>::vertex_descriptor
 	get(const InvertibleVertexMapAdaptor &m, const GraphDom &gDom, const GraphCodom &gCodom,
 			typename boost::graph_traits<GraphDom>::vertex_descriptor v) {

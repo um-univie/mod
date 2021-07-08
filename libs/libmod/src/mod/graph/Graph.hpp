@@ -1,5 +1,5 @@
-#ifndef MOD_GRAPH_GRAPH_H
-#define MOD_GRAPH_GRAPH_H
+#ifndef MOD_GRAPH_GRAPH_HPP
+#define MOD_GRAPH_GRAPH_HPP
 
 #include <mod/BuildConfig.hpp>
 #include <mod/Config.hpp>
@@ -28,6 +28,7 @@ namespace mod::graph {
 // rst:
 // rst-class-start:
 struct MOD_DECL Graph {
+	using Handle = std::shared_ptr<Graph>;
 	class Vertex;
 	class Edge;
 	class VertexIterator;
@@ -41,8 +42,8 @@ public:
 	struct AutGroup;
 private: // The actual class interface
 	Graph(std::unique_ptr<lib::Graph::Single> g);
-	Graph(const Graph&) = delete;
-	Graph &operator=(const Graph&) = delete;
+	Graph(const Graph &) = delete;
+	Graph &operator=(const Graph &) = delete;
 public:
 	~Graph();
 	// rst: .. function:: std::size_t getId() const
@@ -165,25 +166,25 @@ public:
 	// rst:
 	// rst:		:returns: the number of edges in the graph with the given label.
 	unsigned int eLabelCount(const std::string &label) const;
-	// rst: .. function:: std::size_t isomorphism(std::shared_ptr<Graph> g, std::size_t maxNumMatches, LabelSettings labelSettings) const
+	// rst: .. function:: std::size_t isomorphism(std::shared_ptr<Graph> host, std::size_t maxNumMatches, LabelSettings labelSettings) const
 	// rst:
-	// rst:		:returns: the number of isomorphisms found from this graph to `g`, but at most `maxNumMatches`.
-	std::size_t isomorphism(std::shared_ptr<Graph> g, std::size_t maxNumMatches, LabelSettings labelSettings) const;
-	// rst: .. function:: std::size_t monomorphism(std::shared_ptr<Graph> g, std::size_t maxNumMatches, LabelSettings labelSettings) const
+	// rst:		:returns: the number of isomorphisms found from this graph to `host`, but at most `maxNumMatches`.
+	std::size_t isomorphism(std::shared_ptr<Graph> host, std::size_t maxNumMatches, LabelSettings labelSettings) const;
+	// rst: .. function:: std::size_t monomorphism(std::shared_ptr<Graph> host, std::size_t maxNumMatches, LabelSettings labelSettings) const
 	// rst:
-	// rst:		:returns: the number of monomorphisms from this graph to `g`, though at most `maxNumMatches`.
-	std::size_t monomorphism(std::shared_ptr<Graph> g, std::size_t maxNumMatches, LabelSettings labelSettings) const;
+	// rst:		:returns: the number of monomorphisms from this graph to `host`, though at most `maxNumMatches`.
+	std::size_t monomorphism(std::shared_ptr<Graph> host, std::size_t maxNumMatches, LabelSettings labelSettings) const;
 	// rst: .. function:: std::shared_ptr<Graph> makePermutation() const
 	// rst:
 	// rst:		:returns: a graph isomorphic to this, but with the vertex indices randomly permuted.
 	std::shared_ptr<Graph> makePermutation() const;
-	// rst: .. function:: void setImage(std::shared_ptr<Function<std::string()> > image)
+	// rst: .. function:: void setImage(std::shared_ptr<Function<std::string()>> image)
 	// rst:
 	// rst:		Set a custom depiction for the graph. The depiction file used will be the string
 	// rst:		returned by the given function, with ``.pdf`` appended.
 	// rst:		The function will only be called once.
 	// rst:		Give `nullptr` to use auto-generated depiction.
-	void setImage(std::shared_ptr<Function<std::string()> > image);
+	void setImage(std::shared_ptr<Function<std::string()>> image);
 	// rst: .. function:: std::shared_ptr<Function<std::string()> > getImage() const
 	// rst:
 	// rst:		:returns: the current custom depiction file function.
@@ -197,6 +198,13 @@ public:
 	// rst:
 	// rst:		:returns: the current post-processing command.
 	std::string getImageCommand() const;
+	// rst: .. function:: void instantiateStereo() const
+	// rst:
+	// rst: 		Make sure that stereo data is instantiated.
+	// rst:
+	// rst: 		:throws: `StereoDeductionError` if the data was not instantiated and deduction failed.
+	void instantiateStereo() const;
+public: // external data
 	// rst: .. function:: Vertex getVertexFromExternalId(int id) const
 	// rst:
 	// rst:		If the graph was not loaded from an external data format, then this function
@@ -218,47 +226,78 @@ public:
 	// rst:		If no such minimum and maximum exists, then 0 will be returned.
 	int getMinExternalId() const;
 	int getMaxExternalId() const;
-	// rst: .. function:: void instantiateStereo() const
+	// rst: .. function:: std::vector<std::pair<std::string, bool>> getLoadingWarnings() const
 	// rst:
-	// rst: 		Make sure that stereo data is instantiated.
-	// rst:
-	// rst: 		:throws: `StereoDeductionError` if the data was not instantiated and deduction failed.
-	void instantiateStereo() const;
+	// rst:		:returns: the list of warnings stored when the graph was created from an external format.
+	// rst:			Each entry is a message and then an indicator of whether
+	// rst:			the warning was printed before construction (``true``), or was a silenced warning (``false``).
+	// rst:		:throws: :class:`LogicError` if the graph does not have data from external loading
+	std::vector<std::pair<std::string, bool>> getLoadingWarnings() const;
 private:
-	struct Pimpl;
-	std::unique_ptr<Pimpl> p;
+	const std::unique_ptr<lib::Graph::Single> g;
+	struct ExternalData;
+	// this is only instantiated when the graph is loaded from an external format
+	std::unique_ptr<ExternalData> externalData;
 public:
-	// rst: .. function:: static std::shared_ptr<Graph> graphGMLString(const std::string &data)
+	// rst: .. function:: static std::shared_ptr<Graph> fromGMLString(const std::string &data)
+	// rst:               static std::shared_ptr<Graph> fromGMLFile(const std::string &file)
 	// rst:
-	// rst:		:returns: a graph created from the given :ref:`GML <graph-gml>` data.
+	// rst:		:returns: a graph created from the given :ref:`GML <graph-gml>` in a string or file.
+	// rst:			The graph must be connected. Use :func:`fromGMLStringMulti` or :func:`fromGMLFile` if it is not.
 	// rst:		:throws: :class:`InputError` on bad input.
-	static std::shared_ptr<Graph> graphGMLString(const std::string &data);
-	// rst: .. function:: static std::shared_ptr<Graph> graphGML(const std::string &file)
+	static std::shared_ptr<Graph> fromGMLString(const std::string &data);
+	static std::shared_ptr<Graph> fromGMLFile(const std::string &file);
+	// rst: .. function:: std::vector<std::shared_ptr<Graph>> fromGMLStringMulti(const std::string &data)
+	// rst:               std::vector<std::shared_ptr<Graph>> fromGMLFileMulti(const std::string &file)
 	// rst:
-	// rst:		:returns: a graph loaded from the given :ref:`GML <graph-gml>` file.
+	// rst:		:returns: a list of graphs, loaded from the given :ref:`GML <graph-gml>` in a string or file.
+	// rst:			The graphs are the connected components of the graph specified in the data.
 	// rst:		:throws: :class:`InputError` on bad input.
-	static std::shared_ptr<Graph> graphGML(const std::string &file);
-	// rst: .. function:: static std::shared_ptr<Graph> graphDFS(const std::string &graphDFS)
+	static std::vector<std::shared_ptr<Graph>> fromGMLStringMulti(const std::string &data);
+	static std::vector<std::shared_ptr<Graph>> fromGMLFileMulti(const std::string &file);
+	// rst: .. function:: static std::shared_ptr<Graph> fromDFS(const std::string &graphDFS)
 	// rst:
 	// rst:		:returns: a graph loaded from the given :ref:`GraphDFS <graph-graphDFS>` string.
 	// rst:		:throws: :class:`InputError` on bad input.
-	static std::shared_ptr<Graph> graphDFS(const std::string &graphDFS);
-	// rst: .. function:: static std::shared_ptr<Graph> smiles(const std::string &smiles)
-	// rst:               static std::shared_ptr<Graph> smiles(const std::string &smiles, bool allowAbstract, SmilesClassPolicy classPolicy)
+	static std::shared_ptr<Graph> fromDFS(const std::string &graphDFS);
+	// rst: .. function:: static std::shared_ptr<Graph> fromSMILES(const std::string &smiles)
+	// rst:               static std::shared_ptr<Graph> fromSMILES(const std::string &smiles, bool allowAbstract, SmilesClassPolicy classPolicy)
 	// rst:
+	// rst:		:param allowAbstract: whether abstract atoms, e.g., ``*``, are allowed. Defaults to `false`.
+	// rst:		:param classPolicy: which policy to use for class labels. Defaults to `SmilesClassPolicy::NoneOnDuplicate`.
 	// rst:		:returns: a graph representing a molecule, loaded from the given :ref:`SMILES <graph-smiles>` string.
-	// rst:			The `allowAbstract` argument defaults to `false`
-	// rst:			and `classPolicy` defaults to `SmilesClassPolicy::NoneOnDuplicate`.
+	// rst:			The graph must be connected. Use :func:`fromSMILESMulti` if it is not.
 	// rst:		:throws: :class:`InputError` on bad input.
 	// rst:		:throws: :class:`InputError` if `classPolicy == SmilesClassPolicy::NoneOnDuplicate` and a class label is duplicated.
-	static std::shared_ptr<Graph> smiles(const std::string &smiles);
-	static std::shared_ptr<Graph> smiles(const std::string &smiles, bool allowAbstract, SmilesClassPolicy classPolicy);
-	// rst: .. function:: static std::shared_ptr<Graph> makeGraph(std::unique_ptr<lib::Graph::Single> g)
-	// rst:               static std::shared_ptr<Graph> makeGraph(std::unique_ptr<lib::Graph::Single> g, std::map<int, std::size_t> externalToInternalIds)
+	static std::shared_ptr<Graph> fromSMILES(const std::string &smiles);
+	static std::shared_ptr<Graph>
+	fromSMILES(const std::string &smiles, bool allowAbstract, SmilesClassPolicy classPolicy);
+	// rst: .. function:: static std::vector<std::shared_ptr<Graph>> fromSMILESMulti(const std::string &smiles)
+	// rst:               static std::vector<std::shared_ptr<Graph>> fromSMILESMulti(const std::string &smiles, bool allowAbstract, SmilesClassPolicy classPolicy)
 	// rst:
-	// rst:		:returns: a graph wrapping the given internal graph object. If an id mapping is given, it will be used for the :cpp:func:`getVertexFromExternalId` function.
-	static std::shared_ptr<Graph> makeGraph(std::unique_ptr<lib::Graph::Single> g);
-	static std::shared_ptr<Graph> makeGraph(std::unique_ptr<lib::Graph::Single> g, std::map<int, std::size_t> externalToInternalIds);
+	// rst:		See :func:`fromSMILES` for parameter and exception descriptions.
+	// rst:
+	// rst:		:returns: a list of graphs representing molecules, loaded from the given :ref:`SMILES <graph-smiles>` string.
+	// rst:			The graphs are the connected components of the graph specified in the SMILES string.
+	static std::vector<std::shared_ptr<Graph>> fromSMILESMulti(const std::string &smiles);
+	static std::vector<std::shared_ptr<Graph>>
+	fromSMILESMulti(const std::string &smiles, bool allowAbstract, SmilesClassPolicy classPolicy);
+	// rst: .. function:: static std::shared_ptr<Graph> create(std::unique_ptr<lib::Graph::Single> g)
+	// rst:               static std::shared_ptr<Graph> create(std::unique_ptr<lib::Graph::Single> g, \
+	// rst:                                                    std::map<int, std::size_t> externalToInternalIds, \
+	// rst:                                                    std::vector<std::pair<std::string, bool>> warnings)
+	// rst:
+	// rst:		:param externalToInternalIds: map from user-defined integers to the vertex indices of ``g``.
+	// rst:			See also :cpp:func:`getVertexFromExternalId`.
+	// rst:		:param warnings: a list of warning messages to store. The second component is supposed to indicate whether
+	// rst:			the warning was printed before construction (``true``), or was a silenced warning (``false``).
+	// rst:			See also :cpp:func:`getLoadingWarnings`.
+	// rst:		:returns: a graph wrapping the given internal graph object.
+	// rst:			The second version instantiates a structure holding the given data created from an external data source.
+	static std::shared_ptr<Graph> create(std::unique_ptr<lib::Graph::Single> g);
+	static std::shared_ptr<Graph> create(std::unique_ptr<lib::Graph::Single> g,
+	                                     std::map<int, std::size_t> externalToInternalIds,
+	                                     std::vector<std::pair<std::string, bool>> warnings);
 };
 // rst-class-end:
 
@@ -270,4 +309,4 @@ struct GraphLess {
 
 } // namespace mod::graph
 
-#endif /* MOD_GRAPH_GRAPH_H */
+#endif // MOD_GRAPH_GRAPH_HPP

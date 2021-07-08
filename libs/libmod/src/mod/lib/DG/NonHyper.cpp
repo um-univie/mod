@@ -154,14 +154,15 @@ bool NonHyper::trustAddGraphAsVertex(std::shared_ptr<graph::Graph> g) {
 	return inserted;
 }
 
-std::pair<std::shared_ptr<graph::Graph>, bool> NonHyper::checkIfNew(std::unique_ptr<lib::Graph::Single> gCand) const {
+std::pair<std::shared_ptr<graph::Graph>, std::unique_ptr<lib::Graph::Single>>
+NonHyper::checkIfNew(std::unique_ptr<lib::Graph::Single> gCand) const {
 	assert(gCand);
 	{
 		const auto g = graphDatabase.findIsomorphic(gCand.get());
-		if(g) return {g, false};
+		if(g) return {g, std::move(gCand)};
 	}
-	std::shared_ptr<graph::Graph> g = graph::Graph::makeGraph(std::move(gCand));
-	return {g, true};
+	auto g = graph::Graph::create(std::move(gCand));
+	return {g, nullptr};
 }
 
 bool NonHyper::addProduct(std::shared_ptr<graph::Graph> g) {

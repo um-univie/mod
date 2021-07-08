@@ -7,7 +7,14 @@
 
 namespace gml::parser {
 
-bool parse(std::string_view src, ast::KeyValue &ast, std::ostream &err);
+struct error : std::exception {
+	error(std::string msg) : msg(std::move(msg)) {}
+	virtual const char *what() const noexcept { return msg.c_str(); }
+private:
+	std::string msg;
+};
+
+ast::KeyValue parse(std::string_view src);
 
 } // namespace gml::parser
 

@@ -115,3 +115,32 @@ e2 = list(v1.incidentEdges)[0]
 assert e1 == e2
 assert not e1 != e2
 
+
+
+a = ruleGMLString("""rule [
+	left [
+		node [ id 1 label "B" ]
+	]
+	context [
+		node [ id 0 label "A" ]
+	]
+	right [
+		node [ id 2 label "C" ]
+	]
+]""")
+v0 = a.getVertexFromExternalId(0)
+v1 = a.getVertexFromExternalId(1)
+v2 = a.getVertexFromExternalId(2)
+assert v0.id == 0, v0.id
+assert v1.id == 1, v1.id
+assert v2.id == 2, v2.id
+
+assert v0.left.id    == 0, v0.left.id
+assert v0.context.id == 0, v0.context.id
+assert v0.right.id   == 0, v0.right.id
+assert v1.left.id    == 1, v1.left.id
+assert v2.right.id   == 2, v2.right.id
+
+print(v0.left.stringLabel, v0.right.stringLabel)
+print(v1.left.stringLabel)
+print(v2.right.stringLabel)

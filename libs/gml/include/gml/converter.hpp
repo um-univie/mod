@@ -6,25 +6,19 @@
 namespace gml::converter {
 
 template<typename IterBegin, typename IterEnd, typename Expression, typename Attr>
-bool convert(IterBegin &iterBegin, const IterEnd &iterEnd, const Expression &expr, std::ostream &err, Attr &attr) {
-	if(iterBegin == iterEnd) {
-		err << "Expected root.";
-		return false;
-	}
-	bool res = asConverter(expr).convert(*iterBegin, err, attr);
-	if(!res) return false;
+void convert(IterBegin &iterBegin, const IterEnd &iterEnd, const Expression &expr, Attr &attr) {
+	if(iterBegin == iterEnd)
+		throw error("Expected root.");
+	asConverter(expr).convert(*iterBegin, attr);
 	++iterBegin;
-	if(iterBegin != iterEnd) {
-		err << "Unexpected second root.";
-		return false;
-	}
-	return true;
+	if(iterBegin != iterEnd)
+		throw error("Unexpected second root.");
 }
 
 template<typename IterBegin, typename IterEnd, typename Expression>
-bool convert(IterBegin &iterBegin, const IterEnd &iterEnd, const Expression &expr, std::ostream &err) {
+void convert(IterBegin &iterBegin, const IterEnd &iterEnd, const Expression &expr) {
 	Unused unused;
-	return convert(iterBegin, iterEnd, expr, err, unused);
+	convert(iterBegin, iterEnd, expr, unused);
 }
 
 } // namespace gml::converter

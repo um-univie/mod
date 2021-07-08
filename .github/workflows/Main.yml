@@ -1,8 +1,8 @@
-name: CI
+name: Main
 on: [push, pull_request]
 jobs:
   Ubuntu:
-    runs-on: ubuntu-18.04
+    runs-on: ubuntu-20.04
     steps:
     - name: Checkout
       uses: actions/checkout@v2
@@ -16,11 +16,10 @@ jobs:
         sudo apt install python3-setuptools python3-wheel
         pip3 install -r requirements.txt
     - name: Install apt dependencies
-      run: |
-        sudo apt install -y $(bindep -b | tr '\n' ' ')
+      run: sudo apt install -y $(bindep -b | tr '\n' ' ')
     - name: Install Boost
       run: |
-        wget https://dl.bintray.com/boostorg/release/1.74.0/source/boost_1_74_0.tar.gz
+        wget https://boostorg.jfrog.io/artifactory/main/release/1.74.0/source/boost_1_74_0.tar.gz
         tar -xf boost_1_74_0.tar.gz
         cd boost_1_74_0
         ./bootstrap.sh --with-python=python3 --prefix=/opt/boost
@@ -42,7 +41,38 @@ jobs:
       run: |
         mkdir build
         cd build
-        cmake ../ -DBUILD_TESTING=on -DBOOST_ROOT=/opt/boost
+        cmake ../ -DBUILD_DOC=on -DBUILD_TESTING=on -DBOOST_ROOT=/opt/boost
+    - name: Build
+      run: cd build && make -j 2
+    - name: Install
+      run: cd build && sudo make install
+    - name: Build tests
+      run: cd build && make tests -j 2
+    - name: Run tests
+      run: cd build && ctest --output-on-failure -j 2
+    - name: Run simple test
+      run: mod -e "smiles('O').print()"
+  macOS:
+    runs-on: macos-10.15
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v2
+      with:
+        fetch-depth: 0
+        submodules: 'recursive'
+    - name: Install Brew dependencies
+      run: |
+        brew bundle
+        /usr/libexec/path_helper | sed -e 's/^PATH="//' -e 's/"; export PATH;//' | tr ":" "\n"  | tail -r >> $GITHUB_PATH
+    - name: Install pip dependencies
+      run: pip3 install -r requirements.txt
+    - name: Bootstrap
+      run: ./bootstrap.sh
+    - name: Configure
+      run: |
+        mkdir build
+        cd build
+        cmake ../ -DBUILD_DOC=on -DBUILD_TESTING=on
     - name: Build
       run: cd build && make -j 2
     - name: Install

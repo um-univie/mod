@@ -15,10 +15,10 @@ struct Prop {
 	using Vertex = typename boost::graph_traits<GraphType>::vertex_descriptor;
 	using Edge = typename boost::graph_traits<GraphType>::edge_descriptor;
 public:
+	Prop(Prop &&) = default;
+	Prop &operator=(Prop &&) = default;
 	Prop(const Prop &) = delete;
-	Prop(Prop &&) = delete;
 	Prop &operator=(const Prop &) = delete;
-	Prop &operator=(Prop &&) = delete;
 public:
 	void verify(const GraphType *g) const;
 	explicit Prop(const GraphType &g);
@@ -30,7 +30,7 @@ public:
 	Derived &getDerived();
 	const Derived &getDerived() const;
 protected:
-	const GraphType &g;
+	const GraphType *g;
 	std::vector<VertexType> vertexState;
 	std::vector<EdgeType> edgeState;
 public:
@@ -54,41 +54,41 @@ void PropVerify(const GraphType *g, const GraphType *gOther,
 
 template<typename Derived, typename VertexType, typename EdgeType>
 void Prop<Derived, VertexType, EdgeType>::verify(const GraphType *g) const {
-	detail::PropVerify(g, &this->g, num_vertices(*g), vertexState.size(), num_edges(*g), edgeState.size());
+	detail::PropVerify(g, this->g, num_vertices(*g), vertexState.size(), num_edges(*g), edgeState.size());
 }
 
 template<typename Derived, typename VertexType, typename EdgeType>
-Prop<Derived, VertexType, EdgeType>::Prop(const GraphType &g) : g(g) {}
+Prop<Derived, VertexType, EdgeType>::Prop(const GraphType &g) : g(&g) {}
 
 template<typename Derived, typename VertexType, typename EdgeType>
 Prop<Derived, VertexType, EdgeType>::Prop(const Prop &other, const GraphType &g)
-		: g(g), vertexState(other.vertexState), edgeState(other.edgeState) {}
+		: g(&g), vertexState(other.vertexState), edgeState(other.edgeState) {}
 
 template<typename Derived, typename VertexType, typename EdgeType>
 void Prop<Derived, VertexType, EdgeType>::addVertex(Vertex v, const VertexType &value) {
-	assert(num_vertices(g) == vertexState.size() + 1);
-	assert(get(boost::vertex_index_t(), g, v) == vertexState.size());
+	assert(num_vertices(*g) == vertexState.size() + 1);
+	assert(get(boost::vertex_index_t(), *g, v) == vertexState.size());
 	vertexState.push_back(value);
-	verify(&g);
+	verify(g);
 }
 
 template<typename Derived, typename VertexType, typename EdgeType>
 void Prop<Derived, VertexType, EdgeType>::addEdge(Edge e, const EdgeType &value) {
-	assert(num_edges(g) == edgeState.size() + 1);
-	assert(get(boost::edge_index_t(), g, e) == edgeState.size());
+	assert(num_edges(*g) == edgeState.size() + 1);
+	assert(get(boost::edge_index_t(), *g, e) == edgeState.size());
 	edgeState.push_back(value);
-	verify(&g);
+	verify(g);
 }
 
 template<typename Derived, typename VertexType, typename EdgeType>
 const VertexType &Prop<Derived, VertexType, EdgeType>::operator[](Vertex v) const {
-	return vertexState[get(boost::vertex_index_t(), g, v)];
+	return vertexState[get(boost::vertex_index_t(), *g, v)];
 }
 
 template<typename Derived, typename VertexType, typename EdgeType>
 const EdgeType &Prop<Derived, VertexType, EdgeType>::operator[](Edge e) const {
-	assert(get(boost::edge_index_t(), g, e) < edgeState.size());
-	return edgeState[get(boost::edge_index_t(), g, e)];
+	assert(get(boost::edge_index_t(), *g, e) < edgeState.size());
+	return edgeState[get(boost::edge_index_t(), *g, e)];
 }
 
 template<typename Derived, typename VertexType, typename EdgeType>

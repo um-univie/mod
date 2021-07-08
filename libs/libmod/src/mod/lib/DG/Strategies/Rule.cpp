@@ -23,9 +23,9 @@ Rule::Rule(const lib::Rules::Real *r)
 	assert(r->getDPORule().numLeftComponents > 0);
 }
 
-Strategy *Rule::clone() const {
-	if(r) return new Rule(r);
-	else return new Rule(rRaw);
+std::unique_ptr<Strategy> Rule::clone() const {
+	if(r) return std::make_unique<Rule>(r);
+	else return std::make_unique<Rule>(rRaw);
 }
 
 void Rule::preAddGraphs(std::function<void(std::shared_ptr<graph::Graph>, IsomorphismPolicy)> add) const {}

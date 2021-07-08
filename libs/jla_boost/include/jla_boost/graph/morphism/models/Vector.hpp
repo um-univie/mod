@@ -1,5 +1,5 @@
-#ifndef JLA_BOOST_GRAPH_MORPHISM_MODELS_VECTOR_H
-#define JLA_BOOST_GRAPH_MORPHISM_MODELS_VECTOR_H
+#ifndef JLA_BOOST_GRAPH_MORPHISM_MODELS_VECTOR_HPP
+#define JLA_BOOST_GRAPH_MORPHISM_MODELS_VECTOR_HPP
 
 #include <jla_boost/graph/morphism/VertexMap.hpp>
 
@@ -10,8 +10,7 @@
 // - InvertibleVectorVertexMap
 // - ToInvertibleVectorVertexMap
 
-namespace jla_boost {
-namespace GraphMorphism {
+namespace jla_boost::GraphMorphism {
 
 // VectorVertexMap
 //------------------------------------------------------------------------------
@@ -29,7 +28,6 @@ struct VectorVertexMap {
 		return VectorVertexMap<GraphDomU, GraphCodomU>(std::move(m.data), gDomReinterpreted, gCodomReinterpreted);
 	}
 public:
-
 	VectorVertexMap(const GraphDom &gDom, const GraphCodom &gCodom)
 	: data(num_vertices(gDom), boost::graph_traits<GraphCodom>::null_vertex()) { }
 
@@ -59,7 +57,6 @@ private:
 private:
 	std::vector<typename boost::graph_traits<GraphCodom>::vertex_descriptor> data;
 public:
-
 	friend typename boost::graph_traits<GraphCodom>::vertex_descriptor
 	get(const VectorVertexMap &m, const GraphDom &gDom, const GraphCodom &gCodom,
 			typename boost::graph_traits<GraphDom>::vertex_descriptor v) {
@@ -81,7 +78,6 @@ public:
 //------------------------------------------------------------------------------
 
 struct ToVectorVertexMap {
-
 	template<typename VertexMap>
 	auto operator()(VertexMap &&m,
 			const typename VertexMapTraits<VertexMap>::GraphDom &gDom,
@@ -152,7 +148,6 @@ private:
 	std::vector<typename boost::graph_traits<GraphCodom>::vertex_descriptor> forward;
 	std::vector<typename boost::graph_traits<GraphDom>::vertex_descriptor> backward;
 public:
-
 	friend typename boost::graph_traits<GraphCodom>::vertex_descriptor
 	get(const InvertibleVectorVertexMap &m, const GraphDom &gDom, const GraphCodom &gCodom,
 			typename boost::graph_traits<GraphDom>::vertex_descriptor v) {
@@ -193,7 +188,6 @@ public:
 		}
 	}
 public:
-
 	void resizeRight(const GraphDom &gDom, const GraphCodom &gCodom) {
 		backward.resize(num_vertices(gCodom), boost::graph_traits<GraphDom>::null_vertex());
 	}
@@ -203,7 +197,6 @@ public:
 //------------------------------------------------------------------------------
 
 struct ToInvertibleVectorVertexMap {
-
 	template<typename VertexMap>
 	auto operator()(VertexMap &&m,
 			const typename VertexMapTraits<VertexMap>::GraphDom &gDom,
@@ -213,7 +206,6 @@ struct ToInvertibleVectorVertexMap {
 	}
 };
 
-} // namespace GraphMorphism
-} // namespace jla_boost
+} // namespace jla_boost::GraphMorphism
 
-#endif /* JLA_BOOST_GRAPH_MORPHISM_MODELS_VECTOR_H */
+#endif // JLA_BOOST_GRAPH_MORPHISM_MODELS_VECTOR_HPP

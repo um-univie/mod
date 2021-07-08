@@ -1,4 +1,4 @@
-include("../graph/smiles/mass/loadGraphs.py")
+include("../graph/030_smiles/mass/loadGraphs.py")
 sys.exit(0)
 for a in inputGraphs:
 	postSection(a.name)

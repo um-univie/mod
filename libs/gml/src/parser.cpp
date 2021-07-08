@@ -47,11 +47,11 @@ const x3::rule<struct value_class, ast::Value> value = "value";
 const x3::rule<struct valueInner, ast::Value> valueInner = "valueInner";
 const x3::rule<struct string, std::string> string = "string";
 #define GML_PARSER_CHAR_DEF(name) const x3::rule<struct name, char> name = #name;
-GML_PARSER_CHAR_DEF(escaped);
-GML_PARSER_CHAR_DEF(plain);
-GML_PARSER_CHAR_DEF(tab);
-GML_PARSER_CHAR_DEF(explicitBackslash);
-GML_PARSER_CHAR_DEF(implicitBackslash);
+GML_PARSER_CHAR_DEF(escaped)
+GML_PARSER_CHAR_DEF(plain)
+GML_PARSER_CHAR_DEF(tab)
+GML_PARSER_CHAR_DEF(explicitBackslash)
+GML_PARSER_CHAR_DEF(implicitBackslash)
 #undef GML_PARSER_CHAR_DEF
 
 const auto skipper_def = x3::space | (x3::lit('#') >> *(x3::char_ - x3::eol) >> x3::eol);
@@ -70,38 +70,37 @@ const auto explicitBackslash_def = '\\' >> x3::attr('\\');
 const auto implicitBackslash_def = x3::attr('\\');
 
 BOOST_SPIRIT_DEFINE(skipper, gml, list, listInner, keyValue, key, value, valueInner, string, escaped, plain, tab,
-                    explicitBackslash, implicitBackslash);
+                    explicitBackslash, implicitBackslash)
 
-bool parse(std::string_view src, ast::KeyValue &ast, std::ostream &err) {
+ast::KeyValue parse(std::string_view src) {
 	using PosIter = spirit::line_pos_iterator<std::string_view::const_iterator>;
 	PosIter iter(src.begin()); // referenced in doError
-	auto doError = [&]() {
+	const auto makeError = [&]() {
 		const auto lineNumber = iter.position();
 		const auto lineRange = get_current_line(PosIter(src.begin()), iter, PosIter(src.end()));
 		const auto column = get_column(lineRange.begin(), iter, SpacesPerTabs);
-		err << "Parsing failed at " << lineNumber << ":" << column << ":\n";
+		std::string msg = "Parsing failed at " + std::to_string(lineNumber) + ":" + std::to_string(column) + ":\n";
 		for(const char c : lineRange) {
-			if(c == '\t') err << std::string(SpacesPerTabs, ' ');
-			else err << c;
+			if(c == '\t') msg += std::string(SpacesPerTabs, ' ');
+			else msg += c;
 		}
-		err << "\n";
-		err << std::string(column - 1, '-') << "^\n";
+		msg += "\n";
+		msg += std::string(column - 1, '-');
+		msg += "^";
+		return msg;
 	};
 	try {
+		ast::KeyValue ast;
 		bool res = x3::phrase_parse(iter, PosIter(src.end()), gml, skipper, ast);
-		if(!res || iter != PosIter(src.end())) {
-			doError();
-			err << "End of x3 error.\n";
-			return false;
-		}
+		if(!res || iter != PosIter(src.end()))
+			throw error(makeError() + "\nEnd of x3 error.");
+		return ast;
 	} catch(const x3::expectation_failure<PosIter> &e) {
 		iter = e.where();
-		doError();
-		err << "Expected " << e.which() << ".\n";
-		err << "End of x3 error.\n";
-		return false;
+		throw error(makeError()
+		            + "\nExpected " + e.which() + ".\n"
+		            + "End of x3 error.");
 	}
-	return true;
 }
 
 } // namespace gml::parser

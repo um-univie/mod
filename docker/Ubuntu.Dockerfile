@@ -25,6 +25,9 @@ RUN apt-get update -qq                                      \
     apt install --no-install-recommends -y                  \
     $(bindep -b | tr '\n' ' ')                              \
     librsvg2-dev libpango1.0-dev                            \
+ && DEBIAN_FRONTEND=noninteractive                          \
+    apt install --no-install-recommends -y                  \
+    vim                                                     \
  && apt-get clean                                           \
  && rm -rf /var/lib/apt/lists/*
 
@@ -44,7 +47,7 @@ RUN \
 # the folder can apparently not be called just 'boost', therefore 'boostDir'
 WORKDIR /opt/boostDir
 RUN wget                                                                   \
- https://dl.bintray.com/boostorg/release/1.74.0/source/boost_1_74_0.tar.gz \
+ https://boostorg.jfrog.io/artifactory/main/release/1.74.0/source/boost_1_74_0.tar.gz \
  -O boost.tar.gz
 RUN \
  tar -xf boost.tar.gz --one-top-level=boostSrc --strip-components=1     \

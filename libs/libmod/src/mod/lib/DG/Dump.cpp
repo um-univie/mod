@@ -145,16 +145,18 @@ bool parse(Iter &textFirst,
            Attr &attr,
            std::ostream &err) {
 	try {
-		bool res = IO::detail::ParseDispatch<x3::ascii::space_type>::parse(first, last, p, attr, x3::ascii::space);
+		const bool res = IO::detail::ParseDispatch<x3::ascii::space_type>::parse(first, last, p, attr, x3::ascii::space);
 		if(!res) {
-			err << "Error while parsing DG dump.\n";
-			IO::detail::doParserError(textFirst, first, last, std::cout);
+			err << "Error while parsing DG dump.\n"
+			    << IO::detail::makeParserError(textFirst, first, last)
+			    << '\n';
 			return false;
 		}
-		return res;
+		return true;
 	} catch(const x3::expectation_failure<IO::PositionIter<Iter>> &e) {
-		err << "Error while parsing DG dump.\n";
-		IO::detail::doParserExpectationError(e, textFirst, last, err);
+		err << "Error while parsing DG dump.\n"
+		    << IO::detail::makeParserExpectationError(e, textFirst, last)
+		    << '\n';
 		return false;
 	}
 }
@@ -165,7 +167,13 @@ std::unique_ptr<NonHyper> load(const std::vector<std::shared_ptr<graph::Graph> >
                                const std::vector<std::shared_ptr<rule::Rule> > &rules,
                                const std::string &file,
                                std::ostream &err) {
-	boost::iostreams::mapped_file_source ifs(file);
+	boost::iostreams::mapped_file_source ifs;
+	try {
+		ifs.open(file);
+	} catch(const BOOST_IOSTREAMS_FAILURE &e) {
+		err << "Could not open file '" << file << "':\n" << e.what();
+		return {};
+	}
 
 	auto textFirst = ifs.begin();
 	const auto textLast = ifs.end();
@@ -198,11 +206,13 @@ std::unique_ptr<NonHyper> load(const std::vector<std::shared_ptr<graph::Graph> >
 		PARSE("vertex:" >> x3::uint_, id);
 		PARSE('"' >> x3::lexeme[*(x3::char_ - '"') >> '"'], name);
 		PARSE('"' >> x3::lexeme[*(x3::char_ - '"') >> '"'], dfs);
-		auto gData = IO::Graph::Read::dfs(dfs, err);
-		if(!gData.g) {
-			err << "GraphDFS \"" << dfs << "\" could not be parsed for vertex " << id << std::endl;
+		auto gDataRes = IO::Graph::Read::dfs(dfs);
+		if(!gDataRes) {
+			err << gDataRes.extractError() << '\n';
+			err << "GraphDFS \"" << dfs << "\" could not be parsed for vertex " << id << '\n';
 			return nullptr;
 		}
+		auto gData = std::move(*gDataRes);
 		if(gData.pStereo) MOD_ABORT;
 		vertices.emplace_back(id, std::move(name), std::move(gData.g), std::move(gData.pString));
 		validVertices.insert(id);

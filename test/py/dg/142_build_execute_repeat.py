@@ -18,8 +18,8 @@ r = ruleGMLString("""rule [
 	right [ node [ id 0 label "N" ] ]
 ]""")
 
-fail(lambda: DGStrat.makeRepeat(-42, None), "Limit must be positive.")
-fail(lambda: DGStrat.makeRepeat(0, None), "Limit must be positive.")
+fail(lambda: DGStrat.makeRepeat(-42, None), "Limit must be non-negative.")
+DGStrat.makeRepeat(0, addSubset(c1))
 fail(lambda: DGStrat.makeRepeat(42, None), "The substrategy is a null pointer.")
 
 exeStrat(addSubset(c1, c2, c3) >> repeat[1](r),
@@ -33,3 +33,5 @@ exeStrat(addSubset(c1, c2, c3) >> repeat(r),
 
 exeStrat(addSubset(c1) >> repeat(filterSubset(False)), [c1], [c1])
 exeStrat(addSubset(c1) >> repeat(filterSubset(False) >> addSubset(c2)), [c2], [c1, c2])
+
+exeStrat(addSubset(c1) >> repeat[0](addSubset(c2)), [c1], [c1])

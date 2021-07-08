@@ -192,7 +192,7 @@ void Strategy_doExport() {
 					// rst:			:param DGStrat strat: the strategy to be repeated.
 					// rst:			:returns: a :ref:`strat-repeat` strategy.
 					// rst:			:rtype: DGStrat
-					// rst:			:raises: :class:`LogicError` if ``limit`` is not positive.
+					// rst:			:raises: :class:`LogicError` if ``limit`` is negative.
 					// rst:			:raises: :class:`LogicError` if ``strat`` is ``None``.
 			.def("makeRepeat", &Strategy::makeRepeat).staticmethod("makeRepeat");
 

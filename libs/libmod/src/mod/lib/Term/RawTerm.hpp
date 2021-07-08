@@ -1,8 +1,5 @@
-#ifndef MOD_LIB_TERM_RAWTERM_H
-#define	MOD_LIB_TERM_RAWTERM_H
-
-#include <boost/variant/recursive_wrapper.hpp>
-#include <boost/variant/variant.hpp>
+#ifndef MOD_LIB_TERM_RAWTERM_HPP
+#define MOD_LIB_TERM_RAWTERM_HPP
 
 #include <limits>
 #include <list>
@@ -10,18 +7,19 @@
 #include <ostream>
 #include <string>
 #include <unordered_map>
+#include <variant>
 #include <vector>
 
-namespace mod {
-namespace lib {
+namespace mod::lib {
 struct StringStore;
-namespace Term {
+} // namespace mod::lib
+namespace mod::lib::Term {
 struct Address;
 struct Wam;
 struct RawVariable;
 struct RawStructure;
 
-typedef boost::variant<RawVariable, RawStructure> RawTerm;
+using RawTerm = std::variant<RawVariable, RawStructure>;
 
 struct RawVariable {
 	std::size_t name;
@@ -36,8 +34,6 @@ struct RawStructure {
 using RawAppendStore = std::unordered_map<std::size_t, Address>;
 Address append(Wam &machine, const RawTerm &term, RawAppendStore &varToAddr);
 
-} // namespace Term
-} // namespace lib
-} // namespace mod
+} // namespace mod::lib::Term
 
-#endif	/* MOD_LIB_TERM_RAWTERM_H */
+#endif // MOD_LIB_TERM_RAWTERM_HPP

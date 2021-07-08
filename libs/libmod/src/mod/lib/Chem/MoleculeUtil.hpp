@@ -1,5 +1,5 @@
-#ifndef MOD_LIB_CHEM_MOLECULEUTIL_H
-#define MOD_LIB_CHEM_MOLECULEUTIL_H
+#ifndef MOD_LIB_CHEM_MOLECULEUTIL_HPP
+#define MOD_LIB_CHEM_MOLECULEUTIL_HPP
 
 #include <mod/Chem.hpp>
 
@@ -15,8 +15,8 @@ inline bool isCleanHydrogen(const AtomData &ad) {
 	return ad == AtomData(AtomIds::H);
 }
 
-namespace lib {
-namespace Chem {
+} // namespace mod
+namespace mod::lib::Chem {
 
 std::tuple<std::string, Isotope, Charge, bool> extractIsotopeChargeRadical(const std::string &label);
 std::tuple<std::string::const_iterator, std::string::const_iterator, Isotope, Charge, bool>
@@ -31,6 +31,7 @@ void appendSymbolFromAtomId(std::string &s, AtomId atomId);
 char bondToChar(BondType bt);
 double exactMass(AtomId a, Isotope i); // implemented in Mass.cpp
 constexpr double electronMass = 0.000548580;
+constexpr double GasConstant = 1.98720425864083e-3; // kcal/(K * mol)
 
 template<typename Graph, typename AtomDataT, typename EdgeDataT, typename HasImportantStereo>
 bool isCollapsible(const typename boost::graph_traits<Graph>::vertex_descriptor v,
@@ -50,8 +51,6 @@ bool isCollapsible(const typename boost::graph_traits<Graph>::vertex_descriptor 
 	return get(boost::vertex_index_t(), g, v) > get(boost::vertex_index_t(), g, vAdj);
 }
 
-} // namespace Chem
-} // namespace lib
-} // namespace mod
+} // namespace mod::lib::Chem
 
-#endif /* MOD_LIB_CHEM_MOLECULEUTIL_H */
+#endif // MOD_LIB_CHEM_MOLECULEUTIL_HPP

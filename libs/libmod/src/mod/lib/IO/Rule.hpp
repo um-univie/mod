@@ -3,10 +3,10 @@
 
 #include <mod/Config.hpp>
 #include <mod/lib/IO/Graph.hpp> // to make sure the write options are defined
+#include <mod/lib/IO/Result.hpp>
 #include <mod/lib/Rules/LabelledRule.hpp>
 
-#include <boost/optional.hpp>
-
+#include <optional>
 #include <ostream>
 #include <string>
 #include <string_view>
@@ -18,15 +18,17 @@ namespace mod::lib::IO::Rules {
 namespace Read {
 
 struct Data {
-	boost::optional<lib::Rules::LabelledRule> rule;
-	boost::optional<std::string> name;
-	boost::optional<LabelType> labelType;
+	std::optional<lib::Rules::LabelledRule> rule;
+	std::optional<std::string> name;
+	std::optional<LabelType> labelType;
 	std::map<int, std::size_t> externalToInternalIds;
 };
 
-Data gml(std::string_view src, std::ostream &err);
+Result<Data> gml(lib::IO::Warnings &warnings, std::string_view input);
+
 } // namespace Read
 namespace Write {
+
 using Options = IO::Graph::Write::Options;
 using CoreVertex = lib::Rules::Vertex;
 using CoreEdge = lib::Rules::Edge;
@@ -69,8 +71,9 @@ tikzTransitionState(const lib::Rules::Real &r, unsigned int idOffset, const Opti
 std::string pdfTransitionState(const lib::Rules::Real &r, const Options &options,
                                const std::string &suffix, const BaseArgs &args);
 //std::string pdfCombined(const lib::Rules::Real &r, const Options &options); // TODO
-std::pair<std::string, std::string> summary(const lib::Rules::Real &r);
-std::pair<std::string, std::string> summary(const lib::Rules::Real &r, const Options &first, const Options &second);
+std::pair<std::string, std::string> summary(const lib::Rules::Real &r, bool printCombined);
+std::pair<std::string, std::string>
+summary(const lib::Rules::Real &r, const Options &first, const Options &second, bool printCombined);
 void termState(const lib::Rules::Real &r);
 } // namespace Write
 } // namespace mod::lib::IO::Rules

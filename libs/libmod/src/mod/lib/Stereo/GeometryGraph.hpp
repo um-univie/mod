@@ -1,7 +1,8 @@
-#ifndef MOD_LIB_STEREO_GEOMETRY_GRAPH_H
-#define MOD_LIB_STEREO_GEOMETRY_GRAPH_H
+#ifndef MOD_LIB_STEREO_GEOMETRY_GRAPH_HPP
+#define MOD_LIB_STEREO_GEOMETRY_GRAPH_HPP
 
 #include <mod/Chem.hpp>
+#include <mod/lib/IO/Result.hpp>
 #include <mod/lib/Stereo/EdgeCategory.hpp>
 
 #include <boost/graph/adjacency_list.hpp>
@@ -10,9 +11,7 @@
 #include <tuple>
 #include <vector>
 
-namespace mod {
-namespace lib {
-namespace Stereo {
+namespace mod::lib::Stereo {
 struct Configuration;
 struct EmbeddingEdge;
 struct Fixation;
@@ -22,9 +21,9 @@ enum struct DeductionResult {
 };
 
 struct GeometryGraph {
-
 	struct VProp {
-		using Constructor = std::function<std::unique_ptr<Configuration>(const EmbeddingEdge*, const EmbeddingEdge*, const Fixation&, std::ostream&) >;
+		using Constructor = std::function<std::unique_ptr<Configuration>(const EmbeddingEdge *, const EmbeddingEdge *,
+		                                                                 const Fixation &, std::ostream &)>;
 	public:
 		VProp() = default; // because BGL requires it
 		VProp(const std::string &name);
@@ -50,23 +49,30 @@ struct GeometryGraph {
 private:
 	friend const GeometryGraph &getGeometryGraph();
 	GeometryGraph();
-	GeometryGraph(const GeometryGraph&) = delete;
-	GeometryGraph(GeometryGraph&&) = delete;
-	GeometryGraph &operator=(const GeometryGraph&) = delete;
-	GeometryGraph &operator=(GeometryGraph&&) = delete;
+	GeometryGraph(const GeometryGraph &) = delete;
+	GeometryGraph(GeometryGraph &&) = delete;
+	GeometryGraph &operator=(const GeometryGraph &) = delete;
+	GeometryGraph &operator=(GeometryGraph &&) = delete;
 public:
 	const GraphType &getGraph() const;
 	Vertex findGeometry(const std::string &name) const;
 	static Vertex nullGeometry();
 public: // deduction
-	std::tuple<DeductionResult, unsigned char> deduceLonePairs(const AtomData &ad, const EdgeCategoryCount &catCount, Vertex vGeometry, bool asPattern, std::ostream &err) const;
-	std::tuple<DeductionResult, Vertex> deduceGeometry(const AtomData &ad, const EdgeCategoryCount &catCount, unsigned char numLonePairs, bool asPattern, std::ostream &err) const;
-	std::tuple<DeductionResult, Vertex, unsigned char> deduceGeometryAndLonePairs(const AtomData &ad, const EdgeCategoryCount &catCount, bool asPattern, std::ostream &err) const;
+	lib::IO::Result<unsigned char>
+	deduceLonePairs(lib::IO::Warnings &warnings, const AtomData &ad, const EdgeCategoryCount &catCount, Vertex vGeometry,
+	                bool asPattern) const;
+	lib::IO::Result<Vertex>
+	deduceGeometry(lib::IO::Warnings &warnings, const AtomData &ad, const EdgeCategoryCount &catCount,
+	               unsigned char numLonePairs, bool asPattern) const;
+	lib::IO::Result<std::tuple<Vertex, unsigned char>>
+	deduceGeometryAndLonePairs(lib::IO::Warnings &warnings, const AtomData &ad, const EdgeCategoryCount &catCount,
+	                           bool asPattern) const;
 public: // matching
 	bool isAncestorOf(Vertex ancestor, Vertex child) const; // true also if child == ancestor
 	Vertex generalize(Vertex a, Vertex b) const;
 	Vertex unify(Vertex a, Vertex b) const;
-	Vertex pushoutComplement(Vertex a, Vertex b, Vertex d) const; // a -> b -> d, find c, st. a -> c -> d is the pushout complement
+	Vertex pushoutComplement(Vertex a, Vertex b,
+	                         Vertex d) const; // a -> b -> d, find c, st. a -> c -> d is the pushout complement
 private:
 	Vertex addGeometry(VProp &&vProp) const;
 	Vertex addChild(Vertex vParent, VProp &&vProp);
@@ -84,8 +90,6 @@ public:
 
 const GeometryGraph &getGeometryGraph(); // singleton
 
-} // namespace Stereo
-} // namespace lib
-} // namespace mod
+} // namespace  mod::lib::Stereo
 
-#endif /* MOD_LIB_STEREO_GEOMETRY_GRAPH_H */
+#endif // MOD_LIB_STEREO_GEOMETRY_GRAPH_HPP

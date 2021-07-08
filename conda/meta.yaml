@@ -1,22 +1,4 @@
 {% set version = environ.get('MOD_CONDA_BUILD_VERSION') %}
-{% set pyPackages = [
-	"ipython",
-	"networkx",
-	"parse",
-	"typing_extensions",
-] %}
-{% set packages = [
-	"boost==1.74",
-	"boost-cpp==1.74",
-	"openbabel",
-	"python",
-] %}
-{% set exePackages = [
-	"make",
-	"graphviz==2.42.3.1",
-	"pdf2svg",
-] %}
-
 
 package:
   name: mod
@@ -30,6 +12,7 @@ source:
   {% endif %}
 
 build:
+  string: py{{ python | replace(".", "") }}_boost{{ boost | replace(".", "") }}
   skip: True  # [win]
 
 requirements:
@@ -38,27 +21,37 @@ requirements:
     - make
     - pkg-config
     - cmake
-#    - texlive-core
-    {% for p in exePackages %}
-    - {{ p }}
-    {% endfor %}
-    {% for p in pyPackages %}
-    - {{ p }}
-    {% endfor %}
+    # Add both exe and py packages to the build environemnt
+    # so configuration checks succeed and tests can be run.
+    # exe packages
+    - graphviz>=2.46.1  # to get the rsvg plugin
+    - pdf2svg
+    # - texlive-core
+    # py packages
+    - ipython
+    - networkx
+    - parse
+    - typing_extensions
   host:
-    {% for p in packages %}
-    - {{ p }}
-    {% endfor %}
+    # lib packages
+    - boost {{ boost }}
+    - openbabel
+    - python
   run:
-    {% for p in exePackages %}
-    - {{ p }}
-    {% endfor %}
-    {% for p in packages %}
-    - {{ p }}
-    {% endfor %}
-    {% for p in pyPackages %}
-    - {{ p }}
-    {% endfor %}
+    # lib packages
+    - boost
+    - openbabel
+    - python
+    # exe packages
+    - graphviz>=2.46.1  # to get the rsvg plugin
+    - pdf2svg
+    # - texlive-core
+    - make
+    # py packages
+    - ipython
+    - networkx
+    - parse
+    - typing_extensions
 
 test:
   commands:

@@ -1,3 +1,5 @@
+include("../xxx_helpers.py")
+
 inc = ruleGMLString("""rule [
 	ruleID "inc"
 	left [

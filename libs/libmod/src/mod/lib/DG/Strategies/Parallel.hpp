@@ -1,20 +1,17 @@
-#ifndef MOD_LIB_DG_STRATEGIES_PARALLEL_H
-#define	MOD_LIB_DG_STRATEGIES_PARALLEL_H
+#ifndef MOD_LIB_DG_STRATEGIES_PARALLEL_HPP
+#define MOD_LIB_DG_STRATEGIES_PARALLEL_HPP
 
 #include <mod/lib/DG/Strategies/Strategy.hpp>
 
 #include <vector>
 
-namespace mod {
-namespace lib {
-namespace DG {
-namespace Strategies {
+namespace mod::lib::DG::Strategies {
 
 struct Parallel : Strategy {
 	// pre: !strats.empty()
-	Parallel(const std::vector<Strategy*> &strats);
+	Parallel(std::vector<std::unique_ptr<Strategy>> strats);
 	virtual ~Parallel() override;
-	virtual Strategy *clone() const override;
+	virtual std::unique_ptr<Strategy> clone() const override;
 	virtual void preAddGraphs(std::function<void(std::shared_ptr<graph::Graph>, IsomorphismPolicy)> add) const override;
 	virtual void forEachRule(std::function<void(const lib::Rules::Real&)> f) const override;
 	virtual void printInfo(PrintSettings settings) const override;
@@ -23,12 +20,9 @@ private:
 	virtual void setExecutionEnvImpl() override;
 	virtual void executeImpl(PrintSettings settings, const GraphState &input) override;
 private:
-	std::vector<Strategy*> strats;
+	std::vector<std::unique_ptr<Strategy>> strats;
 };
 
-} // namespace Strategies
-} // namespace DG
-} // namespace lib
-} // namespace mod
+} // namespace mod::lib::DG::Strategies
 
-#endif	/* MOD_LIB_DG_STRATEGIES_PARALLEL_H */
+#endif // MOD_LIB_DG_STRATEGIES_PARALLEL_HPP

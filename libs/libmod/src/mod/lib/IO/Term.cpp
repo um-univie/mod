@@ -33,7 +33,7 @@ struct Variable {
 	std::string name;
 };
 
-struct Term : x3::variant<Variable, x3::forward_ast<Structure> > {
+struct Term : x3::variant<Variable, x3::forward_ast<Structure>> {
 	using base_type::base_type;
 	using base_type::operator=;
 };
@@ -60,7 +60,7 @@ const auto termList_def = term % ',';
 const auto variable_def = (x3::lexeme['_' > identifier] >> x3::eps) | x3::string("*");
 const auto identifier_def = x3::lexeme[x3::char_(FIRST) > *x3::char_(SECOND FIRST)];
 
-BOOST_SPIRIT_DEFINE(term, function, termList, variable, identifier);
+BOOST_SPIRIT_DEFINE(term, function, termList, variable, identifier)
 } // namespace parser
 } // namespace
 
@@ -100,14 +100,11 @@ private:
 
 } // namespace detail
 
-boost::optional<lib::Term::RawTerm>
-rawTerm(const std::string &data, const StringStore &stringStore, std::ostream &errorStream) {
+lib::Term::RawTerm rawTerm(const std::string &data, const StringStore &stringStore) {
 	detail::Term term;
-	bool res = parse(data.begin(), data.end(), detail::parser::term, term, errorStream, x3::space);
-	if(!res) return boost::none;
+	parse(data.begin(), data.end(), detail::parser::term, term, x3::space);
 	detail::Converter converter(stringStore);
-	auto libTerm = boost::apply_visitor(converter, term);
-	return libTerm;
+	return boost::apply_visitor(converter, term);
 }
 
 } // namespace mod::lib::IO::Term::Read
@@ -116,7 +113,7 @@ namespace {
 
 std::ostream &rawVarFromCell(std::ostream &s, lib::Term::Cell cell) {
 	using namespace lib::Term;
-	assert(cell.tag == CellTag::REF);
+	assert(cell.tag == Cell::Tag::REF);
 	switch(cell.REF.addr.type) {
 	case AddressType::Heap:
 		return s << "_H" << cell.REF.addr.addr;
@@ -129,9 +126,7 @@ std::ostream &rawVarFromCell(std::ostream &s, lib::Term::Cell cell) {
 } // namespace
 
 std::ostream &rawTerm(const lib::Term::RawTerm &term, const StringStore &strings, std::ostream &s) {
-	struct Printer : public boost::static_visitor<void> {
-		Printer(std::ostream &s, const StringStore &strings) : s(s), strings(strings) {}
-
+	struct Printer {
 		void operator()(lib::Term::RawVariable v) const {
 			s << "_" << strings.getString(v.name);
 		}
@@ -140,41 +135,40 @@ std::ostream &rawTerm(const lib::Term::RawTerm &term, const StringStore &strings
 			s << strings.getString(str.name);
 			if(!str.args.empty()) {
 				s << '(';
-				boost::apply_visitor(*this, str.args.front());
-				for(unsigned int i = 1; i < str.args.size(); i++) {
+				std::visit(*this, str.args.front());
+				for(int i = 1; i != str.args.size(); i++) {
 					s << ", ";
-					boost::apply_visitor(*this, str.args[i]);
+					std::visit(*this, str.args[i]);
 				}
 				s << ')';
 			}
 		}
-	private:
+	public:
 		std::ostream &s;
 		const StringStore &strings;
 	};
-	boost::apply_visitor(Printer(s, strings), term);
+	std::visit(Printer{s, strings}, term);
 	return s;
 }
 
 std::ostream &element(lib::Term::Cell cell, const StringStore &strings, std::ostream &s) {
 	using namespace lib::Term;
 	switch(cell.tag) {
-	case CellTag::STR:
+	case Cell::Tag::STR:
 		return s << "STR " << cell.STR.addr;
-	case CellTag::Structure:
+	case Cell::Tag::Structure:
 		s << strings.getString(cell.Structure.name);
 		if(cell.Structure.arity > 0)
 			s << "/" << cell.Structure.arity;
 		return s;
-	case CellTag::REF:
+	case Cell::Tag::REF:
 		return s << "REF " << cell.REF.addr;
 	}
-	MOD_ABORT;
+	__builtin_unreachable();
 }
 
 void wam(const lib::Term::Wam &machine, const StringStore &strings, std::ostream &s) {
-	wam(machine, strings, s, [](lib::Term::Address, std::ostream &) {
-	});
+	wam(machine, strings, s, [](lib::Term::Address, std::ostream &) {});
 }
 
 void wam(const lib::Term::Wam &machine, const StringStore &strings, std::ostream &s,
@@ -214,17 +208,17 @@ term(const lib::Term::Wam &machine, lib::Term::Address addr, const StringStore &
 		void operator()(Address addr) {
 			Cell cell = machine.getCell(addr);
 			switch(cell.tag) {
-			case CellTag::REF:
+			case Cell::Tag::REF:
 				if(cell.REF.addr == addr
 				   || occurred[static_cast<int>(cell.REF.addr.type)][cell.REF.addr.addr] != 0
 						) {
 					rawVarFromCell(s, cell);
 				} else (*this)(cell.REF.addr);
 				break;
-			case CellTag::STR:
+			case Cell::Tag::STR:
 				(*this)(cell.STR.addr);
 				break;
-			case CellTag::Structure:
+			case Cell::Tag::Structure:
 				if(occurred[static_cast<int>(addr.type)][addr.addr] != 0) {
 					wam(machine, strings, std::cout);
 					std::cout << "addr.addr = " << addr.addr << std::endl;
@@ -280,7 +274,7 @@ mgu(const lib::Term::Wam &machine, const lib::Term::MGU &mgu, const StringStore 
 		if(!first) s << ", ";
 		first = false;
 		Cell cell;
-		cell.tag = CellTag::REF;
+		cell.tag = Cell::Tag::REF;
 		cell.REF.addr = binding;
 		rawVarFromCell(s, cell) << " = ";
 		term(machine, binding, strings, s);

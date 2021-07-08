@@ -21,7 +21,6 @@ namespace mod {
 // rst:		A class encapsulating the current stacktrace at construction time.
 // rst:		Stacktraces may not be supported on all platforms.
 // rst-class-start:
-
 struct MOD_DECL Stacktrace {
 	// rst: .. function:: Stacktrace(unsigned int frameLimit, unsigned int numSkip)
 	// rst:
@@ -44,8 +43,7 @@ private:
 // rst:
 // rst:		The base class of all MØD exceptions.
 // rst-class-start:
-
-struct MOD_DECL Exception : public std::exception {
+struct BOOST_SYMBOL_VISIBLE Exception : public std::exception {
 protected:
 	Exception(std::string &&text, unsigned int numSkip, unsigned int frameLimit)
 			: text(text), stacktrace(frameLimit, numSkip) {}
@@ -80,11 +78,9 @@ protected:
 // rst:		When thrown there is no exception safety. It is not safe to continue after catching it.
 // rst:
 // rst-class-start:
-
-struct MOD_DECL FatalError : public Exception {
-	FatalError(std::string &&text, unsigned int numSkip) : Exception(std::move(text), numSkip) {}
-
+struct BOOST_SYMBOL_VISIBLE FatalError : public Exception {
 	FatalError(std::string &&text) : Exception(std::move(text)) {}
+	FatalError(std::string &&text, unsigned int numSkip) : Exception(std::move(text), numSkip) {}
 
 	std::string getName() const {
 		return "MØD FatalError";
@@ -99,8 +95,7 @@ struct MOD_DECL FatalError : public Exception {
 // rst:		This exception is thrown when bad data has been provided to a loading function.
 // rst:
 // rst-class-start:
-
-struct MOD_DECL InputError : public Exception {
+struct BOOST_SYMBOL_VISIBLE InputError : public Exception {
 	InputError(std::string &&text) : Exception(std::move(text)) {}
 
 	std::string getName() const {
@@ -115,7 +110,7 @@ struct MOD_DECL InputError : public Exception {
 // rst:		This exception is thrown when a pre-condition of a function is violated.
 // rst:
 // rst-class-start:
-struct MOD_DECL LogicError : public Exception {
+struct BOOST_SYMBOL_VISIBLE LogicError : public Exception {
 	LogicError(std::string &&text) : Exception(std::move(text)) {}
 
 	std::string getName() const {
@@ -131,7 +126,7 @@ struct MOD_DECL LogicError : public Exception {
 // rst:		parsing of a string into a first-order term fails.
 // rst:
 // rst-class-start:
-struct MOD_DECL TermParsingError : public Exception {
+struct BOOST_SYMBOL_VISIBLE TermParsingError : public Exception {
 	TermParsingError(std::string &&text) : Exception(std::move(text)) {}
 
 	std::string getName() const {
@@ -147,7 +142,7 @@ struct MOD_DECL TermParsingError : public Exception {
 // rst:		deduction failed.
 // rst:
 // rst-class-start:
-struct MOD_DECL StereoDeductionError : public Exception {
+struct BOOST_SYMBOL_VISIBLE StereoDeductionError : public Exception {
 	StereoDeductionError(std::string &&text) : Exception(std::move(text)) {}
 
 	std::string getName() const {

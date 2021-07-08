@@ -23,7 +23,7 @@ struct ArgWrap {
 };
 
 template<typename T>
-struct ArgWrap<T&> {
+struct ArgWrap<T &> {
 	static auto wrap(T &t) -> decltype(boost::ref(t)) {
 		return boost::ref(t);
 	}
@@ -31,14 +31,14 @@ struct ArgWrap<T&> {
 
 template<typename R>
 struct Returner {
-	static R doReturn(decltype((*static_cast<py::override*> (nullptr))()) r) {
+	static R doReturn(decltype(std::declval<py::override>()()) r) {
 		return r;
 	}
 };
 
 template<>
 struct Returner<void> {
-	static void doReturn(decltype((*static_cast<py::override*> (nullptr))())) { }
+	static void doReturn(decltype(std::declval<py::override>()())) {}
 };
 
 template<typename F>
@@ -47,7 +47,7 @@ struct FunctionWrapper {
 
 template<typename R, typename ...Args>
 struct FunctionWrapper<R(Args...)> : mod::Function<R(Args...)>, py::wrapper<FunctionWrapper<R(Args...)> > {
-	std::shared_ptr < mod::Function < R(Args...)> > clone() const {
+	std::shared_ptr<mod::Function<R(Args...)> > clone() const {
 		if(py::override f = this->get_override("clone")) {
 			return f();
 		} else {
@@ -95,8 +95,7 @@ void exportFunc(const char *name) {
 	py::class_<Wrap, StoragePtr, boost::noncopyable>(name)
 			.def("clone", py::pure_virtual(&Func::clone))
 			.def("__str__", py::pure_virtual(&Func::print))
-			.def("__call__", py::pure_virtual(&Func::operator()))
-			;
+			.def("__call__", py::pure_virtual(&Func::operator()));
 	py::implicitly_convertible<StoragePtr, SharedPtr>();
 	py::def("_sharedToStd", &detail::sharedToStd<Func>);
 }

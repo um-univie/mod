@@ -27,9 +27,7 @@
 
 #include <vector>
 
-namespace mod {
-namespace lib {
-namespace Graph {
+namespace mod::lib::Graph {
 namespace {
 
 template<typename LabelledGraph, typename Grpah, typename Idx>
@@ -692,6 +690,4 @@ bool canonicalCompare(const Single &g1, const Single &g2, LabelType labelType, b
 	MOD_ABORT;
 }
 
-} // namespace Graph
-} // namespace lib
-} // namespace mod
+} // namespace mod::lib::Graph

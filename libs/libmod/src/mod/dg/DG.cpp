@@ -175,14 +175,28 @@ std::pair<std::string, std::string> DG::print(const Printer &printer, const Prin
 	return lib::IO::DG::Write::summary(data.getData(), printer.getPrinter(), printer.getGraphPrinter().getOptions());
 }
 
+std::string DG::printNonHyper() const {
+	return lib::IO::DG::Write::summaryNonHyper(getNonHyper());
+}
+
 std::string DG::dump() const {
-	if(!p->dg->getHasCalculated())
-		throw LogicError("No dump can be done before the derivation graph it has been calculated.\n");
-	else return lib::IO::DG::Write::dumpToFile(*p->dg);
+	return dump("");
+}
+
+std::string DG::dump(const std::string &filename) const {
+	if(!isLocked()) throw LogicError("Can not dump DG before it is locked.");
+	if(filename.empty()) {
+		std::string name = lib::IO::getUniqueFilePrefix() + "DG.dg";
+		lib::IO::writeJsonFile(name, lib::IO::DG::Write::dumpToJson(getNonHyper()));
+		return name;
+	} else {
+		lib::IO::writeJsonFile(filename, lib::IO::DG::Write::dumpToJson(getNonHyper()));
+		return filename;
+	}
 }
 
 void DG::listStats() const {
-	if(!p->dg->getHasCalculated()) throw LogicError("No stats can be printed before calculation.\n");
+	if(!isLocked()) throw LogicError("No stats can be printed before calculation.");
 	else p->dg->getHyper().printStats(std::cout);
 }
 
@@ -225,16 +239,15 @@ std::shared_ptr<DG> DG::load(const std::vector<std::shared_ptr<graph::Graph>> &g
                              IsomorphismPolicy graphPolicy, int verbosity) {
 	if(std::any_of(graphDatabase.begin(), graphDatabase.end(), [](const auto &g) {
 		return !g;
-	}))
+	})) {
 		throw LogicError("Nullptr in graph database.");
+	}
 	if(std::any_of(ruleDatabase.begin(), ruleDatabase.end(), [](const auto &r) {
 		return !r;
-	}))
+	})) {
 		throw LogicError("Nullptr in rule database.");
+	}
 
-	std::ifstream fileStream(file.c_str());
-	if(!fileStream.is_open()) throw InputError("DG dump file not found, '" + file + "'.");
-	fileStream.close();
 	std::ostringstream err;
 	std::unique_ptr<lib::DG::NonHyper> dgInternal(
 			lib::IO::DG::Read::dump(graphDatabase, ruleDatabase, file, graphPolicy, err, verbosity));

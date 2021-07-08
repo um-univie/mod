@@ -2,32 +2,29 @@
 #define MOD_LIB_IO_GMLUTILS_HPP
 
 #include <mod/lib/IO/Stereo.hpp>
-
-#include <boost/optional/optional.hpp>
-#include <boost/variant/variant.hpp>
-
-#include <vector>
-
 #include <gml/converter_edsl.hpp>
 
+#include <optional>
 #include <string>
+#include <variant>
+#include <vector>
 
 namespace mod::lib::IO::GML {
 
 struct Vertex {
 	int id;
-	boost::optional<std::string> label;
-	boost::optional<std::string> stereo;
+	std::optional<std::string> label;
+	std::optional<std::string> stereo;
 public:
-	boost::optional<lib::IO::Stereo::Read::ParsedEmbedding> parsedEmbedding;
+	std::optional<lib::IO::Stereo::Read::ParsedEmbedding> parsedEmbedding;
 };
 
 struct Edge {
 	friend std::ostream &operator<<(std::ostream &s, const Edge &e);
 public:
 	int source, target;
-	boost::optional<std::string> label;
-	boost::optional<std::string> stereo;
+	std::optional<std::string> label;
+	std::optional<std::string> stereo;
 };
 
 struct Graph {
@@ -48,11 +45,11 @@ struct ShortestPathConstraint {
 	int length;
 };
 
-using MatchConstraint = boost::variant<AdjacencyConstraint, ShortestPathConstraint>;
+using MatchConstraint = std::variant<AdjacencyConstraint, ShortestPathConstraint>;
 
 struct Rule {
-	boost::optional<std::string> id;
-	boost::optional<std::string> labelType;
+	std::optional<std::string> id;
+	std::optional<std::string> labelType;
 	Graph left, context, right;
 	std::vector<MatchConstraint> matchConstraints;
 };

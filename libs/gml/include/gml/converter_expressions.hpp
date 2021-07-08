@@ -1,9 +1,10 @@
 #ifndef GML_CONVERTER_EXPRESSIONS_HPP
 #define GML_CONVERTER_EXPRESSIONS_HPP
 
+#include <gml/converter_error.hpp>
 #include <gml/value_type.hpp>
 
-#include <boost/variant/get.hpp>
+#include <boost/lexical_cast.hpp>
 
 #include <ostream>
 
@@ -11,12 +12,13 @@ namespace gml::converter {
 namespace detail {
 
 struct ExpressionBase {
-	bool checkKey(const std::string &key) const;
+	bool checkKey(const std::string &key) const noexcept;
 protected:
 	ExpressionBase(const std::string &key) : key(key) {}
-	void errorOnKey(const ast::KeyValue &kv, std::ostream &err) const;
-	bool checkAndErrorOnKey(const ast::KeyValue &kv, std::ostream &err) const;
-	bool checkAndErrorOnType(const ast::Value &value, std::ostream &err, ValueType expected) const;
+	// throws error
+	[[noreturn]] void errorOnKey(const ast::KeyValue &kv) const;
+	void checkAndErrorOnKey(const ast::KeyValue &kv) const;
+	void checkAndErrorOnType(const ast::Value &value, ValueType expected) const;
 protected:
 	std::string key;
 };
@@ -37,16 +39,13 @@ protected:
     struct Name : Expression<AttrHandler> {                                                      \
         using Base = Expression<AttrHandler>;                                                    \
                                                                                                  \
-        Name(const std::string &key, AttrHandler attrHandler)                                    \
-        : Base(key, attrHandler) { }                                                             \
+        Name(const std::string &key, AttrHandler attrHandler) : Base(key, attrHandler) {}        \
                                                                                                  \
         template<typename ParentAttr>                                                            \
-        bool convert(const ast::KeyValue &kv, std::ostream &err, ParentAttr &parentAttr) const { \
-            bool res = Base::checkAndErrorOnKey(kv, err)                                         \
-                       && Base::checkAndErrorOnType(kv.value, err, ValueType::Name);             \
-            if(!res) return res;                                                                 \
+        void convert(const ast::KeyValue &kv, ParentAttr &parentAttr) const {                    \
+            Base::checkAndErrorOnKey(kv);                                                        \
+            Base::checkAndErrorOnType(kv.value, ValueType::Name);                                \
             Base::attrHandler(parentAttr, boost::get<Type>(kv.value));                           \
-            return true;                                                                         \
         }                                                                                        \
                                                                                                  \
         friend std::ostream &operator<<(std::ostream &s, const Name &expr) {                     \
@@ -95,55 +94,46 @@ struct ListElementPrinter<N, N, Expr...> {
 template<std::size_t I, std::size_t N, typename ...Expr>
 struct ListElementHandler {
 	template<typename ParentAttr>
-	static bool handle(const ast::KeyValue &kv, const std::tuple<ListElement<Expr>...> &elems,
-	                   std::ostream &err, ParentAttr &parentAttr, std::array<std::size_t, N> &count) {
+	static void handle(const ast::KeyValue &kv, const std::tuple<ListElement<Expr>...> &elems,
+	                   ParentAttr &parentAttr, std::array<std::size_t, N> &count) {
 		auto &elem = std::get<I>(elems);
-		if(!elem.expr.checkKey(kv.key)) {
-			return ListElementHandler<I + 1, N, Expr...>::handle(kv, elems, err, parentAttr, count);
-		} else if(elem.expr.convert(kv, err, parentAttr)) {
-			++count[I];
-			if(count[I] > elem.upperBound) {
-				err << "Error at " << kv.line << ":" << kv.column << ".";
-				err << " Unexpected " << elem.expr << ". Already got " << elem.upperBound << " occurrences.";
-				return false;
-			}
-			return true;
-		} else {
-			return false;
-		}
+		if(!elem.expr.checkKey(kv.key))
+			return ListElementHandler<I + 1, N, Expr...>::handle(kv, elems, parentAttr, count);
+		elem.expr.convert(kv, parentAttr);
+		++count[I];
+		if(count[I] > elem.upperBound)
+			throw error("Error at " + std::to_string(kv.line) + ":" + std::to_string(kv.column) + "."
+			            + " Unexpected " + boost::lexical_cast<std::string>(elem.expr)
+			            + ". Already got " + std::to_string(elem.upperBound) + " occurrences.");
 	}
 };
 
 template<std::size_t N, typename ...Expr>
 struct ListElementHandler<N, N, Expr...> {
 	template<typename ParentAttr>
-	static bool handle(const ast::KeyValue &kv, const std::tuple<ListElement<Expr>...> &elems,
-	                   std::ostream &err, ParentAttr &parentAttr, std::array<std::size_t, N> &count) {
-		err << "Error at " << kv.line << ":" << kv.column << ".";
-		err << " Unexpected list element with key '" << kv.key << "'.";
-		return false;
+	static void handle(const ast::KeyValue &kv, const std::tuple<ListElement<Expr>...> &elems, ParentAttr &parentAttr,
+	                   std::array<std::size_t, N> &count) {
+		throw error("Error at " + std::to_string(kv.line) + ":" + std::to_string(kv.column) + "."
+		            + " Unexpected list element with key '" + boost::lexical_cast<std::string>(kv.key) + "'.");
 	}
 };
 
 template<std::size_t I, std::size_t N, typename ...Expr>
 struct ListElementUpperBound {
-	static bool
-	check(const std::tuple<ListElement<Expr>...> &elems, std::ostream &err, std::array<std::size_t, N> &count) {
+	static void check(const std::tuple<ListElement<Expr>...> &elems, std::array<std::size_t, N> &count) {
 		auto &elem = std::get<I>(elems);
-		if(count[I] < elem.lowerBound) {
-			err << "Expected " << elem.lowerBound << " of " << elem.expr << ". Got only " << count[I] << ".";
-			return false;
-		}
-		return ListElementUpperBound<I + 1, N, Expr...>::check(elems, err, count);
+		if(count[I] < elem.lowerBound)
+			throw error(
+					"Expected " + std::to_string(elem.lowerBound) + " of " + boost::lexical_cast<std::string>(elem.expr)
+					+ ". Got only " + std::to_string(count[I]) + ".");
+		return ListElementUpperBound<I + 1, N, Expr...>::check(elems, count);
 	}
 };
 
 template<std::size_t N, typename ...Expr>
 struct ListElementUpperBound<N, N, Expr...> {
-	static bool
-	check(const std::tuple<ListElement<Expr>...> &elems, std::ostream &err, std::array<std::size_t, N> &count) {
-		return true;
-	}
+	static void
+	check(const std::tuple<ListElement<Expr>...> &elems, std::array<std::size_t, N> &count) {}
 };
 
 template<typename Type, typename AttrHandler, typename ParentAttr>
@@ -201,21 +191,16 @@ struct List : Expression<AttrHandler> {
 			: Base(key, attrHandler), elems(elems) {}
 
 	template<typename ParentAttr>
-	bool convert(const ast::KeyValue &kv, std::ostream &err, ParentAttr &parentAttr) const {
-		bool res = Base::checkAndErrorOnKey(kv, err)
-		           && Base::checkAndErrorOnType(kv.value, err, ValueType::List);
-		if(!res) return res;
+	bool convert(const ast::KeyValue &kv, ParentAttr &parentAttr) const {
+		Base::checkAndErrorOnKey(kv);
+		Base::checkAndErrorOnType(kv.value, ValueType::List);
 		const ast::List &value = boost::get<x3::forward_ast<ast::List> >(kv.value);
 		std::array<std::size_t, sizeof...(Expr)> count;
 		count.fill(0);
 		ListAttrHandler <Type, AttrHandler, ParentAttr> ourAttr(this->attrHandler, parentAttr);
-		for(const ast::KeyValue &kv : value.list) {
-			bool res = ListElementHandler<0, sizeof...(Expr), Expr...>::handle(kv, elems, err, ourAttr.getAttr(),
-			                                                                   count);
-			if(!res) return false;
-		}
-		res = ListElementUpperBound<0, sizeof...(Expr), Expr...>::check(elems, err, count);
-		if(!res) return false;
+		for(const ast::KeyValue &kvElem : value.list)
+			ListElementHandler<0, sizeof...(Expr), Expr...>::handle(kvElem, elems, ourAttr.getAttr(), count);
+		ListElementUpperBound<0, sizeof...(Expr), Expr...>::check(elems, count);
 		ourAttr.assignToParent();
 		return true;
 	}

@@ -1,19 +1,19 @@
-#ifndef MOD_LIB_DG_GRAPHDECL_H
-#define MOD_LIB_DG_GRAPHDECL_H
+#ifndef MOD_LIB_DG_GRAPHDECL_HPP
+#define MOD_LIB_DG_GRAPHDECL_HPP
 
 #include <mod/lib/Graph/Multiset.hpp>
 
 #include <boost/graph/adjacency_list.hpp>
 
-namespace mod {
-namespace lib {
-namespace Graph {
+#include <optional>
+
+namespace mod::lib::Graph {
 struct Single;
-} // namespace Graph
-namespace Rules {
+} // namespace mod::lib::Graph
+namespace mod::lib::Rules {
 struct Real;
-} // namespace Rules
-namespace DG {
+} // namespace mod::lib::Rules
+namespace mod::lib::DG {
 // NonHyper
 struct NonHyperVProp;
 struct NonHyperEProp;
@@ -39,7 +39,7 @@ struct NonHyperEProp {
 	HyperVertex hyper // the representative of this hyperedge
 			= boost::graph_traits<HyperGraphType>::null_vertex(); // initialized to prevent GCC warning
 	std::vector<const lib::Rules::Real *> rules;
-	boost::optional<NonHyperEdge> reverse;
+	std::optional<NonHyperEdge> reverse;
 };
 
 struct NonHyperEdgeHash {
@@ -65,8 +65,6 @@ struct HyperVProp {
 	NonHyperEdge edge; // only defined for kind == Edge
 };
 
-} // namespace DG
-} // namespace lib
-} // namespace mod
+} // namespace mod::lib::DG
 
-#endif /* MOD_LIB_DG_GRAPHDECL_H */
+#endif // MOD_LIB_DG_GRAPHDECL_HPP

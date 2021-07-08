@@ -9,7 +9,7 @@
 
 #include <jla_boost/graph/morphism/Predicates.hpp>
 
-#include <boost/optional/optional.hpp>
+#include <optional>
 
 namespace mod::lib::Graph {
 struct PropStereo;
@@ -26,14 +26,14 @@ using DPOProjection = LabelledRule::LabelledLeftType::GraphType;
 struct Real {
 	static bool sanityChecks(const GraphType &core, const PropStringCore &labelState, std::ostream &s);
 public:
-	Real(LabelledRule &&rule, boost::optional<LabelType> labelType);
+	Real(LabelledRule &&rule, std::optional<LabelType> labelType);
 	~Real();
 	std::size_t getId() const;
 	std::shared_ptr<rule::Rule> getAPIReference() const;
 	void setAPIReference(std::shared_ptr<rule::Rule> r);
 	const std::string &getName() const;
 	void setName(std::string name);
-	boost::optional<LabelType> getLabelType() const;
+	std::optional<LabelType> getLabelType() const;
 	const LabelledRule &getDPORule() const;
 public: // shorthands
 	const GraphType &getGraph() const;
@@ -63,7 +63,7 @@ private:
 	const std::size_t id;
 	std::weak_ptr<rule::Rule> apiReference;
 	std::string name;
-	const boost::optional<LabelType> labelType;
+	const std::optional<LabelType> labelType;
 private:
 	LabelledRule dpoRule;
 	mutable std::unique_ptr<DepictionDataCore> depictionData;

@@ -8,6 +8,7 @@
 #include <boost/iterator/iterator_facade.hpp>
 
 #include <memory>
+#include <optional>
 #include <vector>
 
 namespace mod {
@@ -55,8 +56,10 @@ public:
 	Union &operator=(const Union &other);
 	Union(Union &&other);
 	Union &operator=(Union &&other);
+	const lib::LabelledUnionGraph<lib::Graph::LabelledGraph> &getInner() const;
 	MOD_DECL friend bool operator==(const Union &a, const Union &b);
 	MOD_DECL friend bool operator!=(const Union &a, const Union &b);
+	MOD_DECL friend bool operator<(const Union &a, const Union &b);
 	// rst: .. function:: friend std::ostream &operator<<(std::ostream &s, const Union &ug)
 	MOD_DECL friend std::ostream &operator<<(std::ostream &s, const Union &ug);
 	// rst: .. function:: std::size_t size() const
@@ -105,7 +108,7 @@ private:
 // rst:		A descriptor of either a vertex in a union graph, or a null vertex.
 // rst-class-start:
 struct MOD_DECL Union::Vertex {
-	Vertex(std::shared_ptr<const Pimpl> p, std::size_t vId);
+	Vertex(Union g, std::size_t vId);
 public:
 	// rst:	.. function:: Vertex()
 	// rst:
@@ -198,7 +201,7 @@ public:
 	// rst:		:throws: :cpp:class:`LogicError` if it is a null descriptor.
 	Graph::Vertex getVertex() const;
 private:
-	std::shared_ptr<const Pimpl> p;
+	std::optional<Union> g;
 	std::size_t vId;
 };
 // rst-class-end:
@@ -210,7 +213,7 @@ private:
 class MOD_DECL Union::Edge {
 	friend class EdgeIterator;
 	friend class IncidentEdgeIterator;
-	Edge(std::shared_ptr<const Pimpl> p, std::size_t vId, std::size_t eId);
+	Edge(Union g, std::size_t vId, std::size_t eId);
 public:
 	// rst:	.. function:: Edge()
 	// rst:
@@ -273,7 +276,7 @@ public:
 	// rst:		:throws: :cpp:class:`LogicError` if it is a null descriptor.
 	Graph::Edge getEdge() const;
 private:
-	std::shared_ptr<const Pimpl> p;
+	std::optional<Union> g;
 	std::size_t vId, eId;
 };
 // rst-class-end:
@@ -290,7 +293,7 @@ private:
 class MOD_DECL Union::VertexIterator
 		: public boost::iterator_facade<VertexIterator, Vertex, std::forward_iterator_tag, Vertex> {
 	friend class Union;
-	VertexIterator(std::shared_ptr<const Pimpl> p);
+	VertexIterator(Union g);
 public:
 	// rst:	.. function:: VertexIterator()
 	// rst:
@@ -302,7 +305,7 @@ private:
 	bool equal(const VertexIterator &iter) const;
 	void increment();
 private:
-	std::shared_ptr<const Pimpl> p;
+	std::optional<Union> g;
 	std::size_t vId;
 };
 // rst-class-end:
@@ -316,13 +319,13 @@ struct Union::VertexRange {
 	using const_iterator = iterator;
 private:
 	friend class Union;
-	VertexRange(std::shared_ptr<const Pimpl> p);
+	VertexRange(Union g);
 public:
 	VertexIterator begin() const;
 	VertexIterator end() const;
 	Vertex operator[](std::size_t i) const;
 private:
-	std::shared_ptr<const Pimpl> p;
+	Union g;
 };
 // rst-class-end:
 
@@ -338,7 +341,7 @@ private:
 class MOD_DECL Union::EdgeIterator
 		: public boost::iterator_facade<EdgeIterator, Edge, std::forward_iterator_tag, Edge> {
 	friend class Union;
-	EdgeIterator(std::shared_ptr<const Pimpl> p);
+	EdgeIterator(Union g);
 public:
 	// rst:	.. function:: EdgeIterator()
 	// rst:
@@ -351,7 +354,7 @@ private:
 	void increment();
 	void advanceToValid();
 private:
-	std::shared_ptr<const Pimpl> p;
+	std::optional<Union> g;
 	std::size_t vId, eId;
 };
 // rst-class-end:
@@ -365,12 +368,12 @@ struct Union::EdgeRange {
 	using const_iterator = iterator;
 private:
 	friend class Union;
-	EdgeRange(std::shared_ptr<const Pimpl> p);
+	EdgeRange(Union g);
 public:
 	EdgeIterator begin() const;
 	EdgeIterator end() const;
 private:
-	std::shared_ptr<const Pimpl> p;
+	Union g;
 };
 // rst-class-end:
 
@@ -386,7 +389,7 @@ private:
 class MOD_DECL Union::IncidentEdgeIterator
 		: public boost::iterator_facade<IncidentEdgeIterator, Edge, std::forward_iterator_tag, Edge> {
 	friend class Union;
-	IncidentEdgeIterator(std::shared_ptr<const Pimpl> p, std::size_t vId);
+	IncidentEdgeIterator(Union g, std::size_t vId);
 public:
 	// rst:	.. function:: IncidentEdgeIterator()
 	// rst:
@@ -398,7 +401,7 @@ private:
 	bool equal(const IncidentEdgeIterator &iter) const;
 	void increment();
 private:
-	std::shared_ptr<const Pimpl> p;
+	std::optional<Union> g;
 	std::size_t vId, eId;
 };
 // rst-class-end:
@@ -412,12 +415,12 @@ struct Union::IncidentEdgeRange {
 	using const_iterator = iterator;
 private:
 	friend class Vertex;
-	IncidentEdgeRange(std::shared_ptr<const Pimpl> p, std::size_t vId);
+	IncidentEdgeRange(Union g, std::size_t vId);
 public:
 	IncidentEdgeIterator begin() const;
 	IncidentEdgeIterator end() const;
 private:
-	std::shared_ptr<const Pimpl> p;
+	Union g;
 	std::size_t vId;
 };
 // rst-class-end:
@@ -430,10 +433,10 @@ private:
 // VertexRange
 //------------------------------------------------------------------------------
 
-inline Union::VertexRange::VertexRange(std::shared_ptr<const Pimpl> p) : p(p) {}
+inline Union::VertexRange::VertexRange(Union g) : g(g) {}
 
 inline Union::VertexIterator Union::VertexRange::begin() const {
-	return VertexIterator(p);
+	return VertexIterator(g);
 }
 
 inline Union::VertexIterator Union::VertexRange::end() const {
@@ -441,16 +444,16 @@ inline Union::VertexIterator Union::VertexRange::end() const {
 }
 
 inline Union::Vertex Union::VertexRange::operator[](std::size_t i) const {
-	return Vertex(p, i); // it will convert to a null descriptor if out of range
+	return Vertex(g, i); // it will convert to a null descriptor if out of range
 }
 
 // EdgeRange
 //------------------------------------------------------------------------------
 
-inline Union::EdgeRange::EdgeRange(std::shared_ptr<const Pimpl> p) : p(p) {}
+inline Union::EdgeRange::EdgeRange(Union g) : g(g) {}
 
 inline Union::EdgeIterator Union::EdgeRange::begin() const {
-	return EdgeIterator(p);
+	return EdgeIterator(g);
 }
 
 inline Union::EdgeIterator Union::EdgeRange::end() const {
@@ -460,10 +463,10 @@ inline Union::EdgeIterator Union::EdgeRange::end() const {
 // IncidentEdgeRange
 //------------------------------------------------------------------------------
 
-inline Union::IncidentEdgeRange::IncidentEdgeRange(std::shared_ptr<const Pimpl> p, std::size_t vId) : p(p), vId(vId) {}
+inline Union::IncidentEdgeRange::IncidentEdgeRange(Union g, std::size_t vId) : g(g), vId(vId) {}
 
 inline Union::IncidentEdgeIterator Union::IncidentEdgeRange::begin() const {
-	return IncidentEdgeIterator(p, vId);
+	return IncidentEdgeIterator(g, vId);
 }
 
 inline Union::IncidentEdgeIterator Union::IncidentEdgeRange::end() const {

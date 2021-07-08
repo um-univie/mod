@@ -1,3 +1,5 @@
+include("../xxx_helpers.py")
+
 _ = ruleGMLString("""rule [ ruleID "->"
 ]""");
 _A = ruleGMLString("""rule [ ruleID "-> A"

@@ -11,7 +11,7 @@ target_include_directories(jla_boost
         $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>)
 target_link_libraries(jla_boost PUBLIC GraphCanon::graph_canon Boost::boost)
-target_compile_options(jla_boost PRIVATE -Wall -Wextra
+target_compile_options(jla_boost PRIVATE -Wall -Wextra -pedantic
         -Wno-unused-parameter)
 set_target_properties(jla_boost PROPERTIES
         POSITION_INDEPENDENT_CODE ON

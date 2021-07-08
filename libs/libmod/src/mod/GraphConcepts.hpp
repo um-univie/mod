@@ -7,12 +7,46 @@
 #include <boost/concept_check.hpp>
 
 #include <memory>
+#include <type_traits>
 
+namespace mod {
+namespace detail {
+
+template<typename T, typename = void>
+struct GraphHandle {
+	using type = T;
+};
+
+template<typename T>
+struct GraphHandle<T, std::void_t<typename T::Handle>> {
+	using type = typename T::Handle;
+};
+
+} // namespace
+
+// rst: .. type:: template<typename GraphT> GraphHandle
+// rst:
+// rst:		Alias for `GraphT::Handle` if it exists, otherwise for `GraphT`.
+// rst:
+template<typename GraphT>
+using GraphHandle = typename detail::GraphHandle<GraphT>::type;
+
+template<typename GraphHandle>
+auto getGraphFromHandle(GraphHandle g) {
+	return g;
+}
+
+template<typename Graph>
+auto &getGraphFromHandle(std::shared_ptr<Graph> &g) {
+	return *g;
+}
+
+} // namespace mod
 namespace mod::concepts {
 
-template<typename GraphT, bool Shared>
+template<typename GraphT>
 struct Graph {
-	using GraphHandle = std::conditional_t<Shared, std::shared_ptr<GraphT>, GraphT>;
+	using Handle = GraphHandle<GraphT>;
 
 	using Vertex = typename GraphT::Vertex;
 	BOOST_CONCEPT_ASSERT((boost::DefaultConstructible<Vertex>));
@@ -87,7 +121,7 @@ private:
 	bool b;
 	std::size_t nSize;
 	std::ostream *s;
-	GraphHandle gHandle;
+	Handle gHandle;
 	Vertex vMut;
 	VertexRange vRangeMut;
 	VertexIterator vIterMut;
@@ -98,9 +132,9 @@ private:
 };
 
 
-template<typename GraphT, bool Shared>
+template<typename GraphT>
 struct LabelledGraph {
-	BOOST_CONCEPT_ASSERT((Graph<GraphT, Shared>));
+	BOOST_CONCEPT_ASSERT((Graph<GraphT>));
 	using Vertex = typename GraphT::Vertex;
 	using Edge = typename GraphT::Edge;
 public:

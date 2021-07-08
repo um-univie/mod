@@ -68,10 +68,11 @@ protected: // calculation
 	// Returns the value from trustAddGraph.
 	bool trustAddGraphAsVertex(std::shared_ptr<graph::Graph> g);
 	// Searches the database for the given graph by isomorphism.
-	// If found, returns the found graph and false, additionally the given graph is deleted.
-	// If not found, returns the given wrapped given graph and true.
+	// If found, returns the found graph and the input,
+	// If not found, returns the given wrapped given graph and nullptr.
 	// Does NOT change the graphDatabse.
-	std::pair<std::shared_ptr<graph::Graph>, bool> checkIfNew(std::unique_ptr<lib::Graph::Single> g) const;
+	std::pair<std::shared_ptr<graph::Graph>, std::unique_ptr<lib::Graph::Single>>
+	checkIfNew(std::unique_ptr<lib::Graph::Single> g) const;
 	// trustAddGraph and then rename if it was a new graph.
 	// Returns the value from trustAddGraph.
 	bool addProduct(std::shared_ptr<graph::Graph> g);

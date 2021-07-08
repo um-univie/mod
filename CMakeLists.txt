@@ -30,7 +30,7 @@ endif()
 ###########################################################################
 # Options
 ###########################################################################
-option(BUILD_DOC "Enable documentation building." ON)
+option(BUILD_DOC "Enable documentation building." OFF)
 option(BUILD_POST_MOD "Enable building of the post processor." ON)
 option(BUILD_POST_MOD_FMT "Enable building of the post processor Latex format files." ON)
 option(BUILD_PY_MOD "Enable building of the Python bindings." ON)

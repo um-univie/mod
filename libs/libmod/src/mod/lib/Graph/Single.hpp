@@ -12,9 +12,8 @@
 #include <perm_group/group/generated.hpp>
 #include <perm_group/permutation/built_in.hpp>
 
-#include <boost/optional/optional.hpp>
-
 #include <iosfwd>
+#include <optional>
 #include <string>
 
 namespace mod::lib::Graph {
@@ -59,9 +58,9 @@ private:
 	const std::size_t id;
 	std::weak_ptr<graph::Graph> apiReference;
 	std::string name;
-	mutable boost::optional<std::string> dfs, dfsWithIds;
+	mutable std::optional<std::string> dfs, dfsWithIds;
 	mutable bool dfsHasNonSmilesRingClosure;
-	mutable boost::optional<std::string> smiles, smilesWithIds;
+	mutable std::optional<std::string> smiles, smilesWithIds;
 	mutable std::unique_ptr<std::vector<Vertex>> vertexOrder;
 	mutable std::vector<int> canon_perm_string;
 	mutable std::unique_ptr<const CanonForm> canon_form_string;

@@ -141,34 +141,26 @@ const LabelledRule::PropStereoType &get_stereo(const LabelledRule &r) {
 		auto pMoleculeRight = get_molecule(gRight);
 		auto leftInference = lib::Stereo::makeInference(get_graph(gLeft), pMoleculeLeft, true);
 		auto rightInference = lib::Stereo::makeInference(get_graph(gRight), pMoleculeRight, true);
-		std::stringstream ssErr;
-		auto leftResult = leftInference.finalize(ssErr, [&r](LabelledRule::Vertex v) {
-			return std::to_string(get(boost::vertex_index_t(), get_graph(r), v)) + " left";
-		});
-		switch(leftResult) {
-		case Stereo::DeductionResult::Success:
-			break;
-		case Stereo::DeductionResult::Warning:
+
+		{
+			lib::IO::Warnings warnings;
+			auto res = leftInference.finalize(warnings, [&r](LabelledRule::Vertex v) {
+				return std::to_string(get(boost::vertex_index_t(), get_graph(r), v)) + " left";
+			});
 			if(!getConfig().stereo.silenceDeductionWarnings.get())
-				std::cout << ssErr.str();
-			break;
-		case Stereo::DeductionResult::Error:
-			throw StereoDeductionError(ssErr.str());
-			break;
+				std::cout << warnings;
+			res.throwIfError<StereoDeductionError>();
 		}
-		auto rightResult = rightInference.finalize(ssErr, [&r](LabelledRule::Vertex v) {
-			return std::to_string(get(boost::vertex_index_t(), get_graph(r), v)) + " right";
-		});
-		switch(rightResult) {
-		case Stereo::DeductionResult::Success:
-			break;
-		case Stereo::DeductionResult::Warning:
+		{
+			lib::IO::Warnings warnings;
+			auto res = rightInference.finalize(warnings, [&r](LabelledRule::Vertex v) {
+				return std::to_string(get(boost::vertex_index_t(), get_graph(r), v)) + " right";
+			});
 			if(!getConfig().stereo.silenceDeductionWarnings.get())
-				std::cout << ssErr.str();
-			break;
-		case Stereo::DeductionResult::Error:
-			throw StereoDeductionError(ssErr.str());
+				std::cout << warnings;
+			res.throwIfError<StereoDeductionError>();
 		}
+
 		r.pStereo.reset(new PropStereoCore(get_graph(r),
 		                                   std::move(leftInference), std::move(rightInference), jla_boost::AlwaysTrue(),
 		                                   jla_boost::AlwaysTrue()));

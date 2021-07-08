@@ -1,4 +1,4 @@
-bindep
+bindep>=2.9
 ipython
 networkx  # epim
 parse     # epim

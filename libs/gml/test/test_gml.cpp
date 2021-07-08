@@ -44,23 +44,23 @@ template<typename Expression, typename ...Attr>
 void test(std::string src, const Expression &expr, Attr &...attr) {
 	std::cout << "Testing: '" << src << "' with '" << asConverter(expr) << "'" << std::endl << std::string(70, '-')
 	          << std::endl;
-	std::stringstream err;
 	gml::ast::KeyValue ast;
-	bool res = gml::parser::parse(src, ast, err);
-	if(!res) {
-		std::cout << err.str() << std::endl;
+	try {
+		ast = gml::parser::parse(src);
+	} catch(const gml::parser::error &e) {
+		std::cout << e.what() << std::endl;
 		std::cout << "Parsing failed." << std::endl;
 		std::exit(1);
 	}
 	auto iterBegin = &ast;
 	auto iterEnd = iterBegin + 1;
-	res = gml::converter::convert(iterBegin, iterEnd, expr, err, attr...);
-	if(!res) {
-		std::cout << err.str() << std::endl << std::endl;
+	try {
+		gml::converter::convert(iterBegin, iterEnd, expr, attr...);
+		print(std::cout, attr...);
+	} catch(const gml::converter::error &e) {
+		std::cout << e.what() << std::endl << std::endl;
 		std::cout << "Expected success." << std::endl;
 		std::exit(1);
-	} else {
-		print(std::cout, attr...);
 	}
 }
 
@@ -68,22 +68,23 @@ template<typename Expression, typename ...Attr>
 void fail(std::string src, const Expression &expr, Attr &...attr) {
 	std::cout << "Testing for fail: '" << src << "' with '" << asConverter(expr) << "'" << std::endl
 	          << std::string(70, '-') << std::endl;
-	std::stringstream err;
 	gml::ast::KeyValue ast;
-	bool res = gml::parser::parse(src, ast, err);
-	if(!res) {
-		std::cout << err.str() << std::endl;
+	try {
+		ast = gml::parser::parse(src);
+	} catch(const gml::parser::error &e) {
+		std::cout << e.what() << std::endl;
 		std::cout << "Parsing failed." << std::endl;
 		return;
 	}
 	auto iterBegin = &ast;
 	auto iterEnd = iterBegin + 1;
-	res = gml::converter::convert(iterBegin, iterEnd, expr, err, attr...);
-	if(!res) {
-		std::cout << err.str() << std::endl << std::endl;
-	} else {
+	try {
+		gml::converter::convert(iterBegin, iterEnd, expr, attr...);
 		print(std::cout, attr...);
 		std::exit(1);
+	} catch(const gml::converter::error &e) {
+		std::cout << e.what() << std::endl << std::endl;
+		return;
 	}
 }
 

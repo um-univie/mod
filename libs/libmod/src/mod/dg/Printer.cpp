@@ -55,7 +55,11 @@ PrintData::PrintData(std::shared_ptr<DG> dg) : dg(dg), data(nullptr) {
 
 PrintData::PrintData(const PrintData &other) : dg(other.dg), data(new lib::IO::DG::Write::Data(*other.data)) {}
 
-PrintData::PrintData(PrintData &&other) : dg(other.dg), data(std::move(other.data)) {}
+PrintData &PrintData::operator=(const PrintData &other) {
+	dg = other.dg;
+	data = std::make_unique<lib::IO::DG::Write::Data>(*other.data);
+	return *this;
+}
 
 PrintData::~PrintData() = default;
 
@@ -76,7 +80,7 @@ void PrintData::makeDuplicate(DG::HyperEdge e, int eDup) {
 	const auto &dg = this->dg->getHyper();
 	const auto eInner = dg.getInternalVertex(e);
 	const bool res = data->makeDuplicate(eInner, eDup);
-	if(!res)	throw LogicError("Duplicate already exists.");
+	if(!res) throw LogicError("Duplicate already exists.");
 }
 
 void PrintData::removeDuplicate(DG::HyperEdge e, int eDup) {
@@ -304,6 +308,14 @@ void Printer::setGraphvizPrefix(const std::string &prefix) {
 
 const std::string &Printer::getGraphvizPrefix() const {
 	return printer->getGraphvizPrefix();
+}
+
+void Printer::setTikzpictureOption(const std::string &option) {
+	printer->setTikzpictureOption(option);
+}
+
+const std::string &Printer::getTikzpictureOption() const {
+	return printer->getTikzpictureOption();
 }
 
 } // namespace mod::dg

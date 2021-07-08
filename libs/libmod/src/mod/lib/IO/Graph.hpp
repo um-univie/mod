@@ -2,6 +2,7 @@
 #define MOD_LIB_IO_GRAPH_HPP
 
 #include <mod/lib/Graph/GraphDecl.hpp>
+#include <mod/lib/IO/Result.hpp>
 
 #include <memory>
 #include <ostream>
@@ -25,6 +26,7 @@ struct Data {
 	Data(std::unique_ptr<lib::Graph::GraphType> graph, std::unique_ptr<lib::Graph::PropString> label);
 	Data(Data &&other);
 	~Data();
+	void reset();
 public:
 	std::unique_ptr<lib::Graph::GraphType> g;
 	std::unique_ptr<lib::Graph::PropString> pString;
@@ -32,9 +34,54 @@ public:
 	std::map<int, std::size_t> externalToInternalIds;
 };
 
-Data gml(std::string_view src, std::ostream &err);
-Data dfs(const std::string &dfs, std::ostream &err);
-Data smiles(const std::string &smiles, std::ostream &err, bool allowAbstract, SmilesClassPolicy classPolicy);
+struct ConnectedComponents {
+	ConnectedComponents(int n) : components(n) {
+		for(int i = 0; i != n; ++i)
+			components[i] = i;
+	}
+
+	int findRoot(int i) {
+		while(components[i] != i)
+			i = components[i];
+		return i;
+	}
+
+	void join(int a, int b) {
+		a = findRoot(a);
+		b = findRoot(b);
+		// always make the smallest the root
+		if(a < b) components[b] = a;
+		else if(b < a) components[a] = b;
+	}
+public:
+	int finalize() {
+		int next = 0;
+		for(int i = 0; i != components.size(); ++i) {
+			// everything below i has been changed to component numbers
+			// and joining always goes downward, so just to a single root-finding step
+			const int root = components[i];
+			if(root == i) {
+				components[i] = next;
+				++next;
+			} else {
+				assert(root < i);
+				components[i] = components[root];
+			}
+		}
+		return next;
+	}
+public:
+	int operator[](int i) const {
+		return components[i];
+	}
+private:
+	std::vector<int> components;
+};
+
+auto gml(lib::IO::Warnings &warnings, std::string_view src) -> Result<std::vector<Data>>;
+auto dfs(const std::string &dfs) -> Result<Data>;
+auto smiles(lib::IO::Warnings &warnings, const std::string &smiles, bool allowAbstract,
+            SmilesClassPolicy classPolicy) -> Result<std::vector<Data>>;
 } // namespace mod::lib::IO::Graph::Read
 namespace mod::lib::IO::Graph::Write {
 
