@@ -106,6 +106,10 @@ Bugs Fixed
   :cpp:func:`dg::Builder::load`/:py:meth:`DGBuilder.load`.
 - Fixes to support Boost 1.76.
 - Fixes to support GCC 11.
+- Build system, use ``add_custom_command`` to avoid recompilation of
+  docs and Latex format file on install.
+  Fixes problem with failing to import ``sphinx``
+  when running ``sudo make install``.
 
 
 Other
