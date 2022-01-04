@@ -306,7 +306,6 @@ CanonMatch::CanonMatch(const std::vector<const Graph::Single *>& hosts,
 	const auto& lgRule = get_labelled_left(dpoRule);
 	const auto gens = rule.getAutGroup().generator_ptrs();
 	for (size_t i = 0; i < rule.getDPORule().leftComponentGraphs.size(); ++i) {
-		const auto& gRule = get_graph(get_component_graph_v2(i, lgRule));
 		const auto vpCore = get_component_core_vertex(i, 0, lgRule);
 		perm_group::orbit(vpCore, gens.begin(), gens.end(),
 		                  [&] (int w, int img, decltype(gens.begin())) {
