@@ -43,7 +43,7 @@ public:
 		return Address{addr.type, addr.addr + k};
 	}
 
-	// implemented in the IO cpp file
+	// implemented in IO/Write.cpp file
 	friend std::ostream &operator<<(std::ostream &s, Address addr);
 };
 

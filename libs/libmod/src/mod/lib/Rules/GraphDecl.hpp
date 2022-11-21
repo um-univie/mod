@@ -1,50 +1,16 @@
-#ifndef MOD_LIB_RULES_GRAPHDECL_H
-#define MOD_LIB_RULES_GRAPHDECL_H
+#ifndef MOD_LIB_RULES_GRAPHDECL_HPP
+#define MOD_LIB_RULES_GRAPHDECL_HPP
 
-#include <jla_boost/graph/EdgeIndexedAdjacencyList.hpp>
-#include <jla_boost/graph/dpo/FilteredGraphProjection.hpp>
-#include <jla_boost/graph/dpo/Rule.hpp>
+#include <mod/lib/DPO/CombinedRule.hpp>
+#include <mod/lib/DPO/FilteredGraphProjection.hpp>
 
-namespace mod {
-namespace lib {
-namespace Rules {
+namespace mod::lib::Rules {
+using lib::DPO::Membership;
 
-using jla_boost::GraphDPO::Membership;
-
-struct VProp {
-	Membership membership;
-};
-
-struct EProp {
-	Membership membership;
-};
-
-using GraphType = jla_boost::EdgeIndexedAdjacencyList<boost::undirectedS, VProp, EProp>;
+using GraphType = lib::DPO::CombinedRule::CombinedGraphType;
 using Vertex = boost::graph_traits<GraphType>::vertex_descriptor;
 using Edge = boost::graph_traits<GraphType>::edge_descriptor;
-using SideGraphType = jla_boost::GraphDPO::FilteredGraphProjection<GraphType>;
 
-struct MembershipPropertyMap {
+} // namespace mod::lib::Rules
 
-	MembershipPropertyMap(const GraphType &g) : g(g) { }
-public:
-	const GraphType &g;
-};
-
-inline MembershipPropertyMap makeMembershipPropertyMap(const GraphType &g) {
-	return MembershipPropertyMap(g);
-}
-
-inline Membership get(MembershipPropertyMap m, Vertex v) {
-	return get(&VProp::membership, m.g, v);
-}
-
-inline Membership get(MembershipPropertyMap m, Edge e) {
-	return get(&EProp::membership, m.g, e);
-}
-
-} // namespace Rules
-} // namespace lib
-} // namespace mod
-
-#endif /* MOD_LIB_RULES_GRAPHDECL_H */
+#endif // MOD_LIB_RULES_GRAPHDECL_HPP

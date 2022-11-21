@@ -68,7 +68,7 @@ bool has_stereo(const LabelledGraph &g) {
 
 const LabelledGraph::PropStereoType &get_stereo(const LabelledGraph &g) {
 	if(!has_stereo(g)) {
-		auto inference = lib::Stereo::makeInference(get_graph(g), get_molecule(g), false);
+		auto inference = lib::Stereo::Inference(get_graph(g), get_molecule(g), false);
 		lib::IO::Warnings warnings;
 		auto result = inference.finalize(warnings, [&g](Vertex v) {
 			return std::to_string(get(boost::vertex_index_t(), get_graph(g), v));

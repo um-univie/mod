@@ -1,11 +1,9 @@
-#ifndef MOD_LIB_STEREO_CONFIGURATION_TETRAHEDRAL_H
-#define MOD_LIB_STEREO_CONFIGURATION_TETRAHEDRAL_H
+#ifndef MOD_LIB_STEREO_CONFIGURATION_TETRAHEDRAL_HPP
+#define MOD_LIB_STEREO_CONFIGURATION_TETRAHEDRAL_HPP
 
 #include <mod/lib/Stereo/Configuration/Configuration.hpp>
 
-namespace mod {
-namespace lib {
-namespace Stereo {
+namespace mod::lib::Stereo {
 
 struct Tetrahedral final : StaticDegree<4> {
 	Tetrahedral(const GeometryGraph &g, const std::array<EmbeddingEdge, 4> &edges, bool fixed);
@@ -30,8 +28,6 @@ private:
 	bool fixed;
 };
 
-} // namespace Stereo
-} // namespace lib
-} // namespace mod
+} // namespace mod::lib::Stereo
 
-#endif /* MOD_LIB_STEREO_CONFIGURATION_TETRAHEDRAL_H */
+#endif // MOD_LIB_STEREO_CONFIGURATION_TETRAHEDRAL_HPP

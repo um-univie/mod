@@ -15,6 +15,12 @@ r = ruleGMLString("""rule [
 ]""")
 
 DG().build().apply([], r, onlyProper=False)
+DG().build().apply([a], ruleGMLString("""rule [
+	right [
+		node [ id 0 label "O" ]
+	]
+]"""), onlyProper=False)
+
 fail(lambda: DG().build().apply([None], r, onlyProper=False), "One of the graphs is a null pointer.")
 fail(lambda: DG().build().apply([], None, onlyProper=False), "The rule is a null pointer.")
 fail(lambda: DG(graphDatabase=[a]).build().apply([aa], r, onlyProper=False), "Isomorphic graphs. Candidate graph 'gaa' is isomorphic to 'ga' in the graph database.")
@@ -136,3 +142,12 @@ with dg.build() as builder:
 		assert e.numTargets == 2
 		ts = [v.graph for v in e.targets]
 		assert ts == [g2, g2]
+
+
+print("Empty result")
+gC = smiles('[C]', "gC")
+rRemove = ruleGMLString('rule [ left [ node [ id 0 label "C" ] ] ]')
+dg = DG()
+with dg.build() as builder:
+	res = builder.apply([gC], rRemove, onlyProper=False, verbosity=4)
+	assert len(res) == 0

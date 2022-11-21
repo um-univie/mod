@@ -39,3 +39,6 @@ print("="*80)
 exeStrat(addSubset(gO) >> addUniverse(gC) >> rConnectOC, [gOC], [gO, gC, gOC],
 	graphDatabase=inputGraphs, verbosity=10)
 
+print("Empty result")
+rRemove = ruleGMLString('rule [ left [ node [ id 0 label "C" ] ] ]')
+exeStrat(addSubset(gC) >> rRemove, [], [gC], verbosity=10)

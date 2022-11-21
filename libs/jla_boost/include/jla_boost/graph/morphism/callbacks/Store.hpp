@@ -1,7 +1,7 @@
 #ifndef JLA_BOOST_GRAPH_MORPHISM_CALLBACKS_STORE_HPP
 #define JLA_BOOST_GRAPH_MORPHISM_CALLBACKS_STORE_HPP
 
-#include <jla_boost/graph/morphism/VertexMap.hpp>
+#include <jla_boost/graph/morphism/Concepts.hpp>
 
 namespace jla_boost {
 namespace GraphMorphism {

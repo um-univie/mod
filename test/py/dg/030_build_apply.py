@@ -199,3 +199,12 @@ with dg.build() as builder:
 		assert e.numTargets == 2
 		ts = [v.graph for v in e.targets]
 		assert ts == [g2, g2]
+
+
+print("Empty result")
+gC = smiles('[C]', "gC")
+rRemove = ruleGMLString('rule [ left [ node [ id 0 label "C" ] ] ]')
+dg = DG()
+with dg.build() as builder:
+	res = builder.apply([gC], rRemove, verbosity=4)
+	assert len(res) == 0

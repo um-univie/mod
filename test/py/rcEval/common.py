@@ -13,8 +13,13 @@ def handleExp(exp, printRules=False):
 	print("Database:\t", rc.ruleDatabase)
 	print("Products:\t", rc.products)
 	if printRules:
-		for a in rc.ruleDatabase: a.print()
-	postSection("Products")
-	for a in rc.products: a.print()
+		for a in rc.ruleDatabase:
+			print("  Printing", a)
+			a.print()
+	post.summarySection("Products")
+	for a in rc.products:
+		print("  Printing", a)
+		a.print()
+	print("Printing", rc)
 	rc.print()
 	inputRules.extend(a for a in rc.products)

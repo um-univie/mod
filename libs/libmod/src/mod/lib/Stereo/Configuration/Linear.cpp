@@ -2,9 +2,7 @@
 
 #include <mod/Error.hpp>
 
-namespace mod {
-namespace lib {
-namespace Stereo {
+namespace mod::lib::Stereo {
 
 Linear::Linear(const GeometryGraph &g, const std::array<EmbeddingEdge, 2> &edges)
 : StaticDegree<2>(g.linear, edges) { }
@@ -35,6 +33,4 @@ std::pair<std::string, bool> Linear::asPrettyStringImpl(std::function<std::size_
 	return std::make_pair("\\modStereoShape{Linear}", false);
 }
 
-} // namespace Stereo
-} // namespace lib
-} // namespace mod
+} // namespace mod::lib::Stereo

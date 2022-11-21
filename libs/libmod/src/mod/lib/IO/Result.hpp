@@ -9,7 +9,7 @@ namespace mod::lib::IO {
 
 struct Warnings {
 	Warnings() = default;
-	Warnings(const Warnings &) = delete;
+	explicit Warnings(const Warnings &warnings) = default;
 	Warnings &operator=(const Warnings &) = delete;
 	Warnings(Warnings &&) = default;
 	Warnings &operator=(Warnings &&) = default;
@@ -23,6 +23,7 @@ public:
 			warnings.emplace_back(std::move(msg), print);
 	}
 public:
+	std::size_t empty() const { return warnings.empty(); }
 	friend std::ostream &operator<<(std::ostream &s, const Warnings &ws);
 public:
 	std::vector<std::pair<std::string, bool>> extractWarnings() { return std::move(warnings); }
@@ -66,6 +67,7 @@ struct [[nodiscard]] Result : Result<void> {
 	// TODO: change to by-value when C++20/P1825R0 is available
 	Result(Result<void> &&other) : Result<void>(std::move(other)) {}
 	T &operator*() { return *value; }
+	T *operator->() { return &*value; }
 private:
 	Result() = default;
 private:

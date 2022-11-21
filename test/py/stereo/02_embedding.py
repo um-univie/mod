@@ -30,12 +30,12 @@ data.append(('tetrahedral', 'node [ id 0 label "S" stereo "[1, 2, 3, 4]" ]' + gm
 data.append(('tetrahedral', 'node [ id 0 label "S" stereo "[1, 2, 3, 4]" ]' + gmlNode(1) + gmlNode(2, "=") + gmlNode(3) + gmlNode(4, "="))) # for testing initialisation
 data.append(('tetrahedral', 'node [ id 0 label "S" stereo "[1, 2, 3, 4]" ]' + gmlNode(1) + gmlNode(2) + gmlNode(3, "=") + gmlNode(4, "="))) # for testing initialisation
 
-postChapter("Graph")
+post.summaryChapter("Graph")
 for n, d in data:
-	postSection(n)
+	post.summarySection(n)
 	gGML(d)
 for side in ["context", "left", "right"]:
-	postChapter("Rule " + side)
+	post.summaryChapter("Rule " + side)
 	for n, d in data:
-		postSection(n + " " + side)
+		post.summarySection(n + " " + side)
 		rGML(d, side)

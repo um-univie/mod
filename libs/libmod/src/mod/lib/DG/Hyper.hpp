@@ -1,26 +1,25 @@
-#ifndef MOD_LIB_DG_HYPER_H
-#define MOD_LIB_DG_HYPER_H
+#ifndef MOD_LIB_DG_HYPER_HPP
+#define MOD_LIB_DG_HYPER_HPP
 
-#include <mod/dg/GraphInterface.hpp>
 #include <mod/Derivation.hpp>
+#include <mod/dg/GraphInterface.hpp>
 #include <mod/lib/DG/NonHyper.hpp>
 
 namespace mod {
 template<typename>
-class Function;
-namespace lib {
-namespace Graph {
-class Single;
-} // namespace Graph
-namespace DG {
+struct Function;
+} // namespace mod
+namespace mod::lib::Graph {
+struct Single;
+} // namespace mod::lib::Graph
+namespace mod::lib::DG {
 struct Expanded;
 
-class HyperCreator {
+struct HyperCreator {
 	HyperCreator(const HyperCreator &) = delete;
 	HyperCreator &operator=(const HyperCreator &) = delete;
 public:
-	friend class Hyper;
-
+	friend struct Hyper;
 private:
 	HyperCreator() = default;
 	explicit HyperCreator(Hyper &hyper);
@@ -34,18 +33,16 @@ private:
 	Hyper *owner = nullptr;
 };
 
-class Hyper {
+struct Hyper {
 	Hyper(const Hyper &) = delete;
-	Hyper(Hyper &&) = delete;
 	Hyper &operator=(const Hyper &) = delete;
-	Hyper &operator=(Hyper &&) = delete;
 public:
 	// bipartite representation
 	using GraphType = HyperGraphType;
 	using Vertex = HyperVertex;
 	using Edge = HyperEdge;
 private:
-	friend class HyperCreator;
+	friend struct HyperCreator;
 	Hyper(const NonHyper &dg);
 public:
 	static std::pair<std::unique_ptr<Hyper>, HyperCreator> makeHyper(const NonHyper &dg);
@@ -81,8 +78,6 @@ private:
 	std::map<const lib::Graph::Single *, Vertex> graphToHyperVertex;
 };
 
-} // namespace DG
-} // namespace lib
-} // namespace mod
+} // namespace mod::lib::DG
 
-#endif /* MOD_LIB_DG_HYPER_H */
+#endif // MOD_LIB_DG_HYPER_HPP

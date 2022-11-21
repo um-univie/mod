@@ -2,10 +2,10 @@
 
 #include <mod/graph/Graph.hpp>
 #include <mod/lib/Graph/Single.hpp>
+#include <mod/lib/Graph/IO/Write.hpp>
 #include <mod/lib/Graph/Properties/Molecule.hpp>
 #include <mod/lib/Graph/Properties/Stereo.hpp>
 #include <mod/lib/Graph/Properties/String.hpp>
-#include <mod/lib/IO/Graph.hpp>
 
 namespace mod::graph::internal {
 
@@ -43,7 +43,7 @@ std::shared_ptr<graph::Graph> makeGraph(
 }
 
 std::string writePDF(const lib::Graph::Single &g, const mod::lib::IO::Graph::Write::Options &options) {
-	return lib::IO::Graph::Write::pdf(g, options);
+	return lib::Graph::Write::pdf(g, options);
 }
 
 // LabelledGraph

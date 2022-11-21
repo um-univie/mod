@@ -5,7 +5,7 @@
 #include <mod/lib/Stereo/Configuration/Configuration.hpp>
 #include <mod/lib/Stereo/EdgeCategory.hpp>
 
-#include <jla_boost/graph/morphism/VertexMap.hpp>
+#include <jla_boost/graph/morphism/Concepts.hpp>
 #include <jla_boost/graph/morphism/models/PropertyVertexMap.hpp>
 
 // LocalIso

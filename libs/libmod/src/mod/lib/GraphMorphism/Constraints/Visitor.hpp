@@ -1,10 +1,7 @@
-#ifndef MOD_LIB_GRAPHMORPHISM_VISITOR_H
-#define MOD_LIB_GRAPHMORPHISM_VISITOR_H
+#ifndef MOD_LIB_GRAPHMORPHISM_VISITOR_HPP
+#define MOD_LIB_GRAPHMORPHISM_VISITOR_HPP
 
-namespace mod {
-namespace lib {
-namespace GraphMorphism {
-namespace Constraints {
+namespace mod::lib::GraphMorphism::Constraints {
 
 template<typename Graph>
 struct BaseVisitor {
@@ -21,10 +18,6 @@ struct Visitor {
 	virtual void operator()(C &c) = 0;
 };
 
-} // namespace Constraints
-} // namespace GraphMorphism
-} // namespace lib
-} // namespace mod
+} // namespace mod::lib::GraphMorphism::Constraints
 
-#endif /* MOD_LIB_GRAPHMORPHISM_VISITOR_H */
-
+#endif // MOD_LIB_GRAPHMORPHISM_VISITOR_HPP

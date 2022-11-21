@@ -34,33 +34,10 @@ inputGraphs[:] = []
 a = smiles("C")
 print("Energy:", a.energy)
 
-host = smiles("O=C=O", "CO2")
-pattern = smiles("[C]=O", name="Pattern")
-host2 = smiles("O=C=O", "CO2 2")
-
-assert(host.isomorphism(host2) > 0)
-assert(host.isomorphism(pattern) == 0)
-assert(pattern.monomorphism(host) > 0)
-assert(host.monomorphism(host2) > 0)
-assert(host2.monomorphism(pattern) == 0)
-
 a = smiles("O=C(O)C(CC(=O)O)C(O)C(=O)O", name="Isocitrate")
 aPerm = a.makePermutation()
 
 a = smiles("C*C")
 a.print()
 a = smiles("N[*]N")
-a.print()
-
-
-a = smiles("C")
-a.print()
-def customImage():
-	with open("out/custom.tex", "w") as f:
-		f.write("""\\begin{tikzpicture}
-\\node {custom};
-\\end{tikzpicture}""")
-	return "out/custom"
-a.image = customImage
-a.imageCommand = "compileTikz \"out/custom\" \"out/custom\""
 a.print()

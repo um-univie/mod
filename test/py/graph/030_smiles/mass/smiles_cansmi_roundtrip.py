@@ -1,4 +1,4 @@
-post("disableSummary")
+post.disableInvokeMake()
 smiles(R"[B@]123[C@@]45[B@]67[B@@]89[C@]1(B2468)B3579")
 smiles(R"[BH3-][N@+]12CN3CN(CN(C3)C2)C1")
 smiles(R"[BH3-][N+]12CN3CN(CN(C3)C2)C1")

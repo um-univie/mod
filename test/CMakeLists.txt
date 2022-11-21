@@ -36,6 +36,11 @@ if(BUILD_PY_MOD)
         string(REPLACE "/" "__" testName "${fileName}")
         make_py_test(${fileName} ${testName} "")
     endforeach()
+
+    add_test(NAME pymod-module-direct
+            COMMAND ${CMAKE_INSTALL_FULL_BINDIR}/mod --nopost -e "assert not mod._redirected")
+    add_test(NAME pymod-module-redirected
+            COMMAND ${Python3_EXECUTABLE} -c "import mod\nassert mod._redirected")
 endif()
 
 add_subdirectory(cmake_add_subdirectory)

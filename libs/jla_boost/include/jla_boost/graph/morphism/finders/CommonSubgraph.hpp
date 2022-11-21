@@ -9,6 +9,7 @@
 #include <jla_boost/graph/PairToRangeAdaptor.hpp>
 #include <jla_boost/graph/morphism/AsPropertyMap.hpp>
 #include <jla_boost/graph/morphism/models/InvertibleAdaptor.hpp>
+#include <jla_boost/graph/morphism/models/InvertibleVector.hpp>
 #include <jla_boost/graph/morphism/models/PropertyVertexMap.hpp>
 
 #include <boost/make_shared.hpp>
@@ -66,16 +67,16 @@ public:
 
 			// NOTE: This will not work with parallel edges, since the
 			// first matching edge is always chosen.
-			EdgeLeft edge_to_new1;
-			bool edge_to_new_exists1 = false;
-			EdgeRight edge_to_new2;
-			bool edge_to_new_exists2 = false;
+			EdgeLeft edgeToNewLeft;
+			bool edgeToNewExistsLeft = false;
+			EdgeRight edgeToNewRight;
+			bool edgeToNewExistsRight = false;
 
 			// Search for edge from existing to new vertex (gLeft)
 			for(auto eOutLeft : asRange(out_edges(vOtherLeft, this->gLeft))) {
 				if(target(eOutLeft, this->gLeft) == vLeft) {
-					edge_to_new1 = eOutLeft;
-					edge_to_new_exists1 = true;
+					edgeToNewLeft = eOutLeft;
+					edgeToNewExistsLeft = true;
 					break;
 				}
 			}
@@ -83,8 +84,8 @@ public:
 			// Search for edge from existing to new vertex (gRight)
 			for(auto eOutRight : asRange(out_edges(vOtherRight, this->gRight))) {
 				if(target(eOutRight, this->gRight) == vRight) {
-					edge_to_new2 = eOutRight;
-					edge_to_new_exists2 = true;
+					edgeToNewRight = eOutRight;
+					edgeToNewExistsRight = true;
 					break;
 				}
 			}
@@ -94,12 +95,16 @@ public:
 #ifdef MORPHISM_INJECTIVE_ENUMERATION_DEBUG
 			std::cout << this->indent(3) << "undirected? "
 			          << std::boolalpha << is_undirected1 << ", " << is_undirected2 << std::endl;
-			std::cout << this->indent(3) << "edge_to_new_exists? "
-			          << std::boolalpha << edge_to_new_exists1 << ", " << edge_to_new_exists1 << std::endl;
+			std::cout << this->indent(3) << "edgeToNew_exists? "
+			          << std::boolalpha << edgeToNewExistsLeft << ", " << edgeToNewExistsLeft << std::endl;
 #endif
 
-			if(edge_to_new_exists1 && edge_to_new_exists2) {
-				if(this->edgePred(edge_to_new1, edge_to_new2)) {
+			if(edgeToNewExistsLeft && edgeToNewExistsRight) {
+#ifdef MORPHISM_INJECTIVE_ENUMERATION_DEBUG
+				std::cout << this->indent(3) << "edgeToNewLeft: " << edgeToNewLeft << std::endl;
+				std::cout << this->indent(3) << "edgeToNewRight: " << edgeToNewRight << std::endl;
+#endif
+				if(this->edgePred(edgeToNewLeft, edgeToNewRight)) {
 					has_one_edge = true;
 				} else {
 #ifdef MORPHISM_INJECTIVE_ENUMERATION_DEBUG
@@ -317,7 +322,7 @@ public:
 	}
 private:
 	const GraphLeft &gLeft;
-	const GraphLeft &gRight;
+	const GraphRight &gRight;
 	Next next;
 	std::vector<CachedSubgraph> cache;
 };

@@ -1,12 +1,15 @@
 #include "Single.hpp"
 
 #include <mod/Misc.hpp>
+#include <mod/VertexMap.hpp>
 #include <mod/graph/Graph.hpp>
+#include <mod/graph/GraphInterface.hpp>
 #include <mod/lib/Chem/MoleculeUtil.hpp>
 #include <mod/lib/Chem/Smiles.hpp>
 #include <mod/lib/Graph/Canonicalisation.hpp>
-#include <mod/lib/Graph/DFSEncoding.hpp>
-#include <mod/lib/Graph/Properties/Depiction.hpp>
+#include <mod/lib/Graph/IO/DepictionData.hpp>
+#include <mod/lib/Graph/IO/Read.hpp>
+#include <mod/lib/Graph/IO/Write.hpp>
 #include <mod/lib/Graph/Properties/Molecule.hpp>
 #include <mod/lib/Graph/Properties/Stereo.hpp>
 #include <mod/lib/Graph/Properties/String.hpp>
@@ -14,12 +17,14 @@
 #include <mod/lib/GraphMorphism/LabelledMorphism.hpp>
 #include <mod/lib/GraphMorphism/VF2Finder.hpp>
 #include <mod/lib/IO/IO.hpp>
-#include <mod/lib/IO/Graph.hpp>
 #include <mod/lib/LabelledGraph.hpp>
 #include <mod/lib/Random.hpp>
 #include <mod/lib/Term/WAM.hpp>
 
 #include <jla_boost/graph/morphism/callbacks/Limit.hpp>
+#include <jla_boost/graph/morphism/models/InvertibleVector.hpp>
+#include <jla_boost/graph/morphism/callbacks/SliceProps.hpp>
+#include <jla_boost/graph/morphism/callbacks/Transform.hpp>
 
 #include <boost/graph/connected_components.hpp>
 #include <boost/graph/graph_traits.hpp>
@@ -38,7 +43,7 @@ const std::string getGraphName(unsigned int id) {
 bool sanityCheck(const GraphType &g, const PropString &pString, std::ostream &s) {
 	std::vector<std::pair<Vertex, Vertex> > edgesSorted;
 	edgesSorted.reserve(num_edges(g));
-	for(Edge e : asRange(edges(g))) {
+	for(Edge e: asRange(edges(g))) {
 		Vertex v1 = source(e, g), v2 = target(e, g);
 		if(get(boost::vertex_index_t(), g, v2) > get(boost::vertex_index_t(), g, v1)) std::swap(v1, v2);
 		edgesSorted.emplace_back(v1, v2);
@@ -115,12 +120,12 @@ void Single::setName(std::string name) {
 }
 
 const std::pair<const std::string &, bool> Single::getGraphDFS() const {
-	if(!dfs) std::tie(dfs, dfsHasNonSmilesRingClosure) = DFSEncoding::write(getGraph(), getStringState(), false);
+	if(!dfs) std::tie(dfs, dfsHasNonSmilesRingClosure) = Write::dfs(getLabelledGraph(), false);
 	return std::pair<const std::string &, bool>(*dfs, dfsHasNonSmilesRingClosure);
 }
 
 const std::string &Single::getGraphDFSWithIds() const {
-	if(!dfsWithIds) dfsWithIds = DFSEncoding::write(getGraph(), getStringState(), true).first;
+	if(!dfsWithIds) dfsWithIds = Write::dfs(getLabelledGraph(), true).first;
 	return *dfsWithIds;
 }
 
@@ -167,7 +172,7 @@ const std::string &Single::getSmilesWithIds() const {
 unsigned int Single::getVertexLabelCount(const std::string &label) const {
 	unsigned int count = 0;
 
-	for(Vertex v : asRange(vertices(getGraph()))) {
+	for(Vertex v: asRange(vertices(getGraph()))) {
 		const std::string &vLabel = getStringState()[v];
 		if(vLabel == label) count++;
 	}
@@ -177,20 +182,20 @@ unsigned int Single::getVertexLabelCount(const std::string &label) const {
 unsigned int Single::getEdgeLabelCount(const std::string &label) const {
 	unsigned int count = 0;
 
-	for(Edge e : asRange(edges(getGraph()))) {
+	for(Edge e: asRange(edges(getGraph()))) {
 		const std::string &eLabel = getStringState()[e];
 		if(eLabel == label) count++;
 	}
 	return count;
 }
 
-DepictionData &Single::getDepictionData() {
-	if(!depictionData) depictionData.reset(new DepictionData(getLabelledGraph()));
+Write::DepictionData &Single::getDepictionData() {
+	if(!depictionData) depictionData.reset(new Write::DepictionData(getLabelledGraph()));
 	return *depictionData;
 }
 
-const DepictionData &Single::getDepictionData() const {
-	if(!depictionData) depictionData.reset(new DepictionData(getLabelledGraph()));
+const Write::DepictionData &Single::getDepictionData() const {
+	if(!depictionData) depictionData.reset(new Write::DepictionData(getLabelledGraph()));
 	return *depictionData;
 }
 
@@ -239,13 +244,24 @@ namespace {
 namespace GM = jla_boost::GraphMorphism;
 namespace GM_MOD = lib::GraphMorphism;
 
-template<typename Finder>
-std::size_t
-morphism(const Single &gDomain, const Single &gCodomain, std::size_t maxNumMatches, LabelSettings labelSettings,
-         Finder finder) {
-	auto mr = GM::makeLimit(maxNumMatches);
+template<typename Finder, typename Callback>
+void morphism(const Single &gDomain,
+              const Single &gCodomain,
+              LabelSettings labelSettings,
+              Finder finder,
+              Callback callback) {
 	lib::GraphMorphism::morphismSelectByLabelSettings(gDomain.getLabelledGraph(), gCodomain.getLabelledGraph(),
-	                                                  labelSettings, finder, std::ref(mr));
+	                                                  labelSettings, finder, callback);
+}
+
+template<typename Finder>
+std::size_t morphismMax(const Single &gDomain,
+                        const Single &gCodomain,
+                        std::size_t maxNumMatches,
+                        LabelSettings labelSettings,
+                        Finder finder) {
+	auto mr = GM::makeLimit(maxNumMatches);
+	morphism(gDomain, gCodomain, labelSettings, finder, std::ref(mr));
 	return mr.getNumHits();
 }
 
@@ -270,7 +286,7 @@ std::size_t isomorphismSmilesOrCanonOrVF2(const Single &gDom, const Single &gCod
 
 std::size_t Single::isomorphismVF2(const Single &gDom, const Single &gCodom, std::size_t maxNumMatches,
                                    LabelSettings labelSettings) {
-	return morphism(gDom, gCodom, maxNumMatches, labelSettings, GM_MOD::VF2Isomorphism());
+	return morphismMax(gDom, gCodom, maxNumMatches, labelSettings, GM_MOD::VF2Isomorphism());
 }
 
 bool Single::isomorphic(const Single &gDom, const Single &gCodom, LabelSettings labelSettings) {
@@ -284,10 +300,8 @@ bool Single::isomorphic(const Single &gDom, const Single &gCodom, LabelSettings 
 		return gDom.getName() == gCodom.getName();
 	if(&gDom == &gCodom) return true;
 	switch(getConfig().graph.isomorphismAlg.get()) {
-	case Config::IsomorphismAlg::SmilesCanonVF2:
-		return isomorphismSmilesOrCanonOrVF2(gDom, gCodom, labelSettings);
-	case Config::IsomorphismAlg::VF2:
-		return isomorphismVF2(gDom, gCodom, 1, labelSettings);
+	case Config::IsomorphismAlg::SmilesCanonVF2: return isomorphismSmilesOrCanonOrVF2(gDom, gCodom, labelSettings);
+	case Config::IsomorphismAlg::VF2: return isomorphismVF2(gDom, gCodom, 1, labelSettings);
 	case Config::IsomorphismAlg::Canon:
 		if(labelSettings.relation != LabelRelation::Isomorphism)
 			throw LogicError("Can only do isomorphism via canonicalisation with the isomorphism relation.");
@@ -315,7 +329,44 @@ Single::isomorphism(const Single &gDom, const Single &gCodom, std::size_t maxNum
 
 std::size_t
 Single::monomorphism(const Single &gDom, const Single &gCodom, std::size_t maxNumMatches, LabelSettings labelSettings) {
-	return morphism(gDom, gCodom, maxNumMatches, labelSettings, GM_MOD::VF2Monomorphism());
+	return morphismMax(gDom, gCodom, maxNumMatches, labelSettings, GM_MOD::VF2Monomorphism());
+}
+
+void Single::enumerateMonomorphisms(const Single &gDom, const Single &gCodom,
+                                    std::function<bool(VertexMap<graph::Graph, graph::Graph>)> callback,
+                                    LabelSettings labelSettings) {
+	if(labelSettings.type != LabelType::String) MOD_ABORT;
+	if(labelSettings.withStereo) MOD_ABORT;
+	morphism(gDom, gCodom, labelSettings, GM_MOD::VF2Monomorphism(),
+	         GM::makeSliceProps( // Slice away the properties for now
+			         GM::makeTransform(
+					         GM::ToInvertibleVectorVertexMap(),
+					         [&gDom, &gCodom, callback](auto &&mVal, const auto &dom, const auto &codom) -> bool {
+						         auto mPtr = std::make_shared<GM::InvertibleVectorVertexMap<GraphType, GraphType>>(
+								         std::move(mVal));
+						         auto gDomAPI = gDom.getAPIReference();
+						         auto gCodomAPI = gCodom.getAPIReference();
+						         auto m = VertexMap<graph::Graph, graph::Graph>(
+								         gDomAPI, gCodomAPI,
+								         [gDomAPI, gCodomAPI, mPtr](graph::Graph::Vertex vDom) -> graph::Graph::Vertex {
+									         const auto &gDom = gDomAPI->getGraph().getGraph();
+									         const auto &gCodom = gCodomAPI->getGraph().getGraph();
+									         assert(vDom.getId() < num_vertices(gDom));
+									         const auto v = vertices(gDom).first[vDom.getId()];
+									         const auto vRes = get(*mPtr, gDom, gCodom, v);
+									         return gCodomAPI->vertices()[get(boost::vertex_index_t(), gCodom, vRes)];
+								         },
+								         [gDomAPI, gCodomAPI, mPtr](graph::Graph::Vertex vCodom) -> graph::Graph::Vertex {
+									         const auto &gDom = gDomAPI->getGraph().getGraph();
+									         const auto &gCodom = gCodomAPI->getGraph().getGraph();
+									         assert(vCodom.getId() < num_vertices(gCodom));
+									         const auto v = vertices(gCodom).first[vCodom.getId()];
+									         const auto vRes = get_inverse(*mPtr, gDom, gCodom, v);
+									         return gDomAPI->vertices()[get(boost::vertex_index_t(), gDom, vRes)];
+								         }
+						         );
+						         return callback(std::move(m));
+					         })));
 }
 
 bool Single::nameLess(const Single *g1, const Single *g2) {
@@ -351,14 +402,14 @@ Single makePermutation(const Single &g) {
 		                                             {LabelType::String, LabelRelation::Isomorphism, false,
 		                                              LabelRelation::Isomorphism});
 		if(!iso) {
-			IO::Graph::Write::Options graphLike, molLike;
+			Write::Options graphLike, molLike;
 			graphLike.EdgesAsBonds(true).RaiseCharges(true).CollapseHydrogens(true).WithIndex(true);
 			molLike.CollapseHydrogens(true).EdgesAsBonds(true).RaiseCharges(true).SimpleCarbons(true).WithColour(
 					true).WithIndex(true);
-			IO::Graph::Write::summary(g, graphLike, molLike);
-			IO::Graph::Write::summary(gPerm, graphLike, molLike);
-			IO::Graph::Write::gml(g, false);
-			IO::Graph::Write::gml(gPerm, false);
+			Write::summary(g, graphLike, molLike);
+			Write::summary(gPerm, graphLike, molLike);
+			Write::gml(g, false);
+			Write::gml(gPerm, false);
 			std::cout << "g:     " << g.getSmiles() << std::endl;
 			std::cout << "gPerm: " << gPerm.getSmiles() << std::endl;
 			MOD_ABORT;

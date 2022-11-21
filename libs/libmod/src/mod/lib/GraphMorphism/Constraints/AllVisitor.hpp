@@ -1,22 +1,19 @@
-#ifndef MOD_LIB_GRAPHMORPHISM_ALLVISITOR_H
-#define MOD_LIB_GRAPHMORPHISM_ALLVISITOR_H
+#ifndef MOD_LIB_GRAPHMORPHISM_ALLVISITOR_HPP
+#define MOD_LIB_GRAPHMORPHISM_ALLVISITOR_HPP
 
 #include <mod/lib/GraphMorphism/Constraints/ShortestPath.hpp>
 #include <mod/lib/GraphMorphism/Constraints/VertexAdjacency.hpp>
 #include <mod/lib/GraphMorphism/Constraints/Visitor.hpp>
 
-namespace mod {
-namespace lib {
-namespace GraphMorphism {
-namespace Constraints {
+namespace mod::lib::GraphMorphism::Constraints {
 namespace detail {
 
 template<typename Graph, template<typename> class ...Cs>
-struct AllVisitor : BaseVisitor<Graph>, Visitor<const Cs<Graph> >... {
+struct AllVisitor : BaseVisitor<Graph>, Visitor<const Cs<Graph> > ... {
 };
 
 template<typename Graph, template<typename> class ...Cs>
-struct AllVisitorNonConst : BaseVisitorNonConst<Graph>, Visitor<Cs<Graph> >... {
+struct AllVisitorNonConst : BaseVisitorNonConst<Graph>, Visitor<Cs<Graph> > ... {
 };
 
 } // namespace detail
@@ -35,9 +32,6 @@ struct AllVisitorNonConst : detail::AllVisitorNonConst<Graph,
 > {
 };
 
-} // namespace Constraints
-} // namespace GraphMorphism
-} // namespace lib
-} // namespace mod
+} // namespace mod::lib::GraphMorphism::Constraints
 
-#endif /* MOD_LIB_GRAPHMORPHISM_ALLVISITOR_H */
+#endif // MOD_LIB_GRAPHMORPHISM_ALLVISITOR_HPP

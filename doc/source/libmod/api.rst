@@ -6,4 +6,4 @@ declarations directly in the ``mod`` namespace. The nested namespace ``mod::lib`
 contains the actual implementation, and you probably do not want to use
 anything from it directly.
 
-.. include:: Libmodtoc.rst
+.. include:: Toc.rst

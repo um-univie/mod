@@ -1,6 +1,7 @@
 #ifndef MOD_LIB_RULES_LABELLED_RULE_HPP
 #define MOD_LIB_RULES_LABELLED_RULE_HPP
 
+#include <mod/lib/DPO/CombinedRule.hpp>
 #include <mod/lib/GraphMorphism/Constraints/Constraint.hpp>
 #include <mod/lib/Rules/ConnectedComponent.hpp>
 #include <mod/lib/Rules/GraphDecl.hpp>
@@ -12,147 +13,121 @@
 #include <vector>
 
 namespace mod::lib::Rules {
-struct LabelledLeftGraph;
-struct LabelledRightGraph;
 
-class LabelledRule {
-public: // LabelledGraphConcept, PushoutRuleConcept
-	using GraphType = lib::Rules::GraphType;
-public: // PushoutRuleConcept
-	using LeftGraphType = lib::Rules::SideGraphType;
-	using ContextGraphType = lib::Rules::SideGraphType;
-	using RightGraphType = lib::Rules::SideGraphType;
+struct LabelledRule {
+	using RuleType = lib::DPO::CombinedRule;
 public: // LabelledGraphConcept
-	using PropStringType = PropStringCore;
-	using PropTermType = PropTermCore;
-	using PropStereoType = PropStereoCore;
-	using PropMoleculeType = PropMoleculeCore;
+	using GraphType = RuleType::CombinedGraphType;
+	using PropStringType = PropString;
+	using PropTermType = PropTerm;
+	using PropStereoType = PropStereo;
+public:
+	using PropMoleculeType = PropMolecule;
+public: // RuleConcept
+	using SideGraphType = RuleType::SideGraphType;
+	using KGraphType = RuleType::KGraphType;
+public: // Projected view
+	using SideProjectedGraphType = RuleType::SideProjectedGraphType;
 public: // Other
 	using Vertex = boost::graph_traits<GraphType>::vertex_descriptor;
 	using Edge = boost::graph_traits<GraphType>::edge_descriptor;
-	using LeftMatchConstraint = GraphMorphism::Constraints::Constraint<LeftGraphType>;
-	using RightMatchConstraint = GraphMorphism::Constraints::Constraint<RightGraphType>;
-	using LabelledLeftType = LabelledLeftGraph;
-	using LabelledRightType = LabelledRightGraph;
+	using MatchConstraint = GraphMorphism::Constraints::Constraint<SideGraphType>;
 public:
-	LabelledRule();
-	LabelledRule(const LabelledRule &other, bool withConstraints);
+	struct SideData;
+public:
+	struct Side {
+		using GraphType = SideGraphType;
+		using ComponentFilter = ConnectedComponentFilter<GraphType, std::vector<std::size_t>>;
+		using ComponentGraph = boost::filtered_graph<GraphType, ComponentFilter, ComponentFilter>;
+		using PropStringType = LabelledRule::PropStringType::Side;
+		using PropTermType = LabelledRule::PropTermType::Side;
+		using PropStereoType = LabelledRule::PropStereoType::Side;
+	public:
+		using PropMoleculeType = LabelledRule::PropMoleculeType::Side;
+	public:
+		// We don't want to convert data unless needed, so instead of storing the
+		// side prop proxy objects, we store member function pointers to retrieve them.
+		explicit Side(const LabelledRule &r, const GraphType &g,
+		              PropStringType (LabelledRule::PropStringType::*fString)() const,
+		              PropTermType (LabelledRule::PropTermType::*fTerm)() const,
+		              PropStereoType (LabelledRule::PropStereoType::*fStereo)() const,
+		              PropMoleculeType (LabelledRule::PropMoleculeType::*fMol)() const,
+		              const SideData &data);
+	public:
+		friend const GraphType &get_graph(const Side &g);
+		friend PropStringType get_string(const Side &g);
+		friend PropTermType get_term(const Side &g);
+		friend bool has_stereo(const Side &g);
+		friend PropStereoType get_stereo(const Side &g);
+	public:
+		friend PropMoleculeType get_molecule(const Side &g);
+	public:
+		friend const std::vector<std::unique_ptr<MatchConstraint>> &
+		get_match_constraints(const Side &g);
+	public:
+		friend std::size_t get_num_connected_components(const Side &g);
+		friend const std::vector<std::size_t> get_component(const Side &g);
+		friend ComponentGraph get_component_graph(std::size_t i, const Side &g);
+	public:
+		friend const std::vector<boost::graph_traits<GraphType>::vertex_descriptor> &
+		get_vertex_order_component(std::size_t i, const Side &g);
+	public:
+		const LabelledRule &r;
+		const GraphType &g;
+		PropStringType (LabelledRule::PropStringType::*fString)() const;
+		PropTermType (LabelledRule::PropTermType::*fTerm)() const;
+		PropStereoType (LabelledRule::PropStereoType::*fStereo)() const;
+		PropMoleculeType (LabelledRule::PropMoleculeType::*fMol)() const;
+		const SideData &data;
+	};
+public:
+	explicit LabelledRule(std::unique_ptr<RuleType> rule,
+	                      std::unique_ptr<PropStringType> pString,
+	                      std::unique_ptr<PropStereoType> pStereo);
+	explicit LabelledRule(std::unique_ptr<RuleType> rule,
+	                      std::unique_ptr<PropTermType> pTerm,
+	                      std::unique_ptr<PropStereoType> pStereo);
+	LabelledRule(); // TODO: remove
+	LabelledRule(const LabelledRule &other, bool withConstraints); // TODO: hmm
+	lib::DPO::CombinedRule &getRule(); // TODO: remove non-const version?
+	const lib::DPO::CombinedRule &getRule() const;
+public:
 	void initComponents(); // TODO: this is a huge hax
 	void invert();
-public: // LabelledGraphConcept, PushoutRuleConcept
+public: // LabelledGraphConcept
 	friend GraphType &get_graph(LabelledRule &r);
 	friend const GraphType &get_graph(const LabelledRule &r);
-public: // LabelledGraphConcept
 	friend const PropStringType &get_string(const LabelledRule &r);
 	friend const PropTermType &get_term(const LabelledRule &r);
 	friend bool has_stereo(const LabelledRule &r);
 	friend const PropStereoType &get_stereo(const LabelledRule &r);
 public:
 	friend const PropMoleculeType &get_molecule(const LabelledRule &r);
-public: // PushoutRuleConcept
-	friend const LeftGraphType &get_left(const LabelledRule &r);
-	friend const ContextGraphType &get_context(const LabelledRule &r);
-	friend const RightGraphType &get_right(const LabelledRule &r);
-	friend jla_boost::GraphDPO::Membership membership(const LabelledRule &r, const Vertex &v);
-	friend jla_boost::GraphDPO::Membership membership(const LabelledRule &r, const Edge &e);
-	friend void put_membership(LabelledRule &r, const Vertex &v, jla_boost::GraphDPO::Membership m);
-	friend void put_membership(LabelledRule &r, const Edge &e, jla_boost::GraphDPO::Membership m);
 public:
-	friend LabelledLeftType get_labelled_left(const LabelledRule &r);
-	friend LabelledRightType get_labelled_right(const LabelledRule &r);
+	friend const SideProjectedGraphType &get_L_projected(const LabelledRule &r);
+	friend const SideProjectedGraphType &get_R_projected(const LabelledRule &r);
+	friend lib::DPO::Membership membership(const LabelledRule &r, const Vertex &v);
+	friend lib::DPO::Membership membership(const LabelledRule &r, const Edge &e);
+	friend void put_membership(LabelledRule &r, const Vertex &v, lib::DPO::Membership m);
+	friend void put_membership(LabelledRule &r, const Edge &e, lib::DPO::Membership m);
+public:
+	friend Side get_labelled_left(const LabelledRule &r);
+	friend Side get_labelled_right(const LabelledRule &r);
 private:
-	struct Projections {
-		Projections(const LabelledRule &r);
-	public:
-		LeftGraphType left;
-		ContextGraphType context;
-		RightGraphType right;
-	};
-	std::unique_ptr<GraphType> g;
-	mutable std::unique_ptr<Projections> projs;
+	std::unique_ptr<lib::DPO::CombinedRule> rule;
 public:
 	mutable std::unique_ptr<PropStringType> pString;
 	mutable std::unique_ptr<PropTermType> pTerm;
 	mutable std::unique_ptr<PropStereoType> pStereo;
-	std::vector<std::unique_ptr<LeftMatchConstraint> > leftMatchConstraints;
-	std::vector<std::unique_ptr<RightMatchConstraint> > rightMatchConstraints;
 private:
 	mutable std::unique_ptr<PropMoleculeType> pMolecule;
 public:
-	std::size_t numLeftComponents = -1, numRightComponents = -1;
-	std::vector<std::size_t> leftComponents, rightComponents;
-};
-
-namespace detail {
-
-struct LabelledSideGraph {
-	using LabelledRule = lib::Rules::LabelledRule;
-	using GraphType = lib::Rules::SideGraphType;
-	using ComponentFilter = ConnectedComponentFilter<GraphType, std::vector<std::size_t> >;
-	using ComponentGraph = boost::filtered_graph<GraphType, ComponentFilter, ComponentFilter>;
-public:
-	LabelledSideGraph(const LabelledRule &r, jla_boost::GraphDPO::Membership m);
-public:
-	const LabelledRule &r;
-	const jla_boost::GraphDPO::Membership m;
-protected:
-	mutable std::vector<std::vector<boost::graph_traits<GraphType>::vertex_descriptor> > vertex_orders;
-};
-
-} // namespace detail
-
-struct LabelledLeftGraph : detail::LabelledSideGraph {
-	using Base = detail::LabelledSideGraph;
-	using PropStringType = LabelledRule::PropStringType::LeftType;
-	using PropTermType = LabelledRule::PropTermType::LeftType;
-	using PropStereoType = LabelledRule::PropStereoType::LeftType;
-public:
-	using PropMoleculeType = typename LabelledRule::PropMoleculeType::LeftType;
-public:
-	explicit LabelledLeftGraph(const LabelledRule &r);
-	friend const Base::GraphType &get_graph(const LabelledLeftGraph &g);
-	friend PropStringType get_string(const LabelledLeftGraph &g);
-	friend PropTermType get_term(const LabelledLeftGraph &g);
-	friend bool has_stereo(const LabelledLeftGraph &g);
-	friend PropStereoType get_stereo(const LabelledLeftGraph &g);
-public:
-	friend const std::vector<std::unique_ptr<LabelledRule::LeftMatchConstraint> > &
-	get_match_constraints(const LabelledLeftGraph &g);
-public:
-	friend std::size_t get_num_connected_components(const LabelledLeftGraph &g);
-	friend Base::ComponentGraph get_component_graph(std::size_t i, const LabelledLeftGraph &g);
-public:
-	friend PropMoleculeType get_molecule(const LabelledLeftGraph &g);
-public:
-	friend const std::vector<boost::graph_traits<GraphType>::vertex_descriptor> &
-	get_vertex_order_component(std::size_t i, const LabelledLeftGraph &g);
-};
-
-struct LabelledRightGraph : detail::LabelledSideGraph {
-	using Base = detail::LabelledSideGraph;
-	using PropStringType = LabelledRule::PropStringType::RightType;
-	using PropTermType = LabelledRule::PropTermType::RightType;
-	using PropStereoType = LabelledRule::PropStereoType::RightType;
-public:
-	using PropMoleculeType = typename LabelledRule::PropMoleculeType::RightType;
-public:
-	explicit LabelledRightGraph(const LabelledRule &r);
-	friend const Base::GraphType &get_graph(const LabelledRightGraph &g);
-	friend PropStringType get_string(const LabelledRightGraph &g);
-	friend PropTermType get_term(const LabelledRightGraph &g);
-	friend bool has_stereo(const LabelledRightGraph &g);
-	friend PropStereoType get_stereo(const LabelledRightGraph &g);
-public:
-	friend const std::vector<std::unique_ptr<LabelledRule::RightMatchConstraint> > &
-	get_match_constraints(const LabelledRightGraph &g);
-public:
-	friend std::size_t get_num_connected_components(const LabelledRightGraph &g);
-	friend Base::ComponentGraph get_component_graph(std::size_t i, const LabelledRightGraph &g);
-public:
-	friend PropMoleculeType get_molecule(const LabelledRightGraph &g);
-public:
-	friend const std::vector<boost::graph_traits<GraphType>::vertex_descriptor> &
-	get_vertex_order_component(std::size_t i, const LabelledRightGraph &g);
+	struct SideData {
+		std::size_t numComponents = -1;
+		std::vector<std::size_t> component;
+		std::vector<std::unique_ptr<MatchConstraint>> matchConstraints;
+		mutable std::vector<std::vector<Vertex>> vertex_orders;
+	} leftData, rightData;
 };
 
 } // namespace mod::lib::Rules

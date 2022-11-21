@@ -23,9 +23,9 @@ data.append(('tetrahedral', dfs("[Z]P([Z])(=[Z])[Z]"))) # for testing initialisa
 data.append(('tetrahedral', dfs("[Z]P([Z])([Z])=[Z]"))) # for testing initialisation
 
 for side in ["context", "left", "right"]:
-	postChapter("Rule " + side)
+	post.summaryChapter("Rule " + side)
 	for n, a in data:
-		postSection(n + " " + side)
+		post.summarySection(n + " " + side)
 		gml = a.getGMLString()
 		gml = gml[7:-2]
 		rGML(gml, side)

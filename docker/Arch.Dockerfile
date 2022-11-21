@@ -9,11 +9,12 @@ RUN pacman -Suy --noconfirm                                 \
     python-pip                                              \
  && pip3 install -r requirements_nodoc.txt                  \
  && pacman -Suy --noconfirm                                 \
-    $(bindep -b | tr '\n' ' ')                              \
+    $(bindep -b testing | tr '\n' ' ')                      \
  && rm -rf /var/cache/pacman
 
 
 WORKDIR /opt/mod/build
+ENV CXXFLAGS=-Werror -Wno-error=maybe-uninitialized
 RUN cmake ../ -DBUILD_DOC=no \
  -DCMAKE_BUILD_TYPE=Release                                                    \
  -DBUILD_TESTING_SANITIZERS=off                                                \

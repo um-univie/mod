@@ -22,10 +22,10 @@ namespace mod::lib::Graph {
 struct PropString;
 } // namespace mod::lib::Graph
 namespace mod::lib::DG {
-class HyperCreator;
+struct HyperCreator;
 
-class NonHyper {
-	friend class HyperCreator;
+struct NonHyper {
+	friend struct HyperCreator;
 public:
 	using GraphType = NonHyperGraphType;
 	using Vertex = NonHyperVertex;

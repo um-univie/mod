@@ -4,8 +4,8 @@
 #include <mod/graph/Graph.hpp>
 #include <mod/rule/CompositionExpr.hpp>
 #include <mod/rule/Rule.hpp>
-#include <mod/lib/IO/RC.hpp>
 #include <mod/lib/RC/ComposeRuleReal.hpp>
+#include <mod/lib/RC/IO/Write.hpp>
 #include <mod/lib/RC/MatchMaker/Common.hpp>
 #include <mod/lib/RC/MatchMaker/Parallel.hpp>
 #include <mod/lib/RC/MatchMaker/Sub.hpp>
@@ -226,7 +226,7 @@ std::vector<std::shared_ptr<rule::Rule>> Evaluator::eval(const rule::RCExp::Expr
 }
 
 void Evaluator::print() const {
-	std::string fileNoExt = IO::RC::Write::pdf(*this);
+	std::string fileNoExt = RC::Write::pdf(*this);
 	IO::post() << "summaryRC \"" << fileNoExt << "\"" << std::endl;
 }
 

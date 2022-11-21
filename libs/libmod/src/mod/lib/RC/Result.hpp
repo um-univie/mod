@@ -1,12 +1,11 @@
-#ifndef MOD_LIB_RC_RESULT_H
-#define   MOD_LIB_RC_RESULT_H
+#ifndef MOD_LIB_RC_RESULT_HPP
+#define MOD_LIB_RC_RESULT_HPP
 
-#include <jla_boost/graph/dpo/Rule.hpp>
-#include <jla_boost/graph/morphism/models/Vector.hpp>
+#include <mod/lib/DPO/CombinedRule.hpp>
 
-namespace mod {
-namespace lib {
-namespace RC {
+#include <jla_boost/graph/morphism/models/InvertibleVector.hpp>
+
+namespace mod::lib::RC {
 
 //------------------------------------------------------------------------------
 // ResultConcept
@@ -33,34 +32,40 @@ namespace RC {
 //	Result result;
 //};
 
-//------------------------------------------------------------------------------
-// BaseResult
-//------------------------------------------------------------------------------
+struct Result {
+	using Rule = lib::DPO::CombinedRule;
+	using CombinedGraph = Rule::CombinedGraphType;
 
-template<typename RuleResultT, typename RuleFirst, typename RuleSecond>
-struct BaseResult {
-	using RuleResult = RuleResultT;
-	BOOST_CONCEPT_ASSERT((jla_boost::GraphDPO::PushoutRuleConcept<RuleResult>));
-	BOOST_CONCEPT_ASSERT((jla_boost::GraphDPO::PushoutRuleConcept<RuleFirst>));
-	BOOST_CONCEPT_ASSERT((jla_boost::GraphDPO::PushoutRuleConcept<RuleSecond>));
-	using GraphResult = typename jla_boost::GraphDPO::PushoutRuleTraits<RuleResult>::GraphType;
-	using GraphFirst = typename jla_boost::GraphDPO::PushoutRuleTraits<RuleFirst>::GraphType;
-	using GraphSecond = typename jla_boost::GraphDPO::PushoutRuleTraits<RuleSecond>::GraphType;
+	struct RuleResult { // TODO: temporary hax
+		using GraphType = CombinedGraph;
+		using SideGraphType = Rule::SideGraphType;
+	};
 
-	template<typename ...Args>
-	BaseResult(const RuleFirst &rFirst, const RuleSecond &rSecond, Args &&... args)
-			: rResult(std::forward<Args>(args)...),
-			  mFirstToResult(get_graph(rFirst), get_graph(rResult)),
-			  mSecondToResult(get_graph(rSecond), get_graph(rResult)) {}
+	Result(const Rule &rFirst, const Rule &rSecond) :
+			rDPO(new Rule()),
+			mFirstToResult(rFirst.getCombinedGraph(), rDPO->getCombinedGraph()),
+			mSecondToResult(rSecond.getCombinedGraph(), rDPO->getCombinedGraph()) {}
 public:
-	RuleResult rResult;
-	jla_boost::GraphMorphism::InvertibleVectorVertexMap<GraphFirst, GraphResult> mFirstToResult;
-	jla_boost::GraphMorphism::InvertibleVectorVertexMap<GraphSecond, GraphResult> mSecondToResult;
+	std::unique_ptr<Rule> rDPO;
+	jla_boost::GraphMorphism::InvertibleVectorVertexMap<CombinedGraph, CombinedGraph> mFirstToResult;
+	jla_boost::GraphMorphism::InvertibleVectorVertexMap<CombinedGraph, CombinedGraph> mSecondToResult;
 };
 
-} // namespace RC
-} // namespace lib
-} // namespace mod
+
+struct LabelledResult : Result {
+	using MatchConstraint = GraphMorphism::Constraints::Constraint<RuleResult::SideGraphType>;
+	using PropStringType = lib::Rules::PropString;
+	using PropTermType = lib::Rules::PropTerm;
+public:
+	using Result::Result;
+public:
+	std::unique_ptr<lib::Rules::PropString> pString;
+	std::unique_ptr<lib::Rules::PropTerm> pTerm;
+	std::unique_ptr<lib::Rules::PropStereo> pStereo;
+	std::vector<std::unique_ptr<MatchConstraint>> matchConstraints;
+};
+
+} // namespace mod::lib::RC
 
 
-#endif   /* MOD_LIB_RC_RESULT_H */
+#endif // MOD_LIB_RC_RESULT_HPP

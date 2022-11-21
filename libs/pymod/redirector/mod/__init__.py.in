@@ -1,0 +1,6 @@
+import sys
+sys.path.insert(0, "@CMAKE_INSTALL_FULL_LIBDIR@")
+del sys.modules['mod']
+import mod
+assert not mod._redirected
+mod._redirected = True

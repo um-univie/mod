@@ -83,7 +83,7 @@ const char *FatalError::what() const noexcept {
 	std::stringstream ss;
 	Exception::printStacktrace(0, ss);
 	ss << getName() << ": " << text;
-	ss << "(Do _not_ try to recover from this exception!)\n";
+	ss << "\n(Do _not_ try to recover from this exception!)\n";
 	whatString = ss.str();
 	return whatString.c_str();
 }

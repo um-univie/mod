@@ -49,7 +49,7 @@ void Chem_doExport() {
 	// rst:
 	py::class_<mod::Isotope>("Isotope", py::no_init)
 			// rst:		.. method:: __init__()
-			// rst:		               __init__(i)
+			// rst:		            __init__(i)
 			// rst:
 			// rst:			Construct a representation of an isotope.
 			// rst:			If an isotope number is given, that specific one is constructed,
@@ -93,7 +93,7 @@ void Chem_doExport() {
 	// rst:		Representation of basic data of an atom.
 	// rst:
 	py::class_<mod::AtomData>("AtomData", py::no_init)
-			// rst:		.. method:: __init__(atomId=AtomIds.Invalid, istotope=Isotope(), charge=Charge(), radical=False)
+			// rst:		.. method:: __init__(atomId=AtomIds.Invalid, isotope=Isotope(), charge=Charge(), radical=False)
 			// rst:
 			// rst:			Construct an atom data object.
 			// rst:
@@ -154,7 +154,6 @@ void Chem_doExport() {
 			;
 	// TOOD: py::enum_ does not support overriding of methods, so we set __str__ on the Python side.
 	py::def("_bondTypeToString", &bondTypeToString);
-
 
 
 	// rst: .. class:: AtomIds

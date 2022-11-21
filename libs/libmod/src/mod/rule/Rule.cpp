@@ -4,9 +4,10 @@
 #include <mod/graph/Printer.hpp>
 #include <mod/rule/GraphInterface.hpp>
 #include <mod/lib/IO/IO.hpp>
-#include <mod/lib/IO/Rule.hpp>
-#include <mod/lib/Rules/Properties/Depiction.hpp>
 #include <mod/lib/Rules/Real.hpp>
+#include <mod/lib/Rules/IO/DepictionData.hpp>
+#include <mod/lib/Rules/IO/Read.hpp>
+#include <mod/lib/Rules/IO/Write.hpp>
 #include <mod/lib/Rules/Properties/Molecule.hpp>
 #include <mod/lib/Rules/Properties/Stereo.hpp>
 
@@ -46,7 +47,7 @@ const lib::Rules::Real &Rule::getRule() const {
 //------------------------------------------------------------------------------
 
 std::size_t Rule::numVertices() const {
-	return num_vertices(p->r->getGraph());
+	return num_vertices(p->r->getDPORule().getRule().getCombinedGraph());
 }
 
 Rule::VertexRange Rule::vertices() const {
@@ -54,7 +55,7 @@ Rule::VertexRange Rule::vertices() const {
 }
 
 std::size_t Rule::numEdges() const {
-	return num_edges(p->r->getGraph());
+	return num_edges(p->r->getDPORule().getRule().getCombinedGraph());
 }
 
 Rule::EdgeRange Rule::edges() const {
@@ -78,21 +79,21 @@ Rule::RightGraph Rule::getRight() const {
 std::shared_ptr<Rule> Rule::makeInverse() const {
 	lib::Rules::LabelledRule dpoRule(getRule().getDPORule(), true);
 	if(getConfig().rule.ignoreConstraintsDuringInversion.get()) {
-		if(dpoRule.leftMatchConstraints.size() > 0
-		   || dpoRule.rightMatchConstraints.size() > 0) {
+		if(get_match_constraints(get_labelled_left(dpoRule)).size() > 0
+		   || get_match_constraints(get_labelled_right(dpoRule)).size() > 0) {
 			std::cout << "WARNING: inversion of rule strips constraints.\n";
 		}
 	} else {
-		if(dpoRule.leftMatchConstraints.size() > 0) {
+		if(get_match_constraints(get_labelled_left(dpoRule)).size() > 0) {
 			throw LogicError("Can not invert rule with left-side component constraints.");
 		}
-		if(dpoRule.rightMatchConstraints.size() > 0) {
+		if(get_match_constraints(get_labelled_right(dpoRule)).size() > 0) {
 			throw LogicError("Can not invert rule with right-side component constraints.");
 		}
 	}
 	dpoRule.invert();
-	bool ignore = getConfig().rule.ignoreConstraintsDuringInversion.get();
-	if(ignore) dpoRule.rightMatchConstraints.clear();
+	const bool ignore = getConfig().rule.ignoreConstraintsDuringInversion.get();
+	if(ignore) dpoRule.rightData.matchConstraints.clear();
 	auto rInner = std::make_unique<lib::Rules::Real>(std::move(dpoRule), getLabelType());
 	rInner->setName(this->getName() + ", inverse");
 	return makeRule(std::move(rInner), *p->externalToInternalIds);
@@ -116,25 +117,25 @@ Rule::print(const graph::Printer &first, const graph::Printer &second) const {
 
 std::pair<std::string, std::string>
 Rule::print(const graph::Printer &first, const graph::Printer &second, bool printCombined) const {
-	return lib::IO::Rules::Write::summary(getRule(), first.getOptions(), second.getOptions(), printCombined);
+	return lib::Rules::Write::summary(getRule(), first.getOptions(), second.getOptions(), printCombined);
 }
 
 void Rule::printTermState() const {
-	lib::IO::Rules::Write::termState(getRule());
+	lib::Rules::Write::termState(getRule());
 }
 
 std::string Rule::getGMLString(bool withCoords) const {
 	if(withCoords && !getRule().getDepictionData().getHasCoordinates())
 		throw LogicError("Coordinates are not available for this rule (" + getName() + ").");
 	std::stringstream ss;
-	lib::IO::Rules::Write::gml(getRule(), withCoords, ss);
+	lib::Rules::Write::gml(getRule(), withCoords, ss);
 	return ss.str();
 }
 
 std::string Rule::printGML(bool withCoords) const {
 	if(withCoords && !getRule().getDepictionData().getHasCoordinates())
 		throw LogicError("Coordinates are not available for this rule (" + getName() + ").");
-	return lib::IO::Rules::Write::gml(*p->r, withCoords);
+	return lib::Rules::Write::gml(*p->r, withCoords);
 }
 
 const std::string &Rule::getName() const {
@@ -150,11 +151,11 @@ std::optional<LabelType> Rule::getLabelType() const {
 }
 
 std::size_t Rule::getNumLeftComponents() const {
-	return getRule().getDPORule().numLeftComponents;
+	return get_num_connected_components(get_labelled_left(getRule().getDPORule()));
 }
 
 std::size_t Rule::getNumRightComponents() const {
-	return getRule().getDPORule().numRightComponents;
+	return get_num_connected_components(get_labelled_right(getRule().getDPORule()));
 }
 
 namespace {
@@ -212,7 +213,7 @@ int Rule::getMaxExternalId() const {
 
 namespace {
 
-std::shared_ptr<Rule> handleLoadedRule(lib::IO::Result<lib::IO::Rules::Read::Data> dataRes,
+std::shared_ptr<Rule> handleLoadedRule(lib::IO::Result<lib::Rules::Read::Data> dataRes,
                                        lib::IO::Warnings warnings,
                                        bool invert,
                                        const std::string &dataSource) {
@@ -223,7 +224,7 @@ std::shared_ptr<Rule> handleLoadedRule(lib::IO::Result<lib::IO::Rules::Read::Dat
 	auto data = std::move(*dataRes);
 	assert(data.rule->pString);
 	if(invert) {
-		if(!data.rule->leftMatchConstraints.empty()) {
+		if(!get_match_constraints(get_labelled_left(*data.rule)).empty()) {
 			const bool ignore = getConfig().rule.ignoreConstraintsDuringInversion.get();
 			std::string msg = "The rule '";
 			if(data.name) msg += *data.name;
@@ -238,7 +239,7 @@ std::shared_ptr<Rule> handleLoadedRule(lib::IO::Result<lib::IO::Rules::Read::Dat
 				throw InputError(std::move(msg));
 			} else {
 				msg += "and these will be stripped from the reversed rule.";
-				data.rule->leftMatchConstraints.clear();
+				data.rule->leftData.matchConstraints.clear();
 				std::cout << "WARNING: " << msg << '\n';
 			}
 		}
@@ -254,7 +255,7 @@ std::shared_ptr<Rule> handleLoadedRule(lib::IO::Result<lib::IO::Rules::Read::Dat
 
 std::shared_ptr<Rule> Rule::fromGMLString(const std::string &data, bool invert) {
 	lib::IO::Warnings warnings;
-	auto res = lib::IO::Rules::Read::gml(warnings, data);
+	auto res = lib::Rules::Read::gml(warnings, data);
 	return handleLoadedRule(std::move(res), std::move(warnings), invert, "<inline GML string>");
 }
 
@@ -267,8 +268,14 @@ std::shared_ptr<Rule> Rule::fromGMLFile(const std::string &file, bool invert) {
 	}
 	if(!ifs) throw InputError("Could not open rule GML file '" + file + "'.\n");
 	lib::IO::Warnings warnings;
-	auto res = lib::IO::Rules::Read::gml(warnings, {ifs.begin(), ifs.size()});
+	auto res = lib::Rules::Read::gml(warnings, {ifs.begin(), ifs.size()});
 	return handleLoadedRule(std::move(res), std::move(warnings), invert, "file '" + file + "'");
+}
+
+std::shared_ptr<Rule> Rule::fromDFS(const std::string &data, bool invert) {
+	lib::IO::Warnings warnings;
+	auto res = lib::Rules::Read::dfs(warnings, data);
+	return handleLoadedRule(std::move(res), std::move(warnings), invert, "<inline DFS string>");
 }
 
 std::shared_ptr<Rule> Rule::makeRule(std::unique_ptr<lib::Rules::Real> r) {

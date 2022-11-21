@@ -22,15 +22,22 @@ Graph getGraphFromStore(std::optional<Graph> g) {
 
 } // namespace
 
-#define MOD_GRAPHPIMPL_Define_Vertex(GraphClass, GraphName, getMacroGraph, g, VertePrint)        \
-    MOD_GRAPHPIMPL_Define_Vertex_noGraph(GraphClass, GraphName, getMacroGraph, g, VertePrint)    \
+#define MOD_GRAPHPIMPL_Define_Vertex(GraphClass, GraphName, getMacroGraph, g, VertexPrint)        \
+    MOD_GRAPHPIMPL_Define_Vertex_noGraph(GraphClass, GraphName, getMacroGraph, g, VertexPrint)    \
+	 MOD_GRAPHPIMPL_Define_Vertex_graph(GraphClass, g)
+
+#define MOD_GRAPHPIMPL_Define_Vertex_graph(GraphClass, g)                            \
                                                                                      \
 GraphHandle<GraphClass> GraphClass::Vertex::getGraph() const {                       \
     if(!*this) throw LogicError("Can not get graph on a null vertex.");              \
     return lib::getGraphFromStore(g);                                                \
 }
 
-#define MOD_GRAPHPIMPL_Define_Vertex_noGraph(GraphClass, GraphName, getMacroGraph, g, VertePrint)\
+#define MOD_GRAPHPIMPL_Define_Vertex_noGraph(GraphClass, GraphName, getMacroGraph, g, VertexPrint) \
+	MOD_GRAPHPIMPL_Define_Vertex_noGraph_noId(GraphClass, GraphName, getMacroGraph, g, VertexPrint) \
+	MOD_GRAPHPIMPL_Define_Vertex_id(GraphClass, getMacroGraph)
+
+#define MOD_GRAPHPIMPL_Define_Vertex_noGraph_noId(GraphClass, GraphName, getMacroGraph, g, VertexPrint)\
                                                                                      \
 GraphClass::Vertex::Vertex(GraphHandle<GraphClass> g, std::size_t vId) : g(g), vId(vId) { \
     using boost::vertices;                                                           \
@@ -47,7 +54,7 @@ GraphClass::Vertex::Vertex() : vId(0) { }                                       
 std::ostream &operator<<(std::ostream &s, const GraphClass::Vertex &v) {             \
     s << #GraphName "Vertex(";                                                       \
     if(!v) s << "null";                                                              \
-    else s << *(v.g VertePrint) << ", " << v.getId();                                \
+    else s << *(v.g VertexPrint) << ", " << v.getId();                               \
     return s << ")";                                                                 \
 }                                                                                    \
                                                                                      \
@@ -74,7 +81,9 @@ GraphClass::Vertex::operator bool() const {                                     
                                                                                      \
 bool GraphClass::Vertex::isNull() const {                                            \
     return *this == GraphClass::Vertex();                                            \
-}                                                                                    \
+}
+
+#define MOD_GRAPHPIMPL_Define_Vertex_id(GraphClass, getMacroGraph)                   \
                                                                                      \
 std::size_t GraphClass::Vertex::getId() const {                                      \
     if(!*this) throw LogicError("Can not get id on a null vertex.");                 \

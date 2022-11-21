@@ -10,40 +10,32 @@
 #include <string>
 
 namespace mod::lib::Rules {
-struct PropStringCore;
+struct PropString;
 
-struct PropTermCore : PropCore<PropTermCore, GraphType, std::size_t, std::size_t> {
-	using Base = PropCore<PropTermCore, GraphType, std::size_t, std::size_t>;
-	using ConstraintPtr = std::unique_ptr<GraphMorphism::Constraints::Constraint<SideGraphType> >;
+struct PropTerm : PropBase<PropTerm, std::size_t, std::size_t> {
+	using Base = PropBase<PropTerm, std::size_t, std::size_t>;
+	using ConstraintPtr = std::unique_ptr<GraphMorphism::Constraints::Constraint<lib::DPO::CombinedRule::SideGraphType>>;
 public:
-	PropTermCore(const GraphType &core,
-			const std::vector<ConstraintPtr> &leftMatchConstraints,
-			const std::vector<ConstraintPtr> &rightMatchConstraints,
-			const PropStringCore &label, const StringStore &stringStore); // parse-construct
-	PropTermCore(const GraphType &core, lib::Term::Wam machine); // import a machine
-	friend bool isValid(const PropTermCore &core);
+	PropTerm(const RuleType &rule,
+	         const std::vector<ConstraintPtr> &leftMatchConstraints,
+	         const std::vector<ConstraintPtr> &rightMatchConstraints,
+	         const PropString &pString, const StringStore &stringStore); // parse-construct
+	PropTerm(const RuleType &rule, lib::Term::Wam machine); // import a machine
+	friend bool isValid(const PropTerm &core);
 	const std::string &getParsingError() const;
-	friend lib::Term::Wam &getMachine(PropTermCore &core);
-	friend const lib::Term::Wam &getMachine(const PropTermCore &core);
+	friend lib::Term::Wam &getMachine(PropTerm &core);
+	friend const lib::Term::Wam &getMachine(const PropTerm &core);
 private:
 	std::optional<std::string> parsingError;
 	lib::Term::Wam machine;
 };
 
-inline const lib::Term::Wam &getMachine(const PropTermCore::LeftType &p) {
-	return getMachine(p.state.getDerived());
+inline const lib::Term::Wam &getMachine(const PropTerm::Side &p) {
+	return getMachine(p.p.getDerived());
 }
 
-inline bool isValid(const PropTermCore::LeftType &p) {
-	return isValid(p.state.getDerived());
-}
-
-inline const lib::Term::Wam &getMachine(const PropTermCore::RightType &p) {
-	return getMachine(p.state.getDerived());
-}
-
-inline bool isValid(const PropTermCore::RightType &p) {
-	return isValid(p.state.getDerived());
+inline bool isValid(const PropTerm::Side &p) {
+	return isValid(p.p.getDerived());
 }
 
 } // namespace mod::lib::Rules

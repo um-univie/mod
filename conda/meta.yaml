@@ -32,6 +32,8 @@ requirements:
     - networkx
     - parse
     - typing_extensions
+    # Add openbabel here to get pybel for test.
+    - openbabel
   host:
     # lib packages
     - boost {{ boost }}

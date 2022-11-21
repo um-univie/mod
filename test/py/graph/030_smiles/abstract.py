@@ -34,10 +34,13 @@ assert a.getVertexFromExternalId(42)
 config.graph.appendSmilesClass = False
 
 check("{}", "abc")
+check("{}", "[]")
 check("{}", "[def]")
+check("{}", "abc[def]")
 check("{}", "[def]efg")
 check("{}", "abc[def]efg")
-check("{}", "[]")
+check("{}", "abc[def]ghi[jkl]mno")
+check("{}", "[abc][def][ghi]")
 
 check("{}", "42")
 check("{}", "42Heblah")

@@ -8,6 +8,7 @@
 #include <boost/algorithm/string.hpp>
 #include <boost/bimap/bimap.hpp>
 #include <boost/graph/copy.hpp>
+#include <boost/lexical_cast.hpp>
 
 #include <map>
 
@@ -373,6 +374,15 @@ char bondToChar(BondType bt) {
 	default:
 		MOD_ABORT;
 	}
+}
+
+std::string chargeSuffix(Charge c) {
+	std::string s;
+	if(c == 0) return s;
+	if(c > 1 || c < -1) s += boost::lexical_cast<std::string>(std::abs(c));
+	if(c < 0) s += '-';
+	else s += '+';
+	return s;
 }
 
 } // namespace mod::lib::Chem

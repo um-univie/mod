@@ -1,4 +1,4 @@
-post("disableSummary")
+post.disableInvokeMake()
 smiles("B1(O)OB(OB2OB(O)O2)O1")
 smiles("B(O[C@H](C)CC(C)C)(O[C@H](C)CC(C)C)O[C@H](C)CC(C)C")
 smiles("Brc1cc(c(c(Br)c1)NC(=S)N)Br")

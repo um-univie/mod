@@ -3,24 +3,22 @@
 
 #include <mod/Config.hpp>
 #include <mod/Misc.hpp>
-#include <mod/lib/Algorithm.hpp>
+#include <mod/lib/Algorithm/MultiDimSelector.hpp>
+#include <mod/lib/DPO/FilteredGraphProjection.hpp>
 #include <mod/lib/Graph/Single.hpp>
 #include <mod/lib/IO/IO.hpp>
-#include <mod/lib/IO/Rule.hpp>
 #include <mod/lib/RC/MatchMaker/ComponentWiseUtil.hpp>
 #include <mod/lib/RC/MatchMaker/LabelledMatch.hpp>
 #include <mod/lib/Rules/Properties/Term.hpp>
 #include <mod/lib/Term/WAM.hpp>
-
-#include <jla_boost/graph/dpo/FilteredGraphProjection.hpp>
 
 #include <optional>
 
 namespace mod::lib::RC {
 
 struct Sub {
-	using GraphDom = lib::Rules::LabelledRule::LeftGraphType;
-	using GraphCodom = lib::Rules::LabelledRule::RightGraphType;
+	using GraphDom = lib::Rules::LabelledRule::SideGraphType;
+	using GraphCodom = lib::Rules::LabelledRule::SideGraphType;
 	using VertexMapType = jla_boost::GraphMorphism::InvertibleVectorVertexMap<GraphDom, GraphCodom>;
 public:
 	explicit Sub(int verbosity, IO::Logger logger, bool allowPartial)
@@ -85,7 +83,7 @@ Sub::matchFromPosition(const lib::Rules::Real &rFirst,
 	auto map = VertexMapType(gDom, gCodom);
 	for(std::size_t pId = 0; pId < position.size(); pId++) {
 		if(position[pId].disabled) continue;
-		if(position[pId].host == rSecond.getDPORule().numLeftComponents) {
+		if(position[pId].host == get_num_connected_components(get_labelled_left(rSecond.getDPORule()))) {
 			if(!allowPartial) MOD_ABORT; // we should have gotten this
 			continue;
 		}

@@ -9,10 +9,10 @@
 #include <mod/lib/LabelledUnionGraph.hpp>
 #include <mod/lib/Graph/LabelledGraph.hpp>
 #include <mod/lib/Graph/Single.hpp>
+#include <mod/lib/Graph/IO/Write.hpp>
 #include <mod/lib/Graph/Properties/Molecule.hpp>
 #include <mod/lib/Graph/Properties/Stereo.hpp>
 #include <mod/lib/Graph/Properties/String.hpp>
-#include <mod/lib/IO/Stereo.hpp>
 
 #include <boost/concept/assert.hpp>
 #include <boost/lexical_cast.hpp>
@@ -23,13 +23,14 @@ struct Union::Pimpl {
 	friend std::ostream &operator<<(std::ostream &s, const Pimpl &p) {
 		s << "UnionGraph{";
 		bool first = true;
-		for(const auto &g : p.graphs) {
+		for(const auto &g: p.graphs) {
 			if(first) first = false;
 			else s << ", ";
 			s << g->getName();
 		}
 		return s << "}";
 	}
+
 public:
 	std::vector<std::shared_ptr<Graph>> graphs;
 	lib::LabelledUnionGraph<lib::Graph::LabelledGraph> g;
@@ -38,8 +39,11 @@ public:
 Union::Union() : p(std::make_unique<Pimpl>()) {}
 
 Union::Union(std::vector<std::shared_ptr<Graph>> graphs) {
+	for(const auto &g: graphs)
+		if(!g) throw LogicError("A graph is null.");
+
 	auto p = std::unique_ptr<Pimpl>(new Pimpl{std::move(graphs), {}});
-	for(const auto &gOther : p->graphs)
+	for(const auto &gOther: p->graphs)
 		p->g.push_back(&gOther->getGraph().getLabelledGraph());
 	this->p = std::move(p);
 }
@@ -109,6 +113,7 @@ Union::EdgeRange Union::edges() const {
 //------------------------------------------------------------------------------
 
 MOD_GRAPHPIMPL_Define_Vertex(Union, UnionGraph, get_graph(this->g->p->g), g, /* VertexPrint */)
+
 MOD_GRAPHPIMPL_Define_Vertex_Undirected(Union, get_graph(this->g->p->g), g)
 
 const std::string &Union::Vertex::getStringLabel() const {
@@ -173,7 +178,7 @@ std::string Union::Vertex::printStereo(const Printer &p) const {
 	const auto vInner = v.v;
 	const auto gIdx = v.gIdx;
 	const auto &gInner = g->p->graphs[gIdx]->getGraph();
-	return lib::IO::Stereo::Write::summary(
+	return lib::Graph::Write::stereoSummary(
 			gInner, vInner, *conf, p.getOptions(), graph.get_vertex_idx_offset(gIdx),
 			" (" + boost::lexical_cast<std::string>(*this)) + ")";
 }

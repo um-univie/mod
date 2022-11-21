@@ -10,6 +10,7 @@ struct LabelledGraphTraits {
 	using GraphType = typename G::GraphType;
 	using PropStringType = typename G::PropStringType;
 	using PropTermType = typename G::PropTermType;
+	using PropStereoType = typename G::PropStereoType;
 };
 
 template<typename G>
@@ -17,16 +18,16 @@ struct LabelledGraphConcept {
 	using GraphType = typename LabelledGraphTraits<G>::GraphType;
 	using PropStringType = typename LabelledGraphTraits<G>::PropStringType;
 	using PropTermType = typename LabelledGraphTraits<G>::PropTermType;
+	using PropStereoType = typename LabelledGraphTraits<G>::PropStereoType;
 public:
 	BOOST_CONCEPT_USAGE(LabelledGraphConcept) {
 		const G &gOuterConst = gOuter;
 
-		const GraphType &gConst = get_graph(gOuterConst);
-		(void) gConst;
-		const PropStringType &pString = get_string(gOuterConst);
-		(void) pString;
-		const PropTermType &pTerm = get_term(gOuterConst);
-		(void) pTerm;
+		[[maybe_unused]] const GraphType &gConst = get_graph(gOuterConst);
+		[[maybe_unused]] const PropStringType &pString = get_string(gOuterConst);
+		[[maybe_unused]] const PropTermType &pTerm = get_term(gOuterConst);
+		[[maybe_unused]] const bool hasStereo = has_stereo(gOuterConst);
+		[[maybe_unused]] const PropStereoType &pStereo = get_stereo(gOuterConst);
 	}
 private:
 	G gOuter;

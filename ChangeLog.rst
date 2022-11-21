@@ -4,6 +4,127 @@
 Changes
 #######
 
+develop
+=======
+
+Incompatible Changes
+--------------------
+
+Doc, several pages have changed URL:
+
+- ``libmod/libmod.html`` to ``libmod/index.html``
+- ``pymod/pymod.html`` to ``pymod/index.html``
+- ``postmod/postmod.html`` to ``postmod/index.html``
+- ``modWrapper/modWrapper.html`` to ``exe/index.html``
+- ``epim/epim.html`` to ``epim/index.html``
+- ``dataDesc/dataDesc.html`` to ``formats/index.html``
+- ``dgStrat/dgStrat.html`` to ``dgStrat/index.html``
+- As default, a Python package is now installed with ``pip`` which enables
+  import of ``mod`` without extra ``PYTHONPATH`` manipulation.
+  This may potentially clash with other packages of the same name.
+  Use ``-DBUILD_PY_MOD_PIP=off`` for CMake to disable this
+  (see :ref:`compiling`).
+- Due to a change in escaping of ``#`` characters in DG vertex/hyperedge labels
+  when printing, some custom labels with additional escaping may need
+  adjustment. See also the bug fix entry regarding this.
+
+
+New Features
+------------
+
+- Doc, a new section, :ref:`graph-model`, and restructuring of
+  :ref:`formats`.
+- The :ref:`GraphDFS format <format-graphDFS>` now supports disconnected graphs
+  through ``.``-edges, simiilar to :ref:`SMILES <graph-smiles>`.
+  The graph loading functions
+  :cpp:func:`graph::Graph::fromDFSMulti` and
+  :py:func:`Graph.fromDFSMulti` has been added to load disconnected graphs.
+- Added :cpp:func:`rule::Rule::fromDFS`/:py:func:`Rule.fromDFS` for loading
+  rules from a :ref:`RuleDFS <format-ruleDFS>` string, a new line-notation for
+  rules based on :ref:`GraphDFS <format-graphDFS>`.
+- Added support for :ref:`MOL and SD <graph-mdl>` formats for loading graphs.
+  The loadeing can be done through the functions
+
+  - :cpp:func:`graph::Graph::fromMOLString`/:py:func:`Graph.fromMOLString`,
+  - :cpp:func:`graph::Graph::fromMOLFile`/:py:func:`Graph.fromMOLFile`,
+  - :cpp:func:`graph::Graph::fromMOLStringMulti`/:py:func:`Graph.fromMOLStringMulti`,
+  - :cpp:func:`graph::Graph::fromMOLFileMulti`/:py:func:`Graph.fromMOLFileMulti`,
+  - :cpp:func:`graph::Graph::fromSDString`/:py:func:`Graph.fromSDString`,
+  - :cpp:func:`graph::Graph::fromSDFile`/:py:func:`Graph.fromSDFile`,
+  - :cpp:func:`graph::Graph::fromSDStringMulti`/:py:func:`Graph.fromSDStringMulti`, and
+  - :cpp:func:`graph::Graph::fromSDFileMulti`/:py:func:`Graph.fromSDFileMulti`,
+- PyMØD: add installation of the bindings via ``pip``.
+  See the setting ``-DBUILD_PY_MOD_PIP=on`` in :ref:`compiling`.
+- Added :cpp:func:`dg::Builder::addHyperEdge`/:py:meth:`DGBuilder.addHyperEdge`.
+- Added :cpp:func:`graph::Printer::setRaiseIsotopes`/:cpp:func:`graph::Printer::getRaiseIsotopes`/:py:attr:`GraphPrinter.raiseIsotopes`.
+  It was previously only available in the internal interface.
+- Added :cpp:func:`graph::Printer::setWithGraphvizCoords`/:cpp:func:`graph::Printer::getWithGraphvizCoords`/:py:attr:`GraphPrinter.withGraphvizCoords`.
+- Added :cpp:func:`graph::Printer::setGraphvizPrefix`/:cpp:func:`graph::Printer::getGraphvizPrefix`/:py:attr:`GraphPrinter.graphvizPrefix`.
+- Whitespace is now allowed inside :ref:`format-dfs` strings.
+- Make :option:`mod --memcheck` cause Valgrind to return non-zero on problems.
+  Additionally add an ``atexit`` handler in Python to delete remaining global
+  objects as this is not guaranteed otherwise.
+- Several undocumented post-processing functions are now documented,
+  and several internal functions are now exposed.
+  See :ref:`cpp-Post`/:ref:`py-Post`.
+- Added :cpp:func:`graph::Graph::enumerateMonomorphisms`/:py:meth:`Graph.enumerateMonomorphisms`.
+- Added :cpp:func:`dg::Printer::setImageOverwrite`/:py:meth:`DGPrinter.setImageOverwrite`.
+
+Bugs Fixed
+----------
+
+- Rule GML loading, check for edges dangling due to wrong vertex membership.
+- :cpp:func:`dg::Builder::execute`/:py:meth:`DGBuilder.execute` and
+  :cpp:func:`dg::Builder::apply`/:py:meth:`DGBuilder.apply`,
+  properly ignore direct derivations with empty right-hand sides,
+  instead of crashing.
+- :cpp:func:`dg::DG::load`/:py:meth:`DG.load` and
+  :cpp:func:`dg::Builder::load`/:py:meth:`DGBuilder.load`,
+  reenable loading of very old dump formats.
+- Fix critical bugs in
+  :cpp:class:`rule::CompositionMatch`/:py:class:`RCMatch`.
+- Doc, added missing ``cd mod`` step in :ref:`compiling`.
+- Doc, add missing ``"`` in usage description for the Docker image.
+- Doc, fix typo (:math:`C_3` to :math:`C_4`) in :ref:`format-graphDFS`,
+  and improve description of ring-closure semantics.
+- Fix :cpp:func:`graph::Graph::getGraphDFS`/:py:attr:`Graph.graphDFS`
+  and :cpp:func:`graph::Graph::getGraphDFSWithIds`/:py:attr:`Graph.graphDFSWithIds`
+  to not produce a :token:`~graphDFS:defRingId` directly followed by a
+  :token:`~graphDFS:ringClosure` which is indistinguishable from just a
+  :token:`~graphDFS:defRingId` when parsing the string again.
+- Check for loop edges and parallel edges when loading graphs from DFS.
+- :ref:`PostMØD <mod_post>`, avoid use of inline ``sed`` in ``compileTikz``
+  to make it work on macOS.
+- For compiling from source on macOS, add ``cmake`` to ``Brewfile``.
+- Check for Boost.Python compiled against Python 3.10 through 3.20 as well.
+- Py, use :py:class:`collections.abc.Iterable` instead of the deprecated/removed
+  ``collections.Iterable``.
+- Py, use :py:func:`inspect.getfullargspec` instead of the deprecated/removed
+  ``inspect.getargspec()``.
+- ``mod_post`` scrub more unreproducible meta-info from figure PDFs.
+- Fix memory leaks in :cpp:func:`dg::Builder::apply`/:py:meth:`DGBuilder.apply`.
+- Fix colour on changed stereo-information in the right-side graph when printing
+  rules and direct derivations.
+- Stop recreating vertex-orders for connected components of rule sides,
+  thereby speeding up rule application (5-6% reduced run-time observed).
+- Fix missing coordinates for rule depiction in rare non-chemical cases with
+  vertices with label "H".
+- Fix rule composition with :cpp:any:`LabelType::Term`/:py:obj:`LabelType.Term`,
+  when two vertices are overlapping and there is an edge in the left side of the
+  second rule, but not in the right side of the first rule.
+- Fix Tikz coordinate node names in rule and stereo depictions to always include
+  ``\modIdPrefix``, to allow post-printing namespacing of node names.
+- :cpp:func:`graph::Graph::fromSMILES`/:py:meth:`Graph.fromSMILES`, properly parse
+  abstract labels when multiple nests of balanced brackets are present.
+- Fix handling of null pointers:
+
+  - :cpp:func:`graph::Graph::isomorphism`/:py:meth:`Graph.isomorphism`.
+  - :cpp:func:`graph::Graph::monomorphism`/:py:meth:`Graph.monomorphism`.
+  - :cpp:func:`graph::Union::Union`/:py:meth:`UnionGraph.__init__`.
+- Fix escaping of ``#`` characters in DG vertex/hyperedge labels when printing
+  using a :cpp:class:`dg::Printer`/:py:class:`DGPrinter` with
+  ``labelsAsLatexMath=True`` (the default).
+
 
 v0.13.0 (2021-07-08)
 ====================

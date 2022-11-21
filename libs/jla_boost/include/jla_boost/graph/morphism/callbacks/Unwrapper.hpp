@@ -5,7 +5,7 @@
 // been unwrapped if they match the given graph.
 
 #include <jla_boost/graph/AdaptorTraits.hpp>
-#include <jla_boost/graph/morphism/VertexMap.hpp>
+#include <jla_boost/graph/morphism/Concepts.hpp>
 
 namespace jla_boost {
 namespace GraphMorphism {

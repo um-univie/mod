@@ -233,7 +233,7 @@ done
 # Create precommand (gdb/valgrind/...)
 precommand=""
 if [ $profile = "true" -o $memcheck = "true" ]; then
-	precommand="valgrind"
+	precommand="valgrind --error-exitcode=42"
 fi
 if [ $profile = "true" ]; then
 	precommand="$precommand --tool=callgrind --dump-instr=yes --collect-jumps=yes $vgArgs"
@@ -346,6 +346,18 @@ def include(fName, checkDup=True, putDup=True, skipDup=True):
 		else:
 			print("End of code from '", fName, "'", sep="")
 mod.include = include
+
+if "LD_PRELOAD" in os.environ and "valgrind" in os.environ["LD_PRELOAD"]:
+	import atexit
+	def _valgrindLeakHaxAtExit():
+		toRemove = set(globals()) - _initialGlobals
+		toRemove.remove("_initialGlobals")
+		print("atexit hax to remove global variables for Valgrind leak check:")
+		for n in toRemove:
+			print("  ", n)
+			del globals()[n]
+	atexit.register(_valgrindLeakHaxAtExit)
+	_initialGlobals = set(globals())
 EOF
 		if [ ! -z "$MOD_NO_DEPRECATED" ]; then
 			echo "config.common.ignoreDeprecation = False"

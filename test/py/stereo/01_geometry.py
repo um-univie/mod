@@ -25,14 +25,14 @@ data.append(('tetrahedral', 'node [ id 0 label "P" stereo "tetrahedral" ]' + gml
 data.append(('tetrahedral', 'node [ id 0 label "P" stereo "tetrahedral" ]' + gmlNode(1) + gmlNode(2) + gmlNode(3, "=") + gmlNode(4))) # for testing initialisation
 data.append(('tetrahedral', 'node [ id 0 label "P" stereo "tetrahedral" ]' + gmlNode(1) + gmlNode(2) + gmlNode(3) + gmlNode(4, "="))) # for testing initialisation
 
-postChapter("Graph")
+post.summaryChapter("Graph")
 for n, d in data:
-	postSection(n)
+	post.summarySection(n)
 	gGML(d)
 for side in ["context", "left", "right"]:
-	postChapter("Rule " + side)
+	post.summaryChapter("Rule " + side)
 	for n, d in data:
 		# TODO: this should work too
 		if n == "trigonalPlanar2": continue
-		postSection(n + " " + side)
+		post.summarySection(n + " " + side)
 		rGML(d, side)

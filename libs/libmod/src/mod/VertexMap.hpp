@@ -31,12 +31,14 @@ public:
 	          std::function<CodomVertex(DomVertex)> forward,
 	          std::function<DomVertex(CodomVertex)> backward)
 			: dom(dom), codom(codom), forward(forward), backward(backward) {}
+
 	// rst: .. function:: friend std::ostream &operator<<(std::ostream &s, const VertexMap &m)
 	friend std::ostream &operator<<(std::ostream &s, const VertexMap &m) {
-		return s << "VertexMap{"
-		         << getGraphFromHandle(m.getDomain()) << ", "
-		         << getGraphFromHandle(m.getCodomain()) << "}";
+		const Domain &dom = getGraphFromHandle(m.getDomain());
+		const Codomain &codom = getGraphFromHandle(m.getCodomain());
+		return s << "VertexMap{" << dom << ", " << codom << "}";
 	}
+
 	// rst: .. function:: DomainHandle getDomain() const
 	// rst:               CodomainHandle getCodomain() const
 	// rst:
@@ -54,6 +56,7 @@ public:
 		if(v.getGraph() != getDomain()) throw LogicError("Vertex does not belong to the domain graph.");
 		return forward(v);
 	}
+
 	// rst: .. function:: DomVertex getInverse(CodomVertex v) const
 	// rst:
 	// rst:		:returns: the domain vertex that maps to the given codomain vertex.

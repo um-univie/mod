@@ -3,7 +3,7 @@
 
 #include <mod/Derivation.hpp>
 #include <mod/lib/DG/NonHyper.hpp>
-#include <mod/lib/IO/JsonUtils.hpp>
+#include <mod/lib/IO/Json.hpp>
 #include <mod/lib/Rules/GraphAsRuleCache.hpp>
 
 namespace mod::lib::DG {

@@ -17,14 +17,15 @@ struct PropString;
 struct Single;
 } // namespace mod::lib::Graph
 namespace mod::lib::Rules {
-struct PropStringCore;
-struct PropMoleculeCore;
-struct DepictionDataCore;
-
-using DPOProjection = LabelledRule::LabelledLeftType::GraphType;
+struct PropString;
+struct PropMolecule;
+namespace Write {
+struct DepictionData;
+} // namespace Write
 
 struct Real {
-	static bool sanityChecks(const GraphType &core, const PropStringCore &labelState, std::ostream &s);
+	static bool sanityChecks(const lib::DPO::CombinedRule::CombinedGraphType &gCombined,
+	                         const PropString &pString, std::ostream &s);
 public:
 	Real(LabelledRule &&rule, std::optional<LabelType> labelType);
 	~Real();
@@ -35,18 +36,14 @@ public:
 	void setName(std::string name);
 	std::optional<LabelType> getLabelType() const;
 	const LabelledRule &getDPORule() const;
-public: // shorthands
+public: // shorthands, deprecated
 	const GraphType &getGraph() const;
-	DepictionDataCore &getDepictionData(); // TODO: should not be available as non-const
+	Write::DepictionData &getDepictionData(); // TODO: should not be available as non-const
 public:
-	const DepictionDataCore &getDepictionData() const;
+	const Write::DepictionData &getDepictionData() const;
 	bool isChemical() const;
 	bool isOnlySide(Membership membership) const;
 	bool isOnlyRightSide() const; // shortcut of above
-public: // deprecated
-	const PropStringCore &getStringState() const;
-	const PropTermCore &getTermState() const;
-	const PropMoleculeCore &getMoleculeState() const;
 public:
 	static std::size_t isomorphism(const Real &rDom,
 	                               const Real &rCodom,
@@ -66,7 +63,7 @@ private:
 	const std::optional<LabelType> labelType;
 private:
 	LabelledRule dpoRule;
-	mutable std::unique_ptr<DepictionDataCore> depictionData;
+	mutable std::unique_ptr<Write::DepictionData> depictionData;
 };
 
 struct LessById {
@@ -85,6 +82,9 @@ struct IsomorphismPredicate {
 		return 1 == Real::isomorphism(*rDom, *rCodom, 1, settings);
 	}
 
+	bool operator()(const std::unique_ptr<Real> &rDom, const std::unique_ptr<Real> &rCodom) const {
+		return 1 == Real::isomorphism(*rDom, *rCodom, 1, settings);
+	}
 private:
 	LabelSettings settings;
 };
@@ -96,11 +96,11 @@ inline detail::IsomorphismPredicate makeIsomorphismPredicate(LabelType labelType
 }
 
 struct MembershipPredWrapper {
-	template<typename OuterGraph, typename Pred>
-	auto operator()(const OuterGraph &gDomain, const OuterGraph &gCodomain, Pred pred) const {
+	template<typename Pred>
+	auto operator()(const LabelledRule &gLabDomain, const LabelledRule &gLabCodomain, Pred pred) const {
 		return jla_boost::GraphMorphism::makePropertyPredicateEq(
-				makeMembershipPropertyMap(get_graph(gDomain)),
-				makeMembershipPropertyMap(get_graph(gCodomain)), pred);
+				gLabDomain.getRule().makeMembershipPropertyMap(),
+				gLabCodomain.getRule().makeMembershipPropertyMap(), pred);
 	}
 };
 

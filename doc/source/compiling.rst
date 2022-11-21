@@ -19,6 +19,7 @@ First, get MØD and install the easy dependencies:
 .. code-block:: bash
 
 	git clone --recursive https://github.com/jakobandersen/mod.git
+	cd mod
 	./bootstrap.sh
 	pip3 install -r requirements.txt  # may need --user to install in home folder instead of system folders
 	# Ubuntu:
@@ -139,6 +140,13 @@ See also :ref:`dependencies` for elaboration on some of them.
   :option:`mod_post --install-format`/:option:`mod_post --install-format-sudo`
   options.
 - ``-DBUILD_PY_MOD=on``, whether to build the Python bindings or not.
+- ``-DBUILD_PY_MOD_PIP=on``, whether to install the Python bindings via pip or
+  not. The bindings are always installed in the ``<prefix>/lib`` folder, so
+  a normal ``import`` in Python will probably not find the module.
+  Having this setting on will enable a build of a fake Python package to be
+  installed via ``pip`` in the default system folder. This fake package will
+  redirect the import to the real location.
+  This package can be uninstalled with ``pip uninstall mod-jakobandersen``.
 - ``-DBUILD_TESTING=off``, whether to allow test building or not.
   This is forced to ``off`` when used via ``add_subdirectory``.
   When ``on`` the tests can be build with ``make tests`` and run with ``ctest``.
@@ -207,7 +215,8 @@ related to them.
     This is fulfilled via a Git submodule (make sure to do
     ``git submodule update --init --recursive``),
     but if another source is needed, set ``-DUSE_NESTED_NLOHMANN_JSON=off``.
-  - (optional) `Open Babel`_ dev, >= 2.3.2 (``-DWITH_OPENBABEL=on``).
+  - (optional) `Open Babel <http://openbabel.org>`__ dev, >= 2.3.2
+    (``-DWITH_OPENBABEL=on``).
 
 - PyMØD (``-DBUILD_PY_MOD=on``):
 

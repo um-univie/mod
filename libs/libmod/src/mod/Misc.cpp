@@ -6,10 +6,10 @@
 #include <mod/lib/Graph/Single.hpp>
 #include <mod/lib/Graph/Properties/Molecule.hpp>
 #include <mod/lib/IO/IO.hpp>
-#include <mod/lib/IO/JsonUtils.hpp>
-#include <mod/lib/IO/Stereo.hpp>
+#include <mod/lib/IO/Json.hpp>
 #include <mod/lib/Random.hpp>
 #include <mod/lib/Stereo/GeometryGraph.hpp>
+#include <mod/lib/Stereo/IO/Write.hpp>
 
 #include <boost/iostreams/device/mapped_file.hpp>
 #include <boost/lexical_cast.hpp>
@@ -44,7 +44,7 @@ void showDump(const std::string &file) {
 }
 
 void printGeometryGraph() {
-	lib::IO::Stereo::Write::summary(lib::Stereo::getGeometryGraph());
+	lib::Stereo::Write::summary(lib::Stereo::getGeometryGraph());
 }
 
 } // namespace mod

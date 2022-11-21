@@ -6,15 +6,16 @@
 
 namespace mod::lib::IO {
 
-std::string getUniqueFilePrefix();
+std::string makeUniqueFilePrefix();
 std::string escapeForLatex(const std::string &str);
 std::string asLatexMath(const std::string &str);
 
 std::ostream &nullStream();
 std::ostream &post();
 
-void postReset();
 void postDisable();
+void postEnable();
+void postReopenCommandFile();
 
 struct Logger {
 	explicit Logger(std::ostream &s) : s(s) {}

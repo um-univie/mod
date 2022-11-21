@@ -1,22 +1,23 @@
 #include "Graph.hpp"
 
 #include <mod/Error.hpp>
+#include <mod/Function.hpp>
+#include <mod/VertexMap.hpp>
 #include <mod/graph/Automorphism.hpp>
 #include <mod/graph/GraphInterface.hpp>
 #include <mod/graph/Printer.hpp>
 #include <mod/lib/Graph/Single.hpp>
-#include <mod/lib/Graph/Properties/Depiction.hpp>
+#include <mod/lib/Graph/IO/DepictionData.hpp>
+#include <mod/lib/Graph/IO/Read.hpp>
+#include <mod/lib/Graph/IO/Write.hpp>
 #include <mod/lib/Graph/Properties/Molecule.hpp>
 #include <mod/lib/Graph/Properties/Stereo.hpp>
 #include <mod/lib/Graph/Properties/String.hpp>
 #include <mod/lib/Graph/Properties/Term.hpp>
-#include <mod/lib/IO/Graph.hpp>
 
-#include <boost/graph/connected_components.hpp>
 #include <boost/iostreams/device/mapped_file.hpp>
 
 #include <cassert>
-#include <fstream>
 #include <iostream>
 
 namespace mod::graph {
@@ -79,25 +80,25 @@ std::pair<std::string, std::string> Graph::print() const {
 }
 
 std::pair<std::string, std::string> Graph::print(const Printer &first, const Printer &second) const {
-	return lib::IO::Graph::Write::summary(*g, first.getOptions(), second.getOptions());
+	return lib::Graph::Write::summary(*g, first.getOptions(), second.getOptions());
 }
 
 void Graph::printTermState() const {
-	lib::IO::Graph::Write::termState(*g);
+	lib::Graph::Write::termState(*g);
 }
 
 std::string Graph::getGMLString(bool withCoords) const {
 	if(withCoords && !g->getDepictionData().getHasCoordinates())
 		throw LogicError("Coordinates are not available for this graph (" + getName() + ").");
 	std::stringstream ss;
-	lib::IO::Graph::Write::gml(*g, withCoords, ss);
+	lib::Graph::Write::gml(*g, withCoords, ss);
 	return ss.str();
 }
 
 std::string Graph::printGML(bool withCoords) const {
 	if(withCoords && !g->getDepictionData().getHasCoordinates())
 		throw LogicError("Coordinates are not available for this graph (" + getName() + ").");
-	return lib::IO::Graph::Write::gml(*g, withCoords);
+	return lib::Graph::Write::gml(*g, withCoords);
 }
 
 const std::string &Graph::getName() const {
@@ -171,17 +172,29 @@ void checkTermParsing(const lib::Graph::Single &g, LabelSettings ls) {
 } // namespace
 
 std::size_t
-Graph::isomorphism(std::shared_ptr<graph::Graph> host, std::size_t maxNumMatches, LabelSettings labelSettings) const {
+Graph::isomorphism(std::shared_ptr<graph::Graph> codomain, std::size_t maxNumMatches, LabelSettings labelSettings) const {
+	if(!codomain) throw LogicError("codomain is null.");
 	checkTermParsing(*g, labelSettings);
-	checkTermParsing(*host->g, labelSettings);
-	return lib::Graph::Single::isomorphism(*g, *host->g, maxNumMatches, labelSettings);
+	checkTermParsing(*codomain->g, labelSettings);
+	return lib::Graph::Single::isomorphism(*g, *codomain->g, maxNumMatches, labelSettings);
 }
 
 std::size_t
-Graph::monomorphism(std::shared_ptr<graph::Graph> host, std::size_t maxNumMatches, LabelSettings labelSettings) const {
+Graph::monomorphism(std::shared_ptr<graph::Graph> codomain, std::size_t maxNumMatches, LabelSettings labelSettings) const {
+	if(!codomain) throw LogicError("codomain is null.");
 	checkTermParsing(*g, labelSettings);
-	checkTermParsing(*host->g, labelSettings);
-	return lib::Graph::Single::monomorphism(*g, *host->g, maxNumMatches, labelSettings);
+	checkTermParsing(*codomain->g, labelSettings);
+	return lib::Graph::Single::monomorphism(*g, *codomain->g, maxNumMatches, labelSettings);
+}
+
+void Graph::enumerateMonomorphisms(std::shared_ptr<Graph> codomain,
+                                   std::shared_ptr<Function<bool(VertexMap<Graph, Graph>)>> callback,
+											  LabelSettings labelSettings) const {
+	if(!codomain) throw LogicError("codomain is null.");
+	if(!callback) throw LogicError("callback is null.");
+	checkTermParsing(*g, labelSettings);
+	checkTermParsing(*codomain->g, labelSettings);
+	return lib::Graph::Single::enumerateMonomorphisms(*g, *codomain->g, toStdFunction(callback), labelSettings);
 }
 
 std::shared_ptr<Graph> Graph::makePermutation() const {
@@ -239,7 +252,7 @@ std::vector<std::pair<std::string, bool>> Graph::getLoadingWarnings() const {
 namespace {
 
 std::shared_ptr<Graph>
-makeGraphFromData(lib::IO::Graph::Read::Data data, std::vector<std::pair<std::string, bool>> warnings) {
+makeGraphFromData(lib::Graph::Read::Data data, std::vector<std::pair<std::string, bool>> warnings) {
 	auto gInternal = std::make_unique<lib::Graph::Single>(
 			std::move(data.g), std::move(data.pString), std::move(data.pStereo));
 	std::shared_ptr<Graph> g = Graph::create(std::move(gInternal),
@@ -249,77 +262,110 @@ makeGraphFromData(lib::IO::Graph::Read::Data data, std::vector<std::pair<std::st
 }
 
 std::shared_ptr<Graph>
-handleLoadedGraph(lib::IO::Result<std::vector<lib::IO::Graph::Read::Data>> dataRes, lib::IO::Warnings warnings,
-                  const std::string &source) {
-	std::cout << warnings << std::flush;
-	if(!dataRes) throw InputError("Error in graph loading from " + source + ".\n" + dataRes.extractError());
-	auto data = std::move(*dataRes);
+handleLoadedGraph(std::vector<lib::Graph::Read::Data> data, lib::IO::Warnings warnings,
+                  const std::string &type, const std::string &source) {
 	if(data.size() != 1)
-		throw InputError("Error in graph loading from " + source
-		                 + ".\nThe graph is not connected (" + std::to_string(data.size()) + " components).");
+		throw InputError("Error in loading " + type + " from " + source
+		                 + ".\nA/the graph is not connected (" + std::to_string(data.size()) + " components).");
 	return makeGraphFromData(std::move(data.front()), warnings.extractWarnings());
 }
 
 std::vector<std::shared_ptr<Graph>>
-handleLoadedGraphs(lib::IO::Result<std::vector<lib::IO::Graph::Read::Data>> dataRes, lib::IO::Warnings warnings,
-                   const std::string &source) {
-	std::cout << warnings << std::flush;
-	if(!dataRes) throw InputError("Error in graph loading from " + source + ".\n" + dataRes.extractError());
-	auto data = std::move(*dataRes);
+handleLoadedGraphs(std::vector<lib::Graph::Read::Data> data, lib::IO::Warnings warnings,
+                   const std::string &type, const std::string &source) {
 	// the warnings are copied into each graph
 	const auto warningList = warnings.extractWarnings();
 	std::vector<std::shared_ptr<Graph>> res;
 	res.reserve(data.size());
-	for(auto &d : data)
+	for(auto &d: data)
 		res.push_back(makeGraphFromData(std::move(d), warningList));
 	return res;
 }
 
+std::vector<std::shared_ptr<Graph>>
+handleLoadedGraphVector(std::vector<std::vector<lib::Graph::Read::Data>> data, lib::IO::Warnings warnings,
+                        const std::string &type, const std::string &source) {
+	std::vector<std::shared_ptr<Graph>> res;
+	res.reserve(data.size());
+	for(auto &ds: data)
+		res.push_back(handleLoadedGraph(std::move(ds), lib::IO::Warnings(warnings), type, source));
+	return res;
+}
+
+std::vector<std::vector<std::shared_ptr<Graph>>>
+handleLoadedGraphsVector(std::vector<std::vector<lib::Graph::Read::Data>> data, lib::IO::Warnings warnings,
+                         const std::string &type, const std::string &source) {
+	std::vector<std::vector<std::shared_ptr<Graph>>> res;
+	res.reserve(data.size());
+	for(auto &ds: data)
+		res.push_back(handleLoadedGraphs(std::move(ds), lib::IO::Warnings(warnings), type, source));
+	return res;
+}
+
+boost::iostreams::mapped_file_source openFile(const std::string &file, const std::string &type) {
+	boost::iostreams::mapped_file_source ifs;
+	try {
+		ifs.open(file);
+	} catch(const BOOST_IOSTREAMS_FAILURE &e) {
+		throw InputError("Could not open " + type + " '" + file + "':\n" + e.what());
+	}
+	if(!ifs) throw InputError("Could not open " + type + " '" + file + "'.\n");
+	return ifs;
+}
+
+
+template<bool IsFile, typename FParse, typename FProcess, typename ...ParseArgs>
+auto load(const std::string &data, const std::string &type, FParse parse, FProcess process, ParseArgs &&... parseArgs) {
+	lib::IO::Warnings warnings;
+	auto parsedData = [&]() {
+		if constexpr(IsFile) {
+			auto ifs = openFile(data, type + " file");
+			return parse(warnings, {ifs.begin(), ifs.size()}, std::forward<ParseArgs>(parseArgs)...);
+		} else {
+			return parse(warnings, data, std::forward<ParseArgs>(parseArgs)...);
+		}
+	}();
+	std::cout << warnings << std::flush;
+	std::string source = IsFile ? type + " file '" + data + "'" : "inline " + type + " string";
+	if(!parsedData) throw InputError("Error in loading from " + source + ".\n" + parsedData.extractError());
+	return process(std::move(*parsedData), std::move(warnings), type, source);
+}
+
 } // namespace
 
+///////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
+
 std::shared_ptr<Graph> Graph::fromGMLString(const std::string &data) {
-	lib::IO::Warnings warnings;
-	auto res = lib::IO::Graph::Read::gml(warnings, data);
-	return handleLoadedGraph(std::move(res), std::move(warnings), "inline GML string");
+	return load<false>(data, "GML", &lib::Graph::Read::gml, &handleLoadedGraph);
 }
 
 std::shared_ptr<Graph> Graph::fromGMLFile(const std::string &file) {
-	boost::iostreams::mapped_file_source ifs;
-	try {
-		ifs.open(file);
-	} catch(const BOOST_IOSTREAMS_FAILURE &e) {
-		throw InputError("Could not open graph GML file '" + file + "':\n" + e.what());
-	}
-	if(!ifs) throw InputError("Could not open graph GML file '" + file + "'.\n");
-	lib::IO::Warnings warnings;
-	auto res = lib::IO::Graph::Read::gml(warnings, {ifs.begin(), ifs.size()});
-	return handleLoadedGraph(std::move(res), std::move(warnings), "file, '" + file + "'");
+	return load<true>(file, "GML", &lib::Graph::Read::gml, &handleLoadedGraph);
 }
 
 std::vector<std::shared_ptr<Graph>> Graph::fromGMLStringMulti(const std::string &data) {
-	lib::IO::Warnings warnings;
-	auto res = lib::IO::Graph::Read::gml(warnings, data);
-	return handleLoadedGraphs(std::move(res), std::move(warnings), "inline GML string");
+	return load<false>(data, "GML", &lib::Graph::Read::gml, &handleLoadedGraphs);
 }
 
 std::vector<std::shared_ptr<Graph>> Graph::fromGMLFileMulti(const std::string &file) {
-	boost::iostreams::mapped_file_source ifs;
-	try {
-		ifs.open(file);
-	} catch(const BOOST_IOSTREAMS_FAILURE &e) {
-		throw InputError("Could not open graph GML file '" + file + "':\n" + e.what());
-	}
-	if(!ifs) throw InputError("Could not open graph GML file '" + file + "'.\n");
-	lib::IO::Warnings warnings;
-	auto res = lib::IO::Graph::Read::gml(warnings, {ifs.begin(), ifs.size()});
-	return handleLoadedGraphs(std::move(res), std::move(warnings), "file, '" + file + "'");
+	return load<true>(file, "GML", &lib::Graph::Read::gml, &handleLoadedGraphs);
 }
 
-std::shared_ptr<Graph> Graph::fromDFS(const std::string &graphDFS) {
-	auto data = lib::IO::Graph::Read::dfs(graphDFS);
-	if(!data) throw InputError("Error in graph loading from graphDFS, '" + graphDFS + "'.\n" + data.extractError());
-	return makeGraphFromData(std::move(*data), {});
+///////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
+
+std::shared_ptr<Graph> Graph::fromDFS(const std::string &data) {
+	return load<false>(data, "GraphDFS", &lib::Graph::Read::dfs, &handleLoadedGraph);
 }
+
+std::vector<std::shared_ptr<Graph>> Graph::fromDFSMulti(const std::string &data) {
+	return load<false>(data, "GraphDFS", &lib::Graph::Read::dfs, &handleLoadedGraphs);
+}
+
+
+///////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 
 std::shared_ptr<Graph> Graph::fromSMILES(const std::string &smiles) {
 	return Graph::fromSMILES(smiles, false, SmilesClassPolicy::NoneOnDuplicate);
@@ -327,9 +373,7 @@ std::shared_ptr<Graph> Graph::fromSMILES(const std::string &smiles) {
 
 std::shared_ptr<Graph>
 Graph::fromSMILES(const std::string &smiles, const bool allowAbstract, SmilesClassPolicy classPolicy) {
-	lib::IO::Warnings warnings;
-	auto res = lib::IO::Graph::Read::smiles(warnings, smiles, allowAbstract, classPolicy);
-	return handleLoadedGraph(std::move(res), std::move(warnings), "smiles string, '" + smiles + "'");
+	return load<false>(smiles, "SMILES", &lib::Graph::Read::smiles, &handleLoadedGraph, allowAbstract, classPolicy);
 }
 
 std::vector<std::shared_ptr<Graph>> Graph::fromSMILESMulti(const std::string &smiles) {
@@ -338,10 +382,53 @@ std::vector<std::shared_ptr<Graph>> Graph::fromSMILESMulti(const std::string &sm
 
 std::vector<std::shared_ptr<Graph>>
 Graph::fromSMILESMulti(const std::string &smiles, bool allowAbstract, SmilesClassPolicy classPolicy) {
-	lib::IO::Warnings warnings;
-	auto res = lib::IO::Graph::Read::smiles(warnings, smiles, allowAbstract, classPolicy);
-	return handleLoadedGraphs(std::move(res), std::move(warnings), "smiles string, '" + smiles + "'");
+	return load<false>(smiles, "SMILES", &lib::Graph::Read::smiles, &handleLoadedGraphs, allowAbstract, classPolicy);
 }
+
+///////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
+
+std::shared_ptr<Graph> Graph::fromMOLString(const std::string &data, const MDLOptions &options) {
+	return load<false>(data, "MOL", &lib::Graph::Read::MDLMOL, &handleLoadedGraph, options);
+}
+
+std::shared_ptr<Graph> Graph::fromMOLFile(const std::string &file, const MDLOptions &options) {
+	return load<true>(file, "MOL", &lib::Graph::Read::MDLMOL, &handleLoadedGraph, options);
+}
+
+std::vector<std::shared_ptr<Graph>> Graph::fromMOLStringMulti(const std::string &data, const MDLOptions &options) {
+	return load<false>(data, "MOL", &lib::Graph::Read::MDLMOL, &handleLoadedGraphs, options);
+}
+
+std::vector<std::shared_ptr<Graph>> Graph::fromMOLFileMulti(const std::string &file, const MDLOptions &options) {
+	return load<true>(file, "MOL", &lib::Graph::Read::MDLMOL, &handleLoadedGraphs, options);
+}
+
+///////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
+
+std::vector<std::shared_ptr<Graph>> Graph::fromSDString(const std::string &data, const MDLOptions &options) {
+
+	return load<false>(data, "SD", &lib::Graph::Read::MDLSD, &handleLoadedGraphVector, options);
+}
+
+std::vector<std::shared_ptr<Graph>> Graph::fromSDFile(const std::string &file, const MDLOptions &options) {
+	return load<true>(file, "SD", &lib::Graph::Read::MDLSD, &handleLoadedGraphVector, options);
+}
+
+
+std::vector<std::vector<std::shared_ptr<Graph>>>
+Graph::fromSDStringMulti(const std::string &data, const MDLOptions &options) {
+	return load<false>(data, "SD", &lib::Graph::Read::MDLSD, &handleLoadedGraphsVector, options);
+}
+
+std::vector<std::vector<std::shared_ptr<Graph>>>
+Graph::fromSDFileMulti(const std::string &file, const MDLOptions &options) {
+	return load<true>(file, "SD", &lib::Graph::Read::MDLSD, &handleLoadedGraphsVector, options);
+}
+
+///////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 
 std::shared_ptr<Graph> Graph::create(std::unique_ptr<lib::Graph::Single> g) {
 	if(!g) MOD_ABORT;

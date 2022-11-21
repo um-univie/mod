@@ -18,6 +18,7 @@ Builder_execute(std::shared_ptr<Builder> b, std::shared_ptr<Strategy> strategy, 
 
 void Builder_doExport() {
 	using AddDerivation = DG::HyperEdge (Builder::*)(const Derivations &, IsomorphismPolicy);
+	using AddHyperEdge = DG::HyperEdge (Builder::*)(const DG::HyperEdge &, IsomorphismPolicy);
 	using Apply = std::vector<DG::HyperEdge> (Builder::*)(const std::vector<std::shared_ptr<graph::Graph> > &,
 	                                                      std::shared_ptr<rule::Rule>, bool,
 	                                                      int, IsomorphismPolicy);
@@ -54,6 +55,21 @@ void Builder_doExport() {
 			// rst:				is different but isomorphic to another given graph object or to a graph object already
 			// rst:				in the internal graph database in the associated derivation graph.
 			.def("addDerivation", static_cast<AddDerivation>(&Builder::addDerivation))
+					// rst:		.. method:: addHyperEdge(e, graphPolicy=IsomorphismPolicy.Check)
+					// rst:
+					// rst:			Adds a hyperedge to the associated :class:`DG` from a copy of the given hyperedge
+					// rst:			(from a different :class:`DG`).
+					// rst:			If it already exists, only add the rules to the edge.
+					// rst:
+					// rst:			:param DGHyperEdge e: a hyperedge to copy.
+					// rst:			:param IsomorphismPolicy graphPolicy: the isomorphism policy for adding the given graphs.
+					// rst:			:returns: the hyperedge corresponding to the copy of the given hyperedge.
+					// rst:			:rtype: DGHyperEdge
+					// rst:			:raises: :class:`LogicError` if ``e`` is a null edge.
+					// rst:			:raises: :class:`LogicError` if ``graphPolicy == IsomorphismPolicy.Check`` and a given graph object
+					// rst:				is different but isomorphic to another given graph object or to a graph object already
+					// rst:				in the internal graph database in the associated derivation graph.
+			.def("addHyperEdge", static_cast<AddHyperEdge>(&Builder::addHyperEdge))
 					// rst:		.. method:: execute(strategy, *, verbosity=2, ignoreRuleLabelTypes=False)
 					// rst:
 					// rst:			Execute the given strategy (:ref:`dgStrat`) and as a side-effect add

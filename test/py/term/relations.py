@@ -1,7 +1,6 @@
-postChapter("DG")
+post.summaryChapter("DG")
 print("DG")
 print("="*80)
-config.io.useOpenBabelCoords = False
 a = graphDFS("[f(a)][f(b)]")
 b = ruleGMLString("""rule [
 	ruleID "b"
@@ -13,12 +12,12 @@ b = ruleGMLString("""rule [
 ]""")
 b.printTermState()
 
-dg = dgRuleComp(inputGraphs,
-	addSubset(a) >> b,
-	labelSettings=LabelSettings(LabelType.Term, LabelRelation.Unification)
-)
-dg.calc()
-dg.print()
+dg = DG(graphDatabase=inputGraphs,
+	labelSettings=LabelSettings(LabelType.Term, LabelRelation.Unification))
+dg.build().execute(addSubset(a) >> b)
+p = DGPrinter()
+p.graphPrinter.withGraphvizCoords = True
+dg.print(p)
 
 def doRelations(xy1, xy2, xx):
 	all = [xy1, xy2, xx]
@@ -44,7 +43,7 @@ def doRelations(xy1, xy2, xx):
 	assert xy1.isomorphism(xx, labelSettings=LabelSettings(LabelType.Term, LabelRelation.Unification)) > 0
 	assert xx.isomorphism(xy1, labelSettings=LabelSettings(LabelType.Term, LabelRelation.Unification)) > 0
 
-postChapter("Graph")
+post.summaryChapter("Graph")
 print("Graph")
 print("="*80)
 xy1 = graphDFS("[f(_X, _Y)][a]")
@@ -52,7 +51,7 @@ xy2 = graphDFS("[a][f(_A, _B)]")
 xx = graphDFS("[a][f(_X, _X)]")
 doRelations(xy1, xy2, xx)
 
-postChapter("Rule")
+post.summaryChapter("Rule")
 print("Rule")
 print("="*80)
 xy1 = rcEvaluator([]).eval(rcId(xy1))[0]

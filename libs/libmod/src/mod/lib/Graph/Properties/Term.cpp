@@ -4,7 +4,7 @@
 #include <mod/lib/Graph/Properties/String.hpp>
 #include <mod/lib/IO/IO.hpp>
 #include <mod/lib/IO/ParsingError.hpp>
-#include <mod/lib/IO/Term.hpp>
+#include <mod/lib/Term/IO/Read.hpp>
 
 #include <jla_boost/graph/PairToRangeAdaptor.hpp>
 
@@ -23,7 +23,7 @@ PropTerm::PropTerm(const GraphType &g, const PropString &pString, const StringSt
 		}
 		lib::Term::RawTerm rawTerm;
 		try {
-			rawTerm = lib::IO::Term::Read::rawTerm(label, stringStore);
+			rawTerm = Term::Read::rawTerm(label, stringStore);
 		} catch(const lib::IO::ParsingError &e) {
 			parsingError = e.msg;
 			return std::numeric_limits<std::size_t>::max();

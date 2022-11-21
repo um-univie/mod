@@ -1,4 +1,4 @@
-post("disableSummary")
+post.disableInvokeMake()
 smiles('[a proteinH:4]', allowAbstract=True)
 smiles('[a proteinH:9]', allowAbstract=True)
 smiles('[C:100][C:123]([C:101])([C:118]([O:134])[C:121](=[O:135])[N:126][C:103][C:102][C:112](=[O:131])[N:125][C:104][C:105][S:144][C:114](=[O:132])[C:106][C:113](=[O:5])[O-:5])[C:108][O:137][P:143](=[O:8])([O:140][P:142](=[O:7])([O:136][C:107][C:111]1([C:117]([O:139][P:141]([O-:6])(=[O:6])[O-:6])[C:116]([O:133])[C:122]([O:138]1)[N:130]3([C:120]2(=[C:115]([C:119]([N:124])=[N:127][C:109]=[N:128]2)[N:129]=[C:110]3))))[O-:7])[O-:8]', allowAbstract=True)

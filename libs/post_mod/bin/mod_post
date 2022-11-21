@@ -57,6 +57,9 @@ else
 fi
 export MOD_PREFIX
 this="$MOD_PREFIX/bin/$self"
+if [ "$this" -ef "$(which $self)" ]; then
+	this=$self
+fi
 
 # Args
 if [ ! -n "$MOD_NUM_POST_THREADS" ]; then
@@ -118,8 +121,15 @@ elif test "x$1" != "x--mode"; then
 		exit $res
 	fi
 
-	$this --mode invokeMake
-	exit $?
+	if [ -e out/disableInvokeMake ]; then
+		echo "Post-processing disabled by user. Run"
+		echo "   $this --mode invokeMake"
+		echo "to manually invoke it."
+		exit 0
+	else
+		$this --mode invokeMake
+		exit $?
+	fi
 else # $1 == --mode
 	mode=$2
 	if test "x$mode" = "x"; then
@@ -169,17 +179,21 @@ else # $1 == --mode
 				echo "$texFile: gen"
 			}
 			function endMakefile {
-				echo "summary.pdf: $texFile"
-				if [ -e out/disableSummary ]; then
-					echo "	echo ''" # each target prints a status message
-					echo "	echo 'Summary disabled by user.' | tee summary/summary.pdf"
+				if [ -e out/disableCompileSummary ]; then
+					echo "	echo ''"
+					echo "	echo 'Summary compilation disabled by user. Run'"
+					echo "	echo '   $this --mode compileSummary'"
+					echo "	echo 'to manually invoke it.'"
+					echo " $texFile" >> $makefileAllTarget
 				else
-					echo "	$this --mode compileSummary"
+					echo " summary.pdf" >> $makefileAllTarget
 				fi
-				echo "include $makefileImpl" >> $makefile
-				echo "include $makefileDep" >> $makefile
-				echo "include $makefileAllTarget" >> $makefile
-				echo "include $makefileClean" >> $makefile
+				echo "summary.pdf: $texFile"
+				echo "	$this --mode compileSummary"
+				echo "include $makefileImpl"
+				echo "include $makefileDep"
+				echo "include $makefileAllTarget"
+				echo "include $makefileClean"
 			}
 			function initMakefileImpl {
 				local p=$MOD_PREFIX/share/mod/commonPreamble
@@ -217,16 +231,35 @@ else # $1 == --mode
 			}
 
 			#---------------------------------------------------------------------
-			# Summary
+			# Invocation Control
 			#---------------------------------------------------------------------
 
-			function disableSummary {
-				touch out/disableSummary
+			function enableInvokeMake {
+				rm -f out/disableInvokeMake
+			}
+			function disableInvokeMake {
+				touch out/disableInvokeMake
+			}
+
+			function enableCompileSummary {
+				rm -f out/disableCompileSummary
+			}
+			function disableCompileSummary {
+				touch out/disableCompileSummary
 			}
 
 			function enableSummary {
-				rm -f out/disableSummary
+				>&2 echo "WARNING: post command 'enableSummary' is deprecated', use 'ensableInvokeMake' instead."
+				enableInvokeMake
 			}
+			function disableSummary {
+				>&2 echo "WARNING: post command 'disableSummary' is deprecated', use 'disableInvokeMake' instead."
+				disableInvokeMake
+			}
+
+			#---------------------------------------------------------------------
+			# Summary
+			#---------------------------------------------------------------------
 
 			function summaryChapter {
 				echo "	echo '\summaryChapter{$(latexEsc "$1")}' >> $texFile" >> $makefile
@@ -371,14 +404,6 @@ else # $1 == --mode
 				echo -n " $fileNoExt.$outType" >> $makefileDep
 
 				return
-				extractGVImageDeps $inFile >> $makefileImpl
-				echo "" >> $makefileImpl
-				# dotFile
-				function extractGVImageDeps {
-					grep image $1 | sed "s/.* image=\"\([^\"]*\)\".*/\1/" | while read f; do
-						echo -n " $f"
-					done;
-				}
 			}
 
 			# graphType fileNoExt [noOverlay]
@@ -388,7 +413,9 @@ else # $1 == --mode
 				local noOverlay=$3
 				echo -n " $fileNoExt.plain ${fileNoExt}_coord.tex" >> $makefileClean
 				function common {
-					grep image $fileNoExt.dot | sed "s/.* image=\"\([^\"]*\)\".*/\1/" | while read f; do
+					reGrep='\[.* image="\([^\"]*\)".*\]'
+					reSed='s/.*\[.* image="\([^\"]*\)".*\].*/\1/'
+					grep "$reGrep" $fileNoExt.dot | sed "$reSed" | while read f; do
 						echo -n " $f" >> $makefileImpl
 					done
 					echo "" >> $makefileImpl
@@ -451,7 +478,6 @@ else # $1 == --mode
 
 			echo "" >> $makefileDep
 			echo "" >> $makefileClean
-			echo " summary.pdf" >> $makefileAllTarget
 			endMakefile >> $makefile
 			return 0
 		}
@@ -518,15 +544,13 @@ else # $1 == --mode
 				break
 			fi
 		done
-		# hax to prevent files from changing
-		sed -i "s!/ID .*!/ID [<0> <0>]!" ${fileNoExt}.pdf
 		return $res
 	}
 
 	gvArgs_base=""
-	#gvArgs_graph="$gvArgs_base -Kneato"
+	gvArgs_graph="$gvArgs_base -Kneato"
 	#gvArgs_ruleSide="$gvArgs_base -Kneato -Nfontsize=28 -Epenwidth=3"
-	#gvArgs_rule="$gvArgs_base -Kneato"
+	gvArgs_rule="$gvArgs_base -Kneato"
 	gvArgs_ruleCombined="$gvArgs_base -Kneato"
 	gvArgs_dgNonHyper="$gvArgs_base -Kneato -Goverlap=false -Elen=1.1"
 	gvArgs_dgHyper="$gvArgs_base -Kneato -Goverlap=false -Elen=1.5"
@@ -592,9 +616,9 @@ BEGIN {
 		if(abs(y) < 1e-4)
 			y = 0
 		if(noOverlay == "xnoOverlay") {
-			printf "\\node          (v-coord-%s) at (%s, %s) {};\n", name, x, y
+			printf "\\node                (\\modIdPrefix v-coord-%s) at (%s, %s) {};\n", name, x, y
 		} else {
-			printf "\\coordinate[overlay] (v-coord-%s) at (%s, %s) {};\n", name, x, y
+			printf "\\coordinate[overlay] (\\modIdPrefix v-coord-%s) at (%s, %s) {};\n", name, x, y
 		}
 	} else {
 		# ignore

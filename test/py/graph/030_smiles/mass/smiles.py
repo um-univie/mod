@@ -6,7 +6,7 @@ config.graph.printSmilesParsingWarnings = False
 #config.canon.printStats = True
 include("loadGraphs.py")
 
-post("disableSummary")
+post.disableInvokeMake()
 
 if not "n" in globals():
 	n = 100
@@ -39,7 +39,7 @@ for a in gCopy:
 		molLike.withIndex = True
 		a.print(graphLike, molLike)
 		b.print(graphLike, molLike)
-		post("enableSummary")
+		post.enableInvokeMake()
 		sys.exit(1)
 	for i in range(1, n):
 		aPerm = a.makePermutation()
@@ -52,7 +52,7 @@ for a in gCopy:
 			aPerm.name = "aPerm"
 			a.print()
 			aPerm.print()
-			post("enableSummary")
+			post.enableInvokeMake()
 			sys.exit(1)
 		ls = LabelSettings(LabelType.String, LabelRelation.Isomorphism)
 		if a.isomorphism(aPerm, labelSettings=ls) != 1:

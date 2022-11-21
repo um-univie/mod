@@ -1,5 +1,5 @@
-#ifndef MOD_LIB_RC_VISITOR_STEREO_H
-#define MOD_LIB_RC_VISITOR_STEREO_H
+#ifndef MOD_LIB_RC_VISITOR_STEREO_HPP
+#define MOD_LIB_RC_VISITOR_STEREO_HPP
 
 #include <mod/lib/GraphMorphism/StereoVertexMap.hpp>
 #include <mod/lib/RC/Visitor/Compound.hpp>
@@ -10,10 +10,7 @@
 
 // TODO: the edge categories are probably not instantiated correctly if the Any category is used
 
-namespace mod {
-namespace lib {
-namespace RC {
-namespace Visitor {
+namespace mod::lib::RC::Visitor {
 
 // During the algorithm we:
 // - allocate space in the data arrays
@@ -24,7 +21,7 @@ namespace Visitor {
 // - instantiate and compose embeddings
 
 struct Stereo {
-	using Membership = jla_boost::GraphDPO::Membership;
+	using Membership = lib::DPO::Membership;
 
 	template<typename G>
 	static auto NullVertex() {
@@ -36,43 +33,48 @@ struct Stereo {
 		return boost::graph_traits<G>::null_vertex();
 	}
 public:
-	std::vector<lib::Stereo::detail::InferenceBase::VertexData> vDataLeft, vDataRight;
+	std::vector<lib::Stereo::InferenceVertexData> vDataLeft, vDataRight;
 	std::vector<lib::Stereo::EdgeCategory> eDataLeft, eDataRight;
 	std::vector<bool> vertexInContext, edgeInContext;
 private:
-
-	template<typename RuleFirst, typename RuleSecond, typename InvertibleVertexMap, typename VertexSecond>
-	auto getVertexFirstChecked(const RuleFirst &rFirst, const RuleSecond &rSecond, const InvertibleVertexMap &match, const VertexSecond &vSecond) const {
+	template<typename InvertibleVertexMap, typename VertexSecond>
+	auto getVertexFirstChecked(const InvertibleVertexMap &match, const VertexSecond &vSecond) const {
 		const auto &gCodom = get_graph(get_labelled_right(rFirst));
 		const auto &gDom = get_graph(get_labelled_left(rSecond));
 		const auto m = membership(rSecond, vSecond);
-		if(m == Membership::Right) return NullVertex(gDom);
+		if(m == Membership::R) return NullVertex(gDom);
 		else return get(match, gDom, gCodom, vSecond);
 	}
 
-	template<typename RuleFirst, typename RuleSecond, typename InvertibleVertexMap, typename VertexFirst>
-	auto getVertexSecondChecked(const RuleFirst &rFirst, const RuleSecond &rSecond, const InvertibleVertexMap &match, const VertexFirst &vFirst) const {
+	template<typename InvertibleVertexMap, typename VertexFirst>
+	auto getVertexSecondChecked(const InvertibleVertexMap &match, const VertexFirst &vFirst) const {
 		const auto &gCodom = get_graph(get_labelled_right(rFirst));
 		const auto &gDom = get_graph(get_labelled_left(rSecond));
 		const auto m = membership(rFirst, vFirst);
-		if(m == Membership::Left) return NullVertex(gCodom);
+		if(m == Membership::L) return NullVertex(gCodom);
 		else return get_inverse(match, gDom, gCodom, vFirst);
 	}
 public:
+	Stereo(const lib::Rules::LabelledRule &rFirst, const lib::Rules::LabelledRule &rSecond)
+			: rFirst(rFirst), rSecond(rSecond) {}
 
-	template<bool Verbose, typename RuleFirst, typename RuleSecond, typename InvertibleVertexMap, typename Result>
-	bool init(const RuleFirst &rFirst, const RuleSecond &rSecond, InvertibleVertexMap &match, Result &result) {
+	template<bool Verbose, typename InvertibleVertexMap, typename Result>
+	bool init(const lib::DPO::CombinedRule &dpoFirst, const lib::DPO::CombinedRule &dpoSecond,
+	          InvertibleVertexMap &match, Result &result) {
+		assert(&dpoFirst == &rFirst.getRule());
+		assert(&dpoSecond == &rSecond.getRule());
 		return true;
 	}
 
-	template<bool Verbose, typename RuleFirst, typename RuleSecond, typename InvertibleVertexMap, typename Result>
-	bool finalize(const RuleFirst &rFirst, const RuleSecond &rSecond, InvertibleVertexMap &match, Result &result) {
+	template<bool Verbose, typename InvertibleVertexMap, typename Result>
+	bool finalize(const lib::DPO::CombinedRule &dpoFirst, const lib::DPO::CombinedRule &dpoSecond,
+	              InvertibleVertexMap &match, Result &result) {
 		const auto &gFirst = get_graph(rFirst);
 		const auto &gSecond = get_graph(rSecond);
-		const auto &gResult = get_graph(result.rResult);
-		using GraphFirst = typename std::decay < decltype(gFirst)>::type;
-		using GraphSecond = typename std::decay < decltype(gSecond)>::type;
-		const auto getGeoName = [](const auto &vGeo) -> const std::string& {
+		const auto &gResult = result.rDPO->getCombinedGraph();
+		using GraphFirst = typename std::decay<decltype(gFirst)>::type;
+		using GraphSecond = typename std::decay<decltype(gSecond)>::type;
+		const auto getGeoName = [](const auto &vGeo) -> const std::string & {
 			return lib::Stereo::getGeometryGraph().getGraph()[vGeo].name;
 		};
 		const auto copyAllFromSide = [&](
@@ -86,7 +88,7 @@ public:
 			const auto &conf = *get_stereo(glSide)[vInput];
 			data.vGeometry = conf.getGeometryVertex();
 			if(Verbose) std::cout << "\tGeometry: " << getGeoName(data.vGeometry) << "\n";
-			for(const auto &emb : conf) {
+			for(const auto &emb: conf) {
 				switch(emb.type) {
 				case lib::Stereo::EmbeddingEdge::Type::LonePair:
 					// offsets should be corrected somewhere else
@@ -102,8 +104,8 @@ public:
 					const auto vAdjInput = target(eInput, gInput);
 					if(Verbose) {
 						std::cout << "\tmapping edge: ("
-								<< get(boost::vertex_index_t(), gInput, vInput) << ", "
-								<< get(boost::vertex_index_t(), gInput, vAdjInput) << ")\n";
+						          << get(boost::vertex_index_t(), gInput, vInput) << ", "
+						          << get(boost::vertex_index_t(), gInput, vAdjInput) << ")\n";
 					}
 					const auto vAdjResult = get(mInputToResult, gInput, gResult, vAdjInput);
 					if(safe) assert(vAdjResult != NullVertex(gResult));
@@ -124,9 +126,9 @@ public:
 					}();
 					if(Verbose) {
 						std::cout << "\tto edge: ("
-								<< get(boost::vertex_index_t(), gResult, vResult) << ", "
-								<< get(boost::vertex_index_t(), gResult, vAdjResult) << "), offset = "
-								<< eResultOffset << " (of " << out_degree(vResult, gResultSide) << ")\n";
+						          << get(boost::vertex_index_t(), gResult, vResult) << ", "
+						          << get(boost::vertex_index_t(), gResult, vAdjResult) << "), offset = "
+						          << eResultOffset << " (of " << out_degree(vResult, gResultSide) << ")\n";
 					}
 					const auto eResult = out_edges(vResult, gResult).first[eResultOffset];
 					const auto eIdResult = get(boost::edge_index_t(), gResult, eResult);
@@ -149,29 +151,33 @@ public:
 		const auto handleOnly = [&](auto vResult, auto vInput, const auto &rInput, const auto &mInputToResult) {
 			const auto &gInput = get_graph(rInput);
 			// yay, just copy the embedding, both in the right and left side
-			const auto m = membership(result.rResult, vResult);
-			if(m != Membership::Right) {
+			const auto m = gResult[vResult].membership;
+			if(m != Membership::R) {
 				// copy left
 				if(Verbose) std::cout << "\tLeft:\n";
-				const bool partial = copyAllFromSide(std::true_type(), get_labelled_left(rInput), vInput, gInput, mInputToResult, vResult, get_left(result.rResult), vDataLeft, eDataLeft);
+				const bool partial = copyAllFromSide(std::true_type(), get_labelled_left(rInput), vInput, gInput,
+				                                     mInputToResult, vResult, result.rDPO->getLProjected(), vDataLeft,
+				                                     eDataLeft);
 				(void) partial;
 				assert(!partial);
 			}
-			if(m != Membership::Left) {
+			if(m != Membership::L) {
 				// copy right
 				if(Verbose) std::cout << "\tRight:\n";
-				const bool partial = copyAllFromSide(std::true_type(), get_labelled_right(rInput), vInput, gInput, mInputToResult, vResult, get_right(result.rResult), vDataRight, eDataRight);
-                (void) partial;
+				const bool partial = copyAllFromSide(std::true_type(), get_labelled_right(rInput), vInput, gInput,
+				                                     mInputToResult, vResult, result.rDPO->getRProjected(), vDataRight,
+				                                     eDataRight);
+				(void) partial;
 				assert(!partial);
 			}
 		};
 		const auto handleBoth = [&](auto vResult, auto vFirst, auto vSecond) {
 			using EmbEdge = lib::Stereo::EmbeddingEdge;
 			//			const auto &geo = lib::Stereo::getGeometryGraph();
-			const auto m = membership(result.rResult, vResult);
+			const auto m = gResult[vResult].membership;
 			const auto vResultId = get(boost::vertex_index_t(), gResult, vResult);
-			const auto &gR1 = get_right(rFirst);
-			const auto &gL2 = get_left(rSecond);
+			const auto &gR1 = getR(rFirst.getRule());
+			const auto &gL2 = getL(rSecond.getRule());
 			const auto &confR1 = *get_stereo(get_labelled_right(rFirst))[vFirst];
 			const auto &confL2 = *get_stereo(get_labelled_left(rSecond))[vSecond];
 			// Let's firs tmake a map of the offsets to each other.
@@ -182,13 +188,15 @@ public:
 					offsetSecondToFirst(confL2.degree(), -1);
 			{ // heuristically we 'usually' have gSecondL as a subgraph of gFirstR
 				std::size_t offsetFirst = 0;
-				for(auto oeFirst = out_edges(vFirst, gR1); oeFirst.first != oeFirst.second; ++oeFirst.first, (void) ++offsetFirst) {
+				for(auto oeFirst = out_edges(vFirst, gR1);
+				    oeFirst.first != oeFirst.second; ++oeFirst.first, (void) ++offsetFirst) {
 					const auto eFirst = *oeFirst.first;
 					const auto vAdjFirst = target(eFirst, gR1);
 					const auto vAdjSecond = get_inverse(match, gL2, gR1, vAdjFirst);
 					if(vAdjSecond == NullVertex(gSecond)) continue;
 					std::size_t offsetSecond = 0;
-					for(auto oeSecond = out_edges(vSecond, gL2); oeSecond.first != oeSecond.second; ++oeSecond.first, (void) ++offsetSecond) {
+					for(auto oeSecond = out_edges(vSecond, gL2);
+					    oeSecond.first != oeSecond.second; ++oeSecond.first, (void) ++offsetSecond) {
 						const auto eSecondCand = *oeSecond.first;
 						if(target(eSecondCand, gL2) == vAdjSecond) {
 							offsetFirstToSecond[offsetFirst] = offsetSecond;
@@ -206,17 +214,19 @@ public:
 				// TODO: how do we merge virtuals?
 				MOD_ABORT;
 			}
-			const bool firstToSecondSubgraph = std::none_of(offsetFirstToSecond.begin(), offsetFirstToSecond.end(), [&](auto o) {
-				return o == -1;
-			});
-			const bool secondToFirstSubgraph = std::none_of(offsetSecondToFirst.begin(), offsetSecondToFirst.end(), [&](auto o) {
-				return o == -1;
-			});
+			const bool firstToSecondSubgraph = std::none_of(offsetFirstToSecond.begin(), offsetFirstToSecond.end(),
+			                                                [&](auto o) {
+				                                                return o == -1;
+			                                                });
+			const bool secondToFirstSubgraph = std::none_of(offsetSecondToFirst.begin(), offsetSecondToFirst.end(),
+			                                                [&](auto o) {
+				                                                return o == -1;
+			                                                });
 			const auto geoR1 = confR1.getGeometryVertex();
 			const auto geoL2 = confL2.getGeometryVertex();
 
-			if(m != Membership::Right) {
-				assert(membership(rFirst, vFirst) == Membership::Context);
+			if(m != Membership::R) {
+				assert(membership(rFirst, vFirst) == Membership::K);
 				//				auto &data = vDataLeft[vResultId];
 				//				const auto &eData = eDataLeft;
 				const auto firstInContext = get_stereo(rFirst).inContext(vFirst);
@@ -224,14 +234,16 @@ public:
 				const auto geoL1 = confL1.getGeometryVertex();
 				if(Verbose)
 					std::cout << "\tHandling L\n"
-					<< "\t\tGeo L1: " << getGeoName(geoL1) << "\n"
-					<< "\t\tGeo R1: " << getGeoName(geoR1) << "\n"
-					<< "\t\tGeo L2: " << getGeoName(geoL2) << "\n";
+					          << "\t\tGeo L1: " << getGeoName(geoL1) << "\n"
+					          << "\t\tGeo R1: " << getGeoName(geoR1) << "\n"
+					          << "\t\tGeo L2: " << getGeoName(geoL2) << "\n";
 				if(firstInContext) {
 					if(Verbose) std::cout << "\t\tFirst stereo in context\n";
 					if(secondToFirstSubgraph) {
 						if(Verbose) std::cout << "\t\tSecond-to-first subgraph: copy and map L1/R1 to L\n";
-						const bool partial = copyAllFromSide(std::true_type(), get_labelled_left(rFirst), vFirst, gFirst, result.mFirstToResult, vResult, get_left(result.rResult), vDataLeft, eDataLeft);
+						const bool partial = copyAllFromSide(std::true_type(), get_labelled_left(rFirst), vFirst, gFirst,
+						                                     result.mFirstToResult, vResult, result.rDPO->getLProjected(),
+						                                     vDataLeft, eDataLeft);
 						(void) partial;
 						assert(!partial);
 					} else if(firstToSecondSubgraph) {
@@ -245,7 +257,9 @@ public:
 					if(Verbose) std::cout << "\t\tFirst stereo changes\n";
 					if(secondToFirstSubgraph) {
 						if(Verbose) std::cout << "\t\tSecond-to-first subgraph: copy and map L1 to L\n";
-						const bool partial = copyAllFromSide(std::true_type(), get_labelled_left(rFirst), vFirst, gFirst, result.mFirstToResult, vResult, get_left(result.rResult), vDataLeft, eDataLeft);
+						const bool partial = copyAllFromSide(std::true_type(), get_labelled_left(rFirst), vFirst, gFirst,
+						                                     result.mFirstToResult, vResult, result.rDPO->getLProjected(),
+						                                     vDataLeft, eDataLeft);
 						(void) partial;
 						assert(!partial);
 					} else if(firstToSecondSubgraph) {
@@ -257,8 +271,8 @@ public:
 					}
 				}
 			}
-			if(m != Membership::Left) {
-				assert(membership(rSecond, vSecond) == Membership::Context);
+			if(m != Membership::L) {
+				assert(membership(rSecond, vSecond) == Membership::K);
 				auto &data = vDataRight[vResultId];
 				const auto &eData = eDataRight;
 				const auto secondInContext = get_stereo(rSecond).inContext(vSecond);
@@ -266,20 +280,24 @@ public:
 				const auto geoR2 = confR2.getGeometryVertex();
 				if(Verbose)
 					std::cout << "\tHandling R\n"
-					<< "\t\tGeo R1: " << getGeoName(geoR1) << "\n"
-					<< "\t\tGeo L2: " << getGeoName(geoL2) << "\n"
-					<< "\t\tGeo R2: " << getGeoName(geoR2) << "\n";
+					          << "\t\tGeo R1: " << getGeoName(geoR1) << "\n"
+					          << "\t\tGeo L2: " << getGeoName(geoL2) << "\n"
+					          << "\t\tGeo R2: " << getGeoName(geoR2) << "\n";
 				if(secondInContext) {
 					if(Verbose) std::cout << "\t\tSecond stereo in context\n";
 					if(firstToSecondSubgraph) {
 						if(Verbose) std::cout << "\t\tFirst-to-second subgraph: copy and map L2/R2 to R\n";
-						const bool partial = copyAllFromSide(std::true_type(), get_labelled_right(rSecond), vSecond, gSecond, result.mSecondToResult, vResult, get_right(result.rResult), vDataRight, eDataRight);
+						const bool partial = copyAllFromSide(std::true_type(), get_labelled_right(rSecond), vSecond, gSecond,
+						                                     result.mSecondToResult, vResult, result.rDPO->getRProjected(),
+						                                     vDataRight, eDataRight);
 						(void) partial;
 						assert(!partial);
 					} else if(secondToFirstSubgraph) {
 						if(Verbose) std::cout << "\t\tSecond-to-first subgraph: copy and map R1 to R\n";
-						const bool partial = copyAllFromSide(std::true_type(), get_labelled_right(rFirst), vFirst, gFirst, result.mFirstToResult, vResult, get_right(result.rResult), vDataRight, eDataRight);
-                        (void) partial;
+						const bool partial = copyAllFromSide(std::true_type(), get_labelled_right(rFirst), vFirst, gFirst,
+						                                     result.mFirstToResult, vResult, result.rDPO->getRProjected(),
+						                                     vDataRight, eDataRight);
+						(void) partial;
 						assert(!partial);
 					} else {
 						if(Verbose) std::cout << "\t\tNon-subgraph: do a merge\n";
@@ -289,19 +307,22 @@ public:
 					if(Verbose) std::cout << "\t\tSecond stereo changes\n";
 					if(firstToSecondSubgraph) {
 						if(Verbose) std::cout << "\t\tFirst-to-second subgraph: copy and map R2 to R\n";
-						const bool partial = copyAllFromSide(std::true_type(), get_labelled_right(rSecond), vSecond, gSecond, result.mSecondToResult, vResult, get_right(result.rResult), vDataRight, eDataRight);
-                        (void) partial;
+						const bool partial = copyAllFromSide(std::true_type(), get_labelled_right(rSecond), vSecond, gSecond,
+						                                     result.mSecondToResult, vResult, result.rDPO->getRProjected(),
+						                                     vDataRight, eDataRight);
+						(void) partial;
 						assert(!partial);
 					} else if(secondToFirstSubgraph) {
 						if(Verbose) {
 							std::cout << "\t\tSecond-to-first subgraph:\n"
-									<< "\t\t\t- Copy all from R2.\n"
-									<< "\t\t\t- Copy unmatched from R1.\n"
-									<< "\t\t\t- Match R2 stereo onto the result and check if the pushout is valid.\n"
-									;
+							          << "\t\t\t- Copy all from R2.\n"
+							          << "\t\t\t- Copy unmatched from R1.\n"
+							          << "\t\t\t- Match R2 stereo onto the result and check if the pushout is valid.\n";
 							std::cout << "\tCopying all from R2\n";
 						}
-						const bool partial = copyAllFromSide(std::true_type(), get_labelled_right(rSecond), vSecond, gSecond, result.mSecondToResult, vResult, get_right(result.rResult), vDataRight, eDataRight);
+						const bool partial = copyAllFromSide(std::true_type(), get_labelled_right(rSecond), vSecond, gSecond,
+						                                     result.mSecondToResult, vResult, result.rDPO->getRProjected(),
+						                                     vDataRight, eDataRight);
 						(void) partial;
 						assert(!partial);
 						const auto sizeAfterR2 = data.edges.size();
@@ -312,15 +333,15 @@ public:
 							const auto &gBaseInput = get_graph(rFirst);
 							const auto &glSide = get_labelled_right(rFirst);
 							const auto &glSideOther = get_labelled_left(rSecond);
-							const auto &gResultSide = get_right(result.rResult);
+							const auto &gResultSide = result.rDPO->getRProjected();
 							const auto &mInputToResult = result.mFirstToResult;
 							const auto mapToOtherInput = [&](const auto &vFirst) {
 								// the "this->" part is needed to get GCC to not seg. fault
-								return this->getVertexSecondChecked(rFirst, rSecond, match, vFirst);
+								return this->getVertexSecondChecked(match, vFirst);
 							};
 							// the rest should be side invariant
 							const auto &conf = *get_stereo(glSide)[vInput];
-							for(const auto &emb : conf) {
+							for(const auto &emb: conf) {
 								switch(emb.type) {
 								case lib::Stereo::EmbeddingEdge::Type::LonePair:
 								case lib::Stereo::EmbeddingEdge::Type::Radical:
@@ -333,8 +354,8 @@ public:
 									const auto vAdjInput = target(eInput, gInput);
 									if(Verbose) {
 										std::cout << "\tmapping edge: ("
-												<< get(boost::vertex_index_t(), gInput, vInput) << ", "
-												<< get(boost::vertex_index_t(), gInput, vAdjInput) << ")\n";
+										          << get(boost::vertex_index_t(), gInput, vInput) << ", "
+										          << get(boost::vertex_index_t(), gInput, vAdjInput) << ")\n";
 									}
 									const auto vAdjResult = get(mInputToResult, gBaseInput, gResult, vAdjInput);
 									if(vAdjResult == NullVertex(gResult)) {
@@ -354,19 +375,21 @@ public:
 											if(Verbose) std::cout << "\tnot matched, due to vAdjInputOther = null\n";
 											return false;
 										}
-										for(auto eInputOther : asRange(out_edges(vInputOther, gInputOther))) {
+										for(auto eInputOther: asRange(out_edges(vInputOther, gInputOther))) {
 											if(target(eInputOther, gInputOther) != vAdjInputOther) {
 												if(Verbose) {
 													std::cout << "\tcand = ("
-															<< get(boost::vertex_index_t(), gInputOther, vInputOther) << ", "
-															<< get(boost::vertex_index_t(), gInputOther, vAdjInputOther) << ") not it\n";
+													          << get(boost::vertex_index_t(), gInputOther, vInputOther) << ", "
+													          << get(boost::vertex_index_t(), gInputOther, vAdjInputOther)
+													          << ") not it\n";
 												}
 												continue;
 											}
 											if(Verbose) {
 												std::cout << "\tcand = ("
-														<< get(boost::vertex_index_t(), gInputOther, vInputOther) << ", "
-														<< get(boost::vertex_index_t(), gInputOther, vAdjInputOther) << ") is it\n";
+												          << get(boost::vertex_index_t(), gInputOther, vInputOther) << ", "
+												          << get(boost::vertex_index_t(), gInputOther, vAdjInputOther)
+												          << ") is it\n";
 											}
 											// TODO: shouldn't we check the membership as well?
 											return true;
@@ -382,17 +405,18 @@ public:
 									// now find the corresponding edge in result
 									const auto eResultOffset = [&]() {
 										const auto oeResult = out_edges(vResult, gResultSide);
-										const auto oeIter = std::find_if(oeResult.first, oeResult.second, [&](const auto &eResultCand) {
-											return target(eResultCand, gResult) == vAdjResult;
-										});
+										const auto oeIter = std::find_if(oeResult.first, oeResult.second,
+										                                 [&](const auto &eResultCand) {
+											                                 return target(eResultCand, gResult) == vAdjResult;
+										                                 });
 										assert(oeIter != oeResult.second);
 										return std::distance(oeResult.first, oeIter);
 									}();
 									if(Verbose) {
 										std::cout << "\tto edge: ("
-												<< get(boost::vertex_index_t(), gResult, vResult) << ", "
-												<< get(boost::vertex_index_t(), gResult, vAdjResult) << "), offset = "
-												<< eResultOffset << " (of " << out_degree(vResult, gResultSide) << ")\n";
+										          << get(boost::vertex_index_t(), gResult, vResult) << ", "
+										          << get(boost::vertex_index_t(), gResult, vAdjResult) << "), offset = "
+										          << eResultOffset << " (of " << out_degree(vResult, gResultSide) << ")\n";
 									}
 									const auto eResult = out_edges(vResult, gResult).first[eResultOffset];
 									const auto eIdResult = get(boost::edge_index_t(), gResult, eResult);
@@ -413,12 +437,15 @@ public:
 					}
 				}
 				if(false) {
-					copyAllFromSide(std::false_type(), get_labelled_right(rSecond), vSecond, gSecond, result.mSecondToResult, vResult, get_right(result.rResult), vDataRight, eDataRight);
+					copyAllFromSide(std::false_type(), get_labelled_right(rSecond), vSecond, gSecond, result.mSecondToResult,
+					                vResult, result.rDPO->getRProjected(), vDataRight, eDataRight);
 					const auto prevEmbSize = data.edges.size();
 
 					if(data.edges.size() > prevEmbSize) {
 						// we the fixation must be free
-						if(Verbose) std::cout << "\tfix: data.edges.size() = " << data.edges.size() << " > " << prevEmbSize << " = prevEmbSize, so set free (was " << data.fix << ")\n";
+						if(Verbose)
+							std::cout << "\tfix: data.edges.size() = " << data.edges.size() << " > " << prevEmbSize
+							          << " = prevEmbSize, so set free (was " << data.fix << ")\n";
 						data.fix = lib::Stereo::Fixation::free();
 					} else {
 						if(Verbose) std::cout << "\tfix: not changing it (" << data.fix << ")\n";
@@ -428,9 +455,9 @@ public:
 		}; // handleBoth()
 		if(Verbose) std::cout << "Stereo Finalization\n" << std::string(80, '-') << '\n';
 		const auto &gGeometry = lib::Stereo::getGeometryGraph().getGraph();
-		for(auto vResult : asRange(vertices(gResult))) {
+		for(auto vResult: asRange(vertices(gResult))) {
 			if(Verbose) std::cout << "Result vertex: " << get(boost::vertex_index_t(), gResult, vResult) << "\n";
-			const auto m = membership(result.rResult, vResult);
+			const auto m = result.rDPO->getCombinedGraph()[vResult].membership;
 			const auto vResultId = get(boost::vertex_index_t(), gResult, vResult);
 			// If vResult is in only first or only second, we should be able to just copy the embedding.
 			const auto vFirst = get_inverse(result.mFirstToResult, gFirst, gResult, vResult);
@@ -440,7 +467,7 @@ public:
 			const auto instantiateConfs = [&]() {
 				if(Verbose) std::cout << "\tinstantiating configurations\n";
 				// TODO: we should probably correct LonePair and Radical offsets here
-				if(m != Membership::Right) {
+				if(m != Membership::R) {
 					auto &data = vDataLeft[vResultId];
 					data.configuration = gGeometry[data.vGeometry].constructor(
 							data.edges.data(), data.edges.data() + data.edges.size(), data.fix, ssErr);
@@ -450,7 +477,7 @@ public:
 						MOD_ABORT;
 					}
 				}
-				if(m != Membership::Left) {
+				if(m != Membership::L) {
 					auto &data = vDataRight[vResultId];
 					data.configuration = gGeometry[data.vGeometry].constructor(
 							data.edges.data(), data.edges.data() + data.edges.size(), data.fix, ssErr);
@@ -476,16 +503,15 @@ public:
 			}
 		}
 
-		using GraphResult = typename std::decay < decltype(gResult)>::type;
+		using GraphResult = typename std::decay<decltype(gResult)>::type;
 		using ResultVertex = typename boost::graph_traits<GraphResult>::vertex_descriptor;
 		using ResultEdge = typename boost::graph_traits<GraphResult>::edge_descriptor;
 
 		struct Inf {
 			const GraphResult &g;
-			std::vector<lib::Stereo::detail::InferenceBase::VertexData> vData;
+			std::vector<lib::Stereo::InferenceVertexData> vData;
 			std::vector<lib::Stereo::EdgeCategory> eData;
 		public:
-
 			std::unique_ptr<lib::Stereo::Configuration> extractConfiguration(const ResultVertex &v) {
 				auto vId = get(boost::vertex_index_t(), g, v);
 				assert(vData[vId].configuration);
@@ -504,18 +530,19 @@ public:
 		const auto edgeInContext = [this, &gResult](const auto &e) -> bool {
 			return this->edgeInContext[get(boost::edge_index_t(), gResult, e)];
 		};
-		result.rResult.pStereo.reset(new lib::Rules::PropStereoCore(gResult,
-				Inf{gResult, std::move(vDataLeft), std::move(eDataLeft)}, Inf{gResult, std::move(vDataRight), std::move(eDataRight)},
-		vertexInContext, edgeInContext));
+		result.pStereo.reset(new lib::Rules::PropStereo(
+				*result.rDPO,
+				Inf{gResult, std::move(vDataLeft), std::move(eDataLeft)},
+				Inf{gResult, std::move(vDataRight), std::move(eDataRight)},
+				vertexInContext, edgeInContext));
 		return true;
 	}
 public:
-
-	template<bool Verbose, typename RuleFirst, typename RuleSecond, typename InvertibleVertexMap, typename Result,
-	typename VertexFirst, typename VertexResult>
-	void copyVertexFirst(const RuleFirst &rFirst, const RuleSecond &rSecond, const InvertibleVertexMap &match, const Result &result,
-			const VertexFirst &vFirst, const VertexResult &vResult) {
-		const auto &gResult = get_graph(result.rResult);
+	template<bool Verbose, typename InvertibleVertexMap, typename Result, typename VertexFirst, typename VertexResult>
+	void copyVertexFirst(const lib::DPO::CombinedRule &dpoFirst, const lib::DPO::CombinedRule &dpoSecond,
+	                     const InvertibleVertexMap &match, const Result &result,
+	                     const VertexFirst &vFirst, const VertexResult &vResult) {
+		const auto &gResult = result.rDPO->getCombinedGraph();
 		const auto vResultId = get(boost::vertex_index_t(), gResult, vResult);
 		(void) vResultId;
 		assert(vDataLeft.size() + 1 == num_vertices(gResult));
@@ -527,11 +554,12 @@ public:
 		vertexInContext.push_back(get_stereo(rFirst).inContext(vFirst));
 	}
 
-	template<bool Verbose, typename RuleFirst, typename RuleSecond, typename InvertibleVertexMap, typename Result,
-	typename VertexSecond, typename VertexResult>
-	void copyVertexSecond(const RuleFirst &rFirst, const RuleSecond &rSecond, const InvertibleVertexMap &match, const Result &result,
-			const VertexSecond &vSecond, const VertexResult &vResult) {
-		const auto &gResult = get_graph(result.rResult);
+	template<bool Verbose, typename InvertibleVertexMap, typename Result,
+			typename VertexSecond, typename VertexResult>
+	void copyVertexSecond(const lib::DPO::CombinedRule &dpoFirst, const lib::DPO::CombinedRule &dpoSecond,
+	                      const InvertibleVertexMap &match, const Result &result,
+	                      const VertexSecond &vSecond, const VertexResult &vResult) {
+		const auto &gResult = result.rDPO->getCombinedGraph();
 		const auto vResultId = get(boost::vertex_index_t(), gResult, vResult);
 		(void) vResultId;
 		assert(vDataLeft.size() + 1 == num_vertices(gResult));
@@ -543,15 +571,16 @@ public:
 		vertexInContext.push_back(get_stereo(rSecond).inContext(vSecond));
 	}
 
-	template<bool Verbose, typename RuleFirst, typename RuleSecond, typename InvertibleVertexMap, typename Result,
-	typename EdgeFirst, typename EdgeResult>
-	void copyEdgeFirst(const RuleFirst &rFirst, const RuleSecond &rSecond, const InvertibleVertexMap &match, const Result &result,
-			const EdgeFirst &eFirst, const EdgeResult &eResult) {
-		using GraphSecond = typename jla_boost::GraphDPO::PushoutRuleTraits<RuleSecond>::GraphType;
+	template<bool Verbose, typename InvertibleVertexMap, typename Result,
+			typename EdgeFirst, typename EdgeResult>
+	void copyEdgeFirst(const lib::DPO::CombinedRule &dpoFirst, const lib::DPO::CombinedRule &dpoSecond,
+	                   const InvertibleVertexMap &match, const Result &result,
+	                   const EdgeFirst &eFirst, const EdgeResult &eResult) {
+		using GraphSecond = lib::Rules::LabelledRule::GraphType;
 		const auto m = membership(rFirst, eFirst);
 		const auto &gFirst = get_graph(rFirst);
 		const auto &gSecond = get_graph(rSecond);
-		const auto &gResult = get_graph(result.rResult);
+		const auto &gResult = result.rDPO->getCombinedGraph();
 		const auto eResultId = get(boost::edge_index_t(), gResult, eResult);
 		assert(eDataLeft.size() + 1 == num_edges(gResult));
 		assert(eDataLeft.size() == eDataRight.size());
@@ -560,20 +589,20 @@ public:
 		eDataLeft.emplace_back();
 		eDataRight.emplace_back();
 		edgeInContext.push_back(get_stereo(rFirst).inContext(eFirst));
-		if(m != Membership::Right) {
+		if(m != Membership::R) {
 			// copy from rFirst left
 			eDataLeft[eResultId] = get_stereo(get_labelled_left(rFirst))[eFirst];
 		}
-		if(m != Membership::Left) {
+		if(m != Membership::L) {
 			// copy from the epimorphic overlap
 			// if the edge is matched, get data from the unifier
 			// otherwise from rFirst
-			const auto vSecondSrc = getVertexSecondChecked(rFirst, rSecond, match, source(eFirst, gFirst));
-			const auto vSecondTar = getVertexSecondChecked(rFirst, rSecond, match, target(eFirst, gFirst));
+			const auto vSecondSrc = getVertexSecondChecked(match, source(eFirst, gFirst));
+			const auto vSecondTar = getVertexSecondChecked(match, target(eFirst, gFirst));
 			const bool isMatched = [&]() {
 				if(vSecondSrc == NullVertex<GraphSecond>()) return false;
 				if(vSecondTar == NullVertex<GraphSecond>()) return false;
-				for(auto eSecond : asRange(out_edges(vSecondSrc, gSecond))) {
+				for(auto eSecond: asRange(out_edges(vSecondSrc, gSecond))) {
 					if(target(eSecond, gSecond) != vSecondTar) continue;
 					// TODO: shouldn't we check the membership as well?
 					return true;
@@ -584,20 +613,22 @@ public:
 				eDataRight[eResultId] = get_stereo(get_labelled_right(rFirst))[eFirst];
 			} else {
 				auto data = get_prop(lib::GraphMorphism::StereoDataT(), match);
-				eDataRight[eResultId] = get_edge_category(data, get_labelled_left(rSecond), get_labelled_right(rFirst), eFirst);
+				eDataRight[eResultId] = get_edge_category(data, get_labelled_left(rSecond), get_labelled_right(rFirst),
+				                                          eFirst);
 			}
 		}
 	}
 
-	template<bool Verbose, typename RuleFirst, typename RuleSecond, typename InvertibleVertexMap, typename Result,
-	typename EdgeSecond, typename EdgeResult>
-	void copyEdgeSecond(const RuleFirst &rFirst, const RuleSecond &rSecond, const InvertibleVertexMap &match, const Result &result,
-			const EdgeSecond &eSecond, const EdgeResult &eResult) {
-		using GraphFirst = typename jla_boost::GraphDPO::PushoutRuleTraits<RuleFirst>::GraphType;
-		const auto m = membership(result.rResult, eResult);
+	template<bool Verbose, typename InvertibleVertexMap, typename Result,
+			typename EdgeSecond, typename EdgeResult>
+	void copyEdgeSecond(const lib::DPO::CombinedRule &dpoFirst, const lib::DPO::CombinedRule &dpoSecond,
+	                    const InvertibleVertexMap &match, const Result &result,
+	                    const EdgeSecond &eSecond, const EdgeResult &eResult) {
+		using GraphFirst = lib::Rules::LabelledRule::GraphType;
 		const auto &gFirst = get_graph(rFirst);
 		const auto &gSecond = get_graph(rSecond);
-		const auto &gResult = get_graph(result.rResult);
+		const auto &gResult = result.rDPO->getCombinedGraph();
+		const auto m = gResult[eResult].membership;
 		const auto eResultId = get(boost::edge_index_t(), gResult, eResult);
 		assert(eDataLeft.size() + 1 == num_edges(gResult));
 		assert(eDataLeft.size() == eDataRight.size());
@@ -606,16 +637,16 @@ public:
 		eDataLeft.emplace_back();
 		eDataRight.emplace_back();
 		edgeInContext.push_back(get_stereo(rSecond).inContext(eSecond));
-		if(m != Membership::Right) {
+		if(m != Membership::R) {
 			// copy from the epimorphic overlap
 			// if the edge is matched, get data from the unifier
 			// otherwise from rSecond
-			const auto vFirstSrc = getVertexFirstChecked(rFirst, rSecond, match, source(eSecond, gSecond));
-			const auto vFirstTar = getVertexFirstChecked(rFirst, rSecond, match, target(eSecond, gSecond));
+			const auto vFirstSrc = getVertexFirstChecked(match, source(eSecond, gSecond));
+			const auto vFirstTar = getVertexFirstChecked(match, target(eSecond, gSecond));
 			const bool isMatched = [&]() {
 				if(vFirstSrc == NullVertex<GraphFirst>()) return false;
 				if(vFirstTar == NullVertex<GraphFirst>()) return false;
-				for(auto eFirst : asRange(out_edges(vFirstSrc, gFirst))) {
+				for(auto eFirst: asRange(out_edges(vFirstSrc, gFirst))) {
 					if(target(eFirst, gFirst) != vFirstTar) continue;
 					// TODO: shouldn't we check the membership as well?
 					return true;
@@ -629,13 +660,12 @@ public:
 				eDataLeft[eResultId] = get_stereo(get_labelled_left(rSecond))[eSecond];
 			}
 		}
-		if(m != Membership::Left) {
+		if(m != Membership::L) {
 			// copy from rSecond right
 			eDataRight[eResultId] = get_stereo(get_labelled_right(rSecond))[eSecond];
 		}
 	}
 private:
-
 	template<typename GeometryVertex, typename IterEmb>
 	void printData(std::ostream &s, GeometryVertex geometryVertex, IterEmb firstEmb, IterEmb lastEmb) {
 		const auto &gGeometry = lib::Stereo::getGeometryGraph().getGraph();
@@ -663,156 +693,163 @@ private:
 		}
 		s << "]";
 	}
-
 public:
-
-	template<typename RuleFirst, typename RuleSecond, typename InvertibleVertexMap, typename Result, typename VertexFirst>
-	void printVertexFirst(const RuleFirst &rFirst, const RuleSecond &rSecond, const InvertibleVertexMap &match, const Result &result,
-			std::ostream &s, const VertexFirst &vFirst) {
+	template<typename InvertibleVertexMap, typename Result, typename VertexFirst>
+	void printVertexFirst(const lib::DPO::CombinedRule &dpoFirst, const lib::DPO::CombinedRule &dpoSecond,
+								 const InvertibleVertexMap &match, const Result &result,
+								 std::ostream &s, const VertexFirst &vFirst) {
 		const auto m = membership(rFirst, vFirst);
 		s << ", Stereo(";
-		if(m != Membership::Right) {
+		if(m != Membership::R) {
 			const auto &conf = *get_stereo(get_labelled_left(rFirst))[vFirst];
 			printData(s, conf.getGeometryVertex(), conf.begin(), conf.end());
 		} else s << "<>";
 		s << " ->";
 		if(!get_stereo(rFirst).inContext(vFirst)) s << "!";
 		s << " ";
-		if(m != Membership::Left) {
+		if(m != Membership::L) {
 			const auto &conf = *get_stereo(get_labelled_right(rFirst))[vFirst];
 			printData(s, conf.getGeometryVertex(), conf.begin(), conf.end());
 		} else s << "<>";
 		s << ")";
 	}
 
-	template<typename RuleFirst, typename RuleSecond, typename InvertibleVertexMap, typename Result, typename VertexSecond>
-	void printVertexSecond(const RuleFirst &rFirst, const RuleSecond &rSecond, const InvertibleVertexMap &match, const Result &result,
-			std::ostream &s, const VertexSecond &vSecond) {
+	template<typename InvertibleVertexMap, typename Result, typename VertexSecond>
+	void printVertexSecond(const lib::DPO::CombinedRule &dpoFirst, const lib::DPO::CombinedRule &dpoSecond,
+								  const InvertibleVertexMap &match, const Result &result,
+								  std::ostream &s, const VertexSecond &vSecond) {
 		const auto m = membership(rSecond, vSecond);
 		s << ", Stereo(";
-		if(m != Membership::Right) {
+		if(m != Membership::R) {
 			const auto &conf = *get_stereo(get_labelled_left(rSecond))[vSecond];
 			printData(s, conf.getGeometryVertex(), conf.begin(), conf.end());
 		} else s << "<>";
 		s << " ->";
 		if(!get_stereo(rSecond).inContext(vSecond)) s << "!";
 		s << " ";
-		if(m != Membership::Left) {
+		if(m != Membership::L) {
 			const auto &conf = *get_stereo(get_labelled_right(rSecond))[vSecond];
 			printData(s, conf.getGeometryVertex(), conf.begin(), conf.end());
 		} else s << "<>";
 		s << ")";
 	}
 
-	template<typename RuleFirst, typename RuleSecond, typename InvertibleVertexMap, typename Result, typename VertexResult>
-	void printVertexResult(const RuleFirst &rFirst, const RuleSecond &rSecond, const InvertibleVertexMap &match, const Result &result,
-			std::ostream &s, const VertexResult &vResult) {
-		const auto m = membership(result.rResult, vResult);
-		const auto &gResult = get_graph(result.rResult);
+	template<typename InvertibleVertexMap, typename Result, typename VertexResult>
+	void printVertexResult(const lib::DPO::CombinedRule &dpoFirst, const lib::DPO::CombinedRule &dpoSecond,
+								  const InvertibleVertexMap &match, const Result &result,
+								  std::ostream &s, const VertexResult &vResult) {
+		const auto &gResult = result.rDPO->getCombinedGraph();
+		const auto m = gResult[vResult].membership;
 		const auto vResultId = get(boost::vertex_index_t(), gResult, vResult);
 		const auto &dLeft = vDataLeft[vResultId];
 		const auto &dRight = vDataRight[vResultId];
 		s << ", Stereo(";
-		if(m != Membership::Right)
+		if(m != Membership::R)
 			printData(s, dLeft.vGeometry, dLeft.edges.begin(), dLeft.edges.end());
 		else s << "<>";
 		s << " ->";
 		if(!vertexInContext[vResultId]) s << "!";
 		s << " ";
-		if(m != Membership::Left)
+		if(m != Membership::L)
 			printData(s, dRight.vGeometry, dRight.edges.begin(), dRight.edges.end());
 		else s << "<>";
 		s << ")";
 	}
 
-	template<typename RuleFirst, typename RuleSecond, typename InvertibleVertexMap, typename Result, typename EdgeFirst>
-	void printEdgeFirst(const RuleFirst &rFirst, const RuleSecond &rSecond, const InvertibleVertexMap &match, const Result &result,
-			std::ostream &s, const EdgeFirst &eFirst) {
+	template<typename InvertibleVertexMap, typename Result, typename EdgeFirst>
+	void printEdgeFirst(const lib::DPO::CombinedRule &dpoFirst, const lib::DPO::CombinedRule &dpoSecond,
+							  const InvertibleVertexMap &match, const Result &result,
+							  std::ostream &s, const EdgeFirst &eFirst) {
 		const auto m = membership(rFirst, eFirst);
 		s << ", Stereo(";
-		if(m != Membership::Right) {
+		if(m != Membership::R) {
 			s << get_stereo(get_labelled_left(rFirst))[eFirst];
 		} else s << "<>";
 		s << " ->";
 		if(!get_stereo(rFirst).inContext(eFirst)) s << "!";
 		s << " ";
-		if(m != Membership::Left) {
+		if(m != Membership::L) {
 			s << get_stereo(get_labelled_right(rFirst))[eFirst];
 		} else s << "<>";
 		s << ")";
 	}
 
-	template<typename RuleFirst, typename RuleSecond, typename InvertibleVertexMap, typename Result, typename EdgeSecond>
-	void printEdgeSecond(const RuleFirst &rFirst, const RuleSecond &rSecond, const InvertibleVertexMap &match, const Result &result,
-			std::ostream &s, const EdgeSecond &eSecond) {
+	template<typename InvertibleVertexMap, typename Result, typename EdgeSecond>
+	void printEdgeSecond(const lib::DPO::CombinedRule &dpoFirst, const lib::DPO::CombinedRule &dpoSecond,
+								const InvertibleVertexMap &match, const Result &result,
+								std::ostream &s, const EdgeSecond &eSecond) {
 		const auto m = membership(rSecond, eSecond);
 		s << ", Stereo(";
-		if(m != Membership::Right) {
+		if(m != Membership::R) {
 			s << get_stereo(get_labelled_left(rSecond))[eSecond];
 		} else s << "<>";
 		s << " ->";
 		if(!get_stereo(rSecond).inContext(eSecond)) s << "!";
 		s << " ";
-		if(m != Membership::Left) {
+		if(m != Membership::L) {
 			s << get_stereo(get_labelled_right(rSecond))[eSecond];
 		} else s << "<>";
 		s << ")";
 	}
-public:
 
-	template<bool Verbose, typename RuleFirst, typename RuleSecond, typename InvertibleVertexMap, typename Result,
-	typename VertexResult, typename VertexSecond>
-	void composeVertexRvsLR(const RuleFirst &rFirst, const RuleSecond &rSecond, const InvertibleVertexMap &match, const Result &result,
-			VertexResult vResult, VertexSecond vSecond) {
+public:
+	template<bool Verbose, typename InvertibleVertexMap, typename Result,
+			typename VertexResult, typename VertexSecond>
+	void composeVertexRvsLR(const lib::DPO::CombinedRule &dpoFirst, const lib::DPO::CombinedRule &dpoSecond,
+	                        const InvertibleVertexMap &match, const Result &result,
+	                        VertexResult vResult, VertexSecond vSecond) {
 		// -> a | a -> b, maybe a == b
 		// to
 		// -> b
-		assert(!vertexInContext[get(boost::vertex_index_t(), get_graph(result.rResult), vResult)]);
+		assert(!vertexInContext[get(boost::vertex_index_t(), result.rDPO->getCombinedGraph(), vResult)]);
 	}
 
-	template<bool Verbose, typename RuleFirst, typename RuleSecond, typename InvertibleVertexMap, typename Result,
-	typename VertexResult, typename VertexSecond>
-	void composeVertexLRvsL(const RuleFirst &rFirst, const RuleSecond &rSecond, const InvertibleVertexMap &match, const Result &result,
-			VertexResult vResult, VertexSecond vSecond) {
+	template<bool Verbose, typename InvertibleVertexMap, typename Result,
+			typename VertexResult, typename VertexSecond>
+	void composeVertexLRvsL(const lib::DPO::CombinedRule &dpoFirst, const lib::DPO::CombinedRule &dpoSecond,
+	                        const InvertibleVertexMap &match, const Result &result,
+	                        VertexResult vResult, VertexSecond vSecond) {
 		// a -> a | a ->
 		// b -> a | a ->
 		// to
 		// a ->
 		// b ->
-		const auto vIdResult = get(boost::vertex_index_t(), get_graph(result.rResult), vResult);
+		const auto vIdResult = get(boost::vertex_index_t(), result.rDPO->getCombinedGraph(), vResult);
 		vertexInContext[vIdResult] = false;
 	}
 
-	template<bool Verbose, typename RuleFirst, typename RuleSecond, typename InvertibleVertexMap, typename Result,
-	typename VertexResult, typename VertexSecond>
-	void composeVertexLRvsLR(const RuleFirst &rFirst, const RuleSecond &rSecond, const InvertibleVertexMap &match, const Result &result,
-			VertexResult vResult, VertexSecond vSecond) {
+	template<bool Verbose, typename InvertibleVertexMap, typename Result,
+			typename VertexResult, typename VertexSecond>
+	void composeVertexLRvsLR(const lib::DPO::CombinedRule &dpoFirst, const lib::DPO::CombinedRule &dpoSecond,
+	                         const InvertibleVertexMap &match, const Result &result,
+	                         VertexResult vResult, VertexSecond vSecond) {
 		// a != b, a != c, b =? c
 		// a -> a | a -> a
 		// a -> a | a -> c
 		// b -> a | a -> a
 		// b -> a | a -> c
 		// if both vertices are in context, so should the result be
-		const auto vIdResult = get(boost::vertex_index_t(), get_graph(result.rResult), vResult);
+		const auto vIdResult = get(boost::vertex_index_t(), result.rDPO->getCombinedGraph(), vResult);
 		vertexInContext[vIdResult] = vertexInContext[vIdResult] && get_stereo(rSecond).inContext(vSecond);
 	}
 public:
-
-	template<bool Verbose, typename RuleFirst, typename RuleSecond, typename InvertibleVertexMap, typename Result,
-	typename EdgeResult, typename EdgeSecond>
-	void setEdgeResultRightFromSecondRight(const RuleFirst &rFirst, const RuleSecond &rSecond, const InvertibleVertexMap &match, const Result &result,
-			EdgeResult eResult, EdgeSecond eSecond) {
+	template<bool Verbose, typename InvertibleVertexMap, typename Result,
+			typename EdgeResult, typename EdgeSecond>
+	void
+	setEdgeResultRightFromSecondRight(const lib::DPO::CombinedRule &dpoFirst, const lib::DPO::CombinedRule &dpoSecond,
+	                                  const InvertibleVertexMap &match, const Result &result,
+	                                  EdgeResult eResult, EdgeSecond eSecond) {
 		// |  ->   vs.    -> |, simply copy the R2 to R
 		// |  -> | vs. |  -> |, do the copy, but also set inContext if both are in context
-		const auto eIdResult = get(boost::edge_index_t(), get_graph(result.rResult), eResult);
+		const auto eIdResult = get(boost::edge_index_t(), result.rDPO->getCombinedGraph(), eResult);
 		eDataRight[eIdResult] = get_stereo(get_labelled_right(rSecond))[eSecond];
 		edgeInContext[eIdResult] = edgeInContext[eIdResult] && get_stereo(rSecond).inContext(eSecond);
 	}
+private:
+	const lib::Rules::LabelledRule &rFirst;
+	const lib::Rules::LabelledRule &rSecond;
 };
 
-} // namespace Composer
-} // namespace RC
-} // namespace lib
-} // namespace mod
+} // namespace mod::lib::RC::Visitor
 
-#endif /* MOD_LIB_RC_VISITOR_STEREO_H */
+#endif // MOD_LIB_RC_VISITOR_STEREO_HPP

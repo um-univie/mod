@@ -40,6 +40,7 @@ void exportClass() {
 			// rst:
 			// rst:			:param graphs: the list of graphs to adapt.
 			// rst:			:type graphs: list[Graph]
+			// rst:			:raises LogicError: if a given graph is ``None``.
 			.def("__init__", py::make_constructor(&make))
 			.def(py::self == py::self)
 			.def(py::self != py::self)

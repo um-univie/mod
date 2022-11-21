@@ -29,16 +29,18 @@ void markSpecialAtomsUsed(std::vector<bool> &used);
 std::string symbolFromAtomId(AtomId atomId);
 void appendSymbolFromAtomId(std::string &s, AtomId atomId);
 char bondToChar(BondType bt);
+std::string chargeSuffix(Charge c);
+
 double exactMass(AtomId a, Isotope i); // implemented in Mass.cpp
 constexpr double electronMass = 0.000548580;
 constexpr double GasConstant = 1.98720425864083e-3; // kcal/(K * mol)
 
 template<typename Graph, typename AtomDataT, typename EdgeDataT, typename HasImportantStereo>
-bool isCollapsible(const typename boost::graph_traits<Graph>::vertex_descriptor v,
-						 const Graph &g,
-						 const AtomDataT &atomData,
-						 const EdgeDataT &edgeData,
-						 const HasImportantStereo &hasImportantStereo) {
+bool isCollapsibleHydrogen(const typename boost::graph_traits<Graph>::vertex_descriptor v,
+                           const Graph &g,
+                           const AtomDataT &atomData,
+                           const EdgeDataT &edgeData,
+                           const HasImportantStereo &hasImportantStereo) {
 	if(!isCleanHydrogen(atomData(v))) return false;
 	if(out_degree(v, g) != 1) return false;
 	const auto e = *out_edges(v, g).first;

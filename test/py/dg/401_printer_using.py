@@ -1,5 +1,5 @@
 include("../xxx_helpers.py")
-post("enableSummary")
+post.enableInvokeMake()
 
 dg = DG()
 fail(lambda: dg.print(), "Can not create print data. The DG is not locked yet.")
@@ -13,6 +13,10 @@ with dg.build() as b:
 		right [ node [ id 0 label "S" ] ]
 	]''')
 	b.addDerivation(d)
+	d = Derivation()
+	d.left = [graphDFS("[image1]", name="image1")]
+	d.right = [graphDFS("[image2]", name="image2")]
+	b.addDerivation(d)
 	s = "A + hide -> B\n"
 	for i in range(1, 4):
 		s += "{i} A{i} -> {i} B\n".format(i=i)
@@ -22,19 +26,19 @@ with dg.build() as b:
 	b.addAbstract(s)
 dg.print()
 
-postSection("withIndex, withShortcutEdges, labelsAsLatexMath")
+post.summarySection("withIndex, withShortcutEdges, labelsAsLatexMath")
 p = DGPrinter()
 p.graphPrinter.withIndex = True
 p.withShortcutEdges = False
 p.labelsAsLatexMath = False
 dg.print(p)
 
-postSection("withGraphImages")
+post.summarySection("withGraphImages")
 p = DGPrinter()
 p.withGraphImages = False
 dg.print(p)
 
-postSection("vertexVisible")
+post.summarySection("vertexVisible")
 p = DGPrinter()
 p.pushVertexVisible(False)
 dg.print(p)
@@ -42,14 +46,12 @@ p.popVertexVisible()
 p.pushVertexVisible(lambda v: v.graph.name != "hide")
 dg.print(p)
 p.popVertexVisible()
-# deprecated
-config.common.ignoreDeprecation = True
-p.pushVertexVisible(lambda g, dg: g.name != "hide")
-config.common.ignoreDeprecation = False
+checkDeprecated(lambda:
+	p.pushVertexVisible(lambda g, dg: g.name != "hide"))
 dg.print(p)
 p.popVertexVisible()
 
-postSection("edgeVisible")
+post.summarySection("edgeVisible")
 p = DGPrinter()
 p.pushEdgeVisible(False)
 dg.print(p)
@@ -58,19 +60,19 @@ p.pushEdgeVisible(lambda e: len(e.rules) != 0)
 dg.print(p)
 p.popEdgeVisible()
 
-postSection("withShortcutEdgesAfterVisibility")
+post.summarySection("withShortcutEdgesAfterVisibility")
 p = DGPrinter()
 p.pushVertexVisible(lambda v: v.graph.name != "hide")
 p.withShortcutEdgesAfterVisibility = True
 dg.print(p)
 
-postSection("vertexLabelSep")
+post.summarySection("vertexLabelSep")
 p = DGPrinter()
 p.pushVertexLabel("vLabelConstant")
 p.vertexLabelSep = " sep "
 dg.print(p)
 
-postSection("vertexLabel")
+post.summarySection("vertexLabel")
 p = DGPrinter()
 p.pushVertexLabel("vLabelConstant")
 dg.print(p)
@@ -78,20 +80,18 @@ p.popVertexLabel()
 p.pushVertexLabel(lambda v: "vLabelCallback")
 dg.print(p)
 p.popVertexLabel()
-# deprecated
-config.common.ignoreDeprecation = True
-p.pushVertexLabel(lambda g, dg: "vLabelCallbackDep")
-config.common.ignoreDeprecation = False
+checkDeprecated(lambda:
+	p.pushVertexLabel(lambda g, dg: "vLabelCallbackDep"))
 dg.print(p)
 p.popVertexLabel()
 
-postSection("edgeLabelSep")
+post.summarySection("edgeLabelSep")
 p = DGPrinter()
 p.pushEdgeLabel("eLabelConstant")
 p.edgeLabelSep = " sep "
 dg.print(p)
 
-postSection("edgeLabel")
+post.summarySection("edgeLabel")
 p = DGPrinter()
 p.pushEdgeLabel("eLabelConstant")
 dg.print(p)
@@ -100,18 +100,18 @@ p.pushEdgeLabel(lambda e: "eLabelCallback")
 dg.print(p)
 p.popEdgeLabel()
 
-postSection("withGraphName, withRuleName, withRuleId")
+post.summarySection("withGraphName, withRuleName, withRuleId")
 p = DGPrinter()
 p.withGraphName = False
 p.withRuleName = True
 p.withRuleId = False
 dg.print(p)
 
-postSection("withInlineGraphs")
+post.summarySection("withInlineGraphs")
 p = DGPrinter()
 p.withInlineGraphs = True
 f = dg.print(p)
-post("summaryInput {}.tex".format(f[0][:-4]))
+post.summaryInput("{}.tex".format(f[0][:-4]))
 e = next(e for e in dg.edges if len(e.rules) > 0)
 src = next(iter(e.sources))
 tar = next(iter(e.targets))
@@ -123,9 +123,9 @@ with open("out/extra.tex", "w") as f:
 \draw[blue] (v-{dgSrc}-0-v-{gSrc}) to[bend left=45] (v-{dgTar}-0-v-{gTar});
 \end{{tikzpicture}}
 """.format(dgSrc=src.id, dgTar=tar.id, gSrc=vSrc.id, gTar=vTar.id))
-post("summaryInput out/extra.tex")
+post.summaryInput("out/extra.tex")
 
-postSection("vertexColour")
+post.summarySection("vertexColour")
 p = DGPrinter()
 p.pushVertexColour("blue")
 dg.print(p)
@@ -133,10 +133,8 @@ p.popVertexColour()
 p.pushVertexColour(lambda v: "green")
 dg.print(p)
 p.popVertexColour()
-# deprecated
-config.common.ignoreDeprecation = True
-p.pushVertexColour(lambda g, dg: "red")
-config.common.ignoreDeprecation = False
+checkDeprecated(lambda:
+	p.pushVertexColour(lambda g, dg: "red"))
 dg.print(p)
 p.popVertexColour()
 
@@ -144,7 +142,7 @@ p = DGPrinter()
 p.pushVertexColour("blue", extendToEdges=False)
 dg.print(p)
 
-postSection("edgeColour")
+post.summarySection("edgeColour")
 p = DGPrinter()
 p.pushEdgeColour("blue")
 dg.print(p)
@@ -153,14 +151,14 @@ p.pushEdgeColour(lambda v: "green")
 dg.print(p)
 p.popEdgeColour()
 
-postSection("rotationOverwrite")
+post.summarySection("rotationOverwrite")
 p = DGPrinter()
 p.setRotationOverwrite(45)
 dg.print(p)
 p.setRotationOverwrite(lambda g: -45)
 dg.print(p)
 
-postSection("mirrorOverwrite")
+post.summarySection("mirrorOverwrite")
 p = DGPrinter()
 p.setMirrorOverwrite(True)
 dg.print(p)
@@ -168,12 +166,27 @@ p = DGPrinter()
 p.setMirrorOverwrite(lambda g: True)
 dg.print(p)
 
-postSection("graphvizPrefix")
+post.summarySection("imageOverride")
+p = DGPrinter()
+def customImage(v, dupNum):
+	if v.graph.name != "image1":
+		return ("", "")
+	with open("out/custom.tex", "w") as f:
+		f.write("""\\begin{tikzpicture}
+\\node {custom};
+\\end{tikzpicture}""")
+	return ("out/custom", "compileTikz \"out/custom\" \"out/custom\"")
+p.setImageOverwrite(customImage)
+dg.print(p)
+p.setImageOverwrite(None)
+dg.print(p)
+
+post.summarySection("graphvizPrefix")
 p = DGPrinter()
 p.graphvizPrefix = 'layout = "dot";'
 dg.print(p)
 
-postSection("tikzpictureOption")
+post.summarySection("tikzpictureOption")
 p = DGPrinter()
 p.tikzpictureOption += ', draw=blue'
 dg.print(p)

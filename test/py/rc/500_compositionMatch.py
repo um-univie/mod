@@ -3,41 +3,14 @@ include("../xxx_helpers.py")
 def vertex(id_, r):
 	return r.getVertexFromExternalId(id_)
 
-_ = ruleGMLString("""rule [ ruleID "->"
-	context [ node [ id 0 label "A" ] ]
-]""");
-A_B = ruleGMLString("""rule [ ruleID "A -> B"
-	left [
-		node [ id 0 label "A" ]
-		node [ id 1 label "X" ]
-		edge [ source 0 target 1 label "-" ]
-	]
-	context [
-		node [ id 2 label "P" ]
-		edge [ source 0 target 2 label "-" ]
-	]
-	right [
-		node [ id 0 label "B" ]
-		node [ id 1 label "Y" ]
-		edge [ source 0 target 1 label "=" ]
-	]
-]""");
-B_C = ruleGMLString("""rule [ ruleID "B -> C"
-	left [
-		node [ id 0 label "B" ]
-		node [ id 1 label "Y" ]
-		edge [ source 0 target 1 label "=" ]
-	]
-	context [
-		node [ id 2 label "Q" ]
-		edge [ source 0 target 2 label "-" ]
-	]
-	right [
-		node [ id 0 label "C" ]
-		node [ id 1 label "Z" ]
-		edge [ source 0 target 1 label "#" ]
-	]
-]""");
+_ = Rule.fromDFS("[A]0>>[A]0")
+_.name = "->"
+
+A_B = Rule.fromDFS("[P]2[A]0[X]1>>[P]2[B]0{=}[Y]1")
+A_B.name = "A -> B"
+
+B_C = Rule.fromDFS("[Q]2[B]0{=}[Y]1>>[Q]2[C]0{#}[Z]1")
+B_C.name = "B -> C"
 
 fail(lambda: RCMatch(None, _), "rFirst is null.")
 fail(lambda: RCMatch(_, None), "rSecond is null.")

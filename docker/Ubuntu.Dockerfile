@@ -23,11 +23,11 @@ RUN apt-get update -qq                                      \
  && pip3 install -r requirements_nodoc.txt                  \
  && DEBIAN_FRONTEND=noninteractive                          \
     apt install --no-install-recommends -y                  \
-    $(bindep -b | tr '\n' ' ')                              \
+    $(bindep -b testing | tr '\n' ' ')                      \
     librsvg2-dev libpango1.0-dev                            \
  && DEBIAN_FRONTEND=noninteractive                          \
     apt install --no-install-recommends -y                  \
-    vim                                                     \
+    vim less                                                \
  && apt-get clean                                           \
  && rm -rf /var/lib/apt/lists/*
 
@@ -61,6 +61,7 @@ RUN \
 
 
 WORKDIR /opt/mod/build
+ENV CXXFLAGS=-Werror
 RUN cmake ../ -DBUILD_DOC=no                                                   \
  -DCMAKE_BUILD_TYPE=Release                                                    \
  -DCMAKE_MODULE_LINKER_FLAGS="-flto=$j" -DCMAKE_SHARED_LINKER_FLAGS="-flto=$j" \

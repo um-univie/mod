@@ -37,7 +37,7 @@ auto getGraphFromHandle(GraphHandle g) {
 }
 
 template<typename Graph>
-auto &getGraphFromHandle(std::shared_ptr<Graph> &g) {
+auto &getGraphFromHandle(const std::shared_ptr<Graph> &g) {
 	return *g;
 }
 

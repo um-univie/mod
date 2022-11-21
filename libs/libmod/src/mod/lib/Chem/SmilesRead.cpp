@@ -6,12 +6,13 @@
 
 #include <mod/Config.hpp>
 #include <mod/Error.hpp>
+#include <mod/lib/Algorithm/ConnectedComponents.hpp>
 #include <mod/lib/Chem/MoleculeUtil.hpp>
 #include <mod/lib/Graph/Properties/Molecule.hpp>
 #include <mod/lib/Graph/Properties/String.hpp>
 #include <mod/lib/Graph/Properties/Stereo.hpp>
 #include <mod/lib/IO/IO.hpp>
-#include <mod/lib/IO/ParsingUtil.hpp>
+#include <mod/lib/IO/Parsing.hpp>
 #include <mod/lib/Stereo/Inference.hpp>
 
 #include <boost/fusion/include/std_pair.hpp>
@@ -264,7 +265,7 @@ struct ChiralSymbl : x3::symbols<Chiral> {
 const auto abstractSymbolChar = x3::char_ - x3::char_("[]:");
 const auto nestedAbstractSymbol = x3::rule<struct nestedAbstractSymbol, std::string>("nestedAbstractSymbol");
 const auto nestedAbstractSymbol_def =
-		*abstractSymbolChar > -(x3::char_('[') > nestedAbstractSymbol > x3::char_(']')) > *abstractSymbolChar;
+		*abstractSymbolChar > *(x3::char_('[') > nestedAbstractSymbol > x3::char_(']') > *abstractSymbolChar);
 // no recursion
 const auto singleDigit = x3::uint_parser<int, 10, 1, 1>();
 const auto singleDoubleDigit = x3::rule<struct singleDoubleDigit, int>{"singleDoubleDigit"}
@@ -474,9 +475,8 @@ public:
 	int nextID = 0;
 };
 
-
 struct JoinConnected {
-	JoinConnected(lib::IO::Graph::Read::ConnectedComponents &components) : components(components) {}
+	JoinConnected(ConnectedComponents &components) : components(components) {}
 
 	void operator()(const SmilesChain &c) {
 		(*this)(c.branchedAtom);
@@ -512,13 +512,13 @@ private:
 		components.join(a.connectedComponentID, b.connectedComponentID);
 	}
 public:
-	lib::IO::Graph::Read::ConnectedComponents &components;
+	ConnectedComponents &components;
 };
 
 struct Converter {
 	Converter(std::vector<std::unique_ptr<lib::Graph::GraphType>> &gPtrs,
 	          std::vector<std::unique_ptr<lib::Graph::PropString>> &pStringPtrs,
-	          const lib::IO::Graph::Read::ConnectedComponents &components,
+	          const ConnectedComponents &components,
 	          lib::IO::Warnings &warnings, bool allowAbstract)
 			: gPtrs(gPtrs), pStringPtrs(pStringPtrs), components(components), warnings(warnings),
 			  allowAbstract(allowAbstract) {}
@@ -659,7 +659,7 @@ struct Converter {
 private:
 	std::vector<std::unique_ptr<lib::Graph::GraphType>> &gPtrs;
 	std::vector<std::unique_ptr<lib::Graph::PropString>> &pStringPtrs;
-	const lib::IO::Graph::Read::ConnectedComponents &components;
+	const ConnectedComponents &components;
 	lib::IO::Warnings &warnings;
 public:
 	std::multimap<int, std::pair<int, Vertex>> classToVertexId;
@@ -671,7 +671,7 @@ private:
 struct ExplicitHydrogenAdder {
 	ExplicitHydrogenAdder(std::vector<std::unique_ptr<lib::Graph::GraphType>> &gPtrs,
 	                      std::vector<std::unique_ptr<lib::Graph::PropString>> &pStringPtrs,
-	                      const lib::IO::Graph::Read::ConnectedComponents &components)
+	                      const ConnectedComponents &components)
 			: gPtrs(gPtrs), pStringPtrs(pStringPtrs), components(components) {}
 
 	void operator()(SmilesChain &c) {
@@ -701,13 +701,13 @@ struct ExplicitHydrogenAdder {
 private:
 	std::vector<std::unique_ptr<lib::Graph::GraphType>> &gPtrs;
 	std::vector<std::unique_ptr<lib::Graph::PropString>> &pStringPtrs;
-	const lib::IO::Graph::Read::ConnectedComponents &components;
+	const ConnectedComponents &components;
 };
 
 struct ImplicitHydrogenAdder {
 	ImplicitHydrogenAdder(std::vector<std::unique_ptr<lib::Graph::GraphType>> &gPtrs,
 	                      std::vector<std::unique_ptr<lib::Graph::PropString>> &pStringPtrs,
-	                      const lib::IO::Graph::Read::ConnectedComponents &components)
+	                      const ConnectedComponents &components)
 			: gPtrs(gPtrs), pStringPtrs(pStringPtrs), components(components) {}
 
 	void operator()(SmilesChain &c) {
@@ -735,13 +735,13 @@ struct ImplicitHydrogenAdder {
 private:
 	std::vector<std::unique_ptr<lib::Graph::GraphType>> &gPtrs;
 	std::vector<std::unique_ptr<lib::Graph::PropString>> &pStringPtrs;
-	const lib::IO::Graph::Read::ConnectedComponents &components;
+	const ConnectedComponents &components;
 };
 
 struct StereoConverter {
 	StereoConverter(std::vector<std::unique_ptr<lib::Graph::GraphType>> &gPtrs,
 	                const std::vector<lib::Graph::PropMolecule> &pMols,
-	                const lib::IO::Graph::Read::ConnectedComponents &components,
+	                const ConnectedComponents &components,
 	                lib::IO::Warnings &warnings)
 			: gPtrs(gPtrs), pMols(pMols), components(components), warnings(warnings),
 			  hasAssigned(gPtrs.size(), false) {
@@ -856,21 +856,19 @@ private:
 public:
 	std::vector<std::unique_ptr<lib::Graph::GraphType>> &gPtrs;
 	const std::vector<lib::Graph::PropMolecule> &pMols;
-	const lib::IO::Graph::Read::ConnectedComponents &components;
+	const ConnectedComponents &components;
 	lib::IO::Warnings &warnings;
 public:
 	std::vector<lib::Stereo::Inference<lib::Graph::GraphType, lib::Graph::PropMolecule>> infs;
 	std::vector<bool> hasAssigned;
 };
 
-lib::IO::Result<std::vector<lib::IO::Graph::Read::Data>>
-parseSmiles(lib::IO::Warnings &warnings, const std::string &smiles, const bool allowAbstract,
+lib::IO::Result<std::vector<lib::Graph::Read::Data>>
+parseSmiles(lib::IO::Warnings &warnings, std::string_view smiles, const bool allowAbstract,
             SmilesClassPolicy classPolicy) {
-	using IteratorType = std::string::const_iterator;
-	IteratorType iterStart = begin(smiles), iterEnd = end(smiles);
 	SmilesChain ast;
 	try {
-		lib::IO::parse(iterStart, iterEnd, parser::smiles, ast);
+		lib::IO::parse(smiles.begin(), smiles.end(), parser::smiles, ast, true);
 	} catch(const lib::IO::ParsingError &e) {
 		return lib::IO::Result<>::Error(e.msg);
 	}
@@ -911,7 +909,7 @@ parseSmiles(lib::IO::Warnings &warnings, const std::string &smiles, const bool a
 	}
 
 	const int numAtoms = AssignConnectedComponentID()(ast);
-	lib::IO::Graph::Read::ConnectedComponents components(numAtoms);
+	ConnectedComponents components(numAtoms);
 	(JoinConnected(components)(ast));
 	const int numComponents = components.finalize();
 	for(int i = 0; i != numAtoms; ++i) {
@@ -930,7 +928,7 @@ parseSmiles(lib::IO::Warnings &warnings, const std::string &smiles, const bool a
 	(ExplicitHydrogenAdder(gPtrs, pStringPtrs, components))(ast);
 	(ImplicitHydrogenAdder(gPtrs, pStringPtrs, components)(ast));
 
-	std::vector<lib::IO::Graph::Read::Data> datas(numComponents);
+	std::vector<lib::Graph::Read::Data> datas(numComponents);
 
 	const auto iter = std::find_if(conv.classToVertexId.begin(), conv.classToVertexId.end(), [&conv](auto &vp) {
 		return conv.classToVertexId.count(vp.first) > 1;
@@ -991,17 +989,17 @@ parseSmiles(lib::IO::Warnings &warnings, const std::string &smiles, const bool a
 		datas[i].g = std::move(gPtrs[i]);
 		datas[i].pString = std::move(pStringPtrs[i]);
 	}
-	return lib::IO::Result<std::vector<lib::IO::Graph::Read::Data>>(std::move(datas));
+	return lib::IO::Result<std::vector<lib::Graph::Read::Data>>(std::move(datas));
 }
 
 } // namespace
 } // namespace mod::lib::Chem::Smiles
 namespace mod::lib::Chem {
 
-lib::IO::Result<std::vector<lib::IO::Graph::Read::Data>>
-readSmiles(lib::IO::Warnings &warnings, const std::string &smiles, const bool allowAbstract,
+lib::IO::Result<std::vector<lib::Graph::Read::Data>>
+readSmiles(lib::IO::Warnings &warnings, std::string_view src, const bool allowAbstract,
            SmilesClassPolicy classPolicy) {
-	return Smiles::parseSmiles(warnings, smiles, allowAbstract, classPolicy);
+	return Smiles::parseSmiles(warnings, src, allowAbstract, classPolicy);
 }
 
 } // namespace mod::lib::Chem

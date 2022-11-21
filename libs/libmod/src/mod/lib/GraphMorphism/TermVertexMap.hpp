@@ -5,7 +5,7 @@
 #include <mod/Error.hpp>
 #include <mod/lib/Term/WAM.hpp>
 
-#include <jla_boost/graph/morphism/VertexMap.hpp>
+#include <jla_boost/graph/morphism/Concepts.hpp>
 #include <jla_boost/graph/morphism/models/PropertyVertexMap.hpp>
 
 // - TermPredConstants (compare terms, variables are equal to everything)
@@ -14,7 +14,8 @@
 
 // for debugging
 #include <mod/lib/IO/IO.hpp>
-#include <mod/lib/IO/Term.hpp>
+#include <mod/lib/Term/IO/Write.hpp>
+
 #include <iostream>
 
 namespace mod::lib::GraphMorphism {
@@ -48,8 +49,8 @@ struct TermPredConstants {
 		return res && next(veDom, veCodom, gDom, gCodom);
 	}
 private:
-	bool compare(std::size_t addrLeft, std::size_t addrRight, const lib::Term::Wam &machineLeft,
-	             const lib::Term::Wam &machineRight) const {
+	bool compare(std::size_t addrLeft, std::size_t addrRight, const Term::Wam &machineLeft,
+	             const Term::Wam &machineRight) const {
 		assert(stack.empty());
 		// maybe_unused to silence warnings on GCC < 9
 		// (perhaps this bug? https://gcc.gnu.org/bugzilla/show_bug.cgi?id=85827)
@@ -58,18 +59,18 @@ private:
 		stack.emplace_back(addrLeft, addrRight);
 		if constexpr(DEBUG) {
 			std::cout << "TermConstEqual:\n";
-			lib::IO::Term::Write::wam(machineLeft, lib::Term::getStrings(), std::cout);
-			lib::IO::Term::Write::wam(machineRight, lib::Term::getStrings(), std::cout);
+			Term::Write::wam(machineLeft, Term::getStrings(), std::cout);
+			Term::Write::wam(machineRight, Term::getStrings(), std::cout);
 		}
 		while(!stack.empty()) {
 			std::size_t l, r;
 			std::tie(l, r) = stack.back();
 			stack.pop_back();
 			if constexpr(DEBUG) std::cout << "comp(" << l << ", " << r << ")\n";
-			using AddressType = lib::Term::AddressType;
-			using Address = lib::Term::Address;
-			using Cell = lib::Term::Cell;
-			using CellTag = lib::Term::Cell::Tag;
+			using AddressType = Term::AddressType;
+			using Address = Term::Address;
+			using Cell = Term::Cell;
+			using CellTag = Term::Cell::Tag;
 			Address addrLhs = machineLeft.deref({AddressType::Heap, l});
 			Address addrRhs = machineRight.deref({AddressType::Heap, r});
 			if constexpr(DEBUG) std::cout << "compDeref(" << addrLhs.addr << ", " << addrRhs.addr << ")\n";
@@ -119,34 +120,34 @@ struct TermDataT {
 };
 
 struct TermData {
-	lib::Term::Wam machine;
-	lib::Term::MGU mgu;
+	Term::Wam machine;
+	Term::MGU mgu;
 };
 
 struct TermAssociationHandlerUnify {
 	template<typename OuterGraphDom, typename OuterGraphCodom>
 	bool operator()(std::size_t l, std::size_t r, const OuterGraphDom &gDom, const OuterGraphCodom &gCodom,
-	                lib::Term::Wam &res, lib::Term::MGU &mgu) const {
+	                Term::Wam &res, Term::MGU &mgu) const {
 		constexpr bool DEBUG = false;
 		if(DEBUG) {
 			auto &s = std::cout;
 			s << "TermAssociationHandlerUnify:\n";
-			lib::IO::Term::Write::wam(res, lib::Term::getStrings(), s);
+			Term::Write::wam(res, Term::getStrings(), s);
 		}
 		res.unifyHeapTemp(r, l, mgu);
 		if(DEBUG) {
 			auto &s = std::cout;
 			s << "\tunifyHeapTemp(" << r << ", " << l << ")\n";
 			switch(mgu.status) {
-			case lib::Term::MGU::Status::Exists:
+			case Term::MGU::Status::Exists:
 				s << "\tExists\n";
 				break;
-			case lib::Term::MGU::Status::Fail:
+			case Term::MGU::Status::Fail:
 				s << "\tFail\n";
 				break;
 			}
 		}
-		if(mgu.status != lib::Term::MGU::Status::Exists) return false;
+		if(mgu.status != Term::MGU::Status::Exists) return false;
 		else {
 			res.verify();
 			return true;
@@ -173,11 +174,11 @@ struct ToTermVertexMap {
 		const auto &pCodomain = get_term(lgCodom);
 		assert(isValid(pDomain));
 		assert(isValid(pCodomain));
-		lib::Term::Wam machine(getMachine(pCodomain));
+		Term::Wam machine(getMachine(pCodomain));
 		machine.setTemp(getMachine(pDomain));
-		lib::Term::MGU mgu(machine.getHeap().size());
+		Term::MGU mgu(machine.getHeap().size());
 		using Handler = typename LabGraphDom::PropTermType::Handler;
-		for(const auto vDom : asRange(vertices(gDom))) {
+		for(const auto vDom: asRange(vertices(gDom))) {
 			const auto vCodom = get(m, gDom, gCodom, vDom);
 			if(vCodom == boost::graph_traits<GraphCodom>::null_vertex()) continue;
 			const bool ok = Handler::reduce(
@@ -187,7 +188,7 @@ struct ToTermVertexMap {
 					));
 			if(!ok) return true;
 		}
-		for(const auto eDom : asRange(edges(gDom))) {
+		for(const auto eDom: asRange(edges(gDom))) {
 			const auto vDomSrc = source(eDom, gDom);
 			const auto vDomTar = target(eDom, gDom);
 			const auto vCodomSrc = get(m, gDom, gCodom, vDomSrc);
@@ -195,6 +196,7 @@ struct ToTermVertexMap {
 			if(vCodomSrc == boost::graph_traits<GraphCodom>::null_vertex()) continue;
 			if(vCodomTar == boost::graph_traits<GraphCodom>::null_vertex()) continue;
 			const auto peCodom = edge(vCodomSrc, vCodomTar, gCodom);
+			if(!peCodom.second) continue; // no edge in the other side
 			assert(peCodom.second);
 			const auto eCodom = peCodom.first;
 			const bool ok = Handler::reduce(
@@ -224,8 +226,8 @@ auto makeToTermVertexMap(const LabGraphDom &gDom, const LabGraphCodom &gCodom, N
 struct TermFilterRenaming {
 	template<typename VertexMap, typename GraphDom, typename GraphCodom>
 	bool operator()(const VertexMap &m, const GraphDom &gDom, const GraphCodom &gCodom) const {
-		//		lib::IO::Term::Write::wam(m.machine, lib::Term::getStrings(), std::cout);
-		//		lib::IO::Term::Write::mgu(m.machine, m.mgu, lib::Term::getStrings(), std::cout) << "\n";
+		//		Term::Write::wam(m.machine, Term::getStrings(), std::cout);
+		//		Term::Write::mgu(m.machine, m.mgu, Term::getStrings(), std::cout) << "\n";
 		const auto &data = get_prop(TermDataT(), m);
 		bool res = data.mgu.isRenaming(data.machine);
 		//		std::cout << "Result: " << std::boolalpha << res << "\n";
@@ -236,8 +238,8 @@ struct TermFilterRenaming {
 struct TermFilterSpecialisation {
 	template<typename VertexMap, typename GraphDom, typename GraphCodom>
 	bool operator()(const VertexMap &m, const GraphDom &gDom, const GraphCodom &gCodom) const {
-		//		lib::IO::Term::Write::wam(m.machine, lib::Term::getStrings(), std::cout);
-		//		lib::IO::Term::Write::mgu(m.machine, m.mgu, lib::Term::getStrings(), std::cout) << "\n";
+		//		Term::Write::wam(m.machine, Term::getStrings(), std::cout);
+		//		Term::Write::mgu(m.machine, m.mgu, Term::getStrings(), std::cout) << "\n";
 		const auto &data = get_prop(TermDataT(), m);
 		bool res = data.mgu.isSpecialisation(data.machine);
 		//		std::cout << "Result: " << std::boolalpha << res << "\n";

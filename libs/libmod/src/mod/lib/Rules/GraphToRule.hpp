@@ -13,31 +13,31 @@ std::unique_ptr<Real> graphToRule(const LGraph &lg, Membership membership, const
 	using EdgeCat = lib::Stereo::EdgeCategory;
 	const auto &g = get_graph(lg);
 	const auto &pStringGraph = get_string(lg);
-	assert(membership == Membership::Left || membership == Membership::Context || membership == Membership::Right);
-	lib::Rules::LabelledRule rule;
-	auto &gCore = get_graph(rule);
-	rule.pString = std::make_unique<PropStringCore>(gCore);
-	auto &pString = *rule.pString;
+	assert(membership == Membership::L || membership == Membership::K || membership == Membership::R);
+	auto cRule = std::make_unique<lib::DPO::CombinedRule>();
+	auto &gCore = cRule->getCombinedGraph();
+	auto pStringPtr = std::make_unique<PropString>(*cRule);
+	auto &pString = *pStringPtr;
 
-	for(const auto v : asRange(vertices(g))) {
+	for(const auto v: asRange(vertices(g))) {
 		const auto vCore = add_vertex(gCore);
 		assert(get(boost::vertex_index_t(), g, v) == get(boost::vertex_index_t(), gCore, vCore));
 		gCore[vCore].membership = membership;
 		const auto &label = pStringGraph[v];
 		switch(membership) {
-		case Membership::Left:
+		case Membership::L:
 			pString.add(vCore, label, "");
 			break;
-		case Membership::Right:
+		case Membership::R:
 			pString.add(vCore, "", label);
 			break;
-		case Membership::Context:
+		case Membership::K:
 			pString.add(vCore, label, label);
 			break;
 		}
 	}
 
-	for(const auto e : asRange(edges(g))) {
+	for(const auto e: asRange(edges(g))) {
 		const auto vSrcCore = vertex(get(boost::vertex_index_t(), g, source(e, g)), gCore);
 		const auto vTarCore = vertex(get(boost::vertex_index_t(), g, target(e, g)), gCore);
 		const auto eCore = add_edge(vSrcCore, vTarCore, gCore).first;
@@ -45,25 +45,26 @@ std::unique_ptr<Real> graphToRule(const LGraph &lg, Membership membership, const
 		gCore[eCore].membership = membership;
 		const auto &label = pStringGraph[e];
 		switch(membership) {
-		case Membership::Left:
+		case Membership::L:
 			pString.add(eCore, label, "");
 			break;
-		case Membership::Right:
+		case Membership::R:
 			pString.add(eCore, "", label);
 			break;
-		case Membership::Context:
+		case Membership::K:
 			pString.add(eCore, label, label);
 			break;
 		}
 	}
 
+	std::unique_ptr<PropStereo> pStereoPtr;
 	if(has_stereo(lg)) {
 		const auto &pStereoGraph = get_stereo(lg);
 		std::vector<EdgeCat> eStereo(num_edges(g));
 
-		for(const auto e : asRange(edges(g))) {
+		for(const auto e: asRange(edges(g))) {
 			const auto eId = get(boost::edge_index_t(), g, e);
-			const auto eCore = *(edges(gCore).first + eId);
+			const auto eCore = *std::next(edges(gCore).first, eId); // TODO: get rid of O(n) lookup
 			const auto eIdCore = get(boost::edge_index_t(), gCore, eCore);
 			assert(eId == eIdCore);
 			eStereo[eIdCore] = pStereoGraph[e];
@@ -82,20 +83,19 @@ std::unique_ptr<Real> graphToRule(const LGraph &lg, Membership membership, const
 			return e;
 		};
 		const auto inf = Stereo::makeCloner(lg, gCore, vertexMap, edgeMap);
-		rule.pStereo = std::make_unique<PropStereoCore>(gCore, inf, inf, jla_boost::AlwaysTrue(),
-		                                                jla_boost::AlwaysTrue());
+		pStereoPtr = std::make_unique<PropStereo>(*cRule, inf, inf, jla_boost::AlwaysTrue(),
+		                                          jla_boost::AlwaysTrue());
 	}
 
-	rule.initComponents();
 	std::string completeName;
 	switch(membership) {
-	case Membership::Left:
+	case Membership::L:
 		completeName += "unbind";
 		break;
-	case Membership::Context:
+	case Membership::K:
 		completeName += "id";
 		break;
-	case Membership::Right:
+	case Membership::R:
 		completeName += "bind";
 		break;
 	default:
@@ -105,7 +105,8 @@ std::unique_ptr<Real> graphToRule(const LGraph &lg, Membership membership, const
 	completeName += "<";
 	completeName += name;
 	completeName += ">";
-	auto res = std::make_unique<Real>(std::move(rule), std::nullopt);
+	LabelledRule lRule(std::move(cRule), std::move(pStringPtr), std::move(pStereoPtr));
+	auto res = std::make_unique<Real>(std::move(lRule), std::nullopt);
 	res->setName(completeName);
 	return res;
 }

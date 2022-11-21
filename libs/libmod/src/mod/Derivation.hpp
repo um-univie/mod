@@ -1,5 +1,5 @@
-#ifndef MOD_DERIVATION_H
-#define MOD_DERIVATION_H
+#ifndef MOD_DERIVATION_HPP
+#define MOD_DERIVATION_HPP
 
 #include <mod/BuildConfig.hpp>
 #include <mod/graph/ForwardDecl.hpp>
@@ -20,7 +20,6 @@ struct Derivations;
 // rst:		:math:`G\Rightarrow^p H`, though the validity of the data is not checked.
 // rst:
 // rst-class-start:
-
 struct MOD_DECL Derivation {
 	// rst: .. type:: GraphList = std::vector<std::shared_ptr<graph::Graph>>
 	// rst:
@@ -61,7 +60,6 @@ public:
 // rst:		though the validity of the data is not checked.
 // rst:
 // rst-class-start:
-
 struct MOD_DECL Derivations {
 	// rst: .. type:: GraphList = std::vector<std::shared_ptr<graph::Graph>>
 	// rst:
@@ -88,4 +86,4 @@ public:
 
 } // namespace mod
 
-#endif /* MOD_DERIVATION_H */
+#endif // MOD_DERIVATION_HPP

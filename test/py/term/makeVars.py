@@ -29,18 +29,18 @@ pWild = ruleGMLString("""rule [
 dg = dgRuleComp(inputGraphs, addSubset(inputGraphs) >> inputRules, labelSettings=LabelSettings(LabelType.Term, LabelRelation.Unification))
 dg.calc()
 dg.print()
-postSection("Input Graphs")
+post.summarySection("Input Graphs")
 for a in inputGraphs:
 	a.print()
 	a.printTermState()
-postSection("Input Rules")
+post.summarySection("Input Rules")
 for a in inputRules:
 	a.print()
 	a.printTermState()
-postSection("Vertex Graphs")
+post.summarySection("Vertex Graphs")
 for a in set((v.graph for v in dg.vertices)) - set(inputGraphs):
 	a.print()
 	a.printTermState()
-postSection("Derivations")
+post.summarySection("Derivations")
 for e in dg.edges:
 	e.print()

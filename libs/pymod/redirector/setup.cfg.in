@@ -1,0 +1,10 @@
+[metadata]
+name = mod-jakobandersen
+version = @mod_VERSION@
+author = @mod_AUTHOR@
+author_email = @mod_AUTHOR_EMAIL@
+description = A package just for redirecting the mod import to the <prefix>/lib folder.
+
+[options]
+packages =
+    mod

@@ -1,4 +1,3 @@
-config.io.useOpenBabelCoords = False
 a = graphDFS("[f(0)][sd(0)]")
 incFirst = ruleGMLString("""rule [
 	ruleID "Inc first"
@@ -24,11 +23,13 @@ incSecond = ruleGMLString("""rule [
 ]""")
 incSecond.printTermState()
 
-dg = dgRuleComp(inputGraphs,
+dg = DG(graphDatabase=inputGraphs,
+	labelSettings=LabelSettings(LabelType.Term, LabelRelation.Unification))
+dg.build().execute(
 	addSubset(a)
 	>> repeat[1]([incSecond, incFirst])
-	>> incSecond,
-	labelSettings=LabelSettings(LabelType.Term, LabelRelation.Unification)
+	>> incSecond
 )
-dg.calc()
-dg.print()
+p = DGPrinter()
+p.graphPrinter.withGraphvizCoords = True
+dg.print(p)

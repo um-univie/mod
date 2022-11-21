@@ -6,18 +6,21 @@
 #include <mod/Config.hpp>
 #include <mod/Error.hpp>
 #include <mod/lib/RC/Compose.hpp>
-#include <mod/lib/RC/Result.hpp>
 #include <mod/lib/RC/Visitor/MatchConstraints.hpp>
 #include <mod/lib/RC/Visitor/Stereo.hpp>
 #include <mod/lib/RC/Visitor/String.hpp>
 #include <mod/lib/RC/Visitor/Term.hpp>
+#include <mod/lib/Rules/LabelledRule.hpp>
 
 namespace mod::lib::RC {
 namespace detail {
 
-template<bool Verbose, typename Result, typename RuleFirst, typename RuleSecond, typename InvertibleVertexMap, typename VisitorT>
-std::optional<Result> composeLabelledFinallyDoIt(const RuleFirst &rFirst, const RuleSecond &rSecond, InvertibleVertexMap &match, VisitorT visitor) {
-	return compose<Verbose, Result>(rFirst, rSecond, match, std::move(visitor));
+template<bool Verbose, typename Result, typename InvertibleVertexMap, typename VisitorT>
+bool composeLabelledFinallyDoIt(Result &result,
+                                const lib::Rules::LabelledRule &rFirst,
+                                const lib::Rules::LabelledRule &rSecond,
+                                InvertibleVertexMap &match, VisitorT visitor) {
+	return compose<Verbose>(result, rFirst.getRule(), rSecond.getRule(), match, std::move(visitor));
 }
 
 template<LabelType T>
@@ -25,12 +28,16 @@ struct LabelTypeToVisitor;
 
 template<>
 struct LabelTypeToVisitor<LabelType::String> {
-	using type = Visitor::String;
+	static Visitor::String make(const lib::Rules::LabelledRule &rFirst, const lib::Rules::LabelledRule &rSecond) {
+		return {rFirst, rSecond};
+	}
 };
 
 template<>
 struct LabelTypeToVisitor<LabelType::Term> {
-	using type = Visitor::Term;
+	static Visitor::Term make(const lib::Rules::LabelledRule &rFirst, const lib::Rules::LabelledRule &rSecond) {
+		return {rFirst, rSecond};
+	}
 };
 
 template<bool withStereo>
@@ -38,22 +45,31 @@ struct WithStereoVisitor;
 
 template<>
 struct WithStereoVisitor<true> {
-	using type = Visitor::Stereo;
+	static Visitor::Stereo make(const lib::Rules::LabelledRule &rFirst, const lib::Rules::LabelledRule &rSecond) {
+		return {rFirst, rSecond};
+	}
 };
 
 template<>
 struct WithStereoVisitor<false> {
-	using type = Visitor::Null;
+	static Visitor::Null make(const lib::Rules::LabelledRule &rFirst, const lib::Rules::LabelledRule &rSecond) {
+		return {};
+	}
 };
 
 } // namespace detail
 
-template<bool Verbose, typename Result, LabelType labelType, bool withStereo, typename RuleFirst, typename RuleSecond, typename InvertibleVertexMap, typename VisitorT = Visitor::Null>
-std::optional<Result> composeLabelled(const RuleFirst &rFirst, const RuleSecond &rSecond, InvertibleVertexMap &match, VisitorT visitor = Visitor::Null()) {
-	return detail::composeLabelledFinallyDoIt<Verbose, Result>(rFirst, rSecond, match, Visitor::makeVisitor(
-			std::move(visitor),
-			typename detail::LabelTypeToVisitor<labelType>::type(),
-			typename detail::WithStereoVisitor<withStereo>::type()
+template<bool Verbose, LabelType labelType, bool withStereo,
+		typename Result, typename InvertibleVertexMap, typename VisitorT = Visitor::Null>
+bool composeLabelled(Result &result, const lib::Rules::LabelledRule &rFirst, const lib::Rules::LabelledRule &rSecond,
+                     InvertibleVertexMap &match,
+                     VisitorT visitor = Visitor::Null()) {
+	return detail::composeLabelledFinallyDoIt<Verbose>(
+			result, rFirst, rSecond, match,
+			Visitor::makeVisitor(
+					std::move(visitor),
+					detail::LabelTypeToVisitor<labelType>::make(rFirst, rSecond),
+					detail::WithStereoVisitor<withStereo>::make(rFirst, rSecond)
 			));
 }
 

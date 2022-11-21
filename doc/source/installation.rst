@@ -85,7 +85,7 @@ We thus arrive at the following full command
 
 	docker run -it --rm -v $(pwd):/workdir -u $(id -u):$(id -g) jakobandersen/mod
 
-As a quick test, you can try running ``mod -e "smiles('O').print()`` inside
+As a quick test, you can try running ``mod -e "smiles('O').print()"`` inside
 the container. When it's done, then outside the container you should now be
 able to open the printed summary ``summary/summary.pdf``.
 You can thus use the ``mod`` command inside the container, but otherwise

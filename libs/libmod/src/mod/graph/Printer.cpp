@@ -1,6 +1,6 @@
 #include "Printer.hpp"
 
-#include <mod/lib/IO/Graph.hpp>
+#include <mod/lib/Graph/IO/Write.hpp>
 
 namespace mod::graph {
 
@@ -39,7 +39,8 @@ void Printer::setMolDefault() {
 }
 
 void Printer::setReactionDefault() {
-	options->All().Thick(false).WithIndex(false).SimpleCarbons(false);
+	setMolDefault();
+	options->SimpleCarbons(false);
 }
 
 void Printer::disableAll() {
@@ -64,6 +65,14 @@ void Printer::setCollapseHydrogens(bool value) {
 
 bool Printer::getCollapseHydrogens() const {
 	return options->collapseHydrogens;
+}
+
+void Printer::setRaiseIsotopes(bool value) {
+	options->RaiseIsotopes(value);
+}
+
+bool Printer::getRaiseIsotopes() const {
+	return options->raiseIsotopes;
 }
 
 void Printer::setRaiseCharges(bool value) {
@@ -144,6 +153,24 @@ void Printer::setMirror(bool value) {
 
 bool Printer::getMirror() const {
 	return options->mirror;
+}
+
+void Printer::setWithGraphvizCoords(bool value) {
+	options->WithGraphvizCoords(value);
+}
+
+bool Printer::getWithGraphvizCoords() const {
+	return options->withGraphvizCoords;
+}
+
+// ===================================================================
+
+void Printer::setGraphvizPrefix(const std::string &prefix) {
+	options->graphvizPrefix = prefix;
+}
+
+const std::string &Printer::getGraphvizPrefix() const {
+	return options->graphvizPrefix;
 }
 
 } // namespace mod::graph

@@ -2,8 +2,7 @@
 #define MOD_LIB_RULES_GRAPHASRULECACHE_HPP
 
 #include <mod/rule/ForwardDecl.hpp>
-
-#include <jla_boost/graph/dpo/Rule.hpp>
+#include <mod/lib/DPO/Membership.hpp>
 
 #include <map>
 #include <memory>
@@ -18,9 +17,9 @@ struct GraphAsRuleCache {
 	std::shared_ptr<rule::Rule> getIdRule(const lib::Graph::Single *g);
 	std::shared_ptr<rule::Rule> getUnbindRule(const lib::Graph::Single *g);
 private:
-	std::shared_ptr<rule::Rule> getRule(const lib::Graph::Single *g, jla_boost::GraphDPO::Membership m);
+	std::shared_ptr<rule::Rule> getRule(const lib::Graph::Single *g, lib::DPO::Membership m);
 private:
-	std::map<std::pair<const lib::Graph::Single*, jla_boost::GraphDPO::Membership>, std::shared_ptr<rule::Rule>> storage;
+	std::map<std::pair<const lib::Graph::Single *, lib::DPO::Membership>, std::shared_ptr<rule::Rule>> storage;
 };
 
 } // namespace mod::lib::Rules

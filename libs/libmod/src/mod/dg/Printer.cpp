@@ -5,8 +5,8 @@
 #include <mod/dg/GraphInterface.hpp>
 #include <mod/graph/Printer.hpp>
 #include <mod/lib/DG/Hyper.hpp>
+#include <mod/lib/DG/IO/Write.hpp>
 #include <mod/lib/Graph/Single.hpp>
-#include <mod/lib/IO/DG.hpp>
 
 #include <boost/lexical_cast.hpp>
 
@@ -50,24 +50,24 @@ void reconnectCommon(std::shared_ptr<DG> dg, DG::HyperEdge e, unsigned int eDup,
 PrintData::PrintData(std::shared_ptr<DG> dg) : dg(dg), data(nullptr) {
 	if(!dg->isLocked())
 		throw LogicError("Can not create print data. The DG is not locked yet.");
-	data.reset(new lib::IO::DG::Write::Data(dg->getHyper()));
+	data.reset(new lib::DG::Write::Data(dg->getHyper()));
 }
 
-PrintData::PrintData(const PrintData &other) : dg(other.dg), data(new lib::IO::DG::Write::Data(*other.data)) {}
+PrintData::PrintData(const PrintData &other) : dg(other.dg), data(new lib::DG::Write::Data(*other.data)) {}
 
 PrintData &PrintData::operator=(const PrintData &other) {
 	dg = other.dg;
-	data = std::make_unique<lib::IO::DG::Write::Data>(*other.data);
+	data = std::make_unique<lib::DG::Write::Data>(*other.data);
 	return *this;
 }
 
 PrintData::~PrintData() = default;
 
-lib::IO::DG::Write::Data &PrintData::getData() {
+lib::DG::Write::Data &PrintData::getData() {
 	return *data;
 }
 
-lib::IO::DG::Write::Data &PrintData::getData() const {
+const lib::DG::Write::Data &PrintData::getData() const {
 	return *data;
 }
 
@@ -112,14 +112,14 @@ void PrintData::reconnectTarget(DG::HyperEdge e, int eDup, DG::Vertex v, int vDu
 //------------------------------------------------------------------------------
 
 Printer::Printer() : graphPrinter(std::make_unique<graph::Printer>()),
-                     printer(std::make_unique<lib::IO::DG::Write::Printer>()) {
+                     printer(std::make_unique<lib::DG::Write::Printer>()) {
 	graphPrinter->enableAll();
 	graphPrinter->setWithIndex(false);
 }
 
-Printer::~Printer() {}
+Printer::~Printer() = default;
 
-lib::IO::DG::Write::Printer &Printer::getPrinter() const {
+lib::DG::Write::Printer &Printer::getPrinter() const {
 	return *printer;
 }
 
@@ -293,13 +293,24 @@ void Printer::popEdgeColour() {
 }
 
 void Printer::setRotationOverwrite(std::function<int(std::shared_ptr<graph::Graph>)> f) {
-	if(!f) throw LogicError("Can not push empty callback.");
+	if(!f) throw LogicError("Can not set empty callback.");
 	printer->setRotationOverwrite(f);
 }
 
 void Printer::setMirrorOverwrite(std::function<bool(std::shared_ptr<graph::Graph>)> f) {
-	if(!f) throw LogicError("Can not push empty callback.");
+	if(!f) throw LogicError("Can not set empty callback.");
 	printer->setMirrorOverwrite(f);
+}
+
+void Printer::setImageOverwrite(std::function<std::pair<std::string, std::string>(DG::Vertex v, int dupNum)> f) {
+	if(!f) {
+		printer->setImageOverwrite(nullptr);
+	} else {
+		printer->setImageOverwrite([f](lib::DG::HyperVertex v, int dupNum, const lib::DG::Hyper &dg) {
+			assert(dg.getGraph()[v].kind == lib::DG::HyperVertexKind::Vertex);
+			return f(dg.getInterfaceVertex(v), dupNum);
+		});
+	}
 }
 
 void Printer::setGraphvizPrefix(const std::string &prefix) {

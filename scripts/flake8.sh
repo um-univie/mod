@@ -8,7 +8,7 @@ if [ $res -ne 0 ]; then
 fi
 cd $root
 mkdir -p build/checkPython/mod
-rm build/checkPython/mod/*
+rm -f build/checkPython/mod/*
 for f in $(ls libs/pymod/lib/mod); do
 	ln -s -T ../../../libs/pymod/lib/mod/$f build/checkPython/mod/$f
 done

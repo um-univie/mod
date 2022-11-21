@@ -54,6 +54,7 @@ bool listCompare(const std::vector<T> &l, py::object r) {
 template<typename T, typename U>
 void makePair() {
 	py::to_python_converter<std::pair<T, U>, PairToTupleConverter<T, U>>();
+	TupleToPairConverter<T, U>();
 }
 
 void Collections_doExport() {
@@ -63,6 +64,7 @@ void Collections_doExport() {
 	makeVector(VecDGHyperEdge, dg::DG::HyperEdge);
 	makeVector(VecDGStrat, std::shared_ptr<dg::Strategy>);
 	makeVector(VecGraph, std::shared_ptr<graph::Graph>);
+	makeVector(VecVecGraph, std::vector<std::shared_ptr<graph::Graph>>);
 	makeVector(VecRule, std::shared_ptr<rule::Rule>);
 	using PairString = std::pair<std::string, std::string>;
 	makeVector(VecPairString, PairString);
@@ -76,7 +78,6 @@ void Collections_doExport() {
 	makePair<std::string, bool>();
 	makePair<int, int>();
 	makePair<double, double>();
-	makePair<dg::DG::HyperEdge, double>();
 
 	// Optional
 	py::to_python_converter<std::optional<int>, ToPythonOptionalValue<int>>();

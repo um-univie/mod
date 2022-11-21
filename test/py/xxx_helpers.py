@@ -1,4 +1,4 @@
-post("disableSummary")
+post.disableInvokeMake()
 
 def fail(f, pattern, err=LogicError, isSubstring=False):
 	try:
@@ -14,6 +14,20 @@ def fail(f, pattern, err=LogicError, isSubstring=False):
 			print("Expected suffix:", pattern)
 			print("str(e):         ", str(e), "<<<")
 			raise
+
+
+def checkDeprecated(f):
+	old = config.common.ignoreDeprecation
+	config.common.ignoreDeprecation = True
+	res = f()
+	config.common.ignoreDeprecation = False
+	try:
+		f()
+		assert False
+	except DeprecationWarning:
+		pass
+	config.common.ignoreDeprecation = old
+	return res
 
 
 def _compareFiles(f1, f2):

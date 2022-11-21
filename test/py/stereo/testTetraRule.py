@@ -18,7 +18,7 @@ r = ruleGMLString("""rule [
 ]""")
 g = smiles("[O][C@]([C@H3])([C@H2][C@H3])([C@H2][C@H3])")
 
-postChapter("DG")
+post.summaryChapter("DG")
 ls = LabelSettings(LabelType.String, LabelRelation.Isomorphism, LabelRelation.Specialisation)
 dg = DG(graphDatabase=inputGraphs, labelSettings=ls)
 dg.build().execute(addSubset(g) >> r, verbosity=100)
@@ -26,13 +26,13 @@ dg.print()
 for a in dg.graphDatabase:
 	a.print()
 
-postChapter("RC")
+post.summaryChapter("RC")
 rc = rcEvaluator([r], labelSettings=ls)
 res = rc.eval(rcBind(g) *rcSuper* r)
 print("Res:", len(res))
 for a in res: a.print()
 
-postChapter("Iso")
+post.summaryChapter("Iso")
 g1 = smiles("[O][C@]([C@H3])([C@H2][C@H3])([C@H2][C@H]([C@H3])([C@H3]))")
 g2 = smiles("[O][C@@]([C@H3])([C@H2][C@H3])([C@H2][C@H]([C@H3])([C@H3]))")
 p = GraphPrinter()

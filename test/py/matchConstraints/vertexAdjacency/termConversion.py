@@ -22,25 +22,25 @@ rStr = """rule [
     ]
 ]"""
 a = ruleGMLString(rStr)
-postChapter("TermState")
+post.summaryChapter("TermState")
 a.printTermState()
 #b = a.makeInverse()
 
-postChapter("Compose first")
+post.summaryChapter("Compose first")
 rc = rcEvaluator([], ls)
 res = rc.eval(a *rcSuper* rId)
 for b in res:
     b.print()
     b.printTermState()
 
-postChapter("Compose second")
+post.summaryChapter("Compose second")
 rc = rcEvaluator([], ls)
 res = rc.eval(rIdInv *rcSub* a)
 for b in res:
     b.print()
     b.printTermState()
 
-postChapter("DGRuleComp")
+post.summaryChapter("DGRuleComp")
 graphDFS("C[Q]")
 dg = dgRuleComp([], addSubset(inputGraphs) >> a, ls)
 dg.calc()

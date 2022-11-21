@@ -44,6 +44,12 @@ Printer_setMirrorOverwrite(Printer &printer, std::shared_ptr<mod::Function<bool(
 	printer.setMirrorOverwrite(mod::toStdFunction(f));
 }
 
+void Printer_setImageOverride(Printer &printer,
+                              std::shared_ptr<mod::Function<std::pair<std::string, std::string>(
+		                              DG::Vertex, int)>> f) {
+	printer.setImageOverwrite(mod::toStdFunction(f));
+}
+
 } // namespace
 
 void Printer_doExport() {
@@ -322,6 +328,29 @@ void Printer_doExport() {
 					// rst:			:param f: the function called on each graph to retrieve the mirror to render it with.
 					// rst:			:type f: Callable[[Graph], bool] or bool
 			.def("setMirrorOverwrite", &Printer_setMirrorOverwrite)
+					// rst:		.. method:: setImageOverwrite(f)
+					// rst:
+					// rst:			Overwrite the image generation for graphs depicted in the vertices of the printed derivation graph.
+					// rst:			For each duplicate of each vertex to be depicted, the given callback is called.
+					// rst:			It must then return two strings:
+					// rst:
+					// rst:			1. Either
+					// rst:
+					// rst:				- an empty string if the standard depiction should be used, in which case the second string is ignored, or
+					// rst:				- the filename of the PDF that should be included in the final compiled figure.
+					// rst:
+					// rst:			2. Either
+					// rst:
+					// rst:				- an empty string if no additional post-processing command is needed, or
+					// rst:				- a string of Bash code which will be inserted in the post-processing instructions.
+					// rst:				  For example, one can write out source code in the callback, and then return a command that compiles
+					// rst:				  that code into the PDF needed by inclusion.
+					// rst:
+					// rst:			The image overwrite can be removed by calling with ``None``.
+					// rst:
+					// rst:			:param f: the callback to use, or ``None`` to remove an existing callback.
+					// rst:			:type f: Callable[[DGVertex, int], tuple[str, str]] or None
+			.def("setImageOverwrite", &Printer_setImageOverride)
 					// rst:		.. attribute:: graphvizPrefix
 					// rst:
 					// rst:			The string that will be inserted into generated DOT files,

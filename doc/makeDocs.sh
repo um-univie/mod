@@ -136,81 +136,6 @@ function getPyModCPPs {
 	done;
 }
 
-function makeIndex {
-	function indexFiles {
-		cat << "EOF"
-	installation
-	compiling
-	libmod/libmod
-	pymod/pymod
-	postmod/postmod
-	modWrapper/modWrapper
-	epim/epim
-	dataDesc/dataDesc
-	dgStrat/dgStrat
-	examples/index
-	
-	knownIssues
-	changes
-	references
-EOF
-	}
-	function data {
-		cat << "EOF"
-################################################
-MØD
-################################################
-
-.. toctree::
-	:maxdepth: 1
-	:numbered:
-	
-EOF
-		indexFiles
-cat << "EOF"
-
-
-.. _overview:
-
-Overview
-========
-
-This is the documentation for the MØD software package.
-The sources can be found in the GitHub repository: `<http://github.com/jakobandersen/mod>`_.
-For additional information see the webpage: `<http://mod.imada.sdu.dk>`_.
-
-The package contains the following components.
-
-* libMØD, shared library (``mod``)
-    The main library.
-* PyMØD, Python 3 module (``mod``)
-    Python bindings for the library and extra functionality for easier usage of
-    many features.
-	It additionally include the submodule :ref:`epim`.
-*  PostMØD, Bash Script (``mod_post``)
-    The post processor for compiling figures and summaries.
-* The wrapper script, Bash Script (``mod``)
-    A convenience wrapper for invoking a virtual machine (e.g., ``python3``)
-    with user-supplied code.
-    The wrapper handles output and invokes the post processor.
-    Additionally, it can run the chosen virtual machine through ``gdb``
-    and/or ``valgrind`` (either normal memcheck or callgrind).
-
-
-Contributors
-============
-
-* `Jakob Lykke Andersen <https://imada.sdu.dk/~jlandersen>`__: main author.
-* `Nikolai Nøjgaard <https://imada.sdu.dk/~nojgaard>`__: author of :ref:`EpiM`.
-
-EOF
-cat << "EOF"
-
-EOF
-	}
-	data | outputRST index
-}
-
 function makeLibMod {
 	function data {
 		local f=$1
@@ -269,7 +194,7 @@ EOF
 		echo ""
 		getFolders | sed 's/$/\/index/' | sed 's/^/   /'
 	}
-	dataToc | outputRST libmod/Libmodtoc
+	dataToc | outputRST libmod/Toc
 	if [ ${PIPESTATUS[0]} -ne 0 ]; then
 		return 1
 	fi
@@ -333,15 +258,18 @@ EOF
 		echo ""
 		getFolders | sed 's/$/\/index/' | sed 's/^/   /'
 	}
-	dataToc | outputRST pymod/Pymodtoc	
+	dataToc | outputRST pymod/Toc
 }
 
-makeIndex || exit 1
+function makeExamples {
+	rm -rf $topSrcDir/doc/source/_static/examples
+	mkdir -p $topSrcDir/doc/source/_static/examples
+	cp -a $topSrcDir/examples/libmod_cmake $topSrcDir/doc/source/_static/examples/
+	cp -a $topSrcDir/examples/pymod_extension $topSrcDir/doc/source/_static/examples/
+	cp -a $topSrcDir/examples/py $topSrcDir/doc/source/_static/examples/
+	$topSrcDir/scripts/makePyExamples.py $topSrcDir rst
+}
+
 makeLibMod || exit 1
 makePyMod || exit 1
-
-rm -rf $topSrcDir/doc/source/_static/examples
-mkdir -p $topSrcDir/doc/source/_static/examples
-cp -a $topSrcDir/examples/libmod_cmake $topSrcDir/doc/source/_static/examples/
-cp -a $topSrcDir/examples/pymod_extension $topSrcDir/doc/source/_static/examples/
-cp -a $topSrcDir/examples/py $topSrcDir/doc/source/_static/examples/
+makeExamples || exit 1
