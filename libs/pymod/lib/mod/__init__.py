@@ -521,7 +521,7 @@ DGStrat.makeRightPredicate = _DGStrat_makeRightPredicate  # type: ignore
 # DG Strategy Prettification
 #----------------------------------------------------------
 
-_DGStratType = Union[DGStrat, Rule, "_DGStrat_sequenceProxy", Iterable['_DGStratType']]  # type: ignore
+_DGStratType = Union[DGStrat, Rule, "_DGStrat_sequenceProxy", Iterable['_DGStratType']]
 
 def dgStrat(s: _DGStratType) -> DGStrat:
 	if isinstance(s, DGStrat):
@@ -927,7 +927,7 @@ RCMatch.composeAll = _RCMatch_composeAll  # type: ignore
 # RCExp prettification
 #----------------------------------------------------------
 
-_rcExpType = Union[RCExpExp, RCExpBind, RCExpComposeCommon, RCExpComposeParallel, RCExpComposeSub, RCExpComposeSuper, Iterable["_rcExpType"]]  # type: ignore
+_rcExpType = Union[RCExpExp, RCExpBind, RCExpComposeCommon, RCExpComposeParallel, RCExpComposeSub, RCExpComposeSuper, Iterable["_rcExpType"]]
 
 def rcExp(e: _rcExpType) -> RCExpExp:
 	if isinstance(e, RCExpExp) or isinstance(e, Rule) or isinstance(e, RCExpUnion):
