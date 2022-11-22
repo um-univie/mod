@@ -27,6 +27,8 @@ Doc, several pages have changed URL:
 - Due to a change in escaping of ``#`` characters in DG vertex/hyperedge labels
   when printing, some custom labels with additional escaping may need
   adjustment. See also the bug fix entry regarding this.
+- Bump Boost version required to 1.76 or higher to avoid an incompatibility with
+  Python 3.10 (https://github.com/boostorg/python/pull/344).
 
 
 New Features

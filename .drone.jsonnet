@@ -178,7 +178,7 @@ local Pipeline(withCoverage, compiler, boost) = {
 		name: "Docker",
 		steps: [
 			Bootstrap(false),
-			Configure("g++", "1_75_0", false),
+			Configure("g++", "1_80_0", false),
 			{
 				name: "dist",
 				image: image,
@@ -230,7 +230,7 @@ local Pipeline(withCoverage, compiler, boost) = {
 		]
 	},
 ] + [
-	Pipeline(boost == "1_74_0" && compiler == "g++-9", compiler, boost)
+	Pipeline(boost == "1_80_0" && compiler == "g++-11", compiler, boost)
 	for compiler in [
 		"g++-8", "g++-9", "g++-10", "g++-11",
 		"clang++-8",
@@ -238,6 +238,6 @@ local Pipeline(withCoverage, compiler, boost) = {
 		"clang++-10", "clang++-11", "clang++-12",
 	]
 	for boost in [
-		"1_73_0", "1_74_0", "1_75_0", "1_76_0", "1_77_0", "1_78_0", "1_79_0", "1_80_0",
+		"1_76_0", "1_77_0", "1_78_0", "1_79_0", "1_80_0",
 	]
 ]

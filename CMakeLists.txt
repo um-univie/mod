@@ -89,9 +89,9 @@ set(libmod_config_find_files "FindPackageHandleStandardArgs.cmake;FindPackageMes
 
 # Boost
 # -------------------------------------------------------------------------
-set(v 1.73.0)
+set(v 1.76.0)
 if(BUILD_PY_MOD)
-    foreach(PY 3 34 35 36 37 38 39 310 311 312 313 314 315 316 317 318 319)
+    foreach(PY 3 37 38 39 310 311 312 313 314 315 316 317 318 319)
         set(lib "python${PY}")
         find_package(Boost ${v} QUIET COMPONENTS ${lib})
         if(Boost_FOUND)
@@ -102,7 +102,7 @@ if(BUILD_PY_MOD)
     endforeach()
     if(NOT Boost_FOUND)
         find_package(Boost ${v} COMPONENTS python3)
-        message(FATAL_ERROR "Could not find Boost.Python for Python 3. Tried 'python' wih suffixes 3, 34 to 39, and 310 to 319.")
+        message(FATAL_ERROR "Could not find Boost.Python for Python 3. Tried 'python' wih suffixes 3, 37, 38, 39, and 310 to 319.")
     endif()
 endif()
 find_package(Boost ${v} REQUIRED COMPONENTS graph iostreams)

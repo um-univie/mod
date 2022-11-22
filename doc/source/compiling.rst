@@ -205,7 +205,7 @@ related to them.
 - libMØD:
 
   - A C++ compiler with reasonable C++17 support is needed.
-  - `Boost <http://boost.org>`__ dev >= 1.73
+  - `Boost <http://boost.org>`__ dev >= 1.76
     (use ``-DBOOST_ROOT=<path>`` for non-standard locations).
   - `GraphCanon <https://github.com/jakobandersen/graph_canon>`__ >= 0.5.
     This is fulfilled via a Git submodule (make sure to do
@@ -277,13 +277,13 @@ Non-standard Python Installation
 """"""""""""""""""""""""""""""""
 
 Passing ``--with-python=python3`` to ``bootstrap.sh`` should work.
-This adds a line similar to "``using python : 3.3 ;``" to
+This adds a line similar to "``using python : 3.7 ;``" to
 ``project-config.jam``.
 After compilation (running ``b2``) the file ``stage/lib/libboost_python3.so``
 should exist. If not, it did not detect Python 3 properly.
 
 If Python is installed in a non-standard location, add the a line similar to
-"``using python : 3.3 : python3 : /path/to/python/3/installtion/include ;``" to
+"``using python : 3.7 : python3 : /path/to/python/3/installtion/include ;``" to
 ``project-config.jam``, where the last path is the path to the
 ``include``-folder of the Python-installation.
 
@@ -295,4 +295,4 @@ Before running ``b2`` create the file ``user-config.jam`` in the root of the
 home dir (see `here
 <http://www.boost.org/boost-build2/doc/html/bbv2/overview/configuration.html>`__
 for the full documentation). Put a line similar to
-"``using gcc : : /path/to/g++-4.8``" in the file.
+"``using gcc : : /path/to/g++-10``" in the file.
