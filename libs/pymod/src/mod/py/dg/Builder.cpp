@@ -39,7 +39,7 @@ void Builder_doExport() {
 	// rst:
 	// rst:		Otherwise one can manually use ``del`` on the obtained builder to trigger the destruction.
 	// rst:
-	py::class_<Builder, std::shared_ptr<Builder>, boost::noncopyable>("DGBuilder", py::no_init)
+	py::class_<Builder, std::shared_ptr<Builder>, boost::noncopyable>("_DGBuilder", py::no_init)
 			// rst:		.. attribute:: dg
 			// rst:
 			// rst:			The derivation graph this builder can modify.

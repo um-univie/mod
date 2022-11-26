@@ -227,7 +227,7 @@ def dgDerivations(ders: Iterable[Derivation]) -> DG:
 	dg = DG()
 	with dg.build() as b:
 		for d in ders:
-			b.addDerivation(d)  # type: ignore
+			b.addDerivation(d)
 	return dg
 
 def dgRuleComp(graphs: Iterable[Graph], strat: DGStrat,
@@ -327,14 +327,14 @@ DG.__eq__ = lambda self, other: self.id == other.id  # type: ignore
 DG.__hash__ = lambda self: self.id  # type: ignore
 
 
-class DGBuildContextManager:
-	_builder: Optional[DGBuilder]
+class DGBuilder:
+	_builder: Optional[libpymod._DGBuilder]
 
 	def __init__(self, dg: DG) -> None:
 		assert dg is not None
 		self._builder = _DG_build_orig(dg)
 
-	def __enter__(self) -> "DGBuildContextManager":
+	def __enter__(self) -> "DGBuilder":
 		return self
 
 	def __exit__(self, exc_type, exc_val, exc_tb) -> None:
@@ -381,7 +381,7 @@ class DGBuildContextManager:
 			prefixFilename(f), verbosity)
 
 _DG_build_orig = DG.build
-DG.build = lambda self: DGBuildContextManager(self)  # type: ignore
+DG.build = lambda self: DGBuilder(self)  # type: ignore
 
 
 #----------------------------------------------------------
