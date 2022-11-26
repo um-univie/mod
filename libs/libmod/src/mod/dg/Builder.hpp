@@ -31,6 +31,10 @@ public:
 	Builder(Builder &&other);
 	Builder &operator=(Builder &&other);
 	~Builder();
+	// rst: .. function:: std::shared_ptr<DG> getDG() const
+	// rst:
+	// rst:		:returns: the derivation graph this builder can modify.
+	std::shared_ptr<DG> getDG() const;
 	// rst: .. function:: bool isActive() const
 	// rst:
 	// rst:		:returns: whether this object is associated with a :cpp:class:`DG`.

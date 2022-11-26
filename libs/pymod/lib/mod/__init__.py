@@ -328,21 +328,28 @@ DG.__hash__ = lambda self: self.id  # type: ignore
 
 
 class DGBuildContextManager:
-	dg: Optional[DG]
 	_builder: Optional[DGBuilder]
 
 	def __init__(self, dg: DG) -> None:
 		assert dg is not None
-		self.dg = dg
-		self._builder = _DG_build_orig(self.dg)
+		self._builder = _DG_build_orig(dg)
 
 	def __enter__(self) -> "DGBuildContextManager":
 		return self
 
 	def __exit__(self, exc_type, exc_val, exc_tb) -> None:
 		del self._builder
-		self.dg = None
 		self._builder = None
+
+	@property
+	def dg(self) -> DG:
+		assert self._builder
+		return self._builder.dg
+
+	@property
+	def isActive(self) -> bool:
+		assert self._builder
+		return self._builder.isActive
 
 	def addDerivation(self, d: Derivations,
 			graphPolicy: IsomorphismPolicy = IsomorphismPolicy.Check) -> DGHyperEdge:

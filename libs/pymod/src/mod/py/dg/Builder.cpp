@@ -40,20 +40,32 @@ void Builder_doExport() {
 	// rst:		Otherwise one can manually use ``del`` on the obtained builder to trigger the destruction.
 	// rst:
 	py::class_<Builder, std::shared_ptr<Builder>, boost::noncopyable>("DGBuilder", py::no_init)
-			// rst:		.. method:: addDerivation(d, graphPolicy=IsomorphismPolicy.Check)
+			// rst:		.. attribute:: dg
 			// rst:
-			// rst:			Adds a hyperedge corresponding to the given derivation to the associated :class:`DG`.
-			// rst:			If it already exists, only add the given rules to the edge.
+			// rst:			The derivation graph this builder can modify.
 			// rst:
-			// rst:			:param Derivations d: a derivation to add a hyperedge for.
-			// rst:			:param IsomorphismPolicy graphPolicy: the isomorphism policy for adding the given graphs.
-			// rst:			:returns: the hyperedge corresponding to the given derivation.
-			// rst:			:rtype: DGHyperEdge
-			// rst:			:raises: :class:`LogicError` if ``d.left`` or ``d.right`` is empty.
-			// rst:			:raises: :class:`LogicError` if a ``None``is in ``d.left``, ``d.right``, or ``d.rules``.
-			// rst:			:raises: :class:`LogicError` if ``graphPolicy == IsomorphismPolicy.Check`` and a given graph object
-			// rst:				is different but isomorphic to another given graph object or to a graph object already
-			// rst:				in the internal graph database in the associated derivation graph.
+			// rst:			:type: DG
+			.add_property("dg", &Builder::getDG)
+					// rst:		.. attribute:: isActive
+					// rst:
+					// rst:			Whether this object is associated with a :py:class:`DG`.
+					// rst:
+					// rst:			:type: bool
+			.add_property("isActive", &Builder::isActive)
+					// rst:		.. method:: addDerivation(d, graphPolicy=IsomorphismPolicy.Check)
+					// rst:
+					// rst:			Adds a hyperedge corresponding to the given derivation to the associated :class:`DG`.
+					// rst:			If it already exists, only add the given rules to the edge.
+					// rst:
+					// rst:			:param Derivations d: a derivation to add a hyperedge for.
+					// rst:			:param IsomorphismPolicy graphPolicy: the isomorphism policy for adding the given graphs.
+					// rst:			:returns: the hyperedge corresponding to the given derivation.
+					// rst:			:rtype: DGHyperEdge
+					// rst:			:raises: :class:`LogicError` if ``d.left`` or ``d.right`` is empty.
+					// rst:			:raises: :class:`LogicError` if a ``None``is in ``d.left``, ``d.right``, or ``d.rules``.
+					// rst:			:raises: :class:`LogicError` if ``graphPolicy == IsomorphismPolicy.Check`` and a given graph object
+					// rst:				is different but isomorphic to another given graph object or to a graph object already
+					// rst:				in the internal graph database in the associated derivation graph.
 			.def("addDerivation", static_cast<AddDerivation>(&Builder::addDerivation))
 					// rst:		.. method:: addHyperEdge(e, graphPolicy=IsomorphismPolicy.Check)
 					// rst:

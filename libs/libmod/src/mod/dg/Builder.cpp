@@ -28,6 +28,10 @@ Builder::Builder(Builder &&other) = default;
 Builder &Builder::operator=(Builder &&other) = default;
 Builder::~Builder() = default;
 
+std::shared_ptr<DG> Builder::getDG() const {
+	return p->dg_;
+}
+
 bool Builder::isActive() const {
 	return p != nullptr;
 }

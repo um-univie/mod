@@ -71,6 +71,8 @@ New Features
   See :ref:`cpp-Post`/:ref:`py-Post`.
 - Added :cpp:func:`graph::Graph::enumerateMonomorphisms`/:py:meth:`Graph.enumerateMonomorphisms`.
 - Added :cpp:func:`dg::Printer::setImageOverwrite`/:py:meth:`DGPrinter.setImageOverwrite`.
+- Added :cpp:func:`dg::Builder::getDG`/:py:attr:`DGBuilder.dg` and
+  :py:attr:`DGBuilder.isActive`.
 
 Bugs Fixed
 ----------
