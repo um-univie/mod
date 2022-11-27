@@ -72,14 +72,7 @@ configure_file(redirector/pyproject.toml ${exportDir}/pyproject.toml @ONLY)
 configure_file(redirector/setup.cfg.in ${exportDir}/setup.cfg @ONLY)
 configure_file(redirector/mod/__init__.py.in ${exportDir}/mod/__init__.py @ONLY)
 if(${BUILD_PY_MOD_PIP})
-    # https://www.scivision.dev/cmake-install-python-package/
-    # detect virtualenv and set Pip args accordingly
-    if(DEFINED ENV{VIRTUAL_ENV} OR DEFINED ENV{CONDA_PREFIX})
-        set(_pip_args)
-    else()
-        set(_pip_args "--user")
-    endif()
-    install(CODE "execute_process(COMMAND ${Python3_EXECUTABLE} -m pip install . ${_pip_args} WORKING_DIRECTORY ${exportDir})"
+    install(CODE "execute_process(COMMAND ${Python3_EXECUTABLE} -m pip install . WORKING_DIRECTORY ${exportDir})"
             COMPONENT pymod_run)
 endif()
 
