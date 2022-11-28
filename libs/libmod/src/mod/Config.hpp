@@ -75,7 +75,6 @@ MOD_DECL std::ostream &operator<<(std::ostream &s, LabelRelation lt);
 // rst:
 // rst:		A class simply for grouping label settings.
 // rst:
-
 struct LabelSettings {
 	// rst:		.. function:: LabelSettings(LabelType type, LabelRelation relation)
 	// rst:
@@ -154,6 +153,105 @@ enum class SmilesClassPolicy {
 };
 MOD_DECL std::ostream &operator<<(std::ostream &s, SmilesClassPolicy p);
 
+// rst: .. enum-struct:: Action
+// rst:
+// rst:		Utility enum for deciding what to do in certain cases.
+// rst:
+enum class Action {
+	// rst:		.. enumerator:: Error
+	// rst:
+	// rst:			Abort the function and produce an error message, e.g., through and exception.
+	Error,
+	// rst:		.. enumerator:: Warn
+	// rst:
+	// rst:			Write a warning, but otherwise do as if it was `Ignore`.
+	Warn,
+	// rst:		.. enumerator:: Ignore
+	// rst:
+	// rst:			Ignore the case. The function taking the action as argument should describe what this means.
+	Ignore
+};
+MOD_DECL std::ostream &operator<<(std::ostream &s, Action a);
+
+// rst: .. class:: MDLOptions
+// rst:
+// rst:		An aggregation of options for the various loading functions for MDL formats.
+// rst:		Generally each option is defaulted to follow the specification of the formats,
+// rst:		unless it is harmless to deviate (e.g., relaxed white-space parsing).
+// rst:
+struct MOD_DECL MDLOptions {
+	// rst:		.. member:: bool addHydrogens = true
+	// rst:
+	// rst:			Use the MDL valence model to add hydrogens to atoms with default valence, or disable all hydrogen addition.
+	bool addHydrogens = true;
+	// rst:		.. member:: bool allowAbstract = false
+	// rst:
+	// rst:			Allow non-standard atom symbols. The standard symbols are the element symbols and those specifying wildcard atoms.
+	bool allowAbstract = false;
+	// rst:		.. member:: bool applyV2000AtomAliases = true
+	// rst:
+	// rst:			In MOL V2000 CTAB blocks, replace atom labels by their aliases.
+	// rst:			After application, the atom is considered abstract without errors, and hydrogen addition is suppressed.
+	bool applyV2000AtomAliases = true;
+	// rst:		.. member:: Action onPatternIsotope = Action::Error
+	// rst:		            Action onPatternCharge = Action::Error;
+	// rst:		            Action onPatternRadical = Action::Error;
+	// rst:
+	// rst:			What to do when an atom with symbol ``*`` has an isotope, charge, or radical.
+	// rst:			`Action::Ignore` means assuming the isotope, charge, or radical was not there.
+	Action onPatternIsotope = Action::Error;
+	Action onPatternCharge = Action::Error;
+	Action onPatternRadical = Action::Error;
+	// rst:		.. member:: Action onImplicitValenceOnAbstract = Action::Error
+	// rst:
+	// rst:			What to do when `addHydrogens && allowAbstract` and an abstract atom is encountered with implicit valence.
+	// rst:			`Action::Ignore` means adding no hydrogens.
+	Action onImplicitValenceOnAbstract = Action::Error;
+	// rst:		.. member:: Action onV2000UnhandledProperty = Action::Warn
+	// rst:
+	// rst:			What to do when a property line in a V2000 MOL file is not recognized.
+	// rst:			`Action::Ignore` means simply ignoring that particular line.
+	Action onV2000UnhandledProperty = Action::Warn;
+	// rst:		.. member:: bool fullyIgnoreV2000UnhandledKnownProperty = false
+	// rst:
+	// rst:			Warnings are usually stored as "loading warnings", even when they are ignored during parsing.
+	// rst:			Setting this to `true` will act as if `onV2000UnhandledProperty = Action::Ignore` and
+	// rst:			skip the storage, but only for a pre-defined known subset of properties.
+	bool fullyIgnoreV2000UnhandledKnownProperty = false;
+	// rst:		.. member:: Action onV3000UnhandledAtomProperty = Action::Warn
+	// rst:
+	// rst:			What to do when a property in atom line in a V3000 MOL file is not recognized.
+	// rst:			`Action::Ignore` means simply ignoring that particular property.
+	Action onV3000UnhandledAtomProperty = Action::Warn;
+	// rst:		.. member:: Action onV2000Charge4 = Action::Error
+	// rst:
+	// rst:			What to do when an atom in a V2000 MOL file has the charge 4 (doublet radical).
+	// rst:			`Action::Ignore` means assuming it was charge 0.
+	Action onV2000Charge4 = Action::Error;
+	// rst:		.. member:: Action onV2000AbstractISO = Action::Error
+	// rst:
+	// rst:			What to do when an abstract atom in a V2000 MOL file has a non-default ISO or mass difference value.
+	//	rst:			`Action::Ignore` means assuming it had no ISO or mass difference value.
+	Action onV2000AbstractISO = Action::Error;
+	// rst:		.. member:: Action onRAD1 = Action::Error
+	// rst:		            Action onRAD3 = Action::Error
+	// rst:		            Action onRAD4 = Action::Error
+	// rst:		            Action onRAD5 = Action::Error
+	// rst:		            Action onRAD6 = Action::Error
+	// rst:
+	// rst:			What to do when an atom has assigned the indicated radical state.
+	// rst:			`Action::Ignore` means pretending the atom has no radical state assigned.
+	Action onRAD1 = Action::Error;
+	Action onRAD3 = Action::Error;
+	Action onRAD4 = Action::Error;
+	Action onRAD5 = Action::Error;
+	Action onRAD6 = Action::Error;
+	// rst:		.. member:: Action onUnsupportedQueryBondType = Action::Error
+	// rst:
+	// rst:			What to do when a bond type 5, 6, or 7 are encountered (constrained query bond types).
+	// rst:			`Action::Ignore` means assigning a term variable, as if the type was 8.
+	Action onUnsupportedQueryBondType = Action::Error;
+};
 
 // rst: .. function:: Config &getConfig()
 // rst: 
@@ -258,16 +356,8 @@ struct Config {
         ((bool, checkIsoInPermutation, false))                                      \
         ((unsigned long, numIsomorphismCalls, 0))                                   \
     ))                                                                              \
-    ((IO, io,                                                                       \
-        ((std::string, dotCoordOptions, ""))                                        \
-        ((bool, useOpenBabelCoords, true))                                          \
-    ))                                                                              \
-    ((OBabel, obabel,                                                               \
-        ((bool, verbose, false))                                                    \
-    ))                                                                              \
     ((Rule, rule,                                                                   \
         ((bool, ignoreConstraintsDuringInversion, false))                           \
-        ((std::string, changeColour, ""))                                           \
         ((std::string, changeColourL, "NavyBlue"))                                  \
         ((std::string, changeColourK, "Purple"))                                    \
         ((std::string, changeColourR, "Green"))                                     \
@@ -284,9 +374,6 @@ struct Config {
     ))                                                                              \
     ((Stereo, stereo,                                                               \
         ((bool, silenceDeductionWarnings, false))                                   \
-    ))                                                                              \
-    ((Term, unification,                                                            \
-        ((bool, verboseMGU, false))                                                 \
     ))
 
 #define MOD_CONFIG_nsIter(rNS, dataNS, tNS)                                           \

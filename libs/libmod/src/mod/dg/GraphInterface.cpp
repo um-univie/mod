@@ -2,9 +2,9 @@
 
 #include <mod/graph/Printer.hpp>
 #include <mod/lib/DG/Hyper.hpp>
+#include <mod/lib/DG/IO/Write.hpp>
 #include <mod/lib/GraphPimpl.hpp>
 #include <mod/lib/Graph/Single.hpp>
-#include <mod/lib/IO/Derivation.hpp>
 #include <mod/lib/Rules/Real.hpp>
 
 namespace mod::dg {
@@ -13,7 +13,7 @@ namespace mod::dg {
 // Vertex
 //------------------------------------------------------------------------------
 
-MOD_GRAPHPIMPL_Define_Vertex_noGraph(DG, DG,g->getHyper().getGraph(), g, /* VertexPrint */)
+MOD_GRAPHPIMPL_Define_Vertex_noGraph(DG, DG, g->getHyper().getGraph(), g, /* VertexPrint */)
 
 std::shared_ptr<DG> DG::Vertex::getDG() const {
 	if(!g) throw LogicError("Can not get DG on a null vertex.");
@@ -156,7 +156,7 @@ DG::HyperEdge::print(const graph::Printer &printer, const std::string &nomatchCo
 	if(rules().size() == 0) throw LogicError("The edge has no rules.");
 	const auto &dg = g->getHyper();
 	const auto v = dg.getInternalVertex(*this);
-	return lib::IO::Derivation::Write::summary(g->getNonHyper(), v, printer.getOptions(), nomatchColour, matchColour);
+	return lib::DG::Write::summaryDerivation(g->getNonHyper(), v, printer.getOptions(), nomatchColour, matchColour);
 }
 
 //------------------------------------------------------------------------------

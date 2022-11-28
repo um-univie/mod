@@ -1,4 +1,4 @@
-post("disableSummary")
+post.disableInvokeMake()
 
 # LabelType
 assert LabelType() == LabelType.String
@@ -70,3 +70,10 @@ assert str(IsomorphismPolicy.TrustMe) == "trustMe"
 assert SmilesClassPolicy() == SmilesClassPolicy.NoneOnDuplicate
 assert str(SmilesClassPolicy.NoneOnDuplicate) == "noneOnDuplicate"
 assert str(SmilesClassPolicy.ThrowOnDuplicate) == "throwOnDuplicate"
+assert str(SmilesClassPolicy.MapUnique) == "mapUnique"
+
+# Action
+assert Action() == Action.Error
+assert str(Action.Error) == "error"
+assert str(Action.Warn) == "warn"
+assert str(Action.Ignore) == "ignore"

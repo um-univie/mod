@@ -1,11 +1,9 @@
-#ifndef MOD_LIB_STEREO_CONFIGURATION_TRIGONAL_PLANAR_H
-#define MOD_LIB_STEREO_CONFIGURATION_TRIGONAL_PLANAR_H
+#ifndef MOD_LIB_STEREO_CONFIGURATION_TRIGONAL_PLANAR_HPP
+#define MOD_LIB_STEREO_CONFIGURATION_TRIGONAL_PLANAR_HPP
 
 #include <mod/lib/Stereo/Configuration/Configuration.hpp>
 
-namespace mod {
-namespace lib {
-namespace Stereo {
+namespace mod::lib::Stereo {
 
 struct TrigonalPlanar final : StaticDegree<3> {
 	TrigonalPlanar(const GeometryGraph &g, const std::array<EmbeddingEdge, 3> &edges, bool fixed);
@@ -29,9 +27,6 @@ private:
 	bool fixed;
 };
 
-} // namespace Stereo
-} // namespace lib
-} // namespace mod
+} // namespace mod::lib::Stereo
 
-#endif /* MOD_LIB_STEREO_CONFIGURATION_TRIGONAL_PLANAR_H */
-
+#endif // MOD_LIB_STEREO_CONFIGURATION_TRIGONAL_PLANAR_HPP

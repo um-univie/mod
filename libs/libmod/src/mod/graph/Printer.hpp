@@ -1,5 +1,5 @@
-#ifndef MOD_GRAPH_PRINTER_H
-#define MOD_GRAPH_PRINTER_H
+#ifndef MOD_GRAPH_PRINTER_HPP
+#define MOD_GRAPH_PRINTER_HPP
 
 #include <mod/BuildConfig.hpp>
 #include <mod/graph/ForwardDecl.hpp>
@@ -40,11 +40,11 @@ struct MOD_DECL Printer {
 	void setReactionDefault();
 	// rst: .. function:: void disableAll()
 	// rst:
-	// rst: 	Disable all special printing features.
+	// rst:		Disable all special printing features.
 	void disableAll();
 	// rst: .. function:: void enableAll()
 	// rst:
-	// rst: 	Enable all special printing features, except typewriter font.
+	// rst:		Enable all special printing features, except typewriter font.
 	void enableAll();
 	// rst: .. function:: void setEdgesAsBonds(bool value)
 	// rst:               bool getEdgesAsBonds() const
@@ -58,6 +58,12 @@ struct MOD_DECL Printer {
 	// rst:		Control whether vertices representing hydrogen atoms are collapsed into their neighbours labels.
 	void setCollapseHydrogens(bool value);
 	bool getCollapseHydrogens() const;
+	// rst: .. function:: void setRaiseIsotopes(bool value)
+	// rst:               bool getRaiseIsotopes() const
+	// rst:
+	// rst:		Control whether a vertex label prefix encoding an isotope is written as a superscript to the rest of the label.
+	void setRaiseIsotopes(bool value);
+	bool getRaiseIsotopes() const;
 	// rst: .. function:: void setRaiseCharges(bool value)
 	// rst:               bool getRaiseCharges() const
 	// rst:
@@ -118,6 +124,24 @@ struct MOD_DECL Printer {
 	// rst:		Mirror internally computed coordinates in the y-axis.
 	void setMirror(bool value);
 	bool getMirror() const;
+	// rst: .. function:: void setWithGraphvizCoords(bool value)
+	// rst:               bool getWithGraphvizCoords() const
+	// rst:
+	// rst:		Do not use Open Babel for coordinate generation, but only the Graphviz fallback
+	// rst:		during post-processing.
+	// rst:		When setting this to `true` consider setting `setSimpleCarbons(false)` to avoid
+	// rst:		misleading depictions due to colinear carbon chains.
+	void setWithGraphvizCoords(bool value);
+	bool getWithGraphvizCoords() const;
+public:
+	// rst: .. function:: void setGraphvizPrefix(const std::string &prefix)
+	// rst:               const std::string &getGraphvizPrefix() const
+	// rst:
+	// rst:		Access the string that will be inserted into generated DOT files,
+	// rst:		just after the graph declaration.
+	// rst:		DOT files are only generated when `getWithGraphvizCoords()`.
+	void setGraphvizPrefix(const std::string &prefix);
+	const std::string &getGraphvizPrefix() const;
 private:
 	std::unique_ptr<lib::IO::Graph::Write::Options> options;
 };
@@ -125,4 +149,4 @@ private:
 
 } // namespace mod::graph
 
-#endif /* MOD_GRAPH_PRINTER_H */
+#endif // MOD_GRAPH_PRINTER_HPP

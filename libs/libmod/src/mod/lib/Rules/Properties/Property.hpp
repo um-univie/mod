@@ -2,94 +2,100 @@
 #define MOD_LIB_RULES_PROP_HPP
 
 #include <mod/Error.hpp>
+#include <mod/lib/DPO/CombinedRule.hpp>
+#include <mod/lib/DPO/Membership.hpp>
 #include <mod/lib/LabelledGraph.hpp>
 #include <mod/lib/IO/IO.hpp>
 
 #include <jla_boost/graph/PairToRangeAdaptor.hpp>
-#include <jla_boost/graph/dpo/Rule.hpp>
 
 #include <boost/graph/graph_traits.hpp>
+#include <boost/graph/properties.hpp>
 #include <boost/optional/optional.hpp>
 
 #include <vector>
 
 namespace mod::lib::Rules {
-using jla_boost::GraphDPO::Membership;
+using lib::DPO::Membership;
 
-#define MOD_RULE_STATE_TEMPLATE_PARAMS                                           \
-   template<typename Derived, typename Graph,                                    \
-   typename LeftVertexType, typename LeftEdgeType,                               \
-   typename RightVertexType, typename RightEdgeType>
-#define MOD_RULE_STATE_TEMPLATE_ARGS                                             \
-   Derived, Graph, LeftVertexType, LeftEdgeType, RightVertexType, RightEdgeType
+#define MOD_RULE_PROP_TEMPLATE_PARAMS typename Derived, typename VertexProp, typename EdgeProp
+#define MOD_RULE_PROP_TEMPLATE_ARGS   Derived, VertexProp, EdgeProp
 
-namespace detail {
-
-MOD_RULE_STATE_TEMPLATE_PARAMS
-struct LeftState;
-
-MOD_RULE_STATE_TEMPLATE_PARAMS
-struct RightState;
-
-} // namespace detail
-
-template<typename Derived, typename Graph, typename LeftVertexTypeT, typename LeftEdgeTypeT,
-		typename RightVertexTypeT = LeftVertexTypeT, typename RightEdgeTypeT = LeftEdgeTypeT>
-struct PropCore {
-	using LeftVertexType = LeftVertexTypeT;
-	using LeftEdgeType = LeftEdgeTypeT;
-	using RightVertexType = RightVertexTypeT;
-	using RightEdgeType = RightEdgeTypeT;
-	using Vertex = typename boost::graph_traits<Graph>::vertex_descriptor;
-	using Edge = typename boost::graph_traits<Graph>::edge_descriptor;
-	using LeftType = detail::LeftState<MOD_RULE_STATE_TEMPLATE_ARGS>;
-	using RightType = detail::RightState<MOD_RULE_STATE_TEMPLATE_ARGS>;
-	friend class detail::LeftState<MOD_RULE_STATE_TEMPLATE_ARGS>;
-	friend class detail::RightState<MOD_RULE_STATE_TEMPLATE_ARGS>;
-	using ValueTypeVertex = std::pair<boost::optional<const LeftVertexType &>, boost::optional<const RightVertexType &> >;
-	using ValueTypeEdge = std::pair<boost::optional<const LeftEdgeType &>, boost::optional<const RightEdgeType &> >;
+template<typename Derived, typename VertexPropT, typename EdgePropT>
+struct PropBase {
+	using RuleType = lib::DPO::CombinedRule;
 public:
-	void verify(const Graph *g) const;
-	explicit PropCore(const Graph &g);
-	ValueTypeVertex operator[](Vertex v) const;
-	ValueTypeEdge operator[](Edge e) const;
-	LeftType getLeft() const;
-	RightType getRight() const;
+	using VertexProp = VertexPropT;
+	using EdgeProp = EdgePropT;
+public:
+	struct Side {
+		using RuleType = lib::DPO::CombinedRule;
+	public:
+		const VertexProp &operator[](RuleType::SideVertex v) const;
+		const EdgeProp &operator[](RuleType::SideEdge e) const;
+
+		friend auto get(const Side &p, const RuleType::SideVertex &v) -> decltype(p[v]) { return p[v]; }
+
+		friend auto get(const Side &p, const RuleType::SideEdge &e) -> decltype(p[e]) { return p[e]; }
+
+	public:
+		const PropBase &p;
+		const std::vector<VertexProp> &pV;
+		const std::vector<EdgeProp> &pE;
+		const RuleType::SideGraphType &g;
+	public:
+		using Handler = IdentityPropertyHandler;
+	};
+public:
+	using ValueTypeVertex = std::pair<boost::optional<const VertexProp &>, boost::optional<const VertexProp &>>;
+	using ValueTypeEdge = std::pair<boost::optional<const EdgeProp &>, boost::optional<const EdgeProp &>>;
+public:
+	void verify() const;
+
+	explicit PropBase(const RuleType &rule) : rule(rule) {}
+
+	Side getLeft() const { return {*this, vPropL, ePropL, getL(rule)}; }
+
+	Side getRight() const { return {*this, vPropR, ePropR, getR(rule)}; }
+
+public:
 	void invert();
-	void add(Vertex v, const LeftVertexType &valueLeft, const RightVertexType &valueRight);
-	void add(Edge e, const LeftEdgeType &valueLeft, const RightEdgeType &valueRight);
+public: // vertex
+	void addL(RuleType::SideVertex v, VertexProp p);
+	void addR(RuleType::SideVertex v, VertexProp p);
+	void addK(RuleType::KVertex v, VertexProp pL, VertexProp pR);
+	void promoteL(RuleType::SideVertex vL, RuleType::SideVertex vR, VertexProp pR);
+public: // edge
+	void addL(RuleType::SideEdge e, EdgeProp p);
+	void addR(RuleType::SideEdge e, EdgeProp p);
+	void addK(RuleType::KEdge e, EdgeProp pL, EdgeProp pR);
+public:
+	ValueTypeVertex operator[](RuleType::CombinedVertex v) const;
+	ValueTypeEdge operator[](RuleType::CombinedEdge e) const;
+public:
+	friend auto get(const PropBase &p, RuleType::CombinedVertex v) -> decltype(p[v]) { return p[v]; }
+
+	friend auto get(const PropBase &p, RuleType::CombinedEdge e) -> decltype(p[e]) { return p[e]; }
+
+public: // old stuff not yet fully evaluated
+	void add(RuleType::CombinedVertex v, const VertexProp &valueLeft, const VertexProp &valueRight);
+	void add(RuleType::CombinedEdge e, const EdgeProp &valueLeft, const EdgeProp &valueRight);
 	// does not modify the other side
-	void setLeft(Vertex v, const LeftVertexType &value);
-	void setRight(Vertex v, const RightVertexType &value);
-	void setLeft(Edge e, const LeftEdgeType &value);
-	void setRight(Edge e, const RightEdgeType &value);
-	bool isChanged(Vertex v) const;
-	bool isChanged(Edge e) const;
-	void print(std::ostream &s, Vertex v) const;
-	void print(std::ostream &s, Edge e) const;
+	void setLeft(RuleType::CombinedVertex v, const VertexProp &value);
+	void setRight(RuleType::CombinedVertex v, const VertexProp &value);
+	void setLeft(RuleType::CombinedEdge e, const EdgeProp &value);
+	void setRight(RuleType::CombinedEdge e, const EdgeProp &value);
+public: // is updated
+	bool isChanged(RuleType::CombinedVertex v) const;
+	bool isChanged(RuleType::CombinedEdge e) const;
+	void print(std::ostream &s, RuleType::CombinedVertex v) const;
+	void print(std::ostream &s, RuleType::CombinedEdge e) const;
 	const Derived &getDerived() const;
 protected:
-	const Graph &g;
+	const RuleType &rule;
 protected:
-	struct VertexStore {
-		VertexStore() = default;
-		VertexStore(const LeftVertexType &left, const RightVertexType &right) : left(left), right(right) {}
-		VertexStore(LeftVertexType &&left, RightVertexType &&right) : left(std::move(left)), right(std::move(right)) {}
-	public:
-		LeftVertexType left;
-		RightVertexType right;
-	};
-
-	struct EdgeStore {
-		EdgeStore() = default;
-		EdgeStore(const LeftEdgeType &left, const RightEdgeType &right) : left(left), right(right) {}
-	public:
-		LeftEdgeType left;
-		RightEdgeType right;
-	};
-
-	std::vector<VertexStore> vertexState;
-	std::vector<EdgeStore> edgeState;
+	std::vector<VertexProp> vPropL, vPropR;
+	std::vector<EdgeProp> ePropL, ePropR;
 public:
 	struct Handler {
 		template<typename VEProp, typename LabGraphDom, typename LabGraphCodom, typename F, typename ...Args>
@@ -119,230 +125,277 @@ public:
 	};
 };
 
-template<typename Derived, typename Graph, typename LeftVertexType, typename LeftEdgeType, typename RightVertexType,
-		typename RightEdgeType, typename VertexOrEdge>
-auto get(const PropCore<MOD_RULE_STATE_TEMPLATE_ARGS> &p, VertexOrEdge ve) -> decltype(p[ve]) {
-	return p[ve];
-}
-
-namespace detail {
-
-MOD_RULE_STATE_TEMPLATE_PARAMS
-struct LeftState {
-	LeftState(const PropCore<MOD_RULE_STATE_TEMPLATE_ARGS> &state) : state(state) {}
-
-	const LeftVertexType &operator[](typename boost::graph_traits<Graph>::vertex_descriptor v) const {
-		auto vId = get(boost::vertex_index_t(), state.g, v);
-		assert(vId < state.vertexState.size());
-		assert(state.g[v].membership != Membership::Right);
-		return state.vertexState[vId].left;
-	}
-
-	const LeftEdgeType &operator[](typename boost::graph_traits<Graph>::edge_descriptor e) const {
-		auto eId = get(boost::edge_index_t(), state.g, e);
-		assert(eId < state.edgeState.size());
-		assert(state.g[e].membership != Membership::Right);
-		return state.edgeState[eId].left;
-	}
-public:
-	const PropCore<MOD_RULE_STATE_TEMPLATE_ARGS> &state;
-public:
-	using Handler = IdentityPropertyHandler;
-};
-
-MOD_RULE_STATE_TEMPLATE_PARAMS
-struct RightState {
-	RightState(const PropCore<MOD_RULE_STATE_TEMPLATE_ARGS> &state) : state(state) {}
-
-	const RightVertexType &operator[](typename boost::graph_traits<Graph>::vertex_descriptor v) const {
-		auto vId = get(boost::vertex_index_t(), state.g, v);
-		assert(vId < state.vertexState.size());
-		assert(state.g[v].membership != Membership::Left);
-		return state.vertexState[vId].right;
-	}
-
-	const RightEdgeType &operator[](typename boost::graph_traits<Graph>::edge_descriptor e) const {
-		auto eId = get(boost::edge_index_t(), state.g, e);
-		assert(eId < state.edgeState.size());
-		assert(state.g[e].membership != Membership::Left);
-		return state.edgeState[eId].right;
-	}
-public:
-	const PropCore<MOD_RULE_STATE_TEMPLATE_ARGS> &state;
-public:
-	using Handler = IdentityPropertyHandler;
-};
-
-template<typename Derived, typename Graph, typename LeftVertexType, typename LeftEdgeType, typename RightVertexType, typename RightEdgeType,
-		typename VertexOrEdge>
-auto get(const LeftState<MOD_RULE_STATE_TEMPLATE_ARGS> &p, const VertexOrEdge &ve) -> decltype(p[ve]) {
-	return p[ve];
-}
-
-template<typename Derived, typename Graph, typename LeftVertexType, typename LeftEdgeType, typename RightVertexType, typename RightEdgeType,
-		typename VertexOrEdge>
-auto get(const RightState<MOD_RULE_STATE_TEMPLATE_ARGS> &p, const VertexOrEdge &ve) -> decltype(p[ve]) {
-	return p[ve];
-}
-
-} // namespace detail
-
 //------------------------------------------------------------------------------
 // Implementation
 //------------------------------------------------------------------------------
 
+template<MOD_RULE_PROP_TEMPLATE_PARAMS>
+const VertexProp &PropBase<MOD_RULE_PROP_TEMPLATE_ARGS>::Side::operator[](RuleType::SideVertex v) const {
+	const auto vId = get(boost::vertex_index_t(), g, v);
+	assert(vId < pV.size());
+	return pV[vId];
+}
+
+template<MOD_RULE_PROP_TEMPLATE_PARAMS>
+const EdgeProp &PropBase<MOD_RULE_PROP_TEMPLATE_ARGS>::Side::operator[](RuleType::SideEdge e) const {
+	const auto eId = get(boost::edge_index_t(), g, e);
+	assert(eId < pE.size());
+	return pE[eId];
+}
+
 namespace detail {
-void PropVerify(const void *g, const void *gOther,
-                std::size_t nGraph, std::size_t nOther,
-                std::size_t mGraph, std::size_t mOther);
+
+void PropVerify(const lib::DPO::CombinedRule &rule,
+                std::size_t vLSize, std::size_t vRSize,
+                std::size_t eLSize, std::size_t eRSize);
+
 } // namespace detail
 
-MOD_RULE_STATE_TEMPLATE_PARAMS
-void PropCore<MOD_RULE_STATE_TEMPLATE_ARGS>::verify(const Graph *g) const {
-	detail::PropVerify(g, &this->g, num_vertices(*g), vertexState.size(), num_edges(*g), edgeState.size());
+template<MOD_RULE_PROP_TEMPLATE_PARAMS>
+void PropBase<MOD_RULE_PROP_TEMPLATE_ARGS>::verify() const {
+	// dispatch to a non-templated function so the iostream stuff is not in a header
+	detail::PropVerify(rule, vPropL.size(), vPropR.size(), ePropL.size(), ePropR.size());
 }
 
-MOD_RULE_STATE_TEMPLATE_PARAMS
-PropCore<MOD_RULE_STATE_TEMPLATE_ARGS>::PropCore(const Graph &g) : g(g) {}
+// ===============================================================================================
 
-MOD_RULE_STATE_TEMPLATE_PARAMS
-std::pair<boost::optional<const LeftVertexType &>, boost::optional<const RightVertexType &> >
-PropCore<MOD_RULE_STATE_TEMPLATE_ARGS>::operator[](typename boost::graph_traits<Graph>::vertex_descriptor v) const {
-	assert(v != boost::graph_traits<Graph>::null_vertex());
-	boost::optional<const LeftVertexType &> l;
-	boost::optional<const RightVertexType &> r;
-	if(g[v].membership != Membership::Right) l = getLeft()[v];
-	if(g[v].membership != Membership::Left) r = getRight()[v];
-	return std::make_pair(l, r);
-}
-
-MOD_RULE_STATE_TEMPLATE_PARAMS
-std::pair<boost::optional<const LeftEdgeType &>, boost::optional<const RightEdgeType &> >
-PropCore<MOD_RULE_STATE_TEMPLATE_ARGS>::operator[](typename boost::graph_traits<Graph>::edge_descriptor e) const {
-	boost::optional<const LeftEdgeType &> l;
-	boost::optional<const RightEdgeType &> r;
-	if(g[e].membership != Membership::Right) l = getLeft()[e];
-	if(g[e].membership != Membership::Left) r = getRight()[e];
-	return std::make_pair(l, r);
-}
-
-MOD_RULE_STATE_TEMPLATE_PARAMS
-typename detail::LeftState<MOD_RULE_STATE_TEMPLATE_ARGS>
-PropCore<MOD_RULE_STATE_TEMPLATE_ARGS>::getLeft() const {
-	return detail::LeftState<MOD_RULE_STATE_TEMPLATE_ARGS>(*this);
-}
-
-MOD_RULE_STATE_TEMPLATE_PARAMS
-typename detail::RightState<MOD_RULE_STATE_TEMPLATE_ARGS>
-PropCore<MOD_RULE_STATE_TEMPLATE_ARGS>::getRight() const {
-	return detail::RightState<MOD_RULE_STATE_TEMPLATE_ARGS>(*this);
-}
-
-MOD_RULE_STATE_TEMPLATE_PARAMS
-void PropCore<MOD_RULE_STATE_TEMPLATE_ARGS>::invert() {
+template<MOD_RULE_PROP_TEMPLATE_PARAMS>
+void PropBase<MOD_RULE_PROP_TEMPLATE_ARGS>::invert() {
 	using std::swap;
-	for(auto &vs : vertexState) swap(vs.left, vs.right);
-	for(auto &es : edgeState) swap(es.left, es.right);
+	swap(vPropL, vPropR);
+	swap(ePropL, ePropR);
 }
 
-MOD_RULE_STATE_TEMPLATE_PARAMS
-void PropCore<MOD_RULE_STATE_TEMPLATE_ARGS>::add(Vertex v,
-                                                 const LeftVertexType &valueLeft,
-                                                 const RightVertexType &valueRight) {
-	assert(num_vertices(g) == vertexState.size() + 1);
-	assert(get(boost::vertex_index_t(), g, v) == vertexState.size());
-	vertexState.emplace_back(valueLeft, valueRight);
-	verify(&g);
+template<MOD_RULE_PROP_TEMPLATE_PARAMS>
+void PropBase<MOD_RULE_PROP_TEMPLATE_ARGS>::addL(RuleType::SideVertex v, VertexProp p) {
+	assert(num_vertices(getL(rule)) == vPropL.size() + 1);
+	assert(get(boost::vertex_index_t(), getL(rule), v) == vPropL.size());
+	vPropL.push_back(std::move(p));
+	vPropR.emplace_back();
+	verify();
 }
 
-MOD_RULE_STATE_TEMPLATE_PARAMS
-void
-PropCore<MOD_RULE_STATE_TEMPLATE_ARGS>::add(Edge e, const LeftEdgeType &valueLeft, const RightEdgeType &valueRight) {
-	assert(num_edges(g) == edgeState.size() + 1);
-	assert(get(boost::edge_index_t(), g, e) == edgeState.size());
-	edgeState.emplace_back(valueLeft, valueRight);
-	verify(&g);
+template<MOD_RULE_PROP_TEMPLATE_PARAMS>
+void PropBase<MOD_RULE_PROP_TEMPLATE_ARGS>::addR(RuleType::SideVertex v, VertexProp p) {
+	assert(num_vertices(getR(rule)) == vPropR.size() + 1);
+	assert(get(boost::vertex_index_t(), getR(rule), v) == vPropR.size());
+	vPropL.emplace_back();
+	vPropR.push_back(std::move(p));
+	verify();
 }
 
-MOD_RULE_STATE_TEMPLATE_PARAMS
-void PropCore<MOD_RULE_STATE_TEMPLATE_ARGS>::setLeft(Vertex v, const LeftVertexType &value) {
-	auto vId = get(boost::vertex_index_t(), g, v);
-	assert(vId < vertexState.size());
-	assert(g[v].membership != Membership::Right);
-	vertexState[vId].left = value;
-	verify(&g);
+template<MOD_RULE_PROP_TEMPLATE_PARAMS>
+void PropBase<MOD_RULE_PROP_TEMPLATE_ARGS>::addK(RuleType::KVertex vK, VertexProp pL, VertexProp pR) {
+	assert(num_vertices(getL(rule)) == vPropL.size() + 1);
+	assert(num_vertices(getR(rule)) == vPropR.size() + 1);
+	assert(get(boost::vertex_index_t(), getL(rule),
+	           get(getMorL(rule), getK(rule), getL(rule), vK))
+	       == vPropL.size());
+	assert(get(boost::vertex_index_t(), getR(rule),
+	           get(getMorR(rule), getK(rule), getR(rule), vK))
+	       == vPropR.size());
+	vPropL.push_back(std::move(pL));
+	vPropR.push_back(std::move(pR));
+	verify();
 }
 
-MOD_RULE_STATE_TEMPLATE_PARAMS
-void PropCore<MOD_RULE_STATE_TEMPLATE_ARGS>::setRight(Vertex v, const RightVertexType &value) {
-	auto vId = get(boost::vertex_index_t(), g, v);
-	assert(vId < vertexState.size());
-	assert(g[v].membership != Membership::Left);
-	vertexState[vId].right = value;
-	verify(&g);
+template<MOD_RULE_PROP_TEMPLATE_PARAMS>
+void PropBase<MOD_RULE_PROP_TEMPLATE_ARGS>::promoteL(RuleType::SideVertex vL, RuleType::SideVertex vR, VertexProp pR) {
+	assert(vL == vR);
+	const auto vRId = get(boost::vertex_index_t(), getR(rule), vR);
+	vPropR[vRId] = std::move(pR);
+	verify();
 }
 
-MOD_RULE_STATE_TEMPLATE_PARAMS
-void PropCore<MOD_RULE_STATE_TEMPLATE_ARGS>::setLeft(Edge e, const LeftEdgeType &value) {
-	auto eId = get(boost::edge_index_t(), g, e);
-	assert(eId < edgeState.size());
-	assert(g[e].membership != Membership::Right);
-	edgeState[eId].left = value;
-	verify(&g);
+template<MOD_RULE_PROP_TEMPLATE_PARAMS>
+void PropBase<MOD_RULE_PROP_TEMPLATE_ARGS>::addL(RuleType::SideEdge e, EdgeProp p) {
+	assert(num_edges(getL(rule)) == ePropL.size() + 1);
+	assert(get(boost::edge_index_t(), getL(rule), e) == ePropL.size());
+	ePropL.push_back(std::move(p));
+	ePropR.emplace_back();
+	verify();
 }
 
-MOD_RULE_STATE_TEMPLATE_PARAMS
-void PropCore<MOD_RULE_STATE_TEMPLATE_ARGS>::setRight(Edge e, const RightEdgeType &value) {
-	auto eId = get(boost::edge_index_t(), g, e);
-	assert(eId < edgeState.size());
-	assert(g[e].membership != Membership::Left);
-	edgeState[eId].right = value;
-	verify(&g);
+template<MOD_RULE_PROP_TEMPLATE_PARAMS>
+void PropBase<MOD_RULE_PROP_TEMPLATE_ARGS>::addR(RuleType::SideEdge e, EdgeProp p) {
+	assert(num_edges(getR(rule)) == ePropR.size() + 1);
+	assert(get(boost::edge_index_t(), getR(rule), e) == ePropR.size());
+	ePropL.emplace_back();
+	ePropR.push_back(std::move(p));
+	verify();
 }
 
-MOD_RULE_STATE_TEMPLATE_PARAMS
-bool PropCore<MOD_RULE_STATE_TEMPLATE_ARGS>::isChanged(Vertex v) const {
-	if(g[v].membership != Membership::Context) return false;
-	auto vId = get(boost::vertex_index_t(), g, v);
-	assert(vId < vertexState.size());
-	return vertexState[vId].left != vertexState[vId].right;
+template<MOD_RULE_PROP_TEMPLATE_PARAMS>
+void PropBase<MOD_RULE_PROP_TEMPLATE_ARGS>::addK(RuleType::KEdge eK, EdgeProp pL, EdgeProp pR) {
+	assert(num_edges(getL(rule)) == ePropL.size() + 1);
+	assert(num_edges(getR(rule)) == ePropR.size() + 1);
+	assert(get(boost::edge_index_t(), getL(rule),
+	           get(getMorL(rule), getK(rule), getL(rule), eK))
+	       == ePropL.size());
+	assert(get(boost::edge_index_t(), getR(rule),
+	           get(getMorR(rule), getK(rule), getR(rule), eK))
+	       == ePropR.size());
+	ePropL.push_back(std::move(pL));
+	ePropR.push_back(std::move(pR));
+	verify();
 }
 
-MOD_RULE_STATE_TEMPLATE_PARAMS
-bool PropCore<MOD_RULE_STATE_TEMPLATE_ARGS>::isChanged(Edge e) const {
-	if(g[e].membership != Membership::Context) return false;
-	auto eId = get(boost::edge_index_t(), g, e);
-	assert(eId < edgeState.size());
-	return edgeState[eId].left != edgeState[eId].right;
+// ===============================================================================================
+
+template<MOD_RULE_PROP_TEMPLATE_PARAMS>
+std::pair<boost::optional<const VertexProp &>, boost::optional<const VertexProp &>>
+PropBase<MOD_RULE_PROP_TEMPLATE_ARGS>::operator[](RuleType::CombinedVertex v) const {
+	assert(v != boost::graph_traits<RuleType::CombinedGraphType>::null_vertex());
+	boost::optional<const VertexProp &> l;
+	boost::optional<const VertexProp &> r;
+	if(rule.getCombinedGraph()[v].membership != Membership::R)
+		l = getLeft()[get_inverse(rule.getLtoCG(), getL(rule), rule.getCombinedGraph(), v)];
+	if(rule.getCombinedGraph()[v].membership != Membership::L)
+		r = getRight()[get_inverse(rule.getRtoCG(), getR(rule), rule.getCombinedGraph(), v)];
+	return {l, r};
 }
 
-MOD_RULE_STATE_TEMPLATE_PARAMS
-void PropCore<MOD_RULE_STATE_TEMPLATE_ARGS>::print(std::ostream &s, Vertex v) const {
-	auto vId = get(boost::vertex_index_t(), g, v);
-	assert(vId < vertexState.size());
-	auto membership = g[v].membership;
-	if(membership == Membership::Right) s << "<>";
-	else s << '\'' << vertexState[vId].left << '\'';
+template<MOD_RULE_PROP_TEMPLATE_PARAMS>
+std::pair<boost::optional<const EdgeProp &>, boost::optional<const EdgeProp &>>
+PropBase<MOD_RULE_PROP_TEMPLATE_ARGS>::operator[](RuleType::CombinedEdge e) const {
+	boost::optional<const EdgeProp &> l;
+	boost::optional<const EdgeProp &> r;
+	const auto &cg = rule.getCombinedGraph();
+	if(cg[e].membership != Membership::R)
+		l = getLeft()[get_inverse(rule.getLtoCG(), getL(rule), cg, e)];
+	if(cg[e].membership != Membership::L)
+		r = getRight()[get_inverse(rule.getRtoCG(), getR(rule), cg, e)];
+	return {l, r};
+}
+
+
+template<MOD_RULE_PROP_TEMPLATE_PARAMS>
+void PropBase<MOD_RULE_PROP_TEMPLATE_ARGS>::add(RuleType::CombinedVertex v, const VertexProp &valueLeft,
+                                                const VertexProp &valueRight) {
+	assert(num_vertices(rule.getCombinedGraph()) == vPropL.size() + 1);
+	assert(num_vertices(rule.getCombinedGraph()) == vPropR.size() + 1);
+	assert(get(boost::vertex_index_t(), rule.getCombinedGraph(), v) == vPropL.size());
+	assert(get(boost::vertex_index_t(), rule.getCombinedGraph(), v) == vPropR.size());
+	vPropL.push_back(valueLeft);
+	vPropR.push_back(valueRight);
+	verify();
+}
+
+template<MOD_RULE_PROP_TEMPLATE_PARAMS>
+void PropBase<MOD_RULE_PROP_TEMPLATE_ARGS>::add(RuleType::CombinedEdge e, const EdgeProp &valueLeft,
+                                                const EdgeProp &valueRight) {
+	assert(num_edges(rule.getCombinedGraph()) == ePropL.size() + 1);
+	assert(num_edges(rule.getCombinedGraph()) == ePropR.size() + 1);
+	assert(get(boost::edge_index_t(), rule.getCombinedGraph(), e) == ePropL.size());
+	assert(get(boost::edge_index_t(), rule.getCombinedGraph(), e) == ePropR.size());
+	ePropL.push_back(valueLeft);
+	ePropR.push_back(valueRight);
+	verify();
+}
+
+template<MOD_RULE_PROP_TEMPLATE_PARAMS>
+void PropBase<MOD_RULE_PROP_TEMPLATE_ARGS>::setLeft(RuleType::CombinedVertex v, const VertexProp &value) {
+	const auto vId = get(boost::vertex_index_t(), rule.getCombinedGraph(), v);
+	assert(vId < vPropL.size());
+	assert(rule.getCombinedGraph()[v].membership != Membership::R);
+	vPropL[vId] = value;
+	verify();
+}
+
+template<MOD_RULE_PROP_TEMPLATE_PARAMS>
+void PropBase<MOD_RULE_PROP_TEMPLATE_ARGS>::setRight(RuleType::CombinedVertex v, const VertexProp &value) {
+	const auto vId = get(boost::vertex_index_t(), rule.getCombinedGraph(), v);
+	assert(vId < vPropR.size());
+	assert(rule.getCombinedGraph()[v].membership != Membership::L);
+	vPropR[vId] = value;
+	verify();
+}
+
+template<MOD_RULE_PROP_TEMPLATE_PARAMS>
+void PropBase<MOD_RULE_PROP_TEMPLATE_ARGS>::setLeft(RuleType::CombinedEdge e, const EdgeProp &value) {
+	const auto eId = get(boost::edge_index_t(), rule.getCombinedGraph(), e);
+	assert(eId < ePropL.size());
+	assert(rule.getCombinedGraph()[e].membership != Membership::R);
+	ePropL[eId] = value;
+	verify();
+}
+
+template<MOD_RULE_PROP_TEMPLATE_PARAMS>
+void PropBase<MOD_RULE_PROP_TEMPLATE_ARGS>::setRight(RuleType::CombinedEdge e, const EdgeProp &value) {
+	const auto eId = get(boost::edge_index_t(), rule.getCombinedGraph(), e);
+	assert(eId < ePropR.size());
+	assert(rule.getCombinedGraph()[e].membership != Membership::L);
+	ePropR[eId] = value;
+	verify();
+}
+
+template<MOD_RULE_PROP_TEMPLATE_PARAMS>
+bool PropBase<MOD_RULE_PROP_TEMPLATE_ARGS>::isChanged(RuleType::CombinedVertex v) const {
+	if(rule.getCombinedGraph()[v].membership != Membership::K) return false;
+	const auto vL = get_inverse(rule.getLtoCG(), getL(rule), rule.getCombinedGraph(), v);
+	const auto vR = get_inverse(rule.getRtoCG(), getR(rule), rule.getCombinedGraph(), v);
+	const auto vLid = get(boost::vertex_index_t(), getL(rule), vL);
+	const auto vRid = get(boost::vertex_index_t(), getR(rule), vR);
+	assert(vLid < vPropL.size());
+	assert(vRid < vPropR.size());
+	return vPropL[vLid] != vPropR[vRid];
+}
+
+template<MOD_RULE_PROP_TEMPLATE_PARAMS>
+bool PropBase<MOD_RULE_PROP_TEMPLATE_ARGS>::isChanged(RuleType::CombinedEdge e) const {
+	if(rule.getCombinedGraph()[e].membership != Membership::K) return false;
+	const auto eL = get_inverse(rule.getLtoCG(), getL(rule), rule.getCombinedGraph(), e);
+	const auto eR = get_inverse(rule.getRtoCG(), getR(rule), rule.getCombinedGraph(), e);
+	const auto eLid = get(boost::edge_index_t(), getL(rule), eL);
+	const auto eRid = get(boost::edge_index_t(), getR(rule), eR);
+	assert(eLid < ePropL.size());
+	assert(eRid < ePropR.size());
+	return ePropL[eLid] != ePropR[eRid];
+}
+
+template<MOD_RULE_PROP_TEMPLATE_PARAMS>
+void PropBase<MOD_RULE_PROP_TEMPLATE_ARGS>::print(std::ostream &s, RuleType::CombinedVertex v) const {
+	const auto membership = rule.getCombinedGraph()[v].membership;
+	if(membership == Membership::R) s << "<>";
+	else {
+		const auto vL = get_inverse(rule.getLtoCG(), getL(rule), rule.getCombinedGraph(), v);
+		const auto vLid = get(boost::vertex_index_t(), getL(rule), vL);
+		assert(vLid < vPropL.size());
+		s << '\'' << vPropL[vLid] << '\'';
+	}
 	s << " -> ";
-	if(membership == Membership::Left) s << "<>";
-	else s << '\'' << vertexState[vId].right << '\'';
+	if(membership == Membership::L) s << "<>";
+	else {
+		const auto vR = get_inverse(rule.getRtoCG(), getR(rule), rule.getCombinedGraph(), v);
+		const auto vRid = get(boost::vertex_index_t(), getR(rule), vR);
+		assert(vRid < vPropR.size());
+		s << '\'' << vPropR[vRid] << '\'';
+	}
 }
 
-MOD_RULE_STATE_TEMPLATE_PARAMS
-void PropCore<MOD_RULE_STATE_TEMPLATE_ARGS>::print(std::ostream &s, Edge e) const {
-	auto eId = get(boost::edge_index_t(), g, e);
-	assert(eId < edgeState.size());
-	auto membership = g[e].membership;
-	if(membership == Membership::Right) s << "<>";
-	else s << '\'' << edgeState[eId].left << '\'';
+template<MOD_RULE_PROP_TEMPLATE_PARAMS>
+void PropBase<MOD_RULE_PROP_TEMPLATE_ARGS>::print(std::ostream &s, RuleType::CombinedEdge e) const {
+	const auto membership = rule.getCombinedGraph()[e].membership;
+	if(membership == Membership::R) s << "<>";
+	else {
+		const auto eL = get_inverse(rule.getLtoCG(), getL(rule), rule.getCombinedGraph(), e);
+		const auto eLid = get(boost::edge_index_t(), getL(rule), eL);
+		assert(eLid < ePropL.size());
+		s << '\'' << ePropL[eLid] << '\'';
+	}
 	s << " -> ";
-	if(membership == Membership::Left) s << "<>";
-	else s << '\'' << edgeState[eId].right << '\'';
+	if(membership == Membership::L) s << "<>";
+	else {
+		const auto eR = get_inverse(rule.getRtoCG(), getR(rule), rule.getCombinedGraph(), e);
+		const auto eRid = get(boost::edge_index_t(), getR(rule), eR);
+		assert(eRid < ePropR.size());
+		s << '\'' << ePropR[eRid] << '\'';
+	}
 }
 
-MOD_RULE_STATE_TEMPLATE_PARAMS
-const Derived &PropCore<MOD_RULE_STATE_TEMPLATE_ARGS>::getDerived() const {
-	return static_cast<const Derived &> (*this);
+template<MOD_RULE_PROP_TEMPLATE_PARAMS>
+const Derived &PropBase<MOD_RULE_PROP_TEMPLATE_ARGS>::getDerived() const {
+	return static_cast<const Derived &>(*this);
 }
 
 } // namespace mod::lib::Rules

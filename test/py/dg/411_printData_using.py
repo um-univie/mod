@@ -1,5 +1,5 @@
 include("../xxx_helpers.py")
-post("enableSummary")
+post.enableInvokeMake()
 
 dg = DG()
 with dg.build() as b:
@@ -14,7 +14,7 @@ e2 = next((e for e in dg.edges if e.numSources == 2))
 for v in dg.vertices:
 	globals()[v.graph.name] = v
 
-postSection("makeDuplicate")
+post.summarySection("makeDuplicate")
 d = DGPrintData(dg)
 d.makeDuplicate(e1, 1)
 dg.print(data=d)
@@ -22,18 +22,18 @@ p = DGPrinter()
 p.withShortcutEdges = False
 dg.print(data=d, printer=p)
 
-postSection("removeDuplicate")
+post.summarySection("removeDuplicate")
 d = DGPrintData(dg)
 d.removeDuplicate(e1, 0)
 dg.print(data=d)
 
-postSection("reconnectSource")
+post.summarySection("reconnectSource")
 d = DGPrintData(dg)
 d.makeDuplicate(e2, 1)
 d.reconnectSource(e2, 1, C, 1)
 dg.print(data=d)
 
-postSection("reconnectTarget")
+post.summarySection("reconnectTarget")
 d = DGPrintData(dg)
 d.makeDuplicate(e2, 1)
 d.reconnectTarget(e2, 1, E, 1)

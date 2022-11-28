@@ -1,4 +1,4 @@
-post("disableSummary")
+post.disableInvokeMake()
 smiles("C(C1C(C=O)=C(C)C=1(CO))")
 smiles("CC1=CC(C)=C1(O)")
 smiles(R"CN(C)C1=NC(=C2C=CC=C12)N(C)C")

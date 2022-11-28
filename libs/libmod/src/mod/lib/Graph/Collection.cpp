@@ -40,7 +40,7 @@ struct Collection::Store {
 			//				opts.edgesAsBonds = opts.withIndex = true;
 			//				optsGraph.collapseHydrogens = optsGraph.edgesAsBonds = optsGraph.raiseCharges = true;
 			//				optsGraph.simpleCarbons = optsGraph.withColour = optsGraph.withIndex = true;
-			//				mod::lib::IO::Graph::Write::summary(*gCand, optsGraph, optsGraph);
+			//				mod::lib::Graph::IO::Write::summary(*gCand, optsGraph, optsGraph);
 			//				std::shared_ptr<graph::Graph> gCandWrapped = graph::Graph::makeGraph(std::move(gCand));
 			//				for(auto v : gCandWrapped->vertices()) {
 			//					if(v.getStringLabel() == "C")

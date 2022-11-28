@@ -39,7 +39,7 @@ target_link_libraries(libmod
 # Boost::graph needs Boost::regex which needs the RPATH of libmod to have Boost in it.
 # But because all Boost libs are linked privately the path is not exposed.
 # So if someone links against libmod, but no Boost lib, then the linking will fail.
-# Perhapse fixed in https://gitlab.kitware.com/cmake/cmake/-/merge_requests/3642
+# Perhaps fixed in https://gitlab.kitware.com/cmake/cmake/-/merge_requests/3642
 # TODO: remove the next line with some higher CMAKE version is required?
 target_link_libraries(libmod PUBLIC Boost::iostreams)
 target_link_libraries(libmod PRIVATE

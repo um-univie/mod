@@ -1,9 +1,12 @@
 #include <mod/py/Common.hpp>
 
+#include <mod/VertexMap.hpp>
 #include <mod/graph/Graph.hpp>
 #include <mod/graph/Automorphism.hpp>
 #include <mod/graph/GraphInterface.hpp>
 #include <mod/graph/Printer.hpp>
+
+#include <mod/py/VertexMap.hpp>
 
 #include <iomanip>
 
@@ -19,8 +22,7 @@ void Graph_doExport() {
 	// rst:
 	// rst:		This class models an undirected graph with labels on vertices and edges,
 	// rst:		without loops and without parallel edges.
-	// rst:		Certain labels are regarded as models of chemical atoms and bonds.
-	// rst:		See :ref:`mol-enc` for more information on this.
+	// rst:		See :ref:`graph-model` for more details.
 	// rst:
 	// rst:		The class implements the :class:`protocols.LabelledGraph`.
 	// rst:		See :ref:`py-Graph/GraphInterface` for additional guarantees.
@@ -109,14 +111,14 @@ void Graph_doExport() {
 			              py::make_function(&Graph::getSmilesWithIds, py::return_value_policy<py::copy_const_reference>()))
 					// rst:		.. attribute:: graphDFS
 					// rst:
-					// rst:			(Read-only) This is a :ref:`GraphDFS <graph-graphDFS>` of the graph.
+					// rst:			(Read-only) This is a :ref:`GraphDFS <format-graphDFS>` of the graph.
 					// rst:
 					// rst:			:type: str
 			.add_property("graphDFS",
 			              py::make_function(&Graph::getGraphDFS, py::return_value_policy<py::copy_const_reference>()))
 					// rst:		.. attribute:: graphDFSWithIds
 					// rst:
-					// rst:			(Read-only) This is a :ref:`GraphDFS <graph-graphDFS>` of the graph, where each vertices have an explicit id,
+					// rst:			(Read-only) This is a :ref:`GraphDFS <format-graphDFS>` of the graph, where each vertices have an explicit id,
 					// rst:			corresponding to its internal vertex id.
 					// rst:
 					// rst:			:type: str
@@ -124,7 +126,7 @@ void Graph_doExport() {
 			                                                   py::return_value_policy<py::copy_const_reference>()))
 					// rst:		.. attribute:: linearEncoding
 					// rst:
-					// rst:			(Read-only) If the graph models a molecule this is the :ref:`SMILES string <graph-smiles>` string, otherwise it is the :ref:`GraphDFS <graph-graphDFS>` string.
+					// rst:			(Read-only) If the graph models a molecule this is the :ref:`SMILES string <graph-smiles>` string, otherwise it is the :ref:`GraphDFS <format-graphDFS>` string.
 					// rst:
 					// rst:			:type: str
 			.add_property("linearEncoding", py::make_function(&Graph::getLinearEncoding,
@@ -170,22 +172,39 @@ void Graph_doExport() {
 					// rst:			:returns: the number of edges in the graph with the given label.
 					// rst:			:rtype: int
 			.def("eLabelCount", &Graph::eLabelCount)
-					// rst:		.. method:: isomorphism(other, maxNumMatches=1, labelSettings=LabelSettings(LabelType.String, LabelRelation.Isomorphism))
+					// rst:		.. method:: isomorphism(codomain, maxNumMatches=1, labelSettings=LabelSettings(LabelType.String, LabelRelation.Isomorphism))
 					// rst:
-					// rst:			:param Graph other: the codomain :class:`Graph` for finding morphisms.
+					// rst:			:param Graph codomain: the codomain graph for finding morphisms.
 					// rst:			:param int maxNumMatches: the maximum number of isomorphisms to search for.
 					// rst:			:param LabelSettings labelSettings: the label settings to use during the search.
 					// rst:			:returns: the number of isomorphisms from this graph to ``other``, but at most ``maxNumMatches``.
 					// rst:			:rtype: int
+					// rst:			:raises LogicError: if ``codomain`` is null.
 			.def("isomorphism", &Graph::isomorphism)
-					// rst:		.. method:: monomorphism(other, maxNumMatches=1, labelSettings=LabelSettings(LabelType.String, LabelRelation.Isomorphism))
+					// rst:		.. method:: monomorphism(codomain, maxNumMatches=1, labelSettings=LabelSettings(LabelType.String, LabelRelation.Isomorphism))
 					// rst:
-					// rst:			:param Graph other: the codomain :class:`Graph` for finding morphisms.
+					// rst:			:param Graph codomain: the codomain graph for finding morphisms.
 					// rst:			:param int maxNumMatches: the maximum number of monomorphisms to search for.
 					// rst:			:param LabelSettings labelSettings: the label settings to use during the search.
 					// rst:			:returns: the number of monomorphisms from this graph to ``other``, though at most ``maxNumMatches``.
 					// rst:			:rtype: int
+					// rst:			:raises LogicError: if ``codomain`` is null.
 			.def("monomorphism", &Graph::monomorphism)
+					// rst:		.. method:: enumerateMonomorphisms(codomain, callback,  labelSettings=LabelSettings(LabelType.String, LabelRelation.Isomorphism))
+					// rst:
+					// rst:			Perform substructure search of this graph into the given codomain graph.
+					// rst:			Whenever a match is found, the corresponding monomorphism is copied into a vertex map
+					// rst:			and the given callback is invoked with it.
+					// rst:
+					// rst:			:param Graph codomain: the codomain graph for finding morphisms.
+					// rst:			:param callback: the function to call with each found monomorphism.
+					// rst:				If ``False`` is returned from it, then the search is stopped.
+					// rst:			:type callback: Callable[[protocols.VertexMap], bool]
+					// rst:			:param LabelSettings labelSettings: the label settings to use during the search.
+					// rst:
+					// rst:			:raises LogicError: if ``codomain`` is null.
+					// rst:			:raises LogicError: if ``callback`` is null.
+			.def("enumerateMonomorphisms", &Graph::enumerateMonomorphisms)
 					// rst:		.. method:: makePermutation()
 					// rst:
 					// rst:			:returns: a graph isomorphic to this, but with the vertex indices randomly permuted.
@@ -261,7 +280,7 @@ void Graph_doExport() {
 					// rst:		Load a graph in :ref:`GML <graph-gml>` format from a given string, ``s``,
 					// rst:		or given file ``f``.
 					// rst:		The graph must be connected.
-					// rst:		If not, use :meth:`Graph.fromGMLStringMulti` or :meth:`Graph.fromGMLFileMulti`.
+					// rst:		If not, use :meth:`fromGMLStringMulti` or :meth:`fromGMLFileMulti`.
 					// rst:
 					// rst:		:param str s: the string with the :ref:`GML <graph-gml>` data to load from.
 					// rst:		:param f: name of the :ref:`GML <graph-gml>` file to be loaded.
@@ -282,7 +301,7 @@ void Graph_doExport() {
 					// rst:		or given file ``f``,
 					// rst:		with each graph being a connected component of the graph specified in the GML data.
 					// rst:
-					// rst:		See :meth:`Graph.fromGMLString` and :meth:`Graph.fromGMLFile`
+					// rst:		See :meth:`fromGMLString` and :meth:`fromGMLFile`
 					// rst:		for a description of the parameters and exceptions.
 					// rst:
 					// rst:		:returns: a list of the loaded graphs.
@@ -293,9 +312,11 @@ void Graph_doExport() {
 			.staticmethod("fromGMLFileMulti")
 					// rst: .. staticmethod:: Graph.fromDFS(s, name=None, add=True)
 					// rst:
-					// rst:		Load a graph from a :ref:`GraphDFS <graph-graphDFS>` string.
+					// rst:		Load a graph from a :ref:`GraphDFS <format-graphDFS>` string.
+					// rst:		The graph must be connected.
+					// rst:		If not, use :meth:`Graph.fromDFSMulti`.
 					// rst:
-					// rst:		:param str s: the :ref:`GraphDFS <graph-graphDFS>` string to parse.
+					// rst:		:param str s: the :ref:`GraphDFS <format-graphDFS>` string to parse.
 					// rst:		:param str name: the name of the graph. If none is given the default name is used.
 					// rst:		:param bool add: whether to append the graph to :data:`inputGraphs` or not.
 					// rst:		:returns: the loaded graph.
@@ -303,10 +324,22 @@ void Graph_doExport() {
 					// rst:		:raises: :class:`InputError` on bad input.
 			.def("fromDFS", &Graph::fromDFS)
 			.staticmethod("fromDFS")
+					// rst: .. staticmethod:: Graph.fromDFSMulti(s, add=True)
+					// rst:
+					// rst:		Load a set of graphs from a :ref:`GraphDFS <format-graphDFS>` string,
+					// rst:		with each graph being a connected component of the graph specified in the DFS data.
+					// rst:
+					// rst:		:param str s: the :ref:`GraphDFS <format-graphDFS>` string to parse.
+					// rst:		:param bool add: whether to append the graphs to :data:`inputGraphs` or not.
+					// rst:		:returns: the loaded graphs.
+					// rst:		:rtype: list[Graph]
+					// rst:		:raises: :class:`InputError` on bad input.
+			.def("fromDFSMulti", &Graph::fromDFSMulti)
+			.staticmethod("fromDFSMulti")
 					// rst: .. staticmethod:: Graph.fromSMILES(s, name=None, allowAbstract=False, classPolicy=SmilesClassPolicy.NoneOnDuplicate, add=True)
 					// rst:
 					// rst:		Load a molecule from a :ref:`SMILES <graph-smiles>` string.
-					// rst:		The molecule must be a connected graph. If not, use :meth:`Graph.fromSMILESMulti`.
+					// rst:		The molecule must be a connected graph. If not, use :meth:`fromSMILESMulti`.
 					// rst:
 					// rst:		:param str s: the :ref:`SMILES <graph-smiles>` string to parse.
 					// rst:		:param str name: the name of the graph. If none is given the default name is used.
@@ -323,13 +356,87 @@ void Graph_doExport() {
 					// rst:		Load a set of molecules from a :ref:`SMILES <graph-smiles>` string,
 					// rst:		with each molecule being a connected component of the graph specified in the SMILES string.
 					// rst:
-					// rst:		See :meth:`Graph.fromSMILES` for a description of the parameters and exceptions.
+					// rst:		See :meth:`fromSMILES` for a description of the parameters and exceptions.
 					// rst:
 					// rst:		:returns: a list of the loaded molecules.
 					// rst:		:rtype: list[Graph]
 			.def("fromSMILESMulti", static_cast<std::vector<std::shared_ptr<Graph>>(*)(const std::string &, bool,
 			                                                                           SmilesClassPolicy)>(&Graph::fromSMILESMulti))
-			.staticmethod("fromSMILESMulti");
+			.staticmethod("fromSMILESMulti")
+					// rst: .. staticmethod:: Graph.fromMOLString(s, name=None, options=MDLOptions(), add=True)
+					// rst:                   Graph.fromMOLFile(f, name=None, options=MDLOptions(), add=True)
+					// rst:
+					// rst:		Load a molecule in :ref:`MOL <graph-mdl>` format from a given string or file.
+					// rst:		The molecule must be a connected graph.
+					// rst:		If not, use :meth:`fromMOLStringMulti` and :meth:`fromMOLFileMulti`.
+					// rst:
+					// rst:		:param str s: the string to parse.
+					// rst:		:param f: name of the file to load.
+					// rst:		:type f: str or CWDPath
+					// rst:		:param str name: the name of the graph. If none is given the default name is used.
+					// rst:		:param MDLOptions options: the options to use for loading.
+					// rst:		:param bool add: whether to append the graph to :data:`inputGraphs` or not.
+					// rst:		:returns: the loaded molecule.
+					// rst:		:rtype: :class:`Graph`
+					// rst:		:raises: :class:`InputError` on bad input.
+			.def("fromMOLString", &Graph::fromMOLString)
+			.staticmethod("fromMOLString")
+			.def("fromMOLFile", &Graph::fromMOLFile)
+			.staticmethod("fromMOLFile")
+					// rst: .. staticmethod:: Graph.fromMOLStringMulti(s, options=MDLOptions(), add=True)
+					// rst:                   Graph.fromMOLFileMulti(f, options=MDLOptions(), add=True)
+					// rst:
+					// rst:		Load a set of molecules from a given string or file with :ref:`MOL <graph-mdl>` data,
+					// rst:		with each molecule being a connected component of the graph specified in the data.
+					// rst:
+					// rst:		See :meth:`fromMOLString` and :meth:`fromMOLFile`
+					// rst:		for a description of the parameters and exceptions.
+					// rst:
+					// rst:		:returns: a list of the loaded molecules.
+					// rst:		:rtype: list[Graph]
+			.def("fromMOLStringMulti", &Graph::fromMOLStringMulti)
+			.staticmethod("fromMOLStringMulti")
+			.def("fromMOLFileMulti", &Graph::fromMOLFileMulti)
+			.staticmethod("fromMOLFileMulti")
+					// rst: .. staticmethod:: Graph.fromSDString(s, options=MDLOptions(), add=True)
+					// rst:                   Graph.fromSDFile(f, options=MDLOptions(), add=True)
+					// rst:
+					// rst:		Load a list of molecules in :ref:`SD <graph-mdl>` format from a given string or file,
+					// rst:		with each molecule being a connected component of each of the the graphs specified in the data.
+					// rst:		If any graph is not connected, use :meth:`fromSDStringMulti` and :meth:`fromSDFileMulti` instead.
+					// rst:
+					// rst:		:param str s: the string to parse.
+					// rst:		:param f: name of the file to load.
+					// rst:		:type f: str or CWDPath
+					// rst:		:param MDLOptions options: the options to use for loading.
+					// rst:		:param bool add: whether to append the graphs to :data:`inputGraphs` or not.
+					// rst:		:returns: a list of the loaded molecules.
+					// rst:		:rtype: list of :class:`Graph`
+					// rst:		:raises: :class:`InputError` on bad input.
+			.def("fromSDString", &Graph::fromSDString)
+			.staticmethod("fromSDString")
+			.def("fromSDFile", &Graph::fromSDFile)
+			.staticmethod("fromSDFile")
+					// rst: .. staticmethod:: Graph.fromSDStringMulti(s, options=MDLOptions(), add=True)
+					// rst:                   Graph.fromSDFileMulti(f, options=MDLOptions(), add=True)
+					// rst:
+					// rst:		Load a list of molecules in :ref:`SD <graph-mdl>` format from a given string or file.
+					// rst:		Each molecule is returned as a list of graphs, with each corresponding to a connected
+					// rst:		component of the MOL entry.
+					// rst:
+					// rst:		See :meth:`fromSDString` and :meth:`fromSDFile`
+					// rst:		for a description of the parameters and exceptions.
+					// rst:
+					// rst:		:returns: a list of lists of the loaded molecules.
+					// rst:			The items of the outer list correspond to each MOL entry in the SD data.
+					// rst:		:rtype: list[list[Graph]]
+			.def("fromSDStringMulti", &Graph::fromSDStringMulti)
+			.staticmethod("fromSDStringMulti")
+			.def("fromSDFileMulti", &Graph::fromSDFileMulti)
+			.staticmethod("fromSDFileMulti");
+
+	mod::Py::exportVertexMap<VertexMap<graph::Graph, graph::Graph>>("VertexMapGraphGraph");
+
 
 	// rst: .. method:: graphGMLString(s, name=None, add=True)
 	// rst:

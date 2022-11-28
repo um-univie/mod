@@ -1,21 +1,15 @@
-#ifndef MOD_LIB_STEREO_CONFIGURATION_CONFIGURATION_H
-#define MOD_LIB_STEREO_CONFIGURATION_CONFIGURATION_H
+#ifndef MOD_LIB_STEREO_CONFIGURATION_CONFIGURATION_HPP
+#define MOD_LIB_STEREO_CONFIGURATION_CONFIGURATION_HPP
 
 #include <mod/lib/Stereo/EmbeddingEdge.hpp>
 #include <mod/lib/Stereo/GeometryGraph.hpp>
 
 #include <iosfwd>
 
-namespace mod {
-namespace lib {
-namespace IO {
-namespace Graph {
-namespace Write {
+namespace mod::lib::IO::Graph::Write {
 enum struct EdgeFake3DType;
-} // namespace Write
-} // namespace Graph
-} // namespace IO
-namespace Stereo {
+} // namespace mod::lib::IO::Graph::Write
+namespace mod::lib::Stereo {
 
 struct Fixation {
 	explicit Fixation(bool f); // simple
@@ -30,11 +24,9 @@ public:
 	static Fixation simpleFixed();
 };
 
-class Configuration {
+struct Configuration {
 	Configuration(const Configuration&) = delete;
-	Configuration(Configuration&&) = delete;
 	Configuration &operator=(const Configuration&) = delete;
-	Configuration &operator=(Configuration&&) = delete;
 protected:
 	explicit Configuration(GeometryGraph::Vertex vGeometry, const EmbeddingEdge *first, const EmbeddingEdge *last);
 public:
@@ -56,24 +48,21 @@ public:
 	}
 public: // checking
 	// pre: dynamic type of this and other is the same
-
 	virtual bool localPredIso(const Configuration &other) const {
 		return true;
 	}
-	// pre: dynamic type of this and other is the same
 
+	// pre: dynamic type of this and other is the same
 	virtual bool localPredSpec(const Configuration &other) const {
 		return true;
 	}
 
 	// TODO: this should be a kind of vtable constant
-
 	virtual bool morphismStaticOk() const {
 		return true;
 	}
 
 	// E.g., influenced by fixedness. (TODO: only fixedness? then we could maybe pull it into the base class)
-
 	virtual bool morphismDynamicOk() const {
 		return true;
 	}
@@ -106,7 +95,6 @@ struct DynamicDegree : Configuration {
 protected:
 	DynamicDegree(GeometryGraph::Vertex vGeometry, const EmbeddingEdge *b, const EmbeddingEdge *e);
 public:
-
 	virtual const EmbeddingEdge *begin() const override final {
 		return edges.data();
 	}
@@ -121,7 +109,6 @@ protected:
 template<std::size_t d>
 struct StaticDegree : Configuration {
 protected:
-
 	StaticDegree(GeometryGraph::Vertex vGeometry, const std::array<EmbeddingEdge, d> &edges)
 	: Configuration(vGeometry, edges.begin(), edges.end()), edges(edges) { }
 public:
@@ -137,8 +124,6 @@ protected:
 	std::array<EmbeddingEdge, d> edges;
 };
 
-} // namespace Stereo
-} // namespace lib
-} // namespace mod
+} // namespace mod::lib::Stereo
 
-#endif /* MOD_LIB_STEREO_CONFIGURATION_CONFIGURATION_H */
+#endif // MOD_LIB_STEREO_CONFIGURATION_CONFIGURATION_HPP

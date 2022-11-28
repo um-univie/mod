@@ -2,9 +2,7 @@
 
 #include <mod/Error.hpp>
 
-namespace mod {
-namespace lib {
-namespace Stereo {
+namespace mod::lib::Stereo {
 
 Tetrahedral::Tetrahedral(const GeometryGraph &g, const std::array<EmbeddingEdge, 4> &edges_, bool fixed)
 : StaticDegree<4>(g.tetrahedral, edges_), fixed(fixed) {
@@ -191,6 +189,4 @@ std::pair<std::string, bool> Tetrahedral::asPrettyStringImpl(std::function<std::
 	return std::make_pair(res, true);
 }
 
-} // namespace Stereo
-} // namespace lib
-} // namespace mod
+} // namespace mod::lib::Stereo

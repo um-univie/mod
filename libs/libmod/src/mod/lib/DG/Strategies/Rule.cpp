@@ -13,14 +13,17 @@
 namespace mod::lib::DG::Strategies {
 
 Rule::Rule(std::shared_ptr<rule::Rule> r)
-		: Strategy(std::max(r->getRule().getDPORule().numLeftComponents, r->getRule().getDPORule().numRightComponents)),
+		: Strategy(std::max(get_num_connected_components(get_labelled_left(r->getRule().getDPORule())),
+		                    get_num_connected_components(get_labelled_right(r->getRule().getDPORule())))),
 		  r(r), rRaw(&r->getRule()) {
-	assert(rRaw->getDPORule().numLeftComponents > 0);
+	assert(get_num_connected_components(get_labelled_left(rRaw->getDPORule())) > 0);
 }
 
 Rule::Rule(const lib::Rules::Real *r)
-		: Strategy(std::max(r->getDPORule().numLeftComponents, r->getDPORule().numRightComponents)), rRaw(r) {
-	assert(r->getDPORule().numLeftComponents > 0);
+		: Strategy(std::max(get_num_connected_components(get_labelled_left(r->getDPORule())),
+		                    get_num_connected_components(get_labelled_right(r->getDPORule())))),
+		  rRaw(r) {
+	assert(get_num_connected_components(get_labelled_left(rRaw->getDPORule())) > 0);
 }
 
 std::unique_ptr<Strategy> Rule::clone() const {
@@ -41,7 +44,7 @@ void Rule::printInfo(PrintSettings settings) const {
 	settings.indent() << "consumed =";
 	std::vector<const lib::Graph::Single *> temp(begin(consumedGraphs), end(consumedGraphs));
 	std::sort(begin(temp), end(temp), lib::Graph::Single::nameLess);
-	for(const auto *g : temp)
+	for(const auto *g: temp)
 		settings.s << " " << g->getName();
 	settings.s << '\n';
 }
@@ -68,7 +71,7 @@ void handleBoundRulePair(int verbosity, IO::Logger logger, Context context, cons
 	// All max component results should be only right side
 	mod::Derivation d;
 	d.r = context.r;
-	for(const lib::Graph::Single *g : brp.boundGraphs) d.left.push_back(g->getAPIReference());
+	for(const lib::Graph::Single *g: brp.boundGraphs) d.left.push_back(g->getAPIReference());
 	{ // left predicate
 		bool result = context.executionEnv.checkLeftPredicate(d);
 		if(!result) {
@@ -79,7 +82,8 @@ void handleBoundRulePair(int verbosity, IO::Logger logger, Context context, cons
 	}
 	if(verbosity >= PrintSettings::V_RuleApplication) {
 		logger.indent() << "Splitting " << r.getName() << " into "
-		                << rDPO.numRightComponents << " graphs" << std::endl;
+		                << get_num_connected_components(get_labelled_right(rDPO))
+		                << " graphs" << std::endl;
 		++logger.indentLevel;
 	}
 	const std::vector<const lib::Graph::Single *> &educts = brp.boundGraphs;
@@ -97,6 +101,14 @@ void handleBoundRulePair(int verbosity, IO::Logger logger, Context context, cons
 	);
 	if(verbosity >= PrintSettings::V_RuleApplication)
 		--logger.indentLevel;
+	if(d.right.empty()) {
+		if(verbosity >= V_RuleApplication) {
+			++logger.indentLevel;
+			logger.indent() << "Discarding derivation, empty result." << std::endl;
+			--logger.indentLevel;
+		}
+		return;
+	}
 
 	{ // right predicates
 		bool result = context.executionEnv.checkRightPredicate(d);
@@ -108,24 +120,24 @@ void handleBoundRulePair(int verbosity, IO::Logger logger, Context context, cons
 	}
 	{ // now the derivation is good, so add the products to output
 		if(getConfig().dg.putAllProductsInSubset.get()) {
-			for(const auto &g : d.right)
+			for(const auto &g: d.right)
 				context.output->addToSubset(&g->getGraph());
 		} else {
-			for(const auto &g : d.right)
+			for(const auto &g: d.right)
 				if(!context.output->isInUniverse(&g->getGraph()))
 					context.output->addToSubset(&g->getGraph());
 		}
-		for(const auto &g : d.right)
+		for(const auto &g: d.right)
 			context.executionEnv.addProduct(g);
 	}
 	std::vector<const lib::Graph::Single *> rightGraphs;
 	rightGraphs.reserve(d.right.size());
-	for(const std::shared_ptr<graph::Graph> &g : d.right)
+	for(const std::shared_ptr<graph::Graph> &g: d.right)
 		rightGraphs.push_back(&g->getGraph());
 	lib::DG::GraphMultiset gmsLeft(educts), gmsRight(std::move(rightGraphs));
 	bool inserted = context.executionEnv.suggestDerivation(gmsLeft, gmsRight, &context.r->getRule());
 	if(inserted) {
-		for(const lib::Graph::Single *g : educts)
+		for(const lib::Graph::Single *g: educts)
 			context.consumedGraphs.insert(g);
 	}
 }
@@ -138,9 +150,9 @@ unsigned int bindGraphs(PrintSettings settings, Context context,
                         Rules::GraphAsRuleCache &graphAsRuleCache) {
 	unsigned int processedRules = 0;
 
-	for(const lib::Graph::Single *g : graphRange) {
+	for(const lib::Graph::Single *g: graphRange) {
 		if(context.executionEnv.doExit()) break;
-		for(const BoundRule &p : rules) {
+		for(const BoundRule &p: rules) {
 			if(context.executionEnv.doExit()) break;
 			if(settings.verbosity >= PrintSettings::V_RuleApplication) {
 				settings.indent() << "Trying to bind " << g->getName() << " to " << p.rule->getName() << ":" << std::endl;
@@ -163,7 +175,7 @@ unsigned int bindGraphs(PrintSettings settings, Context context,
 					settings,
 					true, true);
 			lib::RC::composeRuleRealByMatchMaker(rFirst, rSecond, mm, reporter, context.executionEnv.labelSettings);
-			for(const BoundRule &brp : resultRules) {
+			for(const BoundRule &brp: resultRules) {
 				processedRules++;
 				if(context.executionEnv.doExit()) delete brp.rule;
 				else if(brp.rule->isOnlyRightSide()) {
@@ -213,7 +225,8 @@ void Rule::executeImpl(PrintSettings settings, const GraphState &input) {
 	}
 
 	if(getConfig().dg.useOldRuleApplication.get()) {
-		std::vector<std::vector<BoundRule>> intermediaryRules(rRaw->getDPORule().numLeftComponents + 1);
+		std::vector<std::vector<BoundRule>>
+		intermediaryRules(get_num_connected_components(get_labelled_left(rRaw->getDPORule())) + 1);
 		{
 			BoundRule p;
 			p.rule = rRaw;
@@ -222,7 +235,7 @@ void Rule::executeImpl(PrintSettings settings, const GraphState &input) {
 		Context context{r, getExecutionEnv(), output, consumedGraphs};
 		const auto &subset = input.getSubset();
 		const auto &universe = input.getUniverse();
-		for(unsigned int i = 1; i <= rRaw->getDPORule().numLeftComponents; i++) {
+		for(unsigned int i = 1; i <= get_num_connected_components(get_labelled_left(rRaw->getDPORule())); i++) {
 			if(settings.verbosity >= PrintSettings::V_RuleBinding) {
 				settings.indent() << "Component bind round " << i << " with ";
 				++settings.indentLevel;
@@ -241,7 +254,7 @@ void Rule::executeImpl(PrintSettings settings, const GraphState &input) {
 			} else {
 				processedRules = bindGraphs(settings, context, universe, intermediaryRules[i - 1], intermediaryRules[i],
 				                            getExecutionEnv().graphAsRuleCache);
-				for(BoundRule &p : intermediaryRules[i - 1]) {
+				for(BoundRule &p: intermediaryRules[i - 1]) {
 					delete p.rule;
 					p.rule = nullptr;
 				}
@@ -262,7 +275,7 @@ void Rule::executeImpl(PrintSettings settings, const GraphState &input) {
 			assert(subset.begin()[i] == universe[subset.getIndices()[i]]);
 
 		std::vector<bool> inSubset(universe.size(), false);
-		for(int idx : subset.getIndices())
+		for(int idx: subset.getIndices())
 			inSubset[idx] = true;
 
 		std::vector<const lib::Graph::Single *> graphs = universe;
@@ -278,7 +291,7 @@ void Rule::executeImpl(PrintSettings settings, const GraphState &input) {
 
 		Context context{r, getExecutionEnv(), output, consumedGraphs};
 		std::vector<BoundRule> inputRules{{rRaw, {}, 0}};
-		for(int round = 0; round != rRaw->getDPORule().numLeftComponents; ++round) {
+		for(int round = 0; round != get_num_connected_components(get_labelled_left(rRaw->getDPORule())); ++round) {
 			const auto firstGraph = graphs.begin();
 			const auto lastGraph = round == 0 ? subsetEnd : graphs.end();
 
@@ -299,7 +312,7 @@ void Rule::executeImpl(PrintSettings settings, const GraphState &input) {
 					onOutput);
 			if(round != 0) {
 				// in round 0 the inputRules is the actual original input rule, so don't delete it
-				for(auto &br : inputRules)
+				for(auto &br: inputRules)
 					delete br.rule;
 			}
 			std::swap(inputRules, outputRules);

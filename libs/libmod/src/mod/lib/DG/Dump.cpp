@@ -7,9 +7,9 @@
 #include <mod/lib/Graph/Single.hpp>
 #include <mod/lib/Graph/Properties/Stereo.hpp>
 #include <mod/lib/Graph/Properties/String.hpp>
-#include <mod/lib/IO/Graph.hpp>
+#include <mod/lib/Graph/IO/Read.hpp>
 #include <mod/lib/IO/IO.hpp>
-#include <mod/lib/IO/ParsingUtil.hpp>
+#include <mod/lib/IO/Parsing.hpp>
 #include <mod/lib/Rules/Real.hpp>
 
 #include <jla_boost/graph/PairToRangeAdaptor.hpp>
@@ -148,14 +148,14 @@ bool parse(Iter &textFirst,
 		const bool res = IO::detail::ParseDispatch<x3::ascii::space_type>::parse(first, last, p, attr, x3::ascii::space);
 		if(!res) {
 			err << "Error while parsing DG dump.\n"
-			    << IO::detail::makeParserError(textFirst, first, last)
+			    << IO::detail::makeParserError(textFirst, first, last, true)
 			    << '\n';
 			return false;
 		}
 		return true;
 	} catch(const x3::expectation_failure<IO::PositionIter<Iter>> &e) {
 		err << "Error while parsing DG dump.\n"
-		    << IO::detail::makeParserExpectationError(e, textFirst, last)
+		    << IO::detail::makeParserExpectationError(e, textFirst, last, true)
 		    << '\n';
 		return false;
 	}
@@ -206,13 +206,17 @@ std::unique_ptr<NonHyper> load(const std::vector<std::shared_ptr<graph::Graph> >
 		PARSE("vertex:" >> x3::uint_, id);
 		PARSE('"' >> x3::lexeme[*(x3::char_ - '"') >> '"'], name);
 		PARSE('"' >> x3::lexeme[*(x3::char_ - '"') >> '"'], dfs);
-		auto gDataRes = IO::Graph::Read::dfs(dfs);
+		IO::Warnings warnings;
+		auto gDataRes = Graph::Read::dfs(warnings, dfs);
+		assert(warnings.empty());
 		if(!gDataRes) {
 			err << gDataRes.extractError() << '\n';
 			err << "GraphDFS \"" << dfs << "\" could not be parsed for vertex " << id << '\n';
 			return nullptr;
 		}
-		auto gData = std::move(*gDataRes);
+		auto gDatas = std::move(*gDataRes);
+		if(gDatas.size() != 1) MOD_ABORT;
+		auto gData = std::move(gDatas[0]);
 		if(gData.pStereo) MOD_ABORT;
 		vertices.emplace_back(id, std::move(name), std::move(gData.g), std::move(gData.pString));
 		validVertices.insert(id);

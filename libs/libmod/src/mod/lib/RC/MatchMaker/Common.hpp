@@ -7,7 +7,7 @@
 #include <mod/lib/Rules/Real.hpp>
 
 #include <jla_boost/graph/morphism/callbacks/Unwrapper.hpp>
-#include <jla_boost/graph/morphism/models/Vector.hpp>
+#include <jla_boost/graph/morphism/models/InvertibleVector.hpp>
 
 namespace mod::lib::RC {
 
@@ -20,7 +20,7 @@ struct Common {
 	                 const lib::Rules::Real &rSecond,
 	                 Callback callback,
 	                 LabelSettings labelSettings) {
-		using MapImpl = std::vector<lib::Rules::Vertex>;
+		using MapImpl = std::vector<lib::DPO::CombinedRule::SideVertex>;
 		std::vector<MapImpl> maps;
 		const auto mr = [&rFirst, &rSecond, &callback, this, &maps]
 				(auto &&m, const auto &gSecond, const auto &gFirst) -> bool {

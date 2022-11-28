@@ -2,7 +2,7 @@ name: Main
 on: [push, pull_request]
 jobs:
   Ubuntu:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     steps:
     - name: Checkout
       uses: actions/checkout@v2
@@ -16,12 +16,12 @@ jobs:
         sudo apt install python3-setuptools python3-wheel
         pip3 install -r requirements.txt
     - name: Install apt dependencies
-      run: sudo apt install -y $(bindep -b | tr '\n' ' ')
+      run: sudo apt install -y $(bindep -b testing | tr '\n' ' ')
     - name: Install Boost
       run: |
-        wget https://boostorg.jfrog.io/artifactory/main/release/1.74.0/source/boost_1_74_0.tar.gz
-        tar -xf boost_1_74_0.tar.gz
-        cd boost_1_74_0
+        wget https://boostorg.jfrog.io/artifactory/main/release/1.80.0/source/boost_1_80_0.tar.gz
+        tar -xf boost_1_80_0.tar.gz
+        cd boost_1_80_0
         ./bootstrap.sh --with-python=python3 --prefix=/opt/boost
         ./b2 -j 2 --with-python --with-graph --with-iostreams install
     - name: Install Graphviz
@@ -52,8 +52,8 @@ jobs:
       run: cd build && ctest --output-on-failure -j 2
     - name: Run simple test
       run: mod -e "smiles('O').print()"
-  macOS:
-    runs-on: macos-10.15
+  macOS-11:
+    runs-on: macos-11
     steps:
     - name: Checkout
       uses: actions/checkout@v2
@@ -61,11 +61,13 @@ jobs:
         fetch-depth: 0
         submodules: 'recursive'
     - name: Install Brew dependencies
-      run: |
-        brew bundle
-        /usr/libexec/path_helper | sed -e 's/^PATH="//' -e 's/"; export PATH;//' | tr ":" "\n"  | tail -r >> $GITHUB_PATH
+      run: brew bundle
     - name: Install pip dependencies
       run: pip3 install -r requirements.txt
+    - name: Set PATH
+      run: |
+        /usr/libexec/path_helper | sed -e 's/^PATH="//' -e 's/"; export PATH;//' | tr ":" "\n"  | tail -r >> $GITHUB_PATH
+        python3 -c 'import os,sysconfig;print(sysconfig.get_path("scripts",f"{os.name}_prefix"))' >> $GITHUB_PATH
     - name: Bootstrap
       run: ./bootstrap.sh
     - name: Configure
@@ -74,12 +76,45 @@ jobs:
         cd build
         cmake ../ -DBUILD_DOC=on -DBUILD_TESTING=on
     - name: Build
-      run: cd build && make -j 2
+      run: cd build && make -j 3
     - name: Install
       run: cd build && sudo make install
     - name: Build tests
-      run: cd build && make tests -j 2
+      run: cd build && make tests -j 3
     - name: Run tests
-      run: cd build && ctest --output-on-failure -j 2
+      run: cd build && ctest --output-on-failure -j 3
+    - name: Run simple test
+      run: mod -e "smiles('O').print()"
+  macOS-12:
+    runs-on: macos-12
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v2
+      with:
+        fetch-depth: 0
+        submodules: 'recursive'
+    - name: Install Brew dependencies
+      run: brew bundle
+    - name: Install pip dependencies
+      run: pip3 install -r requirements.txt
+    - name: Set PATH
+      run: |
+        /usr/libexec/path_helper | sed -e 's/^PATH="//' -e 's/"; export PATH;//' | tr ":" "\n"  | tail -r >> $GITHUB_PATH
+        python3 -c 'import os,sysconfig;print(sysconfig.get_path("scripts",f"{os.name}_prefix"))' >> $GITHUB_PATH
+    - name: Bootstrap
+      run: ./bootstrap.sh
+    - name: Configure
+      run: |
+        mkdir build
+        cd build
+        cmake ../ -DBUILD_DOC=on -DBUILD_TESTING=on
+    - name: Build
+      run: cd build && make -j 3
+    - name: Install
+      run: cd build && sudo make install
+    - name: Build tests
+      run: cd build && make tests -j 3
+    - name: Run tests
+      run: cd build && ctest --output-on-failure -j 3
     - name: Run simple test
       run: mod -e "smiles('O').print()"

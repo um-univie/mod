@@ -6,8 +6,8 @@
 #include <mod/lib/DG/NonHyperBuilder.hpp>
 #include <mod/lib/DG/Strategies/GraphState.hpp>
 #include <mod/lib/DG/Strategies/Strategy.hpp>
+#include <mod/lib/DG/IO/Read.hpp>
 #include <mod/lib/Graph/Single.hpp>
-#include <mod/lib/IO/DG.hpp>
 
 #include <boost/lexical_cast.hpp>
 
@@ -27,6 +27,10 @@ Builder::Builder(lib::DG::NonHyperBuilder &dg_) : p(new Pimpl(dg_.getAPIReferenc
 Builder::Builder(Builder &&other) = default;
 Builder &Builder::operator=(Builder &&other) = default;
 Builder::~Builder() = default;
+
+std::shared_ptr<DG> Builder::getDG() const {
+	return p->dg_;
+}
 
 bool Builder::isActive() const {
 	return p != nullptr;
@@ -61,6 +65,26 @@ DG::HyperEdge Builder::addDerivation(const Derivations &d, IsomorphismPolicy gra
 		throw LogicError("Derivation has a nullptr in the rule list: " + boost::lexical_cast<std::string>(d));
 	auto innerRes = p->b.addDerivation(d, graphPolicy);
 	return p->dg_->getHyper().getInterfaceEdge(p->dg_->getNonHyper().getHyperEdge(innerRes.first));
+}
+
+DG::HyperEdge Builder::addHyperEdge(const DG::HyperEdge &e) {
+	return addHyperEdge(e, IsomorphismPolicy::Check);
+}
+
+DG::HyperEdge Builder::addHyperEdge(const DG::HyperEdge &e, IsomorphismPolicy graphPolicy) {
+	check(p);
+	if(!e) throw LogicError("The hyperedge is null.");
+	Derivations d;
+	d.left.reserve(e.numSources());
+	d.right.reserve(e.numTargets());
+	d.rules.reserve(e.rules().size());
+	for(const auto &v : e.sources())
+		d.left.push_back(v.getGraph());
+	for(const auto &v : e.targets())
+		d.right.push_back(v.getGraph());
+	for(const auto &r: e.rules())
+		d.rules.push_back(r);
+	return addDerivation(d, graphPolicy);
 }
 
 ExecuteResult Builder::execute(std::shared_ptr<Strategy> strategy) {

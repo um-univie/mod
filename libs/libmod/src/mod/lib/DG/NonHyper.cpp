@@ -13,12 +13,12 @@
 #include <mod/rule/Rule.hpp>
 #include <mod/lib/Chem/MoleculeUtil.hpp>
 #include <mod/lib/DG/Hyper.hpp>
+#include <mod/lib/DG/IO/Write.hpp>
 #include <mod/lib/Graph/Single.hpp>
 #include <mod/lib/Graph/Properties/Molecule.hpp>
 #include <mod/lib/Graph/Properties/Stereo.hpp>
 #include <mod/lib/Graph/Properties/String.hpp>
 #include <mod/lib/Graph/Properties/Term.hpp>
-#include <mod/lib/IO/DG.hpp>
 #include <mod/lib/IO/IO.hpp>
 
 #include <jla_boost/graph/PairToRangeAdaptor.hpp>
@@ -190,6 +190,8 @@ std::pair<NonHyper::Edge, bool> NonHyper::isDerivation(const GraphMultiset &gmsS
 
 std::pair<NonHyper::Edge, bool> NonHyper::suggestDerivation(
 		const GraphMultiset &gmsSrc, const GraphMultiset &gmsTar, const lib::Rules::Real *r) {
+	assert(!gmsSrc.empty());
+	assert(!gmsTar.empty());
 	// make vertices for to and from
 	Vertex vSrc = getVertex(gmsSrc), vTar = getVertex(gmsTar);
 	std::pair<Edge, bool> e = edge(vSrc, vTar, dg);
@@ -255,7 +257,7 @@ const std::vector<std::shared_ptr<graph::Graph> > &NonHyper::getProducts() const
 
 void NonHyper::print() const {
 	if(!getHasCalculated()) std::abort();
-	std::string fileNoExt = IO::DG::Write::pdfNonHyper(*this);
+	std::string fileNoExt = Write::pdfNonHyper(*this);
 	IO::post() << "summaryDGNonHyper \"dg_" << getId() << "\" \"" << fileNoExt << "\"" << std::endl;
 }
 

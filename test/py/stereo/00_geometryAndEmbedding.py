@@ -14,12 +14,12 @@ data['trigonalPlanar'] = 'node [ id 0 label "C" stereo "trigonalPlanar[1, 2, 3]"
 data['any'] = 'node [ id 0 label "Q" stereo "any[1, 2, 3, 4]" ]' + gmlNode(1) + gmlNode(2) + gmlNode(3) + gmlNode(4)
 data['tetrahedral'] = 'node [ id 0 label "C" stereo "tetrahedral[1, 2, 3, 4]" ]' + gmlNode(1) + gmlNode(2) + gmlNode(3) + gmlNode(4)
 
-postChapter("Graph")
+post.summaryChapter("Graph")
 for n, d in data.items():
-	postSection(n)
+	post.summarySection(n)
 	gGML(d)
 for side in ["context", "left", "right"]:
-	postChapter("Rule " + side)
+	post.summaryChapter("Rule " + side)
 	for n, d in data.items():
-		postSection(n + " " + side)
+		post.summarySection(n + " " + side)
 		rGML(d, side)

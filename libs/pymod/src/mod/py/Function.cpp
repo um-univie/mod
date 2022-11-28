@@ -1,9 +1,9 @@
-#include <mod/py/Common.hpp>
-
-#include "Function.hpp"
+#include <mod/py/Function.hpp>
 
 #include <mod/Derivation.hpp>
+#include <mod/VertexMap.hpp>
 #include <mod/graph/Graph.hpp>
+#include <mod/graph/GraphInterface.hpp>
 #include <mod/dg/DG.hpp>
 #include <mod/dg/GraphInterface.hpp>
 #include <mod/dg/Strategies.hpp>
@@ -19,7 +19,11 @@ void Function_doExport() {
 	exportFunc<std::string(const Derivation &)>("_Func_StringDerivation");
 	// DG::Vertex -> X
 	exportFunc<bool(dg::DG::Vertex)>("_Func_BoolDGVertex");
+	exportFunc<double(dg::DG::Vertex)>("_Func_DoubleDGVertex");
 	exportFunc<std::string(dg::DG::Vertex)>("_Func_StringDGVertex");
+	// DG::Vertex x int -> X
+	exportFunc<std::pair<std::string, std::string>(dg::DG::Vertex, int)>(
+			"_Func_PairStringStringDGVertexInt");
 	// DG::HyperEdge -> X
 	exportFunc<bool(dg::DG::HyperEdge)>("_Func_BoolDGHyperEdge");
 	exportFunc<std::string(dg::DG::HyperEdge)>("_Func_StringDGHyperEdge");
@@ -28,10 +32,6 @@ void Function_doExport() {
 	exportFunc<bool(std::shared_ptr<graph::Graph>)>("_Func_BoolGraph");
 	exportFunc<int(std::shared_ptr<graph::Graph>)>("_Func_IntGraph");
 	exportFunc<std::string(std::shared_ptr<graph::Graph>)>("_Func_StringGraph");
-	// Graph x DG -> X
-	exportFunc<std::string(std::shared_ptr<graph::Graph>, std::shared_ptr<dg::DG>)>("_Func_StringGraphDG");
-	// Graph x DG x bool -> X
-	exportFunc<std::string(std::shared_ptr<graph::Graph>, std::shared_ptr<dg::DG>, bool)>("_Func_StringGraphDGBool");
 	// Graph x Strategy::GraphState -> X
 	exportFunc<bool(std::shared_ptr<graph::Graph>, const dg::Strategy::GraphState &)>(
 			"_Func_BoolGraphDGStratGraphState");
@@ -43,6 +43,8 @@ void Function_doExport() {
 			"_Func_BoolGraphGraphDGStratGraphState");
 	// Strategy::GraphState -> X
 	exportFunc<void(const dg::Strategy::GraphState &)>("_Func_VoidDGStratGraphState");
+
+	exportFunc<bool(VertexMap<graph::Graph, graph::Graph>)>("_Func_BoolVertexMapGraphGraph");
 }
 
 } // namespace mod::Py

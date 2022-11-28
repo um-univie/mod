@@ -7,37 +7,71 @@
 
 namespace mod::post {
 
-FileHandle::FileHandle(std::string name) : name(name) {
-	stream.open(name.c_str());
-	if(!stream) throw LogicError("Can not open file '" + name + "'.");
-}
-
-void command(const std::string &text) {
-	lib::IO::post() << text << std::endl;
-}
-
-void reset() {
-	lib::IO::postReset();
-}
-
-void flush() {
-	lib::IO::post() << std::flush;
-}
-
-void disable() {
-	lib::IO::postDisable();
-}
-
-void summaryChapter(const std::string &chapterTitle) {
-	lib::IO::post() << "summaryChapter \"" << chapterTitle << "\"" << std::endl;
-}
-
-void summarySection(const std::string &sectionTitle) {
-	lib::IO::post() << "summarySection \"" << sectionTitle << "\"" << std::endl;
+FileHandle::FileHandle(const std::string &name) : name(name) {
+	stream.open(name.data());
+	if(!stream) throw LogicError("Can not open file '" + this->name + "'.");
 }
 
 std::string makeUniqueFilePrefix() {
-	return lib::IO::getUniqueFilePrefix();
+	return lib::IO::makeUniqueFilePrefix();
+}
+
+void command(const std::string &line) {
+	lib::IO::post() << line << '\n';
+}
+
+void flushCommands() {
+	lib::IO::post() << std::flush;
+}
+
+void disableCommands() {
+	lib::IO::postDisable();
+}
+
+void enableCommands() {
+	lib::IO::postEnable();
+}
+
+void reopenCommandFile() {
+	lib::IO::postReopenCommandFile();
+}
+
+void summaryChapter(const std::string &heading) {
+	lib::IO::post() << "summaryChapter \"" << heading << "\"\n";
+}
+
+void summarySection(const std::string &heading) {
+	lib::IO::post() << "summarySection \"" << heading << "\"\n";
+}
+
+void summaryRaw(const std::string &latexCode) {
+	summaryRaw(latexCode, "raw.tex");
+}
+
+void summaryRaw(const std::string &latexCode, const std::string &file) {
+	FileHandle s(lib::IO::makeUniqueFilePrefix() + file);
+	s << latexCode;
+	lib::IO::post() << "summaryInput '" << std::string(s) << "'\n";
+}
+
+void summaryInput(const std::string &filename) {
+	lib::IO::post() << "summaryInput '" << filename << "'\n";
+}
+
+void disableInvokeMake() {
+	lib::IO::post() << "disableInvokeMake\n";
+}
+
+void enableInvokeMake() {
+	lib::IO::post() << "enableInvokeMake\n";
+}
+
+void disableCompileSummary() {
+	lib::IO::post() << "disableCompileSummary\n";
+}
+
+void enableCompileSummary() {
+	lib::IO::post() << "enableInvokeMake\n";
 }
 
 } // namespace mod::post

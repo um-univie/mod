@@ -2,9 +2,7 @@
 
 #include <mod/Error.hpp>
 
-namespace mod {
-namespace lib {
-namespace Stereo {
+namespace mod::lib::Stereo {
 
 TrigonalPlanar::TrigonalPlanar(const GeometryGraph &g, const std::array<EmbeddingEdge, 3> &edges, bool fixed)
 : StaticDegree<3>(g.trigonalPlanar, edges), fixed(fixed) { }
@@ -68,6 +66,4 @@ std::pair<std::string, bool> TrigonalPlanar::asPrettyStringImpl(std::function<st
 	return std::make_pair(res, true);
 }
 
-} // namespace Stereo
-} // namespace lib
-} // namespace mod
+} // namespace mod::lib::Stereo

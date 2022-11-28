@@ -1,11 +1,9 @@
-#ifndef MOD_LIB_RULES_CONNECTEDCOMPONENT_H
-#define MOD_LIB_RULES_CONNECTEDCOMPONENT_H
+#ifndef MOD_LIB_RULES_CONNECTEDCOMPONENT_HPP
+#define MOD_LIB_RULES_CONNECTEDCOMPONENT_HPP
 
 #include <boost/graph/properties.hpp>
 
-namespace mod {
-namespace lib {
-namespace Rules {
+namespace mod::lib::Rules {
 
 template<typename Graph, typename ComponentMap>
 struct ConnectedComponentFilter {
@@ -13,10 +11,10 @@ struct ConnectedComponentFilter {
 	using Edge = typename boost::graph_traits<Graph>::edge_descriptor;
 	// because filters in boost::filetered_graph must be default constructible
 
-	ConnectedComponentFilter() : g(nullptr), componentMap(nullptr) { }
+	ConnectedComponentFilter() : g(nullptr), componentMap(nullptr) {}
 
 	ConnectedComponentFilter(const Graph *g, const ComponentMap *componentMap, std::size_t component)
-	: g(g), componentMap(componentMap), component(component) { }
+			: g(g), componentMap(componentMap), component(component) {}
 
 	bool operator()(Vertex v) const {
 		auto vComponent = (*componentMap)[get(boost::vertex_index_t(), *g, v)];
@@ -33,8 +31,6 @@ private:
 	std::size_t component;
 };
 
-} // namespace Rules
-} // namespace lib
-} // namespace mod
+} // namespace mod::lib::Rules
 
-#endif /* MOD_LIB_RULES_CONNECTEDCOMPONENT_H */
+#endif // MOD_LIB_RULES_CONNECTEDCOMPONENT_HPP

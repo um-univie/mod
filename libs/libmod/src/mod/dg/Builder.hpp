@@ -31,6 +31,10 @@ public:
 	Builder(Builder &&other);
 	Builder &operator=(Builder &&other);
 	~Builder();
+	// rst: .. function:: std::shared_ptr<DG> getDG() const
+	// rst:
+	// rst:		:returns: the derivation graph this builder can modify.
+	std::shared_ptr<DG> getDG() const;
 	// rst: .. function:: bool isActive() const
 	// rst:
 	// rst:		:returns: whether this object is associated with a :cpp:class:`DG`.
@@ -54,6 +58,23 @@ public:
 	// rst:			in the internal graph database in the associated derivation graph.
 	DG::HyperEdge addDerivation(const Derivations &d);
 	DG::HyperEdge addDerivation(const Derivations &d, IsomorphismPolicy graphPolicy);
+	// rst: .. function:: DG::HyperEdge addHyperEdge(const DG::HyperEdge &e)
+	// rst:               DG::HyperEdge addHyperEdge(const DG::HyperEdge &e, IsomorphismPolicy graphPolicy)
+	// rst:
+	// rst:		Adds a hyperedge to the associated :class:`DG` from a copy of the given hyperedge
+	// rst:		(from a different :class:`DG`).
+	// rst:		If it already exists, only add the rules to the edge.
+	// rst:		The given :var:`graphPolicy` refers to adding the graphs associated with :var:`e`,
+	// rst:		and it defaults to :enumerator:`IsomorphismPolicy::Check`.
+	// rst:
+	// rst:		:returns: the hyperedge corresponding to the given derivation.
+	// rst:		:throws: :class:`LogicError` if `!isActive()`.
+	// rst:		:throws: :class:`LogicError` if `!e`.
+	// rst:		:throws: :class:`LogicError` if `graphPolicy == IsomorphismPolicy::Check` and a given graph object
+	// rst:			is different but isomorphic to another given graph object or to a graph object already
+	// rst:			in the internal graph database in the associated derivation graph.
+	DG::HyperEdge addHyperEdge(const DG::HyperEdge &e);
+	DG::HyperEdge addHyperEdge(const DG::HyperEdge &e, IsomorphismPolicy graphPolicy);
 	// rst: .. function:: ExecuteResult execute(std::shared_ptr<Strategy> strategy)
 	// rst:               ExecuteResult execute(std::shared_ptr<Strategy> strategy, int verbosity)
 	// rst:               ExecuteResult execute(std::shared_ptr<Strategy> strategy, int verbosity, bool ignoreRuleLabelTypes)

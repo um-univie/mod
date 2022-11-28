@@ -1,4 +1,4 @@
-FROM fedora:34
+FROM fedora:36
 ARG j=7
 
 WORKDIR /opt/mod
@@ -9,12 +9,14 @@ RUN dnf install -y                                          \
     python3-pip                                             \
  && pip3 install -r requirements_nodoc.txt                  \
  && dnf install -y                                          \
-    $(bindep -b | tr '\n' ' ')                              \
+    $(bindep -b testing | tr '\n' ' ')                      \
  && dnf clean all                                           \
  && rm -rf /var/cache/yum
 
 
 WORKDIR /opt/mod/build
+ENV BABEL_LIBDIR=/usr/lib64/openbabel3
+ENV CXXFLAGS=-Werror
 RUN cmake ../ -DBUILD_DOC=no                                                   \
  -DCMAKE_BUILD_TYPE=Release                                                    \
  -DBUILD_TESTING_SANITIZERS=off                                                \

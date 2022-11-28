@@ -22,10 +22,11 @@ void Rule_doExport() {
 
 	// rst: .. class:: Rule
 	// rst:
-	// rst:		Model of a transformation rule in the Double Pushout formalism,
+	// rst:		This class models a graph transformation rule in the Double Pushout formalism,
 	// rst:		as the span :math:`L \leftarrow K \rightarrow R`.
 	// rst:		The three graphs are referred to as respectively
 	// rst:		the "left", "context", and "right" graphs of the rule.
+	// rst:		See :ref:`graph-model` for more details.
 	// rst:
 	// rst:		The class implements the :class:`protocols.Graph` protocol,
 	// rst:		which gives access to a graph view of the rule which has the left, context, and right graphs
@@ -210,7 +211,20 @@ void Rule_doExport() {
 			.def("fromGMLString", &Rule::fromGMLString)
 			.staticmethod("fromGMLString")
 			.def("fromGMLFile", &Rule::fromGMLFile)
-			.staticmethod("fromGMLFile");
+			.staticmethod("fromGMLFile")
+					// rst: .. staticmethod:: Rule.fromDFS(s, invert=False, add=True)
+					// rst:
+					// rst:		Load a rule from a :ref:`RuleDFS <format-ruleDFS>` string.
+					// rst:
+					// rst:		:param str s: the :ref:`RuleDFS <format-ruleDFS>` string to parse.
+					// rst:		:param bool invert: whether or not to invert the loaded rule.
+					// rst:		:param str name: the name of the rule. If none is given the default name is used.
+					// rst:		:param bool add: whether to append the rule to :data:`inputRules` or not.
+					// rst:		:returns: the loaded rule.
+					// rst:		:rtype: Rule
+					// rst:		:raises: :class:`InputError` on bad input.
+			.def("fromDFS", &Rule::fromDFS)
+			.staticmethod("fromDFS");
 
 	// rst: .. function:: ruleGMLString(s, invert=False, add=True)
 	// rst:

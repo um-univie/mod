@@ -1,7 +1,7 @@
 include("common.py")
 
 def convert(name, cls, f):
-	postSection(name)
+	post.summarySection(name)
 	print(name + ", explicit -------------------------------------------------")
 	handleExp(cls(formaldehyde))
 	print(name + ", implicit -------------------------------------------------")

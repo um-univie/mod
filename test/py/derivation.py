@@ -1,4 +1,4 @@
-post("disableSummary")
+post.disableInvokeMake()
 g1 = smiles('O', name="g1")
 g2 = smiles('C', name="g2")
 r = ruleGMLString("""rule [ ruleID "r" context [ node [ id 0 label "O" ] ] ]""")

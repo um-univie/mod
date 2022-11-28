@@ -1,5 +1,5 @@
-g = smiles('C')
-r = ruleGMLString("""rule [
+g = Graph.fromSMILES('C')
+r = Rule.fromGMLString("""rule [
 	left [
 		node [ id 1 label "C" ]
 		node [ id 2 label "H" ]

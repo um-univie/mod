@@ -1,5 +1,5 @@
-#ifndef MOD_DG_GRAPHINTERFACE_H
-#define MOD_DG_GRAPHINTERFACE_H
+#ifndef MOD_DG_GRAPHINTERFACE_HPP
+#define MOD_DG_GRAPHINTERFACE_HPP
 
 // rst: This header contains the definitions for the hypergraph interface for :class:`dg::DG`.
 // rst:
@@ -626,4 +626,4 @@ struct std::hash<mod::dg::DG::HyperEdge> {
 	}
 };
 
-#endif /* MOD_DG_GRAPHINTERFACE_H */
+#endif // MOD_DG_GRAPHINTERFACE_HPP

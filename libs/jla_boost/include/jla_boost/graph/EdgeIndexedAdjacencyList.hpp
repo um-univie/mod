@@ -6,17 +6,18 @@
 namespace jla_boost {
 
 template<typename DirectedS,
-typename VertexProperty = boost::no_property,
-typename EdgeProperty = boost::no_property,
-typename GraphProperty = boost::no_property>
+		typename VertexProperty = boost::no_property,
+		typename EdgeProperty = boost::no_property,
+		typename GraphProperty = boost::no_property>
 struct EdgeIndexedAdjacencyList {
 	using Self = EdgeIndexedAdjacencyList;
-	using GraphType = boost::adjacency_list< boost::vecS, boost::vecS, DirectedS,
+	using GraphType = boost::adjacency_list<boost::vecS, boost::vecS, DirectedS,
 			VertexProperty, boost::property<boost::edge_index_t, std::size_t, EdgeProperty>, GraphProperty,
-			boost::vecS>;
+			boost::listS>;
+	// Do not use vecS for the edges, as it seems that the edge properties are stored by value there
+	// and the edge descriptors contain a pointer to the property.
 public:
-
-	EdgeIndexedAdjacencyList() { }
+	EdgeIndexedAdjacencyList() = default;
 public: // Graph
 	using vertex_descriptor = typename boost::graph_traits<GraphType>::vertex_descriptor;
 	using edge_descriptor = typename boost::graph_traits<GraphType>::edge_descriptor;
@@ -132,9 +133,9 @@ public: // PropertyGraph
 	}
 
 	template<typename VertexOrEdge, typename Value>
-	friend void put(const boost::edge_index_t&, Self &g, VertexOrEdge ve, Value &&v) {
+	friend void put(const boost::edge_index_t &, Self &g, VertexOrEdge ve, Value &&v) {
 		// TODO: change to use "= delete" when GCC 5 is required (https://gcc.gnu.org/bugzilla/show_bug.cgi?id=62101))
-		static_assert(sizeof (ve) == 0, "You should not mess with this.");
+		static_assert(sizeof(ve) == 0, "You should not mess with this.");
 	}
 
 	template<typename VertexOrEdge>
@@ -163,14 +164,14 @@ namespace boost {
 
 template<typename DirectedS, typename VertexProperty, typename EdgeProperty, typename GraphProperty, typename Property>
 struct property_map<jla_boost::EdgeIndexedAdjacencyList<DirectedS, VertexProperty, EdgeProperty, GraphProperty>, Property>
-: property_map<typename jla_boost::EdgeIndexedAdjacencyList<DirectedS, VertexProperty, EdgeProperty, GraphProperty>::GraphType, Property> {
+		: property_map<typename jla_boost::EdgeIndexedAdjacencyList<DirectedS, VertexProperty, EdgeProperty, GraphProperty>::GraphType, Property> {
 };
 
 template<typename DirectedS, typename VertexProperty, typename EdgeProperty, typename GraphProperty, typename Property>
 struct property_map<const jla_boost::EdgeIndexedAdjacencyList<DirectedS, VertexProperty, EdgeProperty, GraphProperty>, Property>
-: property_map<typename jla_boost::EdgeIndexedAdjacencyList<DirectedS, VertexProperty, EdgeProperty, GraphProperty>::GraphType, Property> {
+		: property_map<typename jla_boost::EdgeIndexedAdjacencyList<DirectedS, VertexProperty, EdgeProperty, GraphProperty>::GraphType, Property> {
 };
 
 } // namespace boost
 
-#endif /* JLA_BOOST_GRAPH_EDGEINDEXEDADJACENCYLIST_HPP */
+#endif // JLA_BOOST_GRAPH_EDGEINDEXEDADJACENCYLIST_HPP

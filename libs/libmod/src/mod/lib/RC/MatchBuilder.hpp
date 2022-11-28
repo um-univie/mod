@@ -3,7 +3,6 @@
 
 #include <mod/lib/Rules/Real.hpp>
 #include <jla_boost/graph/morphism/finders/CommonSubgraph.hpp>
-#include <jla_boost/graph/morphism/models/Vector.hpp>
 
 namespace mod::lib::RC {
 
@@ -37,8 +36,9 @@ public:
 	const LabelSettings labelSettings;
 private:
 	// note: the match has rSecond as domain and rFirst as codomain, i.e., <-,
-	//       so everything todo with match is somewhat "backwards"
-	jla_boost::GraphMorphism::CommonSubgraphEnumerator<false, lib::Rules::SideGraphType, lib::Rules::SideGraphType,
+	//       so everything to do with match is somewhat "backwards"
+	jla_boost::GraphMorphism::CommonSubgraphEnumerator<false,
+			lib::DPO::CombinedRule::SideGraphType, lib::DPO::CombinedRule::SideGraphType,
 			EdgePred, VertexPred> match;
 };
 

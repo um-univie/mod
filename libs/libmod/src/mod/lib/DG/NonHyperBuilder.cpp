@@ -7,11 +7,12 @@
 #include <mod/lib/DG/RuleApplicationUtils.hpp>
 #include <mod/lib/DG/Strategies/GraphState.hpp>
 #include <mod/lib/DG/Strategies/Strategy.hpp>
+#include <mod/lib/DG/IO/Read.hpp>
+#include <mod/lib/Graph/IO/Read.hpp>
 #include <mod/lib/Graph/Properties/Term.hpp>
 #include <mod/lib/IO/Config.hpp>
-#include <mod/lib/IO/DG.hpp>
 #include <mod/lib/IO/IO.hpp>
-#include <mod/lib/IO/JsonUtils.hpp>
+#include <mod/lib/IO/Json.hpp>
 #include <mod/lib/RC/ComposeRuleReal.hpp>
 #include <mod/lib/RC/MatchMaker/Super.hpp>
 
@@ -64,16 +65,16 @@ std::pair<NonHyper::Edge, bool> Builder::addDerivation(const Derivations &d, Iso
 	// add graphs
 	switch(graphPolicy) {
 	case IsomorphismPolicy::Check: {
-		for(const auto &g : d.left)
+		for(const auto &g: d.left)
 			dg->tryAddGraph(g);
-		for(const auto &g : d.right)
+		for(const auto &g: d.right)
 			dg->tryAddGraph(g);
 		break;
 	}
 	case IsomorphismPolicy::TrustMe:
-		for(const auto &g : d.left)
+		for(const auto &g: d.left)
 			dg->trustAddGraph(g);
-		for(const auto &g : d.right)
+		for(const auto &g: d.right)
 			dg->trustAddGraph(g);
 		break;
 	}
@@ -81,7 +82,7 @@ std::pair<NonHyper::Edge, bool> Builder::addDerivation(const Derivations &d, Iso
 	const auto makeSide = [](const mod::Derivation::GraphList &graphs) -> GraphMultiset {
 		std::vector<const lib::Graph::Single *> gPtrs;
 		gPtrs.reserve(graphs.size());
-		for(const auto &g : graphs) gPtrs.push_back(&g->getGraph());
+		for(const auto &g: graphs) gPtrs.push_back(&g->getGraph());
 		return GraphMultiset(std::move(gPtrs));
 	};
 	auto gmsLeft = makeSide(d.left);
@@ -93,7 +94,7 @@ std::pair<NonHyper::Edge, bool> Builder::addDerivation(const Derivations &d, Iso
 		return dg->suggestDerivation(std::move(gmsLeft), std::move(gmsRight), rule);
 	} else {
 		auto res = dg->suggestDerivation(gmsLeft, gmsRight, &d.rules.front()->getRule());
-		for(const auto &r : asRange(d.rules.begin() + 1, d.rules.end()))
+		for(const auto &r: asRange(d.rules.begin() + 1, d.rules.end()))
 			dg->suggestDerivation(gmsLeft, gmsRight, &r->getRule());
 		return res;
 	}
@@ -120,7 +121,7 @@ struct NonHyperBuilder::ExecutionEnv final : public Strategies::ExecutionEnv {
 	}
 
 	bool checkLeftPredicate(const mod::Derivation &d) const override {
-		for(const auto &pred : asRange(leftPredicates.rbegin(), leftPredicates.rend())) {
+		for(const auto &pred: asRange(leftPredicates.rbegin(), leftPredicates.rend())) {
 			bool result = (*pred)(d);
 			if(!result) return false;
 		}
@@ -128,7 +129,7 @@ struct NonHyperBuilder::ExecutionEnv final : public Strategies::ExecutionEnv {
 	}
 
 	bool checkRightPredicate(const mod::Derivation &d) const override {
-		for(const auto &pred : asRange(rightPredicates.rbegin(), rightPredicates.rend())) {
+		for(const auto &pred: asRange(rightPredicates.rbegin(), rightPredicates.rend())) {
 			bool result = (*pred)(d);
 			if(!result) return false;
 		}
@@ -233,11 +234,11 @@ Builder::apply(const std::vector<std::shared_ptr<graph::Graph>> &graphs,
 	dg->rules.insert(rOrig);
 	switch(graphPolicy) {
 	case IsomorphismPolicy::Check:
-		for(const auto &g : graphs)
+		for(const auto &g: graphs)
 			dg->tryAddGraph(g);
 		break;
 	case IsomorphismPolicy::TrustMe:
-		for(const auto &g : graphs)
+		for(const auto &g: graphs)
 			dg->trustAddGraph(g);
 		break;
 	}
@@ -251,7 +252,7 @@ Builder::apply(const std::vector<std::shared_ptr<graph::Graph>> &graphs,
 	if(graphs.empty()) return {};
 	std::vector<const lib::Graph::Single *> libGraphs;
 	libGraphs.reserve(graphs.size());
-	for(const auto &g : graphs)
+	for(const auto &g: graphs)
 		libGraphs.push_back(&g->getGraph());
 
 	std::vector<BoundRule> resultRules;
@@ -287,13 +288,13 @@ Builder::apply(const std::vector<std::shared_ptr<graph::Graph>> &graphs,
 					firstGraph, firstGraph + round + 1, inputRules,
 					dg->graphAsRuleCache, ls,
 					onOutput);
-			for(BoundRule &br : outputRules) {
+			for(BoundRule &br: outputRules) {
 				// always go to the next graph
 				++br.nextGraphOffset;
 			}
 			if(round != 0) {
 				// in round 0 the inputRules is the actual original input rule, so don't delete it
-				for(auto &br : inputRules)
+				for(auto &br: inputRules)
 					delete br.rule;
 			}
 			std::swap(inputRules, outputRules);
@@ -303,10 +304,14 @@ Builder::apply(const std::vector<std::shared_ptr<graph::Graph>> &graphs,
 				--logger.indentLevel;
 			}
 		} // for each round
+		// after the last round we may still have rules with connected components in L
+		// which go unused, so delete them
+		for(auto &br: inputRules)
+			delete br.rule;
 	} // end of binding
 
 	std::vector<std::pair<NonHyper::Edge, bool>> res;
-	for(const BoundRule &br : resultRules) {
+	for(const BoundRule &br: resultRules) {
 		if(getConfig().dg.applyLimit.get() == res.size()) break;
 
 		const auto &r = *br.rule;
@@ -326,18 +331,26 @@ Builder::apply(const std::vector<std::shared_ptr<graph::Graph>> &graphs,
 					}
 				}
 		);
-		for(const auto &p : products)
+		if(products.empty()) {
+			if(verbosity >= V_RuleApplication) {
+				++logger.indentLevel;
+				logger.indent() << "Discarding derivation, empty result." << std::endl;
+				--logger.indentLevel;
+			}
+			continue;
+		}
+		for(const auto &p: products)
 			dg->addProduct(p);
 		std::vector<const lib::Graph::Single *> rightGraphs;
 		rightGraphs.reserve(products.size());
-		for(const auto &p : products)
+		for(const auto &p: products)
 			rightGraphs.push_back(&p->getGraph());
 		lib::DG::GraphMultiset gmsLeft(br.boundGraphs), gmsRight(std::move(rightGraphs));
 		const auto derivationRes = dg->suggestDerivation(gmsLeft, gmsRight, &rOrig->getRule());
 		res.push_back(derivationRes);
 	}
 
-	for(const auto &br : resultRules)
+	for(const auto &br: resultRules)
 		delete br.rule;
 
 	return res;
@@ -347,16 +360,15 @@ std::vector<std::pair<NonHyper::Edge, bool>>
 Builder::applyRelaxed(const std::vector<std::shared_ptr<graph::Graph>> &graphs,
                       std::shared_ptr<rule::Rule> rOrig,
                       int verbosity, IsomorphismPolicy graphPolicy) {
-
 	IO::Logger logger(std::cout);
 	dg->rules.insert(rOrig);
 	switch(graphPolicy) {
 	case IsomorphismPolicy::Check:
-		for(const auto &g : graphs)
+		for(const auto &g: graphs)
 			dg->tryAddGraph(g);
 		break;
 	case IsomorphismPolicy::TrustMe:
-		for(const auto &g : graphs)
+		for(const auto &g: graphs)
 			dg->trustAddGraph(g);
 		break;
 	}
@@ -370,7 +382,7 @@ Builder::applyRelaxed(const std::vector<std::shared_ptr<graph::Graph>> &graphs,
 	if(graphs.empty()) return {};
 	std::vector<const lib::Graph::Single *> libGraphs;
 	libGraphs.reserve(graphs.size());
-	for(const auto &g : graphs)
+	for(const auto &g: graphs)
 		libGraphs.push_back(&g->getGraph());
 
 	const auto ls = dg->getLabelSettings();
@@ -390,7 +402,8 @@ Builder::applyRelaxed(const std::vector<std::shared_ptr<graph::Graph>> &graphs,
 			const auto &r = *br.rule;
 			if(verbosity >= V_RuleApplication_Binding) {
 				logger.indent() << "Splitting " << r.getName() << " into "
-				                << r.getDPORule().numRightComponents << " graphs" << std::endl;
+				                << get_num_connected_components(get_labelled_right(r.getDPORule()))
+				                << " graphs" << std::endl;
 				++logger.indentLevel;
 			}
 
@@ -410,11 +423,20 @@ Builder::applyRelaxed(const std::vector<std::shared_ptr<graph::Graph>> &graphs,
 						}
 					}
 			);
-			for(const auto &p : products)
+			if(products.empty()) {
+				if(verbosity >= V_RuleApplication) {
+					++logger.indentLevel;
+					logger.indent() << "Discarding derivation, empty result." << std::endl;
+					--logger.indentLevel;
+				}
+				delete br.rule;
+				return true;
+			}
+			for(const auto &p: products)
 				dg->addProduct(p);
 			std::vector<const lib::Graph::Single *> rightGraphs;
 			rightGraphs.reserve(products.size());
-			for(const auto &p : products)
+			for(const auto &p: products)
 				rightGraphs.push_back(&p->getGraph());
 			lib::DG::GraphMultiset gmsLeft(br.boundGraphs), gmsRight(std::move(rightGraphs));
 			const auto derivationRes = dg->suggestDerivation(gmsLeft, gmsRight, &rOrig->getRule());
@@ -432,28 +454,32 @@ Builder::applyRelaxed(const std::vector<std::shared_ptr<graph::Graph>> &graphs,
 				 firstGraph, lastGraph, inputRules,
 				 dg->graphAsRuleCache, ls,
 				 onOutput);
-		for(BoundRule &br : outputRules) {
+		for(BoundRule &br: outputRules) {
 			// always go to the next graph
 			++br.nextGraphOffset;
 		}
 		if(round != 0) {
 			// in round 0 the inputRules is the actual original input rule, so don't delete it
-			for(auto &br : inputRules)
+			for(auto &br: inputRules)
 				delete br.rule;
 		}
 		std::swap(inputRules, outputRules);
 	} // for each round based on numComponents
+	// the last round should not produce any results with non-empty L,
+	// as we do exactly |CC(L)| number of rounds.
+	if(rOrig->getNumLeftComponents() != 0)
+		assert(inputRules.empty());
 	return res;
 }
 
 void Builder::addAbstract(const std::string &description) {
 	std::ostringstream err;
-	auto res = lib::IO::DG::Read::abstract(description, err);
+	auto res = lib::DG::Read::abstract(description, err);
 	if(!res) throw InputError("Could not parse description of abstract derivations.\n" + err.str());
 	const auto &derivations = *res;
 	std::unordered_map<std::string, std::shared_ptr<graph::Graph> > strToGraph;
-	const auto handleSide = [this, &strToGraph](const lib::IO::DG::Read::AbstractDerivation::List &side) {
-		for(const auto &e : side) {
+	const auto handleSide = [this, &strToGraph](const lib::DG::Read::AbstractDerivation::List &side) {
+		for(const auto &e: side) {
 			const auto iter = strToGraph.find(e.second);
 			if(iter != end(strToGraph)) continue;
 			auto gBoost = std::make_unique<lib::Graph::GraphType>();
@@ -465,15 +491,15 @@ void Builder::addAbstract(const std::string &description) {
 			strToGraph[e.second] = g;
 		}
 	};
-	for(const auto &der : derivations) {
+	for(const auto &der: derivations) {
 		handleSide(der.left);
 		handleSide(der.right);
 	}
 
 	using Side = std::unordered_map<std::shared_ptr<graph::Graph>, unsigned int>;
-	const auto makeSide = [&strToGraph](const lib::IO::DG::Read::AbstractDerivation::List &side) {
+	const auto makeSide = [&strToGraph](const lib::DG::Read::AbstractDerivation::List &side) {
 		Side result;
-		for(const auto &e : side) {
+		for(const auto &e: side) {
 			const auto g = strToGraph[e.second];
 			assert(g);
 			auto iter = result.find(g);
@@ -482,15 +508,15 @@ void Builder::addAbstract(const std::string &description) {
 		}
 		return result;
 	};
-	for(const auto &der : derivations) {
+	for(const auto &der: derivations) {
 		const Side left = makeSide(der.left);
 		const Side right = makeSide(der.right);
 		std::vector<const lib::Graph::Single *> leftGraphs, rightGraphs;
-		for(const auto &e : left) {
+		for(const auto &e: left) {
 			for(unsigned int i = 0; i < e.second; i++)
 				leftGraphs.push_back(&e.first->getGraph());
 		}
-		for(const auto &e : right) {
+		for(const auto &e: right) {
 			for(unsigned int i = 0; i < e.second; i++)
 				rightGraphs.push_back(&e.first->getGraph());
 		}
@@ -517,7 +543,7 @@ bool Builder::load(const std::vector<std::shared_ptr<rule::Rule>> &ruleDatabase,
 		return false;
 	}
 	ifs.close();
-	auto jOpt = lib::IO::DG::Read::loadDump(file, err);
+	auto jOpt = lib::DG::Read::loadDump(file, err);
 	if(!jOpt) return {};
 	auto &j = *jOpt;
 
@@ -551,12 +577,12 @@ bool Builder::trustLoadDump(nlohmann::json &&j,
 	auto &jVertices = j["vertices"];
 	std::vector<Vertex> vertices;
 	vertices.reserve(jVertices.size());
-	for(auto &jv : jVertices) {
+	for(auto &jv: jVertices) {
 		Vertex v;
 		v.id = jv[0].get<int>();
 		const std::string &gml = jv[2].get<std::string>();
 		lib::IO::Warnings warnings;
-		auto gDatasRes = lib::IO::Graph::Read::gml(warnings, gml);
+		auto gDatasRes = lib::Graph::Read::gml(warnings, gml);
 		err << warnings;
 		if(!gDatasRes) {
 			err << gDatasRes.extractError() << '\n';
@@ -586,7 +612,7 @@ bool Builder::trustLoadDump(nlohmann::json &&j,
 	std::vector<std::shared_ptr<rule::Rule>> rules;
 	rules.reserve(jRules.size());
 	const auto ls = dg->getLabelSettings();
-	for(const auto &j : jRules) {
+	for(const auto &j: jRules) {
 		const std::string &jr = j.get<std::string>();
 		auto rCand = rule::Rule::fromGMLString(jr, false);
 		const auto iter = std::find_if(ruleDatabase.begin(), ruleDatabase.end(), [rCand, ls](const auto &r) {
@@ -628,7 +654,7 @@ bool Builder::trustLoadDump(nlohmann::json &&j,
 			std::vector<const lib::Graph::Single *> srcGraphs, tarGraphs;
 			srcGraphs.reserve(e[1].size());
 			tarGraphs.reserve(e[2].size());
-			for(int src : e[1]) {
+			for(int src: e[1]) {
 				auto gIter = graphFromId.find(src);
 				if(gIter == end(graphFromId)) {
 					err << "Corrupt data for edge " << e[0].get<int>() << ". Source " << src << " is not a yet a vertex.";
@@ -636,7 +662,7 @@ bool Builder::trustLoadDump(nlohmann::json &&j,
 				}
 				srcGraphs.push_back(gIter->second);
 			}
-			for(int tar : e[2]) {
+			for(int tar: e[2]) {
 				auto gIter = graphFromId.find(tar);
 				if(gIter == end(graphFromId)) {
 					err << "Corrupt data for edge " << e[0].get<int>() << ". Target " << tar << " is not a yet a vertex.";
@@ -649,7 +675,7 @@ bool Builder::trustLoadDump(nlohmann::json &&j,
 			if(ruleIds.empty()) {
 				dg->suggestDerivation(std::move(gmsSrc), std::move(gmsTar), nullptr);
 			} else {
-				for(const int rId : ruleIds) {
+				for(const int rId: ruleIds) {
 					if(rId < 0 || rId >= rules.size()) {
 						err << "Corrupt data for edge " << e[0].get<int>() << ". Rule offset " << rId << " is not in range.";
 						return false;

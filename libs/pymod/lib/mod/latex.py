@@ -15,14 +15,14 @@ _ls = mod.LabelSettings(mod.LabelType.String, mod.LabelRelation.Isomorphism,
 def setTexFile(fName):
 	global _texFile
 	_texFile = open(fName, "w")
-	mod.post("disableSummary")
+	mod.post.disableCompileSummary()
 
 
 def setFigFolder(fName):
 	global _figFolder
 	_figFolder = fName
 	_checkSettings()
-	mod.post("post \"mkdir -p '%s'\"" % _figFolder)
+	mod.post.command("post \"mkdir -p '%s'\"" % _figFolder)
 
 
 def _checkSettings():
@@ -39,7 +39,7 @@ def outputFile(f, inline=False):
 	assert f.endswith(".pdf")
 	f = f[:-4]
 	f += ".tex" if inline else ".pdf"
-	mod.post("post \"cp '%s' '%s/'\"" % (f, _figFolder))
+	mod.post.command("post \"cp '%s' '%s/'\"" % (f, _figFolder))
 	res = _figFolder + "/" + os.path.basename(f)
 	return res[:-4]
 
@@ -70,15 +70,15 @@ def graph(id, g, p, inline):
 
 
 def graphGML(id, data, printer, inline=False):
-	graph(id, mod.graphGML(data), printer, inline)
+	graph(id, mod.Graph.fromGMLFile(data), printer, inline)
 
 
 def smiles(id, data, printer, inline=False):
-	graph(id, mod.smiles(data.replace('##', '#')), printer, inline)
+	graph(id, mod.Graph.fromSMILES(data.replace('##', '#')), printer, inline)
 
 
 def graphDFS(id, data, printer, inline=False):
-	graph(id, mod.graphDFS(data.replace('##', '#')), printer, inline)
+	graph(id, mod.Graph.fromDFS(data.replace('##', '#')), printer, inline)
 
 
 # ------------------------------------------------------------------------------
@@ -102,4 +102,4 @@ def rule(id, r, p):
 
 
 def ruleGML(id, data, printer):
-	rule(id, mod.ruleGML(data), printer)
+	rule(id, mod.Rule.fromGMLFile(data), printer)

@@ -1,5 +1,5 @@
 include("xxx_helpers.py")
-postDisable()
+post.disableCommands()
 
 def checkGraph(g, *, string: str, vertexString: str, edgeString: str,
 		graphNameInElements: str = None,

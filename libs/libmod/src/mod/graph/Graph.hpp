@@ -12,8 +12,13 @@
 #include <vector>
 
 namespace mod {
+
 template<typename Sig>
 struct Function;
+
+template<typename Domain, typename Codomain>
+struct VertexMap;
+
 } // namespace mod
 namespace mod::graph {
 
@@ -21,8 +26,7 @@ namespace mod::graph {
 // rst:
 // rst:		This class models an undirected graph with labels on vertices and edges,
 // rst:		without loops and without parallel edges.
-// rst:		Certain labels are regarded as models of chemical atoms and bonds.
-// rst:		See :ref:`mol-enc` for more information on this.
+// rst:		See :ref:`graph-model` for more details.
 // rst:		See also :ref:`cpp-graph/GraphInterface` for the documentation for the
 // rst:		graph interface for this class.
 // rst:
@@ -124,16 +128,16 @@ public:
 	const std::string &getSmilesWithIds() const;
 	// rst: .. function:: const std::string &getGraphDFS() const
 	// rst:
-	// rst:		:returns: a :ref:`GraphDFS <graph-graphDFS>` string of the graph.
+	// rst:		:returns: a :ref:`GraphDFS <format-graphDFS>` string of the graph.
 	const std::string &getGraphDFS() const;
 	// rst: .. function:: const std::string &getGraphDFSWithIds() const
 	// rst:
-	// rst:		:returns: a :ref:`GraphDFS <graph-graphDFS>` string of the graph, where each vertices have an explicit id,
+	// rst:		:returns: a :ref:`GraphDFS <format-graphDFS>` string of the graph, where each vertices have an explicit id,
 	// rst:			corresponding to its internal vertex id.
 	const std::string &getGraphDFSWithIds() const;
 	// rst: .. function:: const std::string &getLinearEncoding() const
 	// rst:
-	// rst:		:returns: the :ref:`SMILES <graph-smiles>` string if the graph is a molecule, otherwise the :ref:`GraphDFS <graph-graphDFS>` string.
+	// rst:		:returns: the :ref:`SMILES <graph-smiles>` string if the graph is a molecule, otherwise the :ref:`GraphDFS <format-graphDFS>` string.
 	const std::string &getLinearEncoding() const;
 	// rst: .. function:: bool getIsMolecule() const
 	// rst:
@@ -166,14 +170,32 @@ public:
 	// rst:
 	// rst:		:returns: the number of edges in the graph with the given label.
 	unsigned int eLabelCount(const std::string &label) const;
-	// rst: .. function:: std::size_t isomorphism(std::shared_ptr<Graph> host, std::size_t maxNumMatches, LabelSettings labelSettings) const
+public: // Morphisms
+	// rst: .. function:: std::size_t isomorphism(std::shared_ptr<Graph> codomain, std::size_t maxNumMatches, LabelSettings labelSettings) const
 	// rst:
-	// rst:		:returns: the number of isomorphisms found from this graph to `host`, but at most `maxNumMatches`.
-	std::size_t isomorphism(std::shared_ptr<Graph> host, std::size_t maxNumMatches, LabelSettings labelSettings) const;
-	// rst: .. function:: std::size_t monomorphism(std::shared_ptr<Graph> host, std::size_t maxNumMatches, LabelSettings labelSettings) const
+	// rst:		:returns: the number of isomorphisms found from this graph to `codomain`, but at most `maxNumMatches`.
+	// rst:		:throws LogicError: if `codomain` is null.
+	std::size_t isomorphism(std::shared_ptr<Graph> codomain, std::size_t maxNumMatches, LabelSettings labelSettings) const;
+	// rst: .. function:: std::size_t monomorphism(std::shared_ptr<Graph> codomain, std::size_t maxNumMatches, LabelSettings labelSettings) const
 	// rst:
-	// rst:		:returns: the number of monomorphisms from this graph to `host`, though at most `maxNumMatches`.
-	std::size_t monomorphism(std::shared_ptr<Graph> host, std::size_t maxNumMatches, LabelSettings labelSettings) const;
+	// rst:		:returns: the number of monomorphisms from this graph to `codomain`, though at most `maxNumMatches`.
+	// rst:		:throws LogicError: if `codomain` is null.
+	std::size_t monomorphism(std::shared_ptr<Graph> codomain, std::size_t maxNumMatches, LabelSettings labelSettings) const;
+	// rst: .. function:: void enumerateMonomorphisms(std::shared_ptr<Graph> codomain, \
+	// rst:                  std::shared_ptr<Function<bool(VertexMap<Graph, Graph>)>> callback, \
+	// rst:                  LabelSettings labelSettings) const
+	// rst:
+	// rst:		Perform substructure search of this graph into the given codomain graph.
+	// rst:		Whenever a match is found, the corresponding monomorphism is copied into a vertex map
+	// rst:		and the given callback is invoked with it.
+	// rst:		The return value from the callback determines whether to continue the search or not.
+	// rst:
+	// rst:		:throws LogicError: if `codomain` is null.
+	// rst:		:throws LogicError: if `callback` is null.
+	void enumerateMonomorphisms(std::shared_ptr<Graph> codomain,
+										 std::shared_ptr<Function<bool(VertexMap<Graph, Graph>)>> callback,
+										 LabelSettings labelSettings) const;
+public:
 	// rst: .. function:: std::shared_ptr<Graph> makePermutation() const
 	// rst:
 	// rst:		:returns: a graph isomorphic to this, but with the vertex indices randomly permuted.
@@ -255,13 +277,23 @@ public:
 	// rst:		:throws: :class:`InputError` on bad input.
 	static std::vector<std::shared_ptr<Graph>> fromGMLStringMulti(const std::string &data);
 	static std::vector<std::shared_ptr<Graph>> fromGMLFileMulti(const std::string &file);
+	// ===========================================================================
 	// rst: .. function:: static std::shared_ptr<Graph> fromDFS(const std::string &graphDFS)
 	// rst:
-	// rst:		:returns: a graph loaded from the given :ref:`GraphDFS <graph-graphDFS>` string.
+	// rst:		:returns: a graph loaded from the given :ref:`GraphDFS <format-graphDFS>` string.
+	// rst:			The graph must be connected. Use :func:`fromDFSMulti` if it is not.
 	// rst:		:throws: :class:`InputError` on bad input.
 	static std::shared_ptr<Graph> fromDFS(const std::string &graphDFS);
+	// rst: .. function:: static std::vector<std::shared_ptr<Graph>> fromDFSMulti(const std::string &graphDFS)
+	// rst:
+	// rst:		:returns: a list of graphs loaded from the given :ref:`GraphDFS <format-graphDFS>` string.
+	// rst:			The graphs are the connected components of the graph specified in the data.
+	// rst:		:throws: :class:`InputError` on bad input.
+	static std::vector<std::shared_ptr<Graph>> fromDFSMulti(const std::string &graphDFS);
+// ===========================================================================
 	// rst: .. function:: static std::shared_ptr<Graph> fromSMILES(const std::string &smiles)
-	// rst:               static std::shared_ptr<Graph> fromSMILES(const std::string &smiles, bool allowAbstract, SmilesClassPolicy classPolicy)
+	// rst:               static std::shared_ptr<Graph> fromSMILES(const std::string &smiles, bool allowAbstract, \
+	// rst:                                                        SmilesClassPolicy classPolicy)
 	// rst:
 	// rst:		:param allowAbstract: whether abstract atoms, e.g., ``*``, are allowed. Defaults to `false`.
 	// rst:		:param classPolicy: which policy to use for class labels. Defaults to `SmilesClassPolicy::NoneOnDuplicate`.
@@ -270,18 +302,54 @@ public:
 	// rst:		:throws: :class:`InputError` on bad input.
 	// rst:		:throws: :class:`InputError` if `classPolicy == SmilesClassPolicy::NoneOnDuplicate` and a class label is duplicated.
 	static std::shared_ptr<Graph> fromSMILES(const std::string &smiles);
-	static std::shared_ptr<Graph>
-	fromSMILES(const std::string &smiles, bool allowAbstract, SmilesClassPolicy classPolicy);
+	static std::shared_ptr<Graph> fromSMILES(const std::string &smiles, bool allowAbstract,
+	                                         SmilesClassPolicy classPolicy);
 	// rst: .. function:: static std::vector<std::shared_ptr<Graph>> fromSMILESMulti(const std::string &smiles)
-	// rst:               static std::vector<std::shared_ptr<Graph>> fromSMILESMulti(const std::string &smiles, bool allowAbstract, SmilesClassPolicy classPolicy)
+	// rst:               static std::vector<std::shared_ptr<Graph>> fromSMILESMulti(const std::string &smiles, bool allowAbstract, \
+	// rst:                                                                          SmilesClassPolicy classPolicy)
 	// rst:
 	// rst:		See :func:`fromSMILES` for parameter and exception descriptions.
 	// rst:
 	// rst:		:returns: a list of graphs representing molecules, loaded from the given :ref:`SMILES <graph-smiles>` string.
 	// rst:			The graphs are the connected components of the graph specified in the SMILES string.
 	static std::vector<std::shared_ptr<Graph>> fromSMILESMulti(const std::string &smiles);
-	static std::vector<std::shared_ptr<Graph>>
-	fromSMILESMulti(const std::string &smiles, bool allowAbstract, SmilesClassPolicy classPolicy);
+	static std::vector<std::shared_ptr<Graph>> fromSMILESMulti(const std::string &smiles, bool allowAbstract,
+																				  SmilesClassPolicy classPolicy);
+	// ===========================================================================
+	// rst: .. function:: static std::shared_ptr<Graph> fromMOLString(const std::string &data, const MDLOptions &options)
+	// rst:               static std::shared_ptr<Graph> fromMOLFile(const std::string &file, const MDLOptions &options)
+	// rst:
+	// rst:		:returns: a graph created from the given :ref:`MOL <graph-mdl>` data.
+	// rst:		:throws: :class:`InputError` on bad input.
+	static std::shared_ptr<Graph> fromMOLString(const std::string &data, const MDLOptions &options);
+	static std::shared_ptr<Graph> fromMOLFile(const std::string &file, const MDLOptions &options);
+	// rst: .. function:: static std::vector<std::shared_ptr<Graph>> fromMOLStringMulti(const std::string &data, const MDLOptions &options)
+	// rst:               static std::vector<std::shared_ptr<Graph>> fromMOLFileMulti(const std::string &file, const MDLOptions &options)
+	// rst:
+	// rst:		See :func:`fromMOLString` and :func:`fromMOLFile` for parameter and exception descriptions.
+	// rst:
+	// rst:		:returns: a list of graphs representing molecules, loaded from the given string or file with :ref:`MOL <graph-mdl>` data.
+	// rst:			The graphs are the connected components of the graph specified in the data.
+	static std::vector<std::shared_ptr<Graph>> fromMOLStringMulti(const std::string &data, const MDLOptions &options);
+	static std::vector<std::shared_ptr<Graph>> fromMOLFileMulti(const std::string &file, const MDLOptions &options);
+	// ===========================================================================
+	// rst: .. function:: static std::vector<std::shared_ptr<Graph>> fromSDString(const std::string &data, const MDLOptions &options)
+	// rst:               static std::vector<std::shared_ptr<Graph>> fromSDFile(const std::string &file, const MDLOptions &options)
+	// rst:
+	// rst:		:returns: a list of graphs graph created from the given :ref:`SD <graph-mdl>` data.
+	// rst:		:throws: :class:`InputError` on bad input.
+	static std::vector<std::shared_ptr<Graph>> fromSDString(const std::string &data, const MDLOptions &options);
+	static std::vector<std::shared_ptr<Graph>> fromSDFile(const std::string &file, const MDLOptions &options);
+	// rst: .. function:: static std::vector<std::vector<std::shared_ptr<Graph>>> fromSDStringMulti(const std::string &data, const MDLOptions &options)
+	// rst:               static std::vector<std::vector<std::shared_ptr<Graph>>> fromSDFileMulti(const std::string &file, const MDLOptions &options)
+	// rst:
+	// rst:		:returns: a list of lists of graphs graph created from the given :ref:`SD <graph-mdl>` data.
+	// rst:		:throws: :class:`InputError` on bad input.
+	static std::vector<std::vector<std::shared_ptr<Graph>>>
+	fromSDStringMulti(const std::string &data, const MDLOptions &options);
+	static std::vector<std::vector<std::shared_ptr<Graph>>>
+	fromSDFileMulti(const std::string &file, const MDLOptions &options);
+	// ===========================================================================
 	// rst: .. function:: static std::shared_ptr<Graph> create(std::unique_ptr<lib::Graph::Single> g)
 	// rst:               static std::shared_ptr<Graph> create(std::unique_ptr<lib::Graph::Single> g, \
 	// rst:                                                    std::map<int, std::size_t> externalToInternalIds, \

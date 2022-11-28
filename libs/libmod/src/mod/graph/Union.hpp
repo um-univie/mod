@@ -51,6 +51,8 @@ public:
 	// rst: .. function:: explicit Union(std::vector<std::shared_ptr<Graph>> graphs)
 	// rst:
 	// rst:		Construct a graph representing the disjoint union of `graphs`.
+	// rst:
+	// rst:		:throws LogicError: if a given graph is null.
 	explicit Union(std::vector<std::shared_ptr<Graph>> graphs);
 	Union(const Union &other);
 	Union &operator=(const Union &other);

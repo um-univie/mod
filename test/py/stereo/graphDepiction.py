@@ -10,7 +10,7 @@ def doPrint(a):
 	a.print(pg, pm)
 	
 
-postSection("All")
+post.summarySection("All")
 a = graphGMLString("""graph [
 	node [ id 0 label "C" stereo "[1, 2, 3, 4]!" ]
 	node [ id 1 label "O" ]
@@ -36,7 +36,7 @@ a = graphGMLString("""graph [
 ]""")
 doPrint(a)
 
-postSection("Lone Pair")
+post.summarySection("Lone Pair")
 a = graphGMLString("""graph [
 	node [ id 0 label "N" stereo "[1, 2, 3, e]!" ]
 	node [ id 1 label "O" ]
@@ -69,7 +69,7 @@ a = graphGMLString("""graph [
 ]""")
 doPrint(a)
 
-postSection("H")
+post.summarySection("H")
 a = graphGMLString("""graph [
 	node [ id 0 label "C" stereo "[1, 2, 3, 4]!" ]
 	node [ id 1 label "O" ]
@@ -109,7 +109,7 @@ a = graphGMLString("""graph [
 doPrint(a)
 
 
-postSection("All H")
+post.summarySection("All H")
 a = graphGMLString("""graph [
 	node [ id 0 label "C" stereo "[1, 2, 3, 4]!" ]
 	node [ id 1 label "H" ]

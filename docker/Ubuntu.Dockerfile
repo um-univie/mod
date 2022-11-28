@@ -23,11 +23,11 @@ RUN apt-get update -qq                                      \
  && pip3 install -r requirements_nodoc.txt                  \
  && DEBIAN_FRONTEND=noninteractive                          \
     apt install --no-install-recommends -y                  \
-    $(bindep -b | tr '\n' ' ')                              \
+    $(bindep -b testing | tr '\n' ' ')                      \
     librsvg2-dev libpango1.0-dev                            \
  && DEBIAN_FRONTEND=noninteractive                          \
     apt install --no-install-recommends -y                  \
-    vim                                                     \
+    vim less                                                \
  && apt-get clean                                           \
  && rm -rf /var/lib/apt/lists/*
 
@@ -47,7 +47,7 @@ RUN \
 # the folder can apparently not be called just 'boost', therefore 'boostDir'
 WORKDIR /opt/boostDir
 RUN wget                                                                   \
- https://boostorg.jfrog.io/artifactory/main/release/1.74.0/source/boost_1_74_0.tar.gz \
+ https://boostorg.jfrog.io/artifactory/main/release/1.76.0/source/boost_1_76_0.tar.gz \
  -O boost.tar.gz
 RUN \
  tar -xf boost.tar.gz --one-top-level=boostSrc --strip-components=1     \
@@ -61,6 +61,7 @@ RUN \
 
 
 WORKDIR /opt/mod/build
+ENV CXXFLAGS=-Werror
 RUN cmake ../ -DBUILD_DOC=no                                                   \
  -DCMAKE_BUILD_TYPE=Release                                                    \
  -DCMAKE_MODULE_LINKER_FLAGS="-flto=$j" -DCMAKE_SHARED_LINKER_FLAGS="-flto=$j" \

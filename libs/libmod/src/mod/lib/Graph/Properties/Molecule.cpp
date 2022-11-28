@@ -1,5 +1,6 @@
 #include "Molecule.hpp"
 
+#include <mod/Config.hpp>
 #include <mod/Error.hpp>
 #include <mod/lib/Chem/MoleculeUtil.hpp>
 #include <mod/lib/Chem/OBabel.hpp>
@@ -9,6 +10,7 @@
 #include <jla_boost/graph/PairToRangeAdaptor.hpp>
 
 #include <iostream>
+#include <numeric>
 
 namespace mod::lib::Graph {
 
@@ -47,7 +49,7 @@ bool PropMolecule::getIsMolecule() const {
 const lib::Chem::OBMolHandle &PropMolecule::getOBMol() const {
 	if(!isMolecule) {
 		std::cout << "MoleculeState: Trying to create OpenBabel::OBMol from non-molecule." << std::endl
-		          << "Should DepictionData be used instead?" << std::endl;
+					 << "Should DepictionData be used instead?" << std::endl;
 		MOD_ABORT;
 	}
 	if(!obMol) {
@@ -77,12 +79,11 @@ double PropMolecule::getExactMass() const {
 double PropMolecule::getEnergy() const {
 	if(!energy) {
 #ifndef MOD_HAVE_OPENBABEL
-		MOD_NO_OPENBABEL_ERROR
-		std::cout << "Energy calculation is not possible without Open Babel." << std::endl;
-		std::cout << "Energy values can be manually cached on graphs if calculation is not desired." << std::endl;
-		std::exit(1);
+		throw FatalError(MOD_NO_OPENBABEL_ERROR_STR
+		                 + "\nEnergy calculation is not possible without Open Babel.\n"
+		                 + "Energy values can be manually cached on graphs if calculation is not desired.");
 #else
-		energy = getOBMol().getEnergy();
+		energy = getOBMol().getEnergy(false);
 #endif
 	}
 	return *energy;

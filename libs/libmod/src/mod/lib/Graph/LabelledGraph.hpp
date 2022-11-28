@@ -21,6 +21,7 @@ public:
 	              std::unique_ptr<PropStereoType> pStereo);
 	LabelledGraph(const LabelledGraph &other);
 	~LabelledGraph();
+public: // LabelledGraphConcept
 	friend GraphType &get_graph(LabelledGraph &g);
 	friend const GraphType &get_graph(const LabelledGraph &g);
 	friend PropStringType &get_string(LabelledGraph &g);

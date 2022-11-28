@@ -1,7 +1,7 @@
 include("../graph/030_smiles/mass/loadGraphs.py")
 sys.exit(0)
 for a in inputGraphs:
-	postSection(a.name)
+	post.summarySection(a.name)
 	for v in a.vertices:
 		try:
 			v.printStereo()

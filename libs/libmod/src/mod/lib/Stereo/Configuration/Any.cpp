@@ -2,9 +2,7 @@
 
 #include <mod/Error.hpp>
 
-namespace mod {
-namespace lib {
-namespace Stereo {
+namespace mod::lib::Stereo {
 
 Any::Any(const GeometryGraph &g, const EmbeddingEdge *b, const EmbeddingEdge *e)
 : DynamicDegree(g.any, b, e) { }
@@ -35,6 +33,4 @@ std::pair<std::string, bool> Any::asPrettyStringImpl(std::function<std::size_t(c
 	return std::make_pair("\\modStereoShape{Any}", false);
 }
 
-} // namespace Stereo
-} // namespace lib
-} // namespace mod
+} // namespace mod::lib::Stereo

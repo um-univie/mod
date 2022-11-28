@@ -9,7 +9,7 @@ handleExp(ketoEnol_F * rcCommon() * aldolAdd_F)
 print("Implicit 2 -----------------------------------------------------------")
 handleExp(ketoEnol_F * rcCommon * aldolAdd_F)
 
-post("disableSummary")
+post.disableInvokeMake()
 
 rc = rcEvaluator(inputRules)
 resWithout = rc.eval(ketoEnol_F *rcCommon* ketoEnol_B)

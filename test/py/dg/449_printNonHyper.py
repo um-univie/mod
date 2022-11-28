@@ -1,5 +1,5 @@
 include("../xxx_helpers.py")
-post("enableSummary")
+post.enableInvokeMake()
 
 dg = DG()
 

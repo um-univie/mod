@@ -41,7 +41,6 @@ struct WrappedComponentGraph {
 	using PropTermType = typename Rule::PropTermType;
 	using PropStereoType = typename Rule::PropStereoType;
 public:
-
 	WrappedComponentGraph(const ComponentGraph &g, std::size_t i, const Rule &r)
 			: g(jla_boost::makeFilteredWrapper(g)), i(i), r(r) {}
 
@@ -69,7 +68,6 @@ public:
 	get_vertex_order(const WrappedComponentGraph<Rule> &g) {
 		return get_vertex_order_component(g.i, g.r);
 	}
-
 private:
 	GraphType g;
 	std::size_t i;
@@ -87,7 +85,6 @@ template<typename RuleSideDom, typename RuleSideCodom>
 struct RuleRuleComponentMonomorphism {
 	using Morphism = GM::VectorVertexMap<typename RuleSideDom::GraphType, typename RuleSideCodom::GraphType>;
 public:
-
 	RuleRuleComponentMonomorphism(const RuleSideDom &rsDom,
 	                              const RuleSideCodom &rsCodom,
 	                              bool enforceConstraints,

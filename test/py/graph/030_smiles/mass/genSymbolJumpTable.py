@@ -1,4 +1,4 @@
-post("disableSummary")
+post.disableInvokeMake()
 data = list()
 data.append((1, "H", "Hydrogen"))
 data.append((2, "He", "Helium"))

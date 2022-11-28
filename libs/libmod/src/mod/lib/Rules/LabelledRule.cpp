@@ -11,83 +11,133 @@
 
 namespace mod::lib::Rules {
 
+LabelledRule::LabelledRule(std::unique_ptr<lib::DPO::CombinedRule> rule,
+                           std::unique_ptr<PropStringType> pString,
+                           std::unique_ptr<PropStereoType> pStereo)
+		: rule(std::move(rule)), pString(std::move(pString)), pStereo(std::move(pStereo)) {
+	initComponents();
+}
+
+LabelledRule::LabelledRule(std::unique_ptr<lib::DPO::CombinedRule> rule,
+                           std::unique_ptr<PropTermType> pTerm,
+                           std::unique_ptr<PropStereoType> pStereo)
+		: rule(std::move(rule)), pTerm(std::move(pTerm)), pStereo(std::move(pStereo)) {
+	initComponents();
+}
+
 // LabelledRule
 //------------------------------------------------------------------------------
 
-LabelledRule::LabelledRule() : g(new GraphType()) {}
+LabelledRule::LabelledRule() : rule(new lib::DPO::CombinedRule()) {}
 
 LabelledRule::LabelledRule(const LabelledRule &other, bool withConstraints) : LabelledRule() {
-	auto &g = *this->g;
-	const auto &gOther = get_graph(other);
-	this->pString = std::make_unique<PropStringType>(g);
+	const auto &cg = rule->getCombinedGraph();
+	this->pString = std::make_unique<PropStringType>(getRule());
 	auto &pString = *this->pString;
-	auto &pStringOther = get_string(other);
-	for(const auto vOther : asRange(vertices(gOther))) {
-		const auto v = add_vertex(g);
-		g[v].membership = membership(other, vOther);
-		switch(g[v].membership) {
-		case Membership::Left:
-			pString.add(v, pStringOther.getLeft()[vOther], "");
-			break;
-		case Membership::Right:
-			pString.add(v, "", pStringOther.getRight()[vOther]);
-			break;
-		case Membership::Context:
-			pString.add(v, pStringOther.getLeft()[vOther], pStringOther.getRight()[vOther]);
+	const auto &ruleOther = other.getRule();
+	const auto &cgOther = ruleOther.getCombinedGraph();
+	const auto &pStringOther = get_string(other);
+	std::vector<lib::DPO::CombinedRule::CombinedVertex> vNewFromOther(num_vertices(cgOther));
+	for(const auto vcgOther: asRange(vertices(cgOther))) {
+		switch(cgOther[vcgOther].membership) {
+		case Membership::L: {
+			const auto vL = addVertexL(*rule);
+			pString.addL(vL, pStringOther.getLeft()[get_inverse(ruleOther.getLtoCG(), getL(ruleOther),
+			                                                    cgOther, vcgOther)]);
+			vNewFromOther[get(boost::vertex_index_t(), cgOther, vcgOther)]
+					= get(rule->getLtoCG(), getL(*rule), cg, vL);
 			break;
 		}
+		case Membership::R: {
+			const auto vR = addVertexR(*rule);
+			pString.addR(vR, pStringOther.getRight()[get_inverse(ruleOther.getRtoCG(), getR(ruleOther),
+			                                                     cgOther, vcgOther)]);
+			vNewFromOther[get(boost::vertex_index_t(), cgOther, vcgOther)]
+					= get(rule->getRtoCG(), getL(*rule), cg, vR);
+			break;
+		}
+		case Membership::K: {
+			const auto vK = addVertexK(*rule);
+			pString.addK(vK,
+			             pStringOther.getLeft()[get_inverse(ruleOther.getLtoCG(), getL(ruleOther),
+			                                                cgOther, vcgOther)],
+			             pStringOther.getRight()[get_inverse(ruleOther.getRtoCG(), getR(ruleOther),
+			                                                 cgOther, vcgOther)]);
+			vNewFromOther[get(boost::vertex_index_t(), cgOther, vcgOther)] = vK;
+			break;
+		}
+		}
 	}
-	for(const auto eOther : asRange(edges(gOther))) {
-		const auto e = add_edge(source(eOther, gOther), target(eOther, gOther), g).first;
-		g[e].membership = membership(other, eOther);
-		switch(g[e].membership) {
-		case Membership::Left:
-			pString.add(e, pStringOther.getLeft()[eOther], "");
+	for(const auto ecgOther: asRange(edges(cgOther))) {
+		const auto vcgNewSrc = vNewFromOther[get(boost::vertex_index_t(), cgOther, source(ecgOther, cgOther))];
+		const auto vcgNewTar = vNewFromOther[get(boost::vertex_index_t(), cgOther, target(ecgOther, cgOther))];
+		switch(cgOther[ecgOther].membership) {
+		case Membership::L: {
+			const auto vLSrc = get_inverse(rule->getLtoCG(), getL(*rule), cg, vcgNewSrc);
+			const auto vLTar = get_inverse(rule->getLtoCG(), getL(*rule), cg, vcgNewTar);
+			const auto eL = addEdgeL(*rule, vLSrc, vLTar);
+			pString.addL(eL, pStringOther.getLeft()[get_inverse(ruleOther.getLtoCG(), getL(ruleOther),
+			                                                    cgOther, ecgOther)]);
 			break;
-		case Membership::Right:
-			pString.add(e, "", pStringOther.getRight()[eOther]);
+		}
+		case Membership::R: {
+			const auto vRSrc = get_inverse(rule->getRtoCG(), getR(*rule), cg, vcgNewSrc);
+			const auto vRTar = get_inverse(rule->getRtoCG(), getR(*rule), cg, vcgNewTar);
+			const auto eR = addEdgeR(*rule, vRSrc, vRTar);
+			pString.addR(eR, pStringOther.getRight()[get_inverse(ruleOther.getRtoCG(), getR(ruleOther),
+			                                                     cgOther, ecgOther)]);
 			break;
-		case Membership::Context:
-			pString.add(e, pStringOther.getLeft()[eOther], pStringOther.getRight()[eOther]);
+		}
+		case Membership::K: {
+			const auto eK = addEdgeK(*rule, vcgNewSrc, vcgNewTar);
+			pString.addK(eK,
+			             pStringOther.getLeft()[get_inverse(ruleOther.getLtoCG(), getL(ruleOther),
+			                                                cgOther, ecgOther)],
+			             pStringOther.getRight()[get_inverse(ruleOther.getRtoCG(), getR(ruleOther),
+			                                                 cgOther, ecgOther)]);
 			break;
+		}
 		}
 	}
 	if(other.pStereo) {
 		const auto &lgLeft = get_labelled_left(other);
 		const auto &lgRight = get_labelled_right(other);
-		const auto infLeft = Stereo::makeCloner(lgLeft, get_left(*this), jla_boost::Identity(), jla_boost::Identity());
-		const auto infRight = Stereo::makeCloner(lgRight, get_right(*this), jla_boost::Identity(), jla_boost::Identity());
+		const auto infLeft = Stereo::makeCloner(lgLeft, get_L_projected(*this), jla_boost::Identity(),
+		                                        jla_boost::Identity());
+		const auto infRight = Stereo::makeCloner(lgRight, get_R_projected(*this), jla_boost::Identity(),
+		                                         jla_boost::Identity());
 		const auto inContext = [&](const auto &ve) {
 			return get_stereo(other).inContext(ve);
 		};
-		this->pStereo.reset(new PropStereoCore(g, infLeft, infRight, inContext, inContext));
+		this->pStereo.reset(new PropStereo(getRule(), infLeft, infRight, inContext, inContext));
 	}
 	if(withConstraints) {
-		leftMatchConstraints.reserve(other.leftMatchConstraints.size());
-		rightMatchConstraints.reserve(other.rightMatchConstraints.size());
-		for(auto &&c : other.leftMatchConstraints)
-			leftMatchConstraints.push_back(c->clone());
-		for(auto &&c : other.rightMatchConstraints)
-			rightMatchConstraints.push_back(c->clone());
+		leftData.matchConstraints.reserve(other.leftData.matchConstraints.size());
+		rightData.matchConstraints.reserve(other.rightData.matchConstraints.size());
+		for(auto &&c: other.leftData.matchConstraints)
+			leftData.matchConstraints.push_back(c->clone());
+		for(auto &&c: other.rightData.matchConstraints)
+			rightData.matchConstraints.push_back(c->clone());
 	}
 }
 
+lib::DPO::CombinedRule &LabelledRule::getRule() { return *rule; }
+const lib::DPO::CombinedRule &LabelledRule::getRule() const { return *rule; }
+
 void LabelledRule::initComponents() { // TODO: structure this better
-	if(numLeftComponents != std::numeric_limits<std::size_t>::max()) MOD_ABORT;
-	leftComponents.resize(num_vertices(get_graph(*this)), -1);
-	rightComponents.resize(num_vertices(get_graph(*this)), -1);
-	numLeftComponents = boost::connected_components(get_graph(get_labelled_left(*this)), leftComponents.data());
-	numRightComponents = boost::connected_components(get_graph(get_labelled_right(*this)), rightComponents.data());
+	if(leftData.numComponents != -1) MOD_ABORT;
+	leftData.component.resize(num_vertices(get_graph(*this)), -1);
+	rightData.component.resize(num_vertices(get_graph(*this)), -1);
+	leftData.numComponents = boost::connected_components(get_graph(get_labelled_left(*this)),
+	                                                     leftData.component.data());
+	rightData.numComponents = boost::connected_components(get_graph(get_labelled_right(*this)),
+	                                                      rightData.component.data());
 }
 
 void LabelledRule::invert() {
-	// invert the underlying graph
-	// and not the actual inversion
-	auto &g = *this->g;
-	for(const auto v : asRange(vertices(g)))
-		g[v].membership = jla_boost::GraphDPO::invert(g[v].membership);
-	for(const auto e : asRange(edges(g)))
-		g[e].membership = jla_boost::GraphDPO::invert(g[e].membership);
+	// invert the underlying rule
+	using lib::DPO::invert;
+	invert(*rule);
 	// invert props
 	if(pString) pString->invert();
 	if(pTerm) pTerm->invert();
@@ -98,23 +148,25 @@ void LabelledRule::invert() {
 	}
 	// also invert the component stuff
 	using std::swap;
-	swap(this->numLeftComponents, this->numRightComponents);
-	swap(this->leftComponents, this->rightComponents);
-	swap(this->leftMatchConstraints, this->rightMatchConstraints);
-	// clear cached stuff
-	this->projs.reset();
+	swap(leftData, rightData);
 }
 
 GraphType &get_graph(LabelledRule &r) {
-	return *r.g;
+	return r.rule->getCombinedGraph();
 }
 
 const GraphType &get_graph(const LabelledRule &r) {
-	return *r.g;
+	return r.rule->getCombinedGraph();
 }
 
 const LabelledRule::PropStringType &get_string(const LabelledRule &r) {
 	assert(r.pString || r.pTerm);
+	if(!r.pString) {
+		r.pString.reset(new LabelledRule::PropStringType(
+				r.getRule(), r.leftData.matchConstraints, r.rightData.matchConstraints,
+				get_term(r), lib::Term::getStrings()
+		));
+	}
 	return *r.pString;
 }
 
@@ -122,7 +174,7 @@ const LabelledRule::PropTermType &get_term(const LabelledRule &r) {
 	assert(r.pString || r.pTerm);
 	if(!r.pTerm) {
 		r.pTerm.reset(new LabelledRule::PropTermType(
-				get_graph(r), r.leftMatchConstraints, r.rightMatchConstraints,
+				r.getRule(), r.leftData.matchConstraints, r.rightData.matchConstraints,
 				get_string(r), lib::Term::getStrings()
 		));
 	}
@@ -139,8 +191,8 @@ const LabelledRule::PropStereoType &get_stereo(const LabelledRule &r) {
 		auto gRight = get_labelled_right(r);
 		auto pMoleculeLeft = get_molecule(gLeft);
 		auto pMoleculeRight = get_molecule(gRight);
-		auto leftInference = lib::Stereo::makeInference(get_graph(gLeft), pMoleculeLeft, true);
-		auto rightInference = lib::Stereo::makeInference(get_graph(gRight), pMoleculeRight, true);
+		auto leftInference = lib::Stereo::Inference(get_graph(gLeft), pMoleculeLeft, true);
+		auto rightInference = lib::Stereo::Inference(get_graph(gRight), pMoleculeRight, true);
 
 		{
 			lib::IO::Warnings warnings;
@@ -161,187 +213,123 @@ const LabelledRule::PropStereoType &get_stereo(const LabelledRule &r) {
 			res.throwIfError<StereoDeductionError>();
 		}
 
-		r.pStereo.reset(new PropStereoCore(get_graph(r),
-		                                   std::move(leftInference), std::move(rightInference), jla_boost::AlwaysTrue(),
-		                                   jla_boost::AlwaysTrue()));
+		r.pStereo.reset(new PropStereo(r.getRule(),
+		                               std::move(leftInference), std::move(rightInference), jla_boost::AlwaysTrue(),
+		                               jla_boost::AlwaysTrue()));
 	}
 	return *r.pStereo;
 }
 
 const LabelledRule::PropMoleculeType &get_molecule(const LabelledRule &r) {
 	if(!r.pMolecule) {
-		r.pMolecule.reset(new LabelledRule::PropMoleculeType(get_graph(r), get_string(r)));
+		r.pMolecule.reset(new LabelledRule::PropMoleculeType(r.getRule(), get_string(r)));
 	}
 	return *r.pMolecule;
 }
 
-const LabelledRule::LeftGraphType &get_left(const LabelledRule &r) {
-	if(!r.projs) r.projs.reset(new LabelledRule::Projections(r));
-	return r.projs->left;
+const LabelledRule::SideProjectedGraphType &get_L_projected(const LabelledRule &r) {
+	return r.rule->getLProjected();
 }
 
-const LabelledRule::ContextGraphType &get_context(const LabelledRule &r) {
-	if(!r.projs) r.projs.reset(new LabelledRule::Projections(r));
-	return r.projs->context;
+const LabelledRule::SideProjectedGraphType &get_R_projected(const LabelledRule &r) {
+	return r.rule->getRProjected();
 }
 
-const LabelledRule::RightGraphType &get_right(const LabelledRule &r) {
-	if(!r.projs) r.projs.reset(new LabelledRule::Projections(r));
-	return r.projs->right;
-}
-
-jla_boost::GraphDPO::Membership membership(const LabelledRule &r, const Vertex &v) {
+lib::DPO::Membership membership(const LabelledRule &r, const Vertex &v) {
 	return get_graph(r)[v].membership;
 }
 
-jla_boost::GraphDPO::Membership membership(const LabelledRule &r, const Edge &e) {
+lib::DPO::Membership membership(const LabelledRule &r, const Edge &e) {
 	return get_graph(r)[e].membership;
 }
 
-void put_membership(LabelledRule &r, const Vertex &v, jla_boost::GraphDPO::Membership m) {
+void put_membership(LabelledRule &r, const Vertex &v, lib::DPO::Membership m) {
 	get_graph(r)[v].membership = m;
 }
 
-void put_membership(LabelledRule &r, const Edge &e, jla_boost::GraphDPO::Membership m) {
+void put_membership(LabelledRule &r, const Edge &e, lib::DPO::Membership m) {
 	get_graph(r)[e].membership = m;
 }
 
-LabelledRule::LabelledLeftType get_labelled_left(const LabelledRule &r) {
-	return LabelledRule::LabelledLeftType(r);
+LabelledRule::Side get_labelled_left(const LabelledRule &r) {
+	return LabelledRule::Side(r, getL(r.getRule()),
+	                          &PropString::getLeft, &PropTerm::getLeft,
+	                          &PropStereo::getLeft, &PropMolecule::getLeft,
+	                          r.leftData);
 }
 
-LabelledRule::LabelledRightType get_labelled_right(const LabelledRule &r) {
-	return LabelledRule::LabelledRightType(r);
+LabelledRule::Side get_labelled_right(const LabelledRule &r) {
+	return LabelledRule::Side(r, getR(r.getRule()),
+	                          &PropString::getRight, &PropTerm::getRight,
+	                          &PropStereo::getRight, &PropMolecule::getRight,
+	                          r.rightData);
 }
 
-LabelledRule::Projections::Projections(const LabelledRule &r)
-		: left(get_graph(r), Membership::Left),
-		  context(get_graph(r), Membership::Context),
-		  right(get_graph(r), Membership::Right) {}
-
-
-// LabelledSideGraph
-//------------------------------------------------------------------------------
-
-namespace detail {
-
-LabelledSideGraph::LabelledSideGraph(const LabelledRule &r, jla_boost::GraphDPO::Membership m)
-		: r(r), m(m) {}
-
-} // namespace detail
 
 // LabelledLeftGraph
 //------------------------------------------------------------------------------
 
-LabelledLeftGraph::LabelledLeftGraph(const LabelledRule &r)
-		: Base(r, jla_boost::GraphDPO::Membership::Left) {}
+LabelledRule::Side::Side(const LabelledRule &r, const GraphType &g,
+                         PropStringType (LabelledRule::PropStringType::*fString)() const,
+                         PropTermType (LabelledRule::PropTermType::*fTerm)() const,
+                         PropStereoType (LabelledRule::PropStereoType::*fStereo)() const,
+                         PropMoleculeType (LabelledRule::PropMoleculeType::*fMol)() const,
+                         const SideData &data)
+		: r(r), g(g), fString(fString), fTerm(fTerm), fStereo(fStereo), fMol(fMol), data(data) {}
 
-const LabelledLeftGraph::GraphType &get_graph(const LabelledLeftGraph &g) {
-	return get_left(g.r);
+const LabelledRule::Side::GraphType &get_graph(const LabelledRule::Side &g) {
+	return g.g;
 }
 
-LabelledLeftGraph::PropStringType get_string(const LabelledLeftGraph &g) {
-	return get_string(g.r).getLeft();
+LabelledRule::Side::PropStringType get_string(const LabelledRule::Side &g) {
+	return (get_string(g.r).*g.fString)();
 }
 
-LabelledLeftGraph::PropTermType get_term(const LabelledLeftGraph &g) {
-	return get_term(g.r).getLeft();
+LabelledRule::Side::PropTermType get_term(const LabelledRule::Side &g) {
+	return (get_term(g.r).*g.fTerm)();
 }
 
-bool has_stereo(const LabelledLeftGraph &g) {
+bool has_stereo(const LabelledRule::Side &g) {
 	return has_stereo(g.r);
 }
 
-LabelledLeftGraph::PropStereoType get_stereo(const LabelledLeftGraph &g) {
-	return get_stereo(g.r).getLeft();
+LabelledRule::Side::PropStereoType get_stereo(const LabelledRule::Side &g) {
+	return (get_stereo(g.r).*g.fStereo)();
 }
 
-const std::vector<std::unique_ptr<LabelledRule::LeftMatchConstraint> > &
-get_match_constraints(const LabelledLeftGraph &g) {
-	return g.r.leftMatchConstraints;
+LabelledRule::Side::PropMoleculeType get_molecule(const LabelledRule::Side &g) {
+	return (get_molecule(g.r).*g.fMol)();
 }
 
-std::size_t get_num_connected_components(const LabelledLeftGraph &g) {
-	return g.r.numLeftComponents;
+const std::vector<std::unique_ptr<LabelledRule::MatchConstraint>> &
+get_match_constraints(const LabelledRule::Side &g) {
+	return g.data.matchConstraints;
 }
 
-LabelledLeftGraph::PropMoleculeType get_molecule(const LabelledLeftGraph &g) {
-	return get_molecule(g.r).getLeft();
+std::size_t get_num_connected_components(const LabelledRule::Side &g) {
+	return g.data.numComponents;
 }
 
-LabelledLeftGraph::Base::ComponentGraph
-get_component_graph(std::size_t i, const LabelledLeftGraph &g) {
+const std::vector<std::size_t> get_component(const LabelledRule::Side &g) {
+	return g.data.component;
+}
+
+LabelledRule::Side::ComponentGraph
+get_component_graph(std::size_t i, const LabelledRule::Side &g) {
 	assert(i < get_num_connected_components(g));
-	LabelledLeftGraph::Base::ComponentFilter filter(&get_graph(g), &g.r.leftComponents, i);
-	return LabelledLeftGraph::Base::ComponentGraph(get_graph(g), filter, filter);
+	LabelledRule::Side::ComponentFilter filter(&get_graph(g), &g.data.component, i);
+	return LabelledRule::Side::ComponentGraph(get_graph(g), filter, filter);
 }
 
 const std::vector<boost::graph_traits<GraphType>::vertex_descriptor> &
-get_vertex_order_component(std::size_t i, const LabelledLeftGraph &g) {
+get_vertex_order_component(std::size_t i, const LabelledRule::Side &g) {
 	assert(i < get_num_connected_components(g));
+	auto &vertex_orders = g.data.vertex_orders;
 	// the number of connected components is initialized externally after construction, so we have this annoying hax
-	if(g.vertex_orders.empty()) g.vertex_orders.resize(get_num_connected_components(g));
-	if(g.vertex_orders[i].empty()) {
-		g.vertex_orders[i] = get_vertex_order(lib::GraphMorphism::DefaultFinderArgsProvider(), get_component_graph(i, g));
-	}
-	return g.vertex_orders[i];
-}
-
-// LabelledRightGraph
-//------------------------------------------------------------------------------
-
-LabelledRightGraph::LabelledRightGraph(const LabelledRule &r)
-		: Base(r, jla_boost::GraphDPO::Membership::Right) {}
-
-const LabelledRightGraph::GraphType &get_graph(const LabelledRightGraph &g) {
-	return get_right(g.r);
-}
-
-LabelledRightGraph::PropStringType get_string(const LabelledRightGraph &g) {
-	return get_string(g.r).getRight();
-}
-
-LabelledRightGraph::PropTermType get_term(const LabelledRightGraph &g) {
-	return get_term(g.r).getRight();
-}
-
-bool has_stereo(const LabelledRightGraph &g) {
-	return has_stereo(g.r);
-}
-
-LabelledRightGraph::PropStereoType get_stereo(const LabelledRightGraph &g) {
-	return get_stereo(g.r).getRight();
-}
-
-const std::vector<std::unique_ptr<LabelledRule::RightMatchConstraint> > &
-get_match_constraints(const LabelledRightGraph &g) {
-	return g.r.rightMatchConstraints;
-}
-
-std::size_t get_num_connected_components(const LabelledRightGraph &g) {
-	return g.r.numRightComponents;
-}
-
-LabelledRightGraph::Base::ComponentGraph
-get_component_graph(std::size_t i, const LabelledRightGraph &g) {
-	assert(i < get_num_connected_components(g));
-	LabelledRightGraph::Base::ComponentFilter filter(&get_graph(g), &g.r.rightComponents, i);
-	return LabelledRightGraph::Base::ComponentGraph(get_graph(g), filter, filter);
-}
-
-LabelledRightGraph::PropMoleculeType get_molecule(const LabelledRightGraph &g) {
-	return get_molecule(g.r).getRight();
-}
-
-const std::vector<boost::graph_traits<GraphType>::vertex_descriptor> &
-get_vertex_order_component(std::size_t i, const LabelledRightGraph &g) {
-	assert(i < get_num_connected_components(g));
-	// the number of connected components is initialized externally after construction, so we have this annoying hax
-	if(g.vertex_orders.empty()) g.vertex_orders.resize(get_num_connected_components(g));
-	if(g.vertex_orders[i].empty()) {
-		g.vertex_orders[i] = get_vertex_order(lib::GraphMorphism::DefaultFinderArgsProvider(), get_component_graph(i, g));
-	}
-	return g.vertex_orders[i];
+	if(vertex_orders.empty()) vertex_orders.resize(get_num_connected_components(g));
+	if(vertex_orders[i].empty())
+		vertex_orders[i] = get_vertex_order(lib::GraphMorphism::DefaultFinderArgsProvider(), get_component_graph(i, g));
+	return vertex_orders[i];
 }
 
 } // namespace mod::lib::Rules

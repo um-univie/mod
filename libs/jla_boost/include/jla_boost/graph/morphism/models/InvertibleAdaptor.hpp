@@ -4,7 +4,7 @@
 // This is just some convenience that wraps a map and its inverse,
 // and exposes them as an invertible vertex map.
 
-#include <jla_boost/graph/morphism/VertexMap.hpp>
+#include <jla_boost/graph/morphism/Concepts.hpp>
 
 namespace jla_boost {
 namespace GraphMorphism {

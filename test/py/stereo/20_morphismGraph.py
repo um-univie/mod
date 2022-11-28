@@ -35,10 +35,10 @@ for n1, g1 in sorted(graphs1.items()):
 	for n2, g2 in sorted(graphs2.items()):
 		def check(res):
 			if not res:
-				postChapter("Error: %s, %s" % (n1, n2))
-				postSection("Stereo, %s" % n1)
+				post.summaryChapter("Error: %s, %s" % (n1, n2))
+				post.summarySection("Stereo, %s" % n1)
 				printStereo(g1)
-				postSection("Stereo, %s" % n2)
+				post.summarySection("Stereo, %s" % n2)
 				printStereo(g2)
 				assert False
 		if n1 == n2:
@@ -74,7 +74,7 @@ for n1, g1 in sorted(graphs1.items()):
 		if n1 == n2:
 			def check(res):
 				if not res:
-					postChapter("Error")
+					post.summaryChapter("Error")
 					printStereo(g1)
 					printStereo(g2)
 					assert False
@@ -86,7 +86,7 @@ for n1, g1 in sorted(graphs1.items()):
 			def check(res, n1, n2):
 				isOk = (n1, n2) in ok
 				if isOk != res:
-					postChapter("Error: %d" % res)
+					post.summaryChapter("Error: %d" % res)
 					print(n1, "vs.", n2)
 					print("isOk:", isOk)
 					print("res:", res)
@@ -112,7 +112,7 @@ tb1 = graphs1["t_b"] = gGML('node [ id 0 label "Q" stereo "tetrahedral[1, 2, 4, 
 tb2 = graphs2["t_b"] = gGML('node [ id 0 label "Q" stereo "tetrahedral[1, 2, 4, 3]!" ]' + gmlNodeIdx(1) + gmlNodeIdx(2) + gmlNodeIdx(3) + gmlNodeIdx(4))
 
 print("\tIsomorphism")
-postChapter("Tetrahedral Isomorphism")
+post.summaryChapter("Tetrahedral Isomorphism")
 assert tf1.isomorphism(tf2, labelSettings=isoLabelSettings) > 0
 assert tf1.isomorphism(ta2, labelSettings=isoLabelSettings) == 0
 assert tf1.isomorphism(tb2, labelSettings=isoLabelSettings) == 0
@@ -124,7 +124,7 @@ assert tb1.isomorphism(ta2, labelSettings=isoLabelSettings) == 0
 assert tb1.isomorphism(tb2, labelSettings=isoLabelSettings) > 0
 
 print("\tSpecialisation")
-postChapter("Tetrahedral Specialisation")
+post.summaryChapter("Tetrahedral Specialisation")
 assert tf1.isomorphism(tf2, labelSettings=specLabelSettings) > 0
 assert tf1.isomorphism(ta2, labelSettings=specLabelSettings) > 0
 assert tf1.isomorphism(tb2, labelSettings=specLabelSettings) > 0

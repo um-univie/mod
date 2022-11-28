@@ -2,9 +2,7 @@
 
 #include <mod/Error.hpp>
 
-namespace mod {
-namespace lib {
-namespace Stereo {
+namespace mod::lib::Stereo {
 
 // Fixation
 //------------------------------------------------------------------------------
@@ -133,6 +131,4 @@ DynamicDegree::DynamicDegree(GeometryGraph::Vertex vGeometry, const EmbeddingEdg
 	std::copy(b, e, std::back_inserter(edges));
 }
 
-} // namespace Stereo
-} // namespace lib
-} // namespace mod
+} // namespace mod::lib::Stereo

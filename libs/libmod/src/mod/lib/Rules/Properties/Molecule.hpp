@@ -1,5 +1,5 @@
-#ifndef MOD_LIB_RULES_PROP_MOLECULE_H
-#define   MOD_LIB_RULES_PROP_MOLECULE_H
+#ifndef MOD_LIB_RULES_PROP_MOLECULE_HPP
+#define MOD_LIB_RULES_PROP_MOLECULE_HPP
 
 #include <mod/lib/Chem/MoleculeUtil.hpp>
 #include <mod/lib/Rules/GraphDecl.hpp>
@@ -8,27 +8,25 @@
 namespace mod {
 struct AtomData;
 enum class BondType;
-namespace lib {
-namespace Rules {
-struct PropStringCore;
+} // namespace mod
+namespace mod::lib::Rules {
+struct PropString;
 
-class PropMoleculeCore : private PropCore<PropMoleculeCore, GraphType, AtomData, BondType> {
-	// read-only of data
-	using Base = PropCore<PropMoleculeCore, GraphType, AtomData, BondType>;
+struct PropMolecule : private PropBase<PropMolecule, AtomData, BondType> {
+	// read-only of data, so do 'using' of things needed
+	using Base = PropBase<PropMolecule, AtomData, BondType>;
+	using Base::Side;
 public:
-	using Base::LeftType;
-	using Base::RightType;
+	PropMolecule(const RuleType &rule, const PropString &pString);
+public: // to be able to form pointers to getLeft and getRight it is not enough to 'using' them
+	Side getLeft() const { return {*this, vPropL, ePropL, getL(rule)}; }
+	Side getRight() const { return {*this, vPropR, ePropR, getR(rule)}; }
 public:
-	PropMoleculeCore(const GraphType &g, const PropStringCore &labelState);
 	using Base::invert;
-	using Base::getLeft;
-	using Base::getRight;
 private:
 	bool isReaction;
 };
 
-} // namespace Rules
-} // namespace lib
-} // namespace mod
+} // namespace mod::lib::Rules
 
-#endif /* MOD_LIB_RULES_STATE_MOLECULE_H */
+#endif // MOD_LIB_RULES_STATE_MOLECULE_HPP

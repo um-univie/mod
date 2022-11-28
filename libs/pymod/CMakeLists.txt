@@ -16,7 +16,7 @@ target_include_directories(pymod
         PUBLIC
         $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src>)
-target_link_libraries(pymod PUBLIC mod::libmod Boost::${PYTHON_TARGET} Python3::Python)
+target_link_libraries(pymod PUBLIC mod::pymodutils)
 target_link_libraries(pymod PRIVATE
         $<$<CXX_COMPILER_ID:GNU>:-Wl,--no-undefined>
         $<$<CXX_COMPILER_ID:Clang>:-Wl,--no-undefined>
@@ -25,8 +25,7 @@ target_link_libraries(pymod PRIVATE
 set_target_properties(pymod PROPERTIES INSTALL_RPATH "${CMAKE_INSTALL_FULL_LIBDIR}")
 target_compile_options(pymod PRIVATE -Wall -Wextra -pedantic
         -Wno-unused-parameter
-        -Wno-comment
-        -Wno-unused-local-typedefs)
+        -Wno-comment)
 set_target_properties(pymod PROPERTIES
         CXX_VISIBILITY_PRESET hidden
         VISIBILITY_INLINES_HIDDEN ON)
@@ -63,6 +62,19 @@ install(DIRECTORY lib/mod
         COMPONENT pymod_run
         FILES_MATCHING PATTERN "*.py" PATTERN "*.pyi")
 
+# redirector
+# -------------------------------------------------------------------------
+
+set(exportDir ${CMAKE_CURRENT_BINARY_DIR}/redirector)
+file(MAKE_DIRECTORY ${exportDir}/mod)
+# TODO: should be file(COPY_FILE redirector/pyproject.toml ${exportDir}/pyproject.toml) when CMake 3.21 is required
+configure_file(redirector/pyproject.toml ${exportDir}/pyproject.toml @ONLY)
+configure_file(redirector/setup.cfg.in ${exportDir}/setup.cfg @ONLY)
+configure_file(redirector/mod/__init__.py.in ${exportDir}/mod/__init__.py @ONLY)
+if(${BUILD_PY_MOD_PIP})
+    install(CODE "execute_process(COMMAND ${Python3_EXECUTABLE} -m pip install . WORKING_DIRECTORY ${exportDir})"
+            COMPONENT pymod_run)
+endif()
 
 # mod
 # -------------------------------------------------------------------------

@@ -13,12 +13,9 @@ __pycache__
 /test/py/**/out/
 /test/py/**/summary/
 /test/py/**/.gdb_history
-/test/py/graph/myGraph.gml
+/test/py/graph/myGraph*
 /test/py/rule/myRule.gml
 
-/doc/source/index.rst
-/doc/source/references.rst
-/doc/source/toc.rst
 /doc/source/libmod/[A-Z]*.rst
 /doc/source/pymod/[A-Z]*.rst
 /doc/source/libmod/[^/]*/

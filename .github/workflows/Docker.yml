@@ -2,7 +2,7 @@ name: Docker
 on: [push, pull_request]
 jobs:
   Ubuntu:
-    runs-on: ubuntu-18.04
+    runs-on: ubuntu-22.04
     steps:
     - name: Checkout
       uses: actions/checkout@v2
@@ -19,9 +19,9 @@ jobs:
       run: sudo apt install -y $(bindep -b | tr '\n' ' ')
     - name: Install Boost
       run: |
-        wget https://boostorg.jfrog.io/artifactory/main/release/1.74.0/source/boost_1_74_0.tar.gz
-        tar -xf boost_1_74_0.tar.gz
-        cd boost_1_74_0
+        wget https://boostorg.jfrog.io/artifactory/main/release/1.80.0/source/boost_1_80_0.tar.gz
+        tar -xf boost_1_80_0.tar.gz
+        cd boost_1_80_0
         ./bootstrap.sh --with-python=python3 --prefix=/opt/boost
         ./b2 -j 2 --with-python --with-graph --with-iostreams install
     - name: Bootstrap
@@ -36,7 +36,7 @@ jobs:
     - name: Build
       run: docker build -t jakobandersen/mod:ubuntu-test -f docker/Ubuntu.Dockerfile --build-arg j=2 .
   Fedora:
-    runs-on: ubuntu-18.04
+    runs-on: ubuntu-22.04
     steps:
     - name: Checkout
       uses: actions/checkout@v2
@@ -53,9 +53,9 @@ jobs:
       run: sudo apt install -y $(bindep -b | tr '\n' ' ')
     - name: Install Boost
       run: |
-        wget https://boostorg.jfrog.io/artifactory/main/release/1.74.0/source/boost_1_74_0.tar.gz
-        tar -xf boost_1_74_0.tar.gz
-        cd boost_1_74_0
+        wget https://boostorg.jfrog.io/artifactory/main/release/1.80.0/source/boost_1_80_0.tar.gz
+        tar -xf boost_1_80_0.tar.gz
+        cd boost_1_80_0
         ./bootstrap.sh --with-python=python3 --prefix=/opt/boost
         ./b2 -j 2 --with-python --with-graph --with-iostreams install
     - name: Bootstrap
@@ -70,7 +70,7 @@ jobs:
     - name: Build
       run: docker build -t jakobandersen/mod:fedora-test -f docker/Fedora.Dockerfile --build-arg j=2 .
   Arch:
-    runs-on: ubuntu-18.04
+    runs-on: ubuntu-22.04
     steps:
     - name: Checkout
       uses: actions/checkout@v2
@@ -87,9 +87,9 @@ jobs:
       run: sudo apt install -y $(bindep -b | tr '\n' ' ')
     - name: Install Boost
       run: |
-        wget https://boostorg.jfrog.io/artifactory/main/release/1.74.0/source/boost_1_74_0.tar.gz
-        tar -xf boost_1_74_0.tar.gz
-        cd boost_1_74_0
+        wget https://boostorg.jfrog.io/artifactory/main/release/1.80.0/source/boost_1_80_0.tar.gz
+        tar -xf boost_1_80_0.tar.gz
+        cd boost_1_80_0
         ./bootstrap.sh --with-python=python3 --prefix=/opt/boost
         ./b2 -j 2 --with-python --with-graph --with-iostreams install
     - name: Bootstrap

@@ -58,7 +58,7 @@ if(BUILD_PY_MOD)
                 COMMAND ${CMAKE_INSTALL_FULL_BINDIR}/mod -f ${CMAKE_CURRENT_LIST_DIR}/${fileName}.py
                 WORKING_DIRECTORY ${workDir})
         set_tests_properties(${testName} PROPERTIES
-                ENVIRONMENT "MOD_NUM_POST_THREADS=1;MOD_NO_DEPRECATED=1")
+                ENVIRONMENT "MOD_NUM_POST_THREADS=1;PYTHONWARNINGS=error;MOD_NO_DEPRECATED=1")
         add_coverage_case(${testName})
     endforeach()
 endif()

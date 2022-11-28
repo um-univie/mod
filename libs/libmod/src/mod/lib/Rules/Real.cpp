@@ -9,8 +9,7 @@
 #include <mod/lib/GraphMorphism/VF2Finder.hpp>
 #include <mod/lib/LabelledGraph.hpp>
 #include <mod/lib/IO/IO.hpp>
-#include <mod/lib/IO/Rule.hpp>
-#include <mod/lib/Rules/Properties/Depiction.hpp>
+#include <mod/lib/Rules/IO/DepictionData.hpp>
 #include <mod/lib/Rules/Properties/Molecule.hpp>
 #include <mod/lib/Rules/Properties/Stereo.hpp>
 #include <mod/lib/Rules/Properties/String.hpp>
@@ -23,48 +22,54 @@
 
 namespace mod::lib::Rules {
 BOOST_CONCEPT_ASSERT((LabelledGraphConcept<LabelledRule>));
-BOOST_CONCEPT_ASSERT((LabelledGraphConcept<LabelledRule::LabelledLeftType>));
-BOOST_CONCEPT_ASSERT((LabelledGraphConcept<LabelledRule::LabelledRightType>));
+BOOST_CONCEPT_ASSERT((LabelledGraphConcept<LabelledRule::Side>));
 
 //------------------------------------------------------------------------------
 // Main class
 //------------------------------------------------------------------------------
 
-void printEdge(Edge e, const GraphType &core, const PropStringCore &labelState, std::ostream &s) {
-	Vertex vSrc = source(e, core), vTar = target(e, core);
-	s << "\t";
-	labelState.print(s, vSrc);
-	s << " -- ";
-	labelState.print(s, e);
-	s << " -- ";
-	labelState.print(s, vTar);
+void printEdge(lib::DPO::CombinedRule::CombinedEdge eCG, const lib::DPO::CombinedRule::CombinedGraphType &gCombined,
+               const PropString &pString, std::ostream &s) {
+	const auto vSrc = source(eCG, gCombined);
+	const auto vTar = target(eCG, gCombined);
+	s << "  vSrc (" << vSrc << "): ";
+	pString.print(s, vSrc);
+	s << "\n  e: ";
+	pString.print(s, eCG);
+	s << "\n  vTar (" << vTar << "): ";
+	pString.print(s, vTar);
+	s << std::endl;
 }
 
-bool Real::sanityChecks(const GraphType &core, const PropStringCore &labelState, std::ostream &s) {
+bool Real::sanityChecks(const lib::DPO::CombinedRule::CombinedGraphType &gCombined,
+                        const PropString &pString, std::ostream &s) {
 	// hmm, boost::edge_range is not supported for vecS, right? so we count in a rather stupid way
 
-	for(Edge e : asRange(edges(core))) {
-		Vertex vSrc = source(e, core), vTar = target(e, core);
-		auto eContext = core[e].membership,
-				srcContext = core[vSrc].membership,
-				tarContext = core[vTar].membership;
+	for(const auto eCG: asRange(edges(gCombined))) {
+		const auto vSrc = source(eCG, gCombined);
+		const auto vTar = target(eCG, gCombined);
+		const auto eContext = gCombined[eCG].membership,
+				srcContext = gCombined[vSrc].membership,
+				tarContext = gCombined[vTar].membership;
 		// check danglingness
-		if(eContext != srcContext && srcContext != Membership::Context) {
+		if(eContext != srcContext && srcContext != Membership::K) {
 			s << "Rule::sanityCheck\tdangling edge at source: " << std::endl;
-			printEdge(e, core, labelState, s);
+			printEdge(eCG, gCombined, pString, s);
 			return false;
 		}
-		if(eContext != tarContext && tarContext != Membership::Context) {
+		if(eContext != tarContext && tarContext != Membership::K) {
 			s << "Rule::sanityCheck\tdangling edge at target: " << std::endl;
-			printEdge(e, core, labelState, s);
+			printEdge(eCG, gCombined, pString, s);
 			return false;
 		}
 		// check parallelness
-		unsigned int count = 0;
-		for(Edge eOut : asRange(out_edges(vSrc, core))) if(target(eOut, core) == vTar) count++;
+		int count = 0;
+		for(const auto eOut: asRange(out_edges(vSrc, gCombined)))
+			if(target(eOut, gCombined) == vTar)
+				++count;
 		if(count > 1) {
 			s << "Rule::sanityCheck\tcan't handle parallel edges in lib::Rules::GraphType" << std::endl;
-			printEdge(e, core, labelState, s);
+			printEdge(eCG, gCombined, pString, s);
 			return false;
 		}
 	}
@@ -73,16 +78,17 @@ bool Real::sanityChecks(const GraphType &core, const PropStringCore &labelState,
 
 namespace {
 std::size_t nextRuleNum = 0;
-} // namespace 
+} // namespace
 
 Real::Real(LabelledRule &&rule, std::optional<LabelType> labelType)
 		: id(nextRuleNum++), name("r_{" + boost::lexical_cast<std::string>(id) + "}"), labelType(labelType),
 		  dpoRule(std::move(rule)) {
-	if(dpoRule.numLeftComponents == std::numeric_limits<std::size_t>::max()) dpoRule.initComponents();
+	if(get_num_connected_components(get_labelled_left(dpoRule)) == -1)
+		dpoRule.initComponents();
 	// only one of propString and propTerm should be defined
 	assert(this->dpoRule.pString || this->dpoRule.pTerm);
 	assert(!this->dpoRule.pString || !this->dpoRule.pTerm);
-	if(!sanityChecks(getGraph(), getStringState(), std::cout)) {
+	if(!sanityChecks(getDPORule().getRule().getCombinedGraph(), get_string(getDPORule()), std::cout)) {
 		std::cout << "Rule::sanityCheck\tfailed in rule '" << getName() << "'" << std::endl;
 		MOD_ABORT;
 	}
@@ -127,13 +133,13 @@ const lib::Rules::GraphType &Real::getGraph() const {
 	return get_graph(dpoRule);
 }
 
-DepictionDataCore &Real::getDepictionData() {
-	if(!depictionData) depictionData.reset(new DepictionDataCore(getDPORule()));
+Write::DepictionData &Real::getDepictionData() {
+	if(!depictionData) depictionData.reset(new Write::DepictionData(getDPORule()));
 	return *depictionData;
 }
 
-const DepictionDataCore &Real::getDepictionData() const {
-	if(!depictionData) depictionData.reset(new DepictionDataCore(getDPORule()));
+const Write::DepictionData &Real::getDepictionData() const {
+	if(!depictionData) depictionData.reset(new Write::DepictionData(getDPORule()));
 	return *depictionData;
 }
 
@@ -143,40 +149,16 @@ bool Real::isChemical() const {
 }
 
 bool Real::isOnlySide(Membership membership) const {
-	const GraphType &core = getGraph();
-	for(Vertex v : asRange(vertices(core)))
-		if(core[v].membership != membership) return false;
-	for(Edge e : asRange(edges(core)))
-		if(core[e].membership != membership) return false;
+	const auto &gCombined = getDPORule().getRule().getCombinedGraph();
+	for(const auto v: asRange(vertices(gCombined)))
+		if(gCombined[v].membership != membership) return false;
+	for(const auto e: asRange(edges(gCombined)))
+		if(gCombined[e].membership != membership) return false;
 	return true;
 }
 
 bool Real::isOnlyRightSide() const {
-	return isOnlySide(Membership::Right);
-}
-
-const PropStringCore &Real::getStringState() const {
-	assert(dpoRule.pString || dpoRule.pTerm);
-	if(!dpoRule.pString) {
-		dpoRule.pString.reset(new PropStringCore(get_graph(dpoRule),
-		                                         dpoRule.leftMatchConstraints, dpoRule.rightMatchConstraints,
-		                                         getTermState(), lib::Term::getStrings()));
-	}
-	return *dpoRule.pString;
-}
-
-const PropTermCore &Real::getTermState() const {
-	assert(dpoRule.pString || dpoRule.pTerm);
-	if(!dpoRule.pTerm) {
-		dpoRule.pTerm.reset(new PropTermCore(get_graph(dpoRule),
-		                                     dpoRule.leftMatchConstraints, dpoRule.rightMatchConstraints,
-		                                     getStringState(), lib::Term::getStrings()));
-	}
-	return *dpoRule.pTerm;
-}
-
-const PropMoleculeCore &Real::getMoleculeState() const {
-	return get_molecule(getDPORule());
+	return isOnlySide(Membership::R);
 }
 
 namespace {

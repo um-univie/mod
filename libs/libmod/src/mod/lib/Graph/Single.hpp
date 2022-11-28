@@ -16,9 +16,15 @@
 #include <optional>
 #include <string>
 
+namespace mod {
+template<typename Domain, typename Codomain>
+struct VertexMap;
+} // namespace mod
 namespace mod::lib::Graph {
 struct PropMolecule;
+namespace Write {
 struct DepictionData;
+} // namespace Write
 
 struct Single {
 	using CanonIdxMap = boost::iterator_property_map<std::vector<int>::const_iterator,
@@ -44,8 +50,8 @@ public:
 	const std::string &getSmilesWithIds() const;
 	unsigned int getVertexLabelCount(const std::string &label) const;
 	unsigned int getEdgeLabelCount(const std::string &label) const;
-	DepictionData &getDepictionData();
-	const DepictionData &getDepictionData() const;
+	Write::DepictionData &getDepictionData();
+	const Write::DepictionData &getDepictionData() const;
 public: // deprecated interface
 	const GraphType &getGraph() const;
 	const PropString &getStringState() const;
@@ -65,7 +71,7 @@ private:
 	mutable std::vector<int> canon_perm_string;
 	mutable std::unique_ptr<const CanonForm> canon_form_string;
 	mutable std::unique_ptr<const AutGroup> aut_group_string;
-	mutable std::unique_ptr<DepictionData> depictionData;
+	mutable std::unique_ptr<Write::DepictionData> depictionData;
 public:
 	static std::size_t
 	isomorphismVF2(const Single &gDom, const Single &gCodom, std::size_t maxNumMatches, LabelSettings labelSettings);
@@ -74,6 +80,9 @@ public:
 	isomorphism(const Single &gDom, const Single &gCodom, std::size_t maxNumMatches, LabelSettings labelSettings);
 	static std::size_t
 	monomorphism(const Single &gDom, const Single &gCodom, std::size_t maxNumMatches, LabelSettings labelSettings);
+	static void enumerateMonomorphisms(const Single &gDom, const Single &gCodom,
+												  std::function<bool(VertexMap<graph::Graph, graph::Graph>)> callback,
+												  LabelSettings labelSettings);
 	static bool nameLess(const Single *g1, const Single *g2);
 	static bool canonicalCompare(const Single &g1, const Single &g2, LabelType labelType, bool withStereo);
 public:

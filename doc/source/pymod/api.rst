@@ -1,4 +1,4 @@
 API Reference
 =============
 
-.. include:: Pymodtoc.rst
+.. include:: Toc.rst

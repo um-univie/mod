@@ -7,56 +7,42 @@
 
 #include <jla_boost/graph/PairToRangeAdaptor.hpp>
 
-namespace mod {
-namespace lib {
-namespace Rules {
+namespace mod::lib::Rules {
 
-PropMoleculeCore::PropMoleculeCore(const GraphType &g, const PropStringCore &labelState) : Base(g), isReaction(true) {
-	vertexState.resize(num_vertices(g));
-	for(Vertex v : asRange(vertices(g))) {
-		auto decodeLabel = [this](const std::string & label) {
-			auto p = Chem::decodeVertexLabel(label);
-			if(std::get<0>(p) == AtomIds::Invalid) isReaction = false;
-			return AtomData(std::get<0>(p), std::get<1>(p), std::get<2>(p), std::get<3>(p));
-		};
-		auto vId = get(boost::vertex_index_t(), g, v);
-		switch(g[v].membership) {
-		case Membership::Left:
-			vertexState[vId].left = decodeLabel(labelState.getLeft()[v]);
-			break;
-		case Membership::Right:
-			vertexState[vId].right = decodeLabel(labelState.getRight()[v]);
-			break;
-		case Membership::Context:
-			vertexState[vId].left = decodeLabel(labelState.getLeft()[v]);
-			vertexState[vId].right = decodeLabel(labelState.getRight()[v]);
-			break;
-		}
+PropMolecule::PropMolecule(const RuleType &rule, const PropString &pString)
+		: Base(rule), isReaction(true) {
+	const auto decodeVLabel = [this](const std::string &label) {
+		const auto p = Chem::decodeVertexLabel(label);
+		if(std::get<0>(p) == AtomIds::Invalid) isReaction = false;
+		return AtomData(std::get<0>(p), std::get<1>(p), std::get<2>(p), std::get<3>(p));
+	};
+	const auto decodeELabel = [this](const std::string &label) {
+		const auto bondType = Chem::decodeEdgeLabel(label);
+		if(bondType == BondType::Invalid) isReaction = false;
+		return bondType;
+	};
+
+	vPropL.resize(num_vertices(getL(rule)));
+	vPropR.resize(num_vertices(getR(rule)));
+	for(const auto v: asRange(vertices(getL(rule)))) {
+		const auto vId = get(boost::vertex_index_t(), getL(rule), v);
+		vPropL[vId] = decodeVLabel(pString.getLeft()[v]);
+	}
+	for(const auto v: asRange(vertices(getR(rule)))) {
+		const auto vId = get(boost::vertex_index_t(), getR(rule), v);
+		vPropR[vId] = decodeVLabel(pString.getRight()[v]);
 	}
 
-	edgeState.resize(num_edges(g));
-	for(Edge e : asRange(edges(g))) {
-		auto decodeLabel = [this](const std::string & label) {
-			auto bondType = Chem::decodeEdgeLabel(label);
-			if(bondType == BondType::Invalid) isReaction = false;
-			return bondType;
-		};
-		auto eId = get(boost::edge_index_t(), g, e);
-		switch(g[e].membership) {
-		case Membership::Left:
-			edgeState[eId].left = decodeLabel(labelState.getLeft()[e]);
-			break;
-		case Membership::Right:
-			edgeState[eId].right = decodeLabel(labelState.getRight()[e]);
-			break;
-		case Membership::Context:
-			edgeState[eId].left = decodeLabel(labelState.getLeft()[e]);
-			edgeState[eId].right = decodeLabel(labelState.getRight()[e]);
-			break;
-		}
+	ePropL.resize(num_edges(getL(rule)));
+	ePropR.resize(num_edges(getR(rule)));
+	for(const auto e: asRange(edges(getL(rule)))) {
+		const auto eId = get(boost::edge_index_t(), getL(rule), e);
+		ePropL[eId] = decodeELabel(pString.getLeft()[e]);
+	}
+	for(const auto e: asRange(edges(getR(rule)))) {
+		const auto eId = get(boost::edge_index_t(), getR(rule), e);
+		ePropR[eId] = decodeELabel(pString.getRight()[e]);
 	}
 }
 
-} // namespace Rules
-} // namespace lib
-} // namespace mod
+} // namespace mod::lib::Rules

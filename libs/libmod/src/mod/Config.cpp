@@ -8,13 +8,11 @@ namespace mod {
 std::ostream &operator<<(std::ostream &s, const LabelType lt) {
 	switch(lt) {
 	case LabelType::String:
-		s << "string";
-		break;
+		return s << "string";
 	case LabelType::Term:
-		s << "term";
-		break;
+		return s << "term";
 	}
-	return s;
+	__builtin_unreachable();
 }
 
 std::ostream &operator<<(std::ostream &s, const LabelRelation lt) {
@@ -26,7 +24,7 @@ std::ostream &operator<<(std::ostream &s, const LabelRelation lt) {
 	case LabelRelation::Unification:
 		return s << "unification";
 	}
-	return s;
+	__builtin_unreachable();
 }
 
 bool operator==(LabelSettings a, LabelSettings b) {
@@ -59,7 +57,7 @@ std::ostream &operator<<(std::ostream &s, IsomorphismPolicy p) {
 	case IsomorphismPolicy::TrustMe:
 		return s << "trustMe";
 	}
-	return s;
+	__builtin_unreachable();
 }
 
 std::ostream &operator<<(std::ostream &s, SmilesClassPolicy p) {
@@ -71,7 +69,19 @@ std::ostream &operator<<(std::ostream &s, SmilesClassPolicy p) {
 	case SmilesClassPolicy::MapUnique:
 		return s << "mapUnique";
 	}
-	return s;
+	__builtin_unreachable();
+}
+
+std::ostream &operator<<(std::ostream &s, Action a) {
+	switch(a) {
+	case Action::Error:
+		return s << "error";
+	case Action::Warn:
+		return s << "warn";
+	case Action::Ignore:
+		return s << "ignore";
+	}
+	__builtin_unreachable();
 }
 
 Config &getConfig() {

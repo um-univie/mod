@@ -1,6 +1,9 @@
 include("../xxx_helpers.py")
 include("../xxx_graphInterface.py")
 
+fail(lambda: UnionGraph([None]), "A graph is null.")
+
+
 O = smiles("O")
 
 def check(ug, gs):

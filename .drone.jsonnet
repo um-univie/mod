@@ -1,7 +1,7 @@
 local image = "localhost:5000/jla/mod";
 local boostArg(v) = "-DBOOST_ROOT=/opt/boost/%s" % v;
 
-local CoverageStep(withCoverage, compiler, boost) = if !withCoverage then null else {
+local CoverageStep(withCoverage, compiler, boost) = if !withCoverage then [] else [{
 	name: "coverage",
 	image: image,
 	environment: {
@@ -10,9 +10,10 @@ local CoverageStep(withCoverage, compiler, boost) = if !withCoverage then null e
 		CXXFLAGS: "-Werror",
 	},
 	commands: [
+		"bindep testing",
 		"mkdir covBuild",
 		"cd covBuild",
-		"cmake ../ -DCMAKE_BUILD_TYPE=OptDebug -DBUILD_TESTING=on -DBUILD_COVERAGE=on %s" % [boostArg(boost)],
+		"cmake ../ -DENABLE_IPO=off -DCMAKE_BUILD_TYPE=OptDebug -DBUILD_TESTING=on -DBUILD_COVERAGE=on %s" % [boostArg(boost)],
 		"make",
 		"make install",
 		"make tests",
@@ -33,7 +34,7 @@ local CoverageStep(withCoverage, compiler, boost) = if !withCoverage then null e
 			path: "/www",
 		},
 	],
-};
+}];
 
 local Volumes(withCoverage) = if !withCoverage then [] else [
 	{
@@ -63,9 +64,10 @@ local Configure(compiler, boost, dep=false) = {
 		CXXFLAGS: "-Werror",
 	},
 	commands: [
+		"bindep testing",
 		"mkdir build",
 		"cd build",
-		"cmake ../ -DCMAKE_BUILD_TYPE=OptDebug -DBUILD_DOC=on -DBUILD_TESTING=on -DBUILD_TESTING_SANITIZERS=off %s" % [boostArg(boost)],
+		"cmake ../ -DCMAKE_BUILD_TYPE=OptDebug -DENABLE_IPO=off -DBUILD_DOC=on -DBUILD_TESTING=on -DBUILD_TESTING_SANITIZERS=off %s" % [boostArg(boost)],
 	],
 	[ if dep then "depends_on"]: [ "bootstrap" ],
 };
@@ -136,8 +138,7 @@ local Pipeline(withCoverage, compiler, boost) = {
 				]
 			},
 		},
-		CoverageStep(withCoverage, compiler, boost),
-	],
+	] +	CoverageStep(withCoverage, compiler, boost),
 	volumes: Volumes(withCoverage),
 };
 
@@ -177,7 +178,7 @@ local Pipeline(withCoverage, compiler, boost) = {
 		name: "Docker",
 		steps: [
 			Bootstrap(false),
-			Configure("g++", "1_75_0", false),
+			Configure("g++", "1_80_0", false),
 			{
 				name: "dist",
 				image: image,
@@ -229,12 +230,14 @@ local Pipeline(withCoverage, compiler, boost) = {
 		]
 	},
 ] + [
-	Pipeline(boost == "1_74_0" && compiler == "g++-9", compiler, boost)
+	Pipeline(boost == "1_80_0" && compiler == "g++-11", compiler, boost)
 	for compiler in [
 		"g++-8", "g++-9", "g++-10", "g++-11",
-		"clang++-8", "clang++-9", "clang++-10", "clang++-11", "clang++-12",
+		"clang++-8",
+		#"clang++-9",
+		"clang++-10", "clang++-11", "clang++-12",
 	]
 	for boost in [
-		"1_73_0", "1_74_0", "1_75_0", "1_76_0",
+		"1_76_0", "1_77_0", "1_78_0", "1_79_0", "1_80_0",
 	]
 ]

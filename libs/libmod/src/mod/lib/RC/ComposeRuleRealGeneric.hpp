@@ -4,9 +4,9 @@
 #include <mod/Config.hpp>
 #include <mod/Misc.hpp>
 #include <mod/lib/GraphMorphism/LabelledMorphism.hpp>
-#include <mod/lib/IO/RC.hpp>
-#include <mod/lib/IO/Rule.hpp>
 #include <mod/lib/RC/LabelledComposition.hpp>
+#include <mod/lib/RC/Result.hpp>
+#include <mod/lib/RC/IO/Write.hpp>
 #include <mod/lib/RC/Visitor/MatchConstraints.hpp>
 #include <mod/lib/RC/Visitor/String.hpp>
 #include <mod/lib/RC/Visitor/Term.hpp>
@@ -20,15 +20,23 @@ struct Sub;
 struct Super;
 
 template<bool verbose, LabelType labelType, bool withStereo, typename InvertibleVertexMap>
-auto composeRuleRealByMatch(const lib::Rules::Real &rFirst,
-                            const lib::Rules::Real &rSecond,
-                            InvertibleVertexMap &match) {
-	using Result = BaseResult<lib::Rules::LabelledRule, lib::Rules::LabelledRule, lib::Rules::LabelledRule>;
-	auto visitor = Visitor::MatchConstraints<labelType>();
-	auto res = composeLabelled<verbose, Result, labelType, withStereo>(
-			rFirst.getDPORule(), rSecond.getDPORule(), match, visitor);
-	if(res) res->rResult.initComponents(); // TODO: move to the visitor finalizer
-	return res;
+std::optional<lib::Rules::LabelledRule> composeRuleRealByMatch(const lib::Rules::Real &rFirst,
+                                                               const lib::Rules::Real &rSecond,
+                                                               InvertibleVertexMap &match) {
+	auto visitor = Visitor::MatchConstraints<labelType>(rFirst.getDPORule(), rSecond.getDPORule());
+	LabelledResult result(rFirst.getDPORule().getRule(), rSecond.getDPORule().getRule());
+	const bool success = composeLabelled<verbose, labelType, withStereo>(
+			result, rFirst.getDPORule(), rSecond.getDPORule(), match, visitor);
+	if(success) {
+		assert(result.pString || result.pTerm);
+		auto rule = result.pString
+		            ? lib::Rules::LabelledRule(std::move(result.rDPO), std::move(result.pString),
+		                                       std::move(result.pStereo))
+		            : lib::Rules::LabelledRule(std::move(result.rDPO), std::move(result.pTerm),
+		                                       std::move(result.pStereo));
+		rule.leftData.matchConstraints = std::move(result.matchConstraints);
+		return rule;
+	} else return {};
 }
 
 template<LabelType labelType, bool withStereo, typename InvertibleVertexMap>
@@ -47,7 +55,7 @@ std::unique_ptr<lib::Rules::Real> composeRuleRealByMatch(const lib::Rules::Real 
 		if(verbose) logger.indent() << "Composition failed" << std::endl;
 		return nullptr;
 	}
-	auto rResult = std::make_unique<lib::Rules::Real>(std::move(resultOpt->rResult), labelType);
+	auto rResult = std::make_unique<lib::Rules::Real>(std::move(*resultOpt), labelType);
 	if(verbose)
 		logger.indent() << "Composition done, rNew is '" << rResult->getName() << "'" << std::endl;
 	return rResult;
@@ -74,7 +82,7 @@ struct MatchMakerCallback {
 				                << "\t= " << rFirst.getName()
 				                << "\t. " << rSecond.getName() << std::endl;
 			if(getConfig().rc.printMatches.get()) {
-				IO::RC::Write::test(rFirst, rSecond, m, *rResult);
+				RC::Write::test(rFirst, rSecond, m, *rResult);
 			}
 			const bool cont = rr(std::move(rResult));
 			if(!cont) return false;

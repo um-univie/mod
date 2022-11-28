@@ -7,7 +7,7 @@
 #include <mod/lib/GraphMorphism/LabelledMorphism.hpp>
 #include <mod/lib/GraphMorphism/StereoVertexMap.hpp>
 #include <mod/lib/GraphMorphism/TermVertexMap.hpp>
-#include <mod/lib/IO/Rule.hpp>
+#include <mod/lib/Rules/IO/Write.hpp>
 
 #include <jla_boost/graph/morphism/models/PropertyVertexMap.hpp>
 
@@ -16,35 +16,38 @@ constexpr int V_MorphismGen = 2;
 constexpr int V_Composition = 12;
 namespace detail {
 
-template<typename RFirst, typename RSecond>
-void initTermLabel(const RFirst &rFirst, const RSecond &rSecond) {
+inline void initTermLabel(const lib::Rules::Real &rFirst, // TODO: make rules generic, when needed
+                          const lib::Rules::Real &rSecond) {
 	const auto &termFirst = get_term(rFirst.getDPORule());
 	const auto &termSecond = get_term(rSecond.getDPORule());
 	if(!isValid(termFirst)) {
 		std::string msg = "Term state of rFirst is invalid:\n" + termFirst.getParsingError();
-		lib::IO::Rules::Write::summary(rFirst, true);
+		lib::Rules::Write::summary(rFirst, true);
 		throw mod::FatalError(std::move(msg));
 	}
 	if(!isValid(termSecond)) {
 		std::string msg = "Term state of rSecond is invalid:\n" + termSecond.getParsingError();
-		lib::IO::Rules::Write::summary(rSecond, true);
+		lib::Rules::Write::summary(rSecond, true);
 		throw mod::FatalError(std::move(msg));
 	}
 }
 
-template<typename RFirst, typename RSecond>
-void initStereoLabel(const RFirst &rFirst, const RSecond &rSecond) {
+inline void initStereoLabel(const lib::Rules::Real &rFirst, // TODO: make rules generic, when needed
+                            const lib::Rules::Real &rSecond) {
 	get_stereo(rFirst.getDPORule());
 	get_stereo(rSecond.getDPORule());
 }
 
 } // namespace detail
 
-template<typename RFirst, typename RSecond>
-void initByLabelSettings(const RFirst &rFirst, const RSecond &rSecond, LabelSettings labelSettings) {
+inline void initByLabelSettings(const lib::Rules::Real &rFirst, // TODO: make rules generic, when needed
+                                const lib::Rules::Real &rSecond,
+                                LabelSettings labelSettings) {
 	switch(labelSettings.type) {
-	case LabelType::String: break;
-	case LabelType::Term: detail::initTermLabel(rFirst, rSecond);
+	case LabelType::String:
+		break;
+	case LabelType::Term:
+		detail::initTermLabel(rFirst, rSecond);
 		break;
 	}
 	if(labelSettings.withStereo) detail::initStereoLabel(rFirst, rSecond);
@@ -57,11 +60,12 @@ namespace detail {
 //	return mr(rFirst, rSecond, std::move(m));
 //}
 
-template<typename RFirst, typename RSecond, typename MR, typename VertexMap>
-bool handleMapToStereo(const RFirst &rFirst, const RSecond &rSecond,
-							  VertexMap &&m, MR &&mr,
-							  LabelSettings labelSettings,
-							  const int verbosity, IO::Logger logger) {
+template<typename MR, typename VertexMap>
+bool handleMapToStereo(const lib::Rules::Real &rFirst, // TODO: make rules generic, when needed
+                       const lib::Rules::Real &rSecond,
+                       VertexMap &&m, MR &&mr,
+                       LabelSettings labelSettings,
+                       const int verbosity, IO::Logger logger) {
 	if(!labelSettings.withStereo) {
 		return mr(rFirst, rSecond, std::move(m), verbosity >= V_Composition, logger);
 	}
@@ -85,11 +89,12 @@ bool handleMapToStereo(const RFirst &rFirst, const RSecond &rSecond,
 	MOD_ABORT;
 }
 
-template<typename RFirst, typename RSecond, typename MR, typename VertexMap>
-bool handleMapToTerm(const RFirst &rFirst, const RSecond &rSecond,
-							VertexMap &&m, MR &&mr,
-							LabelSettings labelSettings,
-							const int verbosity, IO::Logger logger) {
+template<typename MR, typename VertexMap>
+bool handleMapToTerm(const lib::Rules::Real &rFirst, // TODO: make rules generic, when needed
+                     const lib::Rules::Real &rSecond,
+                     VertexMap &&m, MR &&mr,
+                     LabelSettings labelSettings,
+                     const int verbosity, IO::Logger logger) {
 	namespace GM = jla_boost::GraphMorphism;
 	using GraphDom = typename GM::VertexMapTraits<VertexMap>::GraphDom;
 	using GraphCodom = typename GM::VertexMapTraits<VertexMap>::GraphCodom;
@@ -105,7 +110,7 @@ bool handleMapToTerm(const RFirst &rFirst, const RSecond &rSecond,
 	machine.verify();
 	lib::Term::MGU mgu(machine.getHeap().size());
 	// first unify mapped vertices and edges
-	for(const auto vCodom : asRange(vertices(gCodom))) {
+	for(const auto vCodom: asRange(vertices(gCodom))) {
 		const auto vDom = get_inverse(m, gDom, gCodom, vCodom);
 		if(vDom == vNullDom) continue;
 		const auto addrCodom = termCodom[vCodom];
@@ -114,7 +119,7 @@ bool handleMapToTerm(const RFirst &rFirst, const RSecond &rSecond,
 		if(mgu.status != lib::Term::MGU::Status::Exists) break;
 		machine.verify();
 	}
-	for(const auto eCodom : asRange(edges(gCodom))) {
+	for(const auto eCodom: asRange(edges(gCodom))) {
 		if(mgu.status != lib::Term::MGU::Status::Exists) break;
 		machine.verify();
 		const auto vSrcCodom = source(eCodom, gCodom);
@@ -146,11 +151,12 @@ bool handleMapToTerm(const RFirst &rFirst, const RSecond &rSecond,
 	return handleMapToStereo(rFirst, rSecond, std::move(mTerm), mr, labelSettings, verbosity, logger);
 }
 
-template<typename RFirst, typename RSecond, typename MR, typename VertexMap>
-bool handleMapToStringOrTerm(const RFirst &rFirst, const RSecond &rSecond,
-									  VertexMap &&m, MR &&mr,
-									  LabelSettings labelSettings,
-									  const int verbosity, IO::Logger logger) {
+template<typename MR, typename VertexMap>
+bool handleMapToStringOrTerm(const lib::Rules::Real &rFirst, // TODO: make rules generic, when needed
+                             const lib::Rules::Real &rSecond,
+                             VertexMap &&m, MR &&mr,
+                             LabelSettings labelSettings,
+                             const int verbosity, IO::Logger logger) {
 	switch(labelSettings.type) {
 	case LabelType::String:
 		return handleMapToStereo(rFirst, rSecond, std::move(m), std::move(mr), labelSettings, verbosity, logger);
@@ -162,13 +168,14 @@ bool handleMapToStringOrTerm(const RFirst &rFirst, const RSecond &rSecond,
 
 } // namesapce detail
 
-template<typename RFirst, typename RSecond, typename VertexMap, typename MR>
-bool handleMapByLabelSettings(const RFirst &rFirst, const RSecond &rSecond,
-										VertexMap &&m, MR &&mr,
-										LabelSettings labelSettings,
-										const int verbosity, IO::Logger logger) {
+template<typename VertexMap, typename MR>
+bool handleMapByLabelSettings(const lib::Rules::Real &rFirst, // TODO: make rules generic, when needed
+                              const lib::Rules::Real &rSecond,
+                              VertexMap &&m, MR &&mr,
+                              LabelSettings labelSettings,
+                              const int verbosity, IO::Logger logger) {
 	return detail::handleMapToStringOrTerm(rFirst, rSecond, std::forward<VertexMap>(m), std::forward<MR>(mr),
-														labelSettings, verbosity, logger);
+	                                       labelSettings, verbosity, logger);
 }
 
 } // namespace mod::lib::RC

@@ -1,4 +1,4 @@
-post("disableSummary")
+post.disableInvokeMake()
 smiles(R"[Ag+]")
 smiles(R"[As](=O)([O-])(C)C")
 smiles(R"[Br-]")

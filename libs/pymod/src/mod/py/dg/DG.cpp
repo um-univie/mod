@@ -210,7 +210,7 @@ void DG_doExport() {
 					// rst:
 					// rst:			:raises: :class:`LogicError` if the DG has not been calculated.
 			.def("listStats", &DG::listStats)
-					// rst:		.. method:: load(graphDatabase, ruleDatabase, f, graphPolicy=IsomorphismPolicy.Check, verbosity=2)
+					// rst:		.. staticmethod:: load(graphDatabase, ruleDatabase, f, graphPolicy=IsomorphismPolicy.Check, verbosity=2)
 					// rst:
 					// rst:			Load a derivation graph dump as a locked object.
 					// rst:			Use :func:`DGBuilder.load` to load a dump into a derivation graph under construction.

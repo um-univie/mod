@@ -23,6 +23,10 @@ std::string SmilesClassPolicy_str(SmilesClassPolicy p) {
 	return boost::lexical_cast<std::string>(p);
 }
 
+std::string Action_str(Action a) {
+	return boost::lexical_cast<std::string>(a);
+}
+
 } // namespace
 
 void Config_doExport() {
@@ -153,6 +157,127 @@ void Config_doExport() {
 					// rst:			Map all class labels that are unique to vertices.
 			.value("MapUnique", SmilesClassPolicy::MapUnique);
 	py::def("_SmilesClassPolicy__str__", &SmilesClassPolicy_str);
+
+	// rst: .. class:: Action
+	// rst:
+	// rst:		Utility enum for deciding what to do in certain cases.
+	// rst:
+	py::enum_<Action>("Action")
+			// rst:		.. attribute:: Error
+			// rst:
+			// rst:			Abort the function and produce an error message, e.g., through and exception.
+			.value("Error", Action::Error)
+					// rst:		.. attribute:: Warn
+					// rst:
+					// rst:			Write a warning, but otherwise do as if it was `Ignore`.
+			.value("Warn", Action::Warn)
+					// rst:		.. attribute:: Ignore
+					// rst:
+					// rst:			Ignore the case. The function taking the action as argument should describe what this means.
+			.value("Ignore", Action::Ignore);
+	py::def("_Action__str__", &Action_str);
+
+	// rst: .. class:: MDLOptions
+	// rst:
+	// rst:		An aggregation of options for the various loading functions for MDL formats.
+	// rst:		Generally each option is defaulted to follow the specification of the formats,
+	// rst:		unless it is harmless to deviate (e.g., relaxed white-space parsing).
+	// rst:
+	py::class_<MDLOptions>("MDLOptions")
+			// rst:		.. attribute:: addHydrogens = True
+			// rst:
+			// rst:			Use the MDL valence model to add hydrogens to atoms with default valence, or disable all hydrogen addition.
+			// rst:
+			// rst:			:type: bool
+			.def_readwrite("addHydrogens", &MDLOptions::addHydrogens)
+					// rst:		.. attribute:: allowAbstract = False
+					// rst:
+					// rst:			Allow non-standard atom symbols. The standard symbols are the element symbols and those specifying wildcard atoms.
+					// rst:
+					// rst:			:type: bool
+			.def_readwrite("allowAbstract", &MDLOptions::allowAbstract)
+					// rst:		.. attribute:: applyV2000AtomAliases = True
+					// rst:
+					// rst:			In MOL V2000 CTAB blocks, replace atom labels by their aliases.
+					// rst:			After application, the atom is considered abstract without errors, and hydrogen addition is suppressed.
+					// rst:
+					// rst:			:type: bool
+			.def_readwrite("applyV2000AtomAliases", &MDLOptions::applyV2000AtomAliases)
+					// rst:		.. attribute:: Action onPatternIsotope = Action::Error
+					// rst:		               Action onPatternCharge = Action::Error;
+					// rst:		               Action onPatternRadical = Action::Error;
+					// rst:
+					// rst:			What to do when an atom with symbol ``*`` has an isotope, charge, or radical.
+					// rst:			``Action.Ignore`` means assuming the isotope, charge, or radical was not there.
+			.def_readwrite("onPatternIsotope", &MDLOptions::onPatternIsotope)
+			.def_readwrite("onPatternCharge", &MDLOptions::onPatternCharge)
+			.def_readwrite("onPatternRadical", &MDLOptions::onPatternRadical)
+					// rst:		.. attribute:: onImplicitValenceOnAbstract = Action.Error
+					// rst:
+					// rst:			What to do when ``addHydrogens and allowAbstract`` and an abstract atom is encountered with implicit valence.
+					// rst:			``Action.Ignore`` means adding no hydrogens.
+					// rst:
+					// rst:			:type: Action
+			.def_readwrite("onImplicitValenceOnAbstract", &MDLOptions::onImplicitValenceOnAbstract)
+					// rst:		.. attribute:: onV2000UnhandledProperty = Action.Warn
+					// rst:
+					// rst:			What to do when a property line in a V2000 MOL file is not recognized.
+					// rst:			``Action.Ignore`` means simply ignoring that particular line.
+					// rst:
+					// rst:			:type: Action
+			.def_readwrite("onV2000UnhandledProperty", &MDLOptions::onV2000UnhandledProperty)
+					// rst:		.. attribute:: fullyIgnoreV2000UnhandledKnownProperty = False
+					// rst:
+					// rst:			Warnings are usually stored as "loading warnings", even when they are ignored as during parsing.
+					// rst:			Setting this to ``True`` will act as if ``onV2000UnhandledProperty = Actions::Ignore`` and
+					// rst:			skip the storage, but only for a pre-defined known subset of properties.
+					// rst:
+					// rst:			:type: bool
+			.def_readwrite("fullyIgnoreV2000UnhandledKnownProperty", &MDLOptions::fullyIgnoreV2000UnhandledKnownProperty)
+					// rst:		.. attribute:: onV3000UnhandledAtomProperty = Action.Warn
+					// rst:
+					// rst:			What to do when a property in atom line in a V3000 MOL file is not recognized.
+					// rst:			``Action.Ignore`` means simply ignoring that particular property.
+					// rst:
+					// rst:			:type: Action
+			.def_readwrite("onV3000UnhandledAtomProperty", &MDLOptions::onV3000UnhandledAtomProperty)
+					// rst:		.. attribute:: onV2000Charge4 = Action.Warn
+					// rst:
+					// rst:			What to do when an atom in a V2000 MOL file has the charge 4 (doublet radical).
+					//	rst:			``Action.Ignore`` means assuming it was charge 0.
+					// rst:
+					// rst:			:type: Action
+			.def_readwrite("onV2000Charge4", &MDLOptions::onV2000Charge4)
+					// rst:		.. attribute:: onV2000AbstractISO = Action.Warn
+					// rst:
+					// rst:			What to do when an abstract atom in a V2000 MOL file has a non-default ISO or mass difference value.
+					//	rst:			``Action.Ignore`` means assuming it had no ISO or mass difference value.
+					// rst:
+					// rst:			:type: Action
+			.def_readwrite("onV2000AbstractISO", &MDLOptions::onV2000AbstractISO)
+					// rst:		.. attribute:: onRAD1 = Action.Error
+					// rst:		               onRAD3 = Action.Error
+					// rst:		               onRAD4 = Action.Error
+					// rst:		               onRAD5 = Action.Error
+					// rst:		               onRAD6 = Action.Error
+					// rst:
+					// rst:			What to do when an atom has assigned the indicated radical state.
+					// rst:			``Action.Ignore`` means pretending the atom has no radical state assigned.
+					// rst:
+					// rst:			:type: Action
+			.def_readwrite("onRAD1", &MDLOptions::onRAD1)
+			.def_readwrite("onRAD3", &MDLOptions::onRAD3)
+			.def_readwrite("onRAD4", &MDLOptions::onRAD4)
+			.def_readwrite("onRAD5", &MDLOptions::onRAD5)
+			.def_readwrite("onRAD6", &MDLOptions::onRAD6)
+					// rst:		.. attribute:: onUnsupportedQueryBondType = Action.Error
+					// rst:
+					// rst:			What to do when a bond type 5, 6, or 7 are encountered (constrained query bond types).
+					// rst:			``Action.Ignore`` means assigning a term variable, as if the type was 8.
+					// rst:
+					// rst:			:type: Action
+			.def_readwrite("onUnsupportedQueryBondType", &MDLOptions::onUnsupportedQueryBondType);
+
 
 #define NSIter(rNS, dataNS, tNS)                                                \
          BOOST_PP_SEQ_FOR_EACH_I(SettingIter, ~,                                \

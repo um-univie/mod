@@ -1,65 +1,67 @@
 #include "String.hpp"
 
 #include <mod/lib/GraphMorphism/Constraints/AllVisitor.hpp>
-#include <mod/lib/IO/Term.hpp>
 #include <mod/lib/Rules/Properties/Term.hpp>
 #include <mod/lib/StringStore.hpp>
+#include <mod/lib/Term/IO/Write.hpp>
 
-namespace mod {
-namespace lib {
-namespace Rules {
+namespace mod::lib::Rules {
 
-PropStringCore::PropStringCore(const GraphType &g) : PropCore(g) {
-	verify(&g);
+PropString::PropString(const RuleType &rule) : PropBase(rule) {
+	verify();
 }
 
-PropStringCore::PropStringCore(const GraphType &g,
-                               const std::vector<ConstraintPtr> &leftMatchConstraints,
-                               const std::vector<ConstraintPtr> &rightMatchConstraints,
-                               const PropTermCore &term, const StringStore &strings) : PropCore(g) {
+PropString::PropString(const RuleType &rule,
+                       const std::vector<ConstraintPtr> &leftMatchConstraints,
+                       const std::vector<ConstraintPtr> &rightMatchConstraints,
+                       const PropTerm &term, const StringStore &strings)
+		: PropBase(rule) {
 	std::stringstream ss;
 	const auto termToString = [&ss, &term, &strings](std::size_t addr) -> std::string {
 		ss.str(std::string());
 
-		lib::IO::Term::Write::term(getMachine(term), {
-				lib::Term::AddressType::Heap, addr
+		Term::Write::term(getMachine(term), {
+				Term::AddressType::Heap, addr
 		}, strings, ss);
 		return ss.str();
 	};
-	vertexState.resize(num_vertices(g));
-	for(auto v : asRange(vertices(g))) {
-		auto vId = get(boost::vertex_index_t(), g, v);
-		switch(g[v].membership) {
-		case Membership::Left:
-			vertexState[vId].left = termToString(term.getLeft()[v]);
+	vPropL.resize(num_vertices(rule.getCombinedGraph()));
+	vPropR.resize(num_vertices(rule.getCombinedGraph()));
+	for(auto v: asRange(vertices(rule.getCombinedGraph()))) {
+		auto vId = get(boost::vertex_index_t(), rule.getCombinedGraph(), v);
+		switch(rule.getCombinedGraph()[v].membership) {
+		case Membership::L:
+			vPropL[vId] = termToString(term.getLeft()[v]);
 			break;
-		case Membership::Right:
-			vertexState[vId].right = termToString(term.getRight()[v]);
+		case Membership::R:
+			vPropR[vId] = termToString(term.getRight()[v]);
 			break;
-		case Membership::Context:
-			vertexState[vId].left = termToString(term.getLeft()[v]);
-			vertexState[vId].right = termToString(term.getRight()[v]);
+		case Membership::K:
+			vPropL[vId] = termToString(term.getLeft()[v]);
+			vPropR[vId] = termToString(term.getRight()[v]);
 			break;
 		}
 	}
-	edgeState.resize(num_edges(g));
-	for(auto e : asRange(edges(g))) {
-		auto eId = get(boost::edge_index_t(), g, e);
-		switch(g[e].membership) {
-		case Membership::Left:
-			edgeState[eId].left = termToString(term.getLeft()[e]);
+	ePropL.resize(num_edges(rule.getCombinedGraph()));
+	ePropR.resize(num_edges(rule.getCombinedGraph()));
+	for(auto e: asRange(edges(rule.getCombinedGraph()))) {
+		auto eId = get(boost::edge_index_t(), rule.getCombinedGraph(), e);
+		switch(rule.getCombinedGraph()[e].membership) {
+		case Membership::L:
+			ePropL[eId] = termToString(term.getLeft()[e]);
 			break;
-		case Membership::Right:
-			edgeState[eId].right = termToString(term.getRight()[e]);
+		case Membership::R:
+			ePropR[eId] = termToString(term.getRight()[e]);
 			break;
-		case Membership::Context:
-			edgeState[eId].left = termToString(term.getLeft()[e]);
-			edgeState[eId].right = termToString(term.getRight()[e]);
+		case Membership::K:
+			ePropL[eId] = termToString(term.getLeft()[e]);
+			ePropR[eId] = termToString(term.getRight()[e]);
 			break;
 		}
 	}
 
 	using HandlerType = decltype(termToString);
+	using SideGraphType = lib::DPO::CombinedRule::SideGraphType;
 
 	struct Visitor : lib::GraphMorphism::Constraints::AllVisitorNonConst<SideGraphType> {
 		Visitor(HandlerType &termToString) : termToString(termToString) {}
@@ -67,9 +69,9 @@ PropStringCore::PropStringCore(const GraphType &g,
 		virtual void operator()(lib::GraphMorphism::Constraints::VertexAdjacency<SideGraphType> &c) override {
 			assert(c.vertexLabels.size() == 0);
 			assert(c.edgeLabels.size() == 0);
-			for(const auto &t : c.vertexTerms)
+			for(const auto &t: c.vertexTerms)
 				c.vertexLabels.insert(termToString(t));
-			for(const auto &t : c.edgeTerms)
+			for(const auto &t: c.edgeTerms)
 				c.edgeLabels.insert(termToString(t));
 		}
 
@@ -80,12 +82,10 @@ PropStringCore::PropStringCore(const GraphType &g,
 
 	const auto handleConstraints = [&](const auto &cs) {
 		Visitor vis(termToString);
-		for(auto &c : cs) c->accept(vis);
+		for(auto &c: cs) c->accept(vis);
 	};
 	handleConstraints(leftMatchConstraints);
 	handleConstraints(rightMatchConstraints);
 }
 
-} // namespace Rules
-} // namespace lib
-} // namespace mod
+} // namespace mod::lib::Rules

@@ -1,3 +1,4 @@
+brew "cmake"
 brew "boost"
 brew "boost-python3"
 brew "open-babel"

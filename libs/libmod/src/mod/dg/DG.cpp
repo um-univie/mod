@@ -10,9 +10,9 @@
 #include <mod/lib/DG/NonHyperBuilder.hpp>
 #include <mod/lib/DG/Strategies/GraphState.hpp>
 #include <mod/lib/DG/Strategies/Strategy.hpp>
+#include <mod/lib/DG/IO/Read.hpp>
+#include <mod/lib/DG/IO/Write.hpp>
 #include <mod/lib/Graph/Single.hpp>
-#include <mod/lib/IO/Derivation.hpp>
-#include <mod/lib/IO/DG.hpp>
 #include <mod/lib/IO/IO.hpp>
 
 #include <boost/lexical_cast.hpp>
@@ -172,11 +172,11 @@ std::pair<std::string, std::string> DG::print(const Printer &printer, const Prin
 		    << ") than this (id=" << getId() << ")" << std::endl;
 		throw LogicError(err.str());
 	}
-	return lib::IO::DG::Write::summary(data.getData(), printer.getPrinter(), printer.getGraphPrinter().getOptions());
+	return lib::DG::Write::summary(data.getData(), printer.getPrinter(), printer.getGraphPrinter().getOptions());
 }
 
 std::string DG::printNonHyper() const {
-	return lib::IO::DG::Write::summaryNonHyper(getNonHyper());
+	return lib::DG::Write::summaryNonHyper(getNonHyper());
 }
 
 std::string DG::dump() const {
@@ -186,11 +186,11 @@ std::string DG::dump() const {
 std::string DG::dump(const std::string &filename) const {
 	if(!isLocked()) throw LogicError("Can not dump DG before it is locked.");
 	if(filename.empty()) {
-		std::string name = lib::IO::getUniqueFilePrefix() + "DG.dg";
-		lib::IO::writeJsonFile(name, lib::IO::DG::Write::dumpToJson(getNonHyper()));
+		std::string name = lib::IO::makeUniqueFilePrefix() + "DG.dg";
+		lib::IO::writeJsonFile(name, lib::DG::Write::dumpToJson(getNonHyper()));
 		return name;
 	} else {
-		lib::IO::writeJsonFile(filename, lib::IO::DG::Write::dumpToJson(getNonHyper()));
+		lib::IO::writeJsonFile(filename, lib::DG::Write::dumpToJson(getNonHyper()));
 		return filename;
 	}
 }
@@ -250,7 +250,7 @@ std::shared_ptr<DG> DG::load(const std::vector<std::shared_ptr<graph::Graph>> &g
 
 	std::ostringstream err;
 	std::unique_ptr<lib::DG::NonHyper> dgInternal(
-			lib::IO::DG::Read::dump(graphDatabase, ruleDatabase, file, graphPolicy, err, verbosity));
+			lib::DG::Read::dump(graphDatabase, ruleDatabase, file, graphPolicy, err, verbosity));
 	if(!dgInternal) throw InputError("DG load error: " + err.str());
 	return wrapIt(new DG(std::move(dgInternal)));
 }

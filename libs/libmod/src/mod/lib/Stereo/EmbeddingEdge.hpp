@@ -1,16 +1,13 @@
-#ifndef MOD_LIB_STEREO_EMBEDDINGEDGE_H
-#define MOD_LIB_STEREO_EMBEDDINGEDGE_H
+#ifndef MOD_LIB_STEREO_EMBEDDINGEDGE_HPP
+#define MOD_LIB_STEREO_EMBEDDINGEDGE_HPP
 
 #include <mod/lib/Stereo/EdgeCategory.hpp>
 
 #include <boost/graph/graph_traits.hpp>
 
-namespace mod {
-namespace lib {
-namespace Stereo {
+namespace mod::lib::Stereo {
 
 struct EmbeddingEdge {
-
 	enum class Type {
 		Edge, LonePair, Radical
 	};
@@ -32,8 +29,6 @@ public:
 	EdgeCategory cat;
 };
 
-} // namespace Stereo
-} // namespace lib
-} // namespace mod
+} // namespace mod::lib::Stereo
 
-#endif /* MOD_LIB_STEREO_EMBEDDINGEDGE_H */
+#endif // MOD_LIB_STEREO_EMBEDDINGEDGE_HPP

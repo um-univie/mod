@@ -1,4 +1,4 @@
-postSection("Hydrogen moving and charges")
+post.summarySection("Hydrogen moving and charges")
 for b in ["", "=", "#"]:
     for c in ["", "+", ".", "+."]:
         for l in [6, 8, 10, 12]:
@@ -16,7 +16,7 @@ p.withIndex = True
 for a in inputGraphs: a.print(p)
 inputGraphs[:] = []
 
-postSection("Double/Triple/Lablled bond")
+post.summarySection("Double/Triple/Lablled bond")
 smiles("O=C=C")
 smiles("CCCC#N")
 smiles("CCC(O)=O")
@@ -24,13 +24,13 @@ smiles("CC(=O)C")
 graphDFS("C{a}C")
 for a in inputGraphs: a.print()
 inputGraphs[:] = []
-postSection("middle C -> simple C + hidden H")
+post.summarySection("middle C -> simple C + hidden H")
 smiles("CCC")
 smiles("CC(O)C")
 smiles("N=CC")
 for a in inputGraphs: a.print()
 inputGraphs[:] = []
-postSection("collapse H")
+post.summarySection("collapse H")
 smiles("[H][H]")
 graphDFS("[Q][H][R]")
 graphDFS("[H]=[R]")
@@ -38,12 +38,12 @@ smiles("O")
 smiles("CNC")
 for a in inputGraphs: a.print()
 inputGraphs[:] = []
-postSection("Aromatic")
+post.summarySection("Aromatic")
 smiles("c1ccccc1")
 smiles("c1[nH]c2c(ncnc2n1)N")
 for a in inputGraphs: a.print()
 inputGraphs[:] = []
-postSection("Charges")
+post.summarySection("Charges")
 smiles("[OH-]")
 graphDFS("[O2-]")
 smiles("[H+]")

@@ -14,7 +14,7 @@ find_package(mod REQUIRED)
 # Boost.Python
 # -------------------------------------------------------------------------
 set(v 1.64.0)
-foreach(PY 3 34 35 36 37 38 39)
+foreach(PY 3 37 38 39 310 311 312 313 314 315 316 317 318 319)
     set(lib "python${PY}")
     find_package(Boost ${v} QUIET COMPONENTS ${lib})
     if(Boost_FOUND)
@@ -25,7 +25,7 @@ foreach(PY 3 34 35 36 37 38 39)
 endforeach()
 if(NOT Boost_FOUND)
     find_package(Boost ${v} REQUIRED COMPONENTS python3)
-    message(FATAL_ERROR "Could not find Boost.Python for Python 3. Tried 'python' wih suffixes 3, 34, 35, 36, 37, 38, and 39.")
+    message(FATAL_ERROR "Could not find Boost.Python for Python 3. Tried 'python' wih suffixes 3, 37, 38, 39, and 310 to 319.")
 endif()
 
 

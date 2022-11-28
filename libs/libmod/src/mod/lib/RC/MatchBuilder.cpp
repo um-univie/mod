@@ -13,7 +13,7 @@ bool MatchBuilder::VertexPred::operator()(lib::Rules::Vertex vSecond, lib::Rules
 
 // ----------------------------------------------------------------------------
 
-bool MatchBuilder::EdgePred::operator()(lib::Rules::Edge eFirst, lib::Rules::Edge eSecond) {
+bool MatchBuilder::EdgePred::operator()(lib::Rules::Edge eSecond, lib::Rules::Edge eFirst) {
 	return lib::GraphMorphism::predicateSelectByLabelSeetings(
 			get_labelled_left(rSecond.getDPORule()), get_labelled_right(rFirst.getDPORule()),
 			eSecond, eFirst, labelSettings);
@@ -23,7 +23,7 @@ bool MatchBuilder::EdgePred::operator()(lib::Rules::Edge eFirst, lib::Rules::Edg
 
 MatchBuilder::MatchBuilder(const lib::Rules::Real &rFirst, const lib::Rules::Real &rSecond, LabelSettings labelSettings)
 		: rFirst(rFirst), rSecond(rSecond), labelSettings(labelSettings),
-		  match(get_left(rSecond.getDPORule()), get_right(rFirst.getDPORule()),
+		  match(getL(rSecond.getDPORule().getRule()), getR(rFirst.getDPORule().getRule()),
 		        EdgePred{rFirst, rSecond, labelSettings}, VertexPred{rFirst, rSecond, labelSettings}) {}
 
 lib::Rules::Vertex MatchBuilder::getSecondFromFirst(lib::Rules::Vertex v) const {
@@ -71,7 +71,6 @@ std::unique_ptr<lib::Rules::Real> MatchBuilder::compose(bool verbose) const {
 	[[maybe_unused]] const bool cont = lib::GraphMorphism::matchSelectByLabelSettings(
 			get_labelled_left(rSecond.getDPORule()), get_labelled_right(rFirst.getDPORule()),
 			match.getVertexMap(), ls, mr);
-	assert(cont == bool(res));
 	return res;
 }
 
@@ -89,19 +88,20 @@ std::vector<std::unique_ptr<lib::Rules::Real>> MatchBuilder::composeAll(bool max
 			return true;
 		})(rFirst, rSecond, std::move(m), verbose, IO::Logger(std::cout));
 	};
-	const auto &gLeft = get_labelled_left(rSecond.getDPORule());
-	const auto &gRight = get_labelled_right(rFirst.getDPORule());
+	const auto &lgLeft = get_labelled_left(rSecond.getDPORule());
+	const auto &lgRight = get_labelled_right(rFirst.getDPORule());
 	if(maximum) {
-		auto mr = jla_boost::GraphMorphism::makeMaxmimumSubgraphCallback(get_graph(gLeft), get_graph(gRight), mrCompose);
+		auto mr = jla_boost::GraphMorphism::makeMaxmimumSubgraphCallback(get_graph(lgLeft), get_graph(lgRight),
+		                                                                 mrCompose);
 		// the non-extended match, and importantly send it through mr to make sure maximum is respected
-		lib::GraphMorphism::matchSelectByLabelSettings(gLeft, gRight, match.getSizedVertexMap(), ls, std::ref(mr));
+		lib::GraphMorphism::matchSelectByLabelSettings(lgLeft, lgRight, match.getSizedVertexMap(), ls, std::ref(mr));
 		// enumerate the rest
 		m(std::ref(mr));
 		// and now release the maximum ones
 		mr.outputMatches();
 	} else {
 		// the non-extended match
-		lib::GraphMorphism::matchSelectByLabelSettings(gLeft, gRight, match.getSizedVertexMap(), ls, mrCompose);
+		lib::GraphMorphism::matchSelectByLabelSettings(lgLeft, lgRight, match.getSizedVertexMap(), ls, mrCompose);
 		// enumerate the rest
 		m(mrCompose);
 	}

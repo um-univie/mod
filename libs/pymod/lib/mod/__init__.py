@@ -1,13 +1,14 @@
 
-import collections
+import collections.abc
 import ctypes
 import inspect
-import math
 import sys
 from typing import (
 	Any, Callable, cast, Generic, Iterable, List, Optional, Sequence,
 	TextIO, Tuple, Type, TypeVar, Union
 )
+
+_redirected = False
 
 _oldFlags = sys.getdlopenflags()
 sys.setdlopenflags(_oldFlags | ctypes.RTLD_GLOBAL)
@@ -164,6 +165,13 @@ def _funcWrap(F: Type["U"], f,
 	return module._sharedToStd(res)
 
 
+#----------------------------------------------------------
+# Common stuff
+#----------------------------------------------------------
+
+_lsString = LabelSettings(LabelType.String, LabelRelation.Isomorphism)
+
+
 ###########################################################
 # Chem
 ###########################################################
@@ -179,6 +187,7 @@ LabelType.__str__ = libpymod._LabelType__str__  # type: ignore
 LabelRelation.__str__ = libpymod._LabelRelation__str__  # type: ignore
 IsomorphismPolicy.__str__ = libpymod._IsomorphismPolicy__str__  # type: ignore
 SmilesClassPolicy.__str__ = libpymod._SmilesClassPolicy__str__  # type: ignore
+Action.__str__ = libpymod._Action__str__  # type: ignore
 
 config = getConfig()
 
@@ -218,11 +227,11 @@ def dgDerivations(ders: Iterable[Derivation]) -> DG:
 	dg = DG()
 	with dg.build() as b:
 		for d in ders:
-			b.addDerivation(d)  # type: ignore
+			b.addDerivation(d)
 	return dg
 
 def dgRuleComp(graphs: Iterable[Graph], strat: DGStrat,
-		labelSettings: LabelSettings=LabelSettings(LabelType.String, LabelRelation.Isomorphism),
+		labelSettings: LabelSettings=_lsString,
 		ignoreRuleLabelTypes: bool=False) -> DG:
 	_deprecation("dgRuleComp is deprecated. Use the new build interface.")
 	dg = DG(labelSettings=labelSettings, graphDatabase=graphs)
@@ -234,6 +243,8 @@ def dgRuleComp(graphs: Iterable[Graph], strat: DGStrat,
 		_deprecation("DG.calc() is deprecated. Use the new build interface.")
 		d = dg._ruleCompData  # type: ignore
 		dg.build().execute(d["strat"], ignoreRuleLabelTypes=d["ignoreRuleLabelTypes"])
+		object.__setattr__(dg, "_ruleCompData", None)
+		object.__setattr__(dg, "calc", None)
 	import types
 	object.__setattr__(dg, "calc", types.MethodType(_DG_calc, dg))
 	return dg
@@ -251,9 +262,7 @@ DG.load = _DG_load  # type: ignore
 
 _DG__init__old = DG.__init__
 def _DG__init__(self: DG, *,
-		labelSettings: LabelSettings = LabelSettings(
-			LabelType.String,
-			LabelRelation.Isomorphism),
+		labelSettings: LabelSettings=_lsString,
 		graphDatabase: List[Graph] = [],
 		graphPolicy: IsomorphismPolicy = IsomorphismPolicy.Check) -> None:
 	return _DG__init__old(self,  # type: ignore
@@ -318,27 +327,39 @@ DG.__eq__ = lambda self, other: self.id == other.id  # type: ignore
 DG.__hash__ = lambda self: self.id  # type: ignore
 
 
-class DGBuildContextManager:
-	dg: Optional[DG]
-	_builder: Optional[DGBuilder]
+class DGBuilder:
+	_builder: Optional[libpymod._DGBuilder]
 
 	def __init__(self, dg: DG) -> None:
 		assert dg is not None
-		self.dg = dg
-		self._builder = _DG_build_orig(self.dg)
+		self._builder = _DG_build_orig(dg)
 
-	def __enter__(self) -> "DGBuildContextManager":
+	def __enter__(self) -> "DGBuilder":
 		return self
 
 	def __exit__(self, exc_type, exc_val, exc_tb) -> None:
 		del self._builder
-		self.dg = None
 		self._builder = None
+
+	@property
+	def dg(self) -> DG:
+		assert self._builder
+		return self._builder.dg
+
+	@property
+	def isActive(self) -> bool:
+		assert self._builder
+		return self._builder.isActive
 
 	def addDerivation(self, d: Derivations,
 			graphPolicy: IsomorphismPolicy = IsomorphismPolicy.Check) -> DGHyperEdge:
 		assert self._builder
 		return self._builder.addDerivation(d, graphPolicy)
+
+	def addHyperEdge(self, e: DGHyperEdge,
+			graphPolicy: IsomorphismPolicy = IsomorphismPolicy.Check) -> DGHyperEdge:
+		assert self._builder
+		return self._builder.addHyperEdge(e, graphPolicy)
 
 	def execute(self, strategy: DGStrat, *, verbosity: int=2, ignoreRuleLabelTypes: bool=False) -> DGExecuteResult:
 		assert self._builder
@@ -360,7 +381,7 @@ class DGBuildContextManager:
 			prefixFilename(f), verbosity)
 
 _DG_build_orig = DG.build
-DG.build = lambda self: DGBuildContextManager(self)  # type: ignore
+DG.build = lambda self: DGBuilder(self)  # type: ignore
 
 
 #----------------------------------------------------------
@@ -396,7 +417,7 @@ def _makeGraphToVertexCallback(orig, name, func):
 	def callback(self, f, *args, **kwargs):
 		if hasattr(f, "__call__"):
 			import inspect
-			spec = inspect.getargspec(f)
+			spec = inspect.getfullargspec(f)
 			if len(spec.args) == 2:
 				_deprecation("The callback for {} seems to take two arguments, a graph and a derivation graph. This is deprecated, the callback should take a single DGVertex argument.".format(name))
 				fOrig = f
@@ -437,6 +458,16 @@ DGPrinter.setRotationOverwrite = (  # type: ignore
 _DGPrinter_setMirrorOverwrite_orig = DGPrinter.setMirrorOverwrite
 DGPrinter.setMirrorOverwrite = (  # type: ignore
 	lambda self, f: _DGPrinter_setMirrorOverwrite_orig(self, _funcWrap(libpymod._Func_BoolGraph, f)))
+
+_DGPrinter_setImageOverwrite_orig = DGPrinter.setImageOverwrite
+def _DGPrinter_setImageOverwrite(self, f):
+	if f is None:
+		wrapped = None
+	else:
+		wrapped = _funcWrap(
+			libpymod._Func_PairStringStringDGVertexInt, f)
+	return _DGPrinter_setImageOverwrite_orig(self, wrapped)
+DGPrinter.setImageOverwrite = _DGPrinter_setImageOverwrite  # type: ignore
 
 
 #----------------------------------------------------------
@@ -497,7 +528,7 @@ DGStrat.makeRightPredicate = _DGStrat_makeRightPredicate  # type: ignore
 # DG Strategy Prettification
 #----------------------------------------------------------
 
-_DGStratType = Union[DGStrat, Rule, "_DGStrat_sequenceProxy", Iterable['_DGStratType']]  # type: ignore
+_DGStratType = Union[DGStrat, Rule, "_DGStrat_sequenceProxy", Iterable['_DGStratType']]
 
 def dgStrat(s: _DGStratType) -> DGStrat:
 	if isinstance(s, DGStrat):
@@ -506,7 +537,7 @@ def dgStrat(s: _DGStratType) -> DGStrat:
 		return DGStrat.makeRule(s)
 	elif isinstance(s, _DGStrat_sequenceProxy):
 		return DGStrat.makeSequence(s.strats)
-	elif isinstance(s, collections.Iterable):
+	elif isinstance(s, collections.abc.Iterable):
 		# do deep dgStrat
 		l = [dgStrat(a) for a in s]
 		return DGStrat.makeParallel(l)	
@@ -656,12 +687,15 @@ def _Graph_print(self: Graph, first: Optional[GraphPrinter]=None, second: Option
 Graph.print = _Graph_print  # type: ignore
 
 _Graph_aut = Graph.aut
-Graph.aut = lambda self, labelSettings=LabelSettings(LabelType.String, LabelRelation.Isomorphism): _Graph_aut(self, labelSettings)  # type: ignore
+Graph.aut = lambda self, labelSettings=_lsString: _Graph_aut(self, labelSettings)  # type: ignore
 
 _Graph_isomorphism = Graph.isomorphism
-Graph.isomorphism = lambda self, g, maxNumMatches=1, labelSettings=LabelSettings(LabelType.String, LabelRelation.Isomorphism): _Graph_isomorphism(self, g, maxNumMatches, labelSettings)  # type: ignore
+Graph.isomorphism = lambda self, g, maxNumMatches=1, labelSettings=_lsString: _Graph_isomorphism(self, g, maxNumMatches, labelSettings)  # type: ignore
 _Graph_monomorphism = Graph.monomorphism
-Graph.monomorphism = lambda self, g, maxNumMatches=1, labelSettings=LabelSettings(LabelType.String, LabelRelation.Isomorphism): _Graph_monomorphism(self, g, maxNumMatches, labelSettings)  # type: ignore
+Graph.monomorphism = lambda self, g, maxNumMatches=1, labelSettings=_lsString: _Graph_monomorphism(self, g, maxNumMatches, labelSettings)  # type: ignore
+_Graph_enumerateMonomorphisms = Graph.enumerateMonomorphisms  # type: ignore
+Graph.enumerateMonomorphisms = lambda self, codomain, *, callback, labelSettings=_lsString: _Graph_enumerateMonomorphisms(  # type: ignore
+	self, codomain, _funcWrap(libpymod._Func_BoolVertexMapGraphGraph, callback), labelSettings)  # type: ignore
 
 _Graph_getGMLString = Graph.getGMLString
 Graph.getGMLString = lambda self, withCoords=False: _Graph_getGMLString(self, withCoords)  # type: ignore
@@ -678,9 +712,14 @@ def _graphLoad(a: Graph, name: Optional[str], add: bool) -> Graph:
 		inputGraphs.append(a)
 	return a
 
-def _graphsLoad(gs, add):
+def _graphsLoad(gs: List[Graph], add: bool) -> List[Graph]:
 	us = _unwrap(gs)
 	res = [_graphLoad(a, name=None, add=add) for a in us]
+	return res
+
+def _graphssLoad(gs: List[List[Graph]], add: bool) -> List[List[Graph]]:
+	us = _unwrap(gs)
+	res = [_graphsLoad(a, add=add) for a in us]
 	return res
 
 _Graph_fromGMLString_orig      = Graph.fromGMLString
@@ -688,36 +727,76 @@ _Graph_fromGMLFile_orig        = Graph.fromGMLFile
 _Graph_fromGMLStringMulti_orig = Graph.fromGMLStringMulti
 _Graph_fromGMLFileMulti_orig   = Graph.fromGMLFileMulti
 _Graph_fromDFS_orig            = Graph.fromDFS
+_Graph_fromDFSMulti_orig       = Graph.fromDFSMulti
 _Graph_fromSMILES_orig         = Graph.fromSMILES
 _Graph_fromSMILESMulti_orig    = Graph.fromSMILESMulti
+_Graph_fromMOLString_orig      = Graph.fromMOLString
+_Graph_fromMOLFile_orig        = Graph.fromMOLFile
+_Graph_fromMOLStringMulti_orig = Graph.fromMOLStringMulti
+_Graph_fromMOLFileMulti_orig   = Graph.fromMOLFileMulti
+_Graph_fromSDString_orig       = Graph.fromSDString
+_Graph_fromSDFile_orig         = Graph.fromSDFile
+_Graph_fromSDStringMulti_orig  = Graph.fromSDStringMulti
+_Graph_fromSDFileMulti_orig    = Graph.fromSDFileMulti
 
-def _Graph_fromGMLString(s: str, name: Optional[str] = None, add: bool = True) -> Graph:
-	return _graphLoad(_Graph_fromGMLString_orig(             s),  name, add)
-def _Graph_fromGMLFile(  f: str, name: Optional[str] = None, add: bool = True) -> Graph:
-	return _graphLoad(_Graph_fromGMLFile_orig(prefixFilename(f)), name, add)
-def _Graph_fromGMLStringMulti(s: str, add: bool = True):
-	return _graphsLoad(_Graph_fromGMLStringMulti_orig(             s),  add)
-def _Graph_fromGMLFileMulti(  f: str, add: bool = True):
-	return _graphsLoad(_Graph_fromGMLFileMulti_orig(prefixFilename(f)), add)
-def _Graph_fromDFS(      s: str, name: Optional[str] = None, add: bool = True) -> Graph:
-	return _graphLoad(_Graph_fromDFS_orig(                   s),  name, add)
-def _Graph_fromSMILES(   s: str, name: Optional[str] = None, allowAbstract: bool = False, classPolicy: SmilesClassPolicy = SmilesClassPolicy.NoneOnDuplicate, add: bool = True) -> Graph:
-	return _graphLoad(_Graph_fromSMILES_orig(                s, allowAbstract, classPolicy), name, add)
-def _Graph_fromSMILESMulti(s: str,                           allowAbstract: bool = False, classPolicy: SmilesClassPolicy = SmilesClassPolicy.NoneOnDuplicate, add: bool = True):
-	return _graphsLoad(_Graph_fromSMILESMulti_orig(          s, allowAbstract, classPolicy), add)
+def _Graph_fromGMLString(     s: str, name: Optional[str] = None,                                     add: bool = True) -> Graph:
+	return _graphLoad(_Graph_fromGMLString_orig(                   s                              ), name, add)
+def _Graph_fromGMLFile(       f: str, name: Optional[str] = None,                                     add: bool = True) -> Graph:
+	return _graphLoad(_Graph_fromGMLFile_orig(      prefixFilename(f)                             ), name, add)
+def _Graph_fromGMLStringMulti(s: str,                                                                 add: bool = True) -> List[Graph]:
+	return _graphsLoad(_Graph_fromGMLStringMulti_orig(             s                              ),       add)
+def _Graph_fromGMLFileMulti(  f: str,                                                                 add: bool = True) -> List[Graph]:
+	return _graphsLoad(_Graph_fromGMLFileMulti_orig(prefixFilename(f)                             ),       add)
+def _Graph_fromDFS(           s: str, name: Optional[str] = None,                                     add: bool = True) -> Graph:
+	return _graphLoad(_Graph_fromDFS_orig(                         s                              ), name, add)
+def _Graph_fromDFSMulti(      s: str,                                                                 add: bool = True) -> List[Graph]:
+	return _graphsLoad(_Graph_fromDFSMulti_orig(                   s                              ),       add)
+def _Graph_fromSMILES(        s: str, name: Optional[str] = None, allowAbstract: bool = False, classPolicy: SmilesClassPolicy = SmilesClassPolicy.NoneOnDuplicate,
+                                                                                                      add: bool = True) -> Graph:
+	return _graphLoad(_Graph_fromSMILES_orig(                      s,  allowAbstract, classPolicy ), name, add)
+def _Graph_fromSMILESMulti(   s: str,                             allowAbstract: bool = False, classPolicy: SmilesClassPolicy = SmilesClassPolicy.NoneOnDuplicate,
+                                                                                                      add: bool = True) -> List[Graph]:
+	return _graphsLoad(_Graph_fromSMILESMulti_orig(                s, allowAbstract, classPolicy  ),       add)
+def _Graph_fromMOLString(     s: str, name: Optional[str] = None, options: MDLOptions = MDLOptions(), add: bool = True) -> Graph:
+	return _graphLoad(_Graph_fromMOLString_orig(                   s,  options                    ), name, add)
+def _Graph_fromMOLFile(       f: str, name: Optional[str] = None, options: MDLOptions = MDLOptions(), add: bool = True) -> Graph:
+	return _graphLoad(_Graph_fromMOLFile_orig(      prefixFilename(f), options                    ), name, add)
+def _Graph_fromMOLStringMulti(s: str,                             options: MDLOptions = MDLOptions(), add: bool = True) -> List[Graph]:
+	return _graphsLoad(_Graph_fromMOLStringMulti_orig(             s,  options                    ),       add)
+def _Graph_fromMOLFileMulti(  f: str,                             options: MDLOptions = MDLOptions(), add: bool = True) -> List[Graph]:
+	return _graphsLoad(_Graph_fromMOLFileMulti_orig(prefixFilename(f), options                    ),       add)
+def _Graph_fromSDString(      s: str,                             options: MDLOptions = MDLOptions(), add: bool = True) -> List[Graph]:
+	return _graphsLoad(_Graph_fromSDString_orig(                   s,  options                    ),       add)
+def _Graph_fromSDFile(        f: str,                             options: MDLOptions = MDLOptions(), add: bool = True) -> List[Graph]:
+	return _graphsLoad(_Graph_fromSDFile_orig(      prefixFilename(f), options                    ),       add)
+def _Graph_fromSDStringMulti( s: str,                             options: MDLOptions = MDLOptions(), add: bool = True) -> List[List[Graph]]:
+	return _graphssLoad(_Graph_fromSDStringMulti_orig(             s,  options                    ),       add)
+def _Graph_fromSDFileMulti(   f: str,                             options: MDLOptions = MDLOptions(), add: bool = True) -> List[List[Graph]]:
+	return _graphssLoad(_Graph_fromSDFileMulti_orig(prefixFilename(f), options                    ),       add)
 
 Graph.fromGMLString      = _Graph_fromGMLString  # type: ignore
 Graph.fromGMLFile        = _Graph_fromGMLFile  # type: ignore
 Graph.fromGMLStringMulti = _Graph_fromGMLStringMulti  # type: ignore
 Graph.fromGMLFileMulti   = _Graph_fromGMLFileMulti  # type: ignore
 Graph.fromDFS            = _Graph_fromDFS  # type: ignore
+Graph.fromDFSMulti       = _Graph_fromDFSMulti  # type: ignore
 Graph.fromSMILES         = _Graph_fromSMILES  # type: ignore
 Graph.fromSMILESMulti    = _Graph_fromSMILESMulti  # type: ignore
+Graph.fromMOLString      = _Graph_fromMOLString  # type: ignore
+Graph.fromMOLFile        = _Graph_fromMOLFile  # type: ignore
+Graph.fromMOLStringMulti = _Graph_fromMOLStringMulti  # type: ignore
+Graph.fromMOLFileMulti   = _Graph_fromMOLFileMulti  # type: ignore
+Graph.fromSDString       = _Graph_fromSDString  # type: ignore
+Graph.fromSDFile         = _Graph_fromSDFile  # type: ignore
+Graph.fromSDStringMulti  = _Graph_fromSDStringMulti  # type: ignore
+Graph.fromSDFileMulti    = _Graph_fromSDFileMulti  # type: ignore
 
 graphGMLString = Graph.fromGMLString
 graphGML       = Graph.fromGMLFile
 graphDFS       = Graph.fromDFS
 smiles         = Graph.fromSMILES
+
+###########################################################
 
 Graph.__repr__ = lambda self: str(self) + "(" + str(self.id) + ")"  # type: ignore
 Graph.__eq__ = lambda self, other: self.id == other.id  # type: ignore
@@ -733,7 +812,35 @@ Graph.__setattr__ = _Graph__setattr__  # type: ignore
 
 
 ###########################################################
-# Rule
+# Post
+###########################################################
+
+def _post_command(self, cmd: str) -> None:
+	_deprecation("'post(cmd)' is deprecated. Use 'post.command(cmd)'.")
+	return post.command(cmd)
+post.__init__ = _post_command  # type: ignore
+
+def postFlush() -> None:
+	_deprecation("'postFlush()' is deprecated. Use 'post.flushCommands()'.")
+	return post.flushCommands()
+def postDisable() -> None:
+	_deprecation("'postDisable()' is deprecated. Use 'post.disableCommands()'.")
+	return post.disableCommands()
+def postEnable() -> None:
+	_deprecation("'postEnable()' is deprecated. Use 'post.enableCommands()'.")
+	return post.enableCommands()
+def postReset() -> None:
+	_deprecation("'postReset()' is deprecated. Use 'post.reopenCommandFile()'.")
+	return post.reopenCommandFile()
+
+def postChapter(heading: str) -> None:
+	_deprecation("'postChapter(heading)' is deprecated. Use 'post.summaryChapter(heading)'.")
+	post.summaryChapter(heading)
+def postSection(heading: str) -> None:
+	_deprecation("'postSection(heading)' is deprecated. Use 'post.summarySection(heading)'.")
+	post.summarySection(heading)
+
+
 ###########################################################
 
 inputRules = []
@@ -749,9 +856,9 @@ def _Rule_print(self: Rule, first: Optional[GraphPrinter]=None, second: Optional
 Rule.print = _Rule_print  # type: ignore
 
 _Rule_isomorphism = Rule.isomorphism
-Rule.isomorphism = lambda self, r, maxNumMatches=1, labelSettings=LabelSettings(LabelType.String, LabelRelation.Isomorphism): _Rule_isomorphism(self, r, maxNumMatches, labelSettings)  # type: ignore
+Rule.isomorphism = lambda self, r, maxNumMatches=1, labelSettings=_lsString: _Rule_isomorphism(self, r, maxNumMatches, labelSettings)  # type: ignore
 _Rule_monomorphism = Rule.monomorphism
-Rule.monomorphism = lambda self, r, maxNumMatches=1, labelSettings=LabelSettings(LabelType.String, LabelRelation.Isomorphism): _Rule_monomorphism(self, r, maxNumMatches, labelSettings)  # type: ignore
+Rule.monomorphism = lambda self, r, maxNumMatches=1, labelSettings=_lsString: _Rule_monomorphism(self, r, maxNumMatches, labelSettings)  # type: ignore
 
 _Rule_getGMLString = Rule.getGMLString
 Rule.getGMLString = lambda self, withCoords=False: _Rule_getGMLString(self, withCoords)  # type: ignore
@@ -765,14 +872,18 @@ def _ruleLoad(a: Rule, add: bool) -> Rule:
 
 _Rule_fromGMLString_orig = Rule.fromGMLString
 _Rule_fromGMLFile_orig   = Rule.fromGMLFile
+_Rule_fromDFS_orig       = Rule.fromDFS
 
 def _Rule_fromGMLString(s: str, invert: bool=False, add: bool=True) -> Rule:
 	return _ruleLoad(_Rule_fromGMLString_orig(s, invert), add)
 def _Rule_fromGMLFile(f: str, invert: bool=False, add: bool=True) -> Rule:
 	return _ruleLoad(_Rule_fromGMLFile_orig(prefixFilename(f), invert), add)
+def _Rule_fromDFS(s: str, invert: bool=False, add: bool=True) -> Rule:
+	return _ruleLoad(_Rule_fromDFS_orig(s, invert), add)
 
 Rule.fromGMLString = _Rule_fromGMLString  # type: ignore
 Rule.fromGMLFile   = _Rule_fromGMLFile  # type: ignore
+Rule.fromDFS       = _Rule_fromDFS  # type: ignore
 
 ruleGMLString = Rule.fromGMLString
 ruleGML       = Rule.fromGMLFile
@@ -799,7 +910,7 @@ RCEvaluator.__getattribute__ = _RCEvaluator__getattribute__  # type: ignore
 _RCEvaluator_eval = RCEvaluator.eval
 RCEvaluator.eval = lambda self, exp, *, verbosity=2: _unwrap(_RCEvaluator_eval(self, exp, verbosity))  # type: ignore
 
-def rcEvaluator(rules: Iterable[Rule], labelSettings: LabelSettings=LabelSettings(LabelType.String, LabelRelation.Isomorphism)) -> RCEvaluator:
+def rcEvaluator(rules: Iterable[Rule], labelSettings: LabelSettings=_lsString) -> RCEvaluator:
 	return libpymod._rcEvaluator(_wrap(libpymod._VecRule, rules), labelSettings)
 
 
@@ -823,7 +934,7 @@ RCMatch.composeAll = _RCMatch_composeAll  # type: ignore
 # RCExp prettification
 #----------------------------------------------------------
 
-_rcExpType = Union[RCExpExp, RCExpBind, RCExpComposeCommon, RCExpComposeParallel, RCExpComposeSub, RCExpComposeSuper, Iterable["_rcExpType"]]  # type: ignore
+_rcExpType = Union[RCExpExp, RCExpBind, RCExpComposeCommon, RCExpComposeParallel, RCExpComposeSub, RCExpComposeSuper, Iterable["_rcExpType"]]
 
 def rcExp(e: _rcExpType) -> RCExpExp:
 	if isinstance(e, RCExpExp) or isinstance(e, Rule) or isinstance(e, RCExpUnion):
@@ -832,7 +943,7 @@ def rcExp(e: _rcExpType) -> RCExpExp:
 		return e
 	elif isinstance(e, RCExpComposeCommon) or isinstance(e, RCExpComposeParallel) or isinstance(e, RCExpComposeSub) or isinstance(e, RCExpComposeSuper):
 		return e
-	elif isinstance(e, collections.Iterable):
+	elif isinstance(e, collections.abc.Iterable):
 		return RCExpUnion(_wrap(libpymod._VecRCExpExp, [rcExp(a) for a in e]))
 	else:
 		raise TypeError("Can not convert type '" + str(type(e)) + "' to RCExpExp")
@@ -842,7 +953,7 @@ _GraphOrGraphs = Union[Graph, Iterable[Graph]]
 def _rcConvertGraph(g: _GraphOrGraphs, cls: Type[Union[RCExpBind, RCExpId, RCExpUnbind]], f: Callable[[Graph], RCExpExp]) -> RCExpExp:
 	if isinstance(g, Graph):
 		return cls(g)
-	elif isinstance(g, collections.Iterable):
+	elif isinstance(g, collections.abc.Iterable):
 		l = [f(a) for a in g]
 		return rcExp(l)
 	else:

@@ -16,7 +16,12 @@ namespace mod::rule {
 
 // rst-class: rule::Rule
 // rst:
-// rst:		Model of a transformation rule in the Double Pushout formalism.
+// rst:		This class models a graph transformation rule in the Double Pushout formalism,
+// rst:		as the span :math:`L \leftarrow K \rightarrow R`.
+// rst:		The three graphs are referred to as respectively
+// rst:		the "left", "context", and "right" graphs of the rule.
+// rst:		See :ref:`graph-model` for more details.
+// rst:
 // rst:		See :ref:`cpp-rule/GraphInterface` for the documentation for the
 // rst:		graph interface for this class.
 // rst:
@@ -187,6 +192,15 @@ public:
 	// rst:		:throws: :class:`InputError` on bad data and when inversion fails due to constraints.
 	static std::shared_ptr<Rule> fromGMLString(const std::string &data, bool invert);
 	static std::shared_ptr<Rule> fromGMLFile(const std::string &file, bool invert);
+	// rst: .. function:: static std::shared_ptr<Rule> fromDFS(const std::string &data, bool invert)
+	// rst:
+	// rst:		Load a rule from a :ref:`RuleDFS <format-ruleDFS>` string, and store either that rule or its inverse.
+	// rst:		The name of the rule is the one specified, though when ``invert=True``
+	// rst:		the string ", inverse" is appended to the name.
+	// rst:
+	// rst:		:returns: the loaded (possibly inverted) rule.
+	// rst:		:throws: :class:`InputError` on bad data and when inversion fails due to constraints.
+	static std::shared_ptr<Rule> fromDFS(const std::string &data, bool invert);
 	// rst: .. function:: static std::shared_ptr<Rule> makeRule(std::unique_ptr<lib::Rules::Real> r)
 	// rst:               static std::shared_ptr<Rule> makeRule(std::unique_ptr<lib::Rules::Real> r, std::map<int, std::size_t> externalToInternalIds)
 	// rst:

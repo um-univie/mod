@@ -2,9 +2,8 @@
 #define JLA_BOOST_GRAPH_MORPHISM_MCGREGORCOMMONFINDER_HPP
 
 #include <jla_boost/graph/morphism/finders/CommonSubgraph.hpp>
+#include <jla_boost/graph/morphism/finders/mcgregor_common_subgraphs.hpp>
 #include <jla_boost/graph/morphism/models/PropertyMap.hpp>
-
-#include <boost/graph/mcgregor_common_subgraphs.hpp>
 
 namespace mod::lib::GraphMorphism {
 namespace detail {

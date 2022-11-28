@@ -28,10 +28,12 @@ function doDir {
 	find $inc -iname "*.hpp" | indentAndDir libs/$1
 	echo ")"
 	echo ""
-	echo "set(mod_$1_SRC_FILES"
-	find src -iname "*.cpp" | indentAndDir libs/$1
-	echo ")"
-	echo ""
+	if test -d src; then
+		echo "set(mod_$1_SRC_FILES"
+		find src -iname "*.cpp" | indentAndDir libs/$1
+		echo ")"
+		echo ""
+	fi
 	if test -d test; then
 		echo "set(mod_$1_TEST_CPP_FILES"
 		find test -iname "*.cpp" | sed "s/^test\/\(.*\)\.cpp$/\1/" | indent
@@ -50,6 +52,7 @@ function gen_file_lists {
 	doDir gml
 	doDir jla_boost
 	doDir libmod src
+	doDir pymodutils src
 	doDir pymod src
 	echo "set(mod_pymod_PY_FILES"
 	find libs/pymod/lib -iname "*.py" | indentAndDir
@@ -64,6 +67,12 @@ function gen_file_lists {
 	echo "set(mod_EXAMPLES_PY_FILES"
 	find examples/py -iname "*.py" | sed -e "s!^examples/!!" -e 's!\.py$!!' | indent
 	echo ")"
+	# this doesn't cover every single file, but it should be enough for normal edit-compile usage
+	echo "set(mod_DOC_FILES"
+	echo '${CMAKE_CURRENT_LIST_DIR}/doc/source/conf.py' | indent
+	echo '${CMAKE_CURRENT_LIST_DIR}/ChangeLog.rst' | indent
+	find doc/source -iname "*.rst" | sed -e 's!^!${CMAKE_CURRENT_LIST_DIR}/!' | indent
+	echo ")"
 }
 
 echo "VERSION"
@@ -72,10 +81,10 @@ echo "VERSION"
 v=$(git describe --tags --always --exclude "archive/*" | sed -e "s/^v//" -e 's/priv-\([0-9]*\.[0-9]*\)\.0/\1.1/' -e "s/-g.*$//" -e "s/-/./")
 echo $v > VERSION
 cat VERSION
-echo "CMakeFiles.txt"
-gen_file_lists > CMakeFiles.txt
 echo "Docs"
 doc/makeDocs.sh . || exit 1
+echo "CMakeFiles.txt"
+gen_file_lists > CMakeFiles.txt
 
 echo "Recursing in external/graph_canon"
 echo "---------------------------------"

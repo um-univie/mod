@@ -1,5 +1,5 @@
-#ifndef MOD_DG_PRINTER_H
-#define MOD_DG_PRINTER_H
+#ifndef MOD_DG_PRINTER_HPP
+#define MOD_DG_PRINTER_HPP
 
 #include <mod/BuildConfig.hpp>
 #include <mod/dg/DG.hpp>
@@ -37,8 +37,8 @@ struct MOD_DECL PrintData {
 	PrintData(const PrintData &other);
 	PrintData &operator=(const PrintData &other);
 	~PrintData();
-	lib::IO::DG::Write::Data &getData();
-	lib::IO::DG::Write::Data &getData() const;
+	lib::DG::Write::Data &getData();
+	const lib::DG::Write::Data &getData() const;
 	// rst: .. function:: std::shared_ptr<DG> getDG() const
 	// rst:
 	// rst:		:returns: the derivation graph the object holds data for.
@@ -86,7 +86,7 @@ struct MOD_DECL PrintData {
 	void reconnectTarget(DG::HyperEdge e, int eDup, DG::Vertex v, int vDupTar);
 private:
 	std::shared_ptr<DG> dg;
-	std::unique_ptr<lib::IO::DG::Write::Data> data;
+	std::unique_ptr<lib::DG::Write::Data> data;
 };
 // rst-class-end:
 
@@ -101,7 +101,7 @@ struct MOD_DECL Printer {
 	Printer(const Printer &) = delete;
 	Printer &operator=(const Printer &) = delete;
 	~Printer();
-	lib::IO::DG::Write::Printer &getPrinter() const;
+	lib::DG::Write::Printer &getPrinter() const;
 	// rst: .. function:: graph::Printer &getGraphPrinter()
 	// rst:               const graph::Printer &getGraphPrinter() const
 	// rst:
@@ -118,7 +118,7 @@ struct MOD_DECL Printer {
 	// rst: .. function:: 	void setWithGraphImages(bool value)
 	// rst:                 bool getWithGraphImages() const
 	// rst:
-	// rst:		Control whether or not each vertex is printed with a image of its graph in it.
+	// rst:		Control whether or not each vertex is printed with an image of its graph in it.
 	void setWithGraphImages(bool value);
 	bool getWithGraphImages() const;
 	// rst: .. function:: void setLabelsAsLatexMath(bool value)
@@ -266,6 +266,27 @@ public:
 	// rst:		:throws: :class:`LogicError` if `!f`.
 	void setMirrorOverwrite(std::function<bool(std::shared_ptr<graph::Graph>)> f);
 public:
+	// rst: .. function:: void setImageOverwrite(std::function<std::pair<std::string, std::string>(DG::Vertex v, int dupNum)> f)
+	// rst:
+	// rst:		Overwrite the image generation for graphs depicted in the vertices of the printed derivation graph.
+	// rst:		For each duplicate of each vertex to be depicted, the given callback is called.
+	// rst:		It must then return two strings:
+	// rst:
+	// rst:		1. Either
+	// rst:
+	// rst:		  - an empty string if the standard depiction should be used, in which case the second string is ignored, or
+	// rst:		  - the filename of the PDF that should be included in the final compiled figure.
+	// rst:
+	// rst:		2. Either
+	// rst:
+	// rst:		  - an empty string if no additional post-processing command is needed, or
+	// rst:		  - a string of Bash code which will be inserted in the post-processing instructions.
+	// rst:		    For example, one can write out source code in the callback, and then return a command that compiles
+	// rst:		    that code into the PDF needed by inclusion.
+	// rst:
+	// rst:		The image overwrite can be removed by calling with `nullptr`.
+	void setImageOverwrite(std::function<std::pair<std::string, std::string>(DG::Vertex v, int dupNum)> f);
+public:
 	// rst: .. function:: void setGraphvizPrefix(const std::string &prefix)
 	// rst:               const std::string &getGraphvizPrefix() const
 	// rst:
@@ -282,10 +303,10 @@ public:
 	const std::string &getTikzpictureOption() const;
 private:
 	std::unique_ptr<graph::Printer> graphPrinter;
-	std::unique_ptr<lib::IO::DG::Write::Printer> printer;
+	std::unique_ptr<lib::DG::Write::Printer> printer;
 };
 // rst-class-end:
 
 } // namespace mod::dg
 
-#endif /* MOD_DG_PRINTER_H */
+#endif // MOD_DG_PRINTER_HPP

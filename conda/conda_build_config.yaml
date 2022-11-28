@@ -1,11 +1,15 @@
+# Note: conda-forge has global pinning, e.g., of boost, so make sure we include
+#       variations for those verions.
+# https://github.com/conda-forge/conda-forge-pinning-feedstock/tree/main/recipe
 python:
-  - 3.6
   - 3.7
   - 3.8
   - 3.9
+  - 3.10
+  - 3.11
 boost:
-  - 1.74
-  - 1.76
+  - 1.78
+  - 1.80
 pin_run_as_build:
   python: x.x
   boost: x.x

@@ -52,7 +52,6 @@ utilMods = (
 	('interface', 'mod'),
 	('lib', 'lib'),
 	('lib', 'Chem'),
-	('lib', 'IO'),
 )
 clusterColour = {
 	'interface': 'green',

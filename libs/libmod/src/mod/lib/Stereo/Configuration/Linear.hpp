@@ -1,11 +1,9 @@
-#ifndef MOD_LIB_STEREO_CONFIGURATION_LINEAR_H
-#define MOD_LIB_STEREO_CONFIGURATION_LINEAR_H
+#ifndef MOD_LIB_STEREO_CONFIGURATION_LINEAR_HPP
+#define MOD_LIB_STEREO_CONFIGURATION_LINEAR_HPP
 
 #include <mod/lib/Stereo/Configuration/Configuration.hpp>
 
-namespace mod {
-namespace lib {
-namespace Stereo {
+namespace mod::lib::Stereo {
 
 struct Linear final : StaticDegree<2> {
 	Linear(const GeometryGraph &g, const std::array<EmbeddingEdge, 2> &edges);
@@ -22,8 +20,6 @@ private:
 	virtual std::pair<std::string, bool> asPrettyStringImpl(std::function<std::size_t(const EmbeddingEdge&)> getNeighbourId) const override;
 };
 
-} // namespace Stereo
-} // namespace lib
-} // namespace mod
+} // namespace mod::lib::Stereo
 
-#endif /* MOD_LIB_STEREO_CONFIGURATION_LINEAR_H */
+#endif // MOD_LIB_STEREO_CONFIGURATION_LINEAR_HPP

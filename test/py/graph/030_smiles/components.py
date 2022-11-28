@@ -18,5 +18,5 @@ gs = Graph.fromSMILESMulti("C1C.CC1")
 assert len(gs) == 1
 
 fail(lambda: Graph.fromSMILES("C.1CCCC.1"),
-	"Error in graph loading from smiles string",
+	"Error in loading from inline SMILES string",
 	err=InputError, isSubstring=True)

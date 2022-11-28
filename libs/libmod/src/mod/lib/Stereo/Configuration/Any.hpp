@@ -1,11 +1,9 @@
-#ifndef MOD_LIB_STEREO_CONFIGURATION_ANY_H
-#define MOD_LIB_STEREO_CONFIGURATION_ANY_H
+#ifndef MOD_LIB_STEREO_CONFIGURATION_ANY_HPP
+#define MOD_LIB_STEREO_CONFIGURATION_ANY_HPP
 
 #include <mod/lib/Stereo/Configuration/Configuration.hpp>
 
-namespace mod {
-namespace lib {
-namespace Stereo {
+namespace mod::lib::Stereo {
 
 struct Any final : DynamicDegree {
 	Any(const GeometryGraph &g, const EmbeddingEdge *b, const EmbeddingEdge *e);
@@ -22,8 +20,6 @@ private:
 	virtual std::pair<std::string, bool> asPrettyStringImpl(std::function<std::size_t(const EmbeddingEdge&)> getNeighbourId) const override;
 };
 
-} // namespace Stereo
-} // namespace lib
-} // namespace mod
-#endif /* MOD_LIB_STEREO_CONFIGURATION_ANY_H */
+} // namespace mod::lib::Stereo
 
+#endif // MOD_LIB_STEREO_CONFIGURATION_ANY_HPP

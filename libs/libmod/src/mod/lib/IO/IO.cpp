@@ -33,6 +33,7 @@ struct PostStream {
 		std::cerr << "Does '" << prefix << "' exist?" << std::endl;
 		std::exit(1);
 	}
+
 private:
 	bool enabled;
 	std::ofstream s;
@@ -44,7 +45,7 @@ PostStream postStream;
 
 } // namespace
 
-std::string getUniqueFilePrefix() {
+std::string makeUniqueFilePrefix() {
 	static int count = 0;
 
 	std::string strCount;
@@ -61,7 +62,7 @@ std::string getUniqueFilePrefix() {
 std::string escapeForLatex(const std::string &str) {
 	std::string res;
 	res.reserve(str.size());
-	for(char c : str) {
+	for(char c: str) {
 		switch(c) {
 		case '#':
 		case '_':
@@ -82,9 +83,10 @@ std::string escapeForLatex(const std::string &str) {
 
 std::string asLatexMath(const std::string &str) {
 	std::string res = "$\\mathrm{";
-	for(char c : str) {
+	for(char c: str) {
 		switch(c) {
 		case ' ':
+		case '#':
 			res += "\\";
 			res += c;
 			break;
@@ -103,6 +105,7 @@ std::ostream &nullStream() {
 	};
 	struct NullStream : public std::ostream {
 		NullStream() : std::ostream(&buffer) {}
+
 	private:
 		NullBuffer buffer;
 	};
@@ -115,12 +118,16 @@ std::ostream &post() {
 	return postStream.getStream();
 }
 
-void postReset() {
-	postStream.resetStream();
-}
-
 void postDisable() {
 	postStream.dynamicallyEnabled = false;
+}
+
+void postEnable() {
+	postStream.dynamicallyEnabled = true;
+}
+
+void postReopenCommandFile() {
+	postStream.resetStream();
 }
 
 std::ostream &Logger::indent() const {

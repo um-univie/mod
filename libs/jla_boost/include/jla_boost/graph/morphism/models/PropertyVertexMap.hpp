@@ -3,7 +3,7 @@
 
 // A wrapper that attaches arbitrary tagged data to a vertex map implementation.
 
-#include <jla_boost/graph/morphism/VertexMap.hpp>
+#include <jla_boost/graph/morphism/Concepts.hpp>
 
 #include <graph_canon/tagged_list.hpp>
 

@@ -1,29 +1,26 @@
-#ifndef MOD_LIB_GRAPHMORPHISM_SHORTESTPATH_H
-#define MOD_LIB_GRAPHMORPHISM_SHORTESTPATH_H
+#ifndef MOD_LIB_GRAPHMORPHISM_SHORTESTPATH_HPP
+#define MOD_LIB_GRAPHMORPHISM_SHORTESTPATH_HPP
 
 #include <mod/Config.hpp>
 #include <mod/lib/LabelledGraph.hpp>
 #include <mod/lib/GraphMorphism/Constraints/Constraint.hpp>
 
-#include <jla_boost/graph/morphism/VertexMap.hpp>
+#include <jla_boost/graph/morphism/Concepts.hpp>
 
 #include <boost/graph/dijkstra_shortest_paths.hpp>
 
-namespace mod {
-namespace lib {
-namespace GraphMorphism {
-namespace Constraints {
+namespace mod::lib::GraphMorphism::Constraints {
 
 template<typename Graph>
 struct ShortestPath : Constraint<Graph> {
 	MOD_VISITABLE();
 	using Vertex = typename boost::graph_traits<Graph>::vertex_descriptor;
 public:
-
 	ShortestPath(Vertex vSrc, Vertex vTar, Operator op, int length)
-	: vSrc(vSrc), vTar(vTar), op(op), length(length) { }
+			: vSrc(vSrc), vTar(vTar), op(op), length(length) {}
 
-	virtual std::unique_ptr<Constraint<Graph> > clone() const override {
+	virtual std::unique_ptr<Constraint < Graph> >
+	clone() const override {
 		return std::make_unique<ShortestPath>(vSrc, vTar, op, length);
 	}
 
@@ -31,15 +28,15 @@ public:
 		return "ShortestPath";
 	}
 
-	virtual bool supportsTerm() const override {
-		return true;
-	}
-
 	template<typename Visitor, typename LabelledGraphCodom, typename VertexMap>
-	bool matches(Visitor &vis, const Graph &gDom, const LabelledGraphCodom &lgCodom, const VertexMap &m, const LabelSettings ls) const {
+	bool matches(Visitor &vis, const Graph &gDom, const LabelledGraphCodom &lgCodom, const VertexMap &m,
+	             const LabelSettings ls) const {
 		using GraphCodom = typename LabelledGraphTraits<LabelledGraphCodom>::GraphType;
-		static_assert(std::is_same<Graph, typename jla_boost::GraphMorphism::VertexMapTraits<VertexMap>::GraphDom>::value, "");
-		static_assert(std::is_same<GraphCodom, typename jla_boost::GraphMorphism::VertexMapTraits<VertexMap>::GraphCodom>::value, "");
+		static_assert(std::is_same<Graph, typename jla_boost::GraphMorphism::VertexMapTraits<VertexMap>::GraphDom>::value,
+		              "");
+		static_assert(
+				std::is_same<GraphCodom, typename jla_boost::GraphMorphism::VertexMapTraits<VertexMap>::GraphCodom>::value,
+				"");
 		const GraphCodom &gCodom = get_graph(lgCodom);
 		{ // verify
 #ifndef NDEBUG
@@ -50,11 +47,16 @@ public:
 		}
 		const auto check = [this](int length) -> bool {
 			switch(op) {
-			case Operator::EQ: return length == this->length;
-			case Operator::LT: return length < this->length;
-			case Operator::GT: return length > this->length;
-			case Operator::LEQ: return length <= this->length;
-			case Operator::GEQ: return length >= this->length;
+			case Operator::EQ:
+				return length == this->length;
+			case Operator::LT:
+				return length < this->length;
+			case Operator::GT:
+				return length > this->length;
+			case Operator::LEQ:
+				return length <= this->length;
+			case Operator::GEQ:
+				return length >= this->length;
 			}
 			assert(false);
 			std::abort();
@@ -84,9 +86,6 @@ public:
 	int length;
 };
 
-} // namespace Constraints
-} // namespace GraphMorphism
-} // namespace lib
-} // namespace mod
+} // namespace mod::lib::GraphMorphism::Constraints
 
-#endif /* MOD_LIB_GRAPHMORPHISM_SHORTESTPATH_H */
+#endif // MOD_LIB_GRAPHMORPHISM_SHORTESTPATH_HPP

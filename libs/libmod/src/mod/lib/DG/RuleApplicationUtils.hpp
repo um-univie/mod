@@ -185,7 +185,7 @@ struct BoundRuleStorage {
 				logger.indent() << "BoundRules: added <" << r->getName() << ", {";
 				for(const auto *g : p.boundGraphs)
 					logger.s << " " << g->getName();
-				logger.s << " }> onlyRight: " << std::boolalpha << r->isOnlySide(lib::Rules::Membership::Right)
+				logger.s << " }> onlyRight: " << std::boolalpha << r->isOnlySide(lib::Rules::Membership::R)
 				         << std::endl;
 			}
 		}
@@ -207,10 +207,9 @@ private:
 // ===========================================================================
 
 struct GraphData {
-	using SideVertex = boost::graph_traits<lib::Rules::DPOProjection>::vertex_descriptor;
+	using SideVertex = boost::graph_traits<lib::DPO::CombinedRule::SideProjectedGraphType>::vertex_descriptor;
 public:
 	GraphData() : gPtr(new lib::Graph::GraphType()), pStringPtr(new lib::Graph::PropString(*gPtr)) {}
-
 public:
 	std::unique_ptr<lib::Graph::GraphType> gPtr;
 	std::unique_ptr<lib::Graph::PropString> pStringPtr;
@@ -224,15 +223,15 @@ std::vector<std::shared_ptr<graph::Graph>> splitRule(const lib::Rules::LabelledR
                                                      const bool withStereo,
                                                      CheckIfNew checkIfNew,
                                                      OnDup onDup) {
-	if(rDPO.numRightComponents == 0) MOD_ABORT; // continue;
+	if(get_num_connected_components(get_labelled_right(rDPO)) == 0) return {};
 	using Vertex = lib::Graph::Vertex;
 	using Edge = lib::Graph::Edge;
-	using SideVertex = boost::graph_traits<lib::Rules::DPOProjection>::vertex_descriptor;
-	using SideEdge = boost::graph_traits<lib::Rules::DPOProjection>::edge_descriptor;
+	using SideVertex = boost::graph_traits<lib::DPO::CombinedRule::SideProjectedGraphType>::vertex_descriptor;
+	using SideEdge = boost::graph_traits<lib::DPO::CombinedRule::SideProjectedGraphType>::edge_descriptor;
 
-	std::vector<GraphData> products(rDPO.numRightComponents);
-	const auto &compMap = rDPO.rightComponents;
-	const auto &gRight = get_right(rDPO);
+	std::vector<GraphData> products(get_num_connected_components(get_labelled_right(rDPO)));
+	const auto &compMap = get_component(get_labelled_right(rDPO));
+	const auto &gRight = get_R_projected(rDPO);
 	auto rpString = get_string(get_labelled_right(rDPO));
 	assert(num_vertices(gRight) == num_vertices(get_graph(rDPO)));
 	std::vector<Vertex> vertexMap(num_vertices(gRight));

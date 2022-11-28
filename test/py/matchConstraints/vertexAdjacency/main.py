@@ -1,4 +1,4 @@
-post("disableSummary")
+post.disableInvokeMake()
 
 lString = LabelSettings(LabelType.String, LabelRelation.Unification)
 lTerm = LabelSettings(LabelType.Term, LabelRelation.Unification)

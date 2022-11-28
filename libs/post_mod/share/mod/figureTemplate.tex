@@ -4,16 +4,11 @@
 \usepackage{hyperref}
 
 % prevent the figures from changing when recompiling
-% http://tex.stackexchange.com/questions/5401/how-to-prevent-different-checksums-for-different-typesets
-% http://superuser.com/questions/130347/how-do-i-produce-bytewise-consistent-documents-with-pdflatex
-\pdfinfo{/CreationDate (FixedForDiffing)
-/ModDate (FixedForDiffing)}
-
-% in some future, use the following
-% see http://tug.org/pipermail/pdftex/2015-July/008953.html
-%\pdfinfoomitdate=1
-%\pdftrailerid{}
-
+% https://tex.stackexchange.com/questions/95080/making-an-anonymous-pdf-file-using-pdflatex
+\pdfinfo{ /ModDate ()  /CreationDate () }
+\hypersetup{pdfinfo={ Creator={}, Producer={} }}
+\pdftrailerid{} %Remove ID
+\pdfsuppressptexinfo15 %Suppress PTEX.Fullbanner and info of imported PDFs
 
 \begin{document}
 \begin{preview}

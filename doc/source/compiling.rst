@@ -19,6 +19,7 @@ First, get MØD and install the easy dependencies:
 .. code-block:: bash
 
 	git clone --recursive https://github.com/jakobandersen/mod.git
+	cd mod
 	./bootstrap.sh
 	pip3 install -r requirements.txt  # may need --user to install in home folder instead of system folders
 	# Ubuntu:
@@ -139,6 +140,13 @@ See also :ref:`dependencies` for elaboration on some of them.
   :option:`mod_post --install-format`/:option:`mod_post --install-format-sudo`
   options.
 - ``-DBUILD_PY_MOD=on``, whether to build the Python bindings or not.
+- ``-DBUILD_PY_MOD_PIP=on``, whether to install the Python bindings via pip or
+  not. The bindings are always installed in the ``<prefix>/lib`` folder, so
+  a normal ``import`` in Python will probably not find the module.
+  Having this setting on will enable a build of a fake Python package to be
+  installed via ``pip`` in the default system folder. This fake package will
+  redirect the import to the real location.
+  This package can be uninstalled with ``pip uninstall mod-jakobandersen``.
 - ``-DBUILD_TESTING=off``, whether to allow test building or not.
   This is forced to ``off`` when used via ``add_subdirectory``.
   When ``on`` the tests can be build with ``make tests`` and run with ``ctest``.
@@ -197,7 +205,7 @@ related to them.
 - libMØD:
 
   - A C++ compiler with reasonable C++17 support is needed.
-  - `Boost <http://boost.org>`__ dev >= 1.73
+  - `Boost <http://boost.org>`__ dev >= 1.76
     (use ``-DBOOST_ROOT=<path>`` for non-standard locations).
   - `GraphCanon <https://github.com/jakobandersen/graph_canon>`__ >= 0.5.
     This is fulfilled via a Git submodule (make sure to do
@@ -207,7 +215,8 @@ related to them.
     This is fulfilled via a Git submodule (make sure to do
     ``git submodule update --init --recursive``),
     but if another source is needed, set ``-DUSE_NESTED_NLOHMANN_JSON=off``.
-  - (optional) `Open Babel`_ dev, >= 2.3.2 (``-DWITH_OPENBABEL=on``).
+  - (optional) `Open Babel <http://openbabel.org>`__ dev, >= 2.3.2
+    (``-DWITH_OPENBABEL=on``).
 
 - PyMØD (``-DBUILD_PY_MOD=on``):
 
@@ -268,13 +277,13 @@ Non-standard Python Installation
 """"""""""""""""""""""""""""""""
 
 Passing ``--with-python=python3`` to ``bootstrap.sh`` should work.
-This adds a line similar to "``using python : 3.3 ;``" to
+This adds a line similar to "``using python : 3.7 ;``" to
 ``project-config.jam``.
 After compilation (running ``b2``) the file ``stage/lib/libboost_python3.so``
 should exist. If not, it did not detect Python 3 properly.
 
 If Python is installed in a non-standard location, add the a line similar to
-"``using python : 3.3 : python3 : /path/to/python/3/installtion/include ;``" to
+"``using python : 3.7 : python3 : /path/to/python/3/installtion/include ;``" to
 ``project-config.jam``, where the last path is the path to the
 ``include``-folder of the Python-installation.
 
@@ -286,4 +295,4 @@ Before running ``b2`` create the file ``user-config.jam`` in the root of the
 home dir (see `here
 <http://www.boost.org/boost-build2/doc/html/bbv2/overview/configuration.html>`__
 for the full documentation). Put a line similar to
-"``using gcc : : /path/to/g++-4.8``" in the file.
+"``using gcc : : /path/to/g++-10``" in the file.

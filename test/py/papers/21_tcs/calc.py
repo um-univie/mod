@@ -120,19 +120,19 @@ def handleResult(r1: Rule, r2: Rule, res: Tuple[CompRes, CompRes],
 	pIndex.withIndex = True
 
 	def printRules(rs, txt):
-		postChapter(txt)
+		post.summaryChapter(txt)
 		if printGood:
-			postSection("Good")
+			post.summarySection("Good")
 			for r in rs[0]:
 				r.print(p)
 		if printBad:
-			postSection("Bad")
+			post.summarySection("Bad")
 			for r in rs[1]:
 				r.print(p)
 
 	# Insert visualizations of the input into the summary.
 	if printInput:
-		postChapter("Input")
+		post.summaryChapter("Input")
 		r1.print(p)
 		r2.print(p)
 	# Insert visualisations of the results into the summary.
@@ -173,21 +173,21 @@ def compute(r1: Rule, r2: Rule, rc: RCEvaluator):
 	# invariant.
 
 	# Use our machinery from above:
-	postChapter("UseBoostCommonSubgraph = True")
+	post.summaryChapter("UseBoostCommonSubgraph = True")
 	print("UseBoostCommonSubgraph = True")
 	print("=" * 80)
 	config.rc.useBoostCommonSubgraph = True
 	res = compose(r1, r2, rc)
 	handleResult(r1, r2, res)
 
-	postChapter("UseBoostCommonSubgraph = False")
+	post.summaryChapter("UseBoostCommonSubgraph = False")
 	print("UseBoostCommonSubgraph = False")
 	print("=" * 80)
 	config.rc.useBoostCommonSubgraph = False
 	res = compose(r1, r2, rc)
 	handleResult(r1, r2, res)
 
-	post("disableSummary")  # it takes quite a while due to all the matches
+	post.disableInvokeMake()  # it takes quite a while due to all the matches
 
 # First load our two rules:
 # - an identity rule with the left-hand side of the Aldol Addition rule, and
@@ -290,14 +290,14 @@ rule [
 
 rc = rcEvaluator(inputRules)
 
-postChapter("No no-edge 'constraints'")
+post.summaryChapter("No no-edge 'constraints'")
 print("No no-edge 'constraints'")
 print("#" * 80)
 compute(aldolAdd_F_id, aldolAdd_F, rc)
 
-postChapter("No-edge 'constraints'")
+post.summaryChapter("No-edge 'constraints'")
 print("No-edge 'constraints'")
 print("#" * 80)
 compute(aldolAdd_F_id_noEdge, aldolAdd_F_noEdge, rc)
 
-#post("enableSummary")
+#post.enableInvokeMake()

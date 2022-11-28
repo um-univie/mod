@@ -6,8 +6,6 @@
 #include <mod/graph/Graph.hpp>
 #include <mod/lib/DG/NonHyper.hpp>
 #include <mod/lib/Graph/Single.hpp>
-#include <mod/lib/IO/DG.hpp>
-#include <mod/lib/IO/Graph.hpp>
 #include <mod/lib/IO/IO.hpp>
 #include <mod/lib/Rules/Real.hpp>
 
@@ -15,9 +13,7 @@
 
 #include <boost/graph/adjacency_list.hpp>
 
-namespace mod {
-namespace lib {
-namespace DG {
+namespace mod::lib::DG {
 
 //------------------------------------------------------------------------------
 // HyperCreator
@@ -366,6 +362,4 @@ mod::Derivation Hyper::getDerivation(Vertex v) const {
 	return d;
 }
 
-} // namespace DG
-} // namespace lib
-} // namespace mod
+} // namespace mod::lib::DG
