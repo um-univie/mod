@@ -42,7 +42,7 @@ New Features
 - Doc, a new section, :ref:`graph-model`, and restructuring of
   :ref:`formats`.
 - The :ref:`GraphDFS format <format-graphDFS>` now supports disconnected graphs
-  through ``.``-edges, simiilar to :ref:`SMILES <graph-smiles>`.
+  through ``.``-edges, similar to :ref:`SMILES <graph-smiles>`.
   The graph loading functions
   :cpp:func:`graph::Graph::fromDFSMulti` and
   :py:func:`Graph.fromDFSMulti` has been added to load disconnected graphs.
@@ -50,7 +50,7 @@ New Features
   rules from a :ref:`RuleDFS <format-ruleDFS>` string, a new line-notation for
   rules based on :ref:`GraphDFS <format-graphDFS>`.
 - Added support for :ref:`MOL and SD <graph-mdl>` formats for loading graphs.
-  The loadeing can be done through the functions
+  The loading can be done through the functions
 
   - :cpp:func:`graph::Graph::fromMOLString`/:py:func:`Graph.fromMOLString`,
   - :cpp:func:`graph::Graph::fromMOLFile`/:py:func:`Graph.fromMOLFile`,
