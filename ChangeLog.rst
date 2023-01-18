@@ -7,6 +7,11 @@ Changes
 develop
 =======
 
+Bugs Fixed
+----------
+
+- Fix CMake finding proper Python version on macOS when multiple are installed.
+
 
 
 v0.14.0 (2022-11-29)

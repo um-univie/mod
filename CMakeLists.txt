@@ -84,7 +84,7 @@ if(NOT CMAKE_CXX_STANDARD)
 endif()
 
 set(libmod_config_dependencies "")
-set(libmod_config_find_files "FindPackageHandleStandardArgs.cmake;FindPackageMessage.cmake;FindPkgConfig.cmake;SelectLibraryConfigurations.cmake")
+set(libmod_config_find_files "")
 
 
 # Boost
