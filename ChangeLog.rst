@@ -11,7 +11,10 @@ Bugs Fixed
 ----------
 
 - Fix CMake finding proper Python version on macOS when multiple are installed.
-
+- Fix :ref:mod-wrapper: such that it uses the Python executable that was found
+  during CMake configuration.
+  The environment variable :envvar:`MOD_PYTHON` can still be used
+  to overwrite the Python executable.
 
 
 v0.14.0 (2022-11-29)

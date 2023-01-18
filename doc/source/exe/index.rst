@@ -87,14 +87,19 @@ Execution Customization
 .. envvar:: MOD_PYTHON
 
   Set this environment variable to the executable to start in non-interactive
-  mode. If not set ``python3`` will be used.
+  mode. If not set it will use a Python interpreter appropriate for the compiled
+  bindings. This interpreter was found during configuration of the build system.
+  When executing the wrapper script the exact command can be seen in the output.
 
 .. envvar:: MOD_IPYTHON
 
   Set this environment variable to the executable to start in interactive
   mode (when :option:`-i` is given).
-  If not set ``ipython3`` will be used, if it can be found, otherwise
-  ``python3`` will be used.
+  If not set ``ipython3`` will be used, if it can be found, otherwise it will
+  fall back to standard Python interpreter as if :option:`-i` was not given.
+
+  .. warning:: The standard ``ipython3`` may not be appropriate for the compiled bindings,
+    which may result in a crash during import of the ``mod`` module.
 
 
 Post-processing Options

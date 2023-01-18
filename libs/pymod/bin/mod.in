@@ -401,7 +401,7 @@ EOF
 		echo "Command ------------------------------------------------------------"
 	fi
 	if [ "x$MOD_PYTHON" = 'x' ]; then
-		pythonvm="python3"
+		pythonvm="@Python3_EXECUTABLE@"
 	else
 		pythonvm="$MOD_PYTHON"
 	fi
