@@ -26,7 +26,7 @@ function printHelp {
 	echo "	--profile       Use callgrind to profile the execution."
 	echo "	--memcheck      Use valgrind to do memory check."
 	echo "	--vgArgs <arg>  Options for valgrind."
-	echo "	--debug         Start gdb with the program."
+	echo "	--debug         Start the execution through GDB or LLDB."
 }
 
 # Args
@@ -230,7 +230,7 @@ done
 
 
 
-# Create precommand (gdb/valgrind/...)
+# Create precommand (debugger/valgrind/...)
 precommand=""
 if [ $profile = "true" -o $memcheck = "true" ]; then
 	precommand="valgrind --error-exitcode=42"
@@ -256,7 +256,16 @@ elif [ $memcheck = "true" ]; then
 		precommand="$precommand --suppressions=$MOD_PREFIX/share/mod/$pythonSupp"
 	fi
 elif [ $debug = "true" ]; then
-	precommand="gdb --args"
+	if [ "x$MOD_DEBUGGER" != 'x' ]; then
+		precommand="$MOD_DEBUGGER"
+	elif command -v gdb &> /dev/null; then
+		precommand="gdb --args"
+	elif command -v lldb &> /dev/null; then
+		precommand="lldb --"
+	else
+		echo "Debugging requested but neither gdb nor lldb exists, and $$MOD_DEBUGGER has not been set."
+		exit 1
+	fi
 fi
 
 # Prepare output folder

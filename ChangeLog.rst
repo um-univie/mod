@@ -7,6 +7,14 @@ Changes
 develop
 =======
 
+New Features
+------------
+
+- Added support for LLDB in :option:`mod --debug`. It will be used if
+  GDB is not available.
+- Added :envvar:`MOD_DEBUGGER` to overwrite which debugger is invoked.
+
+
 Bugs Fixed
 ----------
 
