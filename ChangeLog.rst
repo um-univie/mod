@@ -15,6 +15,9 @@ Bugs Fixed
   during CMake configuration.
   The environment variable :envvar:`MOD_PYTHON` can still be used
   to overwrite the Python executable.
+- Fix :cpp:func:`post::enableCompileSummary`/:py:meth:`post.enableCompileSummary`,
+  to emit the correct command, instead of acting like
+  :cpp:func:`post::enableInvokeMake`/:py:meth:`post.enableInvokeMake`.
 
 
 v0.14.0 (2022-11-29)
