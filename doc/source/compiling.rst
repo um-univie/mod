@@ -30,7 +30,7 @@ First, get MØD and install the easy dependencies:
 	sudo pacman -Suy $(bindep -b | tr '\n' ' ')
 	# macOS:
 	brew tap Homebrew/bundle  # may not be needed
-	brew bundle
+	brew bundle # perhaps restart the terminal afterwards to pick up the new commands
 
 Then:
 
@@ -55,8 +55,12 @@ Finally, compile and install MØD:
 
 	mkdir build
 	cd build
+	# Configure the project, either just
+	cmake ../
+	# or if you compiled and installed Boost manually, then something like
 	cmake ../ -DCMAKE_PREFIX_PATH=path/to/boost
-	make
+	# Build and install:
+	make -j <n> # where <n> is the number of CPU cores you have, e.g., 'make -j 8'
 	sudo make install
 
 

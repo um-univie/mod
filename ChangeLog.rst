@@ -26,6 +26,7 @@ Bugs Fixed
 - Fix :cpp:func:`post::enableCompileSummary`/:py:meth:`post.enableCompileSummary`,
   to emit the correct command, instead of acting like
   :cpp:func:`post::enableInvokeMake`/:py:meth:`post.enableInvokeMake`.
+- Elaborate :ref:`quick-start` instructions for compiling to make it a bit easier to follow.
 
 
 v0.14.0 (2022-11-29)
