@@ -81,27 +81,33 @@ std::vector<std::unique_ptr<lib::Rules::Real>> MatchBuilder::composeAll(bool max
 	if(ls.relation == LabelRelation::Specialisation)
 		ls.relation = LabelRelation::Unification;
 	std::vector<std::unique_ptr<lib::Rules::Real>> res;
-	auto m = match; // make a copy we can modify
-	auto mrCompose = [this, verbose, &res](auto &&m, const auto &gSecond, const auto &gFirst) -> bool {
-		return detail::MatchMakerCallback([&res](std::unique_ptr<lib::Rules::Real> rr) {
-			res.push_back(std::move(rr));
-			return true;
-		})(rFirst, rSecond, std::move(m), verbose, IO::Logger(std::cout));
+	const auto mrCompose = [this, verbose, ls, &res](auto &&m, const auto &gSecond, const auto &gFirst) -> bool {
+		const auto &lgLeft = get_labelled_left(rSecond.getDPORule());
+		const auto &lgRight = get_labelled_right(rFirst.getDPORule());
+		return lib::GraphMorphism::matchSelectByLabelSettings(
+				lgLeft, lgRight, std::move(m), ls,
+				[this, verbose, &res](auto &&m, const auto &gSecond, const auto &gFirst) -> bool {
+					return detail::MatchMakerCallback([&res](std::unique_ptr<lib::Rules::Real> rr) {
+						res.push_back(std::move(rr));
+						return true;
+					})(rFirst, rSecond, std::move(m), verbose, IO::Logger(std::cout));
+				});
 	};
 	const auto &lgLeft = get_labelled_left(rSecond.getDPORule());
 	const auto &lgRight = get_labelled_right(rFirst.getDPORule());
+	auto m = match; // make a copy we can modify
 	if(maximum) {
 		auto mr = jla_boost::GraphMorphism::makeMaxmimumSubgraphCallback(get_graph(lgLeft), get_graph(lgRight),
 		                                                                 mrCompose);
 		// the non-extended match, and importantly send it through mr to make sure maximum is respected
-		lib::GraphMorphism::matchSelectByLabelSettings(lgLeft, lgRight, match.getSizedVertexMap(), ls, std::ref(mr));
+		mr(match.getSizedVertexMap(), get_graph(lgLeft), get_graph(lgRight));
 		// enumerate the rest
 		m(std::ref(mr));
 		// and now release the maximum ones
 		mr.outputMatches();
 	} else {
 		// the non-extended match
-		lib::GraphMorphism::matchSelectByLabelSettings(lgLeft, lgRight, match.getSizedVertexMap(), ls, mrCompose);
+		mrCompose(match.getSizedVertexMap(), get_graph(lgLeft), get_graph(lgRight));
 		// enumerate the rest
 		m(mrCompose);
 	}

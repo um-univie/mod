@@ -27,6 +27,8 @@ Bugs Fixed
   to emit the correct command, instead of acting like
   :cpp:func:`post::enableInvokeMake`/:py:meth:`post.enableInvokeMake`.
 - Elaborate :ref:`quick-start` instructions for compiling to make it a bit easier to follow.
+- Fix :cpp:func:`rule::CompositionMatch::composeAll`/:py:meth:`RCMatch.composeAll` when using
+  terms and/or stereo information, to actually switch to those label settings.
 
 
 v0.14.0 (2022-11-29)
