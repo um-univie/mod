@@ -29,6 +29,7 @@ Bugs Fixed
 - Elaborate :ref:`quick-start` instructions for compiling to make it a bit easier to follow.
 - Fix :cpp:func:`rule::CompositionMatch::composeAll`/:py:meth:`RCMatch.composeAll` when using
   terms and/or stereo information, to actually switch to those label settings.
+- Allow term and stereo in :cpp:func:`graph::Graph::enumerateMonomorphisms`/:py:meth:`Graph.enumerateMonomorphisms`.
 
 
 v0.14.0 (2022-11-29)

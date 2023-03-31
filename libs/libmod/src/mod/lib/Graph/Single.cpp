@@ -335,8 +335,6 @@ Single::monomorphism(const Single &gDom, const Single &gCodom, std::size_t maxNu
 void Single::enumerateMonomorphisms(const Single &gDom, const Single &gCodom,
                                     std::function<bool(VertexMap<graph::Graph, graph::Graph>)> callback,
                                     LabelSettings labelSettings) {
-	if(labelSettings.type != LabelType::String) MOD_ABORT;
-	if(labelSettings.withStereo) MOD_ABORT;
 	morphism(gDom, gCodom, labelSettings, GM_MOD::VF2Monomorphism(),
 	         GM::makeSliceProps( // Slice away the properties for now
 			         GM::makeTransform(
