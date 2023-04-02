@@ -172,7 +172,8 @@ void checkTermParsing(const lib::Graph::Single &g, LabelSettings ls) {
 } // namespace
 
 std::size_t
-Graph::isomorphism(std::shared_ptr<graph::Graph> codomain, std::size_t maxNumMatches, LabelSettings labelSettings) const {
+Graph::isomorphism(std::shared_ptr<graph::Graph> codomain, std::size_t maxNumMatches,
+                   LabelSettings labelSettings) const {
 	if(!codomain) throw LogicError("codomain is null.");
 	checkTermParsing(*g, labelSettings);
 	checkTermParsing(*codomain->g, labelSettings);
@@ -180,16 +181,27 @@ Graph::isomorphism(std::shared_ptr<graph::Graph> codomain, std::size_t maxNumMat
 }
 
 std::size_t
-Graph::monomorphism(std::shared_ptr<graph::Graph> codomain, std::size_t maxNumMatches, LabelSettings labelSettings) const {
+Graph::monomorphism(std::shared_ptr<graph::Graph> codomain, std::size_t maxNumMatches,
+                    LabelSettings labelSettings) const {
 	if(!codomain) throw LogicError("codomain is null.");
 	checkTermParsing(*g, labelSettings);
 	checkTermParsing(*codomain->g, labelSettings);
 	return lib::Graph::Single::monomorphism(*g, *codomain->g, maxNumMatches, labelSettings);
 }
 
+void Graph::enumerateIsomorphisms(std::shared_ptr<Graph> codomain,
+                                  std::shared_ptr<Function<bool(VertexMap<Graph, Graph>)>> callback,
+                                  LabelSettings labelSettings) const {
+	if(!codomain) throw LogicError("codomain is null.");
+	if(!callback) throw LogicError("callback is null.");
+	checkTermParsing(*g, labelSettings);
+	checkTermParsing(*codomain->g, labelSettings);
+	return lib::Graph::Single::enumerateIsomorphisms(*g, *codomain->g, toStdFunction(callback), labelSettings);
+}
+
 void Graph::enumerateMonomorphisms(std::shared_ptr<Graph> codomain,
                                    std::shared_ptr<Function<bool(VertexMap<Graph, Graph>)>> callback,
-											  LabelSettings labelSettings) const {
+                                   LabelSettings labelSettings) const {
 	if(!codomain) throw LogicError("codomain is null.");
 	if(!callback) throw LogicError("callback is null.");
 	checkTermParsing(*g, labelSettings);

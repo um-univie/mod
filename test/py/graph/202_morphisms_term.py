@@ -25,6 +25,21 @@ assert fab.isomorphism(gab, labelSettings=lsIso) == 0
 assert fab.isomorphism(gab, labelSettings=lsSpec) == 0
 assert fab.isomorphism(gab, labelSettings=lsUni) > 0
 
+res = [
+	[(0, 0), (1, 1)],
+	[(0, 1), (1, 0)],
+]
+check(ab.enumerateIsomorphisms, cd, res, ls=lsIso)
+check(ab.enumerateIsomorphisms, cd, res, ls=lsSpec)
+check(ab.enumerateIsomorphisms, cd, res, ls=lsUni)
+
+check(ab.enumerateIsomorphisms, xx, [], ls=lsIso)
+check(ab.enumerateIsomorphisms, xx, res, ls=lsSpec)
+check(ab.enumerateIsomorphisms, xx, res, ls=lsUni)
+
+check(fab.enumerateIsomorphisms, gab, [], ls=lsIso)
+check(fab.enumerateIsomorphisms, gab, [], ls=lsSpec)
+check(fab.enumerateIsomorphisms, gab, [[(0, 1), (1, 0)]], ls=lsUni)
 
 
 assert ab.monomorphism(cdq, labelSettings=lsIso) > 0

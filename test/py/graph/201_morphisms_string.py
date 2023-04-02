@@ -7,12 +7,20 @@ co2_2 = smiles("O=C=O", "CO2 2")
 assert co2.isomorphism(co2_2) > 0
 assert co2.isomorphism(co) == 0
 
+check(co2.enumerateIsomorphisms, co2_2, [
+	[(0, 0), (1, 1), (2, 2)],
+	[(0, 0), (1, 2), (1, 2)],
+])
+check(co2.enumerateIsomorphisms, co2_2, [], numMaps=0)
+check(co2.enumerateIsomorphisms, co, [])
+check(co.enumerateIsomorphisms, co2, [])
+check(co.enumerateIsomorphisms, co2, [], numMaps=0)
+check(co2.enumerateIsomorphisms, co, [])
 
 
 assert co.monomorphism(co2) > 0
 assert co2.monomorphism(co2_2) > 0
 assert co2.monomorphism(co) == 0
-
 
 check(co2.enumerateMonomorphisms, co2_2, [
 	[(0, 0), (1, 1), (2, 2)],

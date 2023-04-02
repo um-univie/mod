@@ -172,29 +172,34 @@ public:
 	unsigned int eLabelCount(const std::string &label) const;
 public: // Morphisms
 	// rst: .. function:: std::size_t isomorphism(std::shared_ptr<Graph> codomain, std::size_t maxNumMatches, LabelSettings labelSettings) const
+	// rst:               std::size_t monomorphism(std::shared_ptr<Graph> codomain, std::size_t maxNumMatches, LabelSettings labelSettings) const
 	// rst:
-	// rst:		:returns: the number of isomorphisms found from this graph to `codomain`, but at most `maxNumMatches`.
+	// rst:		:returns: the number of isomorphisms/monomorphisms found from this graph to `codomain`, but at most `maxNumMatches`.
 	// rst:		:throws LogicError: if `codomain` is null.
-	std::size_t isomorphism(std::shared_ptr<Graph> codomain, std::size_t maxNumMatches, LabelSettings labelSettings) const;
-	// rst: .. function:: std::size_t monomorphism(std::shared_ptr<Graph> codomain, std::size_t maxNumMatches, LabelSettings labelSettings) const
-	// rst:
-	// rst:		:returns: the number of monomorphisms from this graph to `codomain`, though at most `maxNumMatches`.
-	// rst:		:throws LogicError: if `codomain` is null.
-	std::size_t monomorphism(std::shared_ptr<Graph> codomain, std::size_t maxNumMatches, LabelSettings labelSettings) const;
-	// rst: .. function:: void enumerateMonomorphisms(std::shared_ptr<Graph> codomain, \
+	std::size_t
+	isomorphism(std::shared_ptr<Graph> codomain, std::size_t maxNumMatches, LabelSettings labelSettings) const;
+	std::size_t
+	monomorphism(std::shared_ptr<Graph> codomain, std::size_t maxNumMatches, LabelSettings labelSettings) const;
+	// rst: .. function:: void enumerateIsomorphisms(std::shared_ptr<Graph> codomain, \
+	// rst:                  std::shared_ptr<Function<bool(VertexMap<Graph, Graph>)>> callback, \
+	// rst:                  LabelSettings labelSettings) const
+	// rst:               void enumerateMonomorphisms(std::shared_ptr<Graph> codomain, \
 	// rst:                  std::shared_ptr<Function<bool(VertexMap<Graph, Graph>)>> callback, \
 	// rst:                  LabelSettings labelSettings) const
 	// rst:
-	// rst:		Perform substructure search of this graph into the given codomain graph.
-	// rst:		Whenever a match is found, the corresponding monomorphism is copied into a vertex map
+	// rst:		Perform (sub)structure search of this graph into the given codomain graph.
+	// rst:		Whenever a match is found, the corresponding isomorphism/monomorphism is copied into a vertex map
 	// rst:		and the given callback is invoked with it.
 	// rst:		The return value from the callback determines whether to continue the search or not.
 	// rst:
 	// rst:		:throws LogicError: if `codomain` is null.
 	// rst:		:throws LogicError: if `callback` is null.
+	void enumerateIsomorphisms(std::shared_ptr<Graph> codomain,
+	                           std::shared_ptr<Function<bool(VertexMap<Graph, Graph>)>> callback,
+	                           LabelSettings labelSettings) const;
 	void enumerateMonomorphisms(std::shared_ptr<Graph> codomain,
-										 std::shared_ptr<Function<bool(VertexMap<Graph, Graph>)>> callback,
-										 LabelSettings labelSettings) const;
+	                            std::shared_ptr<Function<bool(VertexMap<Graph, Graph>)>> callback,
+	                            LabelSettings labelSettings) const;
 public:
 	// rst: .. function:: std::shared_ptr<Graph> makePermutation() const
 	// rst:
@@ -314,7 +319,7 @@ public:
 	// rst:			The graphs are the connected components of the graph specified in the SMILES string.
 	static std::vector<std::shared_ptr<Graph>> fromSMILESMulti(const std::string &smiles);
 	static std::vector<std::shared_ptr<Graph>> fromSMILESMulti(const std::string &smiles, bool allowAbstract,
-																				  SmilesClassPolicy classPolicy);
+	                                                           SmilesClassPolicy classPolicy);
 	// ===========================================================================
 	// rst: .. function:: static std::shared_ptr<Graph> fromMOLString(const std::string &data, const MDLOptions &options)
 	// rst:               static std::shared_ptr<Graph> fromMOLFile(const std::string &file, const MDLOptions &options)

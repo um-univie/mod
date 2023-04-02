@@ -300,8 +300,10 @@ bool Single::isomorphic(const Single &gDom, const Single &gCodom, LabelSettings 
 		return gDom.getName() == gCodom.getName();
 	if(&gDom == &gCodom) return true;
 	switch(getConfig().graph.isomorphismAlg.get()) {
-	case Config::IsomorphismAlg::SmilesCanonVF2: return isomorphismSmilesOrCanonOrVF2(gDom, gCodom, labelSettings);
-	case Config::IsomorphismAlg::VF2: return isomorphismVF2(gDom, gCodom, 1, labelSettings);
+	case Config::IsomorphismAlg::SmilesCanonVF2:
+		return isomorphismSmilesOrCanonOrVF2(gDom, gCodom, labelSettings);
+	case Config::IsomorphismAlg::VF2:
+		return isomorphismVF2(gDom, gCodom, 1, labelSettings);
 	case Config::IsomorphismAlg::Canon:
 		if(labelSettings.relation != LabelRelation::Isomorphism)
 			throw LogicError("Can only do isomorphism via canonicalisation with the isomorphism relation.");
@@ -332,39 +334,55 @@ Single::monomorphism(const Single &gDom, const Single &gCodom, std::size_t maxNu
 	return morphismMax(gDom, gCodom, maxNumMatches, labelSettings, GM_MOD::VF2Monomorphism());
 }
 
+namespace {
+
+auto makeMorphismEnumerationCallback(const Single &gDom, const Single &gCodom,
+                                     std::function<bool(VertexMap<graph::Graph, graph::Graph>)> callback) {
+	return GM::makeSliceProps( // Slice away the properties for now
+			GM::makeTransform(
+					GM::ToInvertibleVectorVertexMap(),
+					[&gDom, &gCodom, callback](auto &&mVal, const auto &dom, const auto &codom) -> bool {
+						auto mPtr = std::make_shared<GM::InvertibleVectorVertexMap<GraphType, GraphType>>(
+								std::move(mVal));
+						auto gDomAPI = gDom.getAPIReference();
+						auto gCodomAPI = gCodom.getAPIReference();
+						auto m = VertexMap<graph::Graph, graph::Graph>(
+								gDomAPI, gCodomAPI,
+								[gDomAPI, gCodomAPI, mPtr](graph::Graph::Vertex vDom) -> graph::Graph::Vertex {
+									const auto &gDom = gDomAPI->getGraph().getGraph();
+									const auto &gCodom = gCodomAPI->getGraph().getGraph();
+									assert(vDom.getId() < num_vertices(gDom));
+									const auto v = vertices(gDom).first[vDom.getId()];
+									const auto vRes = get(*mPtr, gDom, gCodom, v);
+									return gCodomAPI->vertices()[get(boost::vertex_index_t(), gCodom, vRes)];
+								},
+								[gDomAPI, gCodomAPI, mPtr](graph::Graph::Vertex vCodom) -> graph::Graph::Vertex {
+									const auto &gDom = gDomAPI->getGraph().getGraph();
+									const auto &gCodom = gCodomAPI->getGraph().getGraph();
+									assert(vCodom.getId() < num_vertices(gCodom));
+									const auto v = vertices(gCodom).first[vCodom.getId()];
+									const auto vRes = get_inverse(*mPtr, gDom, gCodom, v);
+									return gDomAPI->vertices()[get(boost::vertex_index_t(), gDom, vRes)];
+								}
+						);
+						return callback(std::move(m));
+					}));
+}
+
+} // namespace
+
+void Single::enumerateIsomorphisms(const Single &gDom, const Single &gCodom,
+                                   std::function<bool(VertexMap<graph::Graph, graph::Graph>)> callback,
+                                   LabelSettings labelSettings) {
+	morphism(gDom, gCodom, labelSettings, GM_MOD::VF2Isomorphism(),
+	         makeMorphismEnumerationCallback(gDom, gCodom, callback));
+}
+
 void Single::enumerateMonomorphisms(const Single &gDom, const Single &gCodom,
                                     std::function<bool(VertexMap<graph::Graph, graph::Graph>)> callback,
                                     LabelSettings labelSettings) {
 	morphism(gDom, gCodom, labelSettings, GM_MOD::VF2Monomorphism(),
-	         GM::makeSliceProps( // Slice away the properties for now
-			         GM::makeTransform(
-					         GM::ToInvertibleVectorVertexMap(),
-					         [&gDom, &gCodom, callback](auto &&mVal, const auto &dom, const auto &codom) -> bool {
-						         auto mPtr = std::make_shared<GM::InvertibleVectorVertexMap<GraphType, GraphType>>(
-								         std::move(mVal));
-						         auto gDomAPI = gDom.getAPIReference();
-						         auto gCodomAPI = gCodom.getAPIReference();
-						         auto m = VertexMap<graph::Graph, graph::Graph>(
-								         gDomAPI, gCodomAPI,
-								         [gDomAPI, gCodomAPI, mPtr](graph::Graph::Vertex vDom) -> graph::Graph::Vertex {
-									         const auto &gDom = gDomAPI->getGraph().getGraph();
-									         const auto &gCodom = gCodomAPI->getGraph().getGraph();
-									         assert(vDom.getId() < num_vertices(gDom));
-									         const auto v = vertices(gDom).first[vDom.getId()];
-									         const auto vRes = get(*mPtr, gDom, gCodom, v);
-									         return gCodomAPI->vertices()[get(boost::vertex_index_t(), gCodom, vRes)];
-								         },
-								         [gDomAPI, gCodomAPI, mPtr](graph::Graph::Vertex vCodom) -> graph::Graph::Vertex {
-									         const auto &gDom = gDomAPI->getGraph().getGraph();
-									         const auto &gCodom = gCodomAPI->getGraph().getGraph();
-									         assert(vCodom.getId() < num_vertices(gCodom));
-									         const auto v = vertices(gCodom).first[vCodom.getId()];
-									         const auto vRes = get_inverse(*mPtr, gDom, gCodom, v);
-									         return gDomAPI->vertices()[get(boost::vertex_index_t(), gDom, vRes)];
-								         }
-						         );
-						         return callback(std::move(m));
-					         })));
+	         makeMorphismEnumerationCallback(gDom, gCodom, callback));
 }
 
 bool Single::nameLess(const Single *g1, const Single *g2) {

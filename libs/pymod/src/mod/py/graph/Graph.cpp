@@ -173,37 +173,32 @@ void Graph_doExport() {
 					// rst:			:rtype: int
 			.def("eLabelCount", &Graph::eLabelCount)
 					// rst:		.. method:: isomorphism(codomain, maxNumMatches=1, labelSettings=LabelSettings(LabelType.String, LabelRelation.Isomorphism))
+					// rst:		            monomorphism(codomain, maxNumMatches=1, labelSettings=LabelSettings(LabelType.String, LabelRelation.Isomorphism))
 					// rst:
 					// rst:			:param Graph codomain: the codomain graph for finding morphisms.
-					// rst:			:param int maxNumMatches: the maximum number of isomorphisms to search for.
+					// rst:			:param int maxNumMatches: the maximum number of isomorphisms/monomorphisms to search for.
 					// rst:			:param LabelSettings labelSettings: the label settings to use during the search.
-					// rst:			:returns: the number of isomorphisms from this graph to ``other``, but at most ``maxNumMatches``.
+					// rst:			:returns: the number of isomorphisms/monomorphisms from this graph to ``other``, but at most ``maxNumMatches``.
 					// rst:			:rtype: int
 					// rst:			:raises LogicError: if ``codomain`` is null.
 			.def("isomorphism", &Graph::isomorphism)
-					// rst:		.. method:: monomorphism(codomain, maxNumMatches=1, labelSettings=LabelSettings(LabelType.String, LabelRelation.Isomorphism))
-					// rst:
-					// rst:			:param Graph codomain: the codomain graph for finding morphisms.
-					// rst:			:param int maxNumMatches: the maximum number of monomorphisms to search for.
-					// rst:			:param LabelSettings labelSettings: the label settings to use during the search.
-					// rst:			:returns: the number of monomorphisms from this graph to ``other``, though at most ``maxNumMatches``.
-					// rst:			:rtype: int
-					// rst:			:raises LogicError: if ``codomain`` is null.
 			.def("monomorphism", &Graph::monomorphism)
-					// rst:		.. method:: enumerateMonomorphisms(codomain, callback,  labelSettings=LabelSettings(LabelType.String, LabelRelation.Isomorphism))
+					// rst:		.. method:: enumerateIsomorphisms(codomain, callback,  labelSettings=LabelSettings(LabelType.String, LabelRelation.Isomorphism))
+					// rst:		            enumerateMonomorphisms(codomain, callback,  labelSettings=LabelSettings(LabelType.String, LabelRelation.Isomorphism))
 					// rst:
-					// rst:			Perform substructure search of this graph into the given codomain graph.
-					// rst:			Whenever a match is found, the corresponding monomorphism is copied into a vertex map
+					// rst:			Perform (sub)structure search of this graph into the given codomain graph.
+					// rst:			Whenever a match is found, the corresponding isomorphism/monomorphism is copied into a vertex map
 					// rst:			and the given callback is invoked with it.
 					// rst:
 					// rst:			:param Graph codomain: the codomain graph for finding morphisms.
-					// rst:			:param callback: the function to call with each found monomorphism.
+					// rst:			:param callback: the function to call with each found isomorphism/monomorphism.
 					// rst:				If ``False`` is returned from it, then the search is stopped.
 					// rst:			:type callback: Callable[[protocols.VertexMap], bool]
 					// rst:			:param LabelSettings labelSettings: the label settings to use during the search.
 					// rst:
 					// rst:			:raises LogicError: if ``codomain`` is null.
 					// rst:			:raises LogicError: if ``callback`` is null.
+			.def("enumerateIsomorphisms", &Graph::enumerateIsomorphisms)
 			.def("enumerateMonomorphisms", &Graph::enumerateMonomorphisms)
 					// rst:		.. method:: makePermutation()
 					// rst:

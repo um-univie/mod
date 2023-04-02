@@ -691,8 +691,14 @@ Graph.aut = lambda self, labelSettings=_lsString: _Graph_aut(self, labelSettings
 
 _Graph_isomorphism = Graph.isomorphism
 Graph.isomorphism = lambda self, g, maxNumMatches=1, labelSettings=_lsString: _Graph_isomorphism(self, g, maxNumMatches, labelSettings)  # type: ignore
+
 _Graph_monomorphism = Graph.monomorphism
 Graph.monomorphism = lambda self, g, maxNumMatches=1, labelSettings=_lsString: _Graph_monomorphism(self, g, maxNumMatches, labelSettings)  # type: ignore
+
+_Graph_enumerateIsomorphisms = Graph.enumerateIsomorphisms  # type: ignore
+Graph.enumerateIsomorphisms = lambda self, codomain, *, callback, labelSettings=_lsString: _Graph_enumerateIsomorphisms(  # type: ignore
+	self, codomain, _funcWrap(libpymod._Func_BoolVertexMapGraphGraph, callback), labelSettings)  # type: ignore
+
 _Graph_enumerateMonomorphisms = Graph.enumerateMonomorphisms  # type: ignore
 Graph.enumerateMonomorphisms = lambda self, codomain, *, callback, labelSettings=_lsString: _Graph_enumerateMonomorphisms(  # type: ignore
 	self, codomain, _funcWrap(libpymod._Func_BoolVertexMapGraphGraph, callback), labelSettings)  # type: ignore
