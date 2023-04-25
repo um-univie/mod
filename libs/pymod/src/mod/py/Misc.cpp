@@ -5,6 +5,8 @@
 
 #include <mod/py/Function.hpp>
 
+#include <cstdint>
+
 namespace mod::Py {
 
 // rst:
