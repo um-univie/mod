@@ -11,6 +11,8 @@ jobs:
         submodules: 'recursive'
     - name: Set PATH
       run: echo "${HOME}/.local/bin" >> $GITHUB_PATH
+    - name: Update apt
+      run: sudo apt update
     - name: Install pip dependencies
       run: |
         sudo apt install python3-setuptools python3-wheel
@@ -45,6 +47,8 @@ jobs:
         submodules: 'recursive'
     - name: Set PATH
       run: echo "${HOME}/.local/bin" >> $GITHUB_PATH
+    - name: Update apt
+      run: sudo apt update
     - name: Install pip dependencies
       run: |
         sudo apt install python3-setuptools python3-wheel
@@ -79,6 +83,8 @@ jobs:
         submodules: 'recursive'
     - name: Set PATH
       run: echo "${HOME}/.local/bin" >> $GITHUB_PATH
+    - name: Update apt
+      run: sudo apt update
     - name: Install pip dependencies
       run: |
         sudo apt install python3-setuptools python3-wheel
