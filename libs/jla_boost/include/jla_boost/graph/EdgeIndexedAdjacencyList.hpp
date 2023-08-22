@@ -104,9 +104,8 @@ public: // MutableGraph
 
 	friend std::pair<edge_descriptor, bool> add_edge(vertex_descriptor u, vertex_descriptor v, Self &g) {
 		auto eId = num_edges(g.g);
-		auto ePair = add_edge(u, v, g.g);
+		auto ePair = add_edge(u, v, {eId, {}}, g.g);
 		assert(ePair.second);
-		put(boost::edge_index_t(), g.g, ePair.first, eId);
 		return ePair;
 	}
 	//	remove_edge(u, v, g) void
@@ -114,7 +113,13 @@ public: // MutableGraph
 	//	remove_edge(e_iter, g)
 public: // MutablePropertyGraph
 	//add_vertex(vp, g)	vertex_descriptor
-	//add_edge(u, v, ep, g)	std::pair<edge_descriptor, bool>
+
+	friend std::pair<edge_descriptor, bool> add_edge(vertex_descriptor u, vertex_descriptor v, EdgeProperty ep, Self &g) {
+		auto eId = num_edges(g.g);
+		auto ePair = add_edge(u, v, {eId, std::move(ep)}, g.g);
+		assert(ePair.second);
+		return ePair;
+	}
 public: // PropertyGraph
 
 	template<typename PropertyTag>

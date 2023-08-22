@@ -261,9 +261,8 @@ void Evaluator::suggestComposition(const lib::Rules::Real *rFirst,
 	for(Vertex vOut : asRange(adjacent_vertices(vComp, rcg))) {
 		if(vOut == vResult) return;
 	}
-	std::pair<Edge, bool> pResult = add_edge(vComp, vResult, rcg);
+	[[maybe_unused]] std::pair<Edge, bool> pResult = add_edge(vComp, vResult, {EdgeKind::Result}, rcg);
 	assert(pResult.second);
-	rcg[pResult.first].kind = EdgeKind::Result;
 }
 
 Evaluator::Vertex Evaluator::getVertexFromRule(const lib::Rules::Real *r) {
@@ -286,13 +285,11 @@ Evaluator::Vertex Evaluator::getVertexFromArgs(const lib::Rules::Real *rFirst, c
 	argsToVertex.insert(std::make_pair(std::make_pair(rFirst, rSecond), vComp));
 	rcg[vComp].kind = VertexKind::Composition;
 	rcg[vComp].rule = nullptr;
-	std::pair<Edge, bool>
-			pFirst = add_edge(vFirst, vComp, rcg),
-			pSecond = add_edge(vSecond, vComp, rcg);
+	[[maybe_unused]] std::pair<Edge, bool>
+			pFirst = add_edge(vFirst, vComp, {EdgeKind::First}, rcg),
+			pSecond = add_edge(vSecond, vComp, {EdgeKind::Second}, rcg);
 	assert(pFirst.second);
 	assert(pSecond.second);
-	rcg[pFirst.first].kind = EdgeKind::First;
-	rcg[pSecond.first].kind = EdgeKind::Second;
 	return vComp;
 }
 
