@@ -4,7 +4,7 @@ ARG j=7
 ENV VIRTUAL_ENV=/opt/venv
 
 RUN pacman -Suy --noconfirm python-virtualenv
-RUN python -m venv $VIRTUAL_ENV
+RUN python -m venv --system-site-packages $VIRTUAL_ENV 
 ENV PATH="$VIRTUAL_ENV/bin:$PATH"
 
 WORKDIR /opt/mod
