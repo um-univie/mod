@@ -31,6 +31,7 @@ Bugs Fixed
 - Fix :cpp:func:`rule::CompositionMatch::composeAll`/:py:meth:`RCMatch.composeAll` when using
   terms and/or stereo information, to actually switch to those label settings.
 - Allow term and stereo in :cpp:func:`graph::Graph::enumerateMonomorphisms`/:py:meth:`Graph.enumerateMonomorphisms`.
+- `#16 <https://github.com/jakobandersen/mod/issues/16>`__, added ``pkg-config`` to ``Brewfile``.
 
 
 v0.14.0 (2022-11-29)
