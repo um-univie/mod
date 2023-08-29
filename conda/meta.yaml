@@ -24,6 +24,7 @@ requirements:
     # lib packages, needed here to make sure we get the exact same version
     #               as in the host environment
     - boost {{ boost }}
+    - boost-cpp {{ boost }}  # to make conda build stop complaining
     - openbabel
     - python {{ python }}
     # Add both exe and py packages to the build environemnt
@@ -42,11 +43,13 @@ requirements:
   host:
     # lib packages
     - boost {{ boost }}
+    - boost-cpp {{ boost }}  # to make conda build stop complaining
     - openbabel
     - python {{ python }}
   run:
     # lib packages
     - boost
+    - boost-cpp {{ boost }}  # to make conda build stop complaining
     - openbabel
     - python {{ python }}
     # exe packages
