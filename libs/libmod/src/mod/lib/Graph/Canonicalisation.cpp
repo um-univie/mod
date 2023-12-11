@@ -30,8 +30,8 @@
 namespace mod::lib::Graph {
 namespace {
 
-template<typename LabelledGraph, typename Grpah, typename Idx>
-void printGraph(std::ostream &s, const LabelledGraph &lg, const Grpah &g, const Idx &idx) {
+template<typename LabelledGraph, typename Graph, typename Idx>
+void printGraph(std::ostream &s, const LabelledGraph &lg, const Graph &g, const Idx &idx) {
 	for(const auto v : asRange(vertices(g))) {
 		s << idx[v] << "(" << get(boost::vertex_index_t(), get_graph(lg), v) << ")("
 		  << get_string(lg)[v] << "):";
